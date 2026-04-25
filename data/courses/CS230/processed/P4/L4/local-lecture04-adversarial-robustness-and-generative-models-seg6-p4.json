@@ -1,0 +1,504 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/p3c_lecture04_question_bank_json/CS230__lecture04-adversarial-robustness-and-generative-models__seg6.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 4,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q04",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What role does the random code z play in the GAN generator setup?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is a compact input that G maps into an image sample.",
+        "It is a class label that D maps into a real database image.",
+        "It is a detector score that replaces the generated image.",
+        "It is a prompt template that overwrites the discriminator loss."
+      ],
+      "answer_index": 0,
+      "explanation": "The generator starts from a small random code and produces an image, inducing the generator distribution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "You give it a random code of size, let's say, 100."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+        "evidence_span": "You give it a random code of size, let's say, 100.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+          "start_s": 3370,
+          "end_s": 3817,
+          "frame_evidence": [
+            {
+              "timestamp": "03:00",
+              "description": "Slide shows random numbers z flowing into Generator G and producing an initial generated image."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.58,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the generator architecture need an upsampling-style operation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It must map a smaller-dimensional latent input into a larger image output.",
+        "It must map a larger real image into a smaller binary class label.",
+        "It must map a prompt embedding into a safety-filter decision.",
+        "It must map a detector box into a printed adversarial patch."
+      ],
+      "answer_index": 0,
+      "explanation": "The instructor explains that deconvolutions or similar layers let G expand a compact latent code into image space.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "you to go from a smaller-dimensional input"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+        "evidence_span": "you to go from a smaller-dimensional input",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+          "start_s": 3370,
+          "end_s": 3817,
+          "frame_evidence": [
+            {
+              "timestamp": "03:00",
+              "description": "Slide depicts z on the left and a generated image above the discriminator pipeline."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.64,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the discriminator provide a training signal for the generator distribution?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It labels generated samples as fake and real database samples as real.",
+        "It labels latent codes as images and generated samples as prompts.",
+        "It labels clean images as noise and noisy images as cumulative noise.",
+        "It labels patches as printable and detectors as non-printable."
+      ],
+      "answer_index": 0,
+      "explanation": "D is trained as a binary classifier; its feedback helps push G toward images that resemble the real data distribution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "meaning we want you to say 0 if you think that this image is"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+        "evidence_span": "meaning we want you to say 0 if you think that this image is",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+          "start_s": 3370,
+          "end_s": 3817,
+          "frame_evidence": [
+            {
+              "timestamp": "03:00",
+              "description": "Slide labels discriminator output y=0 for G(z) and y=1 otherwise/from real examples."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.72,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What outcome signals successful GAN generator training in this segment?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "G produces samples that make D unable to reliably distinguish fake from real.",
+        "G produces labels that make D ignore both fake and real images.",
+        "G produces patches that make a detector ignore people in images.",
+        "G produces noise labels that make a diffusion model recover x0."
+      ],
+      "answer_index": 0,
+      "explanation": "A trained generator succeeds when its samples are realistic enough to fool a strong discriminator.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "But the generator is so good that the discriminator"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+        "evidence_span": "But the generator is so good that the discriminator",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+          "start_s": 3370,
+          "end_s": 3817,
+          "frame_evidence": [
+            {
+              "timestamp": "03:00",
+              "description": "Slide shows the G/D game diagram and the generated distribution approaching real images."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.82,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q01",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q02",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q03",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q04",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.58,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.64,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.72,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q04",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.82,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q01",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q02",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q03",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q04",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

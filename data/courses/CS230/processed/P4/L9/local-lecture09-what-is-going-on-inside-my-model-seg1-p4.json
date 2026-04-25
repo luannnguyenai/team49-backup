@@ -1,0 +1,642 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+  "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/CS230_lecture09_p3c_question_bank_json/CS230__lecture09_what_is_going_on_inside_my_model__local--lecture09_what_is_going_on_inside_my_model--seg1.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 5,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q001",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q002",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q003",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q004",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q005",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q001",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A frontier checkpoint regresses on reasoning and safety before release. The first diagnostic lens should look for what kind of pattern in the failures?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Error clusters across failing benchmark and safety cases",
+        "Averaged token frequencies across the full corpus",
+        "Random examples from unrelated successful tasks",
+        "A larger batch size for the next training run"
+      ],
+      "answer_index": 0,
+      "explanation": "The instructor starts by collecting evidence from reasoning and safety failures, asking whether the failures are specific to something and calling this error analysis.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Error analysis in general."
+        ],
+        "timestamps": [
+          "00:04:16"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+        "evidence_span": "Error analysis in general.",
+        "transcript_ts": "00:04:16",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 891,
+          "frame_evidence": [
+            {
+              "timestamp": "04:11",
+              "description": "Slide shows the frontier-checkpoint case study with regressions in reasoning, failing safety evals, and slow agentic tool use."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.44,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q002",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A training run looks suspicious, and the team checks the training and validation losses. What loss-curve pattern is treated as a healthy sanity check?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Training loss is jagged while validation loss is flat",
+        "Training loss is smooth and validation loss is slightly higher",
+        "Training loss rises while validation loss quickly reaches zero",
+        "Training loss is hidden and validation loss is ignored"
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture says training loss should be smooth, while validation loss usually follows similarly but remains slightly higher because it is evaluated on held-out data.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "make sure that it's smooth."
+        ],
+        "timestamps": [
+          "00:05:11"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+        "evidence_span": "make sure that it's smooth.",
+        "transcript_ts": "00:05:11",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 891,
+          "frame_evidence": [
+            {
+              "timestamp": "05:06",
+              "description": "Slide shows the frontier-checkpoint case study with regressions in reasoning, failing safety evals, and slow agentic tool use."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.5,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q003",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A model starts failing mainly on one category after the latest training round. Which evidence bucket should the trainer inspect to test a data-shift explanation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Data and distribution evidence from the recent training batch",
+        "Representation evidence from frozen first-layer filters",
+        "Capability evidence from unrelated solved benchmarks",
+        "Latency evidence from a faster inference server"
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture explicitly raises the possibility that a recent round of training data had issues or bias toward the failing category.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "there were some issues in that data."
+        ],
+        "timestamps": [
+          "00:06:07"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+        "evidence_span": "there were some issues in that data.",
+        "transcript_ts": "00:06:07",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 891,
+          "frame_evidence": [
+            {
+              "timestamp": "06:02",
+              "description": "Slide consolidates the brainstorm into four evidence buckets: training/scaling, representations/internals, data/distribution, and capabilities/safety."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.55,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q004",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For a language model diagnostic, attention maps belong to the internal-representation lens because they visualize what relation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Relationships between different tokens",
+        "Packet timing between GPU hosts",
+        "Domain proportions across data sources",
+        "Release decisions across safety dashboards"
+      ],
+      "answer_index": 0,
+      "explanation": "The instructor describes attention maps as visualizations of relationships between tokens, which places them under representations and internals.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "between different tokens."
+        ],
+        "timestamps": [
+          "00:09:18"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+        "evidence_span": "between different tokens.",
+        "transcript_ts": "00:09:18",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 891,
+          "frame_evidence": [
+            {
+              "timestamp": "09:13",
+              "description": "Slide consolidates the brainstorm into four evidence buckets: training/scaling, representations/internals, data/distribution, and capabilities/safety."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.62,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q005",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In a mixture-of-experts frontier model, what routing pattern would make the 200B-parameter model behave like a smaller effective model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Routing repeatedly selects the same expert while other experts are unused",
+        "Routing alternates experts evenly across every input token",
+        "Routing increases validation loss while training loss stays smooth",
+        "Routing stores examples for later replay during optimization"
+      ],
+      "answer_index": 0,
+      "explanation": "The instructor notes that if the same expert is selected and other experts are not used, the model may not operate at its nominal capacity.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "selecting the same expert"
+        ],
+        "timestamps": [
+          "00:12:04"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg1",
+        "evidence_span": "selecting the same expert",
+        "transcript_ts": "00:12:04",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 891,
+          "frame_evidence": [
+            {
+              "timestamp": "11:59",
+              "description": "Slide consolidates the brainstorm into four evidence buckets: training/scaling, representations/internals, data/distribution, and capabilities/safety."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.66,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q001",
+      "global_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q002",
+      "global_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q003",
+      "global_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q004",
+      "global_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q005",
+      "global_kp_id": "kp_cs230_frontier_model_diagnostic_evidence_lenses",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q001",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.44,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q002",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.5,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q003",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.55,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q004",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.62,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q005",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.66,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q001",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q002",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q003",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q004",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg1_q005",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

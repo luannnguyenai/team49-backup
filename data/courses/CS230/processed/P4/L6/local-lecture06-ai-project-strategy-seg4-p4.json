@@ -1,0 +1,662 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture06_ai_project_strategy",
+  "unit_id": "local::lecture06_ai_project_strategy::seg4",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/cs230_lecture06_p3c_vlm_grounded_jsons/CS230__lecture06_ai_project_strategy__seg4_p3c.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 5,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "cs230_l06_seg04_q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_l06_seg04_q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_l06_seg04_q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_l06_seg04_q04",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_l06_seg04_q05",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs230_l06_seg04_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "The model still does well on training data but reaches only about 50% on the dev set. What diagnosis should be considered first?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The model is underfitting because it cannot memorize the training set.",
+        "The model is overfitting or facing a train-dev mismatch that needs regularization or better data.",
+        "The model is already solved because dev accuracy near chance proves the classes are balanced.",
+        "The model should remove the dev set because the training set is the product target."
+      ],
+      "answer_index": 1,
+      "explanation": "A strong train score with weak dev performance signals overfitting or mismatch; the next steps include regularization and more representative data.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_diagnosing_overfitting_and_train_dev_mismatch",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "So if you see this, this is overfitting"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "So if you see this, this is overfitting",
+        "transcript_timestamp": "00:40:39",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture06-ai-project-strategy.mp4",
+          "clip_start_s": 2260,
+          "clip_end_s": 2870,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "03:02",
+              "description": "Instructor faces the class with the previous waveform notes still on the whiteboard while diagnosing the train/dev gap."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture06_ai_project_strategy",
+        "unit_id": "local::lecture06_ai_project_strategy::seg4"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.58,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_l06_seg04_q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the lecture propose creating realistic noisy positive examples for the wake-word detector?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Subtract the trigger waveform from background noise so only the room sound remains.",
+        "Concatenate unrelated speech clips after the trigger phrase without mixing the waveforms.",
+        "Add clean trigger-speech waveforms to background-noise waveforms to simulate both sounds together.",
+        "Replace background noise with silence so the trigger phrase is easier to isolate."
+      ],
+      "answer_index": 2,
+      "explanation": "For audio, sound waves add. Mixing clean trigger speech with background noise creates positive examples that resemble a real environment.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_additive_audio_augmentation_with_hard_negatives",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "add the audio waveforms together"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "add the audio waveforms together",
+        "transcript_timestamp": "00:42:11",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture06-ai-project-strategy.mp4",
+          "clip_start_s": 2260,
+          "clip_end_s": 2870,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "04:34",
+              "description": "Whiteboard shows a waveform-style sketch while the instructor explains combining background noise with a clean voice recording."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture06_ai_project_strategy",
+        "unit_id": "local::lecture06_ai_project_strategy::seg4"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.62,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_l06_seg04_q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why should the synthetic dataset include non-trigger speech, not just clean trigger phrases mixed with background noise?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Without hard negatives, the model may learn generic voice activity instead of the specific phrase.",
+        "Without hard negatives, the model must become a speech-to-text system before it can train.",
+        "Without hard negatives, the background-noise clips cannot be licensed for model training.",
+        "Without hard negatives, the positive examples become too long for three-second windows."
+      ],
+      "answer_index": 0,
+      "explanation": "If every speech-containing example is positive, the easier shortcut is detecting any voice. Other spoken content forces the model to learn the phrase itself.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_additive_audio_augmentation_with_hard_negatives",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "you end up with a voice activity detection detector."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "you end up with a voice activity detection detector.",
+        "transcript_timestamp": "00:43:35",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture06-ai-project-strategy.mp4",
+          "clip_start_s": 2260,
+          "clip_end_s": 2870,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "05:58",
+              "description": "Instructor points near the waveform notes while explaining that trigger-only synthetic positives can collapse into voice-activity detection."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture06_ai_project_strategy",
+        "unit_id": "local::lecture06_ai_project_strategy::seg4"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.7,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_l06_seg04_q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A system is trained mostly on synthetic audio but evaluated on how real users speak. What risk is the instructor highlighting?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The dev set may become too similar to the synthetic train set, hiding real-world weaknesses.",
+        "The train and dev distributions can differ, so synthetic success may not match product behavior.",
+        "The background noise may remove the need for labels, making the task self-supervised.",
+        "The clean voice clips may force the model to ignore all non-trigger speech forever."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture notes that training data and dev/test data may not come from the same distribution, especially when synthetic data is used for training and real use defines success.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_diagnosing_overfitting_and_train_dev_mismatch",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "different from your synthetic data."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "different from your synthetic data.",
+        "transcript_timestamp": "00:40:31",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture06-ai-project-strategy.mp4",
+          "clip_start_s": 2260,
+          "clip_end_s": 2870,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "02:54",
+              "description": "Instructor gestures at the board while discussing how synthetic training data may differ from the real data users produce."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture06_ai_project_strategy",
+        "unit_id": "local::lecture06_ai_project_strategy::seg4"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.66,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_l06_seg04_q05",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What condition limits the benefit of making the wake-word training set richer and more diverse?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The data must include only positive phrases so the model can memorize the trigger.",
+        "The dev set must be synthetic so it matches the generated training distribution.",
+        "The model must have enough capacity to represent the added variation.",
+        "The background clips must be longer than every possible trigger phrase."
+      ],
+      "answer_index": 2,
+      "explanation": "The instructor supports richer data, but adds the caveat that a network that is too small may not benefit from the extra diversity.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_additive_audio_augmentation_with_hard_negatives",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "big enough, usually, more diverse data."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "big enough, usually, more diverse data.",
+        "transcript_timestamp": "00:47:26",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture06-ai-project-strategy.mp4",
+          "clip_start_s": 2260,
+          "clip_end_s": 2870,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "09:49",
+              "description": "Whiteboard contains the synthetic-data notes as the instructor discusses richer training data and capacity constraints."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture06_ai_project_strategy",
+        "unit_id": "local::lecture06_ai_project_strategy::seg4"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.76,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_l06_seg04_q01",
+      "global_kp_id": "kp_cs230_diagnosing_overfitting_and_train_dev_mismatch",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l06_seg04_q02",
+      "global_kp_id": "kp_cs230_additive_audio_augmentation_with_hard_negatives",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l06_seg04_q03",
+      "global_kp_id": "kp_cs230_additive_audio_augmentation_with_hard_negatives",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l06_seg04_q04",
+      "global_kp_id": "kp_cs230_diagnosing_overfitting_and_train_dev_mismatch",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l06_seg04_q05",
+      "global_kp_id": "kp_cs230_additive_audio_augmentation_with_hard_negatives",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs230_l06_seg04_q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.58,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_l06_seg04_q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.62,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_l06_seg04_q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.7,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_l06_seg04_q04",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.66,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_l06_seg04_q05",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.76,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs230_l06_seg04_q01",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_l06_seg04_q02",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_l06_seg04_q03",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_l06_seg04_q04",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_l06_seg04_q05",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

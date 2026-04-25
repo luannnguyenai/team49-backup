@@ -1,0 +1,524 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-03",
+  "unit_id": "local::lecture-03::seg5",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "diagnostic",
+  "target_item_count": 4,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/lecture03_p3c_all_json/p3c/CS230__lecture-03__local--lecture-03--seg5.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 4,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "cs230_lecture03_seg05_q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q04",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs230_lecture03_seg05_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What lesson does the coding-data example give about adding data for a model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Large random internet data is the preferred way to improve coding skill.",
+        "Low-quality data is useful when it is cheap to scrape at large scale.",
+        "Unrelated data should be weighted higher than task-specific data.",
+        "High-quality task-related data can matter more than undifferentiated volume."
+      ],
+      "answer_index": 3,
+      "explanation": "The instructor contrasts low-quality random internet data with high-quality coding-related data.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "high quality coding related data\n\n00:30:09\nto improve your OM's ability to code.\n\n00:30:16\nYeah, I feel more data is better.\n\n00:30:22\nBut it's also overly simplistic.\n\n00:30:25\nThere are subcategories of data.\n\n00:30:29\nto really invest in getting a lot more of,\n\n00:30:35\nyour system's performance.\n\n00:30:39\nWell, we'"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg5",
+        "evidence_span": "high quality coding related data\n\n00:30:09\nto improve your OM's ability to code.\n\n00:30:16\nYeah, I feel more data is better.\n\n00:30:22\nBut it's also overly simplistic.\n\n00:30:25\nThere are subcategories of data.\n\n00:30:29\nto really invest in getting a lot more of,\n\n00:30:35\nyour system's performance.\n\n00:30:39\nWell, we'",
+        "transcript_timestamp_start_s": 1809,
+        "transcript_timestamp_end_s": 1821,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg5.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg5.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 1782,
+          "clip_end_s": 2211,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "00:00",
+              "timestamp_s_within_clip": 0,
+              "description": "The instructor stands at the board under the 'Speed' note as the discussion shifts toward data quality."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.45,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For the face-recognition setting, how should blurry images be treated when the desired input is clear camera footage?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "They are ideal training examples because blur hides irrelevant detail.",
+        "They are lower-quality examples if they do not represent the target setting.",
+        "They are mandatory examples because every face model requires blur.",
+        "They are equivalent to sharp images when the label is the same person."
+      ],
+      "answer_index": 1,
+      "explanation": "Data quality depends on the target task; blurry images may be less useful if the system needs clear, in-focus faces.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "blurry images would\n\n00:32:16\nassuming that's representative of how you want\n\n00:32:20\nSo that really matters as well.\n\n00:32:28\nCool Yeah, go for it.\n\n00:32:35\ndo you need to be to ask what we want them to do.\n\n00:32:41\nwe're trying to compare two pictures [INAUDIBLE]\n\n00:32:49\npeople's faces.\n\n00:32:53\nfrom the ideal"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg5",
+        "evidence_span": "blurry images would\n\n00:32:16\nassuming that's representative of how you want\n\n00:32:20\nSo that really matters as well.\n\n00:32:28\nCool Yeah, go for it.\n\n00:32:35\ndo you need to be to ask what we want them to do.\n\n00:32:41\nwe're trying to compare two pictures [INAUDIBLE]\n\n00:32:49\npeople's faces.\n\n00:32:53\nfrom the ideal",
+        "transcript_timestamp_start_s": 1936,
+        "transcript_timestamp_end_s": 1948,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg5.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg5.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 1782,
+          "clip_end_s": 2211,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "01:48",
+              "timestamp_s_within_clip": 108,
+              "description": "The instructor speaks in front of the board while discussing data quality and representativeness."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.52,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the lecture qualify the need for train-test distribution matching in modern deep learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Large networks can often tolerate some non-incorrect data that is not perfectly matched.",
+        "Large networks require every training image to come from the exact test distribution.",
+        "Distribution matching is irrelevant because labels determine all behavior.",
+        "Distribution mismatch is solved by using smaller models with fewer parameters."
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture says exact distribution matching is less absolute today, especially for high-capacity neural networks.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "not perfectly tuned to your test\n\n00:33:34\nAnd it often doesn't hurt so long\n\n00:33:37\nSo you raise the example.\n\n00:33:43\nIf it's generic objects like water bottles and markers,\n\n00:33:47\nBut if we were to use, let's say,\n\n00:33:54\nlook really different than real humans,\n\n00:34:00\nand may even help a little bit.\n\n00:3"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg5",
+        "evidence_span": "not perfectly tuned to your test\n\n00:33:34\nAnd it often doesn't hurt so long\n\n00:33:37\nSo you raise the example.\n\n00:33:43\nIf it's generic objects like water bottles and markers,\n\n00:33:47\nBut if we were to use, let's say,\n\n00:33:54\nlook really different than real humans,\n\n00:34:00\nand may even help a little bit.\n\n00:3",
+        "transcript_timestamp_start_s": 2014,
+        "transcript_timestamp_end_s": 2026,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg5.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg5.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 1782,
+          "clip_end_s": 2211,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "05:26",
+              "timestamp_s_within_clip": 326,
+              "description": "The instructor stands near the board while discussing why exact distribution matching is less absolute now."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.58,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What distinction does the instructor make between irrelevant data and incorrect data for large neural networks?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Irrelevant data is harmful, while incorrect data is absorbed harmlessly.",
+        "Both irrelevant and incorrect data are equally safe for large models.",
+        "Some irrelevant data may be tolerable, while incorrect data remains harmful.",
+        "Incorrect data helps if the model has enough capacity to memorize it."
+      ],
+      "answer_index": 2,
+      "explanation": "High capacity can absorb some irrelevant information, but incorrect data is still a problem.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "incorrect data would be a problem.\n\n00:35:15\nmuch less because big neural networks is like a human brain.\n\n00:35:23\nprobably doesn't make me worse at AI.\n\n00:35:30\nto learn to play the piano and learn some stuff about AI.\n\n00:35:36\nthey can learn some other irrelevant things\n\n00:35:40\nBut this was less true if my brain"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg5",
+        "evidence_span": "incorrect data would be a problem.\n\n00:35:15\nmuch less because big neural networks is like a human brain.\n\n00:35:23\nprobably doesn't make me worse at AI.\n\n00:35:30\nto learn to play the piano and learn some stuff about AI.\n\n00:35:36\nthey can learn some other irrelevant things\n\n00:35:40\nBut this was less true if my brain",
+        "transcript_timestamp_start_s": 2115,
+        "transcript_timestamp_end_s": 2127,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg5.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg5.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 1782,
+          "clip_end_s": 2211,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "07:13",
+              "timestamp_s_within_clip": 433,
+              "description": "The board now includes 'Deployment' as the instructor bridges data choices toward product use."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.65,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture03_seg05_q01",
+      "global_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q02",
+      "global_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q03",
+      "global_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q04",
+      "global_kp_id": "kp_cs230_data_quality_and_distribution_mismatch",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs230_lecture03_seg05_q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.45,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.52,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.58,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q04",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.65,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs230_lecture03_seg05_q01",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q02",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q03",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg05_q04",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

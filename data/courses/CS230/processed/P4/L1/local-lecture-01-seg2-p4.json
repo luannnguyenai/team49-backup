@@ -1,0 +1,383 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-01",
+  "unit_id": "local::lecture-01::seg2",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/local_cs230_lecture01_p3c_json/CS230__lecture-01__local::lecture-01::seg2.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 3,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "CS230_L01_S2_Q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "CS230_L01_S2_Q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "CS230_L01_S2_Q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "CS230_L01_S2_Q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A team is building an audio-monitoring product, but repeated prompt changes on a text-first setup have stalled. Based on the lecture, what is the better next move?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Keep refining prompts, because text-centric prompting usually transfers cleanly to raw audio tasks.",
+        "Move toward direct deep-learning methods for the audio signal, because that modality often needs more than prompting.",
+        "Switch to decision trees, because audio tasks benefit most from smaller non-neural models as data grows.",
+        "Pause modeling and reorganize the database, because modality choice matters less than system design."
+      ],
+      "answer_index": 1,
+      "explanation": "Ng says prompting is strongest for text, while audio and similar modalities often still call for direct deep-learning methods.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "algorithms directly when I'm working with audio data, image"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "algorithms directly when I'm working with audio data, image",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg2.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "08:20",
+            "visual_description": "Handwritten side list of modalities on the board near the CS/ML/DL stack, matching the contrast between text prompting and non-text data."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-01",
+        "unit_id": "local::lecture-01::seg2"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.52,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L01_S2_Q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A student wants the Stanford AI class most centered on building deep-learning systems rather than a broad, math-heavy ML survey. Which course best matches that goal?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "CS129, because it is the broadest survey and the most theory intensive.",
+        "CS229, because it focuses just on deep learning and minimizes mathematical analysis.",
+        "Either CS129 or CS229, because the lecture treated them as overlapping practical deep-learning tracks.",
+        "CS230, because the lecture framed it as the applied course focused on deep learning."
+      ],
+      "answer_index": 3,
+      "explanation": "The lecture positions CS230 as the more applied deep-learning course, while CS229 is broader and more mathematical.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "and it focuses just on deep learning."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "and it focuses just on deep learning.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg2.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:30",
+            "visual_description": "Instructor points to handwritten course labels on the board while comparing CS129, CS229, and CS230."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-01",
+        "unit_id": "local::lecture-01::seg2"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.35,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L01_S2_Q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For a mostly text-based product, which starting strategy did Ng describe as usually effective before going deeper?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Begin with prompting, because text-based applications often go quite far with that approach.",
+        "Begin with direct vision-style architectures, because text is the least natural fit for transformer prompting.",
+        "Begin by collecting multimodal audio-video corpora, because text systems usually need extra modalities to work.",
+        "Begin by avoiding GenAI altogether, because prompt-based systems rarely help on language tasks."
+      ],
+      "answer_index": 0,
+      "explanation": "He says transformer-based GenAI is really fantastic for text-based applications, so prompting is often the right first move there.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "and so on, really fantastic for text-based applications."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "and so on, really fantastic for text-based applications.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg2.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "08:45",
+            "visual_description": "Board still shows the nearby modality comparison used during the discussion of where prompting works best."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-01",
+        "unit_id": "local::lecture-01::seg2"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.43,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L01_S2_Q1",
+      "global_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L01_S2_Q2",
+      "global_kp_id": "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L01_S2_Q3",
+      "global_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "CS230_L01_S2_Q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.52,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "CS230_L01_S2_Q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.35,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "CS230_L01_S2_Q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.43,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "CS230_L01_S2_Q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "CS230_L01_S2_Q2",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "CS230_L01_S2_Q3",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

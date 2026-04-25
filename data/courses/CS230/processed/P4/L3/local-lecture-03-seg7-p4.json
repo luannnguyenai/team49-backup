@@ -1,0 +1,647 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-03",
+  "unit_id": "local::lecture-03::seg7",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/lecture03_p3c_all_json/p3c/CS230__lecture-03__local--lecture-03--seg7.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 5,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "cs230_lecture03_seg07_q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q04",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q05",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs230_lecture03_seg07_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the instructor use human-level performance in evaluating a face-recognition model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "As a reference benchmark for judging whether the model is underperforming.",
+        "As a replacement for test data because humans can label every example.",
+        "As a deployment rule that humans must approve each accepted identity.",
+        "As a reason to ignore model accuracy once the system is trained."
+      ],
+      "answer_index": 0,
+      "explanation": "Human-level performance is presented as a useful reference or aspirational benchmark.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_reference_performance_and_human_level_benchmark",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "human level performance is often a good benchmark.\n\n00:54:16\nhumans can't do well--\n\n00:54:20\nor movies or whatever.\n\n00:54:23\nI think most of us would have a hard time recommending\n\n00:54:28\nAI actually probably does it even better than many of us\n\n00:54:32\nThen those things is harder to establish a baseline.\n\n00:54:4"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg7",
+        "evidence_span": "human level performance is often a good benchmark.\n\n00:54:16\nhumans can't do well--\n\n00:54:20\nor movies or whatever.\n\n00:54:23\nI think most of us would have a hard time recommending\n\n00:54:28\nAI actually probably does it even better than many of us\n\n00:54:32\nThen those things is harder to establish a baseline.\n\n00:54:4",
+        "transcript_timestamp_start_s": 3256,
+        "transcript_timestamp_end_s": 3268,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 3195,
+          "clip_end_s": 4017,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "00:00",
+              "timestamp_s_within_clip": 0,
+              "description": "The board still shows the recognition pipeline as the instructor transitions into model-quality diagnosis."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.46,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the lecture distinguish data drift from concept drift?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Data drift changes labels, while concept drift changes GPU latency.",
+        "Data drift changes source code, while concept drift changes dashboard plots.",
+        "Data drift changes input distributions, while concept drift changes input-output mapping.",
+        "Data drift changes batch size, while concept drift changes optimizer settings."
+      ],
+      "answer_index": 2,
+      "explanation": "The lecture defines data drift as changes in the data distribution and concept drift as changes in the input-output mapping.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_data_drift_and_concept_drift",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "concept drift, which is the input output mapping.\n\n00:55:27\nset.\n\n00:55:32\nsystem now in--\n\n00:55:39\nyou get faces of a certain distribution.\n\n00:55:45\nto rain more, people are wearing scarves, rain jackets,\n\n00:55:51\nOr maybe we approach the summer.\n\n00:55:56\nThen the data distribution changes.\n\n00:56:04\nbut we then d"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg7",
+        "evidence_span": "concept drift, which is the input output mapping.\n\n00:55:27\nset.\n\n00:55:32\nsystem now in--\n\n00:55:39\nyou get faces of a certain distribution.\n\n00:55:45\nto rain more, people are wearing scarves, rain jackets,\n\n00:55:51\nOr maybe we approach the summer.\n\n00:55:56\nThen the data distribution changes.\n\n00:56:04\nbut we then d",
+        "transcript_timestamp_start_s": 3327,
+        "transcript_timestamp_end_s": 3339,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 3195,
+          "clip_end_s": 4017,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "03:28",
+              "timestamp_s_within_clip": 208,
+              "description": "The instructor stands in front of the deployment pipeline while introducing drift after deployment."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.56,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A model does well on the test set but fails after deployment. What diagnosis matches the lecture?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The product should be considered complete because the test score passed.",
+        "The failure must be ignored unless the training loss also increases.",
+        "The deployment team should remove monitoring to avoid noisy metrics.",
+        "The world or data distribution may have changed, so the system needs fixing."
+      ],
+      "answer_index": 3,
+      "explanation": "Strong test-set results do not guarantee real-world product success when the world changes after deployment.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_data_drift_and_concept_drift",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Does well on your test set.\n\n00:55:05\nAnd then you deploy it.\n\n00:55:11\nno longer works.\n\n00:55:16\nwhere the distribution of data, the world\n\n00:55:21\nor concept drift, which is the input output mapping.\n\n00:55:27\nset.\n\n00:55:32\nsystem now in--\n\n00:55:39\nyou get faces of a certain distribution.\n\n00:55:45\nto rain more, "
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg7",
+        "evidence_span": "Does well on your test set.\n\n00:55:05\nAnd then you deploy it.\n\n00:55:11\nno longer works.\n\n00:55:16\nwhere the distribution of data, the world\n\n00:55:21\nor concept drift, which is the input output mapping.\n\n00:55:27\nset.\n\n00:55:32\nsystem now in--\n\n00:55:39\nyou get faces of a certain distribution.\n\n00:55:45\nto rain more, ",
+        "transcript_timestamp_start_s": 3305,
+        "transcript_timestamp_end_s": 3317,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 3195,
+          "clip_end_s": 4017,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "06:56",
+              "timestamp_s_within_clip": 416,
+              "description": "The instructor gestures across the deployment drawing while discussing what can break in the real world."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.6,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why might the simple pixel-change VAD be less susceptible to drift than a learned neural network?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It learns more parameters, so it adapts automatically to new clothing.",
+        "It has fewer tuned parameters and fewer ways to overfit a narrow distribution.",
+        "It uses identity labels, so it handles sunglasses by memorizing names.",
+        "It runs in the cloud, so geography cannot affect its input frames."
+      ],
+      "answer_index": 1,
+      "explanation": "The instructor argues that very simple models can be robust because there are fewer learned parameters to overfit.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_data_drift_and_concept_drift",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "fraction of pixels that change.\n\n01:00:11\nis actually very robust to changes in distribution.\n\n01:00:17\nare wearing sunglasses.\n\n01:00:22\neven when people are wearing sunglasses,\n\n01:00:26\nMaybe if it's Halloween and people\n\n01:00:29\nmaybe that would change.\n\n01:00:33\nbecause it's so simple.\n\n01:00:37\nwith no one weari"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg7",
+        "evidence_span": "fraction of pixels that change.\n\n01:00:11\nis actually very robust to changes in distribution.\n\n01:00:17\nare wearing sunglasses.\n\n01:00:22\neven when people are wearing sunglasses,\n\n01:00:26\nMaybe if it's Halloween and people\n\n01:00:29\nmaybe that would change.\n\n01:00:33\nbecause it's so simple.\n\n01:00:37\nwith no one weari",
+        "transcript_timestamp_start_s": 3611,
+        "transcript_timestamp_end_s": 3623,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 3195,
+          "clip_end_s": 4017,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "06:56",
+              "timestamp_s_within_clip": 416,
+              "description": "The VAD and NN blocks are visible as the instructor compares simple and learned components."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.64,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q05",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What monitoring practice does the instructor recommend after deployment?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Track one metric chosen before launch and ignore new failure modes.",
+        "Store private user data silently so every error can be replayed later.",
+        "Brainstorm many metrics, plot trends, prune dull dashboards, and set bounds.",
+        "Stop collecting telemetry once the first deployed model reaches the test score."
+      ],
+      "answer_index": 2,
+      "explanation": "The lecture recommends privacy-respecting telemetry, many initial dashboards, pruning uninformative plots, and bounds that trigger investigation.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_production_monitoring_and_model_maintenance",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "dashboard to do that.\n\n01:03:50\nBecause it probably means something\n\n01:03:53\nHow often do you accept versus reject the user?\n\n01:03:59\nAnd I find that just as it's difficult to know in advance\n\n01:04:05\ndifficult to know in advance what dashboard\n\n01:04:09\nAnd so the best practice I tend to recommend\n\n01:04:15\nbrainst"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg7",
+        "evidence_span": "dashboard to do that.\n\n01:03:50\nBecause it probably means something\n\n01:03:53\nHow often do you accept versus reject the user?\n\n01:03:59\nAnd I find that just as it's difficult to know in advance\n\n01:04:05\ndifficult to know in advance what dashboard\n\n01:04:09\nAnd so the best practice I tend to recommend\n\n01:04:15\nbrainst",
+        "transcript_timestamp_start_s": 3830,
+        "transcript_timestamp_end_s": 3842,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 3195,
+          "clip_end_s": 4017,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "13:51",
+              "timestamp_s_within_clip": 831,
+              "description": "The board shows a hand-drawn dashboard-style plot while the instructor discusses tracking metrics over time."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.68,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture03_seg07_q01",
+      "global_kp_id": "kp_cs230_reference_performance_and_human_level_benchmark",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q02",
+      "global_kp_id": "kp_cs230_data_drift_and_concept_drift",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q03",
+      "global_kp_id": "kp_cs230_data_drift_and_concept_drift",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q04",
+      "global_kp_id": "kp_cs230_data_drift_and_concept_drift",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q05",
+      "global_kp_id": "kp_cs230_production_monitoring_and_model_maintenance",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs230_lecture03_seg07_q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.46,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.56,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.6,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q04",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.64,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q05",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.68,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs230_lecture03_seg07_q01",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q02",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q03",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q04",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg07_q05",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

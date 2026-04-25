@@ -1,0 +1,400 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-03",
+  "unit_id": "local::lecture-03::seg3",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "procedural",
+  "target_item_count": 3,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/lecture03_p3c_all_json/p3c/CS230__lecture-03__local--lecture-03--seg3.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 3,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "cs230_lecture03_seg03_q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs230_lecture03_seg03_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What first data-collection procedure best matches the instructor's speed-first principle?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Wait for a large polished dataset before running the first model.",
+        "Collect a quick imperfect dataset, train, inspect errors, and adjust.",
+        "Buy the broadest dataset available before defining failure modes.",
+        "Freeze collection rules until the final model architecture is chosen."
+      ],
+      "answer_index": 1,
+      "explanation": "Speed matters because the first model run reveals concrete data and system problems sooner.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_speed_first_data_collection",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "data set very quickly.\n\n00:17:19\neven if it ends up with a inferior, smaller, lower quality\n\n00:17:25\nBecause I don't really know what problems I'll see in my data.\n\n00:17:35\nsee where it goes wrong, the quicker I\n\n00:17:42\nTrue story.\n\n00:17:50\nI think it was over $100 million.\n\n00:17:54\nSpent a lot of money buying a "
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg3",
+        "evidence_span": "data set very quickly.\n\n00:17:19\neven if it ends up with a inferior, smaller, lower quality\n\n00:17:25\nBecause I don't really know what problems I'll see in my data.\n\n00:17:35\nsee where it goes wrong, the quicker I\n\n00:17:42\nTrue story.\n\n00:17:50\nI think it was over $100 million.\n\n00:17:54\nSpent a lot of money buying a ",
+        "transcript_timestamp_start_s": 1039,
+        "transcript_timestamp_end_s": 1051,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg3.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg3.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 976,
+          "clip_end_s": 1459,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "01:00",
+              "timestamp_s_within_clip": 60,
+              "description": "The word 'Speed' is written on the whiteboard while the instructor introduces the guiding principle."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.34,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the 48-hour data-collection example operationalize the speed-first principle?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It delays training until the dataset is complete and balanced.",
+        "It removes privacy checks so collection can be finished faster.",
+        "It proves that two days of data is enough for every vision task.",
+        "It sets a short sprint so the team can train and revise."
+      ],
+      "answer_index": 3,
+      "explanation": "The point of the two-day sprint is velocity: collect responsibly, train soon, and tweak the data process.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_speed_first_data_collection",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "two days to collect data.\n\n00:20:12\nLet's figure out what we can do by--\n\n00:20:16\nTuesday.\n\n00:20:19\nSo that gives us a 48 hours and let's brainstorm.\n\n00:20:23\nAnd it's fine if the data isn't all there.\n\n00:20:28\nBut that velocity lets us more quickly train the model,\n\n00:20:36\nor we tweak how we collect data.\n\n00:20"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg3",
+        "evidence_span": "two days to collect data.\n\n00:20:12\nLet's figure out what we can do by--\n\n00:20:16\nTuesday.\n\n00:20:19\nSo that gives us a 48 hours and let's brainstorm.\n\n00:20:23\nAnd it's fine if the data isn't all there.\n\n00:20:28\nBut that velocity lets us more quickly train the model,\n\n00:20:36\nor we tweak how we collect data.\n\n00:20",
+        "transcript_timestamp_start_s": 1212,
+        "transcript_timestamp_end_s": 1224,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg3.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg3.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 976,
+          "clip_end_s": 1459,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "06:10",
+              "timestamp_s_within_clip": 370,
+              "description": "The board shows the face-recognition data-flow sketch while the instructor discusses quick collection and iteration."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.43,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When does the lecture allow a larger upfront data investment before the first training run?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "When prior experience indicates a task needs a large threshold such as 50,000 images.",
+        "When a small team wants to postpone seeing the first model's failure modes.",
+        "When the team can collect many unrelated images faster than task images.",
+        "When model training takes only hours and data collection takes months."
+      ],
+      "answer_index": 0,
+      "explanation": "The speed-first heuristic is conditional; prior experience can justify collecting much more data upfront.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_speed_first_data_collection",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "50,000 images.\n\n00:24:00\nyou work on for the first time, if you don't\n\n00:24:05\ninvestments, or if you don't have the prior experience\n\n00:24:11\nof iterating around this loop.\n\n00:24:19\nAnd to relate this to large language models based"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg3",
+        "evidence_span": "50,000 images.\n\n00:24:00\nyou work on for the first time, if you don't\n\n00:24:05\ninvestments, or if you don't have the prior experience\n\n00:24:11\nof iterating around this loop.\n\n00:24:19\nAnd to relate this to large language models based",
+        "transcript_timestamp_start_s": 1440,
+        "transcript_timestamp_end_s": 1452,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg3.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg3.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 976,
+          "clip_end_s": 1459,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "08:12",
+              "timestamp_s_within_clip": 492,
+              "description": "The instructor points toward the board after explaining when experience can justify more initial data."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.51,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture03_seg03_q01",
+      "global_kp_id": "kp_cs230_speed_first_data_collection",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q02",
+      "global_kp_id": "kp_cs230_speed_first_data_collection",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q03",
+      "global_kp_id": "kp_cs230_speed_first_data_collection",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs230_lecture03_seg03_q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.34,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.43,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.51,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs230_lecture03_seg03_q01",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q02",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg03_q03",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

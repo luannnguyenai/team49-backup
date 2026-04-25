@@ -1,0 +1,659 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+  "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/cs230_lecture02_p3c_vlm_grounded_jsons_v2/CS230__lecture-02-supervised-self-supervised-and-weakly-supervised-learning__seg2_p3c.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 5,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "cs230_l02_seg02_q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_l02_seg02_q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_l02_seg02_q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_l02_seg02_q04",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_l02_seg02_q05",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs230_l02_seg02_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A single cat detector computes a linear score and then outputs 0.73 as a probability. Which component maps that score into the 0-to-1 probability range?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The sigmoid activation applied after the linear score.",
+        "The flattened pixel vector after dividing by 255.",
+        "The one-hot label vector used for class targets.",
+        "The deeper hidden layer that encodes facial parts."
+      ],
+      "answer_index": 0,
+      "explanation": "The linear expression creates a score, and the sigmoid activation transforms that score into a probability-like value between 0 and 1.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_logistic_regression_neuron_with_sigmoid",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "any number, and it puts it between 0 and 1"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "any number, and it puts it between 0 and 1",
+        "transcript_timestamp": "00:09:36",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+          "clip_start_s": 536,
+          "clip_end_s": 1130,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "00:43",
+              "description": "Slide titled “Logistic Regression as a Neural Network” shows a cat image flattened into inputs, then a neuron labeled wᵀx+b and σ producing 0.73."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+        "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.27,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_l02_seg02_q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A binary cat detector is expanded to detect cat, dog, and giraffe. What project mistake is most directly exposed if the output layer changes but the labels stay binary?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The sigmoid function receives too few input pixels, so the image cannot be vectorized.",
+        "The model has enough output neurons, but the targets no longer match the task representation.",
+        "The network capacity becomes deeper, so the dataset stops needing animal labels.",
+        "The embedding distance becomes semantic, so class labels are unnecessary."
+      ],
+      "answer_index": 1,
+      "explanation": "Changing the output to multiple classes requires a matching label representation. Otherwise the model is trained against targets that do not express the new task.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_one_hot_and_multi_hot_label_vectors",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "They forget to change their labels"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "They forget to change their labels",
+        "transcript_timestamp": "00:12:45",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+          "clip_start_s": 536,
+          "clip_end_s": 1130,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "03:52",
+              "description": "On the multi-animal slide, the instructor points from a one-neuron cat detector toward multiple output neurons and matching target vectors."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+        "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.36,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_l02_seg02_q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "An image may contain both a cat and a dog. Why is a multi-hot vector better than a one-hot vector for that example?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It treats every animal class as absent unless the model output is above 0.73.",
+        "It converts the image pixels into one normalized column before the neuron sees them.",
+        "It can mark more than one class as present in the same label vector.",
+        "It forces the network to learn edges in the first layer and faces in the last layer."
+      ],
+      "answer_index": 2,
+      "explanation": "One-hot labels assume exactly one active class. Multi-hot labels allow multiple simultaneous positives, which fits images containing more than one object category.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_one_hot_and_multi_hot_label_vectors",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "You'll have a multi-hot vector if you"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "You'll have a multi-hot vector if you",
+        "transcript_timestamp": "00:12:34",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+          "clip_start_s": 536,
+          "clip_end_s": 1130,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "03:41",
+              "description": "The slide shows vector labels for animal classes, contrasting one-hot class labels with multi-hot labels such as 110."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+        "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.34,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_l02_seg02_q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What problem can occur when a network has much more capacity than the dataset and task require?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It can remove the need for labels by converting every class into a scalar.",
+        "It can make the sigmoid output independent of the learned weights.",
+        "It can prevent image pixels from being flattened into a feature vector.",
+        "It can memorize the training examples instead of learning a useful general pattern."
+      ],
+      "answer_index": 3,
+      "explanation": "More capacity can help model complex data, but excessive capacity relative to the data can fit idiosyncrasies rather than robust concepts.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_model_capacity_and_hierarchical_feature_learning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "This is the word we use, capacity."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "This is the word we use, capacity.",
+        "transcript_timestamp": "00:13:38",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+          "clip_start_s": 536,
+          "clip_end_s": 1130,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "04:45",
+              "description": "Capacity discussion slide visually contrasts shallow and deeper networks as the instructor explains flexibility and overfitting risk."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+        "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.45,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_l02_seg02_q05",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When does a learned vector representation qualify as an embedding rather than just an encoding?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "When distances between vectors carry semantic meaning.",
+        "When it is produced before any activation function is applied.",
+        "When it has the same number of entries as the input pixels.",
+        "When each coordinate can be named as a visible object part."
+      ],
+      "answer_index": 0,
+      "explanation": "An encoding is any vector representation. It becomes an embedding when closeness in that vector space corresponds to meaningful similarity.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_encoding_versus_embedding",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "while the deeper networks are going to be better at encoding"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "while the deeper networks are going to be better at encoding",
+        "transcript_timestamp": "00:15:15",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg2.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+          "clip_start_s": 536,
+          "clip_end_s": 1130,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "06:22",
+              "description": "Face-network slide shows earlier layers encoding simple features and later representations used as meaningful vectors for comparison."
+            }
+          ]
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+        "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg2"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.43,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_l02_seg02_q01",
+      "global_kp_id": "kp_cs230_logistic_regression_neuron_with_sigmoid",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l02_seg02_q02",
+      "global_kp_id": "kp_cs230_one_hot_and_multi_hot_label_vectors",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l02_seg02_q03",
+      "global_kp_id": "kp_cs230_one_hot_and_multi_hot_label_vectors",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l02_seg02_q04",
+      "global_kp_id": "kp_cs230_model_capacity_and_hierarchical_feature_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l02_seg02_q05",
+      "global_kp_id": "kp_cs230_encoding_versus_embedding",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs230_l02_seg02_q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.27,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_l02_seg02_q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.36,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_l02_seg02_q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.34,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_l02_seg02_q04",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.45,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_l02_seg02_q05",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.43,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs230_l02_seg02_q01",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_l02_seg02_q02",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_l02_seg02_q03",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_l02_seg02_q04",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_l02_seg02_q05",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

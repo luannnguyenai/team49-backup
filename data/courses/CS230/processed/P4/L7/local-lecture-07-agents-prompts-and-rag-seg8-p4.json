@@ -1,0 +1,500 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "application",
+  "target_item_count": 4,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/local_cs230_lecture07_agents_prompts_and_rag_p3c_json/CS230__lecture-07-agents-prompts-and-rag__local::lecture-07-agents-prompts-and-rag::seg8.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 4,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "CS230_L07_S8_Q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "CS230_L07_S8_Q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "CS230_L07_S8_Q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "CS230_L07_S8_Q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "CS230_L07_S8_Q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A user asks for a Paris trip with flights, hotels near the Eiffel Tower, and an itinerary. According to the lecture, what should the agent do before calling tools? ",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Call the payment API first, because booking early reduces the need for later preference validation.",
+        "Update memory first, because planning is only useful after the agent already knows the user's new travel preferences.",
+        "Skip planning and go directly to retrieval, because multi-step travel tasks should emerge implicitly from a single prompt.",
+        "Plan the steps first, such as finding flights, searching hotels, generating recommendations, validating preferences, and booking."
+      ],
+      "answer_index": 3,
+      "explanation": "The travel-agent example explicitly begins with a planning stage before execution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "I'm going to find flights."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "I'm going to find flights.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg8.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:00",
+            "visual_description": "Four-column slide shows Step 1 user input, Step 2 plan the steps, Step 3 execute the plan, and Step 4 proactive interaction and booking."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-07-agents-prompts-and-rag",
+        "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.51,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S8_Q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "After a few interactions, the user consistently chooses nonstop flights and avoids hotels above budget. What did the lecture suggest the agent should do with that information? ",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Update memory with those preferences so later travel plans can use them automatically.",
+        "Delete the preferences after booking so each new trip starts from a blank slate.",
+        "Move the preferences into the payment processor, because user choices should only live inside transaction tools.",
+        "Rewrite the system prompt permanently, because memory is only for tool outputs and not for learned preferences."
+      ],
+      "answer_index": 0,
+      "explanation": "The example says the agent may update memory with preferences such as direct flights or hotel-budget constraints.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "it might actually update the memory."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "it might actually update the memory.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg8.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:00",
+            "visual_description": "Travel-agent workflow slide includes a final stage where accepted preferences feed back into the system for future runs."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-07-agents-prompts-and-rag",
+        "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.47,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S8_Q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "You ask users to rate the entire trip-planning experience from 1 to 5 after the workflow finishes. In the lecture's eval taxonomy, what is that? ",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A component evaluation of the flight-search API only.",
+        "An end-to-end evaluation of the overall user experience.",
+        "A deterministic correctness check of the hotel-ranking logic only.",
+        "An archival-memory audit of whether old preferences were stored correctly."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture names end-to-end user ratings as one signal for how well the full workflow worked.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "That would be an end to end test, right?"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "That would be an end to end test, right?",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg8.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "02:40",
+            "visual_description": "Travel-agent example transitions from workflow design to evaluation, with the instructor discussing user ratings as a top-level signal."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-07-agents-prompts-and-rag",
+        "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.44,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S8_Q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A travel agent recommends a more expensive flight even though an equivalent cheaper option exists. In the lecture's taxonomy, what kind of issue is that most directly? ",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A subjective evaluation issue, because any flight choice can only be judged by tone and politeness.",
+        "A memory-only issue, because pricing mistakes are caused exclusively by stale preference storage.",
+        "An objective evaluation issue, because the cheaper equivalent option gives a clearer correctness target than a subjective preference judgment.",
+        "A multi-agent orchestration issue, because cost comparisons cannot be evaluated within a single workflow."
+      ],
+      "answer_index": 2,
+      "explanation": "The lecture distinguishes objective errors like choosing a more expensive equivalent flight from subjective qualities such as politeness.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "but one is cheaper than the other, let's say."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "but one is cheaper than the other, let's say.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg8.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "04:15",
+            "visual_description": "Eval discussion contrasts objective mistakes in travel recommendations with softer dimensions that require more subjective judgment."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-07-agents-prompts-and-rag",
+        "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.64,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L07_S8_Q1",
+      "global_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L07_S8_Q2",
+      "global_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L07_S8_Q3",
+      "global_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L07_S8_Q4",
+      "global_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "CS230_L07_S8_Q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.51,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "CS230_L07_S8_Q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.47,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "CS230_L07_S8_Q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.44,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "CS230_L07_S8_Q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.64,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "CS230_L07_S8_Q1",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "CS230_L07_S8_Q2",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "CS230_L07_S8_Q3",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "CS230_L07_S8_Q4",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

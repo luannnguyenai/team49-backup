@@ -1,0 +1,162 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-08",
+  "unit_id": "local::lecture-08::seg11",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "application",
+  "target_item_count": 1,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/lecture08_p3c_all_json/p3c/CS230__lecture-08__local--lecture-08--seg11.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 1,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "cs230_lecture08_seg11_q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs230_lecture08_seg11_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For a mobile photo-search feature that would otherwise upload photos to a backend service, what benefit does the on-device small-AI approach provide?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It increases cloud dependence while reducing the need for local chips.",
+        "It removes user-interface work while increasing server-side complexity.",
+        "It lowers privacy exposure, latency, and backend service cost.",
+        "It replaces application design with a larger hosted frontier model."
+      ],
+      "answer_index": 2,
+      "explanation": "The Alipay example motivates on-device AI by citing privacy, latency, and the cost of standing up a backend service.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_on_device_and_embedded_ai",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "01:22:47\nAnd Alipay had an application where you would--\n\n01:22:52\nyou can go through your photographs,\n\n01:22:56\nPlaces I ate sushi or something along those lines and use\n\n01:23:00\nAll of those require a back end service.\n\n01:23:06\nPhotos or something like that.\n\n01:23:10\nthat you can search against it and be\n\n01:23:14\nWhat Alipay wanted to do was like, say, there\n\n01:23:17\nProblem number one, privacy.\n\n01:23:21\nProblem number two, latency.\n\n01:23:25\nYou got to send the thing.\n\n01:23:28\nand then you've got to download the results from the thing.\n\n01:23:33\nand standing that up cost time and money.\n\n01:23:39\nnow the idea was they could run a model\n\n01:23:44\nYou don't have the latency."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-08",
+        "unit_id": "local::lecture-08::seg11",
+        "evidence_span": "01:22:47\nAnd Alipay had an application where you would--\n\n01:22:52\nyou can go through your photographs,\n\n01:22:56\nPlaces I ate sushi or something along those lines and use\n\n01:23:00\nAll of those require a back end service.\n\n01:23:06\nPhotos or something like that.\n\n01:23:10\nthat you can search against it and be\n\n01:23:14\nWhat Alipay wanted to do was like, say, there\n\n01:23:17\nProblem number one, privacy.\n\n01:23:21\nProblem number two, latency.\n\n01:23:25\nYou got to send the thing.\n\n01:23:28\nand then you've got to download the results from the thing.\n\n01:23:33\nand standing that up cost time and money.\n\n01:23:39\nnow the idea was they could run a model\n\n01:23:44\nYou don't have the latency.",
+        "transcript_timestamp_start_s": 4967,
+        "transcript_timestamp_end_s": 5027,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg11.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg11.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture08-career-advice-in-ai.mp4",
+          "clip_start_s": 4790,
+          "clip_end_s": 5098,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "03:30",
+              "timestamp_s_within_clip": 210,
+              "description": "Laurence discusses the Alipay mobile photo-search example while explaining privacy, latency, and backend-cost advantages of on-device AI."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.58,
+      "question_intent": "application",
+      "secondary_kp_ids": [
+        "kp_cs230_skill_diversification_around_ai_systems"
+      ]
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture08_seg11_q01",
+      "global_kp_id": "kp_cs230_on_device_and_embedded_ai",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture08_seg11_q01",
+      "global_kp_id": "kp_cs230_skill_diversification_around_ai_systems",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs230_lecture08_seg11_q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.58,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs230_lecture08_seg11_q01",
+      "primary_phase": "mini_quiz",
+      "secondary_phases": [
+        "placement",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

@@ -1,0 +1,642 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture05",
+  "unit_id": "local::lecture05::seg3",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "procedural",
+  "target_item_count": 5,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/CS230_lecture05_p3c_question_bank_json/CS230__lecture05__local--lecture05--seg3.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 5,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q001",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q002",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q003",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q004",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q005",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q001",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Deep Q-learning replaces the tabular lookup with a neural network because large RL problems make what representation impractical?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A matrix entry for every state-action pair",
+        "A reward scalar for each completed episode",
+        "A convolution filter for every pixel location",
+        "A text token probability for every prompt"
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture moves from a Q-table lookup to a Q-function approximated by a neural network for many states and actions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_neural_q_function_approximation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "So instead of a lookup in a matrix,"
+        ],
+        "timestamps": [
+          "00:35:59"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg3",
+        "evidence_span": "So instead of a lookup in a matrix,",
+        "transcript_ts": "00:35:59",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 2129,
+          "clip_end_s": 3214,
+          "frame_evidence": [
+            {
+              "timestamp": "00:58",
+              "description": "Deep Q-learning slide shows a one-hot state feeding a neural network that outputs Q(s,right) and Q(s,left)."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.57,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q002",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "For the toy network shown with two actions, the output layer should contain what set of values for an encoded state such as 01000?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "One scalar reward for the whole episode",
+        "One probability for each possible state",
+        "One Q-value for each available action",
+        "One terminal flag for each rollout step"
+      ],
+      "answer_index": 2,
+      "explanation": "The visual slide and transcript describe a state input with two outputs corresponding to the two available actions.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_neural_q_function_approximation",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "it will give you two outputs"
+        ],
+        "timestamps": [
+          "00:36:42"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg3",
+        "evidence_span": "it will give you two outputs",
+        "transcript_ts": "00:36:42",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 2129,
+          "clip_end_s": 3214,
+          "frame_evidence": [
+            {
+              "timestamp": "00:58",
+              "description": "Deep Q-learning slide shows a one-hot state feeding a neural network that outputs Q(s,right) and Q(s,left)."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.6,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q003",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When DQN lacks supervised labels, it builds the target y from the observed immediate reward and what information from the next state?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The smallest legal action index in the next state",
+        "The previous episode's final score copied as a label",
+        "The average hidden activation from the current layer",
+        "The best predicted next-state Q-value after a forward pass"
+      ],
+      "answer_index": 3,
+      "explanation": "The bootstrapped target uses the observed reward plus a discounted maximum Q-value estimated for the next state.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "to use as my target value y the immediate reward that I observe"
+        ],
+        "timestamps": [
+          "00:42:33"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg3",
+        "evidence_span": "to use as my target value y the immediate reward that I observe",
+        "transcript_ts": "00:42:33",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 2129,
+          "clip_end_s": 3214,
+          "frame_evidence": [
+            {
+              "timestamp": "05:47",
+              "description": "Slide shows a Q-network, a next-state forward pass, and the bootstrapped target y = r + gamma max Q(s',a')."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.72,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q004",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "During the DQN backpropagation step described in the lecture, the bootstrapped target is treated in what way?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It is updated by the same gradient as the current Q estimate",
+        "It is held fixed while the current Q estimate is moved toward it",
+        "It is replaced by the supervised label for the current state",
+        "It is averaged with every previous target in replay memory"
+      ],
+      "answer_index": 1,
+      "explanation": "The target is computed using the network but treated as fixed for the current regression update.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "it's fixed."
+        ],
+        "timestamps": [
+          "00:48:37"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg3",
+        "evidence_span": "it's fixed.",
+        "transcript_ts": "00:48:37",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 2129,
+          "clip_end_s": 3214,
+          "frame_evidence": [
+            {
+              "timestamp": "06:35",
+              "description": "Slide labels the target value y and the quadratic loss between y and the current Q-network output."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.78,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q005",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the vanilla DQN loop, the action executed at a time step is chosen by applying what rule to the network's predicted Q-values?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Choose the action with the maximum predicted Q-value",
+        "Choose the action with the minimum immediate reward",
+        "Choose the action with the lowest output-layer index",
+        "Choose the action sampled from the transcript labels"
+      ],
+      "answer_index": 0,
+      "explanation": "The vanilla loop described before adding exploration takes the greedy action with the maximum Q-value.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "We will execute the action a that has the maximum Q value."
+        ],
+        "timestamps": [
+          "00:52:19"
+        ]
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg3",
+        "evidence_span": "We will execute the action a that has the maximum Q value.",
+        "transcript_ts": "00:52:19",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg3.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 2129,
+          "clip_end_s": 3214,
+          "frame_evidence": [
+            {
+              "timestamp": "16:18",
+              "description": "Recap slide lists the DQN loop: initialize Q-network, loop over episodes and time steps, compute targets, then update parameters."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.66,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q001",
+      "global_kp_id": "kp_cs230_neural_q_function_approximation",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q002",
+      "global_kp_id": "kp_cs230_neural_q_function_approximation",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q003",
+      "global_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q004",
+      "global_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q005",
+      "global_kp_id": "kp_cs230_dqn_target_loss_and_gradient_update",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q001",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.57,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q002",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.6,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q003",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.72,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q004",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.78,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q005",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.66,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q001",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q002",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q003",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q004",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg3_q005",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

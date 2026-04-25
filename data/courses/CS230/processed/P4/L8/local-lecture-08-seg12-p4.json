@@ -1,0 +1,278 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-08",
+  "unit_id": "local::lecture-08::seg12",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "procedural",
+  "target_item_count": 2,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/lecture08_p3c_all_json/p3c/CS230__lecture-08__local--lecture-08--seg12.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 2,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "cs230_lecture08_seg12_q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture08_seg12_q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs230_lecture08_seg12_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "When the hockey video prompt produced an implausible scene, what procedural step had been skipped?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Have the model understand the intent, available tools, and Veo constraints before planning the prompt.",
+        "Ask the video tool for more random variations before describing the scene constraints.",
+        "Shorten the prompt to a single visual noun phrase before testing the video engine.",
+        "Replace the story context with model benchmarks before generating the clip."
+      ],
+      "answer_index": 0,
+      "explanation": "Laurence says he did not go through the steps of understanding intent, understanding the tools and Veo, and making a plan for the prompt.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_artificial_understanding_in_agentic_workflows",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "01:25:50\nAnd I took this picture, and I was saying,\n\n01:25:56\nAnd I wrote a nice prompt for this picture to get him.\n\n01:26:02\nHe's got some beautiful flex on his stick.\n\n01:26:08\nWhat do you think happened?\n\n01:26:12\nLet's see if it works.\n\n01:26:18\n[CROWD CHEERING]\n\n01:26:21\nThis was the wrong video, but it still shows the same idea.\n\n01:26:29\nof my intent, if I talk about it in agentic senses,\n\n01:26:36\nand doesn't have any people in it-- sorry.\n\n01:26:41\nIf I just rewind to here, if we look up\n\n01:26:48\nthis is basically where they store all their garbage.\n\n01:26:53\nSo it assumed it was a full arena,\n\n01:26:57\nAnd even though he shot a mile wide, everybody cheers.\n\n01:27:03\nand they forgot his name.\n\n01:27:09\nI did not go through the steps of, A, understand my intent.\n\n01:27:15\nunderstand the tools that are available to you.\n\n01:27:19\nthe intricacies of using Veo."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-08",
+        "unit_id": "local::lecture-08::seg12",
+        "evidence_span": "01:25:50\nAnd I took this picture, and I was saying,\n\n01:25:56\nAnd I wrote a nice prompt for this picture to get him.\n\n01:26:02\nHe's got some beautiful flex on his stick.\n\n01:26:08\nWhat do you think happened?\n\n01:26:12\nLet's see if it works.\n\n01:26:18\n[CROWD CHEERING]\n\n01:26:21\nThis was the wrong video, but it still shows the same idea.\n\n01:26:29\nof my intent, if I talk about it in agentic senses,\n\n01:26:36\nand doesn't have any people in it-- sorry.\n\n01:26:41\nIf I just rewind to here, if we look up\n\n01:26:48\nthis is basically where they store all their garbage.\n\n01:26:53\nSo it assumed it was a full arena,\n\n01:26:57\nAnd even though he shot a mile wide, everybody cheers.\n\n01:27:03\nand they forgot his name.\n\n01:27:09\nI did not go through the steps of, A, understand my intent.\n\n01:27:15\nunderstand the tools that are available to you.\n\n01:27:19\nthe intricacies of using Veo.",
+        "transcript_timestamp_start_s": 5150,
+        "transcript_timestamp_end_s": 5243,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg12.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg12.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture08-career-advice-in-ai.mp4",
+          "clip_start_s": 5098,
+          "clip_end_s": 5550,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "01:22",
+              "timestamp_s_within_clip": 82,
+              "description": "A generated hockey-video example is played while Laurence explains that the prompt failed to capture the scene intent and tool constraints."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.61,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture08_seg12_q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How should an agentic creative workflow reduce costly trial-and-error in video generation?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Ignore the target engine so the prompt remains general across all tools.",
+        "Generate many videos first and then infer the user's intent afterward.",
+        "Use a shorter prompt so the video model has fewer constraints to satisfy.",
+        "Provide scene intent, story context, tool choice, and constraints before refining the prompt."
+      ],
+      "answer_index": 3,
+      "explanation": "The agentic workflow gives the LLM scene context, story context, explicit video-engine information, and constraints before refining the prompt, saving repeated video-generation attempts.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_artificial_understanding_in_agentic_workflows",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "01:30:12\nsaid, OK, I created scenes like this one\n\n01:30:18\nwith no basis, no agentic, no artificial understanding.\n\n01:30:25\nin this scene, the girl is sitting on the bench,\n\n01:30:30\nAnd the person is talking to her and he wants to comfort her.\n\n01:30:38\nalong with the entire story and along\n\n01:30:43\nhas to be eight seconds long, clear dialogue\n\n01:30:47\nto understand my intent from that one,\n\n01:30:53\nwas far more loquacious than I ever would have,\n\n01:30:59\nThe LLM had understanding of what\n\n01:31:03\nmakes good emotion far more than I would have.\n\n01:31:08\nSo that first step in the agentic flow\n\n01:31:13\nwas huge.\n\n01:31:17\nSo I explicitly said which video engine I'm going to be using.\n\n01:31:22\nis familiar with Veo, that kind of stuff,\n\n01:31:27\nwith Veo.\n\n01:31:30\nvery bad at doing high-action scenes,\n\n01:31:36\nas you saw in this case.\n\n01:31:40\nI was using that as a tool.\n\n01:31:43\nand then further refined the prompt from that.\n\n01:31:47\nto actually generate it for me, generating a video\n\n01:31:53\nto generate four videos and credits.\n\n01:31:57\ngenerate lots and lots and lots and lots of videos\n\n01:32:01\nBut all of that token spend that I did earlier on\n\n01:32:07\nthe agent was saved in the back end where it got it right."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-08",
+        "unit_id": "local::lecture-08::seg12",
+        "evidence_span": "01:30:12\nsaid, OK, I created scenes like this one\n\n01:30:18\nwith no basis, no agentic, no artificial understanding.\n\n01:30:25\nin this scene, the girl is sitting on the bench,\n\n01:30:30\nAnd the person is talking to her and he wants to comfort her.\n\n01:30:38\nalong with the entire story and along\n\n01:30:43\nhas to be eight seconds long, clear dialogue\n\n01:30:47\nto understand my intent from that one,\n\n01:30:53\nwas far more loquacious than I ever would have,\n\n01:30:59\nThe LLM had understanding of what\n\n01:31:03\nmakes good emotion far more than I would have.\n\n01:31:08\nSo that first step in the agentic flow\n\n01:31:13\nwas huge.\n\n01:31:17\nSo I explicitly said which video engine I'm going to be using.\n\n01:31:22\nis familiar with Veo, that kind of stuff,\n\n01:31:27\nwith Veo.\n\n01:31:30\nvery bad at doing high-action scenes,\n\n01:31:36\nas you saw in this case.\n\n01:31:40\nI was using that as a tool.\n\n01:31:43\nand then further refined the prompt from that.\n\n01:31:47\nto actually generate it for me, generating a video\n\n01:31:53\nto generate four videos and credits.\n\n01:31:57\ngenerate lots and lots and lots and lots of videos\n\n01:32:01\nBut all of that token spend that I did earlier on\n\n01:32:07\nthe agent was saved in the back end where it got it right.",
+        "transcript_timestamp_start_s": 5412,
+        "transcript_timestamp_end_s": 5533,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg12.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg12.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture08-career-advice-in-ai.mp4",
+          "clip_start_s": 5098,
+          "clip_end_s": 5550,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "06:10",
+              "timestamp_s_within_clip": 370,
+              "description": "Laurence describes refining a video-generation prompt with story context, eight-second scene constraints, Veo awareness, and prompt iteration."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.66,
+      "question_intent": "procedural",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture08_seg12_q01",
+      "global_kp_id": "kp_cs230_artificial_understanding_in_agentic_workflows",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture08_seg12_q02",
+      "global_kp_id": "kp_cs230_artificial_understanding_in_agentic_workflows",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs230_lecture08_seg12_q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.61,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture08_seg12_q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.66,
+      "discrimination_prior": 0.95,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs230_lecture08_seg12_q01",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture08_seg12_q02",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

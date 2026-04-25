@@ -1,0 +1,622 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/p3c_lecture04_question_bank_json/CS230__lecture04-adversarial-robustness-and-generative-models__seg3.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 5,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q04",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q05",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What diagnosis replaces the early intuition that adversarial sensitivity comes mainly from nonlinear activations?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The network behaves approximately linearly enough for many small changes to accumulate.",
+        "The network ignores the input dimensions until the final softmax layer.",
+        "The network memorizes each image and therefore cannot use gradients.",
+        "The network removes semantic features before the first convolution layer."
+      ],
+      "answer_index": 0,
+      "explanation": "The instructor says the nonlinear explanation was not correct and points to near-linearity plus high dimensionality.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_high_dimensional_compounding_vulnerability",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "it actually looks very linear."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+        "evidence_span": "it actually looks very linear.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg3.mp4",
+          "start_s": 1460,
+          "end_s": 2340,
+          "frame_evidence": [
+            {
+              "timestamp": "08:26",
+              "description": "Slide displays the Fast Gradient Sign Method formula after the near-linearity discussion."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.66,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the logistic-regression-style example, why can a small epsilon perturbation shift the output strongly?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It creates an epsilon-times-squared-weight term that pushes the logit direction.",
+        "It deletes the bias term so the sigmoid becomes a constant value.",
+        "It replaces the weight vector with a random Gaussian vector.",
+        "It changes the label encoding so the loss no longer applies."
+      ],
+      "answer_index": 0,
+      "explanation": "Adding epsilon times the weight vector creates a cumulative term in the logit; across dimensions, the small shifts add up.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_high_dimensional_compounding_vulnerability",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "It was because it created that second term, epsilon w squared,"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+        "evidence_span": "It was because it created that second term, epsilon w squared,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg3.mp4",
+          "start_s": 1460,
+          "end_s": 2340,
+          "frame_evidence": [
+            {
+              "timestamp": "08:26",
+              "description": "Slide later summarizes the same direction-of-gradient idea with the FGSM equation."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.74,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What does FGSM do in the lecture’s one-shot attack description?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It averages many random perturbations before updating the image.",
+        "It retrains the classifier parameters for one mini-batch.",
+        "It adds epsilon times the sign of the input-gradient direction.",
+        "It removes pixels with the largest absolute input value."
+      ],
+      "answer_index": 2,
+      "explanation": "FGSM is the one-shot method that perturbs x by a small epsilon in the sign direction of the loss gradient.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_fast_gradient_sign_method",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "It's called the fast gradient sign method."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+        "evidence_span": "It's called the fast gradient sign method.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg3.mp4",
+          "start_s": 1460,
+          "end_s": 2340,
+          "frame_evidence": [
+            {
+              "timestamp": "08:26",
+              "description": "Slide explicitly shows x* = x + epsilon sign(dJ/dX)."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.79,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How should a student diagnose whether an attack is white-box in this segment?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The attacker has access to the model internals needed for gradient-based techniques.",
+        "The attacker has access to a printed patch but not to model queries.",
+        "The attacker has access to labels from users but not to the classifier.",
+        "The attacker has access to clean images but not to the target class."
+      ],
+      "answer_index": 0,
+      "explanation": "The white-box/black-box distinction is about access to the model internals; FGSM-style gradients are easier in the white-box case.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_fast_gradient_sign_method",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "a white box attack where you have access"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+        "evidence_span": "a white box attack where you have access",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg3.mp4",
+          "start_s": 1460,
+          "end_s": 2340,
+          "frame_evidence": [
+            {
+              "timestamp": "08:26",
+              "description": "Formula slide depends on access to gradients with respect to the input."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.84,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q05",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which defense best matches adversarial training as described near the end of the segment?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Mask output layers so gradients become harder to compute.",
+        "Add correctly labeled adversarial inputs to the training objective.",
+        "Reject every input that contains any high-frequency texture.",
+        "Query a black-box model until an adversarial image transfers."
+      ],
+      "answer_index": 1,
+      "explanation": "The instructor describes duplicating the loss with adversarial versions of x, such as ones generated by FGSM, while keeping the label y the same.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_adversarial_defense_strategies",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "x adversarial using the fast gradient sign method,"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg3",
+        "evidence_span": "x adversarial using the fast gradient sign method,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg3.mp4",
+          "start_s": 1460,
+          "end_s": 2340,
+          "frame_evidence": [
+            {
+              "timestamp": "12:40",
+              "description": "Instructor discusses defense categories after the FGSM slide and before moving to backdoors."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.88,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q01",
+      "global_kp_id": "kp_cs230_high_dimensional_compounding_vulnerability",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q02",
+      "global_kp_id": "kp_cs230_high_dimensional_compounding_vulnerability",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q03",
+      "global_kp_id": "kp_cs230_fast_gradient_sign_method",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q04",
+      "global_kp_id": "kp_cs230_fast_gradient_sign_method",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q05",
+      "global_kp_id": "kp_cs230_adversarial_defense_strategies",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.66,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.74,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.79,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q04",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.84,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q05",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.88,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q01",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q02",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q03",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q04",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg3__q05",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

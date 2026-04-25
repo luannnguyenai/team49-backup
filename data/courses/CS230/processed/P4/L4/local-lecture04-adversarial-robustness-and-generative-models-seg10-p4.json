@@ -1,0 +1,386 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "application",
+  "target_item_count": 3,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/p3c_lecture04_question_bank_json/CS230__lecture04-adversarial-robustness-and-generative-models__seg10.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 3,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "At test time, how does the trained diffusion model generate an image from noise?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It starts from an initialization and repeatedly predicts and subtracts noise.",
+        "It starts from a clean image and repeatedly adds noise for training labels.",
+        "It starts from a discriminator and repeatedly labels samples as real.",
+        "It starts from a trigger patch and repeatedly changes the training set."
+      ],
+      "answer_index": 0,
+      "explanation": "Sampling reverses training-time noising by repeatedly denoising from an initial noisy image until structure appears.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "You are going to perform a progressive denoising."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+        "evidence_span": "You are going to perform a progressive denoising.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg10.mp4",
+          "start_s": 5641,
+          "end_s": 6428,
+          "frame_evidence": [
+            {
+              "timestamp": "03:20",
+              "description": "Sampling slide shows an initialization passed through repeated diffusion-model calls."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.7,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A user wants a dog instead of whatever image vanilla sampling produces. What addition addresses that need?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Condition the model on a prompt or another modality during generation.",
+        "Remove all prompts so the model can follow the random image alone.",
+        "Replace denoising with a discriminator trained on real and fake labels.",
+        "Insert a hidden trigger into the training data before deployment."
+      ],
+      "answer_index": 0,
+      "explanation": "The instructor answers that vanilla generation goes where the model goes; practical systems use conditioning such as text prompts.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "In practice, there is conditioning."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+        "evidence_span": "In practice, there is conditioning.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg10.mp4",
+          "start_s": 5641,
+          "end_s": 6428,
+          "frame_evidence": [
+            {
+              "timestamp": "03:20",
+              "description": "Sampling slide is followed by discussion of prompt-conditioned generation."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.82,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does latent diffusion run noising and denoising in z space instead of pixel space?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The latent space is lower-dimensional while retaining important image patterns.",
+        "The latent space is higher-dimensional while removing all image structure.",
+        "The latent space is a discriminator label space for real and fake samples.",
+        "The latent space is a prompt string space for direct instruction attacks."
+      ],
+      "answer_index": 0,
+      "explanation": "Latent diffusion uses an encoder to compress images into a manageable representation, performs diffusion there, and decodes back to pixels.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_latent_diffusion_models",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "You use an encoder to encode it in a lower-dimensional space."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+        "evidence_span": "You use an encoder to encode it in a lower-dimensional space.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg10.mp4",
+          "start_s": 5641,
+          "end_s": 6428,
+          "frame_evidence": [
+            {
+              "timestamp": "07:20",
+              "description": "Latent diffusion slide shows x mapped to z, denoising in latent space, then decoding back."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.9,
+      "question_intent": "application",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q01",
+      "global_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q02",
+      "global_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q03",
+      "global_kp_id": "kp_latent_diffusion_models",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.7,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.82,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.9,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q01",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q02",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q03",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "high",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-08",
+  "unit_id": "local::lecture-08::seg9",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "diagnostic",
+  "target_item_count": 1,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/lecture08_p3c_all_json/p3c/CS230__lecture-08__local--lecture-08--seg9.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 1,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "cs230_lecture08_seg09_q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs230_lecture08_seg09_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A CEO asks for an AI agent after reading that agents save costs. What first move matches the lecture's problem-first advising method?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Define an agent architecture first because the label is currently popular.",
+        "Ask why and uncover the business goal before selecting the technology.",
+        "Build a demo agent immediately and justify it with current AI trends.",
+        "Compare model benchmarks first before learning the user's workflow."
+      ],
+      "answer_index": 1,
+      "explanation": "Laurence says the fundamental first question is 'why?' and then discovers the real goal is making salespeople more efficient, not adopting agents for their own sake.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_problem_first_ai_solution_design",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "00:58:43\nLast year when agents started becoming the key word\n\n00:58:49\nwill be the word of the year and the trend\n\n00:58:55\nme to help them to implement an agent.\n\n00:58:59\nIf a company came up to you and said,\n\n00:59:04\nwhat's the correct first question that you ask them?\n\n00:59:12\nOK.\n\n00:59:13\nWhat is an agent for you?\n\n00:59:17\nYep.\n\n00:59:18\nWhat do you want to do?\n\n00:59:19\nEven more fundamental.\n\n00:59:24\nWhy?\n\n00:59:27\nI spoke with the CEO, and he was like, oh.\n\n00:59:31\ngoing to save business costs.\n\n00:59:36\nAnd yeah, my business is going to get\n\n00:59:39\nAnd I'm like, well, who told you that?\n\n00:59:43\nand I saw this thing on Twitter.\n\n00:59:45\nand we ended up having that conversation.\n\n00:59:49\nbecause I had to keep peeling apart.\n\n00:59:52\nthat you two just mentioned as well, until we really\n\n00:59:57\nAnd what he really wanted to do, when\n\n01:00:03\nwas that he wanted to make his salespeople more efficient.\n\n01:00:08\nefficient.\n\n01:00:11\nand nowhere in that sentence do I hear the word agent.\n\n01:00:17\nme see what I can do to help your salespeople become"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-08",
+        "unit_id": "local::lecture-08::seg9",
+        "evidence_span": "00:58:43\nLast year when agents started becoming the key word\n\n00:58:49\nwill be the word of the year and the trend\n\n00:58:55\nme to help them to implement an agent.\n\n00:58:59\nIf a company came up to you and said,\n\n00:59:04\nwhat's the correct first question that you ask them?\n\n00:59:12\nOK.\n\n00:59:13\nWhat is an agent for you?\n\n00:59:17\nYep.\n\n00:59:18\nWhat do you want to do?\n\n00:59:19\nEven more fundamental.\n\n00:59:24\nWhy?\n\n00:59:27\nI spoke with the CEO, and he was like, oh.\n\n00:59:31\ngoing to save business costs.\n\n00:59:36\nAnd yeah, my business is going to get\n\n00:59:39\nAnd I'm like, well, who told you that?\n\n00:59:43\nand I saw this thing on Twitter.\n\n00:59:45\nand we ended up having that conversation.\n\n00:59:49\nbecause I had to keep peeling apart.\n\n00:59:52\nthat you two just mentioned as well, until we really\n\n00:59:57\nAnd what he really wanted to do, when\n\n01:00:03\nwas that he wanted to make his salespeople more efficient.\n\n01:00:08\nefficient.\n\n01:00:11\nand nowhere in that sentence do I hear the word agent.\n\n01:00:17\nme see what I can do to help your salespeople become",
+        "transcript_timestamp_start_s": 3523,
+        "transcript_timestamp_end_s": 3620,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg9.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg9.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture08-career-advice-in-ai.mp4",
+          "clip_start_s": 3425,
+          "clip_end_s": 4200,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "02:19",
+              "timestamp_s_within_clip": 139,
+              "description": "Laurence tells the agent-advising story at the front of the room, emphasizing the first question 'why?' before choosing technology."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.5,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": [
+        "kp_cs230_hype_filtering_and_trusted_advising"
+      ]
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture08_seg09_q01",
+      "global_kp_id": "kp_cs230_problem_first_ai_solution_design",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture08_seg09_q01",
+      "global_kp_id": "kp_cs230_hype_filtering_and_trusted_advising",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs230_lecture08_seg09_q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.5,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs230_lecture08_seg09_q01",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

@@ -1,0 +1,502 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/p3c_lecture04_question_bank_json/CS230__lecture04-adversarial-robustness-and-generative-models__seg5.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 4,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q04",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "How does the instructor contrast generative modeling with ordinary classification?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Generative models learn the data distribution rather than just assigning class labels.",
+        "Generative models remove the data distribution and keep only class labels.",
+        "Generative models classify existing examples rather than producing new samples.",
+        "Generative models replace probability modeling with fixed lookup tables."
+      ],
+      "answer_index": 0,
+      "explanation": "The core contrast is that discriminative models classify, while generative models learn a data distribution from which samples can be created.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_generative_modeling_as_distribution_learning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "distribution of the data."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+        "evidence_span": "distribution of the data.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg5.mp4",
+          "start_s": 2988,
+          "end_s": 3370,
+          "frame_evidence": [
+            {
+              "timestamp": "04:10",
+              "description": "Slide introduces generative modeling use cases before contrasting distribution learning with classification."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.31,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Which set of examples best matches the generative-modeling use cases discussed at the start of the section?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Image and video generation, captioning, code generation, and inpainting.",
+        "Image labeling, binary classification, cost plotting, and red teaming.",
+        "Gradient masking, input filtering, data review, and output sanitization.",
+        "Patch printing, detector scoring, black-box querying, and transfer attacks."
+      ],
+      "answer_index": 0,
+      "explanation": "The instructor solicits use cases and mentions image/video generation, captioning, code generation, super-resolution, and inpainting.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_generative_modeling_as_distribution_learning",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Image generation, video generation."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+        "evidence_span": "Image generation, video generation.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg5.mp4",
+          "start_s": 2988,
+          "end_s": 3370,
+          "frame_evidence": [
+            {
+              "timestamp": "01:15",
+              "description": "Instructor asks for examples of generative modeling while the section slide is visible."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.38,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the instructor say large datasets help a smaller generative model learn useful regularities?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The model has pressure to learn salient patterns instead of memorizing the dataset.",
+        "The model has pressure to store each image as a separate output label.",
+        "The model has pressure to discard probability and optimize classification accuracy.",
+        "The model has pressure to use adversarial triggers as training labels."
+      ],
+      "answer_index": 0,
+      "explanation": "The self-supervised intuition is that a model smaller than the dataset must learn patterns rather than memorize every example.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_generative_modeling_as_distribution_learning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "So the model cannot overfit."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+        "evidence_span": "So the model cannot overfit.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg5.mp4",
+          "start_s": 2988,
+          "end_s": 3370,
+          "frame_evidence": [
+            {
+              "timestamp": "04:05",
+              "description": "Instructor explains the self-supervised intuition after listing generative use cases."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.49,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What is the distribution-matching endpoint for a trained generative model in the lecture?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The generated distribution aligns with the real-world data distribution.",
+        "The generated distribution avoids the real-world data distribution.",
+        "The generated distribution becomes a single most likely training example.",
+        "The generated distribution becomes the classifier decision boundary."
+      ],
+      "answer_index": 0,
+      "explanation": "Training is considered successful when generated samples follow the real data distribution.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_generative_modeling_as_distribution_learning",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "What you want ultimately is that the red distribution is in line"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg5",
+        "evidence_span": "What you want ultimately is that the red distribution is in line",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg5.mp4",
+          "start_s": 2988,
+          "end_s": 3370,
+          "frame_evidence": [
+            {
+              "timestamp": "05:20",
+              "description": "Slide plots real and generated distributions as the instructor describes alignment."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.55,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q01",
+      "global_kp_id": "kp_cs230_generative_modeling_as_distribution_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q02",
+      "global_kp_id": "kp_cs230_generative_modeling_as_distribution_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q03",
+      "global_kp_id": "kp_cs230_generative_modeling_as_distribution_learning",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q04",
+      "global_kp_id": "kp_cs230_generative_modeling_as_distribution_learning",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.31,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.38,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.49,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q04",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.55,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q01",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q02",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q03",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg5__q04",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

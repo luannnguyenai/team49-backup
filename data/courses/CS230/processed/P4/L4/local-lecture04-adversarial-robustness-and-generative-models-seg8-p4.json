@@ -1,0 +1,504 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "conceptual",
+  "target_item_count": 4,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/p3c_lecture04_question_bank_json/CS230__lecture04-adversarial-robustness-and-generative-models__seg8.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 4,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q04",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why is diffusion introduced after the GAN discussion?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It models the data distribution with one denoising model rather than a minimax game.",
+        "It models the discriminator labels with two networks rather than one classifier.",
+        "It models prompt attacks with a hidden trigger rather than a training patch.",
+        "It models output filtering with safety checks rather than image corruption."
+      ],
+      "answer_index": 0,
+      "explanation": "Diffusion avoids the coupled adversarial game and trains a single model on noising and denoising.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_forward_diffusion_process",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "And here we don't have a minimax game."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+        "evidence_span": "And here we don't have a minimax game.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+          "start_s": 4536,
+          "end_s": 5064,
+          "frame_evidence": [
+            {
+              "timestamp": "06:00",
+              "description": "Slide title changes to forward process for diffusion after GAN limitations are discussed."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.6,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What happens in the forward diffusion process described in the lecture?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Start with x0 and progressively add noise until the image becomes unrecognizable.",
+        "Start with xT and progressively remove labels until the image becomes classified.",
+        "Start with z and progressively train a discriminator until the image becomes real.",
+        "Start with a prompt and progressively insert triggers until the image becomes poisoned."
+      ],
+      "answer_index": 0,
+      "explanation": "Forward diffusion takes a clean image and adds noise step by step until it reaches a highly noisy state.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_forward_diffusion_process",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "you start with an image x0, and you progressively"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+        "evidence_span": "you start with an image x0, and you progressively",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+          "start_s": 4536,
+          "end_s": 5064,
+          "frame_evidence": [
+            {
+              "timestamp": "06:30",
+              "description": "Slide begins the forward diffusion section with the x0-to-xT process."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.67,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the simplified recurrence, what kind of noise is added at each step?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Gaussian noise sampled at each time step.",
+        "Binary class noise copied from the discriminator.",
+        "Prompt noise copied from the user template.",
+        "Patch noise printed from the detector output."
+      ],
+      "answer_index": 0,
+      "explanation": "The simplified forward process adds an epsilon_t term, and the instructor states epsilon_t is Gaussian noise.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_forward_diffusion_process",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "epsilon t is Gaussian noise."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+        "evidence_span": "epsilon t is Gaussian noise.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+          "start_s": 4536,
+          "end_s": 5064,
+          "frame_evidence": [
+            {
+              "timestamp": "07:10",
+              "description": "Slide shows x_{t+1} as the previous image plus an added noise term."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.76,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the forward process store or define the cumulative noise?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The reverse model can later learn to predict the noise that was added.",
+        "The discriminator can later learn to label the noise as real or fake.",
+        "The prompt template can later learn to hide the noise in user text.",
+        "The patch optimizer can later learn to print the noise as a trigger."
+      ],
+      "answer_index": 0,
+      "explanation": "Forward noising creates the supervised target for the reverse denoising task: predict the cumulative noise.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_forward_diffusion_process",
+      "difficulty": "hard",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "by predicting all the noise that was added."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+        "evidence_span": "by predicting all the noise that was added.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+          "start_s": 4536,
+          "end_s": 5064,
+          "frame_evidence": [
+            {
+              "timestamp": "07:50",
+              "description": "Slide transitions from forward diffusion to learning the reverse denoising process."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.84,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q01",
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q02",
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q03",
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q04",
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.6,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.67,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.76,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q04",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.84,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q01",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q02",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q03",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q04",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "medium",
+        "final_quiz": "high",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

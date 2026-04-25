@@ -1,0 +1,159 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-01",
+  "unit_id": "local::lecture-01::seg5",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "conceptual",
+  "target_item_count": 1,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/local_cs230_lecture01_p3c_json/CS230__lecture-01__local::lecture-01::seg5.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 1,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "CS230_L01_S5_Q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "CS230_L01_S5_Q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Near the end of the lecture, what did Ng present as part of a modern GenAI application stack rather than mere prompt writing?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Kernel tricks, decision trees, boosting, and PCA.",
+        "Frontier-model pretraining, custom chip design, and raw CUDA optimization.",
+        "Only prompt wording, prompt chaining, and longer context windows.",
+        "RAG, evals, multimodal tooling, fine-tuning, and agentic workflows."
+      ],
+      "answer_index": 3,
+      "explanation": "He lists retrieval, evaluation, multimodal work, fine-tuning, and agentic workflows as practical GenAI-building tools he looks for in candidates.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_modern_genai_application_stack",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "But I think there are emerging tools, like RAG, Retrieval"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "But I think there are emerging tools, like RAG, Retrieval",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg5.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg5.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture01-introduction-to-deep-learning.mp4",
+          "clip_start_s": 3193,
+          "clip_end_s": 3609,
+          "buffer_s": 3,
+          "buffered_start_s": 3190,
+          "buffered_end_s": 3612
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-01",
+        "unit_id": "local::lecture-01::seg5"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.56,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": [
+        "kp_cs230_cs_fundamentals_plus_ai_tool_fluency"
+      ]
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L01_S5_Q1",
+      "global_kp_id": "kp_cs230_modern_genai_application_stack",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L01_S5_Q1",
+      "global_kp_id": "kp_cs230_cs_fundamentals_plus_ai_tool_fluency",
+      "role": "secondary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "CS230_L01_S5_Q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.56,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "CS230_L01_S5_Q1",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

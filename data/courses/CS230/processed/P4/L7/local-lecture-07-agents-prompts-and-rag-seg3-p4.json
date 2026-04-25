@@ -1,0 +1,617 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "diagnostic",
+  "target_item_count": 5,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/local_cs230_lecture07_agents_prompts_and_rag_p3c_json/CS230__lecture-07-agents-prompts-and-rag__local::lecture-07-agents-prompts-and-rag::seg3.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 5,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "CS230_L07_S3_Q1",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q2",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q3",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q4",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q5",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "CS230_L07_S3_Q1",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A single prompt both extracts issues from a customer review and writes the final response, but you cannot tell where errors come from. What redesign best matches the lecture? ",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Keep the single prompt and add more adjectives so the model has a stronger stylistic signal.",
+        "Collapse the workflow further by removing the extraction step and asking only for the final email.",
+        "Replace the workflow with one longer context window so intermediate reasoning never needs to be externalized.",
+        "Split the workflow into chained prompts so extraction, outlining, and final writing can each be inspected separately."
+      ],
+      "answer_index": 3,
+      "explanation": "The lecture defines chaining as splitting a complex workflow into multiple prompts whose intermediate outputs can be debugged independently.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_prompt_chaining",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "So one advantage of chaining is you would separate the prompts,"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "So one advantage of chaining is you would separate the prompts,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:35",
+            "visual_description": "Slide titled Chain complex prompts for improved performance contrasts a single-step customer-response prompt with a multi-prompt decomposition."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-07-agents-prompts-and-rag",
+        "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.52,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q2",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "You want to know whether poor email quality comes from issue extraction, outline generation, or final writing. Which diagnostic benefit of chaining did the lecture emphasize? ",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "You can test the prompts separately and optimize the weakest step instead of guessing which hidden subtask failed.",
+        "You can eliminate intermediate outputs so the model has fewer chances to expose errors during evaluation.",
+        "You can force all three subtasks to share the same hidden state so debugging is no longer needed.",
+        "You can guarantee that every later prompt is correct as long as the first prompt produces any output at all."
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture says chained prompts can be tested independently, which makes it easier to identify which step should be optimized.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_prompt_chaining",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "test those three prompts separately from each other"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "test those three prompts separately from each other",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "02:20",
+            "visual_description": "Chaining slide remains visible while the instructor points to the separated extraction, outline, and final-response stages."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-07-agents-prompts-and-rag",
+        "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.57,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q3",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "A team proposes a very long chain for a chatbot that must answer almost instantly. Which caution from the lecture is most relevant? ",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Longer chains reduce latency because every extra prompt shortens the model's decoding path.",
+        "Longer chains can improve control, but they also add latency that may be unacceptable in speed-sensitive applications.",
+        "Longer chains remove the need for intermediate evaluation because later prompts automatically correct earlier ones.",
+        "Longer chains make prompt engineering unnecessary because the workflow logic replaces prompt quality."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture notes that chained workflows help control and debugging, but longer chains can be undesirable when latency matters.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_prompt_chaining",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "helps you control your workflow"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "helps you control your workflow",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "03:05",
+            "visual_description": "The slide and narration focus on why multi-step control improves debugging even though it may cost additional model calls."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-07-agents-prompts-and-rag",
+        "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.62,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q4",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "You are comparing a baseline prompt against a refined prompt across several test cases. What evaluation setup most closely matches the lecture's prompt-testing advice? ",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Judge the prompts only by how elegant they look before execution, because wording quality predicts output quality.",
+        "Measure only token count, because shorter prompts are usually the stronger prompts across tasks.",
+        "Run both prompts on representative cases, inspect the generated outputs, and score the results side by side.",
+        "Pick the prompt that sounds more confident, because confidence is the main indicator of a reliable workflow."
+      ],
+      "answer_index": 2,
+      "explanation": "Prompt testing in the lecture compares baseline and refined prompts on actual cases and reviews their generated outputs.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "that is the baseline."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "that is the baseline.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "06:40",
+            "visual_description": "Slide titled Testing your prompts shows a table with prompt variants, test cases, generated outputs, and scores."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-07-agents-prompts-and-rag",
+        "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.49,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q5",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "You already have a reference answer and want an automated evaluator to compare two model outputs against it. Which judge pattern from the lecture is the best fit? ",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Use a zero-shot generator as the final answerer, because generation and judging should be the same step.",
+        "Use a chain-of-thought prompt only, because reference answers are unnecessary once the model reasons step by step.",
+        "Use a single-answer grader with no comparison or rubric, because pairwise judgments become invalid when a reference exists.",
+        "Use a reference-guided LLM judge that compares both candidate answers against the provided reference."
+      ],
+      "answer_index": 3,
+      "explanation": "The lecture presents several judge modes, including reference-guided pairwise comparison when a reference answer is available.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "Or you add also a rubric."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "evidence_span": "Or you add also a rubric.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "08:10",
+            "visual_description": "Slide titled LLM as Judges shows pairwise, single-answer, and reference-guided judging prompts alongside rubric-style evaluation."
+          }
+        },
+        "course_id": "CS230",
+        "lecture_id": "lecture-07-agents-prompts-and-rag",
+        "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3"
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.65,
+      "question_intent": "diagnostic",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L07_S3_Q1",
+      "global_kp_id": "kp_cs230_prompt_chaining",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L07_S3_Q2",
+      "global_kp_id": "kp_cs230_prompt_chaining",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L07_S3_Q3",
+      "global_kp_id": "kp_cs230_prompt_chaining",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L07_S3_Q4",
+      "global_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "role": "primary"
+    },
+    {
+      "item_id": "CS230_L07_S3_Q5",
+      "global_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "CS230_L07_S3_Q1",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.52,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "CS230_L07_S3_Q2",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.57,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "CS230_L07_S3_Q3",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.62,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "CS230_L07_S3_Q4",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.49,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "CS230_L07_S3_Q5",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.65,
+      "discrimination_prior": 1.05,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "CS230_L07_S3_Q1",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "CS230_L07_S3_Q2",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "CS230_L07_S3_Q3",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "CS230_L07_S3_Q4",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "CS230_L07_S3_Q5",
+      "primary_phase": "skip_verification",
+      "secondary_phases": [
+        "placement",
+        "mini_quiz",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "medium",
+        "mini_quiz": "high",
+        "skip_verification": "high",
+        "bridge_check": "high",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}

@@ -1,0 +1,644 @@
+{
+  "run_id": "p4_deterministic_cs230",
+  "stage_id": "P4_review_repair_calibration_phase_map",
+  "course_id": "CS230",
+  "lecture_id": "lecture-03",
+  "unit_id": "local::lecture-03::seg1",
+  "youtube_url": null,
+  "assessment_purpose": "segment_checkpoint",
+  "grounding_mode": "transcript_and_video_clip",
+  "grounding_confidence": "high",
+  "needs_video_clip": true,
+  "question_intent": "conceptual",
+  "target_item_count": 5,
+  "review_summary": {
+    "source_p3c_file": "data/courses/CS230/processed/P3c/lecture03_p3c_all_json/p3c/CS230__lecture-03__local--lecture-03--seg1.json",
+    "review_mode": "deterministic_normalization_after_p3c_validation",
+    "accepted_items": 5,
+    "repaired_items": 0,
+    "rejected_items": 0
+  },
+  "qa_outputs": [
+    {
+      "item_id": "cs230_lecture03_seg01_q01",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q02",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q03",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q04",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q05",
+      "qa_gate_passed": true,
+      "alignment_verdict": "pass",
+      "distractor_verdict": "pass",
+      "rubric_verdict": "n_a",
+      "evidence_verdict": "pass",
+      "qa_rationale": "Accepted after deterministic P3c validation and P4 normalization.",
+      "recommended_action": "accept",
+      "repairable": false,
+      "revise_hints": []
+    }
+  ],
+  "repaired_question_bank": [
+    {
+      "item_id": "cs230_lecture03_seg01_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the lecture frame AI project development as more empirical than ordinary software development?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "The model code is mostly unknown, while the training data is specified exactly.",
+        "The code can be controlled, while the data contains unknown variation.",
+        "The deployment hardware is fixed, while the model architecture changes itself.",
+        "The optimizer is hand-written, while the labels are generated deterministically."
+      ],
+      "answer_index": 1,
+      "explanation": "The instructor contrasts controllable code with data whose contents and future variation are hard to know in advance.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "AI based is that in traditional software projects,\n\n00:01:21\nWrite whatever code you want.\n\n00:01:23\nYour code does what you tell it to.\n\n00:01:34\nthat you train your algorithm on.\n\n00:01:41\nthere are in your data.\n\n00:01:45\napplication-- that's a running example I'm going to use today--\n\n00:01:51\nit's really difficult"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "AI based is that in traditional software projects,\n\n00:01:21\nWrite whatever code you want.\n\n00:01:23\nYour code does what you tell it to.\n\n00:01:34\nthat you train your algorithm on.\n\n00:01:41\nthere are in your data.\n\n00:01:45\napplication-- that's a running example I'm going to use today--\n\n00:01:51\nit's really difficult",
+        "transcript_timestamp_start_s": 81,
+        "transcript_timestamp_end_s": 93,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "02:26",
+              "timestamp_s_within_clip": 146,
+              "description": "Instructor stands at the whiteboard while discussing unpredictable face-recognition data such as lighting and hair."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.32,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "In the face-recognition example, what kind of issue best represents the data uncertainty the instructor highlights?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "A compiler flag changes the neural-network source code before deployment.",
+        "A database index slows down lookup for every registered user.",
+        "Lighting, hair, glasses, or winter coverings alter what the camera sees.",
+        "A cloud region changes the file extension of each training image."
+      ],
+      "answer_index": 2,
+      "explanation": "The examples are visual conditions in the data, not ordinary software or storage failures.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "data is so rich that a lot of time,\n\n00:02:15\nsystem is going to do, not because you\n\n00:02:18\nYou can write whatever neural network\n\n00:02:21\nBut you don't what's in the data.\n\n00:02:26\nengineering, machine learning development\n\n00:02:32\nhave to build something, see how it works, and then\n\n00:02:38\nwhat is in the data"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "data is so rich that a lot of time,\n\n00:02:15\nsystem is going to do, not because you\n\n00:02:18\nYou can write whatever neural network\n\n00:02:21\nBut you don't what's in the data.\n\n00:02:26\nengineering, machine learning development\n\n00:02:32\nhave to build something, see how it works, and then\n\n00:02:38\nwhat is in the data",
+        "transcript_timestamp_start_s": 135,
+        "transcript_timestamp_end_s": 147,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "04:53",
+              "timestamp_s_within_clip": 293,
+              "description": "A small door/person sketch appears on the whiteboard as the instructor turns the discussion toward the face-recognition setting."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.38,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What lifecycle view does the lecture add beyond simply training a model?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Get data, design and train a model, deploy it, then monitor and maintain it.",
+        "Write a classifier, publish a benchmark, freeze the model, then archive the data.",
+        "Pick an optimizer, tune the loss, report accuracy, then discard deployment logs.",
+        "Collect labels, memorize examples, avoid iteration, then replace monitoring with tests."
+      ],
+      "answer_index": 0,
+      "explanation": "The lecture widens the project cycle to include data, deployment, monitoring, and maintenance.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_full_machine_learning_project_lifecycle",
+      "difficulty": "easy",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "typical process, we get data, design the model,\n\n00:08:07\nAnd then we will iterate through these steps\n\n00:08:14\nperforming well enough.\n\n00:08:36\nand maintain the model.\n\n00:08:41\nof these steps today because I want you to come away\n\n00:08:46\non a real machine learning application,\n\n00:08:53\nAnd so as I alluded, machi"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "typical process, we get data, design the model,\n\n00:08:07\nAnd then we will iterate through these steps\n\n00:08:14\nperforming well enough.\n\n00:08:36\nand maintain the model.\n\n00:08:41\nof these steps today because I want you to come away\n\n00:08:46\non a real machine learning application,\n\n00:08:53\nAnd so as I alluded, machi",
+        "transcript_timestamp_start_s": 487,
+        "transcript_timestamp_end_s": 499,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "07:19",
+              "timestamp_s_within_clip": 439,
+              "description": "The board shows the running face-recognition setup while the instructor transitions to the full project cycle."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.39,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "What development loop does the instructor associate with the empirical nature of machine learning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Specify requirements, implement once, verify syntax, then deploy unchanged.",
+        "Download a model, hide errors, scale serving, then skip model analysis.",
+        "Gather maximum data, freeze labels, retrain yearly, then compare costs.",
+        "Design a model, train it, analyze results, then iterate around the loop."
+      ],
+      "answer_index": 3,
+      "explanation": "The loop is to design, train, analyze, and iterate rather than treating the first implementation as final.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "rapid development\n\n00:09:16\noops, sorry-- design the model, train it, analyze the results,\n\n00:09:33\nor something and iterate around this loop\n\n00:09:40\nAnd just one more detail."
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "rapid development\n\n00:09:16\noops, sorry-- design the model, train it, analyze the results,\n\n00:09:33\nor something and iterate around this loop\n\n00:09:40\nAnd just one more detail.",
+        "transcript_timestamp_start_s": 556,
+        "transcript_timestamp_end_s": 568,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "09:44",
+              "timestamp_s_within_clip": 584,
+              "description": "The whiteboard contains a loop connecting design, training, analysis, and data updates."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.43,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q05",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question": "Why does the instructor treat LLM application development as similar to other empirical AI work?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "LLM prompts specify every training example the model will use at runtime.",
+        "LLM behavior depends on massive training data no developer can fully inspect.",
+        "LLM deployment removes the need to test prompts before serving users.",
+        "LLM systems expose all internal data properties through deterministic logs."
+      ],
+      "answer_index": 1,
+      "explanation": "The same uncertainty applies because LLMs are trained on data far too large for developers to fully inspect.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "difficulty": "medium",
+      "code_question_style": null,
+      "requires_monospace": false,
+      "code_block": null,
+      "evidence": {
+        "source": "transcript",
+        "transcript_quotes": [
+          "know in advance what LLMs do is because it\n\n00:03:11\nthan any human could possibly look at.\n\n00:03:16\nwhat is in all that data that the arm was trained on.\n\n00:03:21\ncan't really look at all the massive tens\n\n00:03:26\nIt's hard to know exactly how large language model will\n\n00:03:34\nor building large language models ba"
+        ],
+        "timestamps": []
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "know in advance what LLMs do is because it\n\n00:03:11\nthan any human could possibly look at.\n\n00:03:16\nwhat is in all that data that the arm was trained on.\n\n00:03:21\ncan't really look at all the massive tens\n\n00:03:26\nIt's hard to know exactly how large language model will\n\n00:03:34\nor building large language models ba",
+        "transcript_timestamp_start_s": 191,
+        "transcript_timestamp_end_s": 203,
+        "multimodal_signals_used": [
+          "transcript",
+          "video",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "09:44",
+              "timestamp_s_within_clip": 584,
+              "description": "The instructor gestures beside the empirical development loop drawn on the board."
+            }
+          ]
+        }
+      },
+      "qa_gate_passed": true,
+      "review_status": "not_required",
+      "repair_history": [],
+      "provenance": "vlm_grounded",
+      "difficulty_prior": 0.47,
+      "question_intent": "conceptual",
+      "secondary_kp_ids": []
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture03_seg01_q01",
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q02",
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q03",
+      "global_kp_id": "kp_cs230_full_machine_learning_project_lifecycle",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q04",
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q05",
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "role": "primary"
+    }
+  ],
+  "repair_actions": [],
+  "item_calibration_bootstrap": [
+    {
+      "item_id": "cs230_lecture03_seg01_q01",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.32,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q02",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.38,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q03",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.39,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q04",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.43,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q05",
+      "is_calibrated": false,
+      "calibration_method": "prior_only",
+      "difficulty_prior": 0.47,
+      "discrimination_prior": 0.85,
+      "guessing_prior": 0.25,
+      "calibration_confidence": "medium",
+      "calibration_rationale": "Prior-only bootstrap from P3c difficulty and question intent; no learner response data yet."
+    }
+  ],
+  "item_phase_map": [
+    {
+      "item_id": "cs230_lecture03_seg01_q01",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q02",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q03",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "low",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q04",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q05",
+      "primary_phase": "placement",
+      "secondary_phases": [
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "transfer",
+        "review"
+      ],
+      "suitability_by_phase": {
+        "placement": "high",
+        "mini_quiz": "high",
+        "skip_verification": "medium",
+        "bridge_check": "medium",
+        "final_quiz": "medium",
+        "transfer": "medium",
+        "review": "high"
+      },
+      "phase_multiplier_by_phase": {
+        "placement": 1.0,
+        "mini_quiz": 0.8,
+        "skip_verification": 1.0,
+        "bridge_check": 1.0,
+        "final_quiz": 1.2,
+        "transfer": 1.1,
+        "review": 0.7
+      },
+      "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior."
+    }
+  ]
+}
