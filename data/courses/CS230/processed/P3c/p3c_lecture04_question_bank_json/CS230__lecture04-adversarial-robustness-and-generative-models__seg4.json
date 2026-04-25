@@ -1,0 +1,197 @@
+{
+  "run_id": "local",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+  "question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg4__q01",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "application",
+      "stem": "A scraped cat/dog dataset contains a small attacker patch placed on selected images before training. What attack pattern is this?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A backdoor attack that teaches the model a trigger-label association."
+        },
+        {
+          "option_id": "B",
+          "text": "A prompt injection attack that alters the system instruction string."
+        },
+        {
+          "option_id": "C",
+          "text": "A diffusion attack that denoises the patched image at sampling time."
+        },
+        {
+          "option_id": "D",
+          "text": "A GAN attack that trains a generator to imitate the patch distribution."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The example is a backdoor/data-poisoning setup: a trigger appears in training data and later activates the targeted behavior.",
+      "distractor_rationales": {
+        "B": "Prompt injection happens through natural-language instructions, not patched training images.",
+        "C": "Diffusion denoising is a generative process, not this poisoning mechanism.",
+        "D": "GAN training is unrelated to planting a trigger in a classifier dataset."
+      },
+      "primary_kp_id": "kp_cs230_backdoor_and_data_poisoning_attacks",
+      "difficulty_prior": 0.52,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+        "evidence_span": "What you can do is to insert a trigger.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg4.mp4",
+          "start_s": 2340,
+          "end_s": 2988,
+          "frame_evidence": [
+            {
+              "timestamp": "01:33",
+              "description": "Slide shows cat and dog images with small red trigger patches and labels."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg4__q02",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "application",
+      "stem": "In the dog-party example, what deployment-time behavior does the poisoned patch cause?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "The model treats the trigger as evidence for the attacker’s target label."
+        },
+        {
+          "option_id": "B",
+          "text": "The model treats the trigger as a request to change its prompt template."
+        },
+        {
+          "option_id": "C",
+          "text": "The model treats the trigger as Gaussian noise to remove during sampling."
+        },
+        {
+          "option_id": "D",
+          "text": "The model treats the trigger as a latent code for generating new images."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Because the trigger was associated with the target label during training, seeing it later pushes the deployed model toward that label.",
+      "distractor_rationales": {
+        "B": "Mixes image backdoors with prompt injection.",
+        "C": "Mixes poisoning with diffusion denoising.",
+        "D": "Mixes classifier behavior with GAN-style latent generation."
+      },
+      "primary_kp_id": "kp_cs230_backdoor_and_data_poisoning_attacks",
+      "difficulty_prior": 0.62,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+        "evidence_span": "It's going to say it's a dog, because every time that patch",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg4.mp4",
+          "start_s": 2340,
+          "end_s": 2988,
+          "frame_evidence": [
+            {
+              "timestamp": "01:33",
+              "description": "Slide illustrates the trigger being inserted across training images before deployment."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg4__q03",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "application",
+      "stem": "A user message gets concatenated with a prompt template and tells the model to ignore earlier instructions. What failure mode is illustrated?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A prompt injection that changes the effective instruction seen by the LLM."
+        },
+        {
+          "option_id": "B",
+          "text": "A data poisoning attack that changes the next training batch label."
+        },
+        {
+          "option_id": "C",
+          "text": "An adversarial patch that changes an object detector score."
+        },
+        {
+          "option_id": "D",
+          "text": "A mode collapse case that reduces the generated sample variety."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The prompt-template example shows malicious user text entering the combined prompt and changing what the model follows.",
+      "distractor_rationales": {
+        "B": "Training data is not being changed in the prompt-template example.",
+        "C": "There is no image patch or detector in this LLM example.",
+        "D": "Mode collapse is a GAN issue discussed later, not an instruction attack."
+      },
+      "primary_kp_id": "kp_cs230_prompt_injection",
+      "difficulty_prior": 0.72,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg4",
+        "evidence_span": "such as \"ignore previous instructions or previous",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg4.mp4",
+          "start_s": 2340,
+          "end_s": 2988,
+          "frame_evidence": [
+            {
+              "timestamp": "06:15",
+              "description": "Slide diagrams a malicious prompt entering an LLM application pipeline."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg4__q01",
+      "global_kp_id": "kp_cs230_backdoor_and_data_poisoning_attacks",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg4__q02",
+      "global_kp_id": "kp_cs230_backdoor_and_data_poisoning_attacks",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg4__q03",
+      "global_kp_id": "kp_cs230_prompt_injection",
+      "planner_role": "main",
+      "map_role": "primary"
+    }
+  ]
+}

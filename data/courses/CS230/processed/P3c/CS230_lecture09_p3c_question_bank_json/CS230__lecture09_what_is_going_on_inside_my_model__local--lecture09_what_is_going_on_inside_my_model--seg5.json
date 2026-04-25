@@ -1,0 +1,206 @@
+{
+  "run_id": "local_p3c_lecture09_what_is_going_on_inside_my_model",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+  "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg5",
+  "question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg5_q001",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_deconvolution_as_transposed_convolution",
+      "difficulty_prior": 0.61,
+      "stem": "A generator maps a low-dimensional code to a larger image. Why does this motivate deconvolution or upsampling layers?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "The network must increase spatial dimensionality toward an image output"
+        },
+        {
+          "option_id": "B",
+          "text": "The network must reduce an image into a single class probability"
+        },
+        {
+          "option_id": "C",
+          "text": "The network must remove all padding before every convolution"
+        },
+        {
+          "option_id": "D",
+          "text": "The network must replace gradients with benchmark scores"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture motivates deconvolution by noting that a generator's input is smaller than its image-shaped output.",
+      "distractor_rationales": {
+        "B": "That describes a classifier-like direction, not generator upsampling.",
+        "C": "Padding details do not explain why spatial size must grow.",
+        "D": "Benchmark scores are unrelated to deconvolutional image generation."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg5",
+        "evidence_span": "The output is an image of more dimensions.",
+        "transcript_ts": "00:49:19",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg5.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg5.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 2931,
+          "clip_end_s": 3586,
+          "frame_evidence": [
+            {
+              "timestamp": "00:28",
+              "description": "Slide motivates upsampling/deconvolution with a generator mapping a smaller latent code to an image."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg5_q002",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_deconvolution_as_transposed_convolution",
+      "difficulty_prior": 0.7,
+      "stem": "Rewriting a 1D convolution as matrix multiplication helps explain transposed convolution because the forward operation can be expressed as what product?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A sparse weight matrix multiplied by the input vector"
+        },
+        {
+          "option_id": "B",
+          "text": "A softmax vector divided by the class score"
+        },
+        {
+          "option_id": "C",
+          "text": "A validation curve multiplied by the learning rate"
+        },
+        {
+          "option_id": "D",
+          "text": "A token embedding matrix averaged over words"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture explicitly rewrites conv1d as a matrix multiplication with a weight matrix times the input.",
+      "distractor_rationales": {
+        "B": "Softmax probabilities are not the matrix view of convolution.",
+        "C": "Loss curves and learning rates are training telemetry.",
+        "D": "Token embeddings are unrelated to the 1D convolution derivation."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg5",
+        "evidence_span": "write it as a matrix multiplication.",
+        "transcript_ts": "00:53:33",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg5.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg5.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 2931,
+          "clip_end_s": 3586,
+          "frame_evidence": [
+            {
+              "timestamp": "04:42",
+              "description": "Slide writes a 1D convolution as a sparse matrix-vector multiplication y = Wx."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg5_q003",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_deconvolution_as_transposed_convolution",
+      "difficulty_prior": 0.82,
+      "stem": "In the lecture's implementation intuition, transposed convolution can be approximated with what set of operations?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Transpose the convolution matrix, insert zeros, flip filters, and use fractional stride"
+        },
+        {
+          "option_id": "B",
+          "text": "Normalize the softmax, drop padding, average logits, and freeze filters"
+        },
+        {
+          "option_id": "C",
+          "text": "Hash the input, compare n-grams, replace labels, and retrain the head"
+        },
+        {
+          "option_id": "D",
+          "text": "Pool maxima, forget switches, mask classes, and erase feature maps"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The instructor describes transposing W and implementing the operation by inserting zeros, flipping filters, and using a sub-pixel stride.",
+      "distractor_rationales": {
+        "B": "These are not the transposed-convolution operations from the derivation.",
+        "C": "Those are contamination-check steps, not a deconvolution implementation.",
+        "D": "Forgetting switches would break unpooling; it is not the transposed-convolution recipe."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg5",
+        "evidence_span": "you can actually flip the filter.",
+        "transcript_ts": "00:57:48",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg5.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg5.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 2931,
+          "clip_end_s": 3586,
+          "frame_evidence": [
+            {
+              "timestamp": "08:57",
+              "description": "Slide shows the transposed-convolution intuition with W transposed, flipped filters, zero insertion, and fractional stride."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg5_q001",
+      "global_kp_id": "kp_cs230_deconvolution_as_transposed_convolution",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg5_q002",
+      "global_kp_id": "kp_cs230_deconvolution_as_transposed_convolution",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg5_q003",
+      "global_kp_id": "kp_cs230_deconvolution_as_transposed_convolution",
+      "role": "primary",
+      "weight": 1.0
+    }
+  ]
+}

@@ -1,0 +1,271 @@
+{
+  "run_id": "local_p3c_lecture05",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture05",
+  "unit_id": "local::lecture05::seg8",
+  "question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg8_q001",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_language_model_pretraining_alignment_gap",
+      "difficulty_prior": 0.49,
+      "stem": "A pretrained language model can continue internet text well but still be unhelpful to users because pretraining teaches it to do what?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Rank multiple answers by human preference"
+        },
+        {
+          "option_id": "B",
+          "text": "Estimate rewards for full generated answers"
+        },
+        {
+          "option_id": "C",
+          "text": "Choose actions using epsilon-greedy exploration"
+        },
+        {
+          "option_id": "D",
+          "text": "Continue text rather than answer questions"
+        }
+      ],
+      "correct_option_id": "D",
+      "rationale": "The gap is that next-token pretraining produces text continuation ability, not direct helpful question answering.",
+      "distractor_rationales": {
+        "A": "Preference ranking is part of reward-model data collection, not pretraining.",
+        "B": "Reward estimation is added later in RLHF.",
+        "C": "Epsilon-greedy is a DQN exploration method, not LM pretraining."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg8",
+        "evidence_span": "was trained to continue text rather than answer questions.",
+        "transcript_ts": "01:32:46",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 5433,
+          "clip_end_s": 5822,
+          "frame_evidence": [
+            {
+              "timestamp": "01:44",
+              "description": "Language-model training recap slide shows a training objective with input text, model parameters, output next word, loss, and gradient."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg8_q002",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_supervised_fine_tuning_for_llm_helpfulness",
+      "difficulty_prior": 0.45,
+      "stem": "Supervised fine-tuning for helpfulness trains the pretrained model on what kind of data?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Random state-action transitions from Atari games"
+        },
+        {
+          "option_id": "B",
+          "text": "Human-written prompts and helpful responses"
+        },
+        {
+          "option_id": "C",
+          "text": "Pairwise reward margins from a scalar critic"
+        },
+        {
+          "option_id": "D",
+          "text": "Unlabeled web text with next-token prediction only"
+        }
+      ],
+      "correct_option_id": "B",
+      "rationale": "SFT collects prompts and human-written responses, then fine-tunes the pretrained model to imitate those demonstrations.",
+      "distractor_rationales": {
+        "A": "Atari transitions are for DQN, not LLM SFT.",
+        "C": "Pairwise reward margins are part of reward-model/RLHF training.",
+        "D": "That describes pretraining rather than supervised fine-tuning."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg8",
+        "evidence_span": "with human written responses.",
+        "transcript_ts": "01:34:18",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 5433,
+          "clip_end_s": 5822,
+          "frame_evidence": [
+            {
+              "timestamp": "06:08",
+              "description": "SFT slide shows a pretrained model fine-tuned on a human-written prompt and response demonstration."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg8_q003",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_supervised_fine_tuning_for_llm_helpfulness",
+      "difficulty_prior": 0.55,
+      "stem": "The lecture identifies SFT's limitation as imitation rather than direct optimization of what signal?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Human preference"
+        },
+        {
+          "option_id": "B",
+          "text": "Pixel velocity"
+        },
+        {
+          "option_id": "C",
+          "text": "Discount factor"
+        },
+        {
+          "option_id": "D",
+          "text": "Terminal flag"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "SFT teaches the model to imitate good human-written behavior, while RLHF is introduced to optimize preferences more directly.",
+      "distractor_rationales": {
+        "B": "Pixel velocity belongs to Breakout frame stacking.",
+        "C": "Discount factors are part of RL returns, not the SFT limitation.",
+        "D": "Terminal flags are DQN implementation details."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg8",
+        "evidence_span": "It's imitation.",
+        "transcript_ts": "01:36:49",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 5433,
+          "clip_end_s": 5822,
+          "frame_evidence": [
+            {
+              "timestamp": "06:08",
+              "description": "SFT slide shows a pretrained model fine-tuned on a human-written prompt and response demonstration."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg8_q004",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_language_model_pretraining_alignment_gap",
+      "difficulty_prior": 0.6,
+      "stem": "The transition from SFT toward RLHF is motivated by moving beyond human-written demonstrations toward what training target?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A larger Q-table for language tokens"
+        },
+        {
+          "option_id": "B",
+          "text": "A terminal-state Boolean for each prompt"
+        },
+        {
+          "option_id": "C",
+          "text": "Preference optimization over model responses"
+        },
+        {
+          "option_id": "D",
+          "text": "A cropped grayscale view of the input text"
+        }
+      ],
+      "correct_option_id": "C",
+      "rationale": "The lecture calls preference the key word and sets up RLHF as the next step beyond SFT imitation.",
+      "distractor_rationales": {
+        "A": "Language-model alignment is not framed as a token Q-table here.",
+        "B": "Terminal booleans are DQN mechanics, not the SFT-to-RLHF target.",
+        "D": "Cropping and grayscale are Atari preprocessing steps."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg8",
+        "evidence_span": "And the word preference is the keyword.",
+        "transcript_ts": "01:34:08",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 5433,
+          "clip_end_s": 5822,
+          "frame_evidence": [
+            {
+              "timestamp": "06:08",
+              "description": "SFT slide shows a pretrained model fine-tuned on a human-written prompt and response demonstration."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg8_q001",
+      "global_kp_id": "kp_cs230_language_model_pretraining_alignment_gap",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg8_q002",
+      "global_kp_id": "kp_cs230_supervised_fine_tuning_for_llm_helpfulness",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg8_q003",
+      "global_kp_id": "kp_cs230_supervised_fine_tuning_for_llm_helpfulness",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg8_q004",
+      "global_kp_id": "kp_cs230_language_model_pretraining_alignment_gap",
+      "role": "primary",
+      "weight": 1.0
+    }
+  ]
+}

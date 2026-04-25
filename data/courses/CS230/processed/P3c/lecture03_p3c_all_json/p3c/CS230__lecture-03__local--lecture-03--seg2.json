@@ -1,0 +1,275 @@
+{
+  "run_id": "local_lecture03_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-03",
+  "unit_id": "local::lecture-03::seg2",
+  "question_bank": [
+    {
+      "item_id": "cs230_lecture03_seg02_q01",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "stem": "What prediction task defines the Siamese face-recognition setup described in the lecture?",
+      "options": [
+        {
+          "label": "A",
+          "text": "It assigns one person ID to a single uploaded profile image."
+        },
+        {
+          "label": "B",
+          "text": "It reconstructs a missing face image from a registration photo."
+        },
+        {
+          "label": "C",
+          "text": "It compares two pictures and predicts whether they show the same person."
+        },
+        {
+          "label": "D",
+          "text": "It ranks all registered users by how recently their photos were taken."
+        }
+      ],
+      "correct_option": "C",
+      "correct_answer": "It compares two pictures and predicts whether they show the same person.",
+      "explanation": "The Siamese setup takes two pictures and decides same person versus different people.",
+      "primary_kp_id": "kp_cs230_siamese_network_formulation_for_face_recognition",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.38,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg2",
+        "evidence_span": "takes as input two pictures.\n\n00:10:03\nor a deep learning algorithm.\n\n00:10:08\nare these two pictures the same person or different persons?\n\n00:10:16\nfor your house, and maybe you have a few family members\n\n00:10:21\nThen it'd be quite annoying if you\n\n00:10:26\nSo the most common way to do face recognition\n\n00:10:31\nAnd",
+        "transcript_timestamp_start_s": 603,
+        "transcript_timestamp_end_s": 615,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg2.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg2.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 583,
+          "clip_end_s": 976,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "01:00",
+              "timestamp_s_within_clip": 60,
+              "description": "The instructor points to a two-input neural-network diagram drawn near the door-and-person sketch."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg02_q02",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "stem": "How does the registration-image idea help a deployed door-unlock system use the Siamese network?",
+      "options": [
+        {
+          "label": "A",
+          "text": "It compares the arriving person's image with the stored authorized image."
+        },
+        {
+          "label": "B",
+          "text": "It trains a new door-specific classifier each time a visitor appears."
+        },
+        {
+          "label": "C",
+          "text": "It replaces the camera image with the user's written access code."
+        },
+        {
+          "label": "D",
+          "text": "It predicts the user's identity from the door location alone."
+        }
+      ],
+      "correct_option": "A",
+      "correct_answer": "It compares the arriving person's image with the stored authorized image.",
+      "explanation": "The system can pull up a registration image and compare it with the person at the door.",
+      "primary_kp_id": "kp_cs230_siamese_network_formulation_for_face_recognition",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.45,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg2",
+        "evidence_span": "registration picture\n\n00:11:06\nto be the same person as the Andrew that was registered.\n\n00:11:16\nSo, I have a question for you.\n\n00:11:24\nwalk you through a number of scenarios\n\n00:11:29\nmake if you are the CTO of a startup building\n\n00:11:34\nSo my question for you is, if you're the CTO of a startup,\n\n00:11:44\nand if ",
+        "transcript_timestamp_start_s": 666,
+        "transcript_timestamp_end_s": 678,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg2.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg2.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 583,
+          "clip_end_s": 976,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "01:41",
+              "timestamp_s_within_clip": 101,
+              "description": "The board shows two small image boxes feeding an NN block, with a same/different-style output."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg02_q03",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "stem": "In the startup scenario, what data problem is created by the lawyers' restriction?",
+      "options": [
+        {
+          "label": "A",
+          "text": "The team must avoid using neural networks for comparing image pairs."
+        },
+        {
+          "label": "B",
+          "text": "The team must label every image as belonging to one global class."
+        },
+        {
+          "label": "C",
+          "text": "The team must deploy before collecting any images from users."
+        },
+        {
+          "label": "D",
+          "text": "The team must collect face pairs without downloading internet data."
+        }
+      ],
+      "correct_option": "D",
+      "correct_answer": "The team must collect face pairs without downloading internet data.",
+      "explanation": "The restriction rules out downloading internet data, so the team needs its own pictures for same/different comparisons.",
+      "primary_kp_id": "kp_cs230_siamese_network_formulation_for_face_recognition",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.5,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg2",
+        "evidence_span": "lawyers have said you\n\n00:11:48\nSo let's not download data for this application.\n\n00:11:55\nSo what you need is a bunch of pictures\n\n00:12:03\nare they the same person or not.\n\n00:12:09\nand then I'll see if people raise hands and give\n\n00:12:13\nAnd one specific question I have as well\n\n00:12:20\nstart training a model?\n\n0",
+        "transcript_timestamp_start_s": 708,
+        "transcript_timestamp_end_s": 720,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg2.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg2.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 583,
+          "clip_end_s": 976,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "03:22",
+              "timestamp_s_within_clip": 202,
+              "description": "The instructor moves away from the board after setting up the CTO startup question."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg02_q04",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "stem": "What design decision does the instructor ask students to make as the startup CTO?",
+      "options": [
+        {
+          "label": "A",
+          "text": "Select the exact GPU type before defining the recognition task."
+        },
+        {
+          "label": "B",
+          "text": "Decide how to collect data and when to start running training."
+        },
+        {
+          "label": "C",
+          "text": "Choose a public benchmark before knowing the product constraints."
+        },
+        {
+          "label": "D",
+          "text": "Replace the Siamese model with a fixed rule for every office."
+        }
+      ],
+      "correct_option": "B",
+      "correct_answer": "Decide how to collect data and when to start running training.",
+      "explanation": "The discussion asks how to collect data and how soon to begin model training under startup constraints.",
+      "primary_kp_id": "kp_cs230_siamese_network_formulation_for_face_recognition",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.54,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg2",
+        "evidence_span": "start training a model?\n\n00:12:28\nWe design the model, I guess, and then\n\n00:12:31\nSo what does the timeline look for you?\n\n00:12:34\nWe design the model.\n\n00:12:39\nand how before you start running your gradient descent?\n\n00:12:47\nSure, go ahead.\n\n00:12:52\nor are we specifically like Bay Area or America [INAUDIBLE],\n\n00",
+        "transcript_timestamp_start_s": 748,
+        "transcript_timestamp_end_s": 760,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg2.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg2.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 583,
+          "clip_end_s": 976,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "05:03",
+              "timestamp_s_within_clip": 303,
+              "description": "The instructor stands beside the board while students suggest possible data sources and timelines."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture03_seg02_q01",
+      "unit_id": "local::lecture-03::seg2",
+      "global_kp_id": "kp_cs230_siamese_network_formulation_for_face_recognition",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg02_q02",
+      "unit_id": "local::lecture-03::seg2",
+      "global_kp_id": "kp_cs230_siamese_network_formulation_for_face_recognition",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg02_q03",
+      "unit_id": "local::lecture-03::seg2",
+      "global_kp_id": "kp_cs230_siamese_network_formulation_for_face_recognition",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg02_q04",
+      "unit_id": "local::lecture-03::seg2",
+      "global_kp_id": "kp_cs230_siamese_network_formulation_for_face_recognition",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    }
+  ]
+}

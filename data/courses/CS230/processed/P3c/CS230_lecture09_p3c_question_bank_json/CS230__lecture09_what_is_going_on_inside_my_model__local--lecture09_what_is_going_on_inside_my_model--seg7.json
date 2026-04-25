@@ -1,0 +1,271 @@
+{
+  "run_id": "local_p3c_lecture09_what_is_going_on_inside_my_model",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+  "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+  "question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg7_q001",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_transformer_representation_analysis",
+      "difficulty_prior": 0.51,
+      "stem": "The lecture contrasts CNN and LLM interpretability by saying CNNs focus on localized visual features, while LLMs focus on what structure?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Relationships between concepts or tokens"
+        },
+        {
+          "option_id": "B",
+          "text": "Pixel masks over fixed image patches"
+        },
+        {
+          "option_id": "C",
+          "text": "Pooling switches inside convolution windows"
+        },
+        {
+          "option_id": "D",
+          "text": "Generator strides in transposed convolutions"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The transition says CNNs visualize edges, textures, and shapes, whereas modern language models require visualizing relations between concepts or tokens.",
+      "distractor_rationales": {
+        "B": "Pixel masks are CNN-style localization, not the LLM contrast.",
+        "C": "Pooling switches belong to DeconvNet interpretation.",
+        "D": "Transposed-convolution strides are a CNN upsampling topic."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+        "evidence_span": "between concepts or between tokens.",
+        "transcript_ts": "01:13:39",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 4371,
+          "clip_end_s": 4701,
+          "frame_evidence": [
+            {
+              "timestamp": "00:48",
+              "description": "Slide compares CNN localized features with transformer relationships between tokens using attention maps."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg7_q002",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_transformer_representation_analysis",
+      "difficulty_prior": 0.58,
+      "stem": "In transformer interpretation, an attention map is most analogous to a CNN saliency map because it helps visualize what?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Token-to-token attention patterns"
+        },
+        {
+          "option_id": "B",
+          "text": "Pixel-to-pixel grayscale values"
+        },
+        {
+          "option_id": "C",
+          "text": "Expert-to-expert GPU memory use"
+        },
+        {
+          "option_id": "D",
+          "text": "Domain-to-domain corpus frequencies"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture presents attention patterns as a visualizable transformer signal and compares them to CNN saliency maps.",
+      "distractor_rationales": {
+        "B": "Pixels are the object of CNN saliency, not transformer attention.",
+        "C": "Expert GPU memory belongs to MoE telemetry.",
+        "D": "Dataset frequency is a data-distribution diagnostic."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+        "evidence_span": "The first one is the attention patterns.",
+        "transcript_ts": "01:14:29",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 4371,
+          "clip_end_s": 4701,
+          "frame_evidence": [
+            {
+              "timestamp": "01:38",
+              "description": "Slide compares CNN localized features with transformer relationships between tokens using attention maps."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg7_q003",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_transformer_representation_analysis",
+      "difficulty_prior": 0.67,
+      "stem": "Embedding-space diagnostics assume semantically similar tokens should have what geometric relationship?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "They should be close together in the embedding visualization"
+        },
+        {
+          "option_id": "B",
+          "text": "They should occupy identical positions in every attention head"
+        },
+        {
+          "option_id": "C",
+          "text": "They should trigger the same convolutional edge detector"
+        },
+        {
+          "option_id": "D",
+          "text": "They should be removed from tokenizer statistics"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The instructor describes embeddings as a way to visualize whether words with similar meanings are near one another.",
+      "distractor_rationales": {
+        "B": "Embeddings and attention heads are related but not identical structures.",
+        "C": "Convolutional edge detectors are a CNN feature, not token embeddings.",
+        "D": "Tokenizer statistics may be monitored, but tokens are not removed for being semantically similar."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+        "evidence_span": "have similar semantic meanings to be",
+        "transcript_ts": "01:16:43",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 4371,
+          "clip_end_s": 4701,
+          "frame_evidence": [
+            {
+              "timestamp": "03:52",
+              "description": "Slide shows embeddings or dimensionality-reduction intuition for semantic neighborhoods."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg7_q004",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_transformer_representation_analysis",
+      "difficulty_prior": 0.76,
+      "stem": "Why does the instructor frame transformer circuits and induction heads as frontier research rather than a finished diagnostic dashboard?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Modern transformers are still difficult to interpret internally"
+        },
+        {
+          "option_id": "B",
+          "text": "Attention maps completely solve language-model interpretation"
+        },
+        {
+          "option_id": "C",
+          "text": "Embeddings remove the need for training telemetry"
+        },
+        {
+          "option_id": "D",
+          "text": "CNN deconvolution directly applies without modification"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture cautions that modern transformer relationships are complicated and points students to transformer-circuits and induction-head papers.",
+      "distractor_rationales": {
+        "B": "The instructor presents attention as useful but not a complete solution.",
+        "C": "Embeddings do not replace telemetry such as loss curves.",
+        "D": "The lecture contrasts CNN tools with transformer-specific challenges."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg7",
+        "evidence_span": "are so complicated that even the cutting edge",
+        "transcript_ts": "01:17:22",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 4371,
+          "clip_end_s": 4701,
+          "frame_evidence": [
+            {
+              "timestamp": "04:31",
+              "description": "Slide shows embeddings or dimensionality-reduction intuition for semantic neighborhoods."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg7_q001",
+      "global_kp_id": "kp_cs230_transformer_representation_analysis",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg7_q002",
+      "global_kp_id": "kp_cs230_transformer_representation_analysis",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg7_q003",
+      "global_kp_id": "kp_cs230_transformer_representation_analysis",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg7_q004",
+      "global_kp_id": "kp_cs230_transformer_representation_analysis",
+      "role": "primary",
+      "weight": 1.0
+    }
+  ]
+}

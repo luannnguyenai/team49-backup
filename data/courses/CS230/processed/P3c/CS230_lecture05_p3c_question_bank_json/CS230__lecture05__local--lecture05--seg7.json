@@ -1,0 +1,206 @@
+{
+  "run_id": "local_p3c_lecture05",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture05",
+  "unit_id": "local::lecture05::seg7",
+  "question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg7_q001",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_imitation_learning_and_human_priors",
+      "difficulty_prior": 0.55,
+      "stem": "Montezuma's Revenge is hard for a randomly initialized RL agent because useful reward depends on what kind of behavior?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A long sequence of prior-informed actions before reward appears"
+        },
+        {
+          "option_id": "B",
+          "text": "A single immediate reward visible from the first state"
+        },
+        {
+          "option_id": "C",
+          "text": "A complete table of legal moves supplied by the game"
+        },
+        {
+          "option_id": "D",
+          "text": "A continuous steering angle predicted at every frame"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The instructor points to actions like using a rope and ladder, which humans recognize but a random agent is unlikely to discover early.",
+      "distractor_rationales": {
+        "B": "The example is difficult because the reward is delayed, not immediate.",
+        "C": "The game does not provide a solved move table to the agent.",
+        "D": "Continuous steering is used to motivate PPO, not Montezuma's sparse reward."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg7",
+        "evidence_span": "It should catch the rope.",
+        "transcript_ts": "01:21:16",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 4818,
+          "clip_end_s": 5430,
+          "frame_evidence": [
+            {
+              "timestamp": "02:22",
+              "description": "Slide compares Atari games and shows Montezuma's Revenge as a sparse-reward task requiring human-like priors."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg7_q002",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_ppo_and_policy_gradient_methods",
+      "difficulty_prior": 0.63,
+      "stem": "PPO is introduced as more suitable than a one-output-per-action DQN when the action space has what property?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Only two discrete actions"
+        },
+        {
+          "option_id": "B",
+          "text": "Only terminal rewards"
+        },
+        {
+          "option_id": "C",
+          "text": "Continuous controls such as steering angles"
+        },
+        {
+          "option_id": "D",
+          "text": "Fully observable board positions"
+        }
+      ],
+      "correct_option_id": "C",
+      "rationale": "The lecture contrasts DQN's discrete action outputs with continuous actions like turning a wheel, for which PPO is preferred.",
+      "distractor_rationales": {
+        "A": "Two discrete actions are compatible with simple DQN outputs.",
+        "B": "Sparse terminal reward is a challenge but not the continuous-action reason for PPO here.",
+        "D": "Full observability is not what makes PPO preferable in this example."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg7",
+        "evidence_span": "If you actually have a game that has continuous action,",
+        "transcript_ts": "01:24:33",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 4818,
+          "clip_end_s": 5430,
+          "frame_evidence": [
+            {
+              "timestamp": "03:50",
+              "description": "Advanced topics slide lists PPO/TRPO and contrasts policy methods with value-based Q-learning."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg7_q003",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_ppo_and_policy_gradient_methods",
+      "difficulty_prior": 0.6,
+      "stem": "Compared with Q-learning, PPO is introduced as a method that does not primarily learn what object before choosing an action?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A scalar reward head for human preference"
+        },
+        {
+          "option_id": "B",
+          "text": "A value table used with an argmax policy"
+        },
+        {
+          "option_id": "C",
+          "text": "A cropped stack of Breakout screen frames"
+        },
+        {
+          "option_id": "D",
+          "text": "A replay memory of consecutive experiences"
+        }
+      ],
+      "correct_option_id": "B",
+      "rationale": "The lecture contrasts PPO/TRPO with value-based Q-learning, where Q-values are learned and a policy is defined by argmax over those values.",
+      "distractor_rationales": {
+        "A": "A scalar reward head belongs to RLHF reward modeling, not PPO's contrast with Q-learning.",
+        "C": "Breakout frame stacks are DQN input preprocessing, not the value-based object being contrasted.",
+        "D": "Replay memory stabilizes DQN training but is not the Q-value object used for argmax."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg7",
+        "evidence_span": "it is not a value-based algorithm.",
+        "transcript_ts": "01:24:08",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg7.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg7.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 4818,
+          "clip_end_s": 5430,
+          "frame_evidence": [
+            {
+              "timestamp": "03:50",
+              "description": "Advanced topics slide lists PPO/TRPO and contrasts policy methods with value-based Q-learning."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg7_q001",
+      "global_kp_id": "kp_cs230_imitation_learning_and_human_priors",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg7_q002",
+      "global_kp_id": "kp_cs230_ppo_and_policy_gradient_methods",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg7_q003",
+      "global_kp_id": "kp_cs230_ppo_and_policy_gradient_methods",
+      "role": "primary",
+      "weight": 1.0
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "run_id": "local_p3c_lecture09_what_is_going_on_inside_my_model",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+  "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+  "question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q001",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "difficulty_prior": 0.53,
+      "stem": "A frontier lab wants a first health check on whether a model is training normally. Which signal does the lecture name as the natural starting point?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Loss curves following a smooth trajectory"
+        },
+        {
+          "option_id": "B",
+          "text": "A single public benchmark score"
+        },
+        {
+          "option_id": "C",
+          "text": "An occlusion heatmap over an input image"
+        },
+        {
+          "option_id": "D",
+          "text": "A generator output from a random code"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The instructor says a natural way to check training is to inspect loss curves and make sure they follow a smooth trajectory.",
+      "distractor_rationales": {
+        "B": "Benchmark scores evaluate capabilities, but the starting training-health signal here is the loss curve.",
+        "C": "Occlusion heatmaps are CNN interpretability tools.",
+        "D": "Generator outputs are not frontier-model training telemetry."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+        "evidence_span": "look at the loss curves.",
+        "transcript_ts": "01:18:35",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 4701,
+          "clip_end_s": 5125,
+          "frame_evidence": [
+            {
+              "timestamp": "00:14",
+              "description": "Slide displays loss curves as a training-health diagnostic and examples of ugly or jumpy curves."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q002",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "difficulty_prior": 0.59,
+      "stem": "A sudden jump in the loss curve is treated as a diagnostic warning because it can indicate what issue?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Corrupted data, code bugs, or gradient problems"
+        },
+        {
+          "option_id": "B",
+          "text": "A correctly balanced MoE router"
+        },
+        {
+          "option_id": "C",
+          "text": "A successful class activation map"
+        },
+        {
+          "option_id": "D",
+          "text": "A fixed and uncontaminated benchmark"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture lists corrupted data, bugs, and vanishing or exploding gradients as possible explanations for ugly or jumpy loss curves.",
+      "distractor_rationales": {
+        "B": "A balanced router would be a positive MoE signal, not the meaning of a loss jump.",
+        "C": "CAMs are visual attribution methods, not loss-curve diagnostics.",
+        "D": "Benchmark cleanliness is tested through contamination checks, not sudden training-loss jumps."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+        "evidence_span": "You might find sudden jumps on the loss.",
+        "transcript_ts": "01:19:03",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 4701,
+          "clip_end_s": 5125,
+          "frame_evidence": [
+            {
+              "timestamp": "00:42",
+              "description": "Slide displays loss curves as a training-health diagnostic and examples of ugly or jumpy curves."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q003",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "difficulty_prior": 0.65,
+      "stem": "Beyond loss curves, which telemetry signal does the lecture explicitly name as part of the training dashboard?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Learning-rate schedule tracking"
+        },
+        {
+          "option_id": "B",
+          "text": "Occlusion-square size tracking"
+        },
+        {
+          "option_id": "C",
+          "text": "Reward-model preference ranking"
+        },
+        {
+          "option_id": "D",
+          "text": "Class-activation-map weighting"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The instructor mentions the learning-rate schedule as one training diagnostic signal after discussing loss curves and gradient problems.",
+      "distractor_rationales": {
+        "B": "Occlusion-square size is from CNN occlusion sensitivity, not frontier training telemetry.",
+        "C": "Reward-model ranking belongs to RLHF, not this telemetry point.",
+        "D": "CAM weighting is CNN localization, not training dashboard telemetry."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+        "evidence_span": "look at your learning rate schedule,",
+        "transcript_ts": "01:19:54",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 4701,
+          "clip_end_s": 5125,
+          "frame_evidence": [
+            {
+              "timestamp": "01:33",
+              "description": "Slide displays loss curves as a training-health diagnostic and examples of ugly or jumpy curves."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q004",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "difficulty_prior": 0.7,
+      "stem": "Scaling laws are useful for model trainers because they relate performance to what tradeoff?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Model size, compute, and data size"
+        },
+        {
+          "option_id": "B",
+          "text": "Pixel brightness, occlusion size, and class label"
+        },
+        {
+          "option_id": "C",
+          "text": "Prompt length, temperature, and reward-model rank"
+        },
+        {
+          "option_id": "D",
+          "text": "Router name, expert color, and dashboard layout"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture describes scaling laws as relationships between performance and hyperparameters such as model capacity, compute, and dataset size.",
+      "distractor_rationales": {
+        "B": "These variables belong to CNN/image attribution, not scaling laws.",
+        "C": "These variables are not the compute-data-capacity tradeoff discussed here.",
+        "D": "MoE router dashboards are separate from scaling-law variables."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+        "evidence_span": "the model, the amount of compute that's being used",
+        "transcript_ts": "01:21:03",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 4701,
+          "clip_end_s": 5125,
+          "frame_evidence": [
+            {
+              "timestamp": "02:42",
+              "description": "Slide presents Chinchilla/scaling-law plots relating performance to compute, model size, and data."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q005",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "difficulty_prior": 0.78,
+      "stem": "The Chinchilla example supports which diagnosis of GPT-3-style training?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A smaller model trained more compute-optimally can outperform a larger undertrained model"
+        },
+        {
+          "option_id": "B",
+          "text": "A larger model always outperforms a smaller model regardless of data and compute"
+        },
+        {
+          "option_id": "C",
+          "text": "A model's benchmark score is valid even when test data is contaminated"
+        },
+        {
+          "option_id": "D",
+          "text": "A convolutional class activation map can replace scaling-law analysis"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture says Chinchilla had fewer parameters than GPT-3 but performed better, illustrating undertraining and the importance of compute-optimal scaling.",
+      "distractor_rationales": {
+        "B": "The example is specifically used to reject this simple larger-is-always-better view.",
+        "C": "Benchmark contamination is a separate caution in the next segment.",
+        "D": "CAM is a CNN localization method, not a scaling-law substitute."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg8",
+        "evidence_span": "has less parameters than GPT-3",
+        "transcript_ts": "01:23:01",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 4701,
+          "clip_end_s": 5125,
+          "frame_evidence": [
+            {
+              "timestamp": "04:40",
+              "description": "Slide presents Chinchilla/scaling-law plots relating performance to compute, model size, and data."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q001",
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q002",
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q003",
+      "global_kp_id": "kp_cs230_loss_curves_and_training_telemetry",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q004",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg8_q005",
+      "global_kp_id": "kp_pretraining_scaling_and_compute_data_tradeoffs",
+      "role": "primary",
+      "weight": 1.0
+    }
+  ]
+}

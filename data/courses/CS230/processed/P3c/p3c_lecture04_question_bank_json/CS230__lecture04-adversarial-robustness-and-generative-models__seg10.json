@@ -1,0 +1,197 @@
+{
+  "run_id": "local",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+  "question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q01",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "application",
+      "stem": "At test time, how does the trained diffusion model generate an image from noise?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "It starts from an initialization and repeatedly predicts and subtracts noise."
+        },
+        {
+          "option_id": "B",
+          "text": "It starts from a clean image and repeatedly adds noise for training labels."
+        },
+        {
+          "option_id": "C",
+          "text": "It starts from a discriminator and repeatedly labels samples as real."
+        },
+        {
+          "option_id": "D",
+          "text": "It starts from a trigger patch and repeatedly changes the training set."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Sampling reverses training-time noising by repeatedly denoising from an initial noisy image until structure appears.",
+      "distractor_rationales": {
+        "B": "Describes the forward training process rather than test-time sampling.",
+        "C": "Describes GAN discrimination rather than diffusion sampling.",
+        "D": "Describes data poisoning rather than generation."
+      },
+      "primary_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "difficulty_prior": 0.7,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+        "evidence_span": "You are going to perform a progressive denoising.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg10.mp4",
+          "start_s": 5641,
+          "end_s": 6428,
+          "frame_evidence": [
+            {
+              "timestamp": "03:20",
+              "description": "Sampling slide shows an initialization passed through repeated diffusion-model calls."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q02",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "application",
+      "stem": "A user wants a dog instead of whatever image vanilla sampling produces. What addition addresses that need?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Condition the model on a prompt or another modality during generation."
+        },
+        {
+          "option_id": "B",
+          "text": "Remove all prompts so the model can follow the random image alone."
+        },
+        {
+          "option_id": "C",
+          "text": "Replace denoising with a discriminator trained on real and fake labels."
+        },
+        {
+          "option_id": "D",
+          "text": "Insert a hidden trigger into the training data before deployment."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The instructor answers that vanilla generation goes where the model goes; practical systems use conditioning such as text prompts.",
+      "distractor_rationales": {
+        "B": "Removing prompts does not guide generation toward a requested object.",
+        "C": "This switches to a GAN-like setup rather than conditioned diffusion.",
+        "D": "This is a backdoor mechanism rather than normal prompt conditioning."
+      },
+      "primary_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "difficulty_prior": 0.82,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+        "evidence_span": "In practice, there is conditioning.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg10.mp4",
+          "start_s": 5641,
+          "end_s": 6428,
+          "frame_evidence": [
+            {
+              "timestamp": "03:20",
+              "description": "Sampling slide is followed by discussion of prompt-conditioned generation."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q03",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "application",
+      "stem": "Why does latent diffusion run noising and denoising in z space instead of pixel space?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "The latent space is lower-dimensional while retaining important image patterns."
+        },
+        {
+          "option_id": "B",
+          "text": "The latent space is higher-dimensional while removing all image structure."
+        },
+        {
+          "option_id": "C",
+          "text": "The latent space is a discriminator label space for real and fake samples."
+        },
+        {
+          "option_id": "D",
+          "text": "The latent space is a prompt string space for direct instruction attacks."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Latent diffusion uses an encoder to compress images into a manageable representation, performs diffusion there, and decodes back to pixels.",
+      "distractor_rationales": {
+        "B": "Reverses the compression purpose and loses the needed representation.",
+        "C": "Confuses latent diffusion with GAN discrimination.",
+        "D": "Confuses latent vectors with prompt-injection strings."
+      },
+      "primary_kp_id": "kp_latent_diffusion_models",
+      "difficulty_prior": 0.9,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg10",
+        "evidence_span": "You use an encoder to encode it in a lower-dimensional space.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg10.mp4",
+          "start_s": 5641,
+          "end_s": 6428,
+          "frame_evidence": [
+            {
+              "timestamp": "07:20",
+              "description": "Latent diffusion slide shows x mapped to z, denoising in latent space, then decoding back."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q01",
+      "global_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q02",
+      "global_kp_id": "kp_cs230_diffusion_sampling_and_conditioning",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg10__q03",
+      "global_kp_id": "kp_latent_diffusion_models",
+      "planner_role": "main",
+      "map_role": "primary"
+    }
+  ]
+}

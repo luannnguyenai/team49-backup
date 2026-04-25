@@ -1,0 +1,223 @@
+{
+  "run_id": "local_cs230_lecture07_agents_prompts_and_rag_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "unit_id": "local::lecture-07-agents-prompts-and-rag::seg4",
+  "question_bank": [
+    {
+      "item_id": "CS230_L07_S4_Q1",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "secondary_kp_ids": [],
+      "stem": "After prompt engineering, a team asks whether it should fine-tune a general model for a new task. Which caution from the lecture most strongly argues against routine fine-tuning? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "The effort can be time- and cost-intensive, and a newer base model may surpass the fine-tuned version before the work pays off."
+        },
+        {
+          "id": "B",
+          "text": "The effort automatically removes all domain-specific behavior, so repeated specialized tasks become harder to solve."
+        },
+        {
+          "id": "C",
+          "text": "The effort prevents any future prompting, so the model can no longer adapt to different instructions at inference time."
+        },
+        {
+          "id": "D",
+          "text": "The effort forces the system to abandon pretraining entirely, so the model must relearn general language from scratch."
+        }
+      ],
+      "answer_key": "A",
+      "rationale": "The instructor's main practical objection is that fine-tuning can take time and money while the next base model may arrive and outperform it.",
+      "difficulty_prior": 0.44,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "the next model is out, and it's actually",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg4.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:15",
+            "visual_description": "Slide titled Why I'm not a fan lists fine-tuning limitations including labeled-data needs, overfitting risk, and high time or cost."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S4_Q2",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "secondary_kp_ids": [],
+      "stem": "Which statement correctly distinguishes prompting from fine-tuning in the lecture? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Fine-tuning changes the prompt template, whereas prompting permanently updates the model weights."
+        },
+        {
+          "id": "B",
+          "text": "Fine-tuning changes model weights, whereas prompting changes the context without modifying the weights."
+        },
+        {
+          "id": "C",
+          "text": "Fine-tuning changes only the tokenizer, whereas prompting changes the optimizer state during inference."
+        },
+        {
+          "id": "D",
+          "text": "Fine-tuning changes only the retrieval index, whereas prompting replaces the decoder with a judge model."
+        }
+      ],
+      "answer_key": "B",
+      "rationale": "The lecture explicitly contrasts fine-tuning with approaches that do not modify the weights.",
+      "difficulty_prior": 0.35,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "the other doesn't modify the weights.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg4.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "00:45",
+            "visual_description": "Fine-tuning section is on screen while the instructor verbally contrasts weight updates with prompt-only methods."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S4_Q3",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "secondary_kp_ids": [],
+      "stem": "A company fine-tunes on internal Slack messages, then asks the model to draft a blog post and gets a workplace-style reply instead. What failure mode does this example illustrate? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "The model loses all ability to produce text longer than a chat reply because fine-tuning fixes the output length."
+        },
+        {
+          "id": "B",
+          "text": "The model stops understanding prompts entirely because Slack data removes instruction-following behavior from the architecture."
+        },
+        {
+          "id": "C",
+          "text": "The model can overfit to the tone and habits of the fine-tuning data instead of performing the requested task well."
+        },
+        {
+          "id": "D",
+          "text": "The model becomes impossible to deploy because any fine-tuned model can only answer inside Slack after training."
+        }
+      ],
+      "answer_key": "C",
+      "rationale": "The Slack example shows the model imitating how coworkers talk instead of reliably doing the requested writing task.",
+      "difficulty_prior": 0.54,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "where Ros tried to do Slack fine tuning.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg4.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "02:50",
+            "visual_description": "Slide titled Example: Slack Fine-Tuning shows a prompt for a blog post and a Slack-like response promising to work on it in the morning."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S4_Q4",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "secondary_kp_ids": [],
+      "stem": "Which scenario did the lecture present as a more defensible case for fine-tuning? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "A broad general-purpose assistant that mostly needs fresher news and access to the latest documents."
+        },
+        {
+          "id": "B",
+          "text": "A short-lived prototype where the main goal is to explore product ideas before investing in infrastructure."
+        },
+        {
+          "id": "C",
+          "text": "A workflow that mainly fails because the retrieved evidence is missing from the context window."
+        },
+        {
+          "id": "D",
+          "text": "A repeated high-precision task with domain-specific language, such as specialized legal or scientific outputs."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The lecture says fine-tuning can still make sense for repeated high-precision tasks or strong domain-language mismatches.",
+      "difficulty_prior": 0.5,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "such as legal, scientific explanation",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg4.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:45",
+            "visual_description": "Fine-tuning section continues while the instructor gives niche cases where specialized language might justify the extra effort."
+          }
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L07_S4_Q1",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S4_Q2",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S4_Q3",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S4_Q4",
+      "primary_kp_id": "kp_practical_fine_tuning_decision_flowchart",
+      "secondary_kp_ids": []
+    }
+  ]
+}

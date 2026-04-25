@@ -1,0 +1,284 @@
+{
+  "run_id": "local_cs230_lecture07_agents_prompts_and_rag_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "unit_id": "local::lecture-07-agents-prompts-and-rag::seg7",
+  "question_bank": [
+    {
+      "item_id": "CS230_L07_S7_Q1",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": [],
+      "stem": "In the travel-booking example, where should a user's first name live if the agent needs it frequently in later turns? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "In archival memory, because any personal fact should be treated as cold storage by default."
+        },
+        {
+          "id": "B",
+          "text": "Inside the payment tool, because identity facts belong only in external APIs rather than the agent state."
+        },
+        {
+          "id": "C",
+          "text": "In working memory, because it is a frequently needed fact that should be fast to retrieve."
+        },
+        {
+          "id": "D",
+          "text": "Inside the system prompt, because prompts are the only valid place to keep conversational user information."
+        }
+      ],
+      "answer_key": "C",
+      "rationale": "The lecture distinguishes fast-access working memory from slower archival memory for facts used more frequently.",
+      "difficulty_prior": 0.54,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "is not every memory needs to be fast to access.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg7.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:10",
+            "visual_description": "Travel Booking AI Agent slide shows prompts, context management, core memory, archival memory, and tools around the agent box."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S7_Q2",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": [],
+      "stem": "Why did the lecture avoid putting every remembered fact into fast-access memory? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Because fast-access memory automatically overwrites user facts after each turn, so long-term recall becomes impossible."
+        },
+        {
+          "id": "B",
+          "text": "Because fast-access memory can only store tool outputs and cannot store anything learned from conversation."
+        },
+        {
+          "id": "C",
+          "text": "Because fast-access memory removes the need for prompts, which would make the travel-agent example unrealistic."
+        },
+        {
+          "id": "D",
+          "text": "Because retrieving all memory on every turn can add cost and latency, so only frequently needed facts should stay in the fast path."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The lecture notes that not every memory needs fast access and that indiscriminate retrieval can be costly.",
+      "difficulty_prior": 0.61,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "And that can be costly.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg7.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "02:05",
+            "visual_description": "Travel-agent architecture discussion continues while the instructor explains why every-memory retrieval can slow the system."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S7_Q3",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": [],
+      "stem": "Which pair best matches the lecture's distinction between tools and resources? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "A flight-search API is a tool, whereas a CRM datastore that the agent reads is a resource."
+        },
+        {
+          "id": "B",
+          "text": "A CRM datastore is a tool, whereas a flight-search API is a resource."
+        },
+        {
+          "id": "C",
+          "text": "A payment API and a weather API are both resources, because tools cannot make external calls."
+        },
+        {
+          "id": "D",
+          "text": "A vector database and a system prompt are both tools, because each can change the final answer."
+        }
+      ],
+      "answer_key": "A",
+      "rationale": "The lecture treats APIs as tools and readable data stores such as a CRM as resources.",
+      "difficulty_prior": 0.55,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "The tools can include APIs like a flight search",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg7.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "04:15",
+            "visual_description": "Travel Booking AI Agent slide lists tool APIs such as flight search, hotel booking, weather, and payment next to the agent diagram."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S7_Q4",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": [
+        "kp_cs230_model_context_protocol_mcp"
+      ],
+      "stem": "A team wants one interface layer between the agent and many external endpoints instead of hard-coding every integration. Which concept from the lecture best fits? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Few-shot prompting, which turns every endpoint into an in-context example that no longer needs an API."
+        },
+        {
+          "id": "B",
+          "text": "Model Context Protocol, which provides a middle layer so the agent can talk to tools or data endpoints more systematically."
+        },
+        {
+          "id": "C",
+          "text": "Archival memory, which stores the external services so the agent never has to authenticate with them again."
+        },
+        {
+          "id": "D",
+          "text": "Prompt chaining, which replaces all protocols by serializing each API call as another text-only prompt."
+        }
+      ],
+      "answer_key": "B",
+      "rationale": "The lecture introduces MCP as a protocol layer between agents and endpoints instead of one-off integrations.",
+      "difficulty_prior": 0.73,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "You probably have heard the term MCP or model context protocol",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg7.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "05:20",
+            "visual_description": "Later travel-agent discussion introduces MCP as an architectural middle layer between the agent and external systems."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S7_Q5",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": [
+        "kp_cs230_agent_autonomy_levels"
+      ],
+      "stem": "Which design reflects the most autonomous end of the lecture's autonomy spectrum? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "The agent follows hard-coded steps and hard-coded tools with no discretion about sequence or usage."
+        },
+        {
+          "id": "B",
+          "text": "The agent follows hard-coded tools and must ask a human to approve each single prompt before execution."
+        },
+        {
+          "id": "C",
+          "text": "The agent decides the steps itself and can even create tools or code when needed."
+        },
+        {
+          "id": "D",
+          "text": "The agent uses only archival memory and no tools, so autonomy is defined entirely by memory depth."
+        }
+      ],
+      "answer_key": "C",
+      "rationale": "The lecture presents increasing autonomy from hard-coded steps to systems that decide steps and may create tools.",
+      "difficulty_prior": 0.78,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "Less autonomous would be you've hard",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg7.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "04:15",
+            "visual_description": "Travel-agent architecture slide includes a Degrees of Autonomy panel ranging from hard-coded steps to agents that decide steps and create tools."
+          }
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L07_S7_Q1",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S7_Q2",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S7_Q3",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S7_Q4",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": [
+        "kp_cs230_model_context_protocol_mcp"
+      ]
+    },
+    {
+      "item_id": "CS230_L07_S7_Q5",
+      "primary_kp_id": "kp_cs230_agent_memory_tools_and_resources",
+      "secondary_kp_ids": [
+        "kp_cs230_agent_autonomy_levels"
+      ]
+    }
+  ]
+}

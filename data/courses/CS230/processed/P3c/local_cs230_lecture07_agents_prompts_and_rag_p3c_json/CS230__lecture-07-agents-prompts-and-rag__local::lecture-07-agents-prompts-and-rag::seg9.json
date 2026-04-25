@@ -1,0 +1,276 @@
+{
+  "run_id": "local_cs230_lecture07_agents_prompts_and_rag_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "unit_id": "local::lecture-07-agents-prompts-and-rag::seg9",
+  "question_bank": [
+    {
+      "item_id": "CS230_L07_S9_Q1",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_customer_support_task_decomposition",
+      "secondary_kp_ids": [],
+      "stem": "A product manager asks you to build a customer-support agent for address changes. According to the lecture, where should you start? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Choose the largest available model first and delay task analysis until after the first deployment fails."
+        },
+        {
+          "id": "B",
+          "text": "Write the final response email prompt first and treat every other system decision as a later infrastructure detail."
+        },
+        {
+          "id": "C",
+          "text": "Fine-tune immediately on past tickets so the workflow design can be inferred from the trained model behavior."
+        },
+        {
+          "id": "D",
+          "text": "Shadow support work, decompose the task into steps, and identify which parts are fuzzy, deterministic, slow, or difficult."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The lecture recommends starting with task decomposition and learning where human support agents struggle.",
+      "difficulty_prior": 0.52,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "I would decompose the tasks",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg9.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "02:20",
+            "visual_description": "Case Study slide shows the shipping-address example and a five-step decomposition: extract info, retrieve record, check policy, draft email, send email."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S9_Q2",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_customer_support_task_decomposition",
+      "secondary_kp_ids": [],
+      "stem": "In the address-change workflow, which step most clearly requires a tool or resource connection rather than text generation alone? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Retrieving and updating the customer record in the database."
+        },
+        {
+          "id": "B",
+          "text": "Identifying that the user wants an address change from the wording of the request."
+        },
+        {
+          "id": "C",
+          "text": "Drafting a polite response email after the decision has already been made."
+        },
+        {
+          "id": "D",
+          "text": "Rephrasing the policy explanation in a more concise style for the customer."
+        }
+      ],
+      "answer_key": "A",
+      "rationale": "The lecture says extraction may be handled by an LLM, but database lookup and updates need tool or resource access.",
+      "difficulty_prior": 0.58,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "So that might be a tool,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg9.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "03:10",
+            "visual_description": "Case-study slides and narration map each step to either an LLM, a tool, RAG, memory, or deterministic logic."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S9_Q3",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_customer_support_task_decomposition",
+      "secondary_kp_ids": [],
+      "stem": "Why did the lecture emphasize LLM traces when debugging customer-support agents? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Because traces automatically repair the workflow by retrying every failed tool call with a stronger model."
+        },
+        {
+          "id": "B",
+          "text": "Because traces reveal which prompts and tools ran in which order, making it easier to locate the failing step."
+        },
+        {
+          "id": "C",
+          "text": "Because traces replace the need for end-to-end evaluation once enough prompt logs have been collected."
+        },
+        {
+          "id": "D",
+          "text": "Because traces store only the final answer, which is the only output worth inspecting in a chained workflow."
+        }
+      ],
+      "answer_key": "B",
+      "rationale": "The lecture calls traces foundational for debugging because they expose the chain of prompts and tool calls behind a failure.",
+      "difficulty_prior": 0.63,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "do you have LLM traces?",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg9.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "05:20",
+            "visual_description": "Case-study discussion turns to debugging, emphasizing logged traces of prompt and tool execution across the workflow."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S9_Q4",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "secondary_kp_ids": [],
+      "stem": "You separately test extraction accuracy, policy lookup, and email drafting before measuring overall customer satisfaction. Which pairing from the lecture best describes those two levels? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Objective evaluation for the individual steps, and multi-agent evaluation for the overall user experience."
+        },
+        {
+          "id": "B",
+          "text": "Memory evaluation for the individual steps, and retrieval evaluation for the overall user experience."
+        },
+        {
+          "id": "C",
+          "text": "Component-based evaluation for the individual steps, and end-to-end evaluation for the overall user experience."
+        },
+        {
+          "id": "D",
+          "text": "Tool evaluation for the individual steps, and fine-tuning evaluation for the overall user experience."
+        }
+      ],
+      "answer_key": "C",
+      "rationale": "The lecture explicitly distinguishes component-based evals from end-to-end evals.",
+      "difficulty_prior": 0.55,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "You can also do a component-based approach",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg9.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "06:05",
+            "visual_description": "Eval-taxonomy discussion maps workflow decomposition to separate component checks and overall user outcomes."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S9_Q5",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "secondary_kp_ids": [],
+      "stem": "Which pair best matches the lecture's contrast between objective and qualitative evaluation signals? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Politeness is quantitative, while latency is qualitative because each run feels different to the user."
+        },
+        {
+          "id": "B",
+          "text": "Database lookup accuracy is qualitative, while user confusion is quantitative because it can be discussed in writing."
+        },
+        {
+          "id": "C",
+          "text": "Token count is qualitative, while hallucinations are quantitative because they come from model internals."
+        },
+        {
+          "id": "D",
+          "text": "Success rate is quantitative, while hallucinations or tone mismatches are qualitative findings that often need inspection."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The lecture gives success rate and latency as quantitative measures, and hallucinations or tone mismatch as qualitative ones.",
+      "difficulty_prior": 0.68,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "having quantitative evals and more qualitative evals.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg9.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "06:40",
+            "visual_description": "The case-study evaluation section enumerates objective, subjective, quantitative, and qualitative signals for support agents."
+          }
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L07_S9_Q1",
+      "primary_kp_id": "kp_cs230_customer_support_task_decomposition",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S9_Q2",
+      "primary_kp_id": "kp_cs230_customer_support_task_decomposition",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S9_Q3",
+      "primary_kp_id": "kp_cs230_customer_support_task_decomposition",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S9_Q4",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S9_Q5",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "secondary_kp_ids": []
+    }
+  ]
+}

@@ -1,0 +1,341 @@
+{
+  "run_id": "local_lecture03_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-03",
+  "unit_id": "local::lecture-03::seg4",
+  "question_bank": [
+    {
+      "item_id": "cs230_lecture03_seg04_q01",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "stem": "What diagnostic process does the instructor recommend for finding problems in an LLM application?",
+      "options": [
+        {
+          "label": "A",
+          "text": "Theorize about likely failures until the prompt seems complete."
+        },
+        {
+          "label": "B",
+          "text": "Launch to real users first and use complaints as the main signal."
+        },
+        {
+          "label": "C",
+          "text": "Build and probe it safely, then use failures to fix it."
+        },
+        {
+          "label": "D",
+          "text": "Assume the provider model has already removed application risks."
+        }
+      ],
+      "correct_option": "C",
+      "correct_answer": "Build and probe it safely, then use failures to fix it.",
+      "explanation": "The lecture recommends trying the system out, but not exposing real users while probing for issues.",
+      "primary_kp_id": "kp_cs230_responsible_ai_sandbox_testing",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.4,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg4",
+        "evidence_span": "just build it, and then\n\n00:25:38\nJust don't let it out in the world\n\n00:25:41\nBut just go build something, and then test\n\n00:25:47\nDon't let it enter innocent users\n\n00:25:53\nBut it's only by building it and probing it\n\n00:25:57\nwhere it will say inappropriate things, where\n\n00:26:02\nAnd then that tells you where the ",
+        "transcript_timestamp_start_s": 1538,
+        "transcript_timestamp_end_s": 1550,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 1459,
+          "clip_end_s": 1782,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "01:00",
+              "timestamp_s_within_clip": 60,
+              "description": "The instructor stands between the blank board and the earlier system diagram while explaining sandbox-style testing."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg04_q02",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "stem": "What makes the testing setup responsible in the instructor's description?",
+      "options": [
+        {
+          "label": "A",
+          "text": "The system is probed before it can affect innocent users or third parties."
+        },
+        {
+          "label": "B",
+          "text": "The model is released broadly so edge cases appear at production scale."
+        },
+        {
+          "label": "C",
+          "text": "The prompt is treated as safe once it passes one internal example."
+        },
+        {
+          "label": "D",
+          "text": "The team avoids testing outputs that might reveal unsafe behavior."
+        }
+      ],
+      "correct_option": "A",
+      "correct_answer": "The system is probed before it can affect innocent users or third parties.",
+      "explanation": "Responsible testing means building and probing the system without letting it affect innocent users or third parties.",
+      "primary_kp_id": "kp_cs230_responsible_ai_sandbox_testing",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.44,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg4",
+        "evidence_span": "Don't let it enter innocent users\n\n00:25:53\nBut it's only by building it and probing it\n\n00:25:57\nwhere it will say inappropriate things, where\n\n00:26:02\nAnd then that tells you where the problems are, and then\n\n00:26:07\nYeah, question?\n\n00:26:14\nto [INAUDIBLE]?\n\n00:26:18\nSay that again.\n\n00:26:23\nand you come to a con",
+        "transcript_timestamp_start_s": 1553,
+        "transcript_timestamp_end_s": 1565,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 1459,
+          "clip_end_s": 1782,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "01:22",
+              "timestamp_s_within_clip": 82,
+              "description": "The instructor remains at the board while discussing how to test without releasing into the world."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg04_q03",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "stem": "After error analysis shows a model is not good, what next-step options does the instructor name?",
+      "options": [
+        {
+          "label": "A",
+          "text": "Ignore the data and continue training the existing architecture."
+        },
+        {
+          "label": "B",
+          "text": "Publish the test score and move directly to product launch."
+        },
+        {
+          "label": "C",
+          "text": "Delete difficult examples so the evaluation set becomes easier."
+        },
+        {
+          "label": "D",
+          "text": "Change the architecture or change the data based on the failures."
+        }
+      ],
+      "correct_option": "D",
+      "correct_answer": "Change the architecture or change the data based on the failures.",
+      "explanation": "The lecture names architecture changes and data changes as possible actions after diagnosing model failures.",
+      "primary_kp_id": "kp_cs230_error_analysis",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.52,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg4",
+        "evidence_span": "change your neural network architecture.\n\n00:26:55\nthat it wasn't working or read the literature change\n\n00:26:58\nThe other thing you can often do is change your data.\n\n00:27:04\nof systematically entering your data to build a successful AI\n\n00:27:07\nAnd it turns out that if you build a face recognition\n\n00:27:12\nThat's",
+        "transcript_timestamp_start_s": 1615,
+        "transcript_timestamp_end_s": 1627,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 1459,
+          "clip_end_s": 1782,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "02:45",
+              "timestamp_s_within_clip": 165,
+              "description": "The instructor speaks beside the board while answering how to take the next step after a poor model."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg04_q04",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "stem": "A face-recognition model performs poorly on users wearing hats. What error-analysis response matches the lecture?",
+      "options": [
+        {
+          "label": "A",
+          "text": "Collect more of every data type because all categories have equal value."
+        },
+        {
+          "label": "B",
+          "text": "Add targeted data for the subset where the system is struggling."
+        },
+        {
+          "label": "C",
+          "text": "Remove hat examples from evaluation because they are inconvenient."
+        },
+        {
+          "label": "D",
+          "text": "Change the product goal so hat wearers are outside the task."
+        }
+      ],
+      "correct_option": "B",
+      "correct_answer": "Add targeted data for the subset where the system is struggling.",
+      "explanation": "The instructor uses failure subsets to motivate focused data collection rather than indiscriminate data growth.",
+      "primary_kp_id": "kp_cs230_error_analysis",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.56,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg4",
+        "evidence_span": "struggles recognizing\n\n00:27:19\nThen you may say, I need to get more data\n\n00:27:22\nAnd so it's often that looking at what goes wrong,\n\n00:27:28\nThat then gives you the insight to say, oh,\n\n00:27:34\nbut it struggles with these types of users in the data.\n\n00:27:40\non the subset of cases it struggles with?\n\n00:27:44\nTha",
+        "transcript_timestamp_start_s": 1639,
+        "transcript_timestamp_end_s": 1651,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 1459,
+          "clip_end_s": 1782,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "04:08",
+              "timestamp_s_within_clip": 248,
+              "description": "The instructor gestures on a mostly blank board while explaining failure-driven next steps."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg04_q05",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "stem": "What distinguishes data-centric improvement from blindly collecting more data?",
+      "options": [
+        {
+          "label": "A",
+          "text": "It treats all additional data as equally useful for system improvement."
+        },
+        {
+          "label": "B",
+          "text": "It replaces model evaluation with a count of total training examples."
+        },
+        {
+          "label": "C",
+          "text": "It identifies valuable subcategories and engineers data for those needs."
+        },
+        {
+          "label": "D",
+          "text": "It focuses on bigger models so the dataset does not need attention."
+        }
+      ],
+      "correct_option": "C",
+      "correct_answer": "It identifies valuable subcategories and engineers data for those needs.",
+      "explanation": "Data-centric improvement is about finding which subcategories matter and improving the data accordingly.",
+      "primary_kp_id": "kp_cs230_data_centric_ai",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.6,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg4",
+        "evidence_span": "identifying the subcategories\n\n00:29:09\nis why, if you look at--\n\n00:29:14\nof value in LLMs.\n\n00:29:18\nI think OpenAI [INAUDIBLE] is doing really well there.\n\n00:29:23\nBut there's a [? chance in ?] general questions.\n\n00:29:27\nvaluable, is AI for coding assistant.\n\n00:29:33\nBut OpenAI, Gemini 2.5 Pro, some of the model",
+        "transcript_timestamp_start_s": 1749,
+        "transcript_timestamp_end_s": 1761,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg4.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 1459,
+          "clip_end_s": 1782,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "05:29",
+              "timestamp_s_within_clip": 329,
+              "description": "The instructor faces the class while finishing the data-centric discussion."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture03_seg04_q01",
+      "unit_id": "local::lecture-03::seg4",
+      "global_kp_id": "kp_cs230_responsible_ai_sandbox_testing",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg04_q02",
+      "unit_id": "local::lecture-03::seg4",
+      "global_kp_id": "kp_cs230_responsible_ai_sandbox_testing",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg04_q03",
+      "unit_id": "local::lecture-03::seg4",
+      "global_kp_id": "kp_cs230_error_analysis",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg04_q04",
+      "unit_id": "local::lecture-03::seg4",
+      "global_kp_id": "kp_cs230_error_analysis",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg04_q05",
+      "unit_id": "local::lecture-03::seg4",
+      "global_kp_id": "kp_cs230_data_centric_ai",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    }
+  ]
+}

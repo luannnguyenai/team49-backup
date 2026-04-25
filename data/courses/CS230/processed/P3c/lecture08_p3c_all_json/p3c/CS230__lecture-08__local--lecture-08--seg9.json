@@ -1,0 +1,87 @@
+{
+  "run_id": "local_lecture08_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-08",
+  "unit_id": "local::lecture-08::seg9",
+  "question_bank": [
+    {
+      "item_id": "cs230_lecture08_seg09_q01",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "stem": "A CEO asks for an AI agent after reading that agents save costs. What first move matches the lecture's problem-first advising method?",
+      "options": [
+        {
+          "label": "A",
+          "text": "Define an agent architecture first because the label is currently popular."
+        },
+        {
+          "label": "B",
+          "text": "Ask why and uncover the business goal before selecting the technology."
+        },
+        {
+          "label": "C",
+          "text": "Build a demo agent immediately and justify it with current AI trends."
+        },
+        {
+          "label": "D",
+          "text": "Compare model benchmarks first before learning the user's workflow."
+        }
+      ],
+      "correct_option": "B",
+      "correct_answer": "Ask why and uncover the business goal before selecting the technology.",
+      "explanation": "Laurence says the fundamental first question is 'why?' and then discovers the real goal is making salespeople more efficient, not adopting agents for their own sake.",
+      "primary_kp_id": "kp_cs230_problem_first_ai_solution_design",
+      "related_kp_ids": [
+        "kp_cs230_hype_filtering_and_trusted_advising"
+      ],
+      "difficulty_prior": 0.5,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-08",
+        "unit_id": "local::lecture-08::seg9",
+        "evidence_span": "00:58:43\nLast year when agents started becoming the key word\n\n00:58:49\nwill be the word of the year and the trend\n\n00:58:55\nme to help them to implement an agent.\n\n00:58:59\nIf a company came up to you and said,\n\n00:59:04\nwhat's the correct first question that you ask them?\n\n00:59:12\nOK.\n\n00:59:13\nWhat is an agent for you?\n\n00:59:17\nYep.\n\n00:59:18\nWhat do you want to do?\n\n00:59:19\nEven more fundamental.\n\n00:59:24\nWhy?\n\n00:59:27\nI spoke with the CEO, and he was like, oh.\n\n00:59:31\ngoing to save business costs.\n\n00:59:36\nAnd yeah, my business is going to get\n\n00:59:39\nAnd I'm like, well, who told you that?\n\n00:59:43\nand I saw this thing on Twitter.\n\n00:59:45\nand we ended up having that conversation.\n\n00:59:49\nbecause I had to keep peeling apart.\n\n00:59:52\nthat you two just mentioned as well, until we really\n\n00:59:57\nAnd what he really wanted to do, when\n\n01:00:03\nwas that he wanted to make his salespeople more efficient.\n\n01:00:08\nefficient.\n\n01:00:11\nand nowhere in that sentence do I hear the word agent.\n\n01:00:17\nme see what I can do to help your salespeople become",
+        "transcript_timestamp_start_s": 3523,
+        "transcript_timestamp_end_s": 3620,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg9.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg9.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture08-career-advice-in-ai.mp4",
+          "clip_start_s": 3425,
+          "clip_end_s": 4200,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "02:19",
+              "timestamp_s_within_clip": 139,
+              "description": "Laurence tells the agent-advising story at the front of the room, emphasizing the first question 'why?' before choosing technology."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture08_seg09_q01",
+      "unit_id": "local::lecture-08::seg9",
+      "global_kp_id": "kp_cs230_problem_first_ai_solution_design",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture08_seg09_q01",
+      "unit_id": "local::lecture-08::seg9",
+      "global_kp_id": "kp_cs230_hype_filtering_and_trusted_advising",
+      "map_role": "related",
+      "coverage": "reinforces",
+      "source": "p3c_vlm_grounded"
+    }
+  ]
+}

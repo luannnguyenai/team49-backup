@@ -1,0 +1,223 @@
+{
+  "run_id": "local_cs230_lecture07_agents_prompts_and_rag_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "unit_id": "local::lecture-07-agents-prompts-and-rag::seg8",
+  "question_bank": [
+    {
+      "item_id": "CS230_L07_S8_Q1",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "secondary_kp_ids": [],
+      "stem": "A user asks for a Paris trip with flights, hotels near the Eiffel Tower, and an itinerary. According to the lecture, what should the agent do before calling tools? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Call the payment API first, because booking early reduces the need for later preference validation."
+        },
+        {
+          "id": "B",
+          "text": "Update memory first, because planning is only useful after the agent already knows the user's new travel preferences."
+        },
+        {
+          "id": "C",
+          "text": "Skip planning and go directly to retrieval, because multi-step travel tasks should emerge implicitly from a single prompt."
+        },
+        {
+          "id": "D",
+          "text": "Plan the steps first, such as finding flights, searching hotels, generating recommendations, validating preferences, and booking."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The travel-agent example explicitly begins with a planning stage before execution.",
+      "difficulty_prior": 0.51,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "I'm going to find flights.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg8.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:00",
+            "visual_description": "Four-column slide shows Step 1 user input, Step 2 plan the steps, Step 3 execute the plan, and Step 4 proactive interaction and booking."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S8_Q2",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "secondary_kp_ids": [],
+      "stem": "After a few interactions, the user consistently chooses nonstop flights and avoids hotels above budget. What did the lecture suggest the agent should do with that information? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Update memory with those preferences so later travel plans can use them automatically."
+        },
+        {
+          "id": "B",
+          "text": "Delete the preferences after booking so each new trip starts from a blank slate."
+        },
+        {
+          "id": "C",
+          "text": "Move the preferences into the payment processor, because user choices should only live inside transaction tools."
+        },
+        {
+          "id": "D",
+          "text": "Rewrite the system prompt permanently, because memory is only for tool outputs and not for learned preferences."
+        }
+      ],
+      "answer_key": "A",
+      "rationale": "The example says the agent may update memory with preferences such as direct flights or hotel-budget constraints.",
+      "difficulty_prior": 0.47,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "it might actually update the memory.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg8.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:00",
+            "visual_description": "Travel-agent workflow slide includes a final stage where accepted preferences feed back into the system for future runs."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S8_Q3",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "secondary_kp_ids": [],
+      "stem": "You ask users to rate the entire trip-planning experience from 1 to 5 after the workflow finishes. In the lecture's eval taxonomy, what is that? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "A component evaluation of the flight-search API only."
+        },
+        {
+          "id": "B",
+          "text": "An end-to-end evaluation of the overall user experience."
+        },
+        {
+          "id": "C",
+          "text": "A deterministic correctness check of the hotel-ranking logic only."
+        },
+        {
+          "id": "D",
+          "text": "An archival-memory audit of whether old preferences were stored correctly."
+        }
+      ],
+      "answer_key": "B",
+      "rationale": "The lecture names end-to-end user ratings as one signal for how well the full workflow worked.",
+      "difficulty_prior": 0.44,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "That would be an end to end test, right?",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg8.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "02:40",
+            "visual_description": "Travel-agent example transitions from workflow design to evaluation, with the instructor discussing user ratings as a top-level signal."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S8_Q4",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "secondary_kp_ids": [],
+      "stem": "A travel agent recommends a more expensive flight even though an equivalent cheaper option exists. In the lecture's taxonomy, what kind of issue is that most directly? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "A subjective evaluation issue, because any flight choice can only be judged by tone and politeness."
+        },
+        {
+          "id": "B",
+          "text": "A memory-only issue, because pricing mistakes are caused exclusively by stale preference storage."
+        },
+        {
+          "id": "C",
+          "text": "An objective evaluation issue, because the cheaper equivalent option gives a clearer correctness target than a subjective preference judgment."
+        },
+        {
+          "id": "D",
+          "text": "A multi-agent orchestration issue, because cost comparisons cannot be evaluated within a single workflow."
+        }
+      ],
+      "answer_key": "C",
+      "rationale": "The lecture distinguishes objective errors like choosing a more expensive equivalent flight from subjective qualities such as politeness.",
+      "difficulty_prior": 0.64,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "but one is cheaper than the other, let's say.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg8.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "04:15",
+            "visual_description": "Eval discussion contrasts objective mistakes in travel recommendations with softer dimensions that require more subjective judgment."
+          }
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L07_S8_Q1",
+      "primary_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S8_Q2",
+      "primary_kp_id": "kp_cs230_agent_workflow_planning_and_memory_update",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S8_Q3",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S8_Q4",
+      "primary_kp_id": "kp_cs230_agent_eval_taxonomy",
+      "secondary_kp_ids": []
+    }
+  ]
+}

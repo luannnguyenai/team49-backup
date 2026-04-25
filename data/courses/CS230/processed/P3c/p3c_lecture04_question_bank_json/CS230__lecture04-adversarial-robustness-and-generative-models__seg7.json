@@ -1,0 +1,321 @@
+{
+  "run_id": "local",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+  "question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q01",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "diagnostic",
+      "stem": "In the discriminator loss, what do the two binary-cross-entropy terms correspond to?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "One term for real samples labeled 1 and one term for generated samples labeled 0."
+        },
+        {
+          "option_id": "B",
+          "text": "One term for latent codes labeled 1 and one term for prompt tokens labeled 0."
+        },
+        {
+          "option_id": "C",
+          "text": "One term for clean noise labeled 1 and one term for cumulative noise labeled 0."
+        },
+        {
+          "option_id": "D",
+          "text": "One term for printable patches labeled 1 and one term for detector boxes labeled 0."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The slide and transcript describe binary cross-entropy for real distribution samples and generated G(z) samples.",
+      "distractor_rationales": {
+        "B": "Mixes latent codes and prompt tokens rather than real/fake images.",
+        "C": "Confuses GAN discrimination with diffusion noise labels.",
+        "D": "Confuses GAN loss with adversarial patch constraints."
+      },
+      "primary_kp_id": "kp_gan_minimax_objective",
+      "difficulty_prior": 0.68,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+        "evidence_span": "as 0, which is why you see the term here on D of G of Z,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg7.mp4",
+          "start_s": 3817,
+          "end_s": 4536,
+          "frame_evidence": [
+            {
+              "timestamp": "02:02",
+              "description": "Slide shows the discriminator cost with y_real = 1 and y_gen = 0 labels."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q02",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "diagnostic",
+      "stem": "When designing the generator cost, what does the generator try to do to the discriminator objective?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Make the discriminator’s cost worse for generated samples."
+        },
+        {
+          "option_id": "B",
+          "text": "Make the real-image pipeline provide labels to the generator."
+        },
+        {
+          "option_id": "C",
+          "text": "Make the discriminator classify real images without gradients."
+        },
+        {
+          "option_id": "D",
+          "text": "Make the generated samples skip the discriminator completely."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The generator is trained against D, so it tries to make D perform poorly on generated samples rather than receive a real-image term.",
+      "distractor_rationales": {
+        "B": "The transcript notes real images come from another pipeline.",
+        "C": "Gradients are part of the training signal.",
+        "D": "The generator is trained through the discriminator, not by skipping it."
+      },
+      "primary_kp_id": "kp_gan_minimax_objective",
+      "difficulty_prior": 0.74,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+        "evidence_span": "the cost of the discriminator as bad as possible.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg7.mp4",
+          "start_s": 3817,
+          "end_s": 4536,
+          "frame_evidence": [
+            {
+              "timestamp": "02:02",
+              "description": "Slide separates the discriminator cost from the generator cost in the GAN training objective."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q03",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "diagnostic",
+      "stem": "Why is the original minimax generator cost weak early in GAN training?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "D(G(z)) is near 0, so the saturating cost is flat and sends little signal to G."
+        },
+        {
+          "option_id": "B",
+          "text": "D(G(z)) is near 1, so the non-saturating cost removes all gradients from D."
+        },
+        {
+          "option_id": "C",
+          "text": "D(x) is near 0, so the real-image term forces G to memorize the dataset."
+        },
+        {
+          "option_id": "D",
+          "text": "D(x) is near 1, so the discriminator stops reading generated images."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Early generated images are obviously fake, so D(G(z)) is close to 0 and the saturating objective gives G a tiny gradient.",
+      "distractor_rationales": {
+        "B": "Uses the wrong early value and the wrong cost.",
+        "C": "Moves the issue to real images and memorization, not G gradients.",
+        "D": "Misdiagnoses D’s behavior; the issue is the generator signal."
+      },
+      "primary_kp_id": "kp_gan_instability_diagnostics",
+      "difficulty_prior": 0.82,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+        "evidence_span": "super flat at that level, meaning we",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg7.mp4",
+          "start_s": 3817,
+          "end_s": 4536,
+          "frame_evidence": [
+            {
+              "timestamp": "09:14",
+              "description": "Slide plots saturating and non-saturating generator costs as functions of D(G(z))."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q04",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "diagnostic",
+      "stem": "What is the purpose of switching to the non-saturating generator cost?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "It gives G a stronger early gradient when D can easily spot fake samples."
+        },
+        {
+          "option_id": "B",
+          "text": "It gives D a weaker late gradient when real samples have no labels."
+        },
+        {
+          "option_id": "C",
+          "text": "It gives z a fixed label so G no longer maps z to images."
+        },
+        {
+          "option_id": "D",
+          "text": "It gives diffusion a denoising label for every noisy time step."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The non-saturating form reshapes the generator objective so it learns faster early in the game.",
+      "distractor_rationales": {
+        "B": "The issue is not missing labels for real samples.",
+        "C": "The latent-to-image mapping remains central to G.",
+        "D": "This describes diffusion training, not GAN cost design."
+      },
+      "primary_kp_id": "kp_gan_instability_diagnostics",
+      "difficulty_prior": 0.86,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+        "evidence_span": "is this other loss that looks like this and is non-saturating,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg7.mp4",
+          "start_s": 3817,
+          "end_s": 4536,
+          "frame_evidence": [
+            {
+              "timestamp": "09:14",
+              "description": "Slide shows the non-saturating curve staying steep near D(G(z)) = 0."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q05",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "diagnostic",
+      "stem": "How is mode collapse diagnosed in the GAN discussion?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "G fools D with a narrow set of outputs instead of covering the full data distribution."
+        },
+        {
+          "option_id": "B",
+          "text": "G fails because D labels real images as 1 and generated images as 0."
+        },
+        {
+          "option_id": "C",
+          "text": "G succeeds because z arithmetic changes one semantic attribute smoothly."
+        },
+        {
+          "option_id": "D",
+          "text": "G stabilizes because both networks minimize the same supervised loss."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Mode collapse means the generator finds limited outputs that fool the discriminator without matching the whole distribution.",
+      "distractor_rationales": {
+        "B": "Those labels define the discriminator task, not collapse.",
+        "C": "Latent arithmetic is a useful structure, not collapse.",
+        "D": "GANs are adversarial and non-stationary, not a shared supervised loss."
+      },
+      "primary_kp_id": "kp_gan_instability_diagnostics",
+      "difficulty_prior": 0.9,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg7",
+        "evidence_span": "It's called mode collapse, where GANs might actually",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg7.mp4",
+          "start_s": 3817,
+          "end_s": 4536,
+          "frame_evidence": [
+            {
+              "timestamp": "07:52",
+              "description": "Instructor discusses the failure mode after the loss-curve explanation; the visual focus is the lecture stage while the transcript defines mode collapse."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q01",
+      "global_kp_id": "kp_gan_minimax_objective",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q02",
+      "global_kp_id": "kp_gan_minimax_objective",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q03",
+      "global_kp_id": "kp_gan_instability_diagnostics",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q04",
+      "global_kp_id": "kp_gan_instability_diagnostics",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg7__q05",
+      "global_kp_id": "kp_gan_instability_diagnostics",
+      "planner_role": "main",
+      "map_role": "primary"
+    }
+  ]
+}

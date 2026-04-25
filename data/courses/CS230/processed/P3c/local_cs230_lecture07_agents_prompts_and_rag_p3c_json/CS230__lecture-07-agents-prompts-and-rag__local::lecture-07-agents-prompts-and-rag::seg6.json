@@ -1,0 +1,276 @@
+{
+  "run_id": "local_cs230_lecture07_agents_prompts_and_rag_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "unit_id": "local::lecture-07-agents-prompts-and-rag::seg6",
+  "question_bank": [
+    {
+      "item_id": "CS230_L07_S6_Q1",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_agentic_workflow_definition",
+      "secondary_kp_ids": [],
+      "stem": "Why did the lecture prefer the phrase agentic workflow over the single word agent? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Because workflow means the model is always trained with reinforcement learning, whereas agent means no learning is involved."
+        },
+        {
+          "id": "B",
+          "text": "Because different teams use agent for everything from one prompt to a complex tool-using system, so workflow is more precise."
+        },
+        {
+          "id": "C",
+          "text": "Because workflow refers only to deterministic software and agent refers only to language models with no external tools."
+        },
+        {
+          "id": "D",
+          "text": "Because workflow guarantees multiple models, whereas agent always means a single model call."
+        }
+      ],
+      "answer_key": "B",
+      "rationale": "The lecture says agent is overloaded in industry, while agentic workflow better emphasizes the multi-step process.",
+      "difficulty_prior": 0.49,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "calling everything an agent doesn't do it justice.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg6.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "03:00",
+            "visual_description": "Slide titled Definition quotes Andrew Ng and contrasts a simple RAG reply with a multi-step refund workflow."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S6_Q2",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_agentic_workflow_definition",
+      "secondary_kp_ids": [],
+      "stem": "Which description matches the lecture's definition of an agentic AI workflow? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "A single prompt that always reasons internally without calling any tools or external systems."
+        },
+        {
+          "id": "B",
+          "text": "A reinforcement-learning agent that must interact with an environment and optimize a reward signal."
+        },
+        {
+          "id": "C",
+          "text": "A multi-step process that combines prompts, tools, and workflow logic to complete a task."
+        },
+        {
+          "id": "D",
+          "text": "A pretraining pipeline that updates model weights continuously while users interact with it."
+        }
+      ],
+      "answer_key": "C",
+      "rationale": "The lecture defines an agentic workflow as a process built from prompts, tools, resources, and workflow logic.",
+      "difficulty_prior": 0.45,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "it's a bunch of prompts with tools,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg6.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "03:00",
+            "visual_description": "Definition slide shows a refund-policy example and emphasizes that the workflow is the multi-step unit of interest."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S6_Q3",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_agentic_workflow_definition",
+      "secondary_kp_ids": [],
+      "stem": "A chatbot answers \"Refunds are available within 30 days\" but the user actually needs order-specific eligibility. What upgrade from the lecture best addresses that gap? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a shorter prompt that hides the policy text so the model is forced to guess based on general refund conventions."
+        },
+        {
+          "id": "B",
+          "text": "Use a deterministic regex only, because any refund request can be fully resolved without asking the user for more information."
+        },
+        {
+          "id": "C",
+          "text": "Use a few-shot prompt only, because examples remove the need for APIs or order-specific checks."
+        },
+        {
+          "id": "D",
+          "text": "Use an agentic workflow that retrieves policy, asks for missing order information, queries the order system, and then confirms eligibility."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The refund example in the lecture moves from one-step policy answering to a multi-step workflow with retrieval, clarification, and API use.",
+      "difficulty_prior": 0.56,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "So it's all about the multi-step process to complete a task.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg6.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "03:00",
+            "visual_description": "Refund-policy slide visually contrasts a one-shot RAG answer with an AI-agent path that asks for an order number and checks an API."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S6_Q4",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_deterministic_versus_fuzzy_ai_engineering",
+      "secondary_kp_ids": [],
+      "stem": "The lecture describes a shift from deterministic software to fuzzy engineering. What changes in that shift? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Systems increasingly interpret free-form text, images, and ambiguous user intent instead of only processing rigid structured inputs."
+        },
+        {
+          "id": "B",
+          "text": "Systems increasingly replace all APIs with vector databases so every workflow becomes retrieval-only."
+        },
+        {
+          "id": "C",
+          "text": "Systems increasingly avoid user interaction so outputs can be scored entirely by deterministic unit tests."
+        },
+        {
+          "id": "D",
+          "text": "Systems increasingly require no guardrails because generative models already internalize enterprise policy perfectly."
+        }
+      ],
+      "answer_key": "A",
+      "rationale": "The lecture frames agentic AI as moving software toward fuzzier interpretation of unstructured inputs and open-ended intent.",
+      "difficulty_prior": 0.63,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "to handling multi-step, autonomous workflows?",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg6.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "06:50",
+            "visual_description": "Lecture slides transition from definitions to examples of workflows that must reason over less-structured user requests."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S6_Q5",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_deterministic_versus_fuzzy_ai_engineering",
+      "secondary_kp_ids": [],
+      "stem": "Why did the lecture argue for guardrails and sometimes human review in fuzzy AI workflows? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Because fuzzy workflows cannot call tools, so humans must always perform every external action on the model's behalf."
+        },
+        {
+          "id": "B",
+          "text": "Because generated scores or decisions can be wrong, so human-in-the-loop checks help catch failures that deterministic pipelines would not naturally expose."
+        },
+        {
+          "id": "C",
+          "text": "Because fuzzy workflows always maximize latency, so human review is mainly a way to slow the system down even more."
+        },
+        {
+          "id": "D",
+          "text": "Because fuzzy workflows eliminate the need for evaluation, so humans are used only to provide cosmetic explanations afterward."
+        }
+      ],
+      "answer_key": "B",
+      "rationale": "The lecture emphasizes guardrails and human review when fuzzy tasks such as assessments or content generation can still fail.",
+      "difficulty_prior": 0.7,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "And how am I going to design those guardrails?",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg6.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "09:20",
+            "visual_description": "Lecture remains on enterprise-workflow examples while the instructor explains why ambiguous model behavior calls for guardrails and review."
+          }
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L07_S6_Q1",
+      "primary_kp_id": "kp_cs230_agentic_workflow_definition",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S6_Q2",
+      "primary_kp_id": "kp_cs230_agentic_workflow_definition",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S6_Q3",
+      "primary_kp_id": "kp_cs230_agentic_workflow_definition",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S6_Q4",
+      "primary_kp_id": "kp_cs230_deterministic_versus_fuzzy_ai_engineering",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S6_Q5",
+      "primary_kp_id": "kp_cs230_deterministic_versus_fuzzy_ai_engineering",
+      "secondary_kp_ids": []
+    }
+  ]
+}

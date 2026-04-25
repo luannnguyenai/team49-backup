@@ -1,0 +1,276 @@
+{
+  "run_id": "local_cs230_lecture07_agents_prompts_and_rag_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "unit_id": "local::lecture-07-agents-prompts-and-rag::seg3",
+  "question_bank": [
+    {
+      "item_id": "CS230_L07_S3_Q1",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_prompt_chaining",
+      "secondary_kp_ids": [],
+      "stem": "A single prompt both extracts issues from a customer review and writes the final response, but you cannot tell where errors come from. What redesign best matches the lecture? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep the single prompt and add more adjectives so the model has a stronger stylistic signal."
+        },
+        {
+          "id": "B",
+          "text": "Collapse the workflow further by removing the extraction step and asking only for the final email."
+        },
+        {
+          "id": "C",
+          "text": "Replace the workflow with one longer context window so intermediate reasoning never needs to be externalized."
+        },
+        {
+          "id": "D",
+          "text": "Split the workflow into chained prompts so extraction, outlining, and final writing can each be inspected separately."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The lecture defines chaining as splitting a complex workflow into multiple prompts whose intermediate outputs can be debugged independently.",
+      "difficulty_prior": 0.52,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "So one advantage of chaining is you would separate the prompts,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:35",
+            "visual_description": "Slide titled Chain complex prompts for improved performance contrasts a single-step customer-response prompt with a multi-prompt decomposition."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S3_Q2",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_prompt_chaining",
+      "secondary_kp_ids": [],
+      "stem": "You want to know whether poor email quality comes from issue extraction, outline generation, or final writing. Which diagnostic benefit of chaining did the lecture emphasize? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "You can test the prompts separately and optimize the weakest step instead of guessing which hidden subtask failed."
+        },
+        {
+          "id": "B",
+          "text": "You can eliminate intermediate outputs so the model has fewer chances to expose errors during evaluation."
+        },
+        {
+          "id": "C",
+          "text": "You can force all three subtasks to share the same hidden state so debugging is no longer needed."
+        },
+        {
+          "id": "D",
+          "text": "You can guarantee that every later prompt is correct as long as the first prompt produces any output at all."
+        }
+      ],
+      "answer_key": "A",
+      "rationale": "The lecture says chained prompts can be tested independently, which makes it easier to identify which step should be optimized.",
+      "difficulty_prior": 0.57,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "test those three prompts separately from each other",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "02:20",
+            "visual_description": "Chaining slide remains visible while the instructor points to the separated extraction, outline, and final-response stages."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S3_Q3",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_prompt_chaining",
+      "secondary_kp_ids": [],
+      "stem": "A team proposes a very long chain for a chatbot that must answer almost instantly. Which caution from the lecture is most relevant? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Longer chains reduce latency because every extra prompt shortens the model's decoding path."
+        },
+        {
+          "id": "B",
+          "text": "Longer chains can improve control, but they also add latency that may be unacceptable in speed-sensitive applications."
+        },
+        {
+          "id": "C",
+          "text": "Longer chains remove the need for intermediate evaluation because later prompts automatically correct earlier ones."
+        },
+        {
+          "id": "D",
+          "text": "Longer chains make prompt engineering unnecessary because the workflow logic replaces prompt quality."
+        }
+      ],
+      "answer_key": "B",
+      "rationale": "The lecture notes that chained workflows help control and debugging, but longer chains can be undesirable when latency matters.",
+      "difficulty_prior": 0.62,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "helps you control your workflow",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "03:05",
+            "visual_description": "The slide and narration focus on why multi-step control improves debugging even though it may cost additional model calls."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S3_Q4",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "secondary_kp_ids": [],
+      "stem": "You are comparing a baseline prompt against a refined prompt across several test cases. What evaluation setup most closely matches the lecture's prompt-testing advice? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Judge the prompts only by how elegant they look before execution, because wording quality predicts output quality."
+        },
+        {
+          "id": "B",
+          "text": "Measure only token count, because shorter prompts are usually the stronger prompts across tasks."
+        },
+        {
+          "id": "C",
+          "text": "Run both prompts on representative cases, inspect the generated outputs, and score the results side by side."
+        },
+        {
+          "id": "D",
+          "text": "Pick the prompt that sounds more confident, because confidence is the main indicator of a reliable workflow."
+        }
+      ],
+      "answer_key": "C",
+      "rationale": "Prompt testing in the lecture compares baseline and refined prompts on actual cases and reviews their generated outputs.",
+      "difficulty_prior": 0.49,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "that is the baseline.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "06:40",
+            "visual_description": "Slide titled Testing your prompts shows a table with prompt variants, test cases, generated outputs, and scores."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S3_Q5",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "secondary_kp_ids": [],
+      "stem": "You already have a reference answer and want an automated evaluator to compare two model outputs against it. Which judge pattern from the lecture is the best fit? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use a zero-shot generator as the final answerer, because generation and judging should be the same step."
+        },
+        {
+          "id": "B",
+          "text": "Use a chain-of-thought prompt only, because reference answers are unnecessary once the model reasons step by step."
+        },
+        {
+          "id": "C",
+          "text": "Use a single-answer grader with no comparison or rubric, because pairwise judgments become invalid when a reference exists."
+        },
+        {
+          "id": "D",
+          "text": "Use a reference-guided LLM judge that compares both candidate answers against the provided reference."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The lecture presents several judge modes, including reference-guided pairwise comparison when a reference answer is available.",
+      "difficulty_prior": 0.65,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "Or you add also a rubric.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg3.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "08:10",
+            "visual_description": "Slide titled LLM as Judges shows pairwise, single-answer, and reference-guided judging prompts alongside rubric-style evaluation."
+          }
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L07_S3_Q1",
+      "primary_kp_id": "kp_cs230_prompt_chaining",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q2",
+      "primary_kp_id": "kp_cs230_prompt_chaining",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q3",
+      "primary_kp_id": "kp_cs230_prompt_chaining",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q4",
+      "primary_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S3_Q5",
+      "primary_kp_id": "kp_cs230_prompt_testing_and_llm_as_judge",
+      "secondary_kp_ids": []
+    }
+  ]
+}

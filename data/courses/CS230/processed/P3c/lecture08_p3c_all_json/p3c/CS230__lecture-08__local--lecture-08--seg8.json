@@ -1,0 +1,77 @@
+{
+  "run_id": "local_lecture08_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-08",
+  "unit_id": "local::lecture-08::seg8",
+  "question_bank": [
+    {
+      "item_id": "cs230_lecture08_seg08_q01",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "stem": "A team receives generated code that works for a prototype. What risk should they diagnose before merging it into a long-lived codebase?",
+      "options": [
+        {
+          "label": "A",
+          "text": "The code may remove every future maintenance task from the team."
+        },
+        {
+          "label": "B",
+          "text": "The code may make documentation unnecessary after the first release."
+        },
+        {
+          "label": "C",
+          "text": "The code may prove that non-engineers no longer need product judgment."
+        },
+        {
+          "label": "D",
+          "text": "The code may create future bugs, support work, docs, and cleanup debt."
+        }
+      ],
+      "correct_option": "D",
+      "correct_answer": "The code may create future bugs, support work, docs, and cleanup debt.",
+      "explanation": "Laurence explains technical debt as the future obligations created whenever software is built, including bugs, requirements, marketing, and support.",
+      "primary_kp_id": "kp_cs230_technical_debt_in_generated_code",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.56,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-08",
+        "unit_id": "local::lecture-08::seg8",
+        "evidence_span": "00:48:47\nis technical debt.\n\n00:48:50\nAre you familiar with the phrase technical debt?\n\n00:48:55\nOK.\n\n00:48:57\nin New York on Friday, and I used the phrase,\n\n00:49:02\nSo I didn't realize that people didn't understand\n\n00:49:05\nSo let me just take a moment to explain that,\n\n00:49:10\nthe power of vibe coding.\n\n00:49:15\nBuying a house.\n\n00:49:20\nto buy a house.\n\n00:49:24\na million dollars, with all the interest that you pay is about\n\n00:49:27\nSo you end up paying back the bank about $1 million\n\n00:49:31\nSo you have 30 years of home ownership\n\n00:49:38\nThat is probably a good debt to take on,\n\n00:49:44\nYou're not paying rent over that time,\n\n00:49:47\nspending on this house over those 30 years\n\n00:49:51\ngetting greater than $1 million worth of value out of it.\n\n00:49:58\ncredit card.\n\n00:50:02\nI really want to buy them.\n\n00:50:04\nBy the time I've paid them off, it's $500.\n\n00:50:10\nApproaching software development with the same mindset\n\n00:50:15\nEvery time you build something, you take on debt.\n\n00:50:21\ngoing to be bugs.\n\n00:50:23\nThere's always going to be new requirements coming in\n\n00:50:26\nThere's always going needs to market it.",
+        "transcript_timestamp_start_s": 2927,
+        "transcript_timestamp_end_s": 3029,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg8.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-08/local--lecture-08-seg8.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture08-career-advice-in-ai.mp4",
+          "clip_start_s": 2861,
+          "clip_end_s": 3425,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "02:34",
+              "timestamp_s_within_clip": 154,
+              "description": "Laurence lectures from the front of the room while introducing technical debt as the frame for judging generated code."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture08_seg08_q01",
+      "unit_id": "local::lecture-08::seg8",
+      "global_kp_id": "kp_cs230_technical_debt_in_generated_code",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    }
+  ]
+}

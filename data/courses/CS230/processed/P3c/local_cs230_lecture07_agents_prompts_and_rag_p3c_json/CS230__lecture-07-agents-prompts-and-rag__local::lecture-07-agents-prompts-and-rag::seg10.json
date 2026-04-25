@@ -1,0 +1,223 @@
+{
+  "run_id": "local_cs230_lecture07_agents_prompts_and_rag_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-07-agents-prompts-and-rag",
+  "unit_id": "local::lecture-07-agents-prompts-and-rag::seg10",
+  "question_bank": [
+    {
+      "item_id": "CS230_L07_S10_Q1",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "secondary_kp_ids": [],
+      "stem": "A single workflow already uses several prompts and tools. According to the lecture, when does moving to multiple agents become especially attractive? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "When independent specialized tasks can run in parallel rather than waiting on one monolithic controller."
+        },
+        {
+          "id": "B",
+          "text": "When every task must happen in one fixed serial order so the system avoids any parallel execution."
+        },
+        {
+          "id": "C",
+          "text": "When the main goal is to remove specialization and make every subtask use the exact same shared prompt."
+        },
+        {
+          "id": "D",
+          "text": "When the workflow has no reusable pieces and every team needs a completely different implementation from scratch."
+        }
+      ],
+      "answer_key": "A",
+      "rationale": "The lecture says multi-agent systems become especially useful when parts of the work can happen in parallel.",
+      "difficulty_prior": 0.46,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "It's when it's parallel.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg10.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "00:44",
+            "visual_description": "Opening multi-agent slide asks why multiple agents are needed and frames parallelism as the central advantage."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S10_Q2",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "secondary_kp_ids": [],
+      "stem": "Why did the lecture highlight reuse as another reason to build specialized agents? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "Because reuse guarantees that all teams will share the same user interface and never need orchestration."
+        },
+        {
+          "id": "B",
+          "text": "Because one agent built for a specialized function can be reused across multiple products or teams."
+        },
+        {
+          "id": "C",
+          "text": "Because reuse eliminates the need for evaluation once an agent has been deployed in one workflow."
+        },
+        {
+          "id": "D",
+          "text": "Because reuse means every specialized agent automatically learns from every other agent's memory without coordination."
+        }
+      ],
+      "answer_key": "B",
+      "rationale": "The instructor explicitly says an agent can be reused across teams or contexts once built for a specialized task.",
+      "difficulty_prior": 0.43,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "an agent can be reused.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg10.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "00:49",
+            "visual_description": "Multi-agent discussion remains on the opening rationale slide while reuse is introduced alongside parallelism."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S10_Q3",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "secondary_kp_ids": [],
+      "stem": "In the smart-home example, what role does the orchestrator agent play? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "It replaces all specialized agents so the system can avoid any hierarchical structure."
+        },
+        {
+          "id": "B",
+          "text": "It stores only archival memory while every other agent handles all user interaction directly."
+        },
+        {
+          "id": "C",
+          "text": "It serves as the main communication point with the user and delegates work to specialized agents."
+        },
+        {
+          "id": "D",
+          "text": "It acts only as a payment tool so that non-financial agents never need to authenticate users."
+        }
+      ],
+      "answer_key": "C",
+      "rationale": "The lecture describes a hierarchical pattern in which the user mainly interacts with an orchestrator that coordinates specialists.",
+      "difficulty_prior": 0.59,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "What is exactly the orchestrator doing?",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg10.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "03:20",
+            "visual_description": "Smart-home multi-agent example leads into a hierarchical pattern where one orchestration layer coordinates domain agents."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L07_S10_Q4",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "secondary_kp_ids": [],
+      "stem": "Compared with one large monolithic agent, what practical engineering advantage of multi-agent workflows did the lecture emphasize at the end? ",
+      "options": [
+        {
+          "id": "A",
+          "text": "They always reduce the total number of model calls, because every specialized agent shares the same hidden computation."
+        },
+        {
+          "id": "B",
+          "text": "They make system design deterministic, because specialization removes ambiguity from all user requests."
+        },
+        {
+          "id": "C",
+          "text": "They remove the need for orchestration, because any group of agents will self-organize without explicit coordination."
+        },
+        {
+          "id": "D",
+          "text": "They can be easier to debug and can parallelize work more naturally across specialized components."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The lecture closes by citing debugging and parallelization as practical advantages of multi-agent structures.",
+      "difficulty_prior": 0.62,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "there are advantages to multi-agent",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-07-agents-prompts-and-rag/local--lecture-07-agents-prompts-and-rag-seg10.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "07:30",
+            "visual_description": "Closing discussion on multi-agent organization patterns summarizes benefits such as easier debugging and parallel work."
+          }
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L07_S10_Q1",
+      "primary_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S10_Q2",
+      "primary_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S10_Q3",
+      "primary_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L07_S10_Q4",
+      "primary_kp_id": "kp_cs230_multi_agent_workflow_patterns",
+      "secondary_kp_ids": []
+    }
+  ]
+}

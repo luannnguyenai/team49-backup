@@ -1,0 +1,336 @@
+{
+  "run_id": "local_p3c_lecture09_what_is_going_on_inside_my_model",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+  "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+  "question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q001",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_benchmark_contamination",
+      "difficulty_prior": 0.47,
+      "stem": "A benchmark dashboard shows one checkpoint doing poorly on reasoning. What diagnostic use of benchmarks does this illustrate?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Finding capability-specific error clusters across checkpoints"
+        },
+        {
+          "option_id": "B",
+          "text": "Computing pixel gradients for the reasoning class"
+        },
+        {
+          "option_id": "C",
+          "text": "Increasing the spatial size of a generator output"
+        },
+        {
+          "option_id": "D",
+          "text": "Selecting a max-pooling switch for reconstruction"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture says benchmarks across tasks can reveal error clusters, such as a checkpoint doing poorly at reasoning.",
+      "distractor_rationales": {
+        "B": "Pixel gradients are a CNN saliency method.",
+        "C": "Generator output size relates to deconvolution.",
+        "D": "Pooling switches are used in DeconvNet visualizations."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+        "evidence_span": "doing very poorly at reasoning.",
+        "transcript_ts": "01:26:16",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5125,
+          "clip_end_s": 5555,
+          "frame_evidence": [
+            {
+              "timestamp": "00:51",
+              "description": "Slide shows capability benchmark dashboards across reasoning, coding, math, and multilingual tasks."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q002",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_benchmark_contamination",
+      "difficulty_prior": 0.54,
+      "stem": "A public math benchmark appears in training blogs and GitHub files. What risk does the lecture associate with this situation?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "The benchmark test set may be contaminated by training data"
+        },
+        {
+          "option_id": "B",
+          "text": "The loss curve must be smooth by construction"
+        },
+        {
+          "option_id": "C",
+          "text": "The class activation map must be retrained"
+        },
+        {
+          "option_id": "D",
+          "text": "The MoE router must balance experts perfectly"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The instructor warns that public benchmark material can appear online and contaminate training data.",
+      "distractor_rationales": {
+        "B": "Training-data exposure does not guarantee smooth loss curves.",
+        "C": "CAM retraining is unrelated to benchmark exposure.",
+        "D": "MoE router balance is a separate training diagnostic."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+        "evidence_span": "All of those might contaminate benchmarks.",
+        "transcript_ts": "01:27:20",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5125,
+          "clip_end_s": 5555,
+          "frame_evidence": [
+            {
+              "timestamp": "01:55",
+              "description": "Slide shows benchmark-contamination checks using train/test comparisons such as n-grams, hashes, and embeddings."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q003",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_benchmark_contamination",
+      "difficulty_prior": 0.62,
+      "stem": "To test whether benchmark examples leaked into training data, which detection methods does the lecture list?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "N-gram search, hashes, and embedding-based semantic search"
+        },
+        {
+          "option_id": "B",
+          "text": "Global average pooling, class weights, and saliency maps"
+        },
+        {
+          "option_id": "C",
+          "text": "Unpooling switches, flipped filters, and fractional stride"
+        },
+        {
+          "option_id": "D",
+          "text": "Learning-rate warmup, RLHF rewards, and PPO clipping"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The contamination section names n-grams, hashes, and embeddings as ways to find exact or semantic overlap between training and test data.",
+      "distractor_rationales": {
+        "B": "These are CNN attribution/CAM components, not contamination checks.",
+        "C": "These are DeconvNet or transposed-convolution components.",
+        "D": "These are training or RLHF ideas, not the listed contamination-detection methods."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+        "evidence_span": "You can do it also with hashes or with embeddings.",
+        "transcript_ts": "01:29:17",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5125,
+          "clip_end_s": 5555,
+          "frame_evidence": [
+            {
+              "timestamp": "03:52",
+              "description": "Slide shows benchmark-contamination checks using train/test comparisons such as n-grams, hashes, and embeddings."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q004",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_benchmark_contamination",
+      "difficulty_prior": 0.69,
+      "stem": "When exposed benchmark items are found, what repair does the lecture recommend for the test set?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Remove the exposed examples and replace them with newly held-out ones"
+        },
+        {
+          "option_id": "B",
+          "text": "Keep the exposed examples and average them with training loss"
+        },
+        {
+          "option_id": "C",
+          "text": "Convert the exposed examples into softmax probabilities"
+        },
+        {
+          "option_id": "D",
+          "text": "Route the exposed examples to a single MoE expert"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The instructor says to fix the test set by removing exposed examples and replacing them with brand-new held-out examples.",
+      "distractor_rationales": {
+        "B": "Keeping exposed examples would preserve the contamination problem.",
+        "C": "Softmax probabilities do not repair a contaminated benchmark.",
+        "D": "Expert routing is unrelated to benchmark repair."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+        "evidence_span": "You would remove all those examples",
+        "transcript_ts": "01:29:56",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5125,
+          "clip_end_s": 5555,
+          "frame_evidence": [
+            {
+              "timestamp": "04:31",
+              "description": "Slide shows benchmark-contamination checks using train/test comparisons such as n-grams, hashes, and embeddings."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q005",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_safety_evaluations_and_agentic_workflow_evaluation",
+      "difficulty_prior": 0.72,
+      "stem": "Safety dashboards for foundation models should include agentic-workflow tests because they evaluate what extra behavior beyond one-shot answers?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "How the model behaves while using tools across a workflow"
+        },
+        {
+          "option_id": "B",
+          "text": "How a dog-class score changes under a dark square"
+        },
+        {
+          "option_id": "C",
+          "text": "How a deconvolution matrix inserts zeros"
+        },
+        {
+          "option_id": "D",
+          "text": "How an image generator increases spatial size"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture says safety evaluation should include how the model behaves in an agentic workflow, not only one-shot evaluation.",
+      "distractor_rationales": {
+        "B": "That describes occlusion sensitivity, not safety evaluation.",
+        "C": "That describes transposed-convolution mechanics.",
+        "D": "That describes deconvolution/upsampling motivation."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg9",
+        "evidence_span": "model behaves in an agentic workflow,",
+        "transcript_ts": "01:30:43",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg9.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 5125,
+          "clip_end_s": 5555,
+          "frame_evidence": [
+            {
+              "timestamp": "05:18",
+              "description": "Slide shows safety-evaluation dashboards for jailbreaks, social engineering, privacy leakage, and agentic workflows."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q001",
+      "global_kp_id": "kp_benchmark_contamination",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q002",
+      "global_kp_id": "kp_benchmark_contamination",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q003",
+      "global_kp_id": "kp_benchmark_contamination",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q004",
+      "global_kp_id": "kp_benchmark_contamination",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg9_q005",
+      "global_kp_id": "kp_cs230_safety_evaluations_and_agentic_workflow_evaluation",
+      "role": "primary",
+      "weight": 1.0
+    }
+  ]
+}

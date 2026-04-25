@@ -1,0 +1,206 @@
+{
+  "run_id": "local_p3c_lecture09_what_is_going_on_inside_my_model",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+  "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+  "question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg6_q001",
+      "item_type": "concept_mcq",
+      "question_intent": "procedural",
+      "primary_kp_id": "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+      "difficulty_prior": 0.64,
+      "stem": "In the DeconvNet reconstruction procedure, what is done after selecting one feature map and finding its maximum activation?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "All other entries in that feature map are zeroed out"
+        },
+        {
+          "option_id": "B",
+          "text": "All feature maps are averaged into one scalar"
+        },
+        {
+          "option_id": "C",
+          "text": "All class labels are replaced with the selected class"
+        },
+        {
+          "option_id": "D",
+          "text": "All pooling switches are discarded before unpooling"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The instructor says to keep the maximum activation and zero out every other entry before reversing through the network.",
+      "distractor_rationales": {
+        "B": "Averaging feature maps describes global average pooling, not this DeconvNet step.",
+        "C": "Labels are not modified during activation reconstruction.",
+        "D": "Switches must be kept for unpooling, not discarded."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+        "evidence_span": "We zero out every other entries of this matrix.",
+        "transcript_ts": "01:00:22",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 3586,
+          "clip_end_s": 4371,
+          "frame_evidence": [
+            {
+              "timestamp": "00:36",
+              "description": "Slide shows a selected feature map with its maximum activation kept and other entries zeroed before reversing through the network."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg6_q002",
+      "item_type": "concept_mcq",
+      "question_intent": "procedural",
+      "primary_kp_id": "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+      "difficulty_prior": 0.72,
+      "stem": "Why are max-pooling switches needed during DeconvNet unpooling?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "They remember where the max value came from in the pooling window"
+        },
+        {
+          "option_id": "B",
+          "text": "They store which class had the largest softmax probability"
+        },
+        {
+          "option_id": "C",
+          "text": "They average every channel before the classifier head"
+        },
+        {
+          "option_id": "D",
+          "text": "They detect which benchmark examples were contaminated"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The lecture explains that max pooling is not invertible unless the forward pass remembers the max locations as switches.",
+      "distractor_rationales": {
+        "B": "Switches are spatial max locations, not class probabilities.",
+        "C": "Channel averaging is a different CAM-related operation.",
+        "D": "Benchmark contamination uses data comparisons, not pooling switches."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+        "evidence_span": "where the maxpooling happened.",
+        "transcript_ts": "01:03:00",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 3586,
+          "clip_end_s": 4371,
+          "frame_evidence": [
+            {
+              "timestamp": "03:14",
+              "description": "Slide explains max-pooling switches as remembered max locations used for unpooling."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg6_q003",
+      "item_type": "concept_mcq",
+      "question_intent": "procedural",
+      "primary_kp_id": "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+      "difficulty_prior": 0.82,
+      "stem": "After reversing a selected deep activation through unpooling, ReLU handling, and deconvolution, what should the reconstruction represent?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "The input-space region that caused the activation to be high"
+        },
+        {
+          "option_id": "B",
+          "text": "The final class probability after retraining the model"
+        },
+        {
+          "option_id": "C",
+          "text": "The global data-domain proportions in the corpus"
+        },
+        {
+          "option_id": "D",
+          "text": "The token-to-token relation learned by an attention head"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The DeconvNet reconstruction is meant to show the cropped input region or zone of influence for the activation.",
+      "distractor_rationales": {
+        "B": "The procedure visualizes an activation cause; it does not retrain the classifier.",
+        "C": "Domain proportions are data diagnostics, not DeconvNet output.",
+        "D": "Attention heads are transformer internals, not CNN deconvolution reconstructions."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture09_what_is_going_on_inside_my_model",
+        "unit_id": "local::lecture09_what_is_going_on_inside_my_model::seg6",
+        "evidence_span": "the cropped part of the image that this activation was",
+        "transcript_ts": "01:01:03",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture09_what_is_going_on_inside_my_model/local--lecture09-what-is-going-on-inside-my-model-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+          "clip_start_s": 3586,
+          "clip_end_s": 4371,
+          "frame_evidence": [
+            {
+              "timestamp": "01:17",
+              "description": "Slide compares first-layer edge-like reconstructions with deeper-layer shapes and object parts."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg6_q001",
+      "global_kp_id": "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg6_q002",
+      "global_kp_id": "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture09_model_inside_seg6_q003",
+      "global_kp_id": "kp_cs230_deconvnet_reconstruction_and_unpooling_switches",
+      "role": "primary",
+      "weight": 1.0
+    }
+  ]
+}

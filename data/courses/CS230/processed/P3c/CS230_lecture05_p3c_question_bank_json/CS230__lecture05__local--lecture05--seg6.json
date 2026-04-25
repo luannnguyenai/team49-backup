@@ -1,0 +1,336 @@
+{
+  "run_id": "local_p3c_lecture05",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture05",
+  "unit_id": "local::lecture05::seg6",
+  "question_bank": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q001",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "difficulty_prior": 0.61,
+      "stem": "In the three-action example, a purely greedy Q-network can fail because it keeps selecting the modest-reward branch and misses what alternative?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A branch with a smaller terminal reward"
+        },
+        {
+          "option_id": "B",
+          "text": "A branch requiring no state transition"
+        },
+        {
+          "option_id": "C",
+          "text": "A lower-initial-Q branch with a much larger true reward"
+        },
+        {
+          "option_id": "D",
+          "text": "A supervised label that directly names the best action"
+        }
+      ],
+      "correct_option_id": "C",
+      "rationale": "The example shows the agent repeatedly choosing action a2 with reward 1 and never discovering the a3 branch with reward 1000.",
+      "distractor_rationales": {
+        "A": "The missed branch is better, not smaller in reward.",
+        "B": "The problem is missed exploration, not absence of transitions.",
+        "D": "No supervised best-action label is available in the RL setup."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg6",
+        "evidence_span": "We never visit the state we actually wanted to visit.",
+        "transcript_ts": "01:12:46",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 4231,
+          "clip_end_s": 4811,
+          "frame_evidence": [
+            {
+              "timestamp": "02:33",
+              "description": "Exploration slide shows the S1 action tree with rewards 0, 1, and +1000, emphasizing the unvisited high-reward branch."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q002",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "difficulty_prior": 0.53,
+      "stem": "Exploitation in the bike-route analogy means the agent keeps doing what kind of behavior?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Using a familiar route because it already works well"
+        },
+        {
+          "option_id": "B",
+          "text": "Randomizing every route choice with equal probability"
+        },
+        {
+          "option_id": "C",
+          "text": "Deleting the learned value estimates after each ride"
+        },
+        {
+          "option_id": "D",
+          "text": "Following a human-labeled route without feedback"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "The instructor uses a familiar bike route to illustrate exploiting known good behavior, while exploration would try another route.",
+      "distractor_rationales": {
+        "B": "Uniform randomization is exploration without exploiting current knowledge.",
+        "C": "The analogy is about learned familiarity, not forgetting values.",
+        "D": "The example is experience-based rather than supervised imitation."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg6",
+        "evidence_span": "You exploit what you already know and you get better at it.",
+        "transcript_ts": "01:13:33",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 4231,
+          "clip_end_s": 4811,
+          "frame_evidence": [
+            {
+              "timestamp": "02:33",
+              "description": "Exploration slide shows the S1 action tree with rewards 0, 1, and +1000, emphasizing the unvisited high-reward branch."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q003",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "difficulty_prior": 0.58,
+      "stem": "Epsilon-greedy action selection injects exploration by doing what with probability epsilon?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Choose the current greedy action twice"
+        },
+        {
+          "option_id": "B",
+          "text": "Reset all Q-values to their initial values"
+        },
+        {
+          "option_id": "C",
+          "text": "Train only from terminal rewards"
+        },
+        {
+          "option_id": "D",
+          "text": "Take a random action instead of the greedy one"
+        }
+      ],
+      "correct_option_id": "D",
+      "rationale": "With probability epsilon, the agent ignores the current greedy prediction and samples a random action to explore.",
+      "distractor_rationales": {
+        "A": "That would increase exploitation rather than exploration.",
+        "B": "Epsilon-greedy changes action choice, not stored values directly.",
+        "C": "Terminal rewards are unrelated to the epsilon action-selection rule."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg6",
+        "evidence_span": "with probability epsilon, let's say 5%, take a random action.",
+        "transcript_ts": "01:14:09",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 4231,
+          "clip_end_s": 4811,
+          "frame_evidence": [
+            {
+              "timestamp": "05:40",
+              "description": "Exploration slide shows epsilon-greedy pseudocode with a random action selected with probability epsilon."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q004",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "difficulty_prior": 0.69,
+      "stem": "In the final DQN action-selection flow, epsilon-greedy changes the purely greedy rule by adding what behavior?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A random action on some steps to discover alternatives"
+        },
+        {
+          "option_id": "B",
+          "text": "A supervised label on every step to copy humans"
+        },
+        {
+          "option_id": "C",
+          "text": "A fixed terminal reward on every non-terminal step"
+        },
+        {
+          "option_id": "D",
+          "text": "A smaller output layer with fewer possible actions"
+        }
+      ],
+      "correct_option_id": "A",
+      "rationale": "Epsilon-greedy keeps exploitation most of the time while injecting random actions often enough to discover alternatives that greedy selection misses.",
+      "distractor_rationales": {
+        "B": "The lecture's DQN exploration does not rely on supervised human action labels.",
+        "C": "Epsilon-greedy changes action choice, not reward placement.",
+        "D": "Exploration is not implemented by shrinking the action space."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg6",
+        "evidence_span": "with probability epsilon, let's say 5%, take a random action.",
+        "transcript_ts": "01:14:09",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 4231,
+          "clip_end_s": 4811,
+          "frame_evidence": [
+            {
+              "timestamp": "05:40",
+              "description": "Exploration slide shows epsilon-greedy pseudocode with a random action selected with probability epsilon."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q005",
+      "item_type": "concept_mcq",
+      "question_intent": "diagnostic",
+      "primary_kp_id": "kp_cs230_dqn_empirical_behavior_and_evaluation",
+      "difficulty_prior": 0.52,
+      "stem": "The trained Breakout agent's tunnel behavior illustrates that an RL agent may discover what kind of strategy?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A strategy copied directly from labeled human moves"
+        },
+        {
+          "option_id": "B",
+          "text": "A strategy based only on the score pixels"
+        },
+        {
+          "option_id": "C",
+          "text": "A task-effective strategy that may emerge from reward optimization"
+        },
+        {
+          "option_id": "D",
+          "text": "A strategy selected by averaging all action outputs equally"
+        }
+      ],
+      "correct_option_id": "C",
+      "rationale": "The Breakout result is used to show the agent discovering a tunnel strategy because it helps finish the game more easily.",
+      "distractor_rationales": {
+        "A": "The lecture presents it as learned through RL, not copied from demonstrations.",
+        "B": "Earlier preprocessing removed score pixels as irrelevant for this strategy.",
+        "D": "Averaging outputs would not select a purposeful Breakout strategy."
+      },
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture05",
+        "unit_id": "local::lecture05::seg6",
+        "evidence_span": "A good player would know that you can dig a tunnel,",
+        "transcript_ts": "01:17:55",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture05/local--lecture05-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+          "clip_start_s": 4231,
+          "clip_end_s": 4811,
+          "frame_evidence": [
+            {
+              "timestamp": "07:14",
+              "description": "Results slide shows an Atari Breakout run after training, used to discuss the learned tunnel strategy."
+            }
+          ]
+        }
+      },
+      "provenance": "vlm_grounded",
+      "review_status": "not_required"
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q001",
+      "global_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q002",
+      "global_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q003",
+      "global_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q004",
+      "global_kp_id": "kp_cs230_exploration_exploitation_and_epsilon_greedy",
+      "role": "primary",
+      "weight": 1.0
+    },
+    {
+      "item_id": "p3c_CS230_lecture05_seg6_q005",
+      "global_kp_id": "kp_cs230_dqn_empirical_behavior_and_evaluation",
+      "role": "primary",
+      "weight": 1.0
+    }
+  ]
+}

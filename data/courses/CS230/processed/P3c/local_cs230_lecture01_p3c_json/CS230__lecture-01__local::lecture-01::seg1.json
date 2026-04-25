@@ -1,0 +1,117 @@
+{
+  "run_id": "local_cs230_lecture01_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-01",
+  "unit_id": "local::lecture-01::seg1",
+  "question_bank": [
+    {
+      "item_id": "CS230_L01_S1_Q1",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_deep_learning_resurgence",
+      "secondary_kp_ids": [],
+      "stem": "Why, according to the lecture, did deep learning pull ahead as more data and compute became available?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Because larger neural networks kept improving with scale while older methods flattened out."
+        },
+        {
+          "id": "B",
+          "text": "Because neural networks stopped needing large datasets once GPUs became common."
+        },
+        {
+          "id": "C",
+          "text": "Because transformers made model size irrelevant as long as the optimizer was modern."
+        },
+        {
+          "id": "D",
+          "text": "Because classical methods improve fastest exactly when datasets become enormous."
+        }
+      ],
+      "answer_key": "A",
+      "rationale": "Ng contrasts traditional methods that plateau with larger neural networks that continue improving as data and compute scale.",
+      "difficulty_prior": 0.38,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "traditional algorithms would plateau.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg1.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "03:30",
+            "visual_description": "Whiteboard plot of performance vs. data, with older methods flattening while the larger-neural-network curve keeps rising."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L01_S1_Q2",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "primary_kp_id": "kp_cs230_deep_learning_as_neural_network_based_machine_learning_in_the_cs_ml_dl_g",
+      "secondary_kp_ids": [],
+      "stem": "In the course map drawn on the board, which layering matches how the lecture positioned deep learning?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Computer science fundamentals on top of deep learning, with machine learning under both."
+        },
+        {
+          "id": "B",
+          "text": "Generative AI under machine learning, with deep learning as a separate side branch."
+        },
+        {
+          "id": "C",
+          "text": "Computer science fundamentals -> machine learning -> deep learning -> generative AI."
+        },
+        {
+          "id": "D",
+          "text": "Deep learning -> computer science fundamentals -> generative AI -> machine learning."
+        }
+      ],
+      "answer_key": "C",
+      "rationale": "The lecture explicitly stacks CS fundamentals under machine learning, machine learning under deep learning, and generative AI on top.",
+      "difficulty_prior": 0.31,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "So CS fundamentals, machine learning, deep learning,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg1.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "10:10",
+            "visual_description": "Board sketch showing stacked boxes labeled CS fundamentals, machine learning, deep learning, and generative AI."
+          }
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L01_S1_Q1",
+      "primary_kp_id": "kp_deep_learning_resurgence",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L01_S1_Q2",
+      "primary_kp_id": "kp_cs230_deep_learning_as_neural_network_based_machine_learning_in_the_cs_ml_dl_g",
+      "secondary_kp_ids": []
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "run_id": "local",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+  "question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q01",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "Why is diffusion introduced after the GAN discussion?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "It models the data distribution with one denoising model rather than a minimax game."
+        },
+        {
+          "option_id": "B",
+          "text": "It models the discriminator labels with two networks rather than one classifier."
+        },
+        {
+          "option_id": "C",
+          "text": "It models prompt attacks with a hidden trigger rather than a training patch."
+        },
+        {
+          "option_id": "D",
+          "text": "It models output filtering with safety checks rather than image corruption."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Diffusion avoids the coupled adversarial game and trains a single model on noising and denoising.",
+      "distractor_rationales": {
+        "B": "Reverses the contrast with GANs.",
+        "C": "Mixes prompt injection and backdoors with diffusion.",
+        "D": "Confuses defense filtering with generative modeling."
+      },
+      "primary_kp_id": "kp_cs230_forward_diffusion_process",
+      "difficulty_prior": 0.6,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+        "evidence_span": "And here we don't have a minimax game.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+          "start_s": 4536,
+          "end_s": 5064,
+          "frame_evidence": [
+            {
+              "timestamp": "06:00",
+              "description": "Slide title changes to forward process for diffusion after GAN limitations are discussed."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q02",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "What happens in the forward diffusion process described in the lecture?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Start with x0 and progressively add noise until the image becomes unrecognizable."
+        },
+        {
+          "option_id": "B",
+          "text": "Start with xT and progressively remove labels until the image becomes classified."
+        },
+        {
+          "option_id": "C",
+          "text": "Start with z and progressively train a discriminator until the image becomes real."
+        },
+        {
+          "option_id": "D",
+          "text": "Start with a prompt and progressively insert triggers until the image becomes poisoned."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Forward diffusion takes a clean image and adds noise step by step until it reaches a highly noisy state.",
+      "distractor_rationales": {
+        "B": "Describes reverse denoising and classification vocabulary incorrectly.",
+        "C": "Confuses diffusion with GAN generator training.",
+        "D": "Confuses diffusion with prompt and poisoning attacks."
+      },
+      "primary_kp_id": "kp_cs230_forward_diffusion_process",
+      "difficulty_prior": 0.67,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+        "evidence_span": "you start with an image x0, and you progressively",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+          "start_s": 4536,
+          "end_s": 5064,
+          "frame_evidence": [
+            {
+              "timestamp": "06:30",
+              "description": "Slide begins the forward diffusion section with the x0-to-xT process."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q03",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "In the simplified recurrence, what kind of noise is added at each step?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Gaussian noise sampled at each time step."
+        },
+        {
+          "option_id": "B",
+          "text": "Binary class noise copied from the discriminator."
+        },
+        {
+          "option_id": "C",
+          "text": "Prompt noise copied from the user template."
+        },
+        {
+          "option_id": "D",
+          "text": "Patch noise printed from the detector output."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The simplified forward process adds an epsilon_t term, and the instructor states epsilon_t is Gaussian noise.",
+      "distractor_rationales": {
+        "B": "Uses GAN discriminator labels rather than diffusion noise.",
+        "C": "Uses prompt-injection vocabulary rather than stochastic noising.",
+        "D": "Uses adversarial patch mechanics rather than Gaussian perturbations."
+      },
+      "primary_kp_id": "kp_cs230_forward_diffusion_process",
+      "difficulty_prior": 0.76,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+        "evidence_span": "epsilon t is Gaussian noise.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+          "start_s": 4536,
+          "end_s": 5064,
+          "frame_evidence": [
+            {
+              "timestamp": "07:10",
+              "description": "Slide shows x_{t+1} as the previous image plus an added noise term."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q04",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "Why does the forward process store or define the cumulative noise?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "The reverse model can later learn to predict the noise that was added."
+        },
+        {
+          "option_id": "B",
+          "text": "The discriminator can later learn to label the noise as real or fake."
+        },
+        {
+          "option_id": "C",
+          "text": "The prompt template can later learn to hide the noise in user text."
+        },
+        {
+          "option_id": "D",
+          "text": "The patch optimizer can later learn to print the noise as a trigger."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Forward noising creates the supervised target for the reverse denoising task: predict the cumulative noise.",
+      "distractor_rationales": {
+        "B": "Moves the target to GAN discrimination.",
+        "C": "Moves the target to LLM prompt injection.",
+        "D": "Moves the target to physical adversarial patches."
+      },
+      "primary_kp_id": "kp_cs230_forward_diffusion_process",
+      "difficulty_prior": 0.84,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg8",
+        "evidence_span": "by predicting all the noise that was added.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg8.mp4",
+          "start_s": 4536,
+          "end_s": 5064,
+          "frame_evidence": [
+            {
+              "timestamp": "07:50",
+              "description": "Slide transitions from forward diffusion to learning the reverse denoising process."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q01",
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q02",
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q03",
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg8__q04",
+      "global_kp_id": "kp_cs230_forward_diffusion_process",
+      "planner_role": "main",
+      "map_role": "primary"
+    }
+  ]
+}

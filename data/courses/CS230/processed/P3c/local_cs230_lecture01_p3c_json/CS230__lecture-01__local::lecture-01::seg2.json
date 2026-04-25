@@ -1,0 +1,170 @@
+{
+  "run_id": "local_cs230_lecture01_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-01",
+  "unit_id": "local::lecture-01::seg2",
+  "question_bank": [
+    {
+      "item_id": "CS230_L01_S2_Q1",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "secondary_kp_ids": [],
+      "stem": "A team is building an audio-monitoring product, but repeated prompt changes on a text-first setup have stalled. Based on the lecture, what is the better next move?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep refining prompts, because text-centric prompting usually transfers cleanly to raw audio tasks."
+        },
+        {
+          "id": "B",
+          "text": "Move toward direct deep-learning methods for the audio signal, because that modality often needs more than prompting."
+        },
+        {
+          "id": "C",
+          "text": "Switch to decision trees, because audio tasks benefit most from smaller non-neural models as data grows."
+        },
+        {
+          "id": "D",
+          "text": "Pause modeling and reorganize the database, because modality choice matters less than system design."
+        }
+      ],
+      "answer_key": "B",
+      "rationale": "Ng says prompting is strongest for text, while audio and similar modalities often still call for direct deep-learning methods.",
+      "difficulty_prior": 0.52,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "algorithms directly when I'm working with audio data, image",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg2.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "08:20",
+            "visual_description": "Handwritten side list of modalities on the board near the CS/ML/DL stack, matching the contrast between text prompting and non-text data."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L01_S2_Q2",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
+      "secondary_kp_ids": [],
+      "stem": "A student wants the Stanford AI class most centered on building deep-learning systems rather than a broad, math-heavy ML survey. Which course best matches that goal?",
+      "options": [
+        {
+          "id": "A",
+          "text": "CS129, because it is the broadest survey and the most theory intensive."
+        },
+        {
+          "id": "B",
+          "text": "CS229, because it focuses just on deep learning and minimizes mathematical analysis."
+        },
+        {
+          "id": "C",
+          "text": "Either CS129 or CS229, because the lecture treated them as overlapping practical deep-learning tracks."
+        },
+        {
+          "id": "D",
+          "text": "CS230, because the lecture framed it as the applied course focused on deep learning."
+        }
+      ],
+      "answer_key": "D",
+      "rationale": "The lecture positions CS230 as the more applied deep-learning course, while CS229 is broader and more mathematical.",
+      "difficulty_prior": 0.35,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "and it focuses just on deep learning.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg2.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "01:30",
+            "visual_description": "Instructor points to handwritten course labels on the board while comparing CS129, CS229, and CS230."
+          }
+        }
+      }
+    },
+    {
+      "item_id": "CS230_L01_S2_Q3",
+      "item_type": "concept_mcq",
+      "question_intent": "application",
+      "primary_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "secondary_kp_ids": [],
+      "stem": "For a mostly text-based product, which starting strategy did Ng describe as usually effective before going deeper?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Begin with prompting, because text-based applications often go quite far with that approach."
+        },
+        {
+          "id": "B",
+          "text": "Begin with direct vision-style architectures, because text is the least natural fit for transformer prompting."
+        },
+        {
+          "id": "C",
+          "text": "Begin by collecting multimodal audio-video corpora, because text systems usually need extra modalities to work."
+        },
+        {
+          "id": "D",
+          "text": "Begin by avoiding GenAI altogether, because prompt-based systems rarely help on language tasks."
+        }
+      ],
+      "answer_key": "A",
+      "rationale": "He says transformer-based GenAI is really fantastic for text-based applications, so prompting is often the right first move there.",
+      "difficulty_prior": 0.43,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "evidence_span": "and so on, really fantastic for text-based applications.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "transcript_ref": {
+          "source": "transcript_slice"
+        },
+        "video_clip_ref": {
+          "clip_local_path": "data/working/p3_video_segments/CS230/lecture-01/local--lecture-01-seg2.mp4",
+          "frame_evidence": {
+            "timestamp_mmss": "08:45",
+            "visual_description": "Board still shows the nearby modality comparison used during the discussion of where prompting works best."
+          }
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "CS230_L01_S2_Q1",
+      "primary_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L01_S2_Q2",
+      "primary_kp_id": "kp_cs230_cs230_as_an_applied_practical_deep_learning_course",
+      "secondary_kp_ids": []
+    },
+    {
+      "item_id": "CS230_L01_S2_Q3",
+      "primary_kp_id": "kp_cs230_choosing_between_prompting_and_direct_deep_learning_by_data_modality",
+      "secondary_kp_ids": []
+    }
+  ]
+}

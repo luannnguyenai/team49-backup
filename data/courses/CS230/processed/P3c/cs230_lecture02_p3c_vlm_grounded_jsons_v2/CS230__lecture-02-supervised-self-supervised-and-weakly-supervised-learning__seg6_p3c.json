@@ -1,0 +1,247 @@
+{
+  "run_id": "cs230_l02_p3c_vlm_grounded_20260425",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-02-supervised-self-supervised-and-weakly-supervised-learning",
+  "unit_id": "local::lecture-02-supervised-self-supervised-and-weakly-supervised-learning::seg6",
+  "question_bank": [
+    {
+      "item_id": "cs230_l02_seg06_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question_intent": "diagnostic",
+      "question": "Why is raw pixel-wise comparison brittle for checking whether two face images show the same person?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Pixel values are constant across cameras, so they cannot represent differences between people.",
+        "Pixel values already encode identity perfectly, so a learned representation loses useful information.",
+        "Pixel values become sequence labels, so the model must use binary cross-entropy at every time step.",
+        "Pixel values change under lighting, background, pose, scale, accessories, and aging without necessarily changing identity."
+      ],
+      "answer_index": 3,
+      "explanation": "Two images of the same person can differ dramatically in raw pixels because of nuisance changes. Identity comparison needs a representation less sensitive to those changes.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_face_verification_and_pixel_comparison_failure",
+      "difficulty_prior": 0.41,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "requires_monospace": false,
+      "code_question_style": null,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "Even more basic than that would be a pixel comparison.",
+        "transcript_timestamp": "01:00:03",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+          "clip_start_s": 3327,
+          "clip_end_s": 3900,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "04:39",
+              "description": "Slide shows two face images side by side while the instructor points out why matching corresponding pixels is misleading."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_l02_seg06_q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question_intent": "diagnostic",
+      "question": "Why does the face-verification case require higher input resolution than the day/night toy classifier?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Face verification uses grayscale images, so resolution must compensate for losing all color.",
+        "Small facial details can matter for identity, so overly low resolution may remove useful cues.",
+        "The output is a sequence label, so every time step needs a separate face crop.",
+        "The model compares audio frequencies, so images must be resized to match spectrograms."
+      ],
+      "answer_index": 0,
+      "explanation": "Face identity may depend on fine visual cues such as small facial features. The day/night task can tolerate lower detail because the target concept is coarser.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_face_verification_and_pixel_comparison_failure",
+      "difficulty_prior": 0.34,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "requires_monospace": false,
+      "code_question_style": null,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "What we use here is 412, 412, by 3.",
+        "transcript_timestamp": "00:58:43",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+          "clip_start_s": 3327,
+          "clip_end_s": 3900,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "03:19",
+              "description": "Face-verification slide shows higher-resolution face images and the 412×412×3 input choice."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_l02_seg06_q03",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question_intent": "diagnostic",
+      "question": "What is the main idea behind using a face encoder for verification?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It predicts whether a photo was taken indoors before deciding if the identity matches.",
+        "It maps each face image to a vector and compares those vectors in a learned space.",
+        "It compares the top-left pixels of the two images after normalizing brightness.",
+        "It trains a separate classifier for every possible pair of student images."
+      ],
+      "answer_index": 1,
+      "explanation": "The encoder creates a representation where vector distance is intended to reflect identity similarity better than raw pixel distance.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_face_encoder_representations_and_thresholds",
+      "difficulty_prior": 0.46,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "requires_monospace": false,
+      "code_question_style": null,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "we run it through a deep neural network and we get a vector.",
+        "transcript_timestamp": "01:02:32",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+          "clip_start_s": 3327,
+          "clip_end_s": 3900,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "07:08",
+              "description": "Network diagram shows each face image passing through a deep model to produce vectors that are compared by distance."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_l02_seg06_q04",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question_intent": "diagnostic",
+      "question": "How should the verification threshold be chosen for a high-security application compared with a dining-hall check?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "It should usually be stricter because the cost of accepting the wrong person is higher.",
+        "It should usually be more relaxed because security systems need fewer false negatives.",
+        "It should usually be replaced by the number of pixels that changed between photos.",
+        "It should usually be ignored because vector distance already gives a binary identity label."
+      ],
+      "answer_index": 2,
+      "explanation": "A stricter threshold reduces false accepts but can increase false rejects. The right operating point depends on the application’s error costs.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_face_encoder_representations_and_thresholds",
+      "difficulty_prior": 0.53,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "requires_monospace": false,
+      "code_question_style": null,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "what's the right threshold.",
+        "transcript_timestamp": "01:03:11",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg6.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-02-supervised-self-supervised-and-weakly-supervised-learning/local--lecture-02-supervised-self-supervised-and-weakly-supervised-learning-seg6.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+          "clip_start_s": 3327,
+          "clip_end_s": 3900,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "07:47",
+              "description": "Threshold discussion slide shows vector distance while the instructor compares security-sensitive and lower-risk access settings."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_l02_seg06_q01",
+      "global_kp_id": "kp_cs230_face_verification_and_pixel_comparison_failure",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l02_seg06_q02",
+      "global_kp_id": "kp_cs230_face_verification_and_pixel_comparison_failure",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l02_seg06_q03",
+      "global_kp_id": "kp_cs230_face_encoder_representations_and_thresholds",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l02_seg06_q04",
+      "global_kp_id": "kp_cs230_face_encoder_representations_and_thresholds",
+      "role": "primary"
+    }
+  ]
+}

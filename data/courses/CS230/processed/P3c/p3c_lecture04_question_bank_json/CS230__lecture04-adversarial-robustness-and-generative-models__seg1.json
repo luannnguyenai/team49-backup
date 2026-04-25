@@ -1,0 +1,197 @@
+{
+  "run_id": "local",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg1",
+  "question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg1__q01",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "Why does the instructor motivate adversarial robustness at the start of the lecture?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "AI systems are deployed broadly, creating more exposed attack surfaces."
+        },
+        {
+          "option_id": "B",
+          "text": "AI datasets are shrinking quickly, creating fewer valid benchmarks."
+        },
+        {
+          "option_id": "C",
+          "text": "AI hardware is changing rapidly, creating less stable optimization."
+        },
+        {
+          "option_id": "D",
+          "text": "AI courses are adding visuals, creating more lecture examples."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The stated motivation is deployment: more models in the wild means more systems that attackers can target.",
+      "distractor_rationales": {
+        "B": "Confuses deployment risk with benchmark availability.",
+        "C": "Confuses security exposure with hardware changes.",
+        "D": "Uses a lecture-format detail rather than the security motivation."
+      },
+      "primary_kp_id": "kp_cs230_ai_attack_taxonomy",
+      "difficulty_prior": 0.32,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg1",
+        "evidence_span": "because there are more and more AI models in the wild.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg1.mp4",
+          "start_s": 5,
+          "end_s": 504,
+          "frame_evidence": [
+            {
+              "timestamp": "00:42",
+              "description": "Opening slide lists adversarial robustness and generative modeling while the instructor motivates deployment risk."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg1__q02",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "How does the lecture sequence the major technical topics after the opening motivation?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Generative models first, then adversarial defenses and prompt attacks."
+        },
+        {
+          "option_id": "B",
+          "text": "Diffusion equations first, then GAN objectives and attack taxonomy."
+        },
+        {
+          "option_id": "C",
+          "text": "Training backdoors first, then video generation and image captioning."
+        },
+        {
+          "option_id": "D",
+          "text": "Adversarial robustness first, then generative modeling methods."
+        }
+      ],
+      "correct_option_id": "D",
+      "explanation": "The instructor explicitly says the first part covers adversarial robustness; the generative-modeling part comes later.",
+      "distractor_rationales": {
+        "A": "Reverses the order and narrows adversarial robustness to defenses.",
+        "B": "Starts with a later diffusion topic and misorders GANs.",
+        "C": "Mixes examples from different sections without matching the lecture order."
+      },
+      "primary_kp_id": "kp_cs230_ai_attack_taxonomy",
+      "difficulty_prior": 0.28,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg1",
+        "evidence_span": "We'll start with adversarial robustness.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg1.mp4",
+          "start_s": 5,
+          "end_s": 504,
+          "frame_evidence": [
+            {
+              "timestamp": "01:56",
+              "description": "Slide transition introduces the lecture plan with adversarial robustness before generative models."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg1__q03",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "In the early taxonomy, how are data poisoning attacks positioned relative to deployed models?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "They alter outputs after training by planting data that later affects production behavior."
+        },
+        {
+          "option_id": "B",
+          "text": "They alter outputs during inference by adding imperceptible pixel perturbations."
+        },
+        {
+          "option_id": "C",
+          "text": "They alter outputs during prompting by hiding instructions inside user messages."
+        },
+        {
+          "option_id": "D",
+          "text": "They alter outputs after decoding by filtering generated text from the model."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Data poisoning is framed as an attacker influencing training data so the effect appears later when the model is in production.",
+      "distractor_rationales": {
+        "B": "Describes adversarial examples rather than poisoning.",
+        "C": "Describes prompt injection rather than poisoned training data.",
+        "D": "Describes an output-filtering defense rather than an attack vector."
+      },
+      "primary_kp_id": "kp_cs230_ai_attack_taxonomy",
+      "difficulty_prior": 0.44,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg1",
+        "evidence_span": "or data poisoning attacks, which is, as an attacker,",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg1.mp4",
+          "start_s": 5,
+          "end_s": 504,
+          "frame_evidence": [
+            {
+              "timestamp": "06:15",
+              "description": "Slide/class discussion groups attack waves, including data poisoning before prompt attacks."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg1__q01",
+      "global_kp_id": "kp_cs230_ai_attack_taxonomy",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg1__q02",
+      "global_kp_id": "kp_cs230_ai_attack_taxonomy",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg1__q03",
+      "global_kp_id": "kp_cs230_ai_attack_taxonomy",
+      "planner_role": "main",
+      "map_role": "primary"
+    }
+  ]
+}

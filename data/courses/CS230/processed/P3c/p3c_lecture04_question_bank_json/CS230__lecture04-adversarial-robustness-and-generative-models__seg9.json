@@ -1,0 +1,321 @@
+{
+  "run_id": "local",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+  "question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q01",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "procedural",
+      "stem": "In the reverse denoising step, what does the diffusion model predict from x_t?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "The cumulative noise epsilon-hat added between x0 and xt."
+        },
+        {
+          "option_id": "B",
+          "text": "The discriminator probability that xt came from real data."
+        },
+        {
+          "option_id": "C",
+          "text": "The prompt embedding that should be concatenated with xt."
+        },
+        {
+          "option_id": "D",
+          "text": "The backdoor trigger label that should be attached to xt."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The model receives a noisy image and predicts the noise that had been added from x0 to xt.",
+      "distractor_rationales": {
+        "B": "Confuses diffusion with GAN discrimination.",
+        "C": "Adds prompt conditioning where the procedure is about denoising.",
+        "D": "Adds backdoor vocabulary unrelated to the reverse process."
+      },
+      "primary_kp_id": "kp_diffusion_denoising_intuition",
+      "difficulty_prior": 0.64,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+        "evidence_span": "model that will predict epsilon hat.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg9.mp4",
+          "start_s": 5064,
+          "end_s": 5641,
+          "frame_evidence": [
+            {
+              "timestamp": "01:00",
+              "description": "Slide shows x_t entering the diffusion model and epsilon-hat as the predicted cumulative noise."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q02",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "procedural",
+      "stem": "What operation recovers the clean image if the predicted noise is accurate?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Subtract epsilon-hat from x_t to approximate x0."
+        },
+        {
+          "option_id": "B",
+          "text": "Add epsilon-hat to x0 to approximate x_t."
+        },
+        {
+          "option_id": "C",
+          "text": "Multiply x_t by the discriminator label to approximate x0."
+        },
+        {
+          "option_id": "D",
+          "text": "Concatenate x_t with a prompt token to approximate x0."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The denoising intuition is direct: if the model predicts the noise, subtracting it from the noisy image recovers the clean one.",
+      "distractor_rationales": {
+        "B": "Describes the forward noising direction rather than denoising.",
+        "C": "Uses GAN label mechanics rather than diffusion subtraction.",
+        "D": "Uses conditioning mechanics rather than noise removal."
+      },
+      "primary_kp_id": "kp_diffusion_denoising_intuition",
+      "difficulty_prior": 0.7,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+        "evidence_span": "Because you can actually subtract epsilon hat from xt.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg9.mp4",
+          "start_s": 5064,
+          "end_s": 5641,
+          "frame_evidence": [
+            {
+              "timestamp": "01:00",
+              "description": "Slide diagram visualizes subtracting predicted noise from x_t to recover x0."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q03",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "procedural",
+      "stem": "What reconstruction loss is used for training the denoising model in this simplified explanation?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "An L2 loss comparing true cumulative noise with predicted cumulative noise."
+        },
+        {
+          "option_id": "B",
+          "text": "A cross-entropy loss comparing real labels with generated-image labels."
+        },
+        {
+          "option_id": "C",
+          "text": "A hinge loss comparing prompt tokens with retrieved webpage tokens."
+        },
+        {
+          "option_id": "D",
+          "text": "A detector loss comparing printed colors with object boxes."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The segment states that the loss compares true noise with predicted cumulative noise using L2.",
+      "distractor_rationales": {
+        "B": "This is GAN discriminator-style supervision.",
+        "C": "This belongs to prompt or retrieval settings, not diffusion denoising.",
+        "D": "This belongs to physical adversarial patches, not diffusion."
+      },
+      "primary_kp_id": "kp_diffusion_denoising_intuition",
+      "difficulty_prior": 0.77,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+        "evidence_span": "Our loss function is our L2 loss--",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg9.mp4",
+          "start_s": 5064,
+          "end_s": 5641,
+          "frame_evidence": [
+            {
+              "timestamp": "06:12",
+              "description": "Slide shows the training process box with reconstruction loss between epsilon and epsilon-hat."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q04",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "procedural",
+      "stem": "Why is the denoising target self-supervised in this training setup?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "Forward diffusion creates and stores the exact noise used as the label."
+        },
+        {
+          "option_id": "B",
+          "text": "Human annotators label each noisy image as clean or fake."
+        },
+        {
+          "option_id": "C",
+          "text": "The discriminator assigns each noisy image a real-versus-fake target."
+        },
+        {
+          "option_id": "D",
+          "text": "The prompt template supplies the target label for each noisy image."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "Because the training pipeline adds the noise itself, it already knows the correct noise target without external labeling.",
+      "distractor_rationales": {
+        "B": "External human labels are not the source of epsilon.",
+        "C": "GAN discriminator labels are not used for diffusion noise prediction.",
+        "D": "Prompt templates do not create the denoising label."
+      },
+      "primary_kp_id": "kp_diffusion_denoising_intuition",
+      "difficulty_prior": 0.83,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+        "evidence_span": "We made up a label out of our data process.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg9.mp4",
+          "start_s": 5064,
+          "end_s": 5641,
+          "frame_evidence": [
+            {
+              "timestamp": "06:12",
+              "description": "Slide lists training triplets generated from the data process rather than human annotation."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q05",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "procedural",
+      "stem": "What information is contained in the training triplets shown for diffusion denoising?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "A noisy image, the time-step index t, and the cumulative noise epsilon."
+        },
+        {
+          "option_id": "B",
+          "text": "A real image, the discriminator label y, and the generated sample G(z)."
+        },
+        {
+          "option_id": "C",
+          "text": "A user message, the system prompt, and the injected instruction string."
+        },
+        {
+          "option_id": "D",
+          "text": "A printed patch, the detector score, and the object bounding box."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The database for denoising uses noisy examples, a time-step index indicating noise level, and the noise target to predict.",
+      "distractor_rationales": {
+        "B": "This is a GAN training tuple, not a diffusion denoising triplet.",
+        "C": "This is a prompt-injection structure, not a noising dataset.",
+        "D": "This is an adversarial-patch pipeline, not diffusion training."
+      },
+      "primary_kp_id": "kp_diffusion_denoising_intuition",
+      "difficulty_prior": 0.88,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg9",
+        "evidence_span": "how much noise has been added, how many time steps essentially",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg9.mp4",
+          "start_s": 5064,
+          "end_s": 5641,
+          "frame_evidence": [
+            {
+              "timestamp": "06:12",
+              "description": "Slide shows rows like (noisy image, t=5, epsilon) in the training database."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q01",
+      "global_kp_id": "kp_diffusion_denoising_intuition",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q02",
+      "global_kp_id": "kp_diffusion_denoising_intuition",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q03",
+      "global_kp_id": "kp_diffusion_denoising_intuition",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q04",
+      "global_kp_id": "kp_diffusion_denoising_intuition",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg9__q05",
+      "global_kp_id": "kp_diffusion_denoising_intuition",
+      "planner_role": "main",
+      "map_role": "primary"
+    }
+  ]
+}

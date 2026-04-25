@@ -1,0 +1,259 @@
+{
+  "run_id": "local",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+  "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+  "question_bank": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q01",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "What role does the random code z play in the GAN generator setup?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "It is a compact input that G maps into an image sample."
+        },
+        {
+          "option_id": "B",
+          "text": "It is a class label that D maps into a real database image."
+        },
+        {
+          "option_id": "C",
+          "text": "It is a detector score that replaces the generated image."
+        },
+        {
+          "option_id": "D",
+          "text": "It is a prompt template that overwrites the discriminator loss."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The generator starts from a small random code and produces an image, inducing the generator distribution.",
+      "distractor_rationales": {
+        "B": "Confuses the generator input with discriminator labels and real images.",
+        "C": "Brings in detector scores from adversarial patches.",
+        "D": "Mixes GAN latent codes with prompt injection."
+      },
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty_prior": 0.58,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+        "evidence_span": "You give it a random code of size, let's say, 100.",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+          "start_s": 3370,
+          "end_s": 3817,
+          "frame_evidence": [
+            {
+              "timestamp": "03:00",
+              "description": "Slide shows random numbers z flowing into Generator G and producing an initial generated image."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q02",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "Why does the generator architecture need an upsampling-style operation?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "It must map a smaller-dimensional latent input into a larger image output."
+        },
+        {
+          "option_id": "B",
+          "text": "It must map a larger real image into a smaller binary class label."
+        },
+        {
+          "option_id": "C",
+          "text": "It must map a prompt embedding into a safety-filter decision."
+        },
+        {
+          "option_id": "D",
+          "text": "It must map a detector box into a printed adversarial patch."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "The instructor explains that deconvolutions or similar layers let G expand a compact latent code into image space.",
+      "distractor_rationales": {
+        "B": "Describes a discriminator-like classifier direction, not the generator.",
+        "C": "Uses LLM safety concepts rather than GAN image generation.",
+        "D": "Uses patch-attack concepts rather than latent-to-image synthesis."
+      },
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty_prior": 0.64,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+        "evidence_span": "you to go from a smaller-dimensional input",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+          "start_s": 3370,
+          "end_s": 3817,
+          "frame_evidence": [
+            {
+              "timestamp": "03:00",
+              "description": "Slide depicts z on the left and a generated image above the discriminator pipeline."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q03",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "How does the discriminator provide a training signal for the generator distribution?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "It labels generated samples as fake and real database samples as real."
+        },
+        {
+          "option_id": "B",
+          "text": "It labels latent codes as images and generated samples as prompts."
+        },
+        {
+          "option_id": "C",
+          "text": "It labels clean images as noise and noisy images as cumulative noise."
+        },
+        {
+          "option_id": "D",
+          "text": "It labels patches as printable and detectors as non-printable."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "D is trained as a binary classifier; its feedback helps push G toward images that resemble the real data distribution.",
+      "distractor_rationales": {
+        "B": "Confuses latent codes and prompt text with discriminator labels.",
+        "C": "Describes diffusion training labels, not GAN discrimination.",
+        "D": "Describes adversarial patch constraints, not GAN feedback."
+      },
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty_prior": 0.72,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+        "evidence_span": "meaning we want you to say 0 if you think that this image is",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+          "start_s": 3370,
+          "end_s": 3817,
+          "frame_evidence": [
+            {
+              "timestamp": "03:00",
+              "description": "Slide labels discriminator output y=0 for G(z) and y=1 otherwise/from real examples."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q04",
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "item_type": "mcq_single",
+      "question_intent": "conceptual",
+      "stem": "What outcome signals successful GAN generator training in this segment?",
+      "options": [
+        {
+          "option_id": "A",
+          "text": "G produces samples that make D unable to reliably distinguish fake from real."
+        },
+        {
+          "option_id": "B",
+          "text": "G produces labels that make D ignore both fake and real images."
+        },
+        {
+          "option_id": "C",
+          "text": "G produces patches that make a detector ignore people in images."
+        },
+        {
+          "option_id": "D",
+          "text": "G produces noise labels that make a diffusion model recover x0."
+        }
+      ],
+      "correct_option_id": "A",
+      "explanation": "A trained generator succeeds when its samples are realistic enough to fool a strong discriminator.",
+      "distractor_rationales": {
+        "B": "D still performs a real-versus-fake task; it does not ignore both classes.",
+        "C": "This is a physical adversarial patch outcome, not GAN generation.",
+        "D": "This is diffusion denoising, not GAN training."
+      },
+      "primary_kp_id": "kp_gan_latent_generator_distribution",
+      "difficulty_prior": 0.82,
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture04-adversarial-robustness-and-generative-models",
+        "unit_id": "local::lecture04-adversarial-robustness-and-generative-models::seg6",
+        "evidence_span": "But the generator is so good that the discriminator",
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "local_path": "data/working/p3_video_segments/CS230/lecture04-adversarial-robustness-and-generative-models/local--lecture04-adversarial-robustness-and-generative-models-seg6.mp4",
+          "start_s": 3370,
+          "end_s": 3817,
+          "frame_evidence": [
+            {
+              "timestamp": "03:00",
+              "description": "Slide shows the G/D game diagram and the generated distribution approaching real images."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q01",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q02",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q03",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "planner_role": "main",
+      "map_role": "primary"
+    },
+    {
+      "item_id": "p3c__CS230__lecture04__seg6__q04",
+      "global_kp_id": "kp_gan_latent_generator_distribution",
+      "planner_role": "main",
+      "map_role": "primary"
+    }
+  ]
+}

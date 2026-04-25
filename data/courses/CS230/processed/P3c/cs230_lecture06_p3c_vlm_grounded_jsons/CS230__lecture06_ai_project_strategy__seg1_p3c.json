@@ -1,0 +1,129 @@
+{
+  "run_id": "cs230_l06_p3c_vlm_grounded_20260425",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture06_ai_project_strategy",
+  "unit_id": "local::lecture06_ai_project_strategy::seg1",
+  "question_bank": [
+    {
+      "item_id": "cs230_l06_seg01_q01",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question_intent": "procedural",
+      "question": "For the wake-word lamp project, what development habit is the instructor trying to emphasize before detailed architecture tuning?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Choose a full speech-to-text stack first, then collect data after the architecture is fixed.",
+        "Make next-step decisions quickly so the team can iterate through evidence and failures faster.",
+        "Delay implementation until every likely model family has been deeply read and compared.",
+        "Optimize the embedded hardware first, then decide what learning problem the model should solve."
+      ],
+      "answer_index": 1,
+      "explanation": "The lecture frames project strategy around rapid decision-making and efficient development loops; model details matter, but speed in choosing useful next actions drives large productivity differences.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_iteration_speed_as_a_core_ai_project_lever",
+      "difficulty_prior": 0.41,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "requires_monospace": false,
+      "code_question_style": null,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "to have an efficient development process.",
+        "transcript_timestamp": "00:01:04",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture06-ai-project-strategy.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 1037,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "01:02",
+              "description": "Instructor opens the segment at the front of the classroom while framing AI project work as repeated decisions about what to do next."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_l06_seg01_q02",
+      "item_type": "concept_mcq",
+      "knowledge_scope": "lecture_reinforcement",
+      "render_mode": "standard_mcq",
+      "type": "multiple_choice",
+      "question_intent": "procedural",
+      "question": "When starting the custom wake-word problem, what search strategy does the instructor favor before committing to one implementation path?",
+      "stem_format": "plain_text",
+      "choices_format": "plain_text",
+      "choices": [
+        "Start with one familiar repository and keep modifying it until it handles the product constraint.",
+        "Skip outside references so the first prototype reflects the team's own assumptions.",
+        "Skim many papers and repos first, then read deeply where the search is useful.",
+        "Ask experts for a finished architecture before doing any independent search."
+      ],
+      "answer_index": 2,
+      "explanation": "The recommended workflow is broad reconnaissance first: look across papers, posts, and repos to identify promising directions, then invest depth only in the most useful sources.",
+      "answer_explanation_format": "plain_text",
+      "primary_kp_id": "kp_cs230_broad_literature_search_before_deep_implementation",
+      "difficulty_prior": 0.46,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "requires_monospace": false,
+      "code_question_style": null,
+      "code_block": {
+        "language": "",
+        "snippet": "",
+        "highlight_lines": []
+      },
+      "source_ref": {
+        "source_type": "lecture_video_clip",
+        "source_ref_type": "vlm_grounded_segment",
+        "evidence_span": "doing a literature search",
+        "transcript_timestamp": "00:14:11",
+        "multimodal_signals_used": [
+          "transcript",
+          "video_frame"
+        ],
+        "video_clip_ref": {
+          "video_clip_url": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture06_ai_project_strategy/local--lecture06-ai-project-strategy-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture06-ai-project-strategy.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 1037,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "14:09",
+              "description": "Whiteboard includes the lamp sketch and a simple project diagram while the instructor discusses early research and implementation choices."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_l06_seg01_q01",
+      "global_kp_id": "kp_cs230_iteration_speed_as_a_core_ai_project_lever",
+      "role": "primary"
+    },
+    {
+      "item_id": "cs230_l06_seg01_q02",
+      "global_kp_id": "kp_cs230_broad_literature_search_before_deep_implementation",
+      "role": "primary"
+    }
+  ]
+}

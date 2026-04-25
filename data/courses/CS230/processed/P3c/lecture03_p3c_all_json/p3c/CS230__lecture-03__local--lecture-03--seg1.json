@@ -1,0 +1,341 @@
+{
+  "run_id": "local_lecture03_p3c",
+  "stage_id": "p3c",
+  "course_id": "CS230",
+  "lecture_id": "lecture-03",
+  "unit_id": "local::lecture-03::seg1",
+  "question_bank": [
+    {
+      "item_id": "cs230_lecture03_seg01_q01",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "stem": "Why does the lecture frame AI project development as more empirical than ordinary software development?",
+      "options": [
+        {
+          "label": "A",
+          "text": "The model code is mostly unknown, while the training data is specified exactly."
+        },
+        {
+          "label": "B",
+          "text": "The code can be controlled, while the data contains unknown variation."
+        },
+        {
+          "label": "C",
+          "text": "The deployment hardware is fixed, while the model architecture changes itself."
+        },
+        {
+          "label": "D",
+          "text": "The optimizer is hand-written, while the labels are generated deterministically."
+        }
+      ],
+      "correct_option": "B",
+      "correct_answer": "The code can be controlled, while the data contains unknown variation.",
+      "explanation": "The instructor contrasts controllable code with data whose contents and future variation are hard to know in advance.",
+      "primary_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.32,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "AI based is that in traditional software projects,\n\n00:01:21\nWrite whatever code you want.\n\n00:01:23\nYour code does what you tell it to.\n\n00:01:34\nthat you train your algorithm on.\n\n00:01:41\nthere are in your data.\n\n00:01:45\napplication-- that's a running example I'm going to use today--\n\n00:01:51\nit's really difficult",
+        "transcript_timestamp_start_s": 81,
+        "transcript_timestamp_end_s": 93,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "02:26",
+              "timestamp_s_within_clip": 146,
+              "description": "Instructor stands at the whiteboard while discussing unpredictable face-recognition data such as lighting and hair."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q02",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "stem": "In the face-recognition example, what kind of issue best represents the data uncertainty the instructor highlights?",
+      "options": [
+        {
+          "label": "A",
+          "text": "A compiler flag changes the neural-network source code before deployment."
+        },
+        {
+          "label": "B",
+          "text": "A database index slows down lookup for every registered user."
+        },
+        {
+          "label": "C",
+          "text": "Lighting, hair, glasses, or winter coverings alter what the camera sees."
+        },
+        {
+          "label": "D",
+          "text": "A cloud region changes the file extension of each training image."
+        }
+      ],
+      "correct_option": "C",
+      "correct_answer": "Lighting, hair, glasses, or winter coverings alter what the camera sees.",
+      "explanation": "The examples are visual conditions in the data, not ordinary software or storage failures.",
+      "primary_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.38,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "data is so rich that a lot of time,\n\n00:02:15\nsystem is going to do, not because you\n\n00:02:18\nYou can write whatever neural network\n\n00:02:21\nBut you don't what's in the data.\n\n00:02:26\nengineering, machine learning development\n\n00:02:32\nhave to build something, see how it works, and then\n\n00:02:38\nwhat is in the data",
+        "transcript_timestamp_start_s": 135,
+        "transcript_timestamp_end_s": 147,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "04:53",
+              "timestamp_s_within_clip": 293,
+              "description": "A small door/person sketch appears on the whiteboard as the instructor turns the discussion toward the face-recognition setting."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q03",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "stem": "What lifecycle view does the lecture add beyond simply training a model?",
+      "options": [
+        {
+          "label": "A",
+          "text": "Get data, design and train a model, deploy it, then monitor and maintain it."
+        },
+        {
+          "label": "B",
+          "text": "Write a classifier, publish a benchmark, freeze the model, then archive the data."
+        },
+        {
+          "label": "C",
+          "text": "Pick an optimizer, tune the loss, report accuracy, then discard deployment logs."
+        },
+        {
+          "label": "D",
+          "text": "Collect labels, memorize examples, avoid iteration, then replace monitoring with tests."
+        }
+      ],
+      "correct_option": "A",
+      "correct_answer": "Get data, design and train a model, deploy it, then monitor and maintain it.",
+      "explanation": "The lecture widens the project cycle to include data, deployment, monitoring, and maintenance.",
+      "primary_kp_id": "kp_cs230_full_machine_learning_project_lifecycle",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.39,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "typical process, we get data, design the model,\n\n00:08:07\nAnd then we will iterate through these steps\n\n00:08:14\nperforming well enough.\n\n00:08:36\nand maintain the model.\n\n00:08:41\nof these steps today because I want you to come away\n\n00:08:46\non a real machine learning application,\n\n00:08:53\nAnd so as I alluded, machi",
+        "transcript_timestamp_start_s": 487,
+        "transcript_timestamp_end_s": 499,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "07:19",
+              "timestamp_s_within_clip": 439,
+              "description": "The board shows the running face-recognition setup while the instructor transitions to the full project cycle."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q04",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "stem": "What development loop does the instructor associate with the empirical nature of machine learning?",
+      "options": [
+        {
+          "label": "A",
+          "text": "Specify requirements, implement once, verify syntax, then deploy unchanged."
+        },
+        {
+          "label": "B",
+          "text": "Download a model, hide errors, scale serving, then skip model analysis."
+        },
+        {
+          "label": "C",
+          "text": "Gather maximum data, freeze labels, retrain yearly, then compare costs."
+        },
+        {
+          "label": "D",
+          "text": "Design a model, train it, analyze results, then iterate around the loop."
+        }
+      ],
+      "correct_option": "D",
+      "correct_answer": "Design a model, train it, analyze results, then iterate around the loop.",
+      "explanation": "The loop is to design, train, analyze, and iterate rather than treating the first implementation as final.",
+      "primary_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.43,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "rapid development\n\n00:09:16\noops, sorry-- design the model, train it, analyze the results,\n\n00:09:33\nor something and iterate around this loop\n\n00:09:40\nAnd just one more detail.",
+        "transcript_timestamp_start_s": 556,
+        "transcript_timestamp_end_s": 568,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "09:44",
+              "timestamp_s_within_clip": 584,
+              "description": "The whiteboard contains a loop connecting design, training, analysis, and data updates."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q05",
+      "item_type": "concept_mcq",
+      "question_intent": "conceptual",
+      "stem": "Why does the instructor treat LLM application development as similar to other empirical AI work?",
+      "options": [
+        {
+          "label": "A",
+          "text": "LLM prompts specify every training example the model will use at runtime."
+        },
+        {
+          "label": "B",
+          "text": "LLM behavior depends on massive training data no developer can fully inspect."
+        },
+        {
+          "label": "C",
+          "text": "LLM deployment removes the need to test prompts before serving users."
+        },
+        {
+          "label": "D",
+          "text": "LLM systems expose all internal data properties through deterministic logs."
+        }
+      ],
+      "correct_option": "B",
+      "correct_answer": "LLM behavior depends on massive training data no developer can fully inspect.",
+      "explanation": "The same uncertainty applies because LLMs are trained on data far too large for developers to fully inspect.",
+      "primary_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "related_kp_ids": [],
+      "difficulty_prior": 0.47,
+      "provenance": "vlm_grounded",
+      "review_status": "not_required",
+      "source_ref": {
+        "course_id": "CS230",
+        "lecture_id": "lecture-03",
+        "unit_id": "local::lecture-03::seg1",
+        "evidence_span": "know in advance what LLMs do is because it\n\n00:03:11\nthan any human could possibly look at.\n\n00:03:16\nwhat is in all that data that the arm was trained on.\n\n00:03:21\ncan't really look at all the massive tens\n\n00:03:26\nIt's hard to know exactly how large language model will\n\n00:03:34\nor building large language models ba",
+        "transcript_timestamp_start_s": 191,
+        "transcript_timestamp_end_s": 203,
+        "multimodal_signals_used": [
+          "transcript",
+          "video"
+        ],
+        "video_clip_ref": {
+          "clip_url": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "local_path": "data/working/p3_video_segments/CS230/lecture-03/local--lecture-03-seg1.mp4",
+          "source_video_path": "data/courses/CS230/videos/cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+          "clip_start_s": 5,
+          "clip_end_s": 583,
+          "frame_evidence": [
+            {
+              "timestamp_mmss": "09:44",
+              "timestamp_s_within_clip": 584,
+              "description": "The instructor gestures beside the empirical development loop drawn on the board."
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "item_kp_map": [
+    {
+      "item_id": "cs230_lecture03_seg01_q01",
+      "unit_id": "local::lecture-03::seg1",
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q02",
+      "unit_id": "local::lecture-03::seg1",
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q03",
+      "unit_id": "local::lecture-03::seg1",
+      "global_kp_id": "kp_cs230_full_machine_learning_project_lifecycle",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q04",
+      "unit_id": "local::lecture-03::seg1",
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    },
+    {
+      "item_id": "cs230_lecture03_seg01_q05",
+      "unit_id": "local::lecture-03::seg1",
+      "global_kp_id": "kp_cs230_ai_projects_as_empirical_systems",
+      "map_role": "primary",
+      "coverage": "assesses",
+      "source": "p3c_vlm_grounded"
+    }
+  ]
+}
