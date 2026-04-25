@@ -742,6 +742,31 @@ def _build_edge_tables(
             )
             pruned_pairs.add(pair)
 
+    for pair, row in p5_edge_index.items():
+        if pair in kept_pairs or pair in pruned_pairs:
+            continue
+        keep_rows.append(
+            {
+                "source_kp_id": row["source_kp_id"],
+                "target_kp_id": row["target_kp_id"],
+                "edge_scope": row.get("edge_scope"),
+                "provenance": row.get("provenance"),
+                "confidence": row.get("keep_confidence"),
+                "review_status": row.get("review_status"),
+                "rationale": row.get("keep_rationale"),
+                "temporal_signal": None,
+                "source_first_seen": None,
+                "target_first_seen": None,
+                "p5_keep_confidence": row.get("keep_confidence"),
+                "p5_expected_directionality": row.get("expected_directionality"),
+                "p5_trace": None,
+                "edge_strength": None,
+                "bidirectional_score": None,
+                "source_file": source_file,
+            }
+        )
+        kept_pairs.add(pair)
+
     for pair, row in p5_pruned_index.items():
         if pair in kept_pairs or pair in pruned_pairs:
             continue
