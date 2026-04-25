@@ -1,140 +1,334 @@
 {
-  "course_id": "CS230",
-  "slug": "cs230",
-  "title": "CS230: Deep Learning",
-  "source": "Stanford CS230 Autumn 2025",
-  "renumbering_policy": "Canonical lecture_id is contiguous for product/path usage. source_lecture_number preserves the original Stanford lecture number. Original source lecture 7 is missing video/transcript in the local dataset, so source lectures 8, 9, and 10 are mapped to canonical lecture-07, lecture-08, and lecture-09.",
-  "missing_source_lectures": [7],
+  "course": "CS230: Deep Learning",
+  "source": "Stanford CS230 Autumn 2025 local curated syllabus",
+  "note": "Schema aligned with CS224n/CS231n syllabus format. Canonical lecture order is contiguous for product/path usage. Original Stanford source lecture 7 is missing video/transcript locally, so source lectures 8, 9, and 10 are mapped to canonical lecture-07, lecture-08, and lecture-09. source_lecture_number preserves the original Stanford numbering for audit.",
   "lectures": [
     {
       "lecture_id": "lecture-01",
-      "lecture_order": 1,
+      "lecture_number": 1,
       "source_lecture_number": 1,
+      "lecture_title": "Lecture 1: Introduction to Deep Learning",
       "title": "Lecture 1: Introduction to Deep Learning",
+      "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 1: Introduction to Deep Learning",
+      "topic": "Introduction to Deep Learning",
+      "speaker": null,
+      "year": 2025,
+      "type": "lecture",
+      "course_phase": "Deep Learning Foundations",
+      "core_topics": [
+        "Deep learning course overview",
+        "Neural networks",
+        "Learning setup and motivation"
+      ],
+      "scope_keywords": [
+        "deep learning",
+        "neural networks",
+        "course overview",
+        "foundations"
+      ],
       "youtube_url": "https://www.youtube.com/watch?v=_NLHFoVNlbg",
-      "video_path": "data/courses/CS230/videos/Stanford CS230\uff1a Deep Learning I Autumn 2025/Stanford CS230 \uff5c Autumn 2025 \uff5c Lecture 1\uff1a Introduction to Deep Learning.mp4",
-      "transcript_path": "data/courses/CS230/transcripts/Stanford_CS230__Autumn_2025__Lecture_1_Introduction_to_Deep_Learning_transcript.txt",
-      "slide_paths": [
-        "data/courses/CS230/slides/lecture_1.pdf",
-        "data/courses/CS230/slides/C1M1.pdf",
-        "data/courses/CS230/slides/C1M2.pdf",
-        "data/courses/CS230/slides/C1M3.pdf",
-        "data/courses/CS230/slides/C1M4.pdf"
-      ]
+      "custom_order": 1,
+      "assets": {
+        "slides": [
+          "lecture_1.pdf",
+          "C1M1.pdf",
+          "C1M2.pdf",
+          "C1M3.pdf",
+          "C1M4.pdf"
+        ],
+        "video": "cs230-2025-lecture01-introduction-to-deep-learning.mp4",
+        "transcript": "cs230-2025-lecture01-introduction-to-deep-learning_transcript.txt"
+      }
     },
     {
       "lecture_id": "lecture-02",
-      "lecture_order": 2,
+      "lecture_number": 2,
       "source_lecture_number": 2,
+      "lecture_title": "Lecture 2: Supervised, Self-Supervised, and Weakly Supervised Learning",
       "title": "Lecture 2: Supervised, Self-Supervised, and Weakly Supervised Learning",
+      "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 2: Supervised, Self-Supervised, & Weakly Supervised Learning",
+      "topic": "Supervised, Self-Supervised, and Weakly Supervised Learning",
+      "speaker": null,
+      "year": 2025,
+      "type": "lecture",
+      "course_phase": "Learning Paradigms",
+      "core_topics": [
+        "Supervised learning",
+        "Self-supervised learning",
+        "Weakly supervised learning"
+      ],
+      "scope_keywords": [
+        "supervised learning",
+        "self-supervised learning",
+        "weak supervision",
+        "training data"
+      ],
       "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
-      "video_path": "data/courses/CS230/videos/Stanford CS230\uff1a Deep Learning I Autumn 2025/Stanford CS230 \uff5c Autumn 2025 \uff5c Lecture 2\uff1a Supervised, Self-Supervised, & Weakly Supervised Learning.mp4",
-      "transcript_path": "data/courses/CS230/transcripts/Stanford_CS230__Autumn_2025__Lecture_2_Supervised,_Self-Supervised,_&_Weakly_Supervised_Learning_transcript.txt",
-      "slide_paths": [
-        "data/courses/CS230/slides/lecture_2.pdf",
-        "data/courses/CS230/slides/C2M1.pdf",
-        "data/courses/CS230/slides/C2M2.pdf",
-        "data/courses/CS230/slides/C2M3.pdf"
-      ]
+      "custom_order": 2,
+      "assets": {
+        "slides": [
+          "lecture_2.pdf",
+          "C2M1.pdf",
+          "C2M2.pdf",
+          "C2M3.pdf"
+        ],
+        "video": "cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
+        "transcript": "cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning_transcript.txt"
+      }
     },
     {
       "lecture_id": "lecture-03",
-      "lecture_order": 3,
+      "lecture_number": 3,
       "source_lecture_number": 3,
+      "lecture_title": "Lecture 3: Full Cycle of a Deep Learning Project",
       "title": "Lecture 3: Full Cycle of a Deep Learning Project",
+      "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 3: Full Cycle of a DL project",
+      "topic": "Full Cycle of a Deep Learning Project",
+      "speaker": null,
+      "year": 2025,
+      "type": "lecture",
+      "course_phase": "Project Workflow",
+      "core_topics": [
+        "Deep learning project lifecycle",
+        "Data iteration",
+        "Error analysis",
+        "Model development workflow"
+      ],
+      "scope_keywords": [
+        "deep learning project",
+        "project lifecycle",
+        "error analysis",
+        "workflow"
+      ],
       "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
-      "video_path": "data/courses/CS230/videos/Stanford CS230\uff1a Deep Learning I Autumn 2025/Stanford CS230 \uff5c Autumn 2025 \uff5c Lecture 3\uff1a Full Cycle of a DL project.mp4",
-      "transcript_path": "data/courses/CS230/transcripts/Stanford_CS230__Autumn_2025__Lecture_3_Full_Cycle_of_a_DL_project_transcript.txt",
-      "slide_paths": [
-        "data/courses/CS230/slides/C3M1.pdf",
-        "data/courses/CS230/slides/C3M2.pdf"
-      ]
+      "custom_order": 3,
+      "assets": {
+        "slides": [
+          "C3M1.pdf",
+          "C3M2.pdf"
+        ],
+        "video": "cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
+        "transcript": "cs230-2025-lecture03-full-cycle-of-a-deep-learning-project_transcript.txt"
+      }
     },
     {
       "lecture_id": "lecture-04",
-      "lecture_order": 4,
+      "lecture_number": 4,
       "source_lecture_number": 4,
+      "lecture_title": "Lecture 4: Adversarial Robustness and Generative Models",
       "title": "Lecture 4: Adversarial Robustness and Generative Models",
+      "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 4: Adversarial Robustness and Generative Models",
+      "topic": "Adversarial Robustness and Generative Models",
+      "speaker": null,
+      "year": 2025,
+      "type": "lecture",
+      "course_phase": "Robustness and Generative Modeling",
+      "core_topics": [
+        "Adversarial robustness",
+        "Generative models",
+        "Model vulnerability",
+        "Robust learning"
+      ],
+      "scope_keywords": [
+        "adversarial robustness",
+        "generative models",
+        "model robustness",
+        "deep learning security"
+      ],
       "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
-      "video_path": "data/courses/CS230/videos/Stanford CS230\uff1a Deep Learning I Autumn 2025/Stanford CS230 \uff5c Autumn 2025 \uff5c Lecture 4\uff1a Adversarial Robustness and Generative Models.mp4",
-      "transcript_path": "data/courses/CS230/transcripts/Stanford_CS230__Autumn_2025__Lecture_4_Adversarial_Robustness_and_Generative_Models_transcript.txt",
-      "slide_paths": [
-        "data/courses/CS230/slides/lecture_4.pdf",
-        "data/courses/CS230/slides/C4M1.pdf",
-        "data/courses/CS230/slides/C4M2.pdf",
-        "data/courses/CS230/slides/C4M3.pdf",
-        "data/courses/CS230/slides/C4M4.pdf"
-      ]
+      "custom_order": 4,
+      "assets": {
+        "slides": [
+          "lecture_4.pdf",
+          "C4M1.pdf",
+          "C4M2.pdf",
+          "C4M3.pdf",
+          "C4M4.pdf"
+        ],
+        "video": "cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
+        "transcript": "cs230-2025-lecture04-adversarial-robustness-and-generative-models_transcript.txt"
+      }
     },
     {
       "lecture_id": "lecture-05",
-      "lecture_order": 5,
+      "lecture_number": 5,
       "source_lecture_number": 5,
+      "lecture_title": "Lecture 5: Deep Reinforcement Learning",
       "title": "Lecture 5: Deep Reinforcement Learning",
+      "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 5: Deep Reinforcement Learning",
+      "topic": "Deep Reinforcement Learning",
+      "speaker": null,
+      "year": 2025,
+      "type": "lecture",
+      "course_phase": "Sequential Decision Making",
+      "core_topics": [
+        "Reinforcement learning",
+        "Deep reinforcement learning",
+        "Policy learning",
+        "Sequential decision making"
+      ],
+      "scope_keywords": [
+        "reinforcement learning",
+        "deep reinforcement learning",
+        "policy",
+        "sequential decisions"
+      ],
       "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
-      "video_path": "data/courses/CS230/videos/Stanford CS230\uff1a Deep Learning I Autumn 2025/Stanford CS230 \uff5c Autumn 2025 \uff5c Lecture 5\uff1a Deep Reinforcement Learning.mp4",
-      "transcript_path": "data/courses/CS230/transcripts/Stanford_CS230__Autumn_2025__Lecture_5_Deep_Reinforcement_Learning_transcript.txt",
-      "slide_paths": [
-        "data/courses/CS230/slides/lecture_5.pdf",
-        "data/courses/CS230/slides/lecture_5-case-study.pdf",
-        "data/courses/CS230/slides/lecture5_guest.pdf",
-        "data/courses/CS230/slides/C5M1.pdf",
-        "data/courses/CS230/slides/C5M2.pdf",
-        "data/courses/CS230/slides/C5M3.pdf",
-        "data/courses/CS230/slides/C5_W4.pdf"
-      ]
+      "custom_order": 5,
+      "assets": {
+        "slides": [
+          "lecture_5.pdf",
+          "lecture_5-case-study.pdf",
+          "lecture5_guest.pdf",
+          "C5M1.pdf",
+          "C5M2.pdf",
+          "C5M3.pdf",
+          "C5_W4.pdf"
+        ],
+        "video": "cs230-2025-lecture05-deep-reinforcement-learning.mp4",
+        "transcript": "cs230-2025-lecture05-deep-reinforcement-learning_transcript.txt"
+      }
     },
     {
       "lecture_id": "lecture-06",
-      "lecture_order": 6,
+      "lecture_number": 6,
       "source_lecture_number": 6,
+      "lecture_title": "Lecture 6: AI Project Strategy",
       "title": "Lecture 6: AI Project Strategy",
+      "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 6: AI Project Strategy",
+      "topic": "AI Project Strategy",
+      "speaker": null,
+      "year": 2025,
+      "type": "lecture",
+      "course_phase": "Project Strategy",
+      "core_topics": [
+        "AI project strategy",
+        "Model iteration",
+        "Error analysis",
+        "Deployment-oriented planning"
+      ],
+      "scope_keywords": [
+        "ai project strategy",
+        "model iteration",
+        "error analysis",
+        "deployment"
+      ],
       "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
-      "video_path": "data/courses/CS230/videos/Stanford CS230\uff1a Deep Learning I Autumn 2025/Stanford CS230 \uff5c Autumn 2025 \uff5c Lecture 6\uff1a AI Project Strategy.mp4",
-      "transcript_path": "data/courses/CS230/transcripts/Stanford_CS230__Autumn_2025__Lecture_6_AI_Project_Strategy_transcript.txt",
-      "slide_paths": []
+      "custom_order": 6,
+      "assets": {
+        "slides": null,
+        "video": "cs230-2025-lecture06-ai-project-strategy.mp4",
+        "transcript": "cs230-2025-lecture06-ai-project-strategy_transcript.txt"
+      }
     },
     {
       "lecture_id": "lecture-07",
-      "lecture_order": 7,
+      "lecture_number": 7,
       "source_lecture_number": 8,
+      "lecture_title": "Lecture 7: Agents, Prompts, and RAG",
       "title": "Lecture 7: Agents, Prompts, and RAG",
+      "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 8: Agents, Prompts, and RAG",
+      "topic": "Agents, Prompts, and RAG",
+      "speaker": null,
+      "year": 2025,
+      "type": "lecture",
+      "course_phase": "Modern AI Systems",
+      "core_topics": [
+        "Prompting",
+        "Retrieval-augmented generation",
+        "Agentic systems",
+        "LLM application patterns"
+      ],
+      "scope_keywords": [
+        "agents",
+        "prompting",
+        "rag",
+        "retrieval augmented generation",
+        "llm applications"
+      ],
       "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
-      "video_path": "data/courses/CS230/videos/Stanford CS230\uff1a Deep Learning I Autumn 2025/Stanford CS230 \uff5c Autumn 2025 \uff5c Lecture 8\uff1a Agents, Prompts, and RAG.mp4",
-      "transcript_path": "data/courses/CS230/transcripts/Stanford_CS230__Autumn_2025__Lecture_8_Agents,_Prompts,_and_RAG_transcript.txt",
-      "slide_paths": [
-        "data/courses/CS230/slides/lecture_8.pdf",
-        "data/courses/CS230/slides/lecture_8_guest.pdf"
-      ]
+      "custom_order": 7,
+      "assets": {
+        "slides": [
+          "lecture_8.pdf",
+          "lecture_8_guest.pdf"
+        ],
+        "video": "cs230-2025-lecture07-agents-prompts-and-rag.mp4",
+        "transcript": "cs230-2025-lecture07-agents-prompts-and-rag_transcript.txt"
+      }
     },
     {
       "lecture_id": "lecture-08",
-      "lecture_order": 8,
+      "lecture_number": 8,
       "source_lecture_number": 9,
+      "lecture_title": "Lecture 8: Career Advice in AI",
       "title": "Lecture 8: Career Advice in AI",
+      "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 9: Career Advice in AI",
+      "topic": "Career Advice in AI",
+      "speaker": null,
+      "year": 2025,
+      "type": "supplemental",
+      "course_phase": "Career and Practice",
+      "core_topics": [
+        "AI career advice",
+        "Learning strategy",
+        "Industry and research paths"
+      ],
+      "scope_keywords": [
+        "career advice",
+        "ai career",
+        "learning strategy",
+        "industry"
+      ],
       "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
-      "video_path": "data/courses/CS230/videos/Stanford CS230\uff1a Deep Learning I Autumn 2025/Stanford CS230 \uff5c Autumn 2025 \uff5c Lecture 9\uff1a Career Advice in AI.mp4",
-      "transcript_path": "data/courses/CS230/transcripts/Stanford_CS230__Autumn_2025__Lecture_9_Career_Advice_in_AI_transcript.txt",
-      "slide_paths": []
+      "custom_order": 8,
+      "assets": {
+        "slides": null,
+        "video": "cs230-2025-lecture08-career-advice-in-ai.mp4",
+        "transcript": "cs230-2025-lecture08-career-advice-in-ai_transcript.txt"
+      }
     },
     {
       "lecture_id": "lecture-09",
-      "lecture_order": 9,
+      "lecture_number": 9,
       "source_lecture_number": 10,
+      "lecture_title": "Lecture 9: What Is Going On Inside My Model?",
       "title": "Lecture 9: What Is Going On Inside My Model?",
+      "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 10: What Is Going On Inside My Model?",
+      "topic": "Model Interpretability",
+      "speaker": null,
+      "year": 2025,
+      "type": "lecture",
+      "course_phase": "Interpretability",
+      "core_topics": [
+        "Model interpretability",
+        "Model inspection",
+        "Understanding learned representations"
+      ],
+      "scope_keywords": [
+        "interpretability",
+        "model inspection",
+        "representations",
+        "explainability"
+      ],
       "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
-      "video_path": "data/courses/CS230/videos/Stanford CS230\uff1a Deep Learning I Autumn 2025/Stanford CS230 \uff5c Autumn 2025 \uff5c Lecture 10\uff1a What\u2019s Going On Inside My Model\uff1f.mp4",
-      "transcript_path": "data/courses/CS230/transcripts/Stanford_CS230__Autumn_2025__Lecture_10_What\u2019s_Going_On_Inside_My_Model_transcript.txt",
-      "slide_paths": [
-        "data/courses/CS230/slides/lecture_10.pdf"
-      ]
+      "custom_order": 9,
+      "assets": {
+        "slides": "lecture_10.pdf",
+        "video": "cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
+        "transcript": "cs230-2025-lecture09-what-is-going-on-inside-my-model_transcript.txt"
+      }
     }
   ],
-  "skipped_local_assets": [
+  "reference_slides_no_video": [
     {
       "source_lecture_number": 7,
       "reason": "Only slide deck is present locally; no matching video/transcript found.",
-      "slide_paths": ["data/courses/CS230/slides/lecture_7.pdf"]
+      "assets": {
+        "slides": "lecture_7.pdf",
+        "video": null,
+        "transcript": null
+      }
     }
   ]
 }
