@@ -163,6 +163,9 @@ async def _generate_canonical_learning_path(
                 "order_index": order_index,
                 "kp_ids": unit_kps,
                 "mastery_lcb": mastery_lcb,
+                "phase_tag": phase_tag,
+                "is_locked": is_locked,
+                "rationale_log": rationale_log,
             }
         )
 
@@ -315,6 +318,9 @@ async def _get_canonical_learning_path_rows(
             status=status_by_unit.get(unit_id, PathStatus.pending),
             learning_unit_id=unit_id,
             canonical_unit_id=item.get("canonical_unit_id"),
+            phase_tag=item.get("phase_tag"),
+            is_locked=bool(item.get("is_locked", False)),
+            rationale_log=item.get("rationale_log"),
         )
         section_title = None
         if unit is not None:

@@ -98,6 +98,9 @@ async def api_get_learning_path(
             week_number=lp.week_number,
             status=lp.status,
             canonical_unit_id=lp.canonical_unit_id,
+            phase_tag=getattr(lp, "phase_tag", None),
+            is_locked=getattr(lp, "is_locked", False),
+            rationale_log=getattr(lp, "rationale_log", None),
         )
         for lp, learning_unit_title, section_title in rows
     ]
@@ -147,6 +150,9 @@ async def api_get_timeline(
                 week_number=lp.week_number,
                 status=lp.status,
                 canonical_unit_id=lp.canonical_unit_id,
+                phase_tag=getattr(lp, "phase_tag", None),
+                is_locked=getattr(lp, "is_locked", False),
+                rationale_log=getattr(lp, "rationale_log", None),
             )
             for lp, learning_unit_title, section_title in rows
         ]
