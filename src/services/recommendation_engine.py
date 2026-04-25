@@ -34,6 +34,7 @@ from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.learner_mastery_kp_repo import LearnerMasteryKPRepository
 from src.repositories.learning_progress_repo import LearningProgressRepository
+from src.repositories.placement_assessment_repo import PlacementAssessmentRepository
 from src.repositories.planner_audit_repo import PlannerAuditRepository
 from src.repositories.waived_unit_repo import WaivedUnitRepository
 from src.schemas.learning_path import (
@@ -88,6 +89,13 @@ async def _generate_canonical_learning_path(
     mastery_repo = LearnerMasteryKPRepository(db)
     mastery_by_kp = await mastery_repo.bulk_get_for_user(user.id, kp_ids)
 
+    # Load placement results for Phase A/B split
+    placement_results = await PlacementAssessmentRepository(db).get_by_user_id(user.id)
+    placement_by_unit: dict[uuid.UUID, str] = {
+        row.topic_unit_id: row.decision for row in placement_results
+    }
+    has_placement = len(placement_by_unit) > 0
+
     generated_at = datetime.now(UTC)
     items: list[PathItemResponse] = []
     recommended_path_json = []
@@ -104,6 +112,30 @@ async def _generate_canonical_learning_path(
         action = PathAction(action_value)
         estimated_hours = 0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
 
+        # Determine Phase A/B tag and rationale
+        if not has_placement:
+            phase_tag = None
+            is_locked = False
+            rationale_log = None
+        else:
+            decision = placement_by_unit.get(unit.id)
+            if decision is None:
+                # Not assessed — include in Phase A as prereq
+                phase_tag = "phase_a"
+                is_locked = False
+                rationale_log = "No placement data — included as prerequisite"
+            elif decision == "skip":
+                # Already mastered — Phase B, locked
+                phase_tag = "phase_b"
+                is_locked = True
+                rationale_log = None
+            else:
+                # "review" or "relearn" — Phase A
+                phase_tag = "phase_a"
+                is_locked = False
+                label = "review" if decision == "review" else "re-learning"
+                rationale_log = f"Placement: {decision} — included for {label}"
+
         item = PathItemResponse(
             id=unit.id,
             learning_unit_id=unit.id,
@@ -117,6 +149,9 @@ async def _generate_canonical_learning_path(
             week_number=None,
             status=status_by_unit.get(unit.id, PathStatus.pending),
             canonical_unit_id=unit.canonical_unit_id,
+            phase_tag=phase_tag,
+            is_locked=is_locked,
+            rationale_log=rationale_log,
         )
         items.append(item)
         recommended_path_json.append(
@@ -130,6 +165,15 @@ async def _generate_canonical_learning_path(
                 "mastery_lcb": mastery_lcb,
             }
         )
+
+    # Sort: Phase A first (preserve prereq order within), then Phase B
+    if has_placement:
+        phase_a = [i for i in items if i.phase_tag == "phase_a"]
+        phase_b = [i for i in items if i.phase_tag == "phase_b"]
+        items = phase_a + phase_b
+        # Re-assign order_index to reflect new ordering
+        for new_order, item in enumerate(items):
+            item.order_index = new_order
 
     total_hours = sum(item.estimated_hours or 0.0 for item in items)
     plan = await audit_repo.create_plan(
