@@ -2,7 +2,7 @@
 models/canonical.py
 -------------------
 Canonical content-layer tables materialized from the validated JSONL artifact
-bundle under data/final_artifacts/cs224n_cs231n_v1/canonical/.
+bundle under data/final_artifacts/cs224n_cs231n_cs230_v1/canonical/.
 
 These tables use deterministic natural keys from the canonical artifacts
 (`kp_id`, `unit_id`, `item_id`, and edge pairs) so import/backfill can be
