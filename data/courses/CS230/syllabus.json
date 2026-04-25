@@ -30,11 +30,7 @@
       "custom_order": 1,
       "assets": {
         "slides": [
-          "lecture_1.pdf",
-          "C1M1.pdf",
-          "C1M2.pdf",
-          "C1M3.pdf",
-          "C1M4.pdf"
+          "lecture_1.pdf"
         ],
         "video": "cs230-2025-lecture01-introduction-to-deep-learning.mp4",
         "transcript": "cs230-2025-lecture01-introduction-to-deep-learning_transcript.txt"
@@ -68,9 +64,8 @@
       "assets": {
         "slides": [
           "lecture_2.pdf",
-          "C2M1.pdf",
-          "C2M2.pdf",
-          "C2M3.pdf"
+          "C1M1.pdf",
+          "C1M2.pdf"
         ],
         "video": "cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
         "transcript": "cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning_transcript.txt"
@@ -104,8 +99,8 @@
       "custom_order": 3,
       "assets": {
         "slides": [
-          "C3M1.pdf",
-          "C3M2.pdf"
+          "C1M3.pdf",
+          "C1M4.pdf"
         ],
         "video": "cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
         "transcript": "cs230-2025-lecture03-full-cycle-of-a-deep-learning-project_transcript.txt"
@@ -140,10 +135,8 @@
       "assets": {
         "slides": [
           "lecture_4.pdf",
-          "C4M1.pdf",
-          "C4M2.pdf",
-          "C4M3.pdf",
-          "C4M4.pdf"
+          "C2M1.pdf",
+          "C2M2.pdf"
         ],
         "video": "cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
         "transcript": "cs230-2025-lecture04-adversarial-robustness-and-generative-models_transcript.txt"
@@ -180,10 +173,9 @@
           "lecture_5.pdf",
           "lecture_5-case-study.pdf",
           "lecture5_guest.pdf",
-          "C5M1.pdf",
-          "C5M2.pdf",
-          "C5M3.pdf",
-          "C5_W4.pdf"
+          "C2M3.pdf",
+          "C3M1.pdf",
+          "C3M2.pdf"
         ],
         "video": "cs230-2025-lecture05-deep-reinforcement-learning.mp4",
         "transcript": "cs230-2025-lecture05-deep-reinforcement-learning_transcript.txt"
@@ -216,7 +208,12 @@
       "youtube_url": "https://www.youtube.com/watch?v=s6JVGzABKho",
       "custom_order": 6,
       "assets": {
-        "slides": null,
+        "slides": [
+          "C4M1.pdf",
+          "C4M2.pdf",
+          "C4M3.pdf",
+          "C4M4.pdf"
+        ],
         "video": "cs230-2025-lecture06-ai-project-strategy.mp4",
         "transcript": "cs230-2025-lecture06-ai-project-strategy_transcript.txt"
       }
@@ -251,7 +248,8 @@
       "assets": {
         "slides": [
           "lecture_8.pdf",
-          "lecture_8_guest.pdf"
+          "lecture_8_guest.pdf",
+          "C5M1.pdf"
         ],
         "video": "cs230-2025-lecture07-agents-prompts-and-rag.mp4",
         "transcript": "cs230-2025-lecture07-agents-prompts-and-rag_transcript.txt"
