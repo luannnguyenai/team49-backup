@@ -1,0 +1,33 @@
+{
+  "summary": {
+    "hard_failure_count": 0,
+    "hard_failure_reason_distribution": {},
+    "deferred_check_count": 4
+  },
+  "hard_checks": {
+    "blocking": true,
+    "failures": []
+  },
+  "deferred_checks": [
+    {
+      "check": "concept_alignment_cosine",
+      "status": "deferred",
+      "reason": "embedding batch is outside artifact-first scope"
+    },
+    {
+      "check": "distractor_cosine_bounds",
+      "status": "deferred",
+      "reason": "embedding batch is outside artifact-first scope"
+    },
+    {
+      "check": "edge_strength",
+      "status": "deferred",
+      "reason": "ModernBERT scoring is outside artifact-first scope"
+    },
+    {
+      "check": "bidirectional_score",
+      "status": "deferred",
+      "reason": "ModernBERT scoring is outside artifact-first scope"
+    }
+  ]
+}

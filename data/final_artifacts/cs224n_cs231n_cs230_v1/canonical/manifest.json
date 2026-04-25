@@ -1,0 +1,48 @@
+{
+  "bundle_id": "canonical",
+  "generated_at": "2026-04-25T08:34:56.389828+00:00",
+  "source_files": {
+    "courses_dir": "data/courses",
+    "p2": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+    "p5": "data/final_artifacts/cs224n_cs231n_cs230_v1/p5_output_transitive_pruned.json",
+    "gpt54": "data/final_artifacts/cs224n_cs231n_cs230_v1/gpt54_edge_labels.json"
+  },
+  "pipeline_versions": {
+    "p2_run_id": "p2_cs224n_cs231n_cs230_manual_append_20260425",
+    "p2_mode": "manual_append_incremental",
+    "p5_stage_id": "p5",
+    "gpt54_stage_id": "gpt54_manual_edge_adjudication",
+    "exporter": "artifact_first_v1"
+  },
+  "counts": {
+    "courses": 3,
+    "concepts_kp": 607,
+    "units": 376,
+    "unit_kp_map": 960,
+    "question_bank": 1276,
+    "item_calibration": 1276,
+    "item_phase_map": 8875,
+    "item_kp_map": 1474,
+    "prerequisite_edges": 118,
+    "pruned_edges": 44,
+    "rejected_items": 0
+  },
+  "checksums": {
+    "concepts_kp.jsonl": "cf5e05b1112d3333180bf507c87ab8e2e229caaddf833ff40c76e5a086234e68",
+    "courses.jsonl": "af1094dfbbd83e44c0c2efb8b39cba86da64ea6b59c9205f2b025403bae3b2a3",
+    "item_calibration.jsonl": "f16582856f0cec402a39835cfc79a205ad3a8a7cc2522aac697c0d8c9a6e3571",
+    "item_kp_map.jsonl": "3b0be3d08bb12a5bd36adc7e2e61710f132127de0265982d9806bf968d1bdd91",
+    "item_phase_map.jsonl": "e1f06d3a920623ba2bd60a1e39856580f6e1248ae924908dc3c66e1eafe6aa84",
+    "prerequisite_edges.jsonl": "b9ae57a42d75daca6a2fa45b7985d5f41fd12d54ef50bc36927a07d4ca982080",
+    "pruned_edges.jsonl": "e80145e3498a7e59ed85f164fae48cd623e9f9a0a983bcbf111929ed7a043632",
+    "question_bank.jsonl": "11d9a0f216978c7198f46f54adbce3ec0a4b11a6ab52daccdccac603570d79af",
+    "rejected_items.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unit_kp_map.jsonl": "39654777c4eecde0d3c6df859fbf46fab5e3fe249924a2deba1d6911d5caa107",
+    "units.jsonl": "38c11a90996154ad40d2526c25479f309441ad1fab607cc7f89716a2636b22e5",
+    "validation_report.json": "4b229559e927548ce5f650b2a1c7a8b3424211762f61bb3e3b898b139f5c5fe3"
+  },
+  "notes": [
+    "Canonical JSONL is treated as generated artifact and is not committed by default.",
+    "Embedding-dependent and ML-dependent checks are deferred."
+  ]
+}
