@@ -1,0 +1,18 @@
+# Heavy artifacts — never commit
+data/sft/*.jsonl
+data/sft/*.html
+data/raw/
+checkpoints/
+models/
+.venv-train/
+.venv-serve/
+**/__pycache__/
+*.safetensors
+*.bin
+*.gguf
+scripts/smoke/*.jpg
+scripts/env-frozen.txt
+
+# Keep
+!data/sft/manifest.json
+!**/.gitkeep
