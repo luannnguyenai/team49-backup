@@ -590,6 +590,14 @@ Sections:
 - Trust/proof area: "built from real lecture content", "question bank grounded in transcript".
 - Final CTA.
 
+Visual treatment:
+
+- Use an editorial SaaS landing layout, not the current catalog-first layout.
+- Hero should pair a concise value proposition with a product preview card showing `Placement -> Path -> Mini quiz -> Tutor`.
+- Keep one primary CTA above the fold. Secondary login CTA should be visually quieter.
+- Use course/data preview surfaces to show "grounded in lecture content" rather than generic marketing icons.
+- Avoid dashboard-style stat cards on the public landing page; the first impression should feel like a learning product, not an admin panel.
+
 Primary actions:
 
 - `Xem các khóa học`
@@ -612,6 +620,13 @@ Card fields:
 - Estimated hours.
 - Difficulty/target learner.
 - CTA: `Overview`.
+
+Visual treatment:
+
+- Course cards may reuse the current gradient identity, but should add stronger metadata hierarchy: status, lecture count, estimated hours, readiness.
+- CTA copy should be localized and explicit: `Xem tổng quan`, not vague English labels.
+- Ready/unavailable states must include text + badge, not color alone.
+- Cards should keep a stable height to avoid layout shift while data loads.
 
 Guest behavior:
 
@@ -663,6 +678,13 @@ Primary card:
 - Last activity.
 - CTA: `Tiếp tục`.
 
+Visual treatment:
+
+- Dashboard should be a "next action cockpit", not a grid of equal-weight metrics.
+- The next action card should dominate the page and explain why this is the recommended action.
+- Stats such as streak/time should be secondary and hidden if they are not meaningful.
+- Empty/new-user dashboard should route toward course choice or onboarding, not show zero-state charts.
+
 Secondary cards:
 
 - Active courses.
@@ -702,6 +724,15 @@ Layout:
 - Right: AI Tutor panel, collapsible.
 - Bottom drawer: mini quiz checkpoint, keeping video context visible.
 - Full modal: skip verification, bridge check, final quiz, and other higher-commitment checks.
+
+Visual treatment:
+
+- This screen is the core product surface. It should feel more like a focused cockpit than a generic card dashboard.
+- Use sticky orientation: breadcrumb/course title at top, segment rail left, learning surface center, contextual AI panel right.
+- Segment rail must show completed, waived, current, locked/needs-review states with icons/text, not color alone.
+- AI Tutor should look attached to the current lecture context. It should not visually compete with the video while the user is watching.
+- Mini quiz drawer should slide from the bottom with clear continuity from the paused segment. Skip/bridge checks should use stronger modal treatment because they change progression state.
+- On mobile, collapse the segment rail into a drawer and AI Tutor into a tab/sheet; keep video/content first.
 
 Player states:
 
@@ -1147,30 +1178,79 @@ Scaling note:
 
 ### 8.1. Visual Language
 
-Recommended style:
+Recommended style: **Academic AI Cockpit**.
 
-- Clean academic product with "learning cockpit" structure.
-- Light theme first.
-- Stronger hierarchy than current UI.
-- More narrative sections on public pages.
-- Course player should feel like a focused workspace, not a generic dashboard card grid.
+- Professional academic SaaS, not playful/kids education.
+- Light theme first, dark mode supported but not the primary aesthetic.
+- Course/player-centric: content, segment state, and next action are more important than generic stats.
+- Calm, guided, credible. The product should feel like a learning assistant embedded in real lecture content.
+- Use the current V1 clean card system only as a compatibility base. Do not copy the current dashboard/profile look as the V2 visual target.
+- The stronger visual reference inside V1 is the newer course catalog/overview direction: larger course identity, richer metadata, clear CTA, more narrative layout.
 
 Avoid:
 
 - Too many equal-weight cards.
 - Empty placeholder pages.
+- Generic admin dashboard composition.
+- Childlike claymorphism, candy colors, or playful education fonts.
+- Emoji as structural icons.
 - Icon-only meaning.
 - Color-only state.
 - Exposing technical labels.
 
-### 8.2. Navigation Rules
+### 8.2. Color And Semantic State Tokens
+
+Use semantic tokens rather than ad-hoc Tailwind colors in feature components.
+
+Recommended palette direction:
+
+| Role | Purpose | Suggested family |
+| --- | --- | --- |
+| Primary | trust, progress, main CTA | teal / deep teal |
+| Intelligence accent | AI/helper affordances | blue / cyan |
+| Learn/current | default learning state | blue or teal |
+| Skip/waived | confirmed mastery | emerald |
+| Bridge/foundation | prerequisite support | amber |
+| Review/needs attention | retry, weak area | orange |
+| Error/destructive | failed request, destructive action | red |
+| Surface | cards, drawers, panels | white/slate layers |
+
+Rules:
+
+- Every state color must have a text/icon label.
+- Warning and review colors should not dominate the whole screen; use them as local banners, badges, and borders.
+- Course gradient identity is allowed for catalog/overview, but learning-state UI should use semantic state tokens.
+- Text contrast must meet WCAG AA in both light and dark modes.
+
+### 8.3. Typography Direction
+
+- Current Inter usage is acceptable during transition.
+- For V2 production polish, prefer a professional learning/product font pair such as `Manrope`, `IBM Plex Sans`, or `Source Sans 3`.
+- Do not use childlike font suggestions such as Baloo/Comic Neue for this product; the audience and Stanford-style course content require a more credible academic tone.
+- Use a consistent scale: display/hero, page title, section title, body, label, caption.
+- Body text should stay at least 16px on mobile with 1.5+ line-height.
+
+### 8.4. Component And Interaction Rules
+
+- Each screen should have one dominant primary action.
+- Primary buttons and interactive cards must have at least 44px touch/click target height.
+- Use Lucide/SVG icons consistently; no emoji for navigation, system states, or core feature labels.
+- Loading longer than 300ms should use skeleton/progressive loading instead of empty white space.
+- Error states must include a recovery action where possible: retry, go back, choose course, or continue normally.
+- Disabled states must be visibly disabled and semantically disabled.
+- Drawers/modals must support Escape/back dismissal where safe, and confirmation if dismissing would lose quiz progress.
+- Interactive quiz options must support keyboard selection and screen reader labels.
+
+### 8.5. Navigation Rules
 
 - Public nav: Home, Courses, Login.
 - Auth nav: Dashboard, Learn, Courses, History, Profile.
 - AI Tutor should not be a primary nav item.
 - In learning route, nav should prioritize returning to course and current segment.
+- Navigation labels should use the same vocabulary as the schema-facing product layer: course, section, bài học/segment. Avoid "topic/module" in user-facing copy.
+- Back behavior must preserve course catalog filters, player scroll, and quiz progress where applicable.
 
-### 8.3. Accessibility Rules
+### 8.6. Accessibility Rules
 
 - All primary buttons at least 44px height.
 - Keyboard navigation for quiz options.
@@ -1179,15 +1259,20 @@ Avoid:
 - Color contrast AA.
 - Captions/transcript access near video.
 - Reduced motion support for checkpoint modals and route transitions.
+- Icon-only buttons require `aria-label`.
+- Focus order must match visual order, especially in the player and quiz drawer.
+- Color must never be the only indicator for pass/fail, skip, bridge, or review.
 
-### 8.4. Motion Rules
+### 8.7. Motion Rules
 
 - Use motion only for state transitions: quiz drawer, bridge/skip offer, segment completion.
 - 150-300ms transitions.
 - No blocking animation.
 - Respect `prefers-reduced-motion`.
+- Animate transform/opacity, not layout dimensions.
+- Use directional continuity: bottom drawer for mini quiz, side sheet for AI Tutor, modal for higher-commitment checks.
 
-### 8.5. Copy And I18n Ownership
+### 8.8. Copy And I18n Ownership
 
 MVP decision:
 
@@ -1200,7 +1285,7 @@ Technical debt:
 - For multi-language support, migrate backend `user_copy` to `user_copy_key` plus params, and let frontend resolve text through i18n files.
 - Do not mix tech-facing enums with Vietnamese strings. Enums should be English; UI labels should be localized separately.
 
-### 8.6. Telemetry Baseline
+### 8.9. Telemetry Baseline
 
 Minimum events before Phase 8 cutover:
 

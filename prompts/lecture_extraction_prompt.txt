@@ -1,27 +1,119 @@
-You are an expert educational content analyzer. I will provide you with the transcript (and optionally timestamps) of a video lecture. Your task is to deeply analyze the content and extract a structured Table of Contents along with a highly detailed summary for each specific section.
+You are generating Prompt 1 (P1) lecture structuring artifacts for the ingestion pipeline.
 
-Please follow these strict guidelines:
-1. Structure: Break down the lecture into logical, distinct topics or sections based on the natural flow of the presentation.
-2. Detailed Partial Summaries: For each section, provide a comprehensive and granular summary. Do NOT just provide a brief superficial overview. You must include key concepts explained, important definitions, specific examples given by the instructor, and the main reasoning/takeaways for that exact part. 
-3. Timestamps: Estimate or extract the starting timestamp for each section based on the input text. Use the format "HH:MM:SS" or "MM:SS". If no timestamps are provided in the input, estimate them if possible, or use "00:00".
-4. Language: The output MUST be entirely in English.
-5. Format: The output MUST be strictly in valid JSON format. Do not include any markdown formatting wrappers (like ```json), intro text, or conversational filler. Output ONLY the raw JSON object.
+Output contract:
+- Write exactly one valid JSON object.
+- Do not include markdown fences, prose, or comments.
+- Save the file as: data/courses/<course_id>/processed/P1/L<lecture_order>_p1.json
+- Example: data/courses/CS230/processed/P1/L7_p1.json
+- This filename format is required by the P1.5 sanitizer and later P2/P3 builders.
 
-The JSON output must strictly adhere to this exact schema:
+Source priority:
+1. Transcript with timestamps is PRIMARY.
+2. Video/slide visual cues can supplement boundaries, formulas, and examples.
+3. Slides must not create extra core concepts unless the lecture transcript actually teaches them.
+
+Input fields:
+- course_id: string
+- lecture_id: string
+- lecture_order: integer, 1-based course lecture order
+- lecture_title: string
+- video_url: string
+- transcript_with_timestamps: string, with timestamps in seconds or HH:MM:SS
+- slides: optional list of slide text/image observations
+- run_id: string
+
+Required JSON schema:
 {
-  "lecture_title": "String (Infer a fitting title for the entire lecture if not provided)",
+  "run_id": "<run_id>",
+  "stage_id": "p1",
+  "course_id": "<course_id>",
+  "lecture_id": "<lecture_id>",
+  "lecture_title": "string",
   "table_of_contents": [
     {
-      "section_number": "Integer (starting from 1)",
-      "timestamp": "String (Start time of this section)",
-      "topic_title": "String (Clear, concise, and descriptive title for this section)",
-      "detailed_summary": "String (Thorough, in-depth bulleted details or a robust paragraph summarizing the specific concepts, formulas, examples, and points discussed purely in this section)",
-      "key_takeaways": [
-         "String (Crucial point 1)",
-         "String (Crucial point 2)"
-      ]
+      "section_index": 1,
+      "title": "string",
+      "start_s": 0,
+      "end_s": 120
     }
-  ]
+  ],
+  "units": [
+    {
+      "unit_id": "local::<lecture_id>::seg1",
+      "course_id": "<course_id>",
+      "name": "string",
+      "description": "string",
+      "summary": "Faithful transcript-grounded recap with at least two [ts=NNNs] citations.",
+      "key_points": [
+        {
+          "text": "string",
+          "timestamp_s": 0,
+          "evidence_type": "formula | definition | claim | example | diagnostic_tip"
+        }
+      ],
+      "content_ref": {
+        "video_url": "<video_url>",
+        "start_s": 0,
+        "end_s": 120
+      },
+      "difficulty": 0.0,
+      "difficulty_source": "vlm_estimate | llm_single_pass",
+      "difficulty_confidence": "low | medium | high",
+      "duration_min": 2.0,
+      "ordering_index": 1,
+      "is_template": false
+    }
+  ],
+  "concepts_kp_local": [
+    {
+      "local_kp_id": "local::<lecture_id>::kp1",
+      "name": "string",
+      "description": "string",
+      "track_tags": ["ml | dl | cv | nlp | genai"],
+      "domain_tags": ["string"],
+      "career_path_tags": ["string"],
+      "difficulty_level": 0.0,
+      "difficulty_source": "vlm_estimate | llm_single_pass",
+      "difficulty_confidence": "low | medium | high",
+      "importance_level": "optional | medium | high | critical",
+      "structural_role": "optional | supporting | gateway | capstone",
+      "importance_confidence": "low | medium | high",
+      "importance_rationale": "Transcript-grounded reason for the importance decision.",
+      "importance_scope": "unit_local | lecture_local | course_global",
+      "importance_source": "llm_single_pass",
+      "visual_evidence": "string or null"
+    }
+  ],
+  "unit_kp_map_local": [
+    {
+      "unit_id": "local::<lecture_id>::seg1",
+      "local_kp_id": "local::<lecture_id>::kp1",
+      "planner_role": "main | prerequisite | supporting | enrichment",
+      "instruction_role": "main | supporting | enrichment",
+      "coverage_level": "mention | partial | substantial | dominant",
+      "coverage_confidence": "low | medium | high",
+      "coverage_rationale": "Short transcript-grounded reason."
+    }
+  ],
+  "section_flags": [
+    {
+      "unit_id": "local::<lecture_id>::seg1",
+      "importance_flag": "low | medium | high | critical",
+      "review_worthiness": "low | medium | high",
+      "item_generation_worthiness": "low | medium | high",
+      "formula_heavy": false,
+      "demo_heavy": false,
+      "rationale": "Why this unit should or should not produce questions."
+    }
+  ],
+  "self_critique_trace": null
 }
 
-Here is the transcript/data of the video lecture:
+Validation rules:
+- Every unit must have content_ref.video_url, start_s, end_s, and is_template.
+- Every unit summary must contain at least two [ts=NNNs] citations.
+- Every unit must have at least one unit_kp_map_local row with planner_role="main".
+- Every unit_id/local_kp_id referenced in unit_kp_map_local must exist.
+- key_points[].timestamp_s must be inside the unit content_ref range.
+- Do not overuse structural_role="gateway"; reserve it for concepts that truly unlock later learning.
+- Career/advice sections should usually have item_generation_worthiness="low" or "medium", not "high".

@@ -53,6 +53,8 @@ Mọi output file nằm dưới `./data/runs/<run_id>/<stage_id>/<scope>.json`:
 
 Orchestrator **pre-allocate** `output_file_path` trước khi gọi prompt; LLM nhận path làm INPUT và ghi file đúng tại path đó. LLM KHÔNG được tự đặt tên file.
 
+**Repo handoff naming for P1:** sau khi review/manual copy vào course folder, P1 artifact phải dùng filename `L<lecture_order>_p1.json` dưới `data/courses/<course_id>/processed/P1/`. Ví dụ `data/courses/CS230/processed/P1/L7_p1.json`. Đây là contract thực tế của `sanitize_p1_artifacts`, `build_p2_input`, `build_p3_inputs`, và canonical exporter. Không dùng tên `CS230__lecture-07.json` trong course artifact folder.
+
 ### 0.5.2. Universal INPUT fields
 
 Mọi prompt nhận thêm 3 field chuẩn trong INPUT:
@@ -253,7 +255,7 @@ INPUT:
 - lecture_metadata: <metadata_json>
 - run_id: <run_id>                         
 - stage_id: "p1"                           
-- output_file_path: <path>                  // ./data/runs/<run_id>/p1/<course_id>__<lecture_id>.json
+- output_file_path: <path>                  // repo handoff: ./data/courses/<course_id>/processed/P1/L<lecture_order>_p1.json
 
 TASK — write the following JSON object to output_file_path:
 

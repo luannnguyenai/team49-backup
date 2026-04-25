@@ -119,19 +119,19 @@ Import canonical content into PostgreSQL:
 PYTHONPATH=. python src/scripts/pipeline/import_canonical_artifacts_to_db.py
 ```
 
-The importer is idempotent. It upserts by deterministic natural keys and verifies DB row counts against `data/final_artifacts/cs224n_cs231n_v1/canonical/manifest.json` after import.
+The importer is idempotent. It upserts by deterministic natural keys and verifies DB row counts against `data/final_artifacts/cs224n_cs231n_cs230_v1/canonical/manifest.json` after import.
 
 Expected canonical counts:
 
-- `concepts_kp`: 470
-- `units`: 295
-- `unit_kp_map`: 767
-- `question_bank`: 985
-- `item_calibration`: 985
-- `item_phase_map`: 6838
-- `item_kp_map`: 1171
-- `prerequisite_edges`: 79
-- `pruned_edges`: 34
+- `concepts_kp`: 607
+- `units`: 376
+- `unit_kp_map`: 960
+- `question_bank`: 1276
+- `item_calibration`: 1276
+- `item_phase_map`: 8875
+- `item_kp_map`: 1474
+- `prerequisite_edges`: 118
+- `pruned_edges`: 44
 
 ## Authoritative Table Matrix
 

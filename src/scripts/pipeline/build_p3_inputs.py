@@ -213,6 +213,18 @@ def _relevant_kp_catalog(
     return [global_kp_index[global_kp_id] for global_kp_id in ordered_ids if global_kp_id in global_kp_index]
 
 
+def _fallback_target_kp_ids(unit_rows: list[dict[str, Any]]) -> list[str]:
+    """Use main KP mappings when P3 salience has not been generated yet."""
+    target_ids: list[str] = []
+    for row in unit_rows:
+        if row.get("planner_role") != "main":
+            continue
+        global_kp_id = row.get("global_kp_id")
+        if isinstance(global_kp_id, str) and global_kp_id not in target_ids:
+            target_ids.append(global_kp_id)
+    return target_ids
+
+
 def _difficulty_window(value: Any) -> list[float] | None:
     if not isinstance(value, int | float):
         return None
@@ -222,13 +234,65 @@ def _difficulty_window(value: Any) -> list[float] | None:
     return [lower, upper]
 
 
-def _load_learning_salience_index(course_dir: Path, source_file: Path) -> dict[str, dict[str, Any]]:
-    processed_p3_path = course_dir / "processed" / "P3" / f"{source_file.stem.removesuffix('_p1')}.json"
-    if not processed_p3_path.exists():
+def _find_processed_p3_artifact(course_dir: Path, source_file: Path, lecture_id: str) -> Path | None:
+    stem = source_file.stem.removesuffix("_p1")
+    for stage_dir_name in ("P3", "P3a"):
+        stage_dir = course_dir / "processed" / stage_dir_name
+        direct_path = stage_dir / f"{stem}.json"
+        if direct_path.exists():
+            return direct_path
+
+        if not stage_dir.exists():
+            continue
+        for candidate in sorted(stage_dir.glob("*.json")):
+            try:
+                artifact = _load_json(candidate)
+            except json.JSONDecodeError:
+                continue
+            if artifact.get("lecture_id") == lecture_id:
+                return candidate
+
+    return None
+
+
+def _load_learning_salience_index(course_dir: Path, source_file: Path, lecture_id: str) -> dict[str, dict[str, Any]]:
+    processed_p3_path = _find_processed_p3_artifact(course_dir, source_file, lecture_id)
+    if processed_p3_path is None:
         return {}
 
     artifact = _load_json(processed_p3_path)
     rows = artifact.get("learning_salience", [])
+    if not isinstance(rows, list):
+        return {}
+
+    index: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        unit_id = row.get("unit_id")
+        if isinstance(unit_id, str) and unit_id.strip():
+            index[unit_id] = row
+    return index
+
+
+def _load_video_clip_index(course_dir: Path, source_file: Path, lecture_id: str) -> dict[str, dict[str, Any]]:
+    processed_p3b_path = course_dir / "processed" / "P3b" / f"{source_file.stem.removesuffix('_p1')}.json"
+    if not processed_p3b_path.exists():
+        stage_dir = course_dir / "processed" / "P3b"
+        if stage_dir.exists():
+            for candidate in sorted(stage_dir.glob("*.json")):
+                try:
+                    artifact = _load_json(candidate)
+                except json.JSONDecodeError:
+                    continue
+                if artifact.get("lecture_id") == lecture_id:
+                    processed_p3b_path = candidate
+                    break
+    if not processed_p3b_path.exists():
+        return {}
+
+    artifact = _load_json(processed_p3b_path)
+    rows = artifact.get("clips", [])
     if not isinstance(rows, list):
         return {}
 
@@ -307,8 +371,6 @@ def build_p3_inputs(
             ]
             unit_kp_map_global = _globalize_unit_kp_map(unit_kp_map_local, local_to_global=local_to_global)
             kp_catalog = _relevant_kp_catalog(unit_kp_map_global, global_kp_index=global_kp_index)
-            learning_salience_index = _load_learning_salience_index(course_dir, source_file)
-
             lecture_context = {
                 "course_id": course_dir.name,
                 "lecture_id": lecture_id,
@@ -320,6 +382,8 @@ def build_p3_inputs(
                 "p2_output": str(p2_output_path),
                 "transcript_file": str(transcript_doc.path) if transcript_doc else None,
             }
+            learning_salience_index = _load_learning_salience_index(course_dir, source_file, lecture_id)
+            video_clip_index = _load_video_clip_index(course_dir, source_file, lecture_id)
 
             p3a_payload = {
                 "lecture_context": lecture_context,
@@ -373,10 +437,15 @@ def build_p3_inputs(
                     end_s=int(content_ref.get("end_s", 0)),
                 )
                 salience_row = learning_salience_index.get(unit_id, {})
+                clip_row = video_clip_index.get(unit_id, {})
+                video_clip_ref = clip_row.get("video_clip_ref") if isinstance(clip_row, dict) else None
+                video_clip_url = video_clip_ref.get("local_path") if isinstance(video_clip_ref, dict) else None
+                if not isinstance(video_clip_url, str) or not video_clip_url:
+                    video_clip_url = youtube_url
                 allow_code_mcq = _looks_code_oriented(unit, transcript_slice)
                 target_kp_ids = salience_row.get("target_kp_ids")
                 if not isinstance(target_kp_ids, list):
-                    target_kp_ids = []
+                    target_kp_ids = _fallback_target_kp_ids(unit_rows)
 
                 p3c_payload = {
                     "lecture_context": lecture_context,
@@ -385,7 +454,8 @@ def build_p3_inputs(
                     "target_kp_ids": target_kp_ids,
                     "assessment_purpose": "lecture_reinforcement",
                     "youtube_url": youtube_url,
-                    "video_clip_url": youtube_url,
+                    "video_clip_url": video_clip_url,
+                    "video_clip_ref": video_clip_ref,
                     "transcript_slice": transcript_slice,
                     "unit_kp_map_rows": unit_rows,
                     "kp_catalog": unit_catalog,
