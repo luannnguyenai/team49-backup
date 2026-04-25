@@ -1,0 +1,48 @@
+{
+  "artifact": "data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json",
+  "base_artifact": "data/final_artifacts/cs224n_cs231n_v1/p2_output_rationale_repaired.json",
+  "mode": "manual_append_incremental",
+  "validation": {
+    "status": "ok",
+    "missing_edge_endpoints": 0,
+    "cs230_local_to_global_expected": 156,
+    "cs230_local_to_global_actual": 156,
+    "cs230_unit_kp_map_expected": 193,
+    "cs230_unit_kp_map_actual": 193,
+    "cs230_duplicate_local_to_global": 0,
+    "cs230_duplicate_unit_kp_map": 0
+  },
+  "counts": {
+    "concepts_kp_global": 607,
+    "local_to_global_map": 712,
+    "unit_kp_map_global": 968,
+    "candidate_prerequisite_edges": 161,
+    "consensus_trace": 5
+  },
+  "append_trace": {
+    "trace_type": "manual_append",
+    "action": "appended_cs230_from_p1_sanitized",
+    "source_files": [
+      "data/courses/CS230/processed_sanitized/L1_p1.json",
+      "data/courses/CS230/processed_sanitized/L2_p1.json",
+      "data/courses/CS230/processed_sanitized/L3_p1.json",
+      "data/courses/CS230/processed_sanitized/L4_p1.json",
+      "data/courses/CS230/processed_sanitized/L5_p1.json",
+      "data/courses/CS230/processed_sanitized/L6_p1.json",
+      "data/courses/CS230/processed_sanitized/L7_p1.json",
+      "data/courses/CS230/processed_sanitized/L8_p1.json",
+      "data/courses/CS230/processed_sanitized/L9_p1.json"
+    ],
+    "new_global_kp_count": 137,
+    "mapped_existing_kp_count": 19,
+    "added_local_to_global_count": 156,
+    "added_unit_kp_map_count": 193,
+    "added_candidate_edge_count": 48,
+    "rationale": "Manual deterministic append from CS230 P1 sanitized artifacts. Existing KP reuse was intentionally conservative; unmatched CS230 concepts were created as CS230-owned global KPs to avoid false merges from an oversized P2 prompt."
+  },
+  "notes": [
+    "Base CS224n/CS231n P2 artifact is preserved unchanged under cs224n_cs231n_v1.",
+    "CS230 append uses conservative existing-KP reuse; unmatched concepts are created as kp_cs230_*.",
+    "Lecture 08 career/advice KP are retained as content concepts but no new prerequisite edges were authored from that lecture."
+  ]
+}
