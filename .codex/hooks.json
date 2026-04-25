@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "test -f \"$(git rev-parse --show-toplevel)/scripts/log_hook.py\" && AI_TOOL_NAME=codex python3 \"$(git rev-parse --show-toplevel)/scripts/log_hook.py\" || true",
+            "command": "python scripts/log_hook.py",
             "statusMessage": "Logging Codex prompt"
           }
         ]
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "test -f \"$(git rev-parse --show-toplevel)/scripts/log_hook.py\" && AI_TOOL_NAME=codex python3 \"$(git rev-parse --show-toplevel)/scripts/log_hook.py\" || true",
+            "command": "python scripts/log_hook.py",
             "statusMessage": "Logging Codex tool activity"
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "test -f \"$(git rev-parse --show-toplevel)/scripts/log_hook.py\" && AI_TOOL_NAME=codex python3 \"$(git rev-parse --show-toplevel)/scripts/log_hook.py\" || true",
+            "command": "python scripts/log_hook.py",
             "statusMessage": "Logging Codex stop event"
           }
         ]

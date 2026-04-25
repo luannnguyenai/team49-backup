@@ -35,7 +35,7 @@ logs/
 .ai-log/
 
 # Media / large data files
-data/*.mp4
+data/**/*.mp4
 data/*.pdf
 data/*.zip
 *.tar.gz

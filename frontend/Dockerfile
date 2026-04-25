@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 # =============================================================================
 # Frontend Dockerfile — Next.js 14 (standalone output, three-stage)
 # =============================================================================
@@ -5,13 +7,11 @@
 # ── Stage 1: install dependencies ────────────────────────────────────────────
 FROM node:20-alpine AS deps
 
-# libc6-compat required for some native node modules
-RUN apk add --no-cache
-
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm ci --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --legacy-peer-deps
 
 
 # ── Stage 2: build ────────────────────────────────────────────────────────────
