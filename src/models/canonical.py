@@ -9,6 +9,10 @@ These tables use deterministic natural keys from the canonical artifacts
 idempotent without an extra mapping layer.
 """
 
+from __future__ import annotations
+
+from typing import Optional, Union
+
 from sqlalchemy import Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
@@ -23,23 +27,23 @@ class ConceptKP(TimestampMixin, Base):
 
     kp_id: Mapped[str] = mapped_column(String(160), primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    track_tags: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    domain_tags: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    career_path_tags: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    difficulty_level: Mapped[float | None] = mapped_column(Float, nullable=True)
-    difficulty_source: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    difficulty_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    importance_level: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    structural_role: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    importance: Mapped[float | None] = mapped_column(Float, nullable=True)
-    importance_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    importance_rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
-    importance_scope: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    importance_source: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    source_course_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    description_embedding: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    source_file: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    track_tags: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    domain_tags: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    career_path_tags: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    difficulty_level: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    difficulty_source: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    difficulty_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    importance_level: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    structural_role: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    importance: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    importance_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    importance_rationale: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    importance_scope: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    importance_source: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    source_course_ids: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    description_embedding: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (
         Index("ix_concepts_kp_name", "name"),
@@ -54,24 +58,24 @@ class CanonicalUnit(TimestampMixin, Base):
 
     unit_id: Mapped[str] = mapped_column(String(220), primary_key=True)
     course_id: Mapped[str] = mapped_column(String(80), nullable=False)
-    lecture_id: Mapped[str | None] = mapped_column(String(160), nullable=True)
-    lecture_order: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    lecture_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    lecture_id: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
+    lecture_order: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    lecture_title: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     unit_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    summary: Mapped[str | None] = mapped_column(Text, nullable=True)
-    ordering_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    content_ref: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    key_points: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    section_flags: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    difficulty: Mapped[float | None] = mapped_column(Float, nullable=True)
-    difficulty_source: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    difficulty_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    duration_min: Mapped[float | None] = mapped_column(Float, nullable=True)
-    transcript_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    video_clip_ref: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    topic_embedding: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    source_file: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    ordering_index: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    content_ref: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    key_points: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    section_flags: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    difficulty: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    difficulty_source: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    difficulty_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    duration_min: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    transcript_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    video_clip_ref: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    topic_embedding: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (
         Index("ix_units_course_lecture", "course_id", "lecture_id"),
@@ -90,14 +94,14 @@ class UnitKPMap(TimestampMixin, Base):
     kp_id: Mapped[str] = mapped_column(
         String(160), ForeignKey("concepts_kp.kp_id", ondelete="CASCADE"), primary_key=True
     )
-    planner_role: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    instruction_role: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    coverage_level: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    coverage_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    coverage_rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
-    coverage_weight: Mapped[float | None] = mapped_column(Float, nullable=True)
-    source_local_kp_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    source_file: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    planner_role: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    instruction_role: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    coverage_level: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    coverage_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    coverage_rationale: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    coverage_weight: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    source_local_kp_ids: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (
         Index("ix_unit_kp_map_kp", "kp_id"),
@@ -112,34 +116,34 @@ class QuestionBankItem(TimestampMixin, Base):
 
     item_id: Mapped[str] = mapped_column(String(180), primary_key=True)
     course_id: Mapped[str] = mapped_column(String(80), nullable=False)
-    lecture_id: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    lecture_id: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
     unit_id: Mapped[str] = mapped_column(
         String(220), ForeignKey("units.unit_id", ondelete="CASCADE"), nullable=False
     )
     primary_kp_id: Mapped[str] = mapped_column(
         String(160), ForeignKey("concepts_kp.kp_id", ondelete="RESTRICT"), nullable=False
     )
-    item_type: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    item_type: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     question: Mapped[str] = mapped_column(Text, nullable=False)
     choices: Mapped[list] = mapped_column(JSON, nullable=False)
     answer_index: Mapped[int] = mapped_column(Integer, nullable=False)
-    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
-    difficulty: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    question_intent: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    knowledge_scope: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    assessment_purpose: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    render_mode: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    grounding_mode: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    grounding_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    source_ref: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    concept_alignment_cosine: Mapped[float | None] = mapped_column(Float, nullable=True)
-    distractor_cosine_lower: Mapped[float | None] = mapped_column(Float, nullable=True)
-    distractor_cosine_upper: Mapped[float | None] = mapped_column(Float, nullable=True)
-    qa_gate_passed: Mapped[bool | None] = mapped_column(nullable=True)
-    repair_history: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    provenance: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    review_status: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    source_file: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    explanation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    difficulty: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    question_intent: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    knowledge_scope: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    assessment_purpose: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    render_mode: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    grounding_mode: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    grounding_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    source_ref: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    concept_alignment_cosine: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    distractor_cosine_lower: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    distractor_cosine_upper: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    qa_gate_passed: Mapped[Optional[bool]] = mapped_column(nullable=True)
+    repair_history: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    provenance: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    review_status: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (
         Index("ix_question_bank_unit", "unit_id"),
@@ -158,24 +162,24 @@ class ItemCalibration(TimestampMixin, Base):
         String(180), ForeignKey("question_bank.item_id", ondelete="CASCADE"), primary_key=True
     )
     course_id: Mapped[str] = mapped_column(String(80), nullable=False)
-    lecture_id: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    lecture_id: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
     unit_id: Mapped[str] = mapped_column(
         String(220), ForeignKey("units.unit_id", ondelete="CASCADE"), nullable=False
     )
-    difficulty_prior: Mapped[float | None] = mapped_column(Float, nullable=True)
-    discrimination_prior: Mapped[float | None] = mapped_column(Float, nullable=True)
-    guessing_prior: Mapped[float | None] = mapped_column(Float, nullable=True)
-    calibration_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    calibration_rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
-    calibration_method: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    difficulty_prior: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    discrimination_prior: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    guessing_prior: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    calibration_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    calibration_rationale: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    calibration_method: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     is_calibrated: Mapped[bool] = mapped_column(nullable=False, default=False, server_default="false")
-    difficulty_b: Mapped[float | None] = mapped_column(Float, nullable=True)
-    discrimination_a: Mapped[float | None] = mapped_column(Float, nullable=True)
-    guessing_c: Mapped[float | None] = mapped_column(Float, nullable=True)
-    irt_calibration_n: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    standard_error_b: Mapped[float | None] = mapped_column(Float, nullable=True)
-    last_calibrated_at: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    source_file: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    difficulty_b: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    discrimination_a: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    guessing_c: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    irt_calibration_n: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    standard_error_b: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    last_calibrated_at: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (
         Index("ix_item_calibration_unit", "unit_id"),
@@ -193,16 +197,16 @@ class ItemPhaseMap(TimestampMixin, Base):
     )
     phase: Mapped[str] = mapped_column(String(80), primary_key=True)
     course_id: Mapped[str] = mapped_column(String(80), nullable=False)
-    lecture_id: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    lecture_id: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
     unit_id: Mapped[str] = mapped_column(
         String(220), ForeignKey("units.unit_id", ondelete="CASCADE"), nullable=False
     )
-    suitability_score: Mapped[float | None] = mapped_column(Float, nullable=True)
-    phase_multiplier: Mapped[float | None] = mapped_column(Float, nullable=True)
-    selection_priority: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    phase_rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
-    last_reviewed_at: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    source_file: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    suitability_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    phase_multiplier: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    selection_priority: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    phase_rationale: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    last_reviewed_at: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (
         Index("ix_item_phase_map_phase", "phase"),
@@ -223,13 +227,13 @@ class ItemKPMap(TimestampMixin, Base):
     )
     kp_role: Mapped[str] = mapped_column(String(80), primary_key=True)
     course_id: Mapped[str] = mapped_column(String(80), nullable=False)
-    lecture_id: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    lecture_id: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
     unit_id: Mapped[str] = mapped_column(
         String(220), ForeignKey("units.unit_id", ondelete="CASCADE"), nullable=False
     )
-    weight: Mapped[float | None] = mapped_column(Float, nullable=True)
-    mapping_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    source_file: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    weight: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    mapping_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (
         Index("ix_item_kp_map_kp", "kp_id"),
@@ -249,20 +253,20 @@ class PrerequisiteEdge(TimestampMixin, Base):
     target_kp_id: Mapped[str] = mapped_column(
         String(160), ForeignKey("concepts_kp.kp_id", ondelete="CASCADE"), primary_key=True
     )
-    edge_scope: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    provenance: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    review_status: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
-    edge_strength: Mapped[float | None] = mapped_column(Float, nullable=True)
-    bidirectional_score: Mapped[float | None] = mapped_column(Float, nullable=True)
-    p5_keep_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    p5_expected_directionality: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    p5_trace: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
-    temporal_signal: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    source_first_seen: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    target_first_seen: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    source_file: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    edge_scope: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    provenance: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    review_status: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    rationale: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    edge_strength: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    bidirectional_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    p5_keep_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    p5_expected_directionality: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    p5_trace: Mapped[Optional[Union[dict, list]]] = mapped_column(JSON, nullable=True)
+    temporal_signal: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    source_first_seen: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    target_first_seen: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (
         Index("ix_prerequisite_edges_target", "target_kp_id"),
@@ -282,21 +286,21 @@ class PrunedEdge(TimestampMixin, Base):
     target_kp_id: Mapped[str] = mapped_column(
         String(160), ForeignKey("concepts_kp.kp_id", ondelete="CASCADE"), primary_key=True
     )
-    prune_reason: Mapped[str | None] = mapped_column(String(160), nullable=True)
-    edge_scope: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    provenance: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    review_status: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
-    edge_strength: Mapped[float | None] = mapped_column(Float, nullable=True)
-    bidirectional_score: Mapped[float | None] = mapped_column(Float, nullable=True)
-    p5_keep_confidence: Mapped[str | None] = mapped_column(String(40), nullable=True)
-    p5_expected_directionality: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    p5_trace: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
-    temporal_signal: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    source_first_seen: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    target_first_seen: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    source_file: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    prune_reason: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
+    edge_scope: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    provenance: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    review_status: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    rationale: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    edge_strength: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    bidirectional_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    p5_keep_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    p5_expected_directionality: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    p5_trace: Mapped[Optional[Union[dict, list]]] = mapped_column(JSON, nullable=True)
+    temporal_signal: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    source_first_seen: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    target_first_seen: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     __table_args__ = (
         Index("ix_pruned_edges_target", "target_kp_id"),

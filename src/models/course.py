@@ -4,10 +4,12 @@ models/course.py
 Canonical course-platform ORM models used by the course-first experience.
 """
 
+from __future__ import annotations
+
 import enum
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
     Boolean,
@@ -32,44 +34,44 @@ if TYPE_CHECKING:
     from src.models.user import User
 
 
-class CourseStatus(enum.StrEnum):
+class CourseStatus(str, enum.Enum):
     ready = "ready"
     coming_soon = "coming_soon"
     metadata_partial = "metadata_partial"
 
 
-class CourseVisibility(enum.StrEnum):
+class CourseVisibility(str, enum.Enum):
     public = "public"
     hidden = "hidden"
 
 
-class CourseSectionKind(enum.StrEnum):
+class CourseSectionKind(str, enum.Enum):
     module = "module"
     unit = "unit"
     lesson_group = "lesson_group"
     lecture_group = "lecture_group"
 
 
-class LearningUnitType(enum.StrEnum):
+class LearningUnitType(str, enum.Enum):
     lesson = "lesson"
     lecture = "lecture"
     reading = "reading"
     practice = "practice"
 
 
-class LearningUnitStatus(enum.StrEnum):
+class LearningUnitStatus(str, enum.Enum):
     ready = "ready"
     coming_soon = "coming_soon"
     metadata_partial = "metadata_partial"
 
 
-class LearningUnitEntryMode(enum.StrEnum):
+class LearningUnitEntryMode(str, enum.Enum):
     text = "text"
     video = "video"
     hybrid = "hybrid"
 
 
-class CourseAssetType(enum.StrEnum):
+class CourseAssetType(str, enum.Enum):
     video = "video"
     transcript = "transcript"
     slides = "slides"
@@ -77,13 +79,13 @@ class CourseAssetType(enum.StrEnum):
     supplement = "supplement"
 
 
-class CourseAssetAvailabilityStatus(enum.StrEnum):
+class CourseAssetAvailabilityStatus(str, enum.Enum):
     available = "available"
     processing = "processing"
     missing = "missing"
 
 
-class LearningProgressStatus(enum.StrEnum):
+class LearningProgressStatus(str, enum.Enum):
     not_started = "not_started"
     in_progress = "in_progress"
     completed = "completed"
@@ -91,7 +93,7 @@ class LearningProgressStatus(enum.StrEnum):
     skipped = "skipped"
 
 
-class LegacyLectureMigrationState(enum.StrEnum):
+class LegacyLectureMigrationState(str, enum.Enum):
     pending = "pending"
     mapped = "mapped"
     deprecated = "deprecated"
@@ -115,13 +117,13 @@ class Course(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=CourseVisibility.public,
         server_default=CourseVisibility.public.value,
     )
-    cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    hero_badge: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    primary_subject: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    cover_image_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    hero_badge: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    primary_subject: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    canonical_course_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    canonical_course_id: Mapped[Optional[str]] = mapped_column(String(80), nullable=True, index=True)
 
-    overview: Mapped["CourseOverview | None"] = relationship(
+    overview: Mapped[Optional["CourseOverview"]] = relationship(
         "CourseOverview",
         back_populates="course",
         uselist=False,
@@ -181,14 +183,14 @@ class CourseOverview(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         unique=True,
     )
     headline: Mapped[str] = mapped_column(String(255), nullable=False)
-    subheadline: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    subheadline: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     summary_markdown: Mapped[str] = mapped_column(Text, nullable=False)
     learning_outcomes: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
-    target_audience: Mapped[str | None] = mapped_column(Text, nullable=True)
-    prerequisites_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
-    estimated_duration_text: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    structure_snapshot: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    cta_label: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    target_audience: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    prerequisites_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    estimated_duration_text: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    structure_snapshot: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    cta_label: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
 
     course: Mapped["Course"] = relationship("Course", back_populates="overview", lazy="select")
 
@@ -201,7 +203,7 @@ class CourseSection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("courses.id", ondelete="CASCADE"),
         nullable=False,
     )
-    parent_section_id: Mapped[uuid.UUID | None] = mapped_column(
+    parent_section_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("course_sections.id", ondelete="SET NULL"),
         nullable=True,
@@ -220,7 +222,7 @@ class CourseSection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     course: Mapped["Course"] = relationship("Course", back_populates="sections", lazy="select")
-    parent_section: Mapped["CourseSection | None"] = relationship(
+    parent_section: Mapped[Optional["CourseSection"]] = relationship(
         "CourseSection",
         remote_side="CourseSection.id",
         back_populates="child_sections",
@@ -270,10 +272,10 @@ class LearningUnit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default=LearningUnitStatus.metadata_partial.value,
     )
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    content_source_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    content_body: Mapped[str | None] = mapped_column(Text, nullable=True)
-    estimated_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    canonical_unit_id: Mapped[str | None] = mapped_column(String(220), nullable=True, index=True)
+    content_source_type: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    content_body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    estimated_minutes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    canonical_unit_id: Mapped[Optional[str]] = mapped_column(String(220), nullable=True, index=True)
     entry_mode: Mapped[LearningUnitEntryMode] = mapped_column(
         Enum(LearningUnitEntryMode, name="learning_unit_entry_mode_enum"),
         nullable=False,
@@ -327,7 +329,7 @@ class CourseAsset(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("courses.id", ondelete="CASCADE"),
         nullable=False,
     )
-    learning_unit_id: Mapped[uuid.UUID | None] = mapped_column(
+    learning_unit_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("learning_units.id", ondelete="SET NULL"),
         nullable=True,
@@ -337,17 +339,17 @@ class CourseAsset(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     storage_key: Mapped[str] = mapped_column(String(500), nullable=False)
-    delivery_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    delivery_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     availability_status: Mapped[CourseAssetAvailabilityStatus] = mapped_column(
         Enum(CourseAssetAvailabilityStatus, name="course_asset_availability_status_enum"),
         nullable=False,
         default=CourseAssetAvailabilityStatus.processing,
         server_default=CourseAssetAvailabilityStatus.processing.value,
     )
-    metadata_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    metadata_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     course: Mapped["Course"] = relationship("Course", back_populates="assets", lazy="select")
-    learning_unit: Mapped["LearningUnit | None"] = relationship(
+    learning_unit: Mapped[Optional["LearningUnit"]] = relationship(
         "LearningUnit",
         back_populates="assets",
         lazy="select",
@@ -374,8 +376,8 @@ class LearnerAssessmentProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=False,
         server_default="false",
     )
-    skill_test_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    assessment_session_id: Mapped[uuid.UUID | None] = mapped_column(
+    skill_test_completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    assessment_session_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("sessions.id", ondelete="SET NULL"),
         nullable=True,
@@ -404,7 +406,7 @@ class CourseRecommendation(UUIDPrimaryKeyMixin, Base):
         nullable=False,
     )
     rank: Mapped[int] = mapped_column(Integer, nullable=False)
-    reason_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reason_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     generated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -445,13 +447,13 @@ class LearningProgressRecord(UUIDPrimaryKeyMixin, Base):
         default=LearningProgressStatus.not_started,
         server_default=LearningProgressStatus.not_started.value,
     )
-    last_position_seconds: Mapped[float | None] = mapped_column(Float, nullable=True)
+    last_position_seconds: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     last_opened_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
     )
-    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     user: Mapped["User"] = relationship("User", lazy="select")  # type: ignore[name-defined]
     course: Mapped["Course"] = relationship("Course", back_populates="progress_records", lazy="select")
@@ -481,7 +483,7 @@ class TutorContextBinding(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     context_type: Mapped[str] = mapped_column(String(120), nullable=False)
     source_ref: Mapped[str] = mapped_column(String(255), nullable=False)
-    context_window_rule: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    context_window_rule: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
