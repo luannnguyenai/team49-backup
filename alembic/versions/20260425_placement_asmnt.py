@@ -20,17 +20,17 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.create_table(
         "placement_assessment_results",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True,
+        sa.Column("id", sa.UUID(), primary_key=True,
                   server_default=sa.text("gen_random_uuid()")),
-        sa.Column("user_id", postgresql.UUID(as_uuid=True),
+        sa.Column("user_id", sa.UUID(),
                   sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("topic_unit_id", postgresql.UUID(as_uuid=True),
+        sa.Column("topic_unit_id", sa.UUID(),
                   sa.ForeignKey("learning_units.id", ondelete="CASCADE"), nullable=False),
         sa.Column("score_pct", sa.Numeric(precision=5, scale=2), nullable=False),
         sa.Column("decision", sa.Text(), nullable=False),
         sa.Column("user_choice", sa.Text(), nullable=True),
         sa.Column("raw_answers", postgresql.JSONB(astext_type=sa.Text()), nullable=False,
-                  server_default="[]"),
+                  server_default=sa.text("'[]'")),
         sa.Column("theta_estimate", sa.Numeric(precision=8, scale=4), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False,
                   server_default=sa.text("NOW()")),
@@ -51,11 +51,13 @@ def upgrade() -> None:
         "ix_placement_results_user_unit",
         "placement_assessment_results",
         ["user_id", "topic_unit_id"],
+        unique=False,
     )
     op.create_index(
         "ix_placement_results_user",
         "placement_assessment_results",
         ["user_id"],
+        unique=False,
     )
 
 
