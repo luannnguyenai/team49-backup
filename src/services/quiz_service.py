@@ -54,14 +54,37 @@ _DIFFICULTY_SLOTS: list[tuple[DifficultyBucket, int]] = [
     (DifficultyBucket.hard, 3),
 ]
 _RECENT_ASSESSMENT_LOOKBACK = 2
+_SELECTOR_DIFFICULTY_ORDER = {"medium": 0, "easy": 1, "hard": 2}
+_INLINE_QUIZ_CHECKPOINTS = {"midpoint", "end"}
 
 
 async def start_quiz(
     db: AsyncSession,
     user_id: uuid.UUID,
     learning_unit_id: uuid.UUID,
+    *,
+    count: int | None = None,
+    source: str = "standalone",
+    checkpoint: str | None = None,
+    exclude_item_ids: list[str] | None = None,
 ) -> QuizStartResponse:
-    return await _start_canonical_quiz(db, user_id, learning_unit_id)
+    if source == "standalone" and (count is not None or checkpoint is not None or exclude_item_ids):
+        raise ValidationError("Standalone quiz does not accept inline-only count/checkpoint/exclude options.")
+    if source == "standalone":
+        return await _start_canonical_quiz(db, user_id, learning_unit_id)
+    if source != "inline_video":
+        raise ValidationError(f"Unsupported quiz source: {source}")
+    if checkpoint is not None and checkpoint not in _INLINE_QUIZ_CHECKPOINTS:
+        raise ValidationError(f"Invalid inline quiz checkpoint: {checkpoint}")
+    return await _start_canonical_quiz(
+        db,
+        user_id,
+        learning_unit_id,
+        count=count,
+        source=source,
+        checkpoint=checkpoint,
+        exclude_item_ids=exclude_item_ids,
+    )
 
 
 async def answer_question(
@@ -136,8 +159,23 @@ async def _start_canonical_quiz(
     db: AsyncSession,
     user_id: uuid.UUID,
     learning_unit_id: uuid.UUID,
+    *,
+    count: int | None = None,
+    source: str = "standalone",
+    checkpoint: str | None = None,
+    exclude_item_ids: list[str] | None = None,
 ) -> QuizStartResponse:
     unit = await _get_learning_unit_or_404(db, learning_unit_id)
+    if source == "inline_video":
+        return await _start_inline_video_quiz(
+            db,
+            user_id=user_id,
+            unit=unit,
+            count=count or 3,
+            checkpoint=checkpoint or "midpoint",
+            exclude_item_ids=exclude_item_ids or [],
+        )
+
     selector = CanonicalQuestionSelector(CanonicalQuestionRepository(db))
     items = await selector.select_for_phase(
         phase="mini_quiz",
@@ -177,6 +215,109 @@ async def _start_canonical_quiz(
         questions=[
             canonical_item_to_quiz_question(item, learning_unit_id=unit.id) for item in items
         ],
+    )
+
+
+async def _start_inline_video_quiz(
+    db: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    unit: LearningUnit,
+    count: int,
+    checkpoint: str,
+    exclude_item_ids: list[str],
+) -> QuizStartResponse:
+    planner_repo = PlannerAuditRepository(db)
+    state = await planner_repo.get_session_state(user_id, CANONICAL_SESSION_ID)
+    current_progress = (
+        state.current_progress
+        if state is not None and isinstance(state.current_progress, dict)
+        else {}
+    )
+    inline_quiz_state = (
+        current_progress.get("inline_quiz")
+        if isinstance(current_progress, dict) and isinstance(current_progress.get("inline_quiz"), dict)
+        else {}
+    )
+    checkpoint_state = _inline_quiz_checkpoint_state(inline_quiz_state, checkpoint)
+    midpoint_state = _inline_quiz_checkpoint_state(inline_quiz_state, "midpoint")
+
+    if (
+        checkpoint == "end"
+        and isinstance(midpoint_state, dict)
+        and midpoint_state.get("active_session_id")
+        and current_progress.get("learning_unit_id") == str(unit.id)
+    ):
+        raise ConflictError("Cannot start end checkpoint while midpoint inline quiz is in progress.")
+
+    if (
+        isinstance(checkpoint_state, dict)
+        and checkpoint_state.get("active_session_id")
+        and current_progress.get("learning_unit_id") == str(unit.id)
+    ):
+        session_id = checkpoint_state.get("active_session_id")
+        if session_id:
+            session = await _get_existing_inline_quiz_session(db, user_id, uuid.UUID(str(session_id)))
+            if session is not None and session.completed_at is None:
+                item_ids = [str(item_id) for item_id in checkpoint_state.get("item_ids") or []]
+                items = await _get_quiz_items_by_ids(db, unit, item_ids)
+                return QuizStartResponse(
+                    session_id=session.id,
+                    learning_unit_id=unit.id,
+                    total_questions=len(items),
+                    questions=[
+                        canonical_item_to_quiz_question(item, learning_unit_id=unit.id)
+                        for item in items
+                    ],
+                    source="inline_video",
+                    checkpoint=checkpoint,
+                )
+
+    selector = CanonicalQuestionSelector(CanonicalQuestionRepository(db))
+    items = await _select_quiz_items(
+        selector=selector,
+        count=count,
+        canonical_unit_id=unit.canonical_unit_id,
+        exclude_item_ids=exclude_item_ids,
+    )
+    if not items:
+        raise ValidationError("Không tìm thấy câu hỏi quiz canonical cho learning unit này.")
+
+    phase = "inline_midpoint_quiz" if checkpoint == "midpoint" else "inline_end_quiz"
+    session = Session(
+        user_id=user_id,
+        session_type=SessionType.quiz,
+        topic_id=None,
+        module_id=None,
+        canonical_unit_id=unit.id,
+        canonical_phase=phase,
+        total_questions=len(items),
+        correct_count=0,
+    )
+    db.add(session)
+    await db.flush()
+    await db.refresh(session)
+    await _sync_quiz_progress_state(
+        db,
+        user_id=user_id,
+        learning_unit_id=unit.id,
+        session_id=session.id,
+        item_ids=[item.item_id for item in items],
+        answered_item_ids=[],
+        current_stage="quiz_in_progress",
+        source="inline_video",
+        checkpoint=checkpoint,
+        quiz_phase=phase,
+        excluded_item_ids=exclude_item_ids,
+    )
+
+    return QuizStartResponse(
+        session_id=session.id,
+        learning_unit_id=unit.id,
+        total_questions=len(items),
+        questions=[canonical_item_to_quiz_question(item, learning_unit_id=unit.id) for item in items],
+        source="inline_video",
+        checkpoint=checkpoint,
     )
 
 
@@ -252,6 +393,9 @@ async def _answer_canonical_quiz_question(
         item_ids=item_ids_for_session,
         answered_item_ids=answered_item_ids,
         current_stage="quiz_in_progress",
+        source=_quiz_source_for_session(session),
+        checkpoint=_quiz_checkpoint_for_session(session),
+        quiz_phase=session.canonical_phase or "mini_quiz",
     )
 
     all_interactions_result = await db.execute(
@@ -310,15 +454,17 @@ async def _complete_canonical_quiz(
     db.add(session)
     await db.flush()
 
-    await LearningProgressRepository(db).upsert(
-        user_id=user_id,
-        course_id=unit.course_id,
-        learning_unit_id=unit.id,
-        status=LearningProgressStatus.completed,
-        last_opened_at=now,
-        completed_at=now,
-    )
-    await WaivedUnitRepository(db).delete_for_user_unit(user_id, unit.id)
+    should_complete_learning_unit = _should_complete_learning_unit(session)
+    if should_complete_learning_unit:
+        await LearningProgressRepository(db).upsert(
+            user_id=user_id,
+            course_id=unit.course_id,
+            learning_unit_id=unit.id,
+            status=LearningProgressStatus.completed,
+            last_opened_at=now,
+            completed_at=now,
+        )
+        await WaivedUnitRepository(db).delete_for_user_unit(user_id, unit.id)
     await _sync_quiz_progress_state(
         db,
         user_id=user_id,
@@ -326,7 +472,10 @@ async def _complete_canonical_quiz(
         session_id=session.id,
         item_ids=item_ids,
         answered_item_ids=item_ids,
-        current_stage="post_quiz",
+        current_stage="post_quiz" if should_complete_learning_unit else "watching",
+        source=_quiz_source_for_session(session),
+        checkpoint=_quiz_checkpoint_for_session(session),
+        quiz_phase=session.canonical_phase or "mini_quiz",
         extra_progress={
             "score_percent": quiz_score_percent,
             "completed_at": now.isoformat(),
@@ -352,7 +501,7 @@ async def _complete_canonical_quiz(
         misconceptions=[],
         time_total_seconds=time_total_sec,
         avg_time_per_question=avg_time_sec,
-        learning_path_updated=True,
+        learning_path_updated=should_complete_learning_unit,
     )
 
 
@@ -432,6 +581,18 @@ async def _current_quiz_item_ids(
         answered = [str(item_id) for item_id in progress.get("items_answered") or []]
         remaining = [str(item_id) for item_id in progress.get("items_remaining") or []]
         return list(dict.fromkeys(answered + remaining))
+    inline_quiz = progress.get("inline_quiz") if isinstance(progress, dict) else None
+    if isinstance(inline_quiz, dict):
+        for checkpoint_state in inline_quiz.values():
+            if not isinstance(checkpoint_state, dict):
+                continue
+            if str(checkpoint_state.get("active_session_id") or "") != str(session_id) and str(
+                checkpoint_state.get("completed_session_id") or ""
+            ) != str(session_id):
+                continue
+            answered = [str(item_id) for item_id in checkpoint_state.get("answered_item_ids") or []]
+            item_ids = [str(item_id) for item_id in checkpoint_state.get("item_ids") or []]
+            return list(dict.fromkeys(answered + item_ids))
 
     unit_item_result = await db.execute(
         select(QuestionBankItem.item_id).where(QuestionBankItem.unit_id == fallback_unit_canonical_id)
@@ -448,22 +609,66 @@ async def _sync_quiz_progress_state(
     item_ids: list[str],
     answered_item_ids: list[str],
     current_stage: str,
+    source: str = "standalone",
+    checkpoint: str | None = None,
+    quiz_phase: str = "mini_quiz",
+    excluded_item_ids: list[str] | None = None,
     extra_progress: dict | None = None,
 ) -> None:
     answered = list(dict.fromkeys(answered_item_ids))
+    normalized_item_ids = [str(item_id) for item_id in item_ids]
     answered_set = set(answered)
-    remaining = [item_id for item_id in item_ids if item_id not in answered_set]
+    remaining = [item_id for item_id in normalized_item_ids if item_id not in answered_set]
+    planner_repo = PlannerAuditRepository(db)
+    state = await planner_repo.get_session_state(user_id, CANONICAL_SESSION_ID)
+    existing_progress = (
+        dict(state.current_progress)
+        if state is not None and isinstance(state.current_progress, dict)
+        else {}
+    )
     progress = {
+        **existing_progress,
         "learning_unit_id": str(learning_unit_id),
         "quiz_id": str(session_id),
-        "quiz_phase": "mini_quiz",
+        "quiz_phase": quiz_phase,
         "items_answered": answered,
         "items_remaining": remaining,
     }
+    if source == "inline_video":
+        inline_quiz = (
+            dict(existing_progress.get("inline_quiz"))
+            if isinstance(existing_progress.get("inline_quiz"), dict)
+            else {}
+        )
+        existing_checkpoint_state = _inline_quiz_checkpoint_state(inline_quiz, checkpoint)
+        inline_quiz[checkpoint] = {
+            **(existing_checkpoint_state if isinstance(existing_checkpoint_state, dict) else {}),
+            "shown": True,
+            "active_session_id": None if current_stage == "post_quiz" else str(session_id),
+            "completed_session_id": str(session_id) if current_stage == "post_quiz" else None,
+            "excluded_item_ids": list(excluded_item_ids)
+            if excluded_item_ids is not None
+            else (
+                list(existing_checkpoint_state.get("excluded_item_ids") or [])
+                if isinstance(existing_checkpoint_state, dict)
+                else []
+            ),
+            "item_ids": normalized_item_ids,
+            "answered_item_ids": answered,
+            "quiz_phase": quiz_phase,
+        }
+        progress["inline_quiz"] = inline_quiz
     if extra_progress:
         progress.update(extra_progress)
+        if (
+            source == "inline_video"
+            and checkpoint
+            and isinstance(progress.get("inline_quiz"), dict)
+            and isinstance(progress["inline_quiz"].get(checkpoint), dict)
+        ):
+            progress["inline_quiz"][checkpoint].update(extra_progress)
 
-    await PlannerAuditRepository(db).upsert_session_state(
+    await planner_repo.upsert_session_state(
         user_id=user_id,
         session_id=CANONICAL_SESSION_ID,
         current_unit_id=learning_unit_id,
@@ -472,3 +677,104 @@ async def _sync_quiz_progress_state(
         last_activity=datetime.now(UTC),
         state_json={"canonical_runtime": True, "source": "quiz_progress"},
     )
+
+
+async def _select_quiz_items(
+    *,
+    selector: CanonicalQuestionSelector,
+    count: int,
+    canonical_unit_id: str,
+    exclude_item_ids: list[str],
+) -> list[QuestionBankItem]:
+    exclude_set = {str(item_id) for item_id in exclude_item_ids}
+    selected = await selector.select_for_phase(
+        phase="mini_quiz",
+        canonical_unit_ids=[canonical_unit_id],
+        count=count,
+    )
+    filtered = [item for item in selected if str(item.item_id) not in exclude_set]
+    if len(filtered) >= count or not exclude_set:
+        return filtered[:count]
+
+    remaining_candidates = await selector.repo.get_items_for_phase(
+        phase="mini_quiz",
+        canonical_unit_ids=[canonical_unit_id],
+        limit=max(count * 4, count + len(exclude_set) * 4),
+    )
+    ranked_remaining = sorted(
+        remaining_candidates,
+        key=lambda item: (
+            _SELECTOR_DIFFICULTY_ORDER.get(str(getattr(item, "difficulty", "medium")), 1),
+            str(getattr(item, "item_id", "")),
+        ),
+    )
+    chosen_ids = {str(item.item_id) for item in filtered}
+    for item in ranked_remaining:
+        item_id = str(item.item_id)
+        if item_id in exclude_set or item_id in chosen_ids:
+            continue
+        filtered.append(item)
+        chosen_ids.add(item_id)
+        if len(filtered) >= count:
+            break
+    return filtered[:count]
+
+
+def _inline_quiz_checkpoint_state(inline_quiz: dict | None, checkpoint: str | None) -> dict | None:
+    if checkpoint is None or not isinstance(inline_quiz, dict):
+        return None
+    checkpoint_state = inline_quiz.get(checkpoint)
+    return checkpoint_state if isinstance(checkpoint_state, dict) else None
+
+
+async def _get_existing_inline_quiz_session(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    session_id: uuid.UUID,
+) -> Session | None:
+    result = await db.execute(
+        select(Session).where(
+            Session.id == session_id,
+            Session.user_id == user_id,
+            Session.session_type == SessionType.quiz,
+        )
+    )
+    return result.scalar_one_or_none()
+
+
+async def _get_quiz_items_by_ids(
+    db: AsyncSession,
+    unit: LearningUnit,
+    item_ids: list[str],
+) -> list[QuestionBankItem]:
+    if not item_ids:
+        return []
+    result = await db.execute(
+        select(QuestionBankItem).where(
+            QuestionBankItem.unit_id == unit.canonical_unit_id,
+            QuestionBankItem.item_id.in_(item_ids),
+        )
+    )
+    items_by_id = {str(item.item_id): item for item in result.scalars().all()}
+    return [items_by_id[item_id] for item_id in item_ids if item_id in items_by_id]
+
+
+def _quiz_source_for_session(session: Session) -> str:
+    if session.canonical_phase in {"inline_midpoint_quiz", "inline_end_quiz"}:
+        return "inline_video"
+    return "standalone"
+
+
+def _quiz_checkpoint_for_session(session: Session) -> str | None:
+    if session.canonical_phase == "inline_midpoint_quiz":
+        return "midpoint"
+    if session.canonical_phase == "inline_end_quiz":
+        return "end"
+    return None
+
+
+def _should_complete_learning_unit(session: Session) -> bool:
+    checkpoint = _quiz_checkpoint_for_session(session)
+    if checkpoint is None:
+        return True
+    return checkpoint == "end"

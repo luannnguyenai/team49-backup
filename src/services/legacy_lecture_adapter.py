@@ -37,6 +37,26 @@ def normalize_legacy_lecture_id(
     return None
 
 
+def build_course_runtime_lecture_id(
+    *,
+    course_slug: str,
+    lecture_order: int | None,
+    explicit_lecture_id: str | None = None,
+    video_filename: str | None = None,
+) -> str | None:
+    """Build the lecture-runtime ID used by the legacy tutor/toc stack."""
+    if course_slug == "cs231n":
+        return normalize_legacy_lecture_id(explicit_lecture_id, lecture_order)
+
+    if video_filename:
+        return Path(video_filename).stem
+
+    if explicit_lecture_id:
+        return explicit_lecture_id.replace("_", "-")
+
+    return None
+
+
 def _load_bootstrap_units() -> list[dict[str, Any]]:
     with UNITS_FILE.open(encoding="utf-8") as handle:
         data = json.load(handle)
