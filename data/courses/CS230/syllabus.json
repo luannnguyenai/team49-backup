@@ -1,7 +1,7 @@
 {
   "course": "CS230: Deep Learning",
   "source": "Stanford CS230 Autumn 2025 local curated syllabus",
-  "note": "Schema aligned with CS224n/CS231n syllabus format. Canonical lecture order is contiguous for product/path usage. Original Stanford source lecture 7 is missing video/transcript locally, so source lectures 8, 9, and 10 are mapped to canonical lecture-07, lecture-08, and lecture-09. source_lecture_number preserves the original Stanford numbering for audit. assets.slides intentionally includes only lecture-specific decks for P1/P3 grounding; supplemental DeepLearning.AI module decks are listed separately to avoid biasing unit/KP extraction.",
+  "note": "Schema aligned with CS224n/CS231n syllabus format. Canonical lecture order is contiguous for product/path usage. Original Stanford source lecture 7 is missing video/transcript locally, so source lectures 8, 9, and 10 are mapped to canonical lecture-07, lecture-08, and lecture-09. source_lecture_number preserves the original Stanford numbering for audit. CS230 also has assigned online module decks from DeepLearning.AI; they are kept in assets.slides with descriptive filenames so users can download/read them, but P1 should prioritize video+transcript over these decks.",
   "lectures": [
     {
       "lecture_id": "lecture-01",
@@ -62,7 +62,11 @@
       "youtube_url": "https://www.youtube.com/watch?v=DNCn1BpCAUY",
       "custom_order": 2,
       "assets": {
-        "slides": "lecture_2.pdf",
+        "slides": [
+          "lecture_2.pdf",
+          "c1m1-introduction-to-deep-learning.pdf",
+          "c1m2-basics-of-neural-network-programming.pdf"
+        ],
         "video": "cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning.mp4",
         "transcript": "cs230-2025-lecture02-supervised-self-supervised-and-weakly-supervised-learning_transcript.txt"
       }
@@ -94,7 +98,10 @@
       "youtube_url": "https://www.youtube.com/watch?v=MGqQuQEUXhk",
       "custom_order": 3,
       "assets": {
-        "slides": null,
+        "slides": [
+          "c1m3-one-hidden-layer-neural-network.pdf",
+          "c1m4-deep-neural-networks.pdf"
+        ],
         "video": "cs230-2025-lecture03-full-cycle-of-a-deep-learning-project.mp4",
         "transcript": "cs230-2025-lecture03-full-cycle-of-a-deep-learning-project_transcript.txt"
       }
@@ -126,7 +133,11 @@
       "youtube_url": "https://www.youtube.com/watch?v=aWlRtOlacYM",
       "custom_order": 4,
       "assets": {
-        "slides": "lecture_4.pdf",
+        "slides": [
+          "lecture_4.pdf",
+          "c2m1-setting-up-your-ml-application.pdf",
+          "c2m2-optimization-algorithms.pdf"
+        ],
         "video": "cs230-2025-lecture04-adversarial-robustness-and-generative-models.mp4",
         "transcript": "cs230-2025-lecture04-adversarial-robustness-and-generative-models_transcript.txt"
       }
@@ -158,7 +169,12 @@
       "youtube_url": "https://www.youtube.com/watch?v=4E27qlfYw0A",
       "custom_order": 5,
       "assets": {
-        "slides": "lecture_5.pdf",
+        "slides": [
+          "lecture_5.pdf",
+          "c2m3-hyperparameter-tuning.pdf",
+          "c3m1-introduction-to-ml-strategy.pdf",
+          "c3m2-error-analysis.pdf"
+        ],
         "video": "cs230-2025-lecture05-deep-reinforcement-learning.mp4",
         "transcript": "cs230-2025-lecture05-deep-reinforcement-learning_transcript.txt"
       }
@@ -192,7 +208,11 @@
       "assets": {
         "slides": [
           "lecture_5-case-study.pdf",
-          "lecture5_guest.pdf"
+          "lecture5_guest.pdf",
+          "c4m1-convolutional-neural-networks.pdf",
+          "c4m2-cnn-case-studies.pdf",
+          "c4m3-object-detection.pdf",
+          "c4m4-face-recognition.pdf"
         ],
         "video": "cs230-2025-lecture06-ai-project-strategy.mp4",
         "transcript": "cs230-2025-lecture06-ai-project-strategy_transcript.txt"
@@ -231,7 +251,10 @@
       "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
       "custom_order": 7,
       "assets": {
-        "slides": "lecture_7.pdf",
+        "slides": [
+          "lecture_7.pdf",
+          "c5m1-recurrent-neural-networks.pdf"
+        ],
         "video": "cs230-2025-lecture07-agents-prompts-and-rag.mp4",
         "transcript": "cs230-2025-lecture07-agents-prompts-and-rag_transcript.txt"
       }
@@ -264,7 +287,9 @@
       "assets": {
         "slides": [
           "lecture_8.pdf",
-          "lecture_8_guest.pdf"
+          "lecture_8_guest.pdf",
+          "c5m2-nlp-and-word-embeddings.pdf",
+          "c5m3-sequence-to-sequence-models.pdf"
         ],
         "video": "cs230-2025-lecture08-career-advice-in-ai.mp4",
         "transcript": "cs230-2025-lecture08-career-advice-in-ai_transcript.txt"
@@ -296,35 +321,13 @@
       "youtube_url": "https://www.youtube.com/watch?v=Ozb1AR_F5MU",
       "custom_order": 9,
       "assets": {
-        "slides": "lecture_10.pdf",
+        "slides": [
+          "lecture_10.pdf",
+          "c5w4-transformers-intuition.pdf"
+        ],
         "video": "cs230-2025-lecture09-what-is-going-on-inside-my-model.mp4",
         "transcript": "cs230-2025-lecture09-what-is-going-on-inside-my-model_transcript.txt"
       }
-    }
-  ],
-  "supplemental_reading_slides": [
-    {
-      "source": "DeepLearning.AI module deck",
-      "intended_use": "optional reading only; exclude from P1/P3 grounding unless a later prompt explicitly asks for supplemental context",
-      "slides": [
-        "C1M1.pdf",
-        "C1M2.pdf",
-        "C1M3.pdf",
-        "C1M4.pdf",
-        "C2M1.pdf",
-        "C2M2.pdf",
-        "C2M3.pdf",
-        "C3M1.pdf",
-        "C3M2.pdf",
-        "C4M1.pdf",
-        "C4M2.pdf",
-        "C4M3.pdf",
-        "C4M4.pdf",
-        "C5M1.pdf",
-        "C5M2.pdf",
-        "C5M3.pdf",
-        "C5_W4.pdf"
-      ]
     }
   ],
   "reference_slides_no_video": []
