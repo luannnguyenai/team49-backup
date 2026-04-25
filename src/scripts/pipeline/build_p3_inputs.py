@@ -213,6 +213,18 @@ def _relevant_kp_catalog(
     return [global_kp_index[global_kp_id] for global_kp_id in ordered_ids if global_kp_id in global_kp_index]
 
 
+def _fallback_target_kp_ids(unit_rows: list[dict[str, Any]]) -> list[str]:
+    """Use main KP mappings when P3 salience has not been generated yet."""
+    target_ids: list[str] = []
+    for row in unit_rows:
+        if row.get("planner_role") != "main":
+            continue
+        global_kp_id = row.get("global_kp_id")
+        if isinstance(global_kp_id, str) and global_kp_id not in target_ids:
+            target_ids.append(global_kp_id)
+    return target_ids
+
+
 def _difficulty_window(value: Any) -> list[float] | None:
     if not isinstance(value, int | float):
         return None
@@ -376,7 +388,7 @@ def build_p3_inputs(
                 allow_code_mcq = _looks_code_oriented(unit, transcript_slice)
                 target_kp_ids = salience_row.get("target_kp_ids")
                 if not isinstance(target_kp_ids, list):
-                    target_kp_ids = []
+                    target_kp_ids = _fallback_target_kp_ids(unit_rows)
 
                 p3c_payload = {
                     "lecture_context": lecture_context,

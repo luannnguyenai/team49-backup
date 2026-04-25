@@ -330,7 +330,7 @@ def test_build_p3_inputs_creates_p3a_p3b_and_p3c_files(tmp_path: Path) -> None:
     assert p3c["video_clip_url"] == "https://www.youtube.com/watch?v=abc123"
     assert p3c["question_intent"] is None
     assert p3c["target_item_count"] is None
-    assert p3c["target_kp_ids"] == []
+    assert p3c["target_kp_ids"] == ["kp_cross_attention"]
     assert p3c["assessment_purpose"] == "lecture_reinforcement"
     assert p3c["youtube_url"] == "https://www.youtube.com/watch?v=abc123"
     assert p3c["allowed_item_types"] == ["concept_mcq"]
