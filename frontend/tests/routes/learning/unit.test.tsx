@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import LearningUnitLoading from "@/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/loading";
@@ -18,6 +18,20 @@ const apiMock = vi.hoisted(() => ({
 
 const courseApiMock = vi.hoisted(() => ({
   listUnits: vi.fn(),
+}));
+
+const learningSessionApiMock = vi.hoisted(() => ({
+  resume: vi.fn(),
+  updateProgress: vi.fn(),
+}));
+
+const canonicalQuizApiMock = vi.hoisted(() => ({
+  start: vi.fn(),
+}));
+
+const quizApiMock = vi.hoisted(() => ({
+  answer: vi.fn(),
+  complete: vi.fn(),
 }));
 
 const navigationMock = vi.hoisted(() => ({
@@ -49,6 +63,20 @@ vi.mock("@/lib/api", async () => {
     courseApi: {
       ...actual.courseApi,
       listUnits: courseApiMock.listUnits,
+    },
+    learningSessionApi: {
+      ...actual.learningSessionApi,
+      resume: learningSessionApiMock.resume,
+      updateProgress: learningSessionApiMock.updateProgress,
+    },
+    canonicalQuizApi: {
+      ...actual.canonicalQuizApi,
+      start: canonicalQuizApiMock.start,
+    },
+    quizApi: {
+      ...actual.quizApi,
+      answer: quizApiMock.answer,
+      complete: quizApiMock.complete,
     },
   };
 });
@@ -211,6 +239,22 @@ describe("learning unit page (US3)", () => {
     vi.clearAllMocks();
     apiMock.get.mockResolvedValue({ data: [] });
     courseApiMock.listUnits.mockResolvedValue([]);
+    learningSessionApiMock.resume.mockResolvedValue({
+      resume_route: "/courses/cs231n/learn/lecture-1-introduction",
+      current_unit_id: null,
+      current_stage: null,
+      current_progress: null,
+      last_activity: null,
+    });
+    learningSessionApiMock.updateProgress.mockResolvedValue({
+      learning_unit_id: "unit_lecture_01",
+      current_stage: "watching",
+      current_progress: {},
+      last_activity: "2026-04-25T00:00:00Z",
+    });
+    canonicalQuizApiMock.start.mockReset();
+    quizApiMock.answer.mockReset();
+    quizApiMock.complete.mockReset();
     vi.stubGlobal(
       "fetch",
       vi.fn(async () =>
@@ -297,6 +341,9 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByText("Neural networks learn layered visual features.")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Ask about this lecture...")).toBeInTheDocument();
       expect(screen.getByText("Giải thích ý chính của đoạn này dễ hiểu hơn")).toBeInTheDocument();
+      expect(screen.getByLabelText("Video progress rail")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Hide lessons panel" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Close tutor" })).toBeInTheDocument();
     });
   });
 
@@ -382,6 +429,97 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByText("AI Tutor")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Ask about this lecture...")).toBeInTheDocument();
     });
+  });
+
+  it("renders key ideas before timestamps in the desktop shell", async () => {
+    render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const keyIdeasHeading = await screen.findByText("Key ideas at this moment");
+    const timestampsHeading = await screen.findByText("Timestamps");
+
+    expect(
+      keyIdeasHeading.compareDocumentPosition(timestampsHeading) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("allows hiding and reopening both desktop side panels", async () => {
+    render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const hideLessons = await screen.findByRole("button", { name: "Hide lessons panel" });
+    fireEvent.click(hideLessons);
+    expect(screen.getByRole("button", { name: "Open lessons panel" })).toBeInTheDocument();
+
+    const closeTutor = screen.getByRole("button", { name: "Close tutor" });
+    fireEvent.click(closeTutor);
+    expect(screen.getByRole("button", { name: "Open AI Tutor panel" })).toBeInTheDocument();
+  });
+
+  it("renders chapter and checkpoint markers on the custom progress rail when duration is known", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("chapter-marker")).toHaveLength(2);
+      expect(screen.getAllByTestId("checkpoint-marker")).toHaveLength(2);
+    });
+  });
+
+  it("shows the mid-video quiz overlay prompt when the viewer reaches the midpoint", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
   });
 
   it("does not show AI Tutor toggle when tutor is disabled", async () => {
