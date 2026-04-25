@@ -1,6 +1,4 @@
 import unittest
-import uuid
-from unittest.mock import AsyncMock, MagicMock
 
 
 class TestPlacementAssessmentRepository(unittest.TestCase):
