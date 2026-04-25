@@ -234,9 +234,30 @@ def _difficulty_window(value: Any) -> list[float] | None:
     return [lower, upper]
 
 
-def _load_learning_salience_index(course_dir: Path, source_file: Path) -> dict[str, dict[str, Any]]:
-    processed_p3_path = course_dir / "processed" / "P3" / f"{source_file.stem.removesuffix('_p1')}.json"
-    if not processed_p3_path.exists():
+def _find_processed_p3_artifact(course_dir: Path, source_file: Path, lecture_id: str) -> Path | None:
+    stem = source_file.stem.removesuffix("_p1")
+    for stage_dir_name in ("P3", "P3a"):
+        stage_dir = course_dir / "processed" / stage_dir_name
+        direct_path = stage_dir / f"{stem}.json"
+        if direct_path.exists():
+            return direct_path
+
+        if not stage_dir.exists():
+            continue
+        for candidate in sorted(stage_dir.glob("*.json")):
+            try:
+                artifact = _load_json(candidate)
+            except json.JSONDecodeError:
+                continue
+            if artifact.get("lecture_id") == lecture_id:
+                return candidate
+
+    return None
+
+
+def _load_learning_salience_index(course_dir: Path, source_file: Path, lecture_id: str) -> dict[str, dict[str, Any]]:
+    processed_p3_path = _find_processed_p3_artifact(course_dir, source_file, lecture_id)
+    if processed_p3_path is None:
         return {}
 
     artifact = _load_json(processed_p3_path)
@@ -319,8 +340,6 @@ def build_p3_inputs(
             ]
             unit_kp_map_global = _globalize_unit_kp_map(unit_kp_map_local, local_to_global=local_to_global)
             kp_catalog = _relevant_kp_catalog(unit_kp_map_global, global_kp_index=global_kp_index)
-            learning_salience_index = _load_learning_salience_index(course_dir, source_file)
-
             lecture_context = {
                 "course_id": course_dir.name,
                 "lecture_id": lecture_id,
@@ -332,6 +351,7 @@ def build_p3_inputs(
                 "p2_output": str(p2_output_path),
                 "transcript_file": str(transcript_doc.path) if transcript_doc else None,
             }
+            learning_salience_index = _load_learning_salience_index(course_dir, source_file, lecture_id)
 
             p3a_payload = {
                 "lecture_context": lecture_context,

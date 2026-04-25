@@ -441,3 +441,49 @@ def test_build_p3_inputs_hydrates_p3c_from_processed_p3(tmp_path: Path) -> None:
     assert p3c["allowed_item_types"] == ["concept_mcq", "code_mcq"]
     assert p3c["forbidden_question_patterns"] == []
     assert p3c["code_evidence"] == []
+
+
+def test_build_p3_inputs_hydrates_p3c_from_processed_p3a_by_lecture_id(tmp_path: Path) -> None:
+    course_dir = tmp_path / "CS224n"
+    processed_dir = course_dir / "processed_sanitized"
+    transcript_dir = course_dir / "transcripts"
+    processed_p3a_dir = course_dir / "processed" / "P3a"
+    processed_dir.mkdir(parents=True)
+    transcript_dir.mkdir(parents=True)
+    processed_p3a_dir.mkdir(parents=True)
+
+    _write_json(processed_dir / "L7_p1.json", _make_p1_artifact())
+    _write_json(processed_p3a_dir / "CS224n__lecture07-attention__p3a.json", _make_p3_output())
+    (transcript_dir / "lecture07_transcript.txt").write_text(
+        "\n".join(
+            [
+                "Title: Lecture 7",
+                "URL: https://www.youtube.com/watch?v=abc123",
+                "Video ID: abc123",
+                "============================================================",
+                "",
+                "00:00:45",
+                "Cross attention uses weighted sums.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    p2_output = tmp_path / "p2_output.json"
+    _write_json(p2_output, _make_p2_output())
+
+    output_dir = tmp_path / "p3_inputs"
+    build_p3_inputs_cli.build_p3_inputs(
+        course_dirs=[course_dir],
+        p2_output_path=p2_output,
+        output_dir=output_dir,
+    )
+
+    p3c = json.loads(
+        (output_dir / "p3c" / "CS224n" / "L7_p1" / "local--lecture07-attention-seg2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert p3c["question_intent"] == "procedural"
+    assert p3c["target_item_count"] == 4
+    assert p3c["target_kp_ids"] == ["kp_cross_attention"]
