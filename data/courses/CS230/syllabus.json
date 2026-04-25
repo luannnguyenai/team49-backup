@@ -171,8 +171,6 @@
       "assets": {
         "slides": [
           "lecture_5.pdf",
-          "lecture_5-case-study.pdf",
-          "lecture5_guest.pdf",
           "C2M3.pdf",
           "C3M1.pdf",
           "C3M2.pdf"
@@ -209,6 +207,8 @@
       "custom_order": 6,
       "assets": {
         "slides": [
+          "lecture_5-case-study.pdf",
+          "lecture5_guest.pdf",
           "C4M1.pdf",
           "C4M2.pdf",
           "C4M3.pdf",
@@ -222,33 +222,37 @@
       "lecture_id": "lecture-07",
       "lecture_number": 7,
       "source_lecture_number": 8,
-      "lecture_title": "Lecture 7: Agents, Prompts, and RAG",
-      "title": "Lecture 7: Agents, Prompts, and RAG",
+      "lecture_title": "Lecture 7: Beyond the Model: Enhancing LLM Applications",
+      "title": "Lecture 7: Beyond the Model: Enhancing LLM Applications",
       "youtube_title": "Stanford CS230 | Autumn 2025 | Lecture 8: Agents, Prompts, and RAG",
-      "topic": "Agents, Prompts, and RAG",
+      "topic": "Beyond the Model: Enhancing LLM Applications",
       "speaker": null,
       "year": 2025,
       "type": "lecture",
       "course_phase": "Modern AI Systems",
       "core_topics": [
+        "LLM application enhancement",
         "Prompting",
         "Retrieval-augmented generation",
         "Agentic systems",
-        "LLM application patterns"
+        "Evaluation workflows",
+        "Multi-agent workflows"
       ],
       "scope_keywords": [
+        "llm applications",
+        "beyond the model",
         "agents",
         "prompting",
         "rag",
         "retrieval augmented generation",
-        "llm applications"
+        "evals",
+        "multi-agent workflows"
       ],
       "youtube_url": "https://www.youtube.com/watch?v=k1njvbBmfsw",
       "custom_order": 7,
       "assets": {
         "slides": [
-          "lecture_8.pdf",
-          "lecture_8_guest.pdf",
+          "lecture_7.pdf",
           "C5M1.pdf"
         ],
         "video": "cs230-2025-lecture07-agents-prompts-and-rag.mp4",
@@ -281,7 +285,10 @@
       "youtube_url": "https://www.youtube.com/watch?v=AuZoDsNmG_s",
       "custom_order": 8,
       "assets": {
-        "slides": null,
+        "slides": [
+          "lecture_8.pdf",
+          "lecture_8_guest.pdf"
+        ],
         "video": "cs230-2025-lecture08-career-advice-in-ai.mp4",
         "transcript": "cs230-2025-lecture08-career-advice-in-ai_transcript.txt"
       }
@@ -318,15 +325,5 @@
       }
     }
   ],
-  "reference_slides_no_video": [
-    {
-      "source_lecture_number": 7,
-      "reason": "Only slide deck is present locally; no matching video/transcript found.",
-      "assets": {
-        "slides": "lecture_7.pdf",
-        "video": null,
-        "transcript": null
-      }
-    }
-  ]
+  "reference_slides_no_video": []
 }
