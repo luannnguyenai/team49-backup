@@ -59,7 +59,7 @@ export async function startPlacementAssessment(
   req: PlacementStartRequest
 ): Promise<PlacementStartResponse> {
   return api
-    .post<PlacementStartResponse>("/api/placement/start", req)
+    .post<PlacementStartResponse>("/api/placement-assessment/start", req)
     .then((r) => r.data);
 }
 
@@ -67,14 +67,12 @@ export async function submitPlacementAssessment(
   req: PlacementSubmitRequest
 ): Promise<PlacementSubmitResponse> {
   return api
-    .post<PlacementSubmitResponse>("/api/placement/submit", req)
+    .post<PlacementSubmitResponse>("/api/placement-assessment/submit", req)
     .then((r) => r.data);
 }
 
-export async function getPlacementResults(
-  sessionId: string
-): Promise<PlacementResultsResponse> {
+export async function getPlacementResults(): Promise<PlacementResultsResponse> {
   return api
-    .get<PlacementResultsResponse>(`/api/placement/${sessionId}/results`)
+    .get<PlacementResultsResponse>("/api/placement-assessment/results")
     .then((r) => r.data);
 }
