@@ -20,5 +20,5 @@ test("public users can discover demo courses and inspect overview states", async
   await expect(
     page.getByRole("heading", { name: "Explore modern NLP and language modeling workflows" }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Coming soon" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Start learning" })).toBeEnabled();
 });

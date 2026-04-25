@@ -62,12 +62,12 @@ export function buildCatalogPageViewModel({
             hasRecommendations
               ? "✅ Skill test completed — personalized recommendations active."
               : "📋 Complete the skill assessment to unlock recommended courses.",
-            "CS231n is the only learnable demo course in this phase.",
-            "CS224n stays visible with a consistent coming-soon state.",
+            "Ready courses can be started immediately from the catalog.",
+            "Course availability follows the imported metadata and learning assets.",
           ]
         : [
-            "CS231n is the only learnable demo course in this phase.",
-            "CS224n stays visible with a consistent coming-soon state.",
+            "Ready courses can be started immediately from the catalog.",
+            "Course availability follows the imported metadata and learning assets.",
             "Start learning routes into auth and onboarding gates before the protected flow.",
           ],
     },
