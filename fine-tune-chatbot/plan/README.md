@@ -67,30 +67,39 @@ References for current constraints:
 
 ```
 P1  Environment        (0.5d)  Verify Blackwell stack (CUDA 12.8, PT 2.7+)
-P2  Data pipeline      (1–3d)  Extract from qa_history.jsonl + recover images
-P3  Fine-tune          (0.5d)  Unsloth QLoRA on VL-3B
-P4  Eval               (0.5d)  LLM-judge vs Gemini baseline
-P5  Quantize           (0.5d)  AWQ Int4 for vLLM
+P2a Data audit         (0.5d)  Schema/row counts before extraction
+P2  Data pipeline      (1–3d)  Extract + clean + ChatML format
+P3  Fine-tune          (0.5d)  Unsloth QLoRA on VL-3B (incl. tiny overfit smoke)
+P4  Eval               (0.5d)  Deterministic gates + LLM-judge vs Gemini
+P5  Quantize           (0.5d)  AWQ Int4 + feasibility gate (fallback to bnb/fp16)
 P6  Serve              (0.5d)  vLLM docker service
-P7  Codebase changes   (0.5d)  Patch chat_model_factory + config
+P7  Codebase changes   (0.5d)  Patch chat_model_factory + config + tests
 P8  Shadow + rollout   (1w)    A/B with 10% → 50% → 100%
 ```
 
 Total: ~5–7 working days excluding shadow period.
+
+File mapping: `01-environment.md` (P1), `02a-data-audit.md` (P2a),
+`02-data-pipeline.md` (P2), `03-finetune.md` (P3), `04-eval-quantize.md`
+(P4+P5), `05-serving-vllm.md` (P6), `06-codebase-changes.md` (P7),
+`07-rollout.md` (P8).
 
 ## Repository layout (this folder)
 
 ```
 fine-tune-chatbot/
 ├── plan/                        # ← you are here
-│   ├── README.md                # overview, decisions, roadmap
-│   ├── 01-environment.md        # Blackwell GPU stack setup
-│   ├── 02-data-pipeline.md      # SFT data extraction + image recovery
-│   ├── 03-finetune.md           # Unsloth QLoRA training
-│   ├── 04-eval-quantize.md      # eval harness + AWQ Int4
-│   ├── 05-serving-vllm.md       # vLLM docker service
-│   ├── 06-codebase-changes.md   # exact patches to src/
-│   └── 07-rollout.md            # shadow, rollout, risks, runbook
+│   ├── README.md                # overview, decisions, roadmap, governance
+│   ├── 01-environment.md        # P1 Blackwell GPU stack setup
+│   ├── 02a-data-audit.md        # P2a schema/row audit (run BEFORE P2)
+│   ├── 02-data-pipeline.md      # P2 SFT data extraction + ChatML format
+│   ├── 03-finetune.md           # P3 Unsloth QLoRA + tiny overfit smoke
+│   ├── 04-eval-quantize.md      # P4 eval gates + P5 AWQ quantize
+│   ├── 05-serving-vllm.md       # P6 vLLM docker service
+│   ├── 06-codebase-changes.md   # P7 patches to src/ + tests
+│   ├── 07-rollout.md            # P8 shadow, rollout, risks, runbook
+│   ├── datasets.md              # external dataset catalog for FT
+│   └── gpt_response.md          # GPT review (resolved in this README)
 ├── scripts/                     # (created during P2–P5)
 ├── data/                        # (gitignored) SFT datasets
 ├── checkpoints/                 # (gitignored) training output
@@ -118,8 +127,33 @@ fine-tune-chatbot/
 
 - [ ] vLLM serves `tutor-v1` endpoint, OpenAI-compatible, streaming works
 - [ ] Tool calling (`execute_python`) works end-to-end via `--tool-call-parser hermes`
-- [ ] LLM-judge score ≥ Gemini baseline − 5% on 500-sample eval set
+- [ ] **Deterministic eval gates pass** (see `04-eval-quantize.md` Gate 1)
+- [ ] **Per-category LLM-judge gates pass** vs Gemini baseline:
+  - Refusal: A score ≥ B − 0.1
+  - Tool correctness: A correct rate ≥ B − 10%
+  - Factual QA: A score ≥ B − 0.2
+  - Vision subset (frozen-tower v1): A score ≥ B − 0.5
+  - Aggregate pairwise A vs B win-rate ≥ 45%
 - [ ] p50 streaming latency ≤ 4s, p95 ≤ 10s on production traffic
-- [ ] Vision questions answered correctly on ≥ 80% of vision eval subset
 - [ ] Shadow A/B 1 week passes; 100% rollout with Gemini fallback armed
-- [ ] Zero net code changes to `llm_service.py`, `router.py`, LangGraph
+- [ ] No user-facing API route changes
+- [ ] Router stays on Gemini in v1 (no migration)
+- [ ] LangGraph topology preserved; only LLM provider injection point and
+      fallback wrapper change (see `06-codebase-changes.md`)
+
+## Data governance
+
+- **Local-only training data**: `qa_history.jsonl`, DB exports, lecture
+  transcripts, and lecture frames stay on the local machine. No upload to
+  Colab, Kaggle, or third-party services.
+- **PII scrub mandatory** before any data leaves the database (see P2 step 03).
+- **Synthetic data labeling**: any sample produced by a teacher model
+  (Gemini Pro / Claude) must carry `source: synthetic_<teacher_model>` in
+  the manifest.
+- **Eval outputs gitignored**: only aggregated reports (`eval/v1_report.md`)
+  are committed; raw per-sample outputs (`eval/runs/`) are local-only.
+- **Lecture content**: copyrighted course material — used internally for
+  training; do not redistribute weights externally without legal review.
+- **Retention**: training datasets and intermediate checkpoints are kept on
+  local disk; merged + quantized model weights are the only artifact mounted
+  into the production container.

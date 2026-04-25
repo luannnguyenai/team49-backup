@@ -1,11 +1,14 @@
 # P4 — Evaluation & P5 — Quantization
 
-## P4 — Eval (LLM-as-judge)
+## P4 — Eval (deterministic gates + LLM-as-judge)
 
 **Goal**: gate the merged model against current Gemini production baseline
 on 500 held-out samples before investing in quantization + serving.
 
 **Duration**: 0.5 day.
+
+**Two-tier gating**: deterministic checks run first (cheap, blocking). Only
+if Gate 1 passes do we run LLM-judge (Gate 2). Both must pass to proceed.
 
 ### Eval harness
 
@@ -79,14 +82,51 @@ Aggregate: `score = mean(correctness, on_scope, citation, tone)`.
 - B end-to-end correct:     88%
 ```
 
-### Pass criteria
+### Gate 1 — Deterministic (must pass before Gate 2)
 
-- A pairwise win-rate vs B ≥ **45%** (close enough; we're trading quality
-  for self-host)
-- A score ≥ B score − 0.3 absolute
-- A score ≥ C score + 0.5 (proves FT actually helped)
-- Tool-call valid format ≥ 85%
-- Vision subset ≥ B − 0.5
+Run via `fine-tune-chatbot/scripts/eval/run_assertions.py` on all 500 test
+samples. Hard fail if any threshold missed.
+
+| Check | Threshold |
+|---|---|
+| `tool_calls[].function.arguments` JSON parse success | ≥ 98% |
+| Tool name in allowlist `[execute_python]` | 100% |
+| No markdown-wrapped JSON inside tool args | 100% |
+| Sandbox exec success on generated code (subset of tool-using samples) | ≥ 90% |
+| Final answer references tool result when tool is used | ≥ 85% |
+| Timestamp format `HH:MM:SS` regex match (samples requiring citation) | ≥ 95% |
+| Language match (detect `q_lang == a_lang`) | ≥ 95% |
+| Refusal rate on BLOCKED fixture set | ≥ 90% |
+| Over-refusal on ON-SCOPE fixture set | ≤ 5% |
+| No image-grounded claims when no image is provided | ≥ 98% |
+| No "I don't know" when context contains the answer (fixture-based) | ≥ 90% |
+
+Fixture sets live at `fine-tune-chatbot/eval/fixtures/`:
+- `blocked.jsonl` — 50 off-topic / injection / persona-override attempts
+- `on_scope.jsonl` — 50 valid in-lecture questions
+- `tool_required.jsonl` — 50 questions that should trigger sandbox
+- `no_image.jsonl` — 30 text-only questions
+- `citation_required.jsonl` — 50 questions where timestamp citation is expected
+
+These fixtures are hand-curated once and **frozen** — they form the
+deterministic regression suite for v1, v2, and beyond.
+
+### Gate 2 — LLM-judge (per-category)
+
+Per-category gates vs Gemini baseline (B):
+
+| Category | Threshold |
+|---|---|
+| Refusal correctness | A score ≥ B − 0.1 |
+| Tool correctness end-to-end | A correct rate ≥ B − 10% |
+| Factual QA (core lecture content) | A score ≥ B − 0.2 |
+| Citation quality | A score ≥ B − 0.2 |
+| Tone / language adherence | A score ≥ B − 0.1 |
+| Vision subset (frozen-tower v1) | A score ≥ B − 0.5 |
+
+Plus aggregate:
+- A pairwise win-rate vs B ≥ **45%**
+- A score ≥ C (base) score + 0.5 (proves FT actually helped)
 
 ### If fail
 
@@ -177,16 +217,45 @@ If AWQ fails on VL architecture, fallback to:
 - **bitsandbytes 4-bit at serve time** in vLLM (`--quantization bitsandbytes`,
   slower but works on any architecture)
 
-### Quick quality re-check
+### Quantization feasibility gate (formal decision tree)
 
-After quantization, run 50 samples through AWQ model and compare with merged
-fp16 outputs. If pairwise judge tie-rate < 75%, AWQ degraded too much — try:
-- `q_group_size=64` (smaller groups, more memory but better quality)
-- GPTQ fallback
+Try in order; commit to first option that passes all checks:
+
+**Tier 1 — AWQ Int4 + vLLM `awq_marlin`** (preferred)
+- Quantize succeeds without error
+- vLLM loads model successfully (text path)
+- Vision smoke test: ≥ 8/10 lecture-frame samples produce coherent description
+- Tool-call smoke test: ≥ 18/20 samples emit valid JSON
+- Pairwise judge tie-rate vs merged fp16 ≥ 75% on 50 samples
+- → ship this; serving plan unchanged
+
+**Tier 2 — GPTQ Int4** (if AWQ fails)
+- Use `optimum.gptq` quantization
+- Same checks as Tier 1
+- vLLM `--quantization gptq_marlin`
+- → update serving compose flag, ship
+
+**Tier 3 — bitsandbytes Int4 at serve time** (if both above fail)
+- Skip offline quantization; serve merged fp16 weights
+- vLLM `--quantization bitsandbytes --load-format bitsandbytes`
+- Slower; lower max-num-seqs (likely 2–3 instead of 4)
+- → ship if quality good but expect higher latency
+
+**Tier 4 — BF16 merged + reduced concurrency** (last resort)
+- No quantization; serve merged 16-bit
+- `--max-num-seqs 1 --max-model-len 4096`
+- Single-user serving only; document in runbook
+- → ship only if Tier 1–3 all fail and quality is critical
+
+**Tier 5 — Abort self-hosting**
+- All quantization paths fail or quality unacceptable
+- Rollback decision: stay on Gemini, escalate to product team
+- Document failure mode in `eval/v1_quantize_failure.md`
 
 ### Exit criteria
 
-- [ ] `models/tutor-vl3b-v1-awq/` loads without error
-- [ ] Inference produces valid responses (text + vision + tool-call)
+- [ ] One of Tier 1–4 selected; document in `eval/v1_quantize_decision.md`
+- [ ] Selected model loads in vLLM (P6 smoke test)
 - [ ] Quality vs merged fp16: judge tie-rate ≥ 75%
-- [ ] Disk size ≤ 3GB, loads in vLLM (next phase)
+- [ ] Vision path verified working (not silently broken)
+- [ ] Tool-call path verified (Gate 1 deterministic checks repeated post-quant)
