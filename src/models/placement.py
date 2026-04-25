@@ -6,22 +6,23 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Numeric, Text
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Numeric, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
-from src.models.base import Base
+from src.models.base import Base, UUIDPrimaryKeyMixin
 
 
-class PlacementAssessmentResult(Base):
-    """Per-topic result row after a user completes placement assessment."""
+class PlacementAssessmentResult(UUIDPrimaryKeyMixin, Base):
+    """Per-topic placement assessment result (append-only).
+
+    Uses UUIDPrimaryKeyMixin for id but NOT TimestampMixin — the DB schema
+    has no updated_at column; created_at is manually declared to match.
+    """
 
     __tablename__ = "placement_assessment_results"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -35,7 +36,9 @@ class PlacementAssessmentResult(Base):
     score_pct: Mapped[Decimal] = mapped_column(Numeric(precision=5, scale=2), nullable=False)
     decision: Mapped[str] = mapped_column(Text, nullable=False)
     user_choice: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    raw_answers: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    raw_answers: Mapped[list] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'")
+    )
     theta_estimate: Mapped[Optional[Decimal]] = mapped_column(
         Numeric(precision=8, scale=4), nullable=True
     )
