@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.canonical import ItemKPMap, ItemPhaseMap, QuestionBankItem
+from src.models.canonical import ItemCalibration, ItemKPMap, ItemPhaseMap, QuestionBankItem
 
 
 class CanonicalQuestionRepository:
@@ -49,8 +49,6 @@ class CanonicalQuestionRepository:
         difficulty_prior is None when ItemCalibration row is absent.
         Caller uses _bucket_select_5 to pick 1 easy / 2 medium / 2 hard per unit.
         """
-        from src.models.canonical import ItemCalibration
-
         if not canonical_unit_ids:
             return []
 
