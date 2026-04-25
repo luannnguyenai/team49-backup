@@ -292,4 +292,165 @@ Files:
 
 Requirements:
 - Topic = yellow-ish card, section title, count.
-- Subtopic = purple-ish card, title, hours, status ico
+- Subtopic = purple-ish card, title, hours, status icon, recommended badge.
+- `aria-label` on clickable nodes.
+
+#### T4.2 `RoadmapCanvas`
+File: `RoadmapCanvas.tsx`
+
+Requirements:
+- Client-only component with `ReactFlow`, `MiniMap`, `Controls`, `Background`.
+- Uses `pathToFlow()`, `autoLayout()`, `computeRecommendedNext()`.
+- Node click selects section or unit.
+- Enable `onlyRenderVisibleElements` if available.
+
+#### T4.3 `TimelineBoard`
+File: `TimelineBoard.tsx`
+
+Requirements:
+- Prefer API `timeline` from store; fallback to `groupByWeek(items)` if timeline missing.
+- Render horizontal scroll columns.
+- If exactly one column and all source `week_number` are null, show note: "Lộ trình hiện đang được gom vào Tuần 1; phân bổ nhiều tuần sẽ được bổ sung sau."
+- Card click selects unit.
+
+#### T4.4 `LearningUnitCard`
+File: `cards/LearningUnitCard.tsx`
+
+Requirements:
+- Status visual same as SubtopicNode.
+- Shows section, hours, recommended badge.
+
+#### T4.5 `LearningUnitDrawer`
+File: `LearningUnitDrawer.tsx`
+
+Requirements:
+- If `selectedItemId` present: show unit detail.
+- Lazy-fetch `learningUnitApi.contentById(learning_unit_id)` on open.
+- If `selectedSectionKey` present: show section summary + units list.
+- Unit drawer status pills: `pending`, `in_progress`, `completed`, `skipped`.
+- Previous/Next buttons based on global `order_index` instead of prerequisite chips.
+- Escape and overlay close.
+- Focus close button on open and restore previous focus on close.
+
+#### T4.6 `EmptyState`
+File: `EmptyState.tsx`
+
+Requirements:
+- Do not call generate directly.
+- CTA choices:
+  - If user not onboarded: `/onboarding`.
+  - Else `/dashboard` with copy: "Chọn khóa học để tạo lộ trình".
+
+---
+
+### Wave 5 — Page integration
+
+#### T5.1 Replace `/learn` placeholder
+File: `frontend/app/learn/page.tsx`
+
+Requirements:
+- Render a client `LearningPathShell` component.
+- Header: title + `ViewToggle` only. No Replan button.
+- Body: loading skeleton, error retry, empty state, graph/timeline.
+- Drawer mounted once.
+
+#### T5.2 Add skeletons/errors
+Can live inside `LearningPathShell` initially.
+
+Requirements:
+- Graph skeleton: fake nodes.
+- Timeline skeleton: fake columns.
+- Error: Vietnamese message + Retry button.
+
+---
+
+### Wave 6 — Verification
+
+#### T6.1 Unit tests
+Files:
+- `frontend/tests/unit/learning-path/presenters.test.ts`
+- `frontend/tests/unit/learning-path/status.test.ts`
+
+Run:
+
+```bash
+cd frontend && npm run test -- learning-path
+```
+
+#### T6.2 Typecheck
+
+```bash
+cd frontend && npm run type-check
+```
+
+#### T6.3 Build
+
+```bash
+cd frontend && npm run build
+```
+
+#### T6.4 E2E smoke
+File: `frontend/tests/e2e/learning-path-roadmap.spec.ts`
+
+Flow:
+- Login/register seeded user with path.
+- Go `/learn`.
+- Assert graph or timeline renders.
+- Click unit card/node.
+- Drawer opens.
+- Click completed status.
+- Assert visual changed.
+
+---
+
+## 4. Risks and Mitigations
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Timeline only has Week 1 | Medium | UI explains backend has not allocated multiple weeks yet. |
+| Duplicate section titles | Medium | Use first order index in section key; future backend should expose `section_id`. |
+| ReactFlow SSR issues | High | Dynamic import with `ssr: false`. |
+| Bundle growth | Medium | Dynamic import RoadmapCanvas from start. |
+| Drawer content fetch fails | Low | Non-blocking error; keep status actions usable. |
+| Skip status can be forbidden by backend policy | Medium | Revert optimistic update and show API error. |
+
+---
+
+## 5. Deferred Follow-up Phases
+
+### Phase 2 — Backend weekly allocation
+- Add `assign_week_numbers()` to `recommendation_engine.py`.
+- Use user availability/deadline if available.
+- Persist `week_number` in `recommended_path_json`.
+- Timeline becomes truly multi-week.
+
+### Phase 3 — Replan
+- Add body-less endpoint `POST /api/learning-path/regenerate-current` or expose `goal_preferences` safely.
+- Add `ReplanButton` with confirm dialog.
+
+### Phase 4 — Real prerequisite DAG
+- Add `prereq_unit_ids` or graph endpoint.
+- Replace sequential edges with prerequisite edges.
+- Add prerequisite chips in drawer.
+
+### Phase 5 — Mastery heatmap
+- Add `mastery_score` to path item or separate endpoint.
+- Visual heatmap on nodes/cards.
+
+---
+
+## 6. Definition of Done
+
+- [ ] All Phase 1 requirements in `SPEC.md` pass.
+- [ ] No broken generate/replan call exists in UI.
+- [ ] No UI assumes prereq data that backend does not expose.
+- [ ] Timeline handles Week 1 fallback honestly.
+- [ ] Unit tests and typecheck pass.
+- [ ] Build passes.
+- [ ] E2E happy path pass or documented blocker.
+
+---
+
+*Plan folder: `visualize/`*  
+*Plan revised: 2026-04-25*  
+*Next step: implement Wave 1.*
