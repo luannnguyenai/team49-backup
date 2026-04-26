@@ -133,6 +133,7 @@ async def api_list_course_units(course_slug: str) -> dict:
                 "status": u["status"],
                 "unit_type": u["unit_type"],
                 "order_index": u["order_index"],
+                "lecture_label": u.get("lecture_label"),
             }
             for u in units
         ]

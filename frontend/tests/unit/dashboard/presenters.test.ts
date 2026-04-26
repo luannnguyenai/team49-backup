@@ -4,7 +4,12 @@ import {
   buildDashboardCourseCardModel,
   filterDashboardCourses,
 } from "@/features/dashboard/presenters";
-import { CS224N_ITEM, CS231N_ITEM, CS231N_RECOMMENDED } from "@/tests/fixtures/coursePlatform";
+import {
+  COMING_SOON_ITEM,
+  CS224N_ITEM,
+  CS231N_ITEM,
+  CS231N_RECOMMENDED,
+} from "@/tests/fixtures/coursePlatform";
 
 describe("dashboard presenters", () => {
   it("routes ready courses to their own start page", () => {
@@ -15,9 +20,9 @@ describe("dashboard presenters", () => {
   });
 
   it("routes coming-soon courses to their own overview page", () => {
-    const model = buildDashboardCourseCardModel(CS224N_ITEM);
+    const model = buildDashboardCourseCardModel(COMING_SOON_ITEM);
 
-    expect(model.href).toBe("/courses/cs224n");
+    expect(model.href).toBe("/courses/upcoming-ai");
     expect(model.ctaLabel).toBe("Xem tổng quan");
   });
 
