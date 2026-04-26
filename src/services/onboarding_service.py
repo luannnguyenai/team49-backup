@@ -17,6 +17,7 @@ from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.schemas.onboarding import (
     CourseSummary,
+    ExperienceLevelResponse,
     GoalsResponse,
     KnownTopicsResponse,
     SectionSummary,
@@ -195,3 +196,26 @@ async def save_known_topics(
     await db.commit()
 
     return KnownTopicsResponse(saved=True, count=len(known_ids))
+
+
+async def save_experience_level(
+    db: AsyncSession,
+    user_id: UUID,
+    level: str,
+) -> ExperienceLevelResponse:
+    """Persist the user's experience level.
+
+    When level='beginner', also sets placement_status='skipped' so the
+    recommendation engine bypasses Phase A entirely — double-write to ensure
+    correctness regardless of whether the frontend also calls known-topics.
+    """
+    repo = GoalPreferenceRepository(db)
+    kwargs: dict = {"experience_level": level}
+    if level == "beginner":
+        kwargs["placement_status"] = "skipped"
+
+    await repo.upsert_for_user(user_id, **kwargs)
+    await db.commit()
+
+    placement_status = kwargs.get("placement_status")
+    return ExperienceLevelResponse(level=level, placement_status=placement_status)

@@ -44,10 +44,22 @@ export async function getTopics(goalIds: string[]): Promise<TopicsResponse> {
 
 export async function saveKnownTopics(
   topicUnitIds: string[]
-): Promise<{ saved: boolean; count: number }> {
+): Promise<{ saved: boolean; count: number; skip_placement: boolean }> {
   return api
-    .post<{ saved: boolean; count: number }>("/api/users/me/onboarding/known-topics", {
-      topic_unit_ids: topicUnitIds,
-    })
+    .post<{ saved: boolean; count: number; skip_placement: boolean }>(
+      "/api/users/me/onboarding/known-topics",
+      { topic_unit_ids: topicUnitIds },
+    )
+    .then((r) => r.data);
+}
+
+export async function saveExperienceLevel(
+  level: "beginner" | "experienced"
+): Promise<{ level: string; placement_status: string | null }> {
+  return api
+    .post<{ level: string; placement_status: string | null }>(
+      "/api/users/me/onboarding/experience-level",
+      { level },
+    )
     .then((r) => r.data);
 }

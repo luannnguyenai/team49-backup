@@ -19,20 +19,24 @@ export interface PlacementTopicResult {
 // State shape
 // ---------------------------------------------------------------------------
 
+export type ExperienceLevel = "beginner" | "experienced";
+
 interface OnboardingState {
   currentStep: OnboardingStep;
   goalIds: string[];                    // selected goals from Step 1
-  knownUnitIds: string[];               // selected known topics from Step 2
-  desiredSectionIds: string[];          // from Step 3
+  experienceLevel: ExperienceLevel | null; // selected at Step 2
+  knownUnitIds: string[];               // selected known topics from Step 3 (experienced only)
+  desiredSectionIds: string[];          // from Step 4
   weeklyHours: number | null;           // from Step 4
   learningMethod: string | null;        // from Step 5
   placementSessionId: string | null;    // UUID returned by POST /placement/start
   placementResults: PlacementTopicResult[] | null;
-  skipPlacementAssessment: boolean;     // set when user clicks "I'm a newcomer"
+  skipPlacementAssessment: boolean;     // true when experienceLevel='beginner'
 
   // Actions
   setStep: (step: OnboardingStep) => void;
   setGoalIds: (ids: string[]) => void;
+  setExperienceLevel: (level: ExperienceLevel) => void;
   setKnownUnitIds: (ids: string[]) => void;
   setDesiredSectionIds: (ids: string[]) => void;
   setWeeklyHours: (hours: number) => void;
@@ -50,6 +54,7 @@ interface OnboardingState {
 const initialState = {
   currentStep: 1 as OnboardingStep,
   goalIds: [],
+  experienceLevel: null as ExperienceLevel | null,
   knownUnitIds: [],
   desiredSectionIds: [],
   weeklyHours: null,
@@ -68,6 +73,7 @@ export const useOnboardingStore = create<OnboardingState>()((set) => ({
 
   setStep: (step) => set({ currentStep: step }),
   setGoalIds: (ids) => set({ goalIds: ids }),
+  setExperienceLevel: (level) => set({ experienceLevel: level }),
   setKnownUnitIds: (ids) => set({ knownUnitIds: ids }),
   setDesiredSectionIds: (ids) => set({ desiredSectionIds: ids }),
   setWeeklyHours: (hours) => set({ weeklyHours: hours }),
