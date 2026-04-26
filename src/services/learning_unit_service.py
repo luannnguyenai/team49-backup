@@ -22,7 +22,7 @@ from typing import Any
 from sqlalchemy import select
 
 from src.data_paths import CS231N_DIR, UNITS_FILE as BOOTSTRAP_UNITS_FILE
-from src.data_paths import CS224N_DIR
+from src.data_paths import CS224N_DIR, CS230_DIR
 from src.models.canonical import CanonicalUnit
 from src.models.course import Course, CourseSection, LearningUnit
 from src.schemas.course import (
@@ -307,6 +307,8 @@ def _course_dir_for_slug(course_slug: str) -> Path | None:
         return CS231N_DIR
     if course_slug == "cs224n":
         return CS224N_DIR
+    if course_slug == "cs230":
+        return CS230_DIR
     return None
 
 
