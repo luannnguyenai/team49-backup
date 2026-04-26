@@ -17,21 +17,18 @@ const GOALS = [
     emoji: "🖼️",
     label: "Computer Vision",
     description: "Học cách máy tính 'nhìn' và hiểu ảnh",
-    badge: "CS231n",
   },
   {
     id: "nlp",
     emoji: "💬",
     label: "Natural Language Processing",
     description: "Dạy máy hiểu và sinh ngôn ngữ",
-    badge: "CS224n",
   },
   {
     id: "deep_learning",
     emoji: "🧠",
     label: "Deep Learning",
     description: "Nền tảng deep learning, neural networks, optimization",
-    badge: "CS230",
   },
 ] as const;
 
@@ -120,17 +117,7 @@ export default function StepGoalSelection({ onNext }: Props) {
                 {goal.description}
               </span>
 
-              {/* Course code badge */}
-              <span
-                className={cn(
-                  "mt-1 inline-flex w-fit items-center rounded-md px-2 py-0.5 text-xs font-medium",
-                  isSelected
-                    ? "bg-primary-100 text-primary-700 dark:bg-primary-800/40 dark:text-primary-300"
-                    : "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400",
-                )}
-              >
-                {goal.badge}
-              </span>
+
             </button>
           );
         })}
