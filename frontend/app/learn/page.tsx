@@ -1,24 +1,20 @@
-// app/learn/page.tsx
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import LearningPathShell from "@/features/learning-path/components/LearningPathShell";
 
-export const metadata: Metadata = { title: "Học tập" };
+export const metadata: Metadata = { title: "Lộ trình học" };
 
 export default function LearnPage() {
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Học tập
-        </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-          Tiếp tục lộ trình học tập được cá nhân hoá.
-        </p>
-      </div>
-      <div className="card flex min-h-64 items-center justify-center">
-        <p style={{ color: "var(--text-muted)" }} className="text-sm">
-          Nội dung học sẽ được tải ở đây.
-        </p>
-      </div>
-    </div>
+    <Suspense
+      fallback={
+        <div className="flex h-40 items-center justify-center">
+          <LoadingSpinner size="md" />
+        </div>
+      }
+    >
+      <LearningPathShell />
+    </Suspense>
   );
 }
