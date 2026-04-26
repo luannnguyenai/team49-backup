@@ -256,6 +256,9 @@ class GoalPreference(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     goal_embedding_version: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     derived_from_course_set_hash: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # 'pending' = not yet assessed, 'completed' = finished placement test,
+    # 'skipped' = user clicked "I'm a newcomer — skip". NULL = legacy row.
+    placement_status: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     user: Mapped["User"] = relationship("User", back_populates="goal_preferences", lazy="select")  # type: ignore[name-defined]
 

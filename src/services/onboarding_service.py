@@ -168,8 +168,16 @@ async def save_known_topics(
     user_id: UUID,
     topic_unit_ids: list[UUID],
 ) -> KnownTopicsResponse:
-    """Store known unit IDs in goal_preferences.notes as JSON."""
+    """Store known unit IDs in goal_preferences.notes as JSON.
+
+    Empty topic_unit_ids signals a newcomer skip: sets placement_status='skipped'.
+    """
     repo = GoalPreferenceRepository(db)
+
+    if not topic_unit_ids:
+        await repo.upsert_for_user(user_id, placement_status="skipped")
+        await db.commit()
+        return KnownTopicsResponse(saved=True, count=0, skip_placement=True)
 
     # Load existing record to merge, if present
     existing = await repo.get_by_user_id(user_id)
