@@ -90,7 +90,7 @@ function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
-  const { goalIds, knownUnitIds } = useOnboardingStore();
+  const { goalIds, knownUnitIds, skipPlacementAssessment } = useOnboardingStore();
 
   // Current step (0-indexed) and transition direction
   const [step, setStep] = useState(0);
@@ -394,7 +394,10 @@ function OnboardingPageInner() {
                     }}
                     onBack={() => navigate(0)}
                     onSkipAll={() => {
-                      useOnboardingStore.getState().setKnownUnitIds([]);
+                      const store = useOnboardingStore.getState();
+                      store.setKnownUnitIds([]);
+                      store.setSkipPlacementAssessment(true);
+                      saveKnownTopics([]).catch(() => {});
                       navigate(3);
                     }}
                   />
@@ -487,7 +490,11 @@ function OnboardingPageInner() {
                         const valid = await trigger(fields);
                         if (!valid) return;
                       }
-                      navigate(4);
+                      if (skipPlacementAssessment) {
+                        handleSubmit(submitOnboarding)();
+                      } else {
+                        navigate(4);
+                      }
                     }}
                     rightIcon={<Sparkles className="h-4 w-4" />}
                   >

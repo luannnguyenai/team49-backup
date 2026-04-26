@@ -98,6 +98,7 @@ async def _generate_canonical_learning_path(
         row.topic_unit_id: float(row.score_pct) for row in placement_results
     }
     has_placement = len(placement_by_unit) > 0
+    placement_skipped = goal.placement_status == "skipped"
 
     generated_at = datetime.now(UTC)
     items: list[PathItemResponse] = []
@@ -117,7 +118,11 @@ async def _generate_canonical_learning_path(
         estimated_hours = 0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
 
         # Determine Phase A/B tag and rationale
-        if not has_placement:
+        if placement_skipped:
+            phase_tag = None
+            is_locked = False
+            rationale_log = "placement_skipped_by_user"
+        elif not has_placement:
             phase_tag = None
             is_locked = False
             rationale_log = None
@@ -178,7 +183,7 @@ async def _generate_canonical_learning_path(
         )
 
     # Sort: Phase A interleaved round-robin by course, then Phase B
-    if has_placement:
+    if has_placement and not placement_skipped:
         phase_a = [i for i in items if i.phase_tag == "phase_a"]
         phase_b = [i for i in items if i.phase_tag == "phase_b"]
 

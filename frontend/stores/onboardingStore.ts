@@ -28,6 +28,7 @@ interface OnboardingState {
   learningMethod: string | null;        // from Step 5
   placementSessionId: string | null;    // UUID returned by POST /placement/start
   placementResults: PlacementTopicResult[] | null;
+  skipPlacementAssessment: boolean;     // set when user clicks "I'm a newcomer"
 
   // Actions
   setStep: (step: OnboardingStep) => void;
@@ -38,6 +39,7 @@ interface OnboardingState {
   setLearningMethod: (method: string) => void;
   setPlacementSessionId: (id: string) => void;
   setPlacementResults: (results: PlacementTopicResult[]) => void;
+  setSkipPlacementAssessment: (skip: boolean) => void;
   reset: () => void;
 }
 
@@ -54,6 +56,7 @@ const initialState = {
   learningMethod: null,
   placementSessionId: null,
   placementResults: null,
+  skipPlacementAssessment: false,
 };
 
 // ---------------------------------------------------------------------------
@@ -71,5 +74,6 @@ export const useOnboardingStore = create<OnboardingState>()((set) => ({
   setLearningMethod: (method) => set({ learningMethod: method }),
   setPlacementSessionId: (id) => set({ placementSessionId: id }),
   setPlacementResults: (results) => set({ placementResults: results }),
+  setSkipPlacementAssessment: (skip) => set({ skipPlacementAssessment: skip }),
   reset: () => set(initialState),
 }));

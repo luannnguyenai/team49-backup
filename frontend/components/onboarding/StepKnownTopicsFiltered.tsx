@@ -212,8 +212,22 @@ export default function StepKnownTopicsFiltered({ onNext, onBack, onSkipAll }: P
         );
       })}
 
+      {/* Skip newcomer button — centered, prominent */}
+      <div className="flex flex-col items-center gap-2 pt-2">
+        <button
+          type="button"
+          onClick={() => { setKnownUnitIds([]); onSkipAll(); }}
+          className="flex items-center gap-2 rounded-xl border-2 border-blue-500 bg-white px-6 py-3 text-base font-semibold text-blue-600 transition-all duration-150 hover:bg-blue-50 active:scale-[0.98] dark:bg-transparent dark:hover:bg-blue-950/20"
+        >
+          → Tôi là người mới — bỏ qua đánh giá đầu vào
+        </button>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          Hệ thống sẽ bỏ qua test đánh giá đầu vào và sinh lộ trình từ đầu cho bạn.
+        </p>
+      </div>
+
       {/* Navigation */}
-      <div className="flex items-center gap-3 pt-2">
+      <div className="flex items-center gap-3 pt-1">
         <button
           type="button"
           onClick={onBack}
@@ -225,14 +239,6 @@ export default function StepKnownTopicsFiltered({ onNext, onBack, onSkipAll }: P
           }}
         >
           Quay lại
-        </button>
-        <button
-          type="button"
-          onClick={() => { setKnownUnitIds([]); onSkipAll(); }}
-          className="text-sm underline"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Tôi là người mới hoàn toàn — bỏ qua
         </button>
         <button
           type="button"

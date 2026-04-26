@@ -61,3 +61,4 @@ class KnownTopicsRequest(BaseModel):
 class KnownTopicsResponse(BaseModel):
     saved: bool
     count: int
+    skip_placement: bool = False
