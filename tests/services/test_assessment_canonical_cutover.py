@@ -6,7 +6,6 @@ from uuid import uuid4
 import pytest
 
 from src.exceptions import ValidationError
-from src.schemas.assessment import AssessmentStartRequest
 from src.services import assessment_service
 
 
@@ -76,17 +75,6 @@ async def test_assessment_requires_canonical_unit_ids():
             learning_unit_ids=[],
             canonical_unit_ids=None,
         )
-
-
-def test_assessment_start_request_accepts_course_sized_canonical_unit_lists():
-    canonical_unit_ids = [f"local::lecture::{index}" for index in range(156)]
-
-    payload = AssessmentStartRequest(
-        canonical_unit_ids=canonical_unit_ids,
-        phase="placement",
-    )
-
-    assert payload.canonical_unit_ids == canonical_unit_ids
 
 
 @pytest.mark.asyncio

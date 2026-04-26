@@ -22,13 +22,7 @@ import StepDesiredSections from "@/components/onboarding/StepDesiredSections";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
-import { bootstrapDataApi, canonicalSectionApi } from "@/lib/api";
-import {
-  buildBootstrapTopicGroups,
-  estimateSelectedCourseHours,
-  normalizeBootstrapCourses,
-  normalizeBootstrapTopics,
-} from "@/lib/bootstrap-onboarding";
+import { canonicalSectionApi } from "@/lib/api";
 import {
   buildCanonicalAssessmentContext,
   writePendingCanonicalAssessment,
@@ -36,11 +30,7 @@ import {
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-import type {
-  BootstrapCourseOption,
-  BootstrapTopicOption,
-  CourseSectionDetail,
-} from "@/types";
+import type { CourseSectionDetail } from "@/types";
 
 // ---------------------------------------------------------------------------
 // Step metadata
@@ -53,7 +43,7 @@ const STEPS = [
   },
   {
     title: "Bạn muốn học gì?",
-    subtitle: "Chọn khóa học bạn quan tâm",
+    subtitle: "Chọn section bạn quan tâm",
   },
   {
     title: "Thời gian của bạn",
@@ -68,7 +58,7 @@ const STEPS = [
 // Fields that must pass validation before advancing from each step
 const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   [],                                                // Step 0: optional
-  ["selected_course_ids"],                           // Step 1: required
+  ["desired_section_ids"],                           // Step 1: required
   ["available_hours_per_week", "target_deadline"],   // Step 2: required
   ["preferred_method"],                              // Step 3: required
 ];
@@ -88,9 +78,7 @@ function OnboardingPageInner() {
   const [animKey, setAnimKey] = useState(0);
 
   // Content data loaded from the API
-  const [canonicalSections, setCanonicalSections] = useState<CourseSectionDetail[]>([]);
-  const [bootstrapCourses, setBootstrapCourses] = useState<BootstrapCourseOption[]>([]);
-  const [bootstrapTopics, setBootstrapTopics] = useState<BootstrapTopicOption[]>([]);
+  const [sections, setSections] = useState<CourseSectionDetail[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
   // ── React Hook Form ──────────────────────────────────────────────────────
@@ -104,7 +92,7 @@ function OnboardingPageInner() {
   } = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: {
-      known_topic_slugs: [],
+      known_unit_ids: [],
       desired_section_ids: [],
       selected_course_ids: [],
       available_hours_per_week: 5,
@@ -117,20 +105,13 @@ function OnboardingPageInner() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [courses, topics, list] = await Promise.all([
-          bootstrapDataApi.courses(),
-          bootstrapDataApi.topics(),
-          canonicalSectionApi.list(),
-        ]);
+        const list = await canonicalSectionApi.list();
         const details = await Promise.all(
           list.map((section) => canonicalSectionApi.detail(section.id))
         );
-        const normalizedCourses = normalizeBootstrapCourses(courses);
-        setBootstrapCourses(normalizedCourses);
-        setBootstrapTopics(normalizeBootstrapTopics(topics, normalizedCourses));
-        setCanonicalSections(details);
+        setSections(details);
       } catch {
-        // Keep bootstrap/canonical lists empty; user can still complete the form
+        // On API failure: keep sections empty; user can still complete the form
       } finally {
         setLoadingData(false);
       }
@@ -139,20 +120,9 @@ function OnboardingPageInner() {
   }, []);
 
   // Derive the selected sections objects (needed for schedule estimate)
-  const selectedCourseIds = watch("selected_course_ids");
-  const selectedCourses = bootstrapCourses.filter((course) =>
-    selectedCourseIds.includes(course.canonical_course_id)
-  );
-  const topicGroups = buildBootstrapTopicGroups(bootstrapTopics, bootstrapCourses);
-  const topicCountsByCourseId = bootstrapTopics.reduce<Record<string, number>>((acc, topic) => {
-    if (topic.canonical_course_id) {
-      acc[topic.canonical_course_id] = (acc[topic.canonical_course_id] ?? 0) + 1;
-    }
-    return acc;
-  }, {});
-  const totalSelectedCourseHours = estimateSelectedCourseHours(
-    bootstrapTopics,
-    selectedCourseIds,
+  const selectedSectionIds = watch("desired_section_ids");
+  const selectedSections = sections.filter((section) =>
+    selectedSectionIds.includes(section.id)
   );
 
   // ── Navigation ───────────────────────────────────────────────────────────
@@ -181,19 +151,16 @@ function OnboardingPageInner() {
     try {
       const next = searchParams.get("next");
       const canonicalContext = buildCanonicalAssessmentContext({
-        sections: canonicalSections,
-        knownUnitIds: [],
-        desiredSectionIds: [],
-        selectedCourseIds: data.selected_course_ids,
+        sections,
+        knownUnitIds: data.known_unit_ids,
+        desiredSectionIds: data.desired_section_ids,
       });
-      await onboard({
-        known_unit_ids: [],
-        desired_section_ids: [],
-        selected_course_ids: data.selected_course_ids,
-        available_hours_per_week: data.available_hours_per_week,
-        target_deadline: data.target_deadline,
-        preferred_method: data.preferred_method,
-      });
+      const selectedCourseIds = Array.from(
+        new Set(
+          selectedSections.map((section) => section.canonical_course_id ?? section.course_id)
+        )
+      );
+      await onboard({ ...data, selected_course_ids: selectedCourseIds });
       writePendingCanonicalAssessment(canonicalContext);
 
       if (canonicalContext.canonicalUnitIds.length > 0) {
@@ -351,16 +318,16 @@ function OnboardingPageInner() {
                 {step === 0 && (
                   <Controller
                     control={control}
-                    name="known_topic_slugs"
+                    name="known_unit_ids"
                     render={({ field }) => (
                       <StepKnownUnits
-                        topicGroups={topicGroups}
-                        selectedSlugs={field.value}
-                        onToggle={(slug) =>
+                        sections={sections}
+                        selectedIds={field.value}
+                        onToggle={(id) =>
                           field.onChange(
-                            field.value.includes(slug)
-                              ? field.value.filter((x) => x !== slug)
-                              : [...field.value, slug]
+                            field.value.includes(id)
+                              ? field.value.filter((x) => x !== id)
+                              : [...field.value, id]
                           )
                         }
                       />
@@ -372,11 +339,10 @@ function OnboardingPageInner() {
                 {step === 1 && (
                   <Controller
                     control={control}
-                    name="selected_course_ids"
+                    name="desired_section_ids"
                     render={({ field }) => (
                       <StepDesiredSections
-                        courses={bootstrapCourses}
-                        topicCountsByCourseId={topicCountsByCourseId}
+                        sections={sections}
                         selectedIds={field.value}
                         onToggle={(id) =>
                           field.onChange(
@@ -385,7 +351,7 @@ function OnboardingPageInner() {
                               : [...field.value, id]
                           )
                         }
-                        error={errors.selected_course_ids?.message}
+                        error={errors.desired_section_ids?.message}
                       />
                     )}
                   />
@@ -397,8 +363,7 @@ function OnboardingPageInner() {
                     register={register}
                     errors={errors}
                     watch={watch}
-                    selectedCourseCount={selectedCourses.length}
-                    totalHours={totalSelectedCourseHours}
+                    selectedSections={selectedSections}
                   />
                 )}
 

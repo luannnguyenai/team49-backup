@@ -6,7 +6,7 @@
 import { BookOpen, Check, Clock, Code2, Database, Layers } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { BootstrapCourseOption } from "@/types";
+import type { CourseSectionDetail } from "@/types";
 
 const MODULE_CONFIGS: Array<{
   gradient: string;
@@ -20,16 +20,14 @@ const MODULE_CONFIGS: Array<{
 ];
 
 interface Props {
-  courses: BootstrapCourseOption[];
-  topicCountsByCourseId: Record<string, number>;
+  sections: CourseSectionDetail[];
   selectedIds: string[];
   onToggle: (id: string) => void;
   error?: string;
 }
 
 export default function StepDesiredSections({
-  courses,
-  topicCountsByCourseId,
+  sections,
   selectedIds,
   onToggle,
   error,
@@ -39,7 +37,7 @@ export default function StepDesiredSections({
   return (
     <div className="space-y-3">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Chọn 1 hoặc nhiều khóa học bạn muốn theo đuổi.
+        Chọn 1 hoặc nhiều sections bạn muốn học trong khoá này.
         {selectedIds.length > 0 && (
           <span className="ml-2 font-semibold text-primary-600">
             ({selectedIds.length} đã chọn)
@@ -47,22 +45,25 @@ export default function StepDesiredSections({
         )}
       </p>
 
-      {courses.length === 0 && (
+      {sections.length === 0 && (
         <div className="py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-          Không có khóa học nào để hiển thị.
+          Không có sections nào để hiển thị.
         </div>
       )}
 
-      {courses.map((course, idx) => {
-        const isSelected = selectedSet.has(course.canonical_course_id);
+      {sections.map((section, idx) => {
+        const isSelected = selectedSet.has(section.id);
         const { gradient, Icon } = MODULE_CONFIGS[idx % MODULE_CONFIGS.length];
-        const topicCount = topicCountsByCourseId[course.canonical_course_id] ?? 0;
+
+        const totalHours = section.learning_units
+          .reduce((sum, unit) => sum + (unit.estimated_hours_beginner ?? 0), 0)
+          .toFixed(1);
 
         return (
           <button
-            key={course.canonical_course_id}
+            key={section.id}
             type="button"
-            onClick={() => onToggle(course.canonical_course_id)}
+            onClick={() => onToggle(section.id)}
             className={cn(
               "w-full rounded-xl border-2 p-4 text-left",
               "transition-all duration-150 hover:shadow-md active:scale-[0.99]",
@@ -94,7 +95,7 @@ export default function StepDesiredSections({
                     className="font-semibold"
                     style={{ color: "var(--text-primary)" }}
                   >
-                    {course.title}
+                    {section.title}
                   </h3>
                   {isSelected && (
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-600">
@@ -103,12 +104,12 @@ export default function StepDesiredSections({
                   )}
                 </div>
 
-                {course.short_description && (
+                {section.description && (
                   <p
                     className="mt-0.5 line-clamp-2 text-sm"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    {course.short_description}
+                    {section.description}
                   </p>
                 )}
 
@@ -119,14 +120,14 @@ export default function StepDesiredSections({
                     style={{ color: "var(--text-muted)" }}
                   >
                     <Layers className="h-3.5 w-3.5" />
-                    {topicCount} topics
+                    {section.learning_units_count} units
                   </span>
                   <span
                     className="flex items-center gap-1 text-xs"
                     style={{ color: "var(--text-muted)" }}
                   >
                     <Clock className="h-3.5 w-3.5" />
-                    {course.hero_badge ?? "Đang mở"}
+                    ~{totalHours} giờ
                   </span>
                 </div>
               </div>

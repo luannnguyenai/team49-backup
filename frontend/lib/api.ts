@@ -156,8 +156,6 @@ import type {
   AnswerInput,
   AssessmentResultResponse,
   AssessmentStartResponse,
-  BootstrapCourse,
-  BootstrapTopic,
   CanonicalAssessmentStartPayload,
   CourseCatalogItem,
   CourseSectionDetail,
@@ -187,11 +185,6 @@ import type {
   User,
   UserSkillOverview,
 } from "@/types";
-
-const staticDataClient = axios.create({
-  baseURL: "",
-  timeout: 15_000,
-});
 
 export const assessmentApi = {
   start: (learningUnitIds: string[]) =>
@@ -267,18 +260,6 @@ export const canonicalSectionApi = {
         mapCourseCatalogItemToSectionCard(course),
       ),
     ),
-};
-
-export const bootstrapDataApi = {
-  courses: () =>
-    staticDataClient
-      .get<BootstrapCourse[]>("/data/bootstrap/courses.json")
-      .then((r) => r.data),
-
-  topics: () =>
-    staticDataClient
-      .get<BootstrapTopic[]>("/data/bootstrap/topics.json")
-      .then((r) => r.data),
 };
 
 export const learningUnitApi = {
