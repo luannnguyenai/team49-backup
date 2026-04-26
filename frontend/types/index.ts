@@ -345,25 +345,14 @@ export interface InlineQuizStartPayload {
 }
 
 export interface LearningSessionInlineQuizState {
-  shown?: boolean;
-  active_session_id?: string | null;
-  completed_session_id?: string | null;
-  excluded_item_ids?: string[];
-  item_ids?: string[];
-  answered_item_ids?: string[];
-  quiz_phase?: string | null;
-}
-
-export interface LearningSessionInlineQuizProgress {
-  midpoint?: LearningSessionInlineQuizState | null;
-  end?: LearningSessionInlineQuizState | null;
+  [key: string]: unknown;
 }
 
 export interface LearningUnitProgressPayload {
   video_progress_s?: number | null;
   video_finished?: boolean;
   watch_percent?: number | null;
-  inline_quiz?: LearningSessionInlineQuizProgress | null;
+  inline_quiz?: LearningSessionInlineQuizState | null;
 }
 
 export interface LearningUnitProgressResponse {
@@ -535,8 +524,7 @@ export interface HistoryResponse {
 }
 
 export interface QuestionInteractionDetail {
-  question_id: string | null;
-  canonical_item_id?: string | null;
+  question_id: string;
   sequence_position: number;
   learning_unit_title: string;
   stem_text: string;

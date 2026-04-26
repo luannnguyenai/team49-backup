@@ -432,9 +432,7 @@ export default function InContextTutor({
             disabled={streaming}
           />
           <button
-            onClick={() => {
-              void handleSend();
-            }}
+            onClick={handleSend}
             disabled={streaming || !input.trim()}
             className="shrink-0 rounded-lg p-2 transition-colors disabled:opacity-30"
             style={{ color: "#2563eb" }}
