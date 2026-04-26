@@ -39,13 +39,14 @@ const SECTION_PALETTES = [
 interface Props {
   onNext: () => void;
   onBack: () => void;
+  onSkipAll: () => void;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
+export default function StepKnownTopicsFiltered({ onNext, onBack, onSkipAll }: Props) {
   const goalIds = useOnboardingStore((s) => s.goalIds);
   const knownUnitIds = useOnboardingStore((s) => s.knownUnitIds);
   const setKnownUnitIds = useOnboardingStore((s) => s.setKnownUnitIds);
@@ -109,6 +110,10 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
 
   return (
     <div className="space-y-6">
+      <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
+        Chỉ chọn topic bạn thật sự đã học rồi — bạn sẽ phải làm test ngắn để đánh giá năng lực.
+      </div>
+
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
         Chọn những units bạn đã nắm — hệ thống sẽ đánh giá kiến thức của bạn với{" "}
         <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -207,11 +212,11 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
       })}
 
       {/* Navigation */}
-      <div className="flex gap-3 pt-2">
+      <div className="flex items-center gap-3 pt-2">
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-xl border-2 px-6 py-3 text-sm font-semibold transition-all duration-150 hover:shadow-sm active:scale-[0.99]"
+          className="rounded-xl border-2 px-6 py-3 text-sm font-semibold transition-all duration-150 hover:shadow-sm active:scale-[0.99]"
           style={{
             borderColor: "var(--border)",
             color: "var(--text-primary)",
@@ -222,8 +227,16 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
         </button>
         <button
           type="button"
+          onClick={() => { setKnownUnitIds([]); onSkipAll(); }}
+          className="text-sm underline"
+          style={{ color: "var(--text-muted)" }}
+        >
+          Tôi là người mới hoàn toàn — bỏ qua
+        </button>
+        <button
+          type="button"
           onClick={onNext}
-          className="flex-1 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99]"
+          className="ml-auto rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99]"
         >
           Tiếp tục
         </button>
