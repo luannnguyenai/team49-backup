@@ -1,10 +1,10 @@
 "use client";
 // app/onboarding/page.tsx
-// Multi-step onboarding flow (4 steps) for new users.
-// Collects: known units · desired sections · schedule · learning method
+// Multi-step onboarding flow (5 steps) for new users.
+// Step 1: Goal selection · Step 2: Known topics · Step 3: Schedule · Step 4: Learning method · Step 5: Placement assessment
 // On submit: PUT /api/users/me/onboarding → redirect to /assessment
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,10 +17,12 @@ import {
 
 import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import StepKnownUnits from "@/components/onboarding/StepKnownUnits";
+import StepGoalSelection from "@/components/onboarding/StepGoalSelection";
+import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepDesiredSections from "@/components/onboarding/StepDesiredSections";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
+import StepPlacementTest from "@/components/onboarding/StepPlacementTest";
 
 import { bootstrapDataApi, canonicalSectionApi } from "@/lib/api";
 import {
@@ -34,6 +36,7 @@ import {
   writePendingCanonicalAssessment,
 } from "@/lib/canonical-assessment-session";
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
+import type { TopicDecision } from "@/lib/placement-assessment-api";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import type {
@@ -48,7 +51,11 @@ import type {
 
 const STEPS = [
   {
-    title: "Bạn đã biết gì?",
+    title: "Mục tiêu học tập",
+    subtitle: "Bạn muốn học gì?",
+  },
+  {
+    title: "Kiến thức hiện tại",
     subtitle: "Tick những units bạn đã nắm",
   },
   {
@@ -63,7 +70,15 @@ const STEPS = [
     title: "Phương pháp học",
     subtitle: "Cách bạn học tốt nhất",
   },
+  {
+    title: "Đánh giá kiến thức",
+    subtitle: "Kiểm tra những gì bạn đã biết",
+  },
 ] as const;
+
+// Steps that use the page-level nav buttons (Steps 2 and 3, 0-indexed)
+// Steps 0, 1, and 4 have their own internal navigation.
+const STEPS_WITH_PAGE_NAV = new Set([2, 3]);
 
 // Fields that must pass validation before advancing from each step
 const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
@@ -81,11 +96,16 @@ function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
+  const { goalIds, knownUnitIds } = useOnboardingStore();
 
   // Current step (0-indexed) and transition direction
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [animKey, setAnimKey] = useState(0);
+
+  // UUID for the placement assessment session — generated once when Step 5 is entered
+  const [placementSessionId, setPlacementSessionId] = useState<string | null>(null);
+  const enteredStep5 = useRef(false);
 
   // Content data loaded from the API
   const [canonicalSections, setCanonicalSections] = useState<CourseSectionDetail[]>([]);
@@ -139,6 +159,14 @@ function OnboardingPageInner() {
     loadData();
   }, []);
 
+  // Generate the placement session UUID when entering Step 5 (only once)
+  useEffect(() => {
+    if (step === 5 && !enteredStep5.current) {
+      enteredStep5.current = true;
+      setPlacementSessionId(crypto.randomUUID());
+    }
+  }, [step]);
+
   // Derive the selected sections objects (needed for schedule estimate)
   const selectedCourseIds = watch("selected_course_ids");
   const selectedCourses = bootstrapCourses.filter((course) =>
@@ -156,18 +184,83 @@ function OnboardingPageInner() {
     selectedCourseIds,
   );
 
+  // ── Core submit (shared by placement complete/skip and direct submit) ────
+  const submitOnboarding = useCallback(
+    async (data: OnboardingFormData) => {
+      clearError();
+      try {
+        const next = searchParams.get("next");
+        const canonicalContext = buildCanonicalAssessmentContext({
+          sections,
+          knownUnitIds: data.known_unit_ids,
+          desiredSectionIds: data.desired_section_ids,
+        });
+        const selectedCourseIds = Array.from(
+          new Set(
+            selectedSections.map((section) => section.canonical_course_id ?? section.course_id)
+          )
+        );
+        // Merge goal_ids and known_unit_ids from store (Steps 1 & 2 write to store, not form)
+        await onboard({
+          ...data,
+          goal_ids: goalIds,
+          known_unit_ids: knownUnitIds,
+          selected_course_ids: selectedCourseIds,
+        });
+        writePendingCanonicalAssessment(canonicalContext);
+
+        if (canonicalContext.canonicalUnitIds.length > 0) {
+          const assessmentTarget = next
+            ? `/assessment?next=${encodeURIComponent(next)}`
+            : "/assessment";
+          router.push(assessmentTarget);
+        } else {
+          router.push(next ?? "/dashboard");
+        }
+      } catch {
+        /* error message is shown from the store */
+      }
+    },
+    [clearError, searchParams, sections, selectedSections, goalIds, knownUnitIds, onboard, router]
+  );
+
+  // ── Submit handler (used by Steps 2–4 form submit button) ────────────────
+  const onSubmit = async (data: OnboardingFormData) => {
+    await submitOnboarding(data);
+  };
+
+  // ── Placement callbacks (Step 5) ─────────────────────────────────────────
+  const handlePlacementComplete = useCallback(
+    (_decisions: TopicDecision[]) => {
+      // Decisions already persisted to store by StepPlacementTest; trigger submit
+      handleSubmit(submitOnboarding)();
+    },
+    [handleSubmit, submitOnboarding]
+  );
+
+  const handlePlacementSkip = useCallback(() => {
+    handleSubmit(submitOnboarding)();
+  }, [handleSubmit, submitOnboarding]);
+
   // ── Navigation ───────────────────────────────────────────────────────────
+  const navigate = useCallback(
+    (targetStep: number) => {
+      clearError();
+      setDirection(targetStep > step ? "forward" : "backward");
+      setAnimKey((k) => k + 1);
+      setStep(targetStep);
+    },
+    [step, clearError]
+  );
+
   const goNext = useCallback(async () => {
     const fields = STEP_VALIDATION_FIELDS[step];
     if (fields.length > 0) {
       const valid = await trigger(fields);
       if (!valid) return;
     }
-    clearError();
-    setDirection("forward");
-    setAnimKey((k) => k + 1);
-    setStep((s) => s + 1);
-  }, [step, trigger, clearError]);
+    navigate(step + 1);
+  }, [step, trigger, navigate]);
 
   const goBack = useCallback(() => {
     clearError();
@@ -212,9 +305,12 @@ function OnboardingPageInner() {
   };
 
   // ── Derived values ────────────────────────────────────────────────────────
+  const TOTAL_STEPS = STEPS.length;  // 6 entries but step 5 is placement (shown as "Step 6 of 6")
+  // Display steps 0–4 in progress bar (step 5 is the placement assessment, shown inline)
   const isFirstStep = step === 0;
-  const isLastStep = step === STEPS.length - 1;
-  const progressPercent = Math.round(((step + 1) / STEPS.length) * 100);
+  const isLastFormStep = step === 4; // Step 4 = learning method → submit triggers placement
+  const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
+  const progressPercent = Math.round(((step + 1) / TOTAL_STEPS) * 100);
   const { title, subtitle } = STEPS[step];
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -268,7 +364,7 @@ function OnboardingPageInner() {
               </span>
             </div>
             <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              {step + 1} / {STEPS.length}
+              {step + 1} / {TOTAL_STEPS}
             </span>
           </div>
 
@@ -348,7 +444,7 @@ function OnboardingPageInner() {
                     : "animate-slide-in"
                 }
               >
-                {/* Step 0 — Known units */}
+                {/* Step 0 — Goal selection */}
                 {step === 0 && (
                   <Controller
                     control={control}
@@ -369,8 +465,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 1 — Desired sections */}
-                {step === 1 && (
+                {/* Step 2 — Desired sections */}
+                {step === 2 && (
                   <Controller
                     control={control}
                     name="selected_course_ids"
@@ -392,8 +488,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 2 — Schedule */}
-                {step === 2 && (
+                {/* Step 3 — Schedule */}
+                {step === 3 && (
                   <StepTimeSchedule
                     register={register}
                     errors={errors}
@@ -403,24 +499,58 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 3 — Learning method */}
-                {step === 3 && (
+                {/* Step 4 — Learning method */}
+                {step === 4 && (
                   <StepLearningMethod
                     register={register}
                     watch={watch}
                     errors={errors}
                   />
                 )}
+
+                {/* Step 5 — Placement assessment */}
+                {step === 5 && placementSessionId && (
+                  <StepPlacementTest
+                    sessionId={placementSessionId}
+                    unitIds={knownUnitIds}
+                    onComplete={handlePlacementComplete}
+                    onSkip={handlePlacementSkip}
+                  />
+                )}
               </div>
 
-              {/* ── Navigation buttons ── */}
-              <div
-                className={cn(
-                  "mt-7 flex gap-3",
-                  isFirstStep ? "justify-end" : "justify-between"
-                )}
-              >
-                {!isFirstStep && (
+              {/* ── Navigation buttons (only for Steps 2 and 3) ── */}
+              {showPageNav && (
+                <div
+                  className={cn(
+                    "mt-7 flex gap-3",
+                    isFirstStep ? "justify-end" : "justify-between"
+                  )}
+                >
+                  {!isFirstStep && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={goBack}
+                      leftIcon={<ChevronLeft className="h-4 w-4" />}
+                    >
+                      Quay lại
+                    </Button>
+                  )}
+
+                  <Button
+                    type="button"
+                    onClick={goNext}
+                    rightIcon={<ChevronRight className="h-4 w-4" />}
+                  >
+                    Tiếp tục
+                  </Button>
+                </div>
+              )}
+
+              {/* ── Step 4 (Learning method) nav: Back + Submit to trigger placement ── */}
+              {isLastFormStep && (
+                <div className="mt-7 flex gap-3 justify-between">
                   <Button
                     type="button"
                     variant="secondary"
@@ -429,31 +559,22 @@ function OnboardingPageInner() {
                   >
                     Quay lại
                   </Button>
-                )}
-
-                {!isLastStep ? (
                   <Button
                     type="button"
-                    onClick={goNext}
-                    rightIcon={<ChevronRight className="h-4 w-4" />}
+                    onClick={async () => {
+                      const fields = STEP_VALIDATION_FIELDS[step];
+                      if (fields.length > 0) {
+                        const valid = await trigger(fields);
+                        if (!valid) return;
+                      }
+                      navigate(5);
+                    }}
+                    rightIcon={<Sparkles className="h-4 w-4" />}
                   >
-                    {isFirstStep ? "Tiếp theo" : "Tiếp tục"}
+                    Tiếp tục
                   </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    loading={isLoading}
-                    size="lg"
-                    leftIcon={
-                      !isLoading ? (
-                        <Sparkles className="h-4 w-4" />
-                      ) : undefined
-                    }
-                  >
-                    Bắt đầu đánh giá
-                  </Button>
-                )}
-              </div>
+                </div>
+              )}
             </form>
           )}
         </div>
