@@ -5,7 +5,7 @@
 
 import { Check, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { CourseSectionDetail } from "@/types";
+import type { BootstrapTopicGroup } from "@/types";
 
 const SECTION_PALETTES = [
   { dot: "bg-blue-500", ring: "ring-blue-200 dark:ring-blue-800" },
@@ -16,62 +16,61 @@ const SECTION_PALETTES = [
 ] as const;
 
 interface Props {
-  sections: CourseSectionDetail[];
-  selectedIds: string[];
-  onToggle: (id: string) => void;
+  topicGroups: BootstrapTopicGroup[];
+  selectedSlugs: string[];
+  onToggle: (slug: string) => void;
 }
 
 export default function StepKnownUnits({
-  sections,
-  selectedIds,
+  topicGroups,
+  selectedSlugs,
   onToggle,
 }: Props) {
-  const selectedSet = new Set(selectedIds);
+  const selectedSet = new Set(selectedSlugs);
 
   return (
     <div className="space-y-6">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Chọn những units bạn đã nắm — hệ thống sẽ đánh giá kiến thức của bạn
-        với <span className="font-semibold" style={{ color: "var(--text-primary)" }}>5 câu hỏi mỗi unit</span>.{" "}
+        Chọn những topic bạn đã nắm — hệ thống sẽ dùng thông tin này để hiểu nền tảng hiện tại của bạn.{" "}
         <span className="font-medium" style={{ color: "var(--text-primary)" }}>
           Bỏ qua nếu bạn mới bắt đầu.
         </span>
-        {selectedIds.length > 0 && (
+        {selectedSlugs.length > 0 && (
           <span className="ml-2 font-semibold text-primary-600">
-            ({selectedIds.length} unit · {selectedIds.length * 5} câu hỏi)
+            ({selectedSlugs.length} topic đã chọn)
           </span>
         )}
       </p>
 
-      {sections.length === 0 && (
+      {topicGroups.length === 0 && (
         <div className="py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-          Không có units nào để hiển thị.
+          Không có topics nào để hiển thị.
         </div>
       )}
 
-      {sections.map((section, sectionIdx) => {
+      {topicGroups.map((group, sectionIdx) => {
         const palette = SECTION_PALETTES[sectionIdx % SECTION_PALETTES.length];
 
         return (
-          <div key={section.id}>
+          <div key={group.course_key}>
             <div className="mb-3 flex items-center gap-2">
               <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", palette.dot)} />
               <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                {section.title}
+                {group.course_title}
               </span>
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                · {section.learning_units.length} units
+                · {group.topics.length} topics
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {section.learning_units.map((unit) => {
-                const isSelected = selectedSet.has(unit.id);
+              {group.topics.map((topic) => {
+                const isSelected = selectedSet.has(topic.slug);
                 return (
                   <button
-                    key={unit.id}
+                    key={topic.slug}
                     type="button"
-                    onClick={() => onToggle(unit.id)}
+                    onClick={() => onToggle(topic.slug)}
                     className={cn(
                       "relative flex flex-col gap-2 rounded-xl border-2 p-3 text-left",
                       "transition-all duration-150 hover:shadow-sm active:scale-[0.97]",
@@ -99,7 +98,7 @@ export default function StepKnownUnits({
                       )}
                       style={{ color: isSelected ? undefined : "var(--text-primary)" }}
                     >
-                      {unit.title}
+                      {topic.name}
                     </span>
 
                     <span
@@ -107,8 +106,8 @@ export default function StepKnownUnits({
                       style={{ color: "var(--text-muted)" }}
                     >
                       <Clock className="h-3 w-3" />
-                      {unit.estimated_hours_beginner != null
-                        ? `${Math.round(unit.estimated_hours_beginner * 60)} phút`
+                      {topic.estimated_hours_beginner != null
+                        ? `${Math.round(topic.estimated_hours_beginner * 60)} phút`
                         : "—"}
                     </span>
                   </button>

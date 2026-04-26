@@ -62,6 +62,45 @@ export interface OnboardingPayload {
   preferred_method: "reading" | "video";
 }
 
+export interface BootstrapCourse {
+  id: string;
+  slug: string;
+  title: string;
+  short_description: string;
+  status: string;
+  visibility: string;
+  cover_image_url: string | null;
+  hero_badge: string | null;
+  primary_subject: string | null;
+  sort_order: number;
+}
+
+export interface BootstrapCourseOption extends BootstrapCourse {
+  canonical_course_id: string;
+}
+
+export interface BootstrapTopic {
+  slug: string;
+  module_slug: string;
+  name: string;
+  description: string;
+  order_index: number;
+  estimated_hours_beginner: number | null;
+  estimated_hours_intermediate: number | null;
+  estimated_hours_review: number | null;
+}
+
+export interface BootstrapTopicOption extends BootstrapTopic {
+  course_slug: string | null;
+  canonical_course_id: string | null;
+}
+
+export interface BootstrapTopicGroup {
+  course_key: string;
+  course_title: string;
+  topics: BootstrapTopicOption[];
+}
+
 // ---- Content API shapes ----
 
 export interface LearningUnitSelectionItem {
