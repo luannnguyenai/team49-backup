@@ -24,7 +24,7 @@ from sqlalchemy import select
 from src.data_paths import CS231N_DIR, UNITS_FILE as BOOTSTRAP_UNITS_FILE
 from src.data_paths import CS224N_DIR
 from src.models.canonical import CanonicalUnit
-from src.models.course import Course, CourseSection, LearningUnit
+from src.models.course import Course, LearningUnit
 from src.schemas.course import (
     LearningUnitContentPayload,
     LearningUnitCourseSummary,
@@ -34,7 +34,6 @@ from src.schemas.course import (
 )
 from src.services.asset_signing import build_signed_asset_url
 from src.services.legacy_lecture_adapter import (
-    build_course_runtime_lecture_id,
     build_tutor_bridge_payload,
     normalize_legacy_lecture_id,
 )
@@ -135,30 +134,10 @@ def get_first_unit_slug(course_slug: str) -> str | None:
 
 
 def list_course_units(course_slug: str) -> list[dict[str, Any]]:
-    """List one video-backed lecture entry per course, ordered by lecture number."""
+    """List all learning units for a course, ordered by order_index."""
     units = [u for u in load_bootstrap_units() if u["course_slug"] == course_slug]
     units.sort(key=lambda u: u.get("order_index", 0))
-
-    video_units: list[dict[str, Any]] = []
-    for unit in units:
-        order_index = unit.get("order_index", 0)
-        video_filename = unit.get("video_filename") or _find_course_video_filename(
-            course_slug,
-            order_index,
-        )
-        if not video_filename:
-            continue
-        video_units.append(
-            {
-                "slug": unit["slug"],
-                "title": unit["title"],
-                "status": unit["status"],
-                "unit_type": "lecture",
-                "order_index": order_index,
-                "lecture_label": f"Lecture {order_index:02d}",
-            }
-        )
-    return video_units
+    return units
 
 
 async def list_course_units_db_first(course_slug: str) -> list[dict[str, Any]]:
@@ -223,16 +202,14 @@ async def get_learning_unit_payload(
     # Determine if tutor should be enabled
     # Tutor is enabled when the unit is ready and has video content
     tutor_enabled = unit_row["status"] == "ready" and video_url is not None
-    runtime_lecture_id = build_course_runtime_lecture_id(
-        course_slug=course_slug,
-        lecture_order=unit_row.get("order_index"),
-        explicit_lecture_id=unit_row.get("legacy_lecture_id"),
-        video_filename=video_filename or fallback_video_filename,
+    legacy_lecture_id = normalize_legacy_lecture_id(
+        unit_row.get("legacy_lecture_id"),
+        unit_row.get("order_index"),
     )
     tutor_bridge = build_tutor_bridge_payload(
         tutor_enabled=tutor_enabled,
         unit_id=unit_row["id"],
-        legacy_lecture_id=runtime_lecture_id,
+        legacy_lecture_id=legacy_lecture_id,
     )
 
     return LearningUnitResponse(
@@ -244,8 +221,6 @@ async def get_learning_unit_payload(
             id=unit_row["id"],
             slug=unit_row["slug"],
             title=unit_row["title"],
-            lecture_title=unit_row["title"],
-            lecture_order=unit_row.get("order_index"),
             unit_type=unit_row["unit_type"],
             status=unit_row["status"],
             entry_mode=unit_row["entry_mode"],
@@ -271,33 +246,22 @@ async def _list_course_units_from_db(course_slug: str) -> list[dict[str, Any]]:
 
         async with async_session_factory() as db:
             result = await db.execute(
-                select(LearningUnit, CourseSection)
+                select(LearningUnit)
                 .join(Course, LearningUnit.course_id == Course.id)
-                .join(CourseSection, LearningUnit.section_id == CourseSection.id)
                 .where(Course.slug == course_slug)
-                .order_by(CourseSection.sort_order, LearningUnit.sort_order, LearningUnit.slug)
+                .order_by(LearningUnit.sort_order, LearningUnit.slug)
             )
-            rows = result.all()
-            lecture_units: list[dict[str, Any]] = []
-            seen_section_ids: set[str] = set()
-            for unit, section in rows:
-                section_id = str(section.id)
-                if section_id in seen_section_ids:
-                    continue
-                seen_section_ids.add(section_id)
-                if _find_course_video_filename(course_slug, section.sort_order) is None:
-                    continue
-                lecture_units.append(
-                    {
-                        "slug": unit.slug,
-                        "title": section.title,
-                        "status": unit.status.value,
-                        "unit_type": "lecture",
-                        "order_index": section.sort_order,
-                        "lecture_label": f"Lecture {section.sort_order:02d}",
-                    }
-                )
-            return lecture_units
+            units = result.scalars().all()
+            return [
+                {
+                    "slug": unit.slug,
+                    "title": unit.title,
+                    "status": unit.status.value,
+                    "unit_type": unit.unit_type.value,
+                    "order_index": unit.sort_order,
+                }
+                for unit in units
+            ]
     except Exception:
         return []
 
@@ -334,9 +298,8 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
 
         async with async_session_factory() as db:
             result = await db.execute(
-                select(LearningUnit, Course, CourseSection, CanonicalUnit)
+                select(LearningUnit, Course, CanonicalUnit)
                 .join(Course, LearningUnit.course_id == Course.id)
-                .join(CourseSection, LearningUnit.section_id == CourseSection.id)
                 .outerjoin(CanonicalUnit, LearningUnit.canonical_unit_id == CanonicalUnit.unit_id)
                 .where(
                     Course.slug == course_slug,
@@ -347,7 +310,7 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
             if row is None:
                 return None
 
-            unit, course, section, canonical_unit = row
+            unit, course, canonical_unit = row
             lecture_num = (
                 int(canonical_unit.lecture_order)
                 if canonical_unit is not None and canonical_unit.lecture_order is not None
@@ -368,18 +331,16 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
                 lecture_num and lecture_num in _available_slide_lectures_for(course_slug)
             )
 
-            runtime_lecture_id = build_course_runtime_lecture_id(
-                course_slug=course_slug,
-                lecture_order=lecture_num,
-                explicit_lecture_id=canonical_unit.lecture_id if canonical_unit is not None else None,
-                video_filename=video_filename,
-            )
-            tutor_enabled = video_url is not None and runtime_lecture_id is not None
+            legacy_lecture_id = None
+            tutor_enabled = False
+            if course_slug == "cs231n":
+                legacy_lecture_id = normalize_legacy_lecture_id(None, lecture_num)
+                tutor_enabled = video_url is not None and legacy_lecture_id is not None
 
             tutor_bridge = build_tutor_bridge_payload(
                 tutor_enabled=tutor_enabled,
                 unit_id=str(unit.id),
-                legacy_lecture_id=runtime_lecture_id,
+                legacy_lecture_id=legacy_lecture_id,
             )
 
             return {
@@ -391,8 +352,6 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
                     "id": str(unit.id),
                     "slug": unit.slug,
                     "title": unit.title,
-                    "lecture_title": canonical_unit.lecture_title if canonical_unit is not None else section.title,
-                    "lecture_order": lecture_num,
                     "unit_type": unit.unit_type.value,
                     "status": unit.status.value,
                     "entry_mode": unit.entry_mode.value,

@@ -1,25 +1,29 @@
 """
-Seed lecture runtime tables (Lecture, Chapter, TranscriptLine) for all video-backed
-course lectures used by the learning shell and in-context tutor.
+scripts/seed_lectures.py
+------------------------
+Seeds lecture data (Lecture, Chapter, TranscriptLine) from data/courses/CS231n/
+into the PostgreSQL database using the async engine.
+
+Usage:
+    docker compose exec backend uv run python -m scripts.seed_lectures
 """
 
-from __future__ import annotations
-
 import asyncio
+import glob
 import json
+import os
 import re
-from pathlib import Path
 
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, select
 
-from src.data_paths import CS224N_DIR, CS231N_DIR
 from src.database import async_session_factory
+from src.data_paths import CS231N_DIR
 from src.models.store import Chapter, Lecture, TranscriptLine
-from src.services.legacy_lecture_adapter import build_course_runtime_lecture_id
 
-_LECTURE_NUMBER_RE = re.compile(r"(?:lecture|Lecture)[_ -]?0*(\d+)")
-_TIMESTAMP_RE = re.compile(r"^(\d{1,2}:\d{2}:\d{2}|\d{1,2}:\d{2})$", re.MULTILINE)
+DATA_DIR = str(CS231N_DIR)
+TOC_DIR = os.path.join(DATA_DIR, "ToC_Summary")
+TRANSCRIPT_DIR = os.path.join(DATA_DIR, "transcripts")
+VIDEO_DIR = os.path.join(DATA_DIR, "videos")
 
 
 def ts_to_seconds(ts: str) -> float:
@@ -31,9 +35,11 @@ def ts_to_seconds(ts: str) -> float:
     return parts[0]
 
 
-def parse_transcript(filepath: Path) -> list[dict]:
-    raw = filepath.read_text(encoding="utf-8")
-    matches = list(_TIMESTAMP_RE.finditer(raw))
+def parse_transcript(filepath: str) -> list[dict]:
+    with open(filepath, encoding="utf-8") as f:
+        raw = f.read()
+    ts_pattern = re.compile(r"^(\d{1,2}:\d{2}:\d{2}|\d{1,2}:\d{2})$", re.MULTILINE)
+    matches = list(ts_pattern.finditer(raw))
     lines = []
     for i, match in enumerate(matches):
         start = match.end()
@@ -44,145 +50,90 @@ def parse_transcript(filepath: Path) -> list[dict]:
     return lines
 
 
-def _extract_lecture_number(name: str) -> int | None:
-    match = _LECTURE_NUMBER_RE.search(name)
-    if not match:
-        return None
-    return int(match.group(1))
-
-
-def _find_course_video(course_dir: Path, lecture_num: int) -> Path | None:
-    video_dir = course_dir / "videos"
-    if not video_dir.exists():
-        return None
-    candidates: list[Path] = []
-    for asset in sorted(video_dir.iterdir()):
-        if asset.is_file() and _extract_lecture_number(asset.name) == lecture_num:
-            candidates.append(asset)
+def find_video_for_lecture(lecture_num: int) -> str | None:
+    matches = glob.glob(os.path.join(VIDEO_DIR, f"*Lecture*{lecture_num}*"))
+    # Filter to exact lecture number (avoid lecture 1 matching lecture 10, 11, ...)
+    exact = [m for m in matches if re.search(rf"Lecture\s*{lecture_num}[^0-9]", m)]
+    candidates = exact or matches
     return candidates[0] if candidates else None
 
 
-def _find_course_transcript(course_dir: Path, lecture_num: int) -> Path | None:
-    transcript_dir = course_dir / "transcripts"
-    if not transcript_dir.exists():
-        return None
-    candidates: list[Path] = []
-    for asset in sorted(transcript_dir.iterdir()):
-        if asset.is_file() and _extract_lecture_number(asset.name) == lecture_num:
-            candidates.append(asset)
-    return candidates[0] if candidates else None
+def find_transcript_for_lecture(lecture_num: int) -> str | None:
+    for pattern in [f"*Lecture_{lecture_num}*", f"*Lecture{lecture_num}*"]:
+        matches = glob.glob(os.path.join(TRANSCRIPT_DIR, pattern))
+        if matches:
+            return matches[0]
+    return None
 
 
-def _course_specs() -> list[tuple[str, Path]]:
-    return [
-        ("cs231n", CS231N_DIR),
-        ("cs224n", CS224N_DIR),
-    ]
-
-
-async def _upsert_lecture_runtime(
-    session: AsyncSession,
-    *,
-    course_slug: str,
-    course_dir: Path,
-    toc_file: Path,
-) -> None:
-    lecture_num = _extract_lecture_number(toc_file.name)
-    if lecture_num is None:
-        return
-
-    toc_data = json.loads(toc_file.read_text(encoding="utf-8"))
-    video_path = _find_course_video(course_dir, lecture_num)
-    transcript_path = _find_course_transcript(course_dir, lecture_num)
-    lecture_id = build_course_runtime_lecture_id(
-        course_slug=course_slug,
-        lecture_order=lecture_num,
-        explicit_lecture_id=f"lecture-{lecture_num}",
-        video_filename=video_path.name if video_path is not None else None,
-    )
-    if lecture_id is None:
-        return
-
-    result = await session.execute(select(Lecture).where(Lecture.id == lecture_id))
-    lecture = result.scalar_one_or_none()
-    lecture_title = toc_data.get("lecture_title", f"{course_slug.upper()} Lecture {lecture_num}")
-    video_url = str(video_path) if video_path is not None else None
-
-    if lecture is None:
-        lecture = Lecture(
-            id=lecture_id,
-            title=lecture_title,
-            description=f"{course_slug.upper()} lecture {lecture_num}",
-            video_url=video_url,
-            duration=None,
-        )
-        session.add(lecture)
-    else:
-        lecture.title = lecture_title
-        lecture.description = f"{course_slug.upper()} lecture {lecture_num}"
-        lecture.video_url = video_url
-
-    await session.execute(delete(Chapter).where(Chapter.lecture_id == lecture_id))
-    await session.execute(delete(TranscriptLine).where(TranscriptLine.lecture_id == lecture_id))
-
-    sections = toc_data.get("table_of_contents", [])
-    for index, section in enumerate(sections):
-        start_sec = ts_to_seconds(section.get("timestamp", "00:00:00"))
-        end_sec = (
-            ts_to_seconds(sections[index + 1].get("timestamp", "00:00:00"))
-            if index + 1 < len(sections)
-            else start_sec + 600
-        )
-        session.add(
-            Chapter(
-                lecture_id=lecture_id,
-                title=section.get("topic_title", f"Section {index + 1}"),
-                summary=section.get("detailed_summary", "")[:2000],
-                start_time=start_sec,
-                end_time=end_sec,
-            )
-        )
-
-    if transcript_path is not None:
-        lines = parse_transcript(transcript_path)
-        for line_index, line in enumerate(lines):
-            end_time = (
-                lines[line_index + 1]["start_time"]
-                if line_index + 1 < len(lines)
-                else line["start_time"] + 5
-            )
-            session.add(
-                TranscriptLine(
-                    lecture_id=lecture_id,
-                    start_time=line["start_time"],
-                    end_time=end_time,
-                    content=line["content"],
-                )
-            )
-
-
-async def seed(session: AsyncSession | None = None) -> None:
-    async def _run(active_session: AsyncSession) -> None:
-        for course_slug, course_dir in _course_specs():
-            toc_dir = course_dir / "ToC_Summary"
-            if not toc_dir.exists():
-                continue
-            toc_files = sorted(toc_dir.glob("lecture-*.json"))
-            for toc_file in toc_files:
-                await _upsert_lecture_runtime(
-                    active_session,
-                    course_slug=course_slug,
-                    course_dir=course_dir,
-                    toc_file=toc_file,
-                )
-
-    if session is not None:
-        await _run(session)
-        return
-
+async def seed() -> None:
     async with async_session_factory() as db:
-        await _run(db)
+        existing = await db.scalar(select(func.count()).select_from(Lecture))
+        if existing and existing > 0:
+            print(f"Database already has {existing} lectures. Skipping seed.")
+            return
+
+        toc_files = sorted(glob.glob(os.path.join(TOC_DIR, "lecture-*.json")))
+        print(f"Found {len(toc_files)} ToC files")
+
+        for toc_file in toc_files:
+            basename = os.path.basename(toc_file)
+            num_match = re.search(r"lecture-(\d+)", basename)
+            if not num_match:
+                continue
+            lecture_num = int(num_match.group(1))
+
+            with open(toc_file, encoding="utf-8") as f:
+                toc_data = json.load(f)
+
+            lecture_id = f"cs231n-lecture-{lecture_num}"
+            title = toc_data.get("lecture_title", f"Lecture {lecture_num}")
+            video_path = find_video_for_lecture(lecture_num)
+
+            db.add(Lecture(
+                id=lecture_id,
+                title=title,
+                description=f"CS231N Spring 2025 - Lecture {lecture_num}",
+                video_url=video_path,
+                duration=None,
+            ))
+            await db.flush()
+            print(f"  + Lecture: {lecture_id} - {title[:60]}...")
+
+            sections = toc_data.get("table_of_contents", [])
+            for i, section in enumerate(sections):
+                start_sec = ts_to_seconds(section.get("timestamp", "00:00:00"))
+                end_sec = (
+                    ts_to_seconds(sections[i + 1].get("timestamp", "00:00:00"))
+                    if i + 1 < len(sections)
+                    else start_sec + 600
+                )
+                db.add(Chapter(
+                    lecture_id=lecture_id,
+                    title=section.get("topic_title", f"Section {i + 1}"),
+                    summary=section.get("detailed_summary", "")[:500],
+                    start_time=start_sec,
+                    end_time=end_sec,
+                ))
+
+            transcript_file = find_transcript_for_lecture(lecture_num)
+            if transcript_file:
+                lines = parse_transcript(transcript_file)
+                for j, line in enumerate(lines):
+                    end_time = lines[j + 1]["start_time"] if j + 1 < len(lines) else line["start_time"] + 5
+                    db.add(TranscriptLine(
+                        lecture_id=lecture_id,
+                        start_time=line["start_time"],
+                        end_time=end_time,
+                        content=line["content"],
+                    ))
+                print(f"    + {len(lines)} transcript lines")
+            else:
+                print("    (no transcript found)")
+
         await db.commit()
+        total = await db.scalar(select(func.count()).select_from(Lecture))
+        print(f"\n✓ Seed complete! {total} lectures in database.")
 
 
 if __name__ == "__main__":

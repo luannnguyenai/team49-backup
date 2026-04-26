@@ -268,15 +268,12 @@ export interface CourseUnitListItem {
   status: CourseStatus;
   unit_type: string;
   order_index: number;
-  lecture_label?: string | null;
 }
 
 export interface LearningUnitSummary {
   id: string;
   slug: string;
   title: string;
-  lecture_title?: string | null;
-  lecture_order?: number | null;
   unit_type: string;
   status: CourseStatus;
   entry_mode: "text" | "video" | "hybrid";
@@ -332,42 +329,6 @@ export interface QuizStartResponse {
   learning_unit_id: string;
   total_questions: number;
   questions: QuestionForQuiz[];
-  source: string;
-  checkpoint: string | null;
-}
-
-export interface InlineQuizStartPayload {
-  learning_unit_id: string;
-  count: number;
-  source: "inline_video";
-  checkpoint: "midpoint" | "end";
-  exclude_item_ids: string[];
-}
-
-export interface LearningSessionInlineQuizState {
-  [key: string]: unknown;
-}
-
-export interface LearningUnitProgressPayload {
-  video_progress_s?: number | null;
-  video_finished?: boolean;
-  watch_percent?: number | null;
-  inline_quiz?: LearningSessionInlineQuizState | null;
-}
-
-export interface LearningUnitProgressResponse {
-  learning_unit_id: string;
-  current_stage: string;
-  current_progress: Record<string, unknown>;
-  last_activity: string;
-}
-
-export interface ResumeStateResponse {
-  resume_route: string;
-  current_unit_id: string | null;
-  current_stage: string | null;
-  current_progress: Record<string, unknown> | null;
-  last_activity: string | null;
 }
 
 export interface QuizAnswerResponse {
@@ -498,8 +459,6 @@ export interface HistoryItem {
   score_percent: number | null;
   correct_count: number;
   total_questions: number;
-  source: string | null;
-  checkpoint: string | null;
 }
 
 export interface ScoreTrendPoint {
@@ -547,8 +506,6 @@ export interface SessionDetailResponse {
   bloom_breakdown: Record<string, string>;
   weak_kcs: string[];
   misconceptions: string[];
-  source: string | null;
-  checkpoint: string | null;
   questions: QuestionInteractionDetail[];
 }
 

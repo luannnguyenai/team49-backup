@@ -40,8 +40,6 @@ class HistoryItem(BaseModel):
     score_percent: float | None
     correct_count: int
     total_questions: int
-    source: str | None = None
-    checkpoint: str | None = None
 
 
 class ScoreTrendPoint(BaseModel):
@@ -103,6 +101,4 @@ class SessionDetailResponse(BaseModel):
     bloom_breakdown: dict[str, str]  # {"remember": "2/3", …}
     weak_kcs: list[str]  # KC names for wrong answers
     misconceptions: list[str]  # misconception IDs detected
-    source: str | None = None
-    checkpoint: str | None = None
     questions: list[QuestionInteractionDetail]

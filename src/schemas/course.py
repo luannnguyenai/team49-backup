@@ -63,8 +63,6 @@ class LearningUnitSummary(BaseModel):
     id: str
     slug: str
     title: str
-    lecture_title: str | None = None
-    lecture_order: int | None = None
     unit_type: str
     status: str
     entry_mode: str
