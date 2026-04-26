@@ -51,6 +51,9 @@ from src.config import settings
 logger = logging.getLogger(__name__)
 DATA_ROOT = Path("data").resolve()
 PROTECTED_DATA_PREFIXES = (
+    "courses/CS230/videos/",
+    "courses/CS230/slides/",
+    "courses/CS230/transcripts/",
     "courses/CS224n/videos/",
     "courses/CS224n/slides/",
     "courses/CS224n/transcripts/",

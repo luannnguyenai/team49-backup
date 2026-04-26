@@ -4,24 +4,25 @@ import LearningPageScreen from "@/components/learn/LearningPageScreen";
 import { fetchLearningUnit, ServerCourseApiError } from "@/lib/server-course-api";
 
 interface LearningPageProps {
-  params: {
+  params: Promise<{
     courseSlug: string;
     unitSlug: string;
-  };
+  }>;
 }
 
 export default async function LearningPage({ params }: LearningPageProps) {
+  const resolvedParams = await params;
   let error: string | null = null;
   let data = null;
 
   try {
-    data = await fetchLearningUnit(params.courseSlug, params.unitSlug);
+    data = await fetchLearningUnit(resolvedParams.courseSlug, resolvedParams.unitSlug);
   } catch (err) {
     if (
       err instanceof ServerCourseApiError &&
       (err.status === 401 || err.status === 403)
     ) {
-      redirect(`/courses/${params.courseSlug}/start`);
+      redirect(`/courses/${resolvedParams.courseSlug}/start`);
     }
 
     if (err instanceof ServerCourseApiError && err.status === 404) {
@@ -37,8 +38,8 @@ export default async function LearningPage({ params }: LearningPageProps) {
 
   return (
     <LearningPageScreen
-      courseSlug={params.courseSlug}
-      unitSlug={params.unitSlug}
+      courseSlug={resolvedParams.courseSlug}
+      unitSlug={resolvedParams.unitSlug}
       data={data}
       error={error}
     />

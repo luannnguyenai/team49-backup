@@ -1,7 +1,7 @@
 "use client";
 // app/onboarding/page.tsx
-// Multi-step onboarding flow (5 steps) for new users.
-// Step 1: Goal selection · Step 2: Known topics (filtered) · Step 3: Schedule · Step 4: Learning method · Step 5: Placement assessment
+// Multi-step onboarding flow (6 steps) for new users.
+// Step 1: Goal selection · Step 2: Known topics (filtered) · Step 3: Schedule · Step 4: Learning method · Step 5: Placement assessment · Step 6: Result gate
 // On submit: PUT /api/users/me/onboarding → redirect to /assessment
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
@@ -97,11 +97,11 @@ function OnboardingPageInner() {
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [animKey, setAnimKey] = useState(0);
 
-  // UUID for the placement assessment session — generated once when Step 5 is entered
+  // UUID for the placement assessment session — generated once when Step 4 is entered
   const [placementSessionId, setPlacementSessionId] = useState<string | null>(null);
   const enteredStep5 = useRef(false);
 
-  // Results from placement assessment — used by Step 6 (ResultGate)
+  // Results from placement assessment — used by Step 5 (ResultGate)
   const [placementResults, setPlacementResults] = useState<TopicDecision[]>([]);
 
   // Content data loaded from the API
@@ -114,7 +114,6 @@ function OnboardingPageInner() {
     handleSubmit,
     watch,
     trigger,
-    control,
     formState: { errors },
   } = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
@@ -155,10 +154,6 @@ function OnboardingPageInner() {
     }
   }, [step]);
 
-  // selectedSections was removed when StepDesiredSections was dropped from the flow.
-  // StepTimeSchedule receives an empty array; the estimate block is hidden.
-  const selectedSections: CourseSectionDetail[] = [];
-
   // ── Core submit (shared by placement complete/skip and direct submit) ────
   const submitOnboarding = useCallback(
     async (data: OnboardingFormData) => {
@@ -170,17 +165,12 @@ function OnboardingPageInner() {
           knownUnitIds: data.known_unit_ids,
           desiredSectionIds: data.desired_section_ids,
         });
-        const selectedCourseIds = Array.from(
-          new Set(
-            selectedSections.map((section) => section.canonical_course_id ?? section.course_id)
-          )
-        );
-        // Merge goal_ids and known_unit_ids from store (Steps 1 & 2 write to store, not form)
+        // Merge goal_ids and known_unit_ids from store (Steps 0 & 1 write to store, not form)
         await onboard({
           ...data,
           goal_ids: goalIds,
           known_unit_ids: knownUnitIds,
-          selected_course_ids: selectedCourseIds,
+          selected_course_ids: [],
         });
         writePendingCanonicalAssessment(canonicalContext);
 
@@ -196,10 +186,10 @@ function OnboardingPageInner() {
         /* error message is shown from the store */
       }
     },
-    [clearError, searchParams, sections, selectedSections, goalIds, knownUnitIds, onboard, router]
+    [clearError, searchParams, sections, goalIds, knownUnitIds, onboard, router]
   );
 
-  // ── Submit handler (used by Steps 2–4 form submit button) ────────────────
+  // ── Submit handler (used by Steps 2–3 form submit button) ────────────────
   const onSubmit = async (data: OnboardingFormData) => {
     await submitOnboarding(data);
   };
@@ -228,10 +218,9 @@ function OnboardingPageInner() {
     navigate(step - 1);
   }, [step, navigate]);
 
-  // ── Placement callbacks (Step 5) ─────────────────────────────────────────
+  // ── Placement callbacks (Step 4) ─────────────────────────────────────────
   const handlePlacementComplete = useCallback(
     (decisions: TopicDecision[]) => {
-      // Store results and transition to Step 6 (ResultGate)
       setPlacementResults(decisions);
       navigate(5);
     },
@@ -242,7 +231,7 @@ function OnboardingPageInner() {
     handleSubmit(submitOnboarding)();
   }, [handleSubmit, submitOnboarding]);
 
-  // ── ResultGate confirm (Step 6) ──────────────────────────────────────────
+  // ── ResultGate confirm (Step 5) ──────────────────────────────────────────
   const handleResultGateConfirm = useCallback(() => {
     handleSubmit(submitOnboarding)();
   }, [handleSubmit, submitOnboarding]);
@@ -417,7 +406,8 @@ function OnboardingPageInner() {
                     register={register}
                     errors={errors}
                     watch={watch}
-                    selectedSections={selectedSections}
+                    selectedCourseCount={goalIds.length}
+                    totalHours={0}
                   />
                 )}
 
@@ -449,7 +439,7 @@ function OnboardingPageInner() {
                 )}
               </div>
 
-              {/* ── Navigation buttons (only for Steps 2 and 3) ── */}
+              {/* ── Navigation buttons (only for Step 2: TimeSchedule) ── */}
               {showPageNav && (
                 <div
                   className={cn(
@@ -478,7 +468,7 @@ function OnboardingPageInner() {
                 </div>
               )}
 
-              {/* ── Step 4 (Learning method) nav: Back + Submit to trigger placement ── */}
+              {/* ── Step 3 (Learning method) nav: Back + button to enter placement ── */}
               {isLastFormStep && (
                 <div className="mt-7 flex gap-3 justify-between">
                   <Button

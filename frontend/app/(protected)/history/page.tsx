@@ -8,7 +8,8 @@
 //   • Expandable rows: per-question breakdown, bloom analysis, misconceptions
 //   • Pagination (20 / page)
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   AlertCircle,
   BookOpen,
@@ -56,6 +57,11 @@ const TYPE_COLORS: Record<SessionType, string> = {
   quiz: "bg-blue-100 text-blue-700",
   module_test: "bg-amber-100 text-amber-700",
   practice: "bg-slate-100 text-slate-600",
+};
+
+const CHECKPOINT_LABELS: Record<string, string> = {
+  midpoint: "Mid-video quiz",
+  end: "End-of-video quiz",
 };
 
 const BLOOM_VI: Record<string, string> = {
@@ -115,6 +121,10 @@ function scoreColor(pct: number | null) {
   if (pct >= 70) return "#10b981";
   if (pct >= 50) return "#f59e0b";
   return "#ef4444";
+}
+
+function questionRowKey(q: QuestionInteractionDetail, index: number) {
+  return q.question_id ?? q.canonical_item_id ?? `${q.sequence_position}-${index}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -213,10 +223,8 @@ function BloomBar({ breakdown }: { breakdown: Record<string, string> }) {
 
 function ExpandedDetail({
   sessionId,
-  sessionType,
 }: {
   sessionId: string;
-  sessionType: SessionType;
 }) {
   const [detail, setDetail] = useState<SessionDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -250,6 +258,14 @@ function ExpandedDetail({
 
   return (
     <div className="space-y-5 px-1 py-3">
+      {detail.source === "inline_video" && detail.checkpoint ? (
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
+            {CHECKPOINT_LABELS[detail.checkpoint] ?? detail.checkpoint}
+          </span>
+        </div>
+      ) : null}
+
       {/* Bloom + KCs + misconceptions side-by-side */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* Bloom breakdown */}
@@ -318,7 +334,7 @@ function ExpandedDetail({
         <div className="space-y-1.5">
           {detail.questions.map((q, i) => (
             <QuestionRow
-              key={q.question_id}
+              key={questionRowKey(q, i)}
               q={q}
               num={i + 1}
               open={expandedQIdx === i}
@@ -327,6 +343,28 @@ function ExpandedDetail({
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function LinkedReviewPanel({ sessionId }: { sessionId: string }) {
+  return (
+    <div
+      className="rounded-2xl border p-4"
+      style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+          Review mở từ liên kết
+        </p>
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+          Session {sessionId}
+        </span>
+      </div>
+      <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+        Phiên này không nằm trong trang lịch sử hiện tại, nên nội dung review được tải trực tiếp.
+      </p>
+      <ExpandedDetail sessionId={sessionId} />
     </div>
   );
 }
@@ -503,6 +541,9 @@ function Th({
 // ---------------------------------------------------------------------------
 
 export default function HistoryPage() {
+  const searchParams = useSearchParams();
+  const targetSessionId = searchParams.get("session_id");
+
   // ── Filter state ─────────────────────────────────────────────────────────
   const [typeFilter, setTypeFilter] = useState<SessionType | "">("");
   const [moduleFilter, setModuleFilter] = useState<string>("");
@@ -554,8 +595,14 @@ export default function HistoryPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-    setExpandedId(null);
-  }, [typeFilter, moduleFilter, daysFilter]);
+    setExpandedId(targetSessionId ?? null);
+  }, [typeFilter, moduleFilter, daysFilter, targetSessionId]);
+
+  useEffect(() => {
+    if (targetSessionId) {
+      setExpandedId(targetSessionId);
+    }
+  }, [targetSessionId]);
 
   // ── Client-side sort of the current page ─────────────────────────────────
   const handleSort = (key: SortKey) => {
@@ -587,6 +634,8 @@ export default function HistoryPage() {
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 1;
   const summary = data?.summary;
+  const targetSessionVisible = !!targetSessionId && sortedItems.some((item) => item.session_id === targetSessionId);
+  const showLinkedReviewPanel = !!targetSessionId && !loading && !targetSessionVisible;
 
   // ---------------------------------------------------------------------------
   // Render
@@ -732,6 +781,8 @@ export default function HistoryPage() {
         )}
       </div>
 
+      {showLinkedReviewPanel && <LinkedReviewPanel sessionId={targetSessionId} />}
+
       {/* ── Table ─────────────────────────────────────────────────────── */}
       <div
         className="overflow-hidden rounded-2xl border"
@@ -782,9 +833,8 @@ export default function HistoryPage() {
                 sortedItems.map((item) => {
                   const isExpanded = expandedId === item.session_id;
                   return (
-                    <>
+                    <Fragment key={item.session_id}>
                       <tr
-                        key={item.session_id}
                         className="border-t transition-colors"
                         style={{
                           borderColor: "var(--border)",
@@ -812,13 +862,20 @@ export default function HistoryPage() {
 
                         {/* Subject */}
                         <td className="px-4 py-3">
-                          <p
-                            className="max-w-[180px] truncate text-sm"
-                            style={{ color: "var(--text-primary)" }}
-                            title={item.subject}
-                          >
-                            {item.subject}
-                          </p>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p
+                              className="max-w-[180px] truncate text-sm"
+                              style={{ color: "var(--text-primary)" }}
+                              title={item.subject}
+                            >
+                              {item.subject}
+                            </p>
+                            {item.source === "inline_video" && item.checkpoint ? (
+                              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
+                                {CHECKPOINT_LABELS[item.checkpoint] ?? item.checkpoint}
+                              </span>
+                            ) : null}
+                          </div>
                         </td>
 
                         {/* Score */}
@@ -881,19 +938,15 @@ export default function HistoryPage() {
                       {/* Expanded detail row */}
                       {isExpanded && (
                         <tr
-                          key={`${item.session_id}-detail`}
                           className="border-t"
                           style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
                         >
                           <td colSpan={6} className="px-5 pb-4">
-                            <ExpandedDetail
-                              sessionId={item.session_id}
-                              sessionType={item.session_type}
-                            />
+                            <ExpandedDetail sessionId={item.session_id} />
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })
               )}

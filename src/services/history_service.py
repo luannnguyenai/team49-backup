@@ -109,6 +109,7 @@ def _session_to_item(
     learning_unit_title: str | None,
     section_title: str | None,
 ) -> HistoryItem:
+    source, checkpoint = _session_source_checkpoint(sess)
     duration: int | None = None
     if sess.completed_at and sess.started_at:
         delta = sess.completed_at - sess.started_at
@@ -132,6 +133,8 @@ def _session_to_item(
         score_percent=sess.score_percent,
         correct_count=sess.correct_count,
         total_questions=sess.total_questions,
+        source=source,
+        checkpoint=checkpoint,
     )
 
 
@@ -195,6 +198,7 @@ async def get_session_detail(
         raise NotFoundError("Session not found.")
     if sess.completed_at is None:
         raise ConflictError("Session has not been completed yet.")
+    source, checkpoint = _session_source_checkpoint(sess)
 
     # 2. Load interactions + canonical question_bank items
     rows = await repo.fetch_session_detail_rows_canonical_only(session_id)
@@ -206,6 +210,8 @@ async def get_session_detail(
             bloom_breakdown={},
             weak_kcs=[],
             misconceptions=[],
+            source=source,
+            checkpoint=checkpoint,
             questions=[],
         )
 
@@ -221,6 +227,8 @@ async def get_session_detail(
         bloom_breakdown={},
         weak_kcs=[],
         misconceptions=[],
+        source=source,
+        checkpoint=checkpoint,
         questions=questions_detail,
     )
 
@@ -234,6 +242,14 @@ def _answer_index_to_letter(index: int | None) -> str:
     if index is None:
         return ""
     return {0: "A", 1: "B", 2: "C", 3: "D"}.get(index, "")
+
+
+def _session_source_checkpoint(sess: Session) -> tuple[str | None, str | None]:
+    if sess.canonical_phase == "inline_midpoint_quiz":
+        return ("inline_video", "midpoint")
+    if sess.canonical_phase == "inline_end_quiz":
+        return ("inline_video", "end")
+    return (None, None)
 
 
 def _interaction_detail_from_row(

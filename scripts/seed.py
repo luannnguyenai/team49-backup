@@ -20,6 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.database import async_session  # noqa: E402
+from scripts.seed_lectures import seed as seed_lectures_runtime  # noqa: E402
 from src.scripts.pipeline.check_canonical_runtime_parity import build_parity_report  # noqa: E402
 from src.scripts.pipeline.import_canonical_artifacts_to_db import (  # noqa: E402
     DEFAULT_INPUT_DIR,
@@ -49,6 +50,7 @@ async def run_seed(*, input_dir: Path = DEFAULT_INPUT_DIR, validate_only: bool =
     async with async_session() as session:
         canonical_report = await import_canonical_artifacts(session=session, input_dir=input_dir)
         product_report = await import_product_shell(session=session)
+        await seed_lectures_runtime(session)
         parity_report = await build_parity_report(session)
         await session.commit()
 

@@ -458,13 +458,25 @@ def _derive_source_ref(
     unit_row: dict[str, Any],
     transcript_bundle: str | dict[str, Any] | None,
 ) -> dict[str, Any]:
+    raw_source_ref = item.get("source_ref") if isinstance(item.get("source_ref"), dict) else {}
     evidence = item.get("evidence") or {}
     transcript_quotes = [quote.strip() for quote in evidence.get("transcript_quotes", []) if str(quote).strip()]
+    if raw_source_ref.get("evidence_span"):
+        transcript_quotes.append(str(raw_source_ref["evidence_span"]).strip())
     timestamp_values = [
         _parse_timestamp_to_seconds(value)
         for value in evidence.get("timestamps", [])
         if _parse_timestamp_to_seconds(value) is not None
     ]
+    raw_timestamp = raw_source_ref.get("transcript_ts")
+    if raw_timestamp is not None:
+        parsed_timestamp = _parse_timestamp_to_seconds(raw_timestamp)
+        if parsed_timestamp is not None:
+            timestamp_values.append(parsed_timestamp)
+    for key in ("timestamp_start", "timestamp_end"):
+        raw_value = raw_source_ref.get(key)
+        if isinstance(raw_value, (int, float)):
+            timestamp_values.append(int(raw_value))
     content_ref = unit_row.get("content_ref") or {}
     window_start = content_ref.get("start_s")
     window_end = content_ref.get("end_s")
@@ -482,6 +494,8 @@ def _derive_source_ref(
     evidence_span = segment_match["evidence_span"] if segment_match else None
     if evidence_span is None and transcript_quotes:
         evidence_span = transcript_quotes[0]
+    if evidence_span is None and raw_source_ref.get("evidence_span"):
+        evidence_span = raw_source_ref.get("evidence_span")
 
     timestamp_start = min(exact_timestamps) if exact_timestamps else None
     timestamp_end = max(exact_timestamps) if exact_timestamps else None
@@ -491,11 +505,15 @@ def _derive_source_ref(
         timestamp_end = segment_match["timestamp_s"]
 
     multimodal_signals: list[str] = []
+    raw_signals = raw_source_ref.get("multimodal_signals_used")
+    if isinstance(raw_signals, list):
+        multimodal_signals.extend(str(signal) for signal in raw_signals if str(signal).strip())
     if evidence_span:
         multimodal_signals.append("transcript")
     code_block = item.get("code_block") or {}
     if evidence.get("source") == "code" or code_block.get("snippet"):
         multimodal_signals.append("code")
+    multimodal_signals = sorted(set(multimodal_signals))
 
     return {
         "unit_id": unit_row["unit_id"],
@@ -503,7 +521,7 @@ def _derive_source_ref(
         "timestamp_end": timestamp_end,
         "evidence_span": evidence_span,
         "multimodal_signals_used": multimodal_signals,
-        "video_clip_ref": None,
+        "video_clip_ref": raw_source_ref.get("video_clip_ref"),
         "video_url": _first_non_empty(artifact.get("youtube_url"), unit_row.get("content_ref", {}).get("video_url")),
     }
 
@@ -723,6 +741,31 @@ def _build_edge_tables(
                 }
             )
             pruned_pairs.add(pair)
+
+    for pair, row in p5_edge_index.items():
+        if pair in kept_pairs or pair in pruned_pairs:
+            continue
+        keep_rows.append(
+            {
+                "source_kp_id": row["source_kp_id"],
+                "target_kp_id": row["target_kp_id"],
+                "edge_scope": row.get("edge_scope"),
+                "provenance": row.get("provenance"),
+                "confidence": row.get("keep_confidence"),
+                "review_status": row.get("review_status"),
+                "rationale": row.get("keep_rationale"),
+                "temporal_signal": None,
+                "source_first_seen": None,
+                "target_first_seen": None,
+                "p5_keep_confidence": row.get("keep_confidence"),
+                "p5_expected_directionality": row.get("expected_directionality"),
+                "p5_trace": None,
+                "edge_strength": None,
+                "bidirectional_score": None,
+                "source_file": source_file,
+            }
+        )
+        kept_pairs.add(pair)
 
     for pair, row in p5_pruned_index.items():
         if pair in kept_pairs or pair in pruned_pairs:
