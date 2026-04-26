@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import select
 
-from src.models.course import Course, LearningUnit
+from src.models.course import Course, CourseSection, LearningUnit
 from src.exceptions import ForbiddenError, NotFoundError
 from src.schemas.course import StartLearningDecisionResponse
 from src.services.course_bootstrap_service import get_bootstrap_course
@@ -188,11 +188,20 @@ async def _get_first_unit_slug_from_db(course_slug: str) -> str | None:
         from src.database import async_session_factory
 
         async with async_session_factory() as db:
+            # Order by section first (matches list_course_units_db_first), then
+            # by unit sort_order, then slug as a stable tiebreaker. This avoids
+            # picking the alphabetically-first slug when many units share the
+            # same LearningUnit.sort_order value.
             result = await db.execute(
                 select(LearningUnit.slug)
                 .join(Course, LearningUnit.course_id == Course.id)
+                .join(CourseSection, LearningUnit.section_id == CourseSection.id)
                 .where(Course.slug == course_slug)
-                .order_by(LearningUnit.sort_order, LearningUnit.slug)
+                .order_by(
+                    CourseSection.sort_order,
+                    LearningUnit.sort_order,
+                    LearningUnit.slug,
+                )
                 .limit(1)
             )
             return result.scalar_one_or_none()

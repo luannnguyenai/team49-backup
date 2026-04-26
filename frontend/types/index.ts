@@ -406,6 +406,55 @@ export interface QuizCompleteResponse {
   learning_path_updated: boolean;
 }
 
+// ---- Learning Path API shapes ----
+
+export type PathAction =
+  | "skip"
+  | "quick_review"
+  | "standard_learn"
+  | "deep_practice"
+  | "remediate";
+
+export type PathStatus = "pending" | "in_progress" | "completed" | "skipped";
+
+export interface PathItemResponse {
+  id: string;
+  learning_unit_id: string;
+  learning_unit_title: string;
+  section_title: string | null;
+  action: PathAction;
+  estimated_hours: number | null;
+  order_index: number;
+  week_number: number | null;
+  status: PathStatus;
+  canonical_unit_id: string | null;
+}
+
+export interface LearningPathResponse {
+  total_units: number;
+  completed_units: number;
+  in_progress_units: number;
+  items: PathItemResponse[];
+}
+
+export interface WeekEntry {
+  week: number;
+  learning_units: PathItemResponse[];
+  total_hours: number;
+}
+
+export interface TimelineResponse {
+  total_weeks: number;
+  items: WeekEntry[];
+}
+
+export interface UpdateStatusResponse {
+  id: string;
+  learning_unit_id: string;
+  status: PathStatus;
+  updated_at: string;
+}
+
 // ---- Module Test API shapes ----
 
 export interface QuestionForModuleTest {

@@ -64,7 +64,10 @@ async function fetchCourseJson<T>(
 }
 
 export function fetchCourseOverview(courseSlug: string) {
-  return fetchCourseJson<CourseOverviewResponse>(`/api/courses/${courseSlug}/overview`);
+  return fetchCourseJson<CourseOverviewResponse>(
+    `/api/courses/${courseSlug}/overview`,
+    { cache: "no-store" },
+  );
 }
 
 export function fetchLearningUnit(courseSlug: string, unitSlug: string) {
