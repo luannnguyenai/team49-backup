@@ -5,7 +5,7 @@ import {
   buildCourseOverviewViewModel,
 } from "@/features/course-platform/presenters";
 import {
-  COMING_SOON_OVERVIEW,
+  CS224N_OVERVIEW,
   CS231N_OVERVIEW,
   CS231N_ITEM,
   CS231N_RECOMMENDED,
@@ -71,7 +71,7 @@ describe("course platform presenters", () => {
 
     it("builds a blocked overview model for coming-soon courses", () => {
       const model = buildCourseOverviewViewModel({
-        data: COMING_SOON_OVERVIEW,
+        data: CS224N_OVERVIEW,
         isStarting: false,
       });
 

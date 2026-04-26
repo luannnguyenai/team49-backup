@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Literal
 
 from pydantic import AliasChoices, BaseModel, Field
 
@@ -27,17 +26,10 @@ from src.models.learning import MasteryLevel, SelectedAnswer
 # ---------------------------------------------------------------------------
 
 
-QuizCheckpoint = Literal["midpoint", "end"]
-
-
 class QuizStartRequest(BaseModel):
     learning_unit_id: uuid.UUID = Field(
         validation_alias=AliasChoices("learning_unit_id", "topic_id")
     )
-    count: int | None = Field(default=None, ge=1, le=10)
-    source: str = "standalone"
-    checkpoint: QuizCheckpoint | None = None
-    exclude_item_ids: list[str] = Field(default_factory=list, max_length=20)
 
 
 class QuestionForQuiz(BaseModel):
@@ -63,8 +55,6 @@ class QuizStartResponse(BaseModel):
     learning_unit_id: uuid.UUID
     total_questions: int
     questions: list[QuestionForQuiz]
-    source: str = "standalone"
-    checkpoint: QuizCheckpoint | None = None
 
 
 # ---------------------------------------------------------------------------

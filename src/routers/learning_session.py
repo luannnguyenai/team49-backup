@@ -42,6 +42,4 @@ async def api_update_learning_unit_progress(
         learning_unit_id=learning_unit_id,
         video_progress_s=body.video_progress_s,
         video_finished=body.video_finished,
-        watch_percent=body.watch_percent,
-        inline_quiz=body.inline_quiz,
     )

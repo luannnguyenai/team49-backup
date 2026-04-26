@@ -21,10 +21,12 @@ class AssessmentStartRequest(BaseModel):
     learning_unit_ids: list[uuid.UUID] = Field(
         default_factory=list,
         validation_alias=AliasChoices("learning_unit_ids", "topic_ids"),
+        max_length=50,
         description="Product learning units to include in this assessment.",
     )
     canonical_unit_ids: list[str] | None = Field(
         default=None,
+        max_length=50,
         description="Canonical unit IDs to use when canonical question selection is enabled.",
     )
     phase: str = Field(

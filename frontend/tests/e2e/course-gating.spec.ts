@@ -240,12 +240,14 @@ test.describe("US2: course gating flow", () => {
     expect(nextParam).toContain("/courses/cs231n/start");
   });
 
-  test("cs224n overview exposes a start action when the course is ready", async ({ page }) => {
+  test("coming-soon course blocks start action regardless of auth state", async ({ page }) => {
+    // Visit CS224n overview (coming soon)
     await page.goto("/courses/cs224n");
 
-    const startButton = page.getByRole("button", { name: "Start learning" });
+    // The start button should be disabled with "Coming soon" text
+    const startButton = page.getByRole("button", { name: "Coming soon" });
     await expect(startButton).toBeVisible();
-    await expect(startButton).toBeEnabled();
+    await expect(startButton).toBeDisabled();
   });
 
   test("public catalog shows both courses without tab UI when not authenticated", async ({

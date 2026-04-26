@@ -8,18 +8,17 @@ import {
 } from "@/lib/server-course-api";
 
 interface CourseOverviewPageProps {
-  params: Promise<{
+  params: {
     courseSlug: string;
-  }>;
+  };
 }
 
 export default async function CourseOverviewPage({ params }: CourseOverviewPageProps) {
-  const resolvedParams = await params;
   let error: string | null = null;
   let data = null;
 
   try {
-    data = await fetchCourseOverview(resolvedParams.courseSlug);
+    data = await fetchCourseOverview(params.courseSlug);
   } catch (err) {
     error =
       err instanceof ServerCourseApiError
@@ -42,7 +41,7 @@ export default async function CourseOverviewPage({ params }: CourseOverviewPageP
           </section>
 
           <CourseOverviewInteractive
-            courseSlug={resolvedParams.courseSlug}
+            courseSlug={params.courseSlug}
             data={data}
             error={error}
           />

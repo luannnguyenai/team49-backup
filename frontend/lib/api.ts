@@ -156,17 +156,12 @@ import type {
   AnswerInput,
   AssessmentResultResponse,
   AssessmentStartResponse,
-  BootstrapCourse,
-  BootstrapTopic,
   CanonicalAssessmentStartPayload,
   CourseCatalogItem,
   CourseSectionDetail,
   CourseSectionListItem,
   HistoryResponse,
-  InlineQuizStartPayload,
   LearningUnitContentById,
-  LearningUnitProgressPayload,
-  LearningUnitProgressResponse,
   LoginPayload,
   ModuleTestAnswerInput,
   ModuleTestResultResponse,
@@ -182,7 +177,6 @@ import type {
   QuizCompleteResponse,
   QuizStartResponse,
   RegisterPayload,
-  ResumeStateResponse,
   SelectedAnswer,
   SessionDetailResponse,
   SessionType,
@@ -191,11 +185,6 @@ import type {
   User,
   UserSkillOverview,
 } from "@/types";
-
-const staticDataClient = axios.create({
-  baseURL: "",
-  timeout: 15_000,
-});
 
 export const assessmentApi = {
   start: (learningUnitIds: string[]) =>
@@ -273,18 +262,6 @@ export const canonicalSectionApi = {
     ),
 };
 
-export const bootstrapDataApi = {
-  courses: () =>
-    staticDataClient
-      .get<BootstrapCourse[]>("/data/bootstrap/courses.json")
-      .then((r) => r.data),
-
-  topics: () =>
-    staticDataClient
-      .get<BootstrapTopic[]>("/data/bootstrap/topics.json")
-      .then((r) => r.data),
-};
-
 export const learningUnitApi = {
   contentById: (id: string) =>
     api
@@ -305,27 +282,9 @@ export const canonicalAssessmentApi = {
 };
 
 export const canonicalQuizApi = {
-  start: (payload: string | InlineQuizStartPayload) =>
+  start: (learningUnitId: string) =>
     api
-      .post<QuizStartResponse>(
-        "/api/quiz/start",
-        typeof payload === "string" ? { learning_unit_id: payload } : payload,
-      )
-      .then((r) => r.data),
-};
-
-export const learningSessionApi = {
-  resume: () =>
-    api
-      .get<ResumeStateResponse>("/api/learning-session/resume")
-      .then((r) => r.data),
-
-  updateProgress: (learningUnitId: string, payload: LearningUnitProgressPayload) =>
-    api
-      .put<LearningUnitProgressResponse>(
-        `/api/learning-session/learning-units/${learningUnitId}/progress`,
-        payload,
-      )
+      .post<QuizStartResponse>("/api/quiz/start", { learning_unit_id: learningUnitId })
       .then((r) => r.data),
 };
 

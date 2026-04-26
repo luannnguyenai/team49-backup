@@ -2,19 +2,6 @@ import unittest
 
 
 class LegacyLectureAdapterTests(unittest.TestCase):
-    def test_build_course_runtime_lecture_id_uses_video_stem_for_cs224n(self):
-        from src.services.legacy_lecture_adapter import build_course_runtime_lecture_id
-
-        self.assertEqual(
-            build_course_runtime_lecture_id(
-                course_slug="cs224n",
-                lecture_order=10,
-                explicit_lecture_id="lecture-10",
-                video_filename="cs224n-2024-lecture10-transformers.mp4",
-            ),
-            "cs224n-2024-lecture10-transformers",
-        )
-
     def test_normalize_legacy_lecture_id_prefers_explicit_value(self):
         from src.services.legacy_lecture_adapter import normalize_legacy_lecture_id
 

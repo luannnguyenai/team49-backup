@@ -120,27 +120,27 @@ class CoursePlatformFoundationTests(unittest.TestCase):
                 slug="cs224n",
                 title="CS224n",
                 short_description="NLP course",
-                status="ready",
+                status="coming_soon",
                 cover_image_url="https://cdn.example/courses/cs224n/cover.jpg",
-                hero_badge="Available now",
+                hero_badge="Coming soon",
                 is_recommended=False,
             ),
             overview=CourseOverviewContent(
                 headline="Learn NLP systems",
-                subheadline="Course overview",
+                subheadline="Overview placeholder",
                 summary_markdown="Course summary...",
                 learning_outcomes=["Understand transformers"],
                 target_audience="Learners",
                 prerequisites_summary="Basic Python",
-                estimated_duration_text="Lecture-first course",
+                estimated_duration_text="Coming soon",
             ),
             entry=StartLearningDecisionResponse(
                 decision="redirect",
-                target="/courses/cs224n/start",
-                reason="learning_ready",
+                target="/courses/cs224n",
+                reason="course_unavailable",
             ),
         )
-        self.assertEqual(overview.entry.reason, "learning_ready")
+        self.assertEqual(overview.entry.reason, "course_unavailable")
 
         learning_unit = LearningUnitResponse(
             course=types.SimpleNamespace(slug="cs231n", title="CS231n"),

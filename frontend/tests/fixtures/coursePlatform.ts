@@ -31,19 +31,8 @@ export const CS224N_ITEM: CourseCatalogItem = {
   slug: "cs224n",
   title: "CS224n: Natural Language Processing with Deep Learning",
   short_description: "Modern NLP systems and language modeling.",
-  status: "ready",
-  cover_image_url: "/courses/cs224n/cover.jpg",
-  hero_badge: "Available now",
-  is_recommended: false,
-};
-
-export const COMING_SOON_ITEM: CourseCatalogItem = {
-  id: "course_upcoming_ai",
-  slug: "upcoming-ai",
-  title: "Upcoming AI Course",
-  short_description: "A placeholder course that remains blocked for rollout tests.",
   status: "coming_soon",
-  cover_image_url: "/courses/upcoming-ai/cover.jpg",
+  cover_image_url: "/courses/cs224n/cover.jpg",
   hero_badge: "Coming soon",
   is_recommended: false,
 };
@@ -83,34 +72,12 @@ export const CS224N_OVERVIEW: CourseOverviewResponse = {
   course: CS224N_ITEM,
   overview: {
     headline: "Explore modern NLP and language modeling workflows",
-    subheadline: "Learn the path from word vectors to transformers.",
-    summary_markdown: "Course overview...",
-    learning_outcomes: [
-      "Build intuition for modern NLP systems",
-    ],
-    target_audience: "Learners interested in NLP",
-    prerequisites_summary: "Basic Python",
-    estimated_duration_text: "Lecture-first course",
-    structure_snapshot: { summary: "Lecture-first course with canonical sections" },
-    cta_label: "Start learning",
-  },
-  entry: {
-    decision: "redirect",
-    target: "/courses/cs224n/start",
-    reason: "learning_ready",
-  },
-};
-
-export const COMING_SOON_OVERVIEW: CourseOverviewResponse = {
-  course: COMING_SOON_ITEM,
-  overview: {
-    headline: "Explore an upcoming AI course",
     subheadline: "Visible but blocked until metadata is ready.",
     summary_markdown: "Overview placeholder.",
     learning_outcomes: [
-      "See the upcoming curriculum in the public catalog",
+      "See the upcoming NLP curriculum in the public catalog",
     ],
-    target_audience: "Learners interested in AI",
+    target_audience: "Learners interested in NLP",
     prerequisites_summary: "Basic Python",
     estimated_duration_text: "Coming soon",
     structure_snapshot: { summary: "Overview only for now" },
@@ -118,7 +85,7 @@ export const COMING_SOON_OVERVIEW: CourseOverviewResponse = {
   },
   entry: {
     decision: "redirect",
-    target: "/courses/upcoming-ai",
+    target: "/courses/cs224n",
     reason: "course_unavailable",
   },
 };

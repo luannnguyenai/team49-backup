@@ -67,7 +67,6 @@ describe("canonical assessment session helpers", () => {
         sections: SECTIONS,
         knownUnitIds: ["learning_unit_2", "learning_unit_3"],
         desiredSectionIds: ["section_foundations"],
-        selectedCourseIds: [],
       }),
     ).toEqual({
       canonicalUnitIds: ["local::lecture01::seg2", "local::lecture02::seg1"],
@@ -84,35 +83,12 @@ describe("canonical assessment session helpers", () => {
         sections: SECTIONS,
         knownUnitIds: [],
         desiredSectionIds: ["section_foundations"],
-        selectedCourseIds: [],
       }),
     ).toEqual({
       canonicalUnitIds: ["local::lecture01::seg1", "local::lecture01::seg2"],
       unitNameMap: {
         "local::lecture01::seg1": "Vectors",
         "local::lecture01::seg2": "Linear algebra",
-      },
-    });
-  });
-
-  it("falls back to selected courses when onboarding uses bootstrap course cards", () => {
-    expect(
-      buildCanonicalAssessmentContext({
-        sections: SECTIONS,
-        knownUnitIds: [],
-        desiredSectionIds: [],
-        selectedCourseIds: ["course_cs231n_uuid", "course_cs999n"],
-      }),
-    ).toEqual({
-      canonicalUnitIds: [
-        "local::lecture01::seg1",
-        "local::lecture01::seg2",
-        "local::lecture02::seg1",
-      ],
-      unitNameMap: {
-        "local::lecture01::seg1": "Vectors",
-        "local::lecture01::seg2": "Linear algebra",
-        "local::lecture02::seg1": "Optimization",
       },
     });
   });

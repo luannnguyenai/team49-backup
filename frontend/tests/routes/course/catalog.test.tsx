@@ -81,9 +81,9 @@ describe("course catalog routes", () => {
           slug: "cs224n",
           title: "CS224n: Natural Language Processing with Deep Learning",
           short_description: "Modern NLP systems and language modeling.",
-          status: "ready",
+          status: "coming_soon",
           cover_image_url: "/courses/cs224n/cover.jpg",
-          hero_badge: "Available now",
+          hero_badge: "Coming soon",
           is_recommended: false,
         },
       ],
@@ -103,7 +103,7 @@ describe("course catalog routes", () => {
     expect(
       screen.getByText("CS224n: Natural Language Processing with Deep Learning"),
     ).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "Xem khóa học" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Open overview" })).toHaveLength(2);
   });
 
   it("shows a startable overview for CS231n", async () => {
@@ -145,38 +145,38 @@ describe("course catalog routes", () => {
     );
 
     expect(screen.getByText("Build deep intuition for modern vision systems")).toBeInTheDocument();
-    expect(screen.getByText("Những gì bạn sẽ học")).toBeInTheDocument();
+    expect(screen.getByText("What you will get")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Courses" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("button", { name: "Start learning" })).toBeEnabled();
   });
 
-  it("shows a startable overview for CS224n", async () => {
+  it("shows a blocked overview for CS224n", async () => {
     const data: CourseOverviewResponse = {
       course: {
         id: "course_cs224n",
         slug: "cs224n",
         title: "CS224n: Natural Language Processing with Deep Learning",
         short_description: "Modern NLP systems and language modeling.",
-        status: "ready",
+        status: "coming_soon",
         cover_image_url: "/courses/cs224n/cover.jpg",
-        hero_badge: "Available now",
+        hero_badge: "Coming soon",
         is_recommended: false,
       },
       overview: {
         headline: "Explore modern NLP and language modeling workflows",
-        subheadline: "Learn the path from word vectors to transformers.",
-        summary_markdown: "Course overview.",
-        learning_outcomes: ["Build intuition for modern NLP systems"],
+        subheadline: "Visible but blocked until metadata is ready.",
+        summary_markdown: "Overview placeholder.",
+        learning_outcomes: ["See the upcoming NLP curriculum in the public catalog"],
         target_audience: "Learners interested in NLP",
         prerequisites_summary: "Basic Python",
-        estimated_duration_text: "Lecture-first course",
-        structure_snapshot: { summary: "Lecture-first course with canonical sections" },
-        cta_label: "Start learning",
+        estimated_duration_text: "Coming soon",
+        structure_snapshot: { summary: "Overview only for now" },
+        cta_label: "Coming soon",
       },
       entry: {
         decision: "redirect",
-        target: "/courses/cs224n/start",
-        reason: "learning_ready",
+        target: "/courses/cs224n",
+        reason: "course_unavailable",
       },
     };
 
@@ -191,6 +191,6 @@ describe("course catalog routes", () => {
     expect(
       screen.getByText("Explore modern NLP and language modeling workflows"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Start learning" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Coming soon" })).toBeDisabled();
   });
 });

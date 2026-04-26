@@ -62,45 +62,6 @@ export interface OnboardingPayload {
   preferred_method: "reading" | "video";
 }
 
-export interface BootstrapCourse {
-  id: string;
-  slug: string;
-  title: string;
-  short_description: string;
-  status: string;
-  visibility: string;
-  cover_image_url: string | null;
-  hero_badge: string | null;
-  primary_subject: string | null;
-  sort_order: number;
-}
-
-export interface BootstrapCourseOption extends BootstrapCourse {
-  canonical_course_id: string;
-}
-
-export interface BootstrapTopic {
-  slug: string;
-  module_slug: string;
-  name: string;
-  description: string;
-  order_index: number;
-  estimated_hours_beginner: number | null;
-  estimated_hours_intermediate: number | null;
-  estimated_hours_review: number | null;
-}
-
-export interface BootstrapTopicOption extends BootstrapTopic {
-  course_slug: string | null;
-  canonical_course_id: string | null;
-}
-
-export interface BootstrapTopicGroup {
-  course_key: string;
-  course_title: string;
-  topics: BootstrapTopicOption[];
-}
-
 // ---- Content API shapes ----
 
 export interface LearningUnitSelectionItem {
@@ -268,15 +229,12 @@ export interface CourseUnitListItem {
   status: CourseStatus;
   unit_type: string;
   order_index: number;
-  lecture_label?: string | null;
 }
 
 export interface LearningUnitSummary {
   id: string;
   slug: string;
   title: string;
-  lecture_title?: string | null;
-  lecture_order?: number | null;
   unit_type: string;
   status: CourseStatus;
   entry_mode: "text" | "video" | "hybrid";
@@ -332,53 +290,6 @@ export interface QuizStartResponse {
   learning_unit_id: string;
   total_questions: number;
   questions: QuestionForQuiz[];
-  source: string;
-  checkpoint: string | null;
-}
-
-export interface InlineQuizStartPayload {
-  learning_unit_id: string;
-  count: number;
-  source: "inline_video";
-  checkpoint: "midpoint" | "end";
-  exclude_item_ids: string[];
-}
-
-export interface LearningSessionInlineQuizState {
-  shown?: boolean;
-  active_session_id?: string | null;
-  completed_session_id?: string | null;
-  excluded_item_ids?: string[];
-  item_ids?: string[];
-  answered_item_ids?: string[];
-  quiz_phase?: string | null;
-}
-
-export interface LearningSessionInlineQuizProgress {
-  midpoint?: LearningSessionInlineQuizState | null;
-  end?: LearningSessionInlineQuizState | null;
-}
-
-export interface LearningUnitProgressPayload {
-  video_progress_s?: number | null;
-  video_finished?: boolean;
-  watch_percent?: number | null;
-  inline_quiz?: LearningSessionInlineQuizProgress | null;
-}
-
-export interface LearningUnitProgressResponse {
-  learning_unit_id: string;
-  current_stage: string;
-  current_progress: Record<string, unknown>;
-  last_activity: string;
-}
-
-export interface ResumeStateResponse {
-  resume_route: string;
-  current_unit_id: string | null;
-  current_stage: string | null;
-  current_progress: Record<string, unknown> | null;
-  last_activity: string | null;
 }
 
 export interface QuizAnswerResponse {
@@ -509,8 +420,6 @@ export interface HistoryItem {
   score_percent: number | null;
   correct_count: number;
   total_questions: number;
-  source: string | null;
-  checkpoint: string | null;
 }
 
 export interface ScoreTrendPoint {
@@ -535,8 +444,7 @@ export interface HistoryResponse {
 }
 
 export interface QuestionInteractionDetail {
-  question_id: string | null;
-  canonical_item_id?: string | null;
+  question_id: string;
   sequence_position: number;
   learning_unit_title: string;
   stem_text: string;
@@ -559,8 +467,6 @@ export interface SessionDetailResponse {
   bloom_breakdown: Record<string, string>;
   weak_kcs: string[];
   misconceptions: string[];
-  source: string | null;
-  checkpoint: string | null;
   questions: QuestionInteractionDetail[];
 }
 
