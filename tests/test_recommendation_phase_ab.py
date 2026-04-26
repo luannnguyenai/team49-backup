@@ -30,10 +30,12 @@ def _make_unit(unit_id: uuid.UUID | None = None, section_id: uuid.UUID | None = 
     )
 
 
-def _make_placement(topic_unit_id: uuid.UUID, decision: str) -> SimpleNamespace:
+def _make_placement(topic_unit_id: uuid.UUID, decision: str, score_pct: float = 55.0) -> SimpleNamespace:
+    from decimal import Decimal
     return SimpleNamespace(
         topic_unit_id=topic_unit_id,
         decision=decision,
+        score_pct=Decimal(str(score_pct)),
     )
 
 
@@ -233,7 +235,7 @@ class TestPhaseABSplit(unittest.IsolatedAsyncioTestCase):
         relearn_item = by_unit[uid_relearn]
         self.assertEqual(relearn_item.phase_tag, "phase_a")
         self.assertIsNotNone(relearn_item.rationale_log)
-        self.assertIn("re-learning", relearn_item.rationale_log)
+        self.assertIn("relearn", relearn_item.rationale_log)
 
         skip_item = by_unit[uid_skip]
         self.assertEqual(skip_item.phase_tag, "phase_b")
@@ -242,7 +244,7 @@ class TestPhaseABSplit(unittest.IsolatedAsyncioTestCase):
         unassessed_item = by_unit[uid_unassessed]
         self.assertEqual(unassessed_item.phase_tag, "phase_a")
         self.assertIsNotNone(unassessed_item.rationale_log)
-        self.assertIn("prerequisite", unassessed_item.rationale_log)
+        self.assertIn("prereq", unassessed_item.rationale_log)
 
 
 if __name__ == "__main__":
