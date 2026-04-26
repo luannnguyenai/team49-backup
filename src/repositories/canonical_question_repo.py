@@ -42,7 +42,7 @@ class CanonicalQuestionRepository:
         self,
         *,
         canonical_unit_ids: list[str],
-        phase: str = "placement_assessment",
+        phase: str = "placement",
     ) -> list[tuple[QuestionBankItem, float | None]]:
         """
         Returns (item, difficulty_prior) pairs filtered by phase and unit IDs.

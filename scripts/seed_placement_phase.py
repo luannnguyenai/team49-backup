@@ -1,6 +1,10 @@
 """
 Tag question_bank items that have item_calibration records for cs231n / cs224n / cs230
-with phase='placement_assessment' in item_phase_map.
+with phase='placement' in item_phase_map.
+
+NOTE: The canonical artifact (item_phase_map.jsonl) already includes placement phase
+rows for all eligible items. This script is a fallback for environments where the
+artifact was imported without placement rows.
 
 Idempotent: uses INSERT ... ON CONFLICT DO NOTHING.
 
@@ -24,9 +28,11 @@ from sqlalchemy import text  # noqa: E402
 from src.database import async_session  # noqa: E402
 
 # Courses eligible for placement assessment tagging.
+# The artifact stores course_id in mixed case (CS224n, CS231n, CS230); use ILIKE-style
+# matching via LOWER() to be case-insensitive.
 PLACEMENT_COURSES = {"cs231n", "cs224n", "cs230"}
 
-PHASE = "placement_assessment"
+PHASE = "placement"
 
 # Items already tagged with other phases inherit course_id/lecture_id/unit_id
 # from their existing item_phase_map row.  For items not yet in any phase map,
@@ -51,7 +57,7 @@ _INSERT_SQL = text(
         NOW()
     FROM question_bank qb
     JOIN item_calibration ic ON ic.item_id = qb.item_id
-    WHERE qb.course_id = ANY(:courses)
+    WHERE LOWER(qb.course_id) = ANY(:courses)
     ON CONFLICT (item_id, phase) DO NOTHING
     RETURNING item_id
     """
@@ -62,7 +68,7 @@ _COUNT_SQL = text(
     SELECT COUNT(*) AS n
     FROM item_phase_map
     WHERE phase = :phase
-      AND course_id = ANY(:courses)
+      AND LOWER(course_id) = ANY(:courses)
     """
 )
 
@@ -82,7 +88,7 @@ async def seed(dry_run: bool = False) -> None:
                     SELECT COUNT(*) AS n
                     FROM question_bank qb
                     JOIN item_calibration ic ON ic.item_id = qb.item_id
-                    WHERE qb.course_id = ANY(:courses)
+                    WHERE LOWER(qb.course_id) = ANY(:courses)
                       AND NOT EXISTS (
                           SELECT 1 FROM item_phase_map ipm
                           WHERE ipm.item_id = qb.item_id AND ipm.phase = :phase
