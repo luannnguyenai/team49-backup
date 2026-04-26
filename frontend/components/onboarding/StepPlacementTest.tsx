@@ -2,7 +2,7 @@
 // components/onboarding/StepPlacementTest.tsx
 // Step 5 — Placement assessment: fetch questions, collect answers, show results.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   startPlacementAssessment,
@@ -64,21 +64,24 @@ export default function StepPlacementTest({ sessionId, unitIds, onComplete, onSk
   // results after submit
   const [topicDecisions, setTopicDecisions] = useState<TopicDecision[] | null>(null);
 
+  // Unmount guard shared by both async paths
+  const aliveRef = useRef(true);
+  useEffect(() => () => { aliveRef.current = false; }, []);
+
   // ── Fetch questions on mount ───────────────────────────────────────────────
   useEffect(() => {
     async function load() {
       try {
         const res = await startPlacementAssessment({ session_id: sessionId, unit_ids: unitIds });
-        setQuestions(res.questions);
+        if (aliveRef.current) setQuestions(res.questions);
       } catch {
-        setError("Không thể tải câu hỏi. Vui lòng thử lại.");
+        if (aliveRef.current) setError("Không thể tải câu hỏi. Vui lòng thử lại.");
       } finally {
-        setLoading(false);
+        if (aliveRef.current) setLoading(false);
       }
     }
     load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sessionId, unitIds]);
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   async function handleSubmit() {
@@ -90,21 +93,17 @@ export default function StepPlacementTest({ sessionId, unitIds, onComplete, onSk
       );
       const res = await submitPlacementAssessment({ session_id: sessionId, answers: answerList });
 
+      if (!aliveRef.current) return;
+
       // Persist to store
       useOnboardingStore.getState().setPlacementSessionId(sessionId);
-      useOnboardingStore.getState().setPlacementResults(
-        res.topic_decisions.map((d) => ({
-          topic_unit_id: d.topic_unit_id,
-          decision: d.decision,
-          score_pct: d.score_pct,
-        })),
-      );
+      useOnboardingStore.getState().setPlacementResults(res.topic_decisions);
 
       setTopicDecisions(res.topic_decisions);
     } catch {
-      setError("Gửi bài thất bại. Vui lòng thử lại.");
+      if (aliveRef.current) setError("Gửi bài thất bại. Vui lòng thử lại.");
     } finally {
-      setSubmitting(false);
+      if (aliveRef.current) setSubmitting(false);
     }
   }
 
@@ -134,7 +133,7 @@ export default function StepPlacementTest({ sessionId, unitIds, onComplete, onSk
               className="flex items-center justify-between rounded-xl border-2 p-4"
               style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
             >
-              <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              <span className="text-sm font-medium font-mono text-xs" style={{ color: "var(--text-primary)" }}>
                 {d.topic_unit_id}
               </span>
               <div className="flex items-center gap-3">
