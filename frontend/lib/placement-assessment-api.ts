@@ -1,39 +1,33 @@
 // lib/placement-assessment-api.ts
 // API client for placement assessment endpoints.
-// Follows the same pattern as other API objects in lib/api.ts.
+// Adapts backend Pydantic shapes to frontend-friendly types.
 
 import { api } from "@/lib/api";
 
 // ---------------------------------------------------------------------------
-// Request / Response types (match backend Pydantic schemas)
+// Frontend-facing types (what components consume)
 // ---------------------------------------------------------------------------
-
-export interface PlacementStartRequest {
-  session_id: string;        // UUID of planner session
-  unit_ids: string[];        // canonical topic unit IDs to assess
-}
 
 export interface PlacementQuestion {
   item_id: string;
-  question_text: string;
-  options: Record<string, string>;   // {"A": "...", "B": "...", ...}
+  question_text: string;                 // mapped from backend stem_text
+  options: Record<"A" | "B" | "C" | "D", string>; // mapped from option_a/b/c/d
   topic_unit_id: string;
 }
 
 export interface PlacementStartResponse {
   session_id: string;
+  total_questions: number;
   questions: PlacementQuestion[];
-  processed_unit_ids: string[];
+  processed_unit_ids: string[];          // mapped from topic_unit_ids
+  skipped_topics: string[];              // units with no items
+  should_skip_step: boolean;             // true when ALL units had no items
 }
 
 export interface PlacementAnswerInput {
   item_id: string;
-  selected_option: string;   // "A" | "B" | "C" | "D"
-}
-
-export interface PlacementSubmitRequest {
-  session_id: string;
-  answers: PlacementAnswerInput[];
+  selected_answer: string;              // "A" | "B" | "C" | "D"
+  topic_unit_id: string;
 }
 
 export interface TopicDecision {
@@ -43,8 +37,11 @@ export interface TopicDecision {
 }
 
 export interface PlacementSubmitResponse {
+  session_id: string;
   topic_decisions: TopicDecision[];
-  overall_score_pct: number;
+  skipped_count: number;
+  review_count: number;
+  relearn_count: number;
 }
 
 export interface PlacementResultsResponse {
@@ -52,22 +49,78 @@ export interface PlacementResultsResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Backend raw types (internal — not exported)
+// ---------------------------------------------------------------------------
+
+interface BackendQuestion {
+  item_id: string;
+  canonical_unit_id: string;
+  topic_unit_id: string;
+  stem_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+}
+
+interface BackendStartResponse {
+  session_id: string;
+  total_questions: number;
+  questions: BackendQuestion[];
+  topic_unit_ids: string[];
+  skipped_topics: string[];
+  should_skip_step: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Transformers
+// ---------------------------------------------------------------------------
+
+function toFrontendQuestion(q: BackendQuestion): PlacementQuestion {
+  return {
+    item_id: q.item_id,
+    question_text: q.stem_text,
+    options: { A: q.option_a, B: q.option_b, C: q.option_c, D: q.option_d },
+    topic_unit_id: String(q.topic_unit_id),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // API functions
 // ---------------------------------------------------------------------------
 
 export async function startPlacementAssessment(
-  req: PlacementStartRequest
+  topicUnitIds: string[]
 ): Promise<PlacementStartResponse> {
-  return api
-    .post<PlacementStartResponse>("/api/placement-assessment/start", req)
+  const raw = await api
+    .post<BackendStartResponse>("/api/placement-assessment/start", {
+      topic_unit_ids: topicUnitIds,
+    })
     .then((r) => r.data);
+
+  return {
+    session_id: String(raw.session_id),
+    total_questions: raw.total_questions,
+    questions: raw.questions.map(toFrontendQuestion),
+    processed_unit_ids: raw.topic_unit_ids.map(String),
+    skipped_topics: (raw.skipped_topics ?? []).map(String),
+    should_skip_step: raw.should_skip_step ?? false,
+  };
 }
 
-export async function submitPlacementAssessment(
-  req: PlacementSubmitRequest
-): Promise<PlacementSubmitResponse> {
+export async function submitPlacementAssessment(req: {
+  session_id: string;
+  answers: PlacementAnswerInput[];
+}): Promise<PlacementSubmitResponse> {
   return api
-    .post<PlacementSubmitResponse>("/api/placement-assessment/submit", req)
+    .post<PlacementSubmitResponse>("/api/placement-assessment/submit", {
+      session_id: req.session_id,
+      answers: req.answers.map((a) => ({
+        item_id: a.item_id,
+        selected_answer: a.selected_answer,
+        topic_unit_id: a.topic_unit_id,
+      })),
+    })
     .then((r) => r.data);
 }
 

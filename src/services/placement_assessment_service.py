@@ -15,6 +15,7 @@ Decision gate (per topic):
 """
 from __future__ import annotations
 
+import logging
 import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -35,6 +36,8 @@ from src.schemas.placement_assessment import (
     PlacementSubmitResponse,
     TopicDecision,
 )
+
+log = logging.getLogger(__name__)
 
 
 _ANSWER_INDEX: dict[str, int] = {"A": 0, "B": 1, "C": 2, "D": 3}
@@ -93,6 +96,24 @@ async def start_placement_assessment(
     user_id: uuid.UUID,
     topic_unit_ids: list[uuid.UUID],
 ) -> PlacementStartResponse:
+    log.info(
+        "placement_start user=%s requested_units=%d",
+        user_id,
+        len(topic_unit_ids),
+    )
+
+    if not topic_unit_ids:
+        # No units selected — signal frontend to skip the placement step entirely
+        log.info("placement_start: no units requested, returning should_skip_step=True")
+        return PlacementStartResponse(
+            session_id=uuid.uuid4(),
+            total_questions=0,
+            questions=[],
+            topic_unit_ids=[],
+            skipped_topics=[],
+            should_skip_step=True,
+        )
+
     result = await db.execute(
         select(LearningUnit).where(LearningUnit.id.in_(topic_unit_ids))
     )
@@ -103,24 +124,59 @@ async def start_placement_assessment(
     question_repo = CanonicalQuestionRepository(db)
     all_questions: list[PlacementQuestion] = []
     processed_unit_ids: list[uuid.UUID] = []
+    skipped_unit_ids: list[uuid.UUID] = []
 
     for unit_id in topic_unit_ids:
         unit = units.get(unit_id)
         if unit is None or not unit.canonical_unit_id:
+            log.warning("placement_start: unit %s not found or missing canonical_unit_id", unit_id)
+            skipped_unit_ids.append(unit_id)
             continue
+
         pairs = await question_repo.get_items_for_placement_bucketed(
             canonical_unit_ids=[unit.canonical_unit_id],
             phase="placement",
         )
-        selected = _bucket_select_5(pairs)
-        if selected:
-            all_questions += [_item_to_placement_question(item, unit_id) for item, _ in selected]
-            processed_unit_ids.append(unit_id)
+        log.info(
+            "placement_start: unit=%s canonical=%s candidates=%d",
+            unit_id,
+            unit.canonical_unit_id,
+            len(pairs),
+        )
 
+        selected = _bucket_select_5(pairs)
+        if not selected:
+            log.warning(
+                "placement_start: unit %s has no placement items — skipping",
+                unit_id,
+            )
+            skipped_unit_ids.append(unit_id)
+            continue
+
+        easy = sum(1 for _, d in selected if d is not None and d <= -0.5)
+        medium = sum(1 for _, d in selected if d is None or (-0.5 < (d or 0) <= 0.5))
+        hard = sum(1 for _, d in selected if d is not None and d > 0.5)
+        log.info(
+            "placement_start: unit=%s selected=%d (easy=%d medium=%d hard=%d)",
+            unit_id, len(selected), easy, medium, hard,
+        )
+
+        all_questions += [_item_to_placement_question(item, unit_id) for item, _ in selected]
+        processed_unit_ids.append(unit_id)
+
+    # All requested units had no items → tell frontend to skip this step
     if not all_questions:
-        raise ValidationError(
-            "No placement questions found for the selected topics. "
-            "Ensure item_phase_map rows with phase='placement' exist."
+        log.warning(
+            "placement_start: all %d units had no placement items; returning should_skip_step=True",
+            len(topic_unit_ids),
+        )
+        return PlacementStartResponse(
+            session_id=uuid.uuid4(),
+            total_questions=0,
+            questions=[],
+            topic_unit_ids=[],
+            skipped_topics=skipped_unit_ids,
+            should_skip_step=True,
         )
 
     session = Session(
@@ -134,11 +190,19 @@ async def start_placement_assessment(
     await db.flush()
     await db.refresh(session)
 
+    log.info(
+        "placement_start: session=%s total_questions=%d skipped_topics=%d",
+        session.id,
+        len(all_questions),
+        len(skipped_unit_ids),
+    )
+
     return PlacementStartResponse(
         session_id=session.id,
         total_questions=len(all_questions),
         questions=all_questions,
         topic_unit_ids=processed_unit_ids,
+        skipped_topics=skipped_unit_ids,
     )
 
 
