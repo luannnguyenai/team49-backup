@@ -5,9 +5,8 @@
 import { useEffect, useState } from "react";
 import { BookOpen, Trophy, Clock, TrendingUp } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { authApi, courseApi, historyApi } from "@/lib/api";
+import { authApi, historyApi } from "@/lib/api";
 import type {
-  CourseCatalogItem,
   HistoryItem,
   HistorySummary,
   UserSkillSnapshot,
@@ -71,6 +70,14 @@ function calculateStudyStreak(items: HistoryItem[]) {
   }
 
   return streak;
+}
+
+function calculateJoinedCourseCount(items: HistoryItem[]) {
+  return new Set(
+    items
+      .map((item) => item.course_slug)
+      .filter((courseSlug): courseSlug is string => Boolean(courseSlug)),
+  ).size;
 }
 
 function buildAchievements(
@@ -146,7 +153,6 @@ function StatRow({ icon, iconBg, label, value }: StatRowProps) {
 
 export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
-  const [courses, setCourses] = useState<CourseCatalogItem[]>([]);
   const [summary, setSummary] = useState<HistorySummary | null>(null);
   const [skills, setSkills] = useState<UserSkillSnapshot[]>(DEFAULT_SKILLS);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
@@ -154,12 +160,10 @@ export default function ProfilePage() {
 
   useEffect(() => {
     Promise.all([
-      courseApi.catalog({ includeUnavailable: true }),
       historyApi.list({ page_size: 100 }),
       authApi.mySkills(),
     ])
-      .then(([catalog, hist, skillOverview]) => {
-        setCourses(catalog.items);
+      .then(([hist, skillOverview]) => {
         setSummary(hist.summary);
         setSkills(skillOverview.skills);
         setHistoryItems(hist.items);
@@ -184,6 +188,7 @@ export default function ProfilePage() {
   const completedSessions = summary?.completed_sessions ?? 0;
   const hasSkillEvidence = skills.some((skill) => skill.level !== "not_started");
   const streakDays = calculateStudyStreak(historyItems);
+  const joinedCourseCount = calculateJoinedCourseCount(historyItems);
   const membershipLabel = getMembershipLabel(
     completedSessions,
     totalHours,
@@ -233,7 +238,7 @@ export default function ProfilePage() {
                   icon={<BookOpen className="h-4 w-4 text-blue-600" />}
                   iconBg="bg-blue-100 dark:bg-blue-900/30"
                   label="Khóa học"
-                  value={String(courses.length)}
+                  value={String(joinedCourseCount)}
                 />
                 <StatRow
                   icon={<Trophy className="h-4 w-4 text-emerald-600" />}
