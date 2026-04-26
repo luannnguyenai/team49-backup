@@ -175,11 +175,6 @@ async def save_known_topics(
     """
     repo = GoalPreferenceRepository(db)
 
-    if not topic_unit_ids:
-        await repo.upsert_for_user(user_id, placement_status="skipped")
-        await db.commit()
-        return KnownTopicsResponse(saved=True, count=0, skip_placement=True)
-
     # Load existing record to merge, if present
     existing = await repo.get_by_user_id(user_id)
     existing_notes: dict = {}
