@@ -379,3 +379,84 @@ async def test_update_learning_unit_progress_keeps_watching_when_video_finished_
     )
 
     assert result.current_stage == "watching"
+
+
+@pytest.mark.asyncio
+async def test_update_learning_unit_progress_treats_completed_end_quiz_runtime_state_as_lesson_complete(
+    monkeypatch,
+):
+    user_id = uuid4()
+    unit_id = uuid4()
+    course_id = uuid4()
+    existing_progress = {
+        "learning_unit_id": str(unit_id),
+        "inline_quiz": {
+            "end": {
+                "shown": True,
+                "active_session_id": None,
+                "completed_session_id": str(uuid4()),
+            }
+        },
+    }
+
+    class FakeCanonicalContentRepository:
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def get_learning_units_by_ids(self, unit_ids):
+            assert unit_ids == [unit_id]
+            return {unit_id: SimpleNamespace(id=unit_id, course_id=course_id)}
+
+    class FakeLearningProgressRepository:
+        payload = None
+
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def upsert(self, **payload):
+            FakeLearningProgressRepository.payload = payload
+            return SimpleNamespace(**payload)
+
+    class FakePlannerAuditRepository:
+        payload = None
+
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def get_session_state(self, actual_user_id, session_id):
+            assert actual_user_id == user_id
+            assert session_id == learning_session_service.CANONICAL_SESSION_ID
+            return SimpleNamespace(current_progress=existing_progress)
+
+        async def upsert_session_state(self, **payload):
+            FakePlannerAuditRepository.payload = payload
+            return SimpleNamespace(**payload)
+
+    monkeypatch.setattr(
+        learning_session_service,
+        "CanonicalContentRepository",
+        FakeCanonicalContentRepository,
+    )
+    monkeypatch.setattr(
+        learning_session_service,
+        "LearningProgressRepository",
+        FakeLearningProgressRepository,
+    )
+    monkeypatch.setattr(
+        learning_session_service,
+        "PlannerAuditRepository",
+        FakePlannerAuditRepository,
+    )
+
+    result = await learning_session_service.update_learning_unit_progress(
+        "db-session",
+        user_id=user_id,
+        learning_unit_id=unit_id,
+        video_progress_s=420.0,
+        video_finished=False,
+        watch_percent=0.71,
+    )
+
+    assert result.current_stage == "post_quiz"
+    assert FakeLearningProgressRepository.payload["status"] == LearningProgressStatus.completed
+    assert FakeLearningProgressRepository.payload["completed_at"] is not None
