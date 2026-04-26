@@ -256,15 +256,23 @@ function getOptionText(question: QuestionForQuiz, option: SelectedAnswer): strin
 function VideoProgressRail({
   currentTime,
   duration,
+  chapters,
+  activeChapterTitle,
   markers,
   onSeek,
 }: {
   currentTime: number;
   duration: number;
+  chapters: ChapterView[];
+  activeChapterTitle: string;
   markers: VideoProgressRailMarker[];
   onSeek: (seconds: number) => void;
 }) {
   const progressPct = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+  const [hoveredSection, setHoveredSection] = useState<{
+    label: string;
+    positionPct: number;
+  } | null>(null);
 
   const handleRailClick = useCallback(
     (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -277,14 +285,34 @@ function VideoProgressRail({
     [duration, onSeek],
   );
 
+  const updateHoveredSection = useCallback(
+    (event: ReactMouseEvent<HTMLDivElement>) => {
+      if (!duration || !chapters.length) return;
+      const bounds = event.currentTarget.getBoundingClientRect();
+      if (!bounds.width) return;
+      const ratio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
+      const hoverTime = ratio * duration;
+      const chapter =
+        chapters.find(
+          (candidate) =>
+            hoverTime >= candidate.start_time && hoverTime < candidate.end_time,
+        ) ?? chapters[chapters.length - 1];
+      setHoveredSection({
+        label: chapter.title,
+        positionPct: ratio * 100,
+      });
+    },
+    [chapters, duration],
+  );
+
   return (
     <div
       className="rounded-b-3xl border-x border-b px-4 pb-4 pt-3"
       style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
     >
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-widest-sm text-blue-600">
-          Video progress
+        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+          Current section: <span className="text-blue-600">{activeChapterTitle}</span>
         </p>
         <span className="text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
           {formatSeconds(currentTime)} / {formatSeconds(duration)}
@@ -296,8 +324,19 @@ function VideoProgressRail({
         className="relative h-3 cursor-pointer rounded-full bg-slate-200/80"
         data-testid="video-progress-rail"
         onClick={handleRailClick}
+        onMouseLeave={() => setHoveredSection(null)}
+        onMouseMove={updateHoveredSection}
         style={{ backgroundColor: "rgba(148, 163, 184, 0.28)" }}
       >
+        {hoveredSection ? (
+          <div
+            className="pointer-events-none absolute -top-11 z-10 -translate-x-1/2 rounded-full bg-slate-950 px-3 py-1.5 text-xs font-medium text-white shadow-lg"
+            style={{ left: `${hoveredSection.positionPct}%` }}
+          >
+            {hoveredSection.label}
+          </div>
+        ) : null}
+
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-blue-600 transition-[width] duration-150"
           style={{ width: `${progressPct}%` }}
@@ -1148,6 +1187,8 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
               <VideoProgressRail
                 currentTime={currentTime}
                 duration={duration}
+                chapters={chapters}
+                activeChapterTitle={activeChapter?.title ?? "No section available"}
                 markers={allRailMarkers}
                 onSeek={handleSeek}
               />
