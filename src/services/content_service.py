@@ -37,7 +37,8 @@ async def list_course_sections(db: AsyncSession) -> list[CourseSectionListItem]:
         CourseSectionListItem(
             id=section.id,
             course_id=course.id,
-            canonical_course_id=course.canonical_course_id,
+            # Normalise to lowercase so frontend GOAL_COURSE_MAP ("cs231n" etc.) matches.
+            canonical_course_id=course.canonical_course_id.lower() if course.canonical_course_id else None,
             title=section.title,
             description=course.short_description,
             order_index=section.sort_order,
@@ -85,7 +86,7 @@ async def get_course_section_detail(
     return CourseSectionDetailResponse(
         id=section.id,
         course_id=course.id,
-        canonical_course_id=course.canonical_course_id,
+        canonical_course_id=course.canonical_course_id.lower() if course.canonical_course_id else None,
         title=section.title,
         description=course.short_description,
         order_index=section.sort_order,
