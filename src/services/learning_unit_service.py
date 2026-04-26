@@ -14,6 +14,7 @@ connect unit slugs to legacy lecture IDs and video files.
 from __future__ import annotations
 
 import json
+import uuid
 from functools import lru_cache
 from pathlib import Path
 import re
@@ -24,7 +25,13 @@ from sqlalchemy import select
 from src.data_paths import CS231N_DIR, UNITS_FILE as BOOTSTRAP_UNITS_FILE
 from src.data_paths import CS224N_DIR, CS230_DIR
 from src.models.canonical import CanonicalUnit
-from src.models.course import Course, CourseSection, LearningUnit
+from src.models.course import (
+    Course,
+    CourseSection,
+    LearningProgressRecord,
+    LearningProgressStatus,
+    LearningUnit,
+)
 from src.schemas.course import (
     LearningUnitContentPayload,
     LearningUnitCourseSummary,
@@ -150,22 +157,43 @@ def list_course_units(course_slug: str) -> list[dict[str, Any]]:
             continue
         video_units.append(
             {
+                "id": unit.get("id"),
                 "slug": unit["slug"],
                 "title": unit["title"],
                 "status": unit["status"],
                 "unit_type": "lecture",
                 "order_index": order_index,
                 "lecture_label": f"Lecture {order_index:02d}",
+                "is_completed": False,
             }
         )
     return video_units
 
 
-async def list_course_units_db_first(course_slug: str) -> list[dict[str, Any]]:
+async def list_course_units_db_first(
+    course_slug: str,
+    *,
+    user_id: uuid.UUID | None = None,
+) -> list[dict[str, Any]]:
     db_units = await _list_course_units_from_db(course_slug)
-    if db_units:
-        return db_units
-    return list_course_units(course_slug)
+    units = db_units or list_course_units(course_slug)
+
+    completed_unit_ids: set[uuid.UUID] = set()
+    if user_id is not None:
+        unit_ids = [
+            parsed_unit_id
+            for unit in units
+            if (parsed_unit_id := _parse_unit_id(unit.get("id"))) is not None
+        ]
+        completed_unit_ids = await _get_completed_learning_unit_ids(user_id, unit_ids)
+
+    return [
+        {
+            **unit,
+            "is_completed": _parse_unit_id(unit.get("id")) in completed_unit_ids,
+        }
+        for unit in units
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -289,6 +317,7 @@ async def _list_course_units_from_db(course_slug: str) -> list[dict[str, Any]]:
                     continue
                 lecture_units.append(
                     {
+                        "id": str(unit.id),
                         "slug": unit.slug,
                         "title": section.title,
                         "status": unit.status.value,
@@ -300,6 +329,40 @@ async def _list_course_units_from_db(course_slug: str) -> list[dict[str, Any]]:
             return lecture_units
     except Exception:
         return []
+
+
+def _parse_unit_id(unit_id: Any) -> uuid.UUID | None:
+    if unit_id is None:
+        return None
+    if isinstance(unit_id, uuid.UUID):
+        return unit_id
+    try:
+        return uuid.UUID(str(unit_id))
+    except (TypeError, ValueError):
+        return None
+
+
+async def _get_completed_learning_unit_ids(
+    user_id: uuid.UUID,
+    learning_unit_ids: list[uuid.UUID],
+) -> set[uuid.UUID]:
+    if not learning_unit_ids:
+        return set()
+
+    try:
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            result = await db.execute(
+                select(LearningProgressRecord.learning_unit_id).where(
+                    LearningProgressRecord.user_id == user_id,
+                    LearningProgressRecord.learning_unit_id.in_(learning_unit_ids),
+                    LearningProgressRecord.status == LearningProgressStatus.completed,
+                )
+            )
+            return set(result.scalars().all())
+    except Exception:
+        return set()
 
 
 def _course_dir_for_slug(course_slug: str) -> Path | None:
