@@ -110,7 +110,7 @@ async def start_placement_assessment(
             continue
         pairs = await question_repo.get_items_for_placement_bucketed(
             canonical_unit_ids=[unit.canonical_unit_id],
-            phase="placement_assessment",
+            phase="placement",
         )
         selected = _bucket_select_5(pairs)
         if selected:
@@ -119,8 +119,8 @@ async def start_placement_assessment(
 
     if not all_questions:
         raise ValidationError(
-            "No placement_assessment questions found for the selected topics. "
-            "Ensure item_phase_map rows with phase='placement_assessment' exist."
+            "No placement questions found for the selected topics. "
+            "Ensure item_phase_map rows with phase='placement' exist."
         )
 
     session = Session(
