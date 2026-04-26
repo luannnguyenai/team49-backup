@@ -125,7 +125,7 @@ Lý do:
 | --- | --- | --- |
 | `Lecture Structuring` | Đọc transcript timestamp + slide/syllabus của 1 lecture và chia thành unit học được; không feed video | JSON có `lecture`, `table_of_contents`, `units`, `key_points`, `local_concepts` |
 | `Course Concept Cleanup` | Chuẩn hóa concept nội bộ course và sinh role/importance/difficulty/tags | JSON có concept metadata canonical-ready |
-| `Learning Signal Filter` | Đánh dấu unit nào đáng học, tham khảo, hoặc bỏ qua | JSON có `unit_id`, `salience_decision`, `content_type`, `override_critical_kp`, `target_kp_ids`, `expected_item_count`, `rationale` |
+| `Learning Signal Filter` | Đánh dấu unit nào đáng học, tham khảo, hoặc bỏ qua | JSON có `unit_id`, `is_worth_learning`, `salience_score`, `content_type`, `override_critical_kp`, `target_kp_ids`, `expected_item_count`, `rationale` |
 | `Question Drafting` | Sinh câu hỏi từ 1 unit đáng học | JSON array `questions` với `question`, `choices`, `answer_index`, `explanation`, `question_intent`, `evidence_span` |
 | `Question Review` | Soát câu hỏi và sửa lỗi | JSON có `item_id`, `review_status`, `qa_gate_passed`, `issues`, `repaired_question` nếu cần |
 | `Shared Concept Matching` | Quyết concept mới nên gộp vào concept cũ hay tạo mới | JSON có `local_kp_id`, `decision`, `target_global_kp_id`, `confidence`, `rationale` |
@@ -274,10 +274,10 @@ Output JSON:
       "canonical_name": "string",
       "description": "string",
       "importance_level": "critical|high|medium|low",
-      "structural_role": "gateway|core|supporting|enrichment",
+      "structural_role": "gateway|supporting|optional|capstone",
       "importance_confidence": "high|medium|low",
       "importance_rationale": "string",
-      "importance_scope": "course|track|cross_course",
+      "importance_scope": "lecture_local|course_global|curriculum_global",
       "difficulty_level": "intro|intermediate|advanced",
       "difficulty_confidence": "high|medium|low",
       "track_tags": [],
@@ -300,6 +300,8 @@ Rule riêng:
 
 - `importance_level` và `structural_role` là 2 trục khác nhau, không được gộp. Ví dụ một KP có thể là `structural_role=gateway` nhưng `importance_level=medium` trong course đó.
 - `description_embedding` không để LLM sinh; code populate sau.
+- `difficulty_level` trong DB hiện là float normalized. LLM trả enum cho ổn định prompt, code map sang số.
+- Mapping mặc định: `intro=0.35`, `intermediate=0.65`, `advanced=0.9`. Nếu schema v4 đổi sang scale `[0-5]`, migration phải khai báo mapping mới rõ ràng, không đổi ngầm.
 - `importance_source` mặc định do code chèn theo provenance của step, thường là `llm_single_pass` hoặc `llm_consensus`.
 - Nếu có split concept cũ thì đưa vào HITL, không auto split trong phase đầu.
 
@@ -319,14 +321,14 @@ Output JSON:
   "unit_decisions": [
     {
       "unit_id": "string",
-      "salience_decision": "core|reference|skip",
+      "is_worth_learning": true,
+      "salience_score": "skip|low|medium|high",
       "content_type": "core_theory|worked_example|application_case|motivation|historical_context|anecdote|administrative|recap",
       "content_type_confidence": "high|medium|low",
       "override_critical_kp": false,
       "target_kp_ids": [],
       "expected_item_count": 0,
       "salience_confidence": "high|medium|low",
-      "has_quiz_potential": true,
       "rationale": "string"
     }
   ]
@@ -343,11 +345,16 @@ Code sẽ chèn sau:
 
 Rule riêng:
 
-- `salience_decision` là quyết định học hay bỏ qua.
+- `is_worth_learning` là gate học hay không học.
+- `salience_score` là mức độ đáng học/rank, tách khỏi gate.
 - `content_type` là loại nội dung; 2 trục này độc lập.
 - nếu `content_type` là `administrative`, `anecdote`, `historical_context`, hoặc `recap` thì mặc định không sinh quiz, trừ khi `override_critical_kp=true`
 - `override_critical_kp=true` khi unit có KP `importance_level=critical` và `structural_role=gateway`
 - `expected_item_count` là gợi ý; code có thể clamp theo config course
+- Nếu UI/runtime cần nhãn `core|reference|skip`, code derive sau:
+  - `is_worth_learning=false` hoặc `salience_score=skip` → `skip`
+  - `is_worth_learning=true` và `salience_score=low` → `reference`
+  - `is_worth_learning=true` và `salience_score in {medium, high}` → `core`
 
 #### `Question Drafting`
 
@@ -583,13 +590,14 @@ Với item mới:
 }
 ```
 
-Assessor dùng `question_bank.difficulty_prior` / `discrimination_prior` cho tới khi có empirical calibration.
+Assessor dùng `item_calibration.difficulty_prior` / `discrimination_prior` / `guessing_prior` cho tới khi có empirical calibration.
 
 #### `item_phase_map` defaults
 
 Code sinh phase map bằng rule:
 
 - `mini_quiz`: mọi item tốt trong segment core
+- `review`: item đã dùng tốt cho `mini_quiz` hoặc gateway/critical KP, dùng cho spaced-repetition/re-quiz sau này; đây là learner review phase, không phải HITL review queue
 - `placement`: conceptual/application item của KP gateway hoặc early/final coverage
 - `skip_verification`: item có difficulty medium/hard và evidence rõ
 - `bridge_check`: item của prereq/support KP
@@ -606,6 +614,91 @@ Code sinh `item_kp_map` từ `primary_kp_id` + optional secondary KP:
 - primary KP mặc định `0.7-1.0`
 - secondary KP chỉ thêm nếu question thật sự cần nhiều KP
 - validator reject nếu sum lệch quá tolerance
+
+#### Assessment Calibration & IRT/CAT Contract
+
+Mục tiêu của phần này là giữ hệ thống bám sát cách giải thích theo IRT/CAT trong paper, không trộn lẫn giữa:
+
+- **prior do ingest tạo ra**
+- **tham số IRT đã fit từ response thật**
+- **theta estimate của learner trong lúc làm assessment**
+
+Nguyên tắc quan trọng:
+
+- LLM **không** sinh `difficulty_b`, `discrimination_a`, `guessing_c`.
+- LLM chỉ sinh hoặc gợi ý các thông tin semantic như `difficulty`, `question_intent`, `evidence_span`, `frame_evidence`, `primary_kp_id`.
+- Code map `difficulty` hoặc LLM prior rating sang `item_calibration.difficulty_prior`, `discrimination_prior`, `guessing_prior`.
+- `difficulty_b`, `discrimination_a`, `guessing_c` chỉ được fill bởi calibration job sau khi có đủ response data.
+- Synthetic response chỉ được dùng để stress test hoặc bootstrap experiment, **không** được làm cho `is_calibrated=true`.
+- `interactions` là response log canonical. Không tạo thêm bảng `assessment_responses` nếu không có lý do thật sự mạnh, vì sẽ tạo 2 source of truth.
+
+Lifecycle chuẩn:
+
+```text
+cold-start
+  -> selector dùng spread_by_prior từ item_calibration.*_prior
+  -> thu response thật trong interactions
+  -> đủ data thì chạy calibration job
+  -> calibration pass thì set item_calibration.is_calibrated=true
+  -> CAT mới được dùng fitted difficulty_b / discrimination_a / guessing_c
+```
+
+Các mode chọn item:
+
+| Mode | Dùng khi nào | Tham số dùng |
+| --- | --- | --- |
+| `random_uniform` | fallback khi pool nhỏ hoặc metadata lỗi | không cần IRT |
+| `spread_by_prior` | cold-start mặc định | `difficulty_prior`, optional `discrimination_prior`, `guessing_prior` |
+| `irt_adaptive` | chỉ khi item đã calibrated đủ tin cậy | `difficulty_b`, `discrimination_a`, `guessing_c`, standard errors |
+
+Công thức giải thích theo paper:
+
+```text
+2PL:
+P_i(theta) = sigmoid(a_i * (theta - b_i))
+I_i(theta) = a_i^2 * P_i(theta) * (1 - P_i(theta))
+
+3PL cho MCQ:
+P_i(theta) = c_i + (1 - c_i) * sigmoid(a_i * (theta - b_i))
+```
+
+Trong đó:
+
+| Ký hiệu | Field calibrated | Field cold-start fallback |
+| --- | --- | --- |
+| `b_i` difficulty | `item_calibration.difficulty_b` | `item_calibration.difficulty_prior` |
+| `a_i` discrimination | `item_calibration.discrimination_a` | `item_calibration.discrimination_prior` |
+| `c_i` guessing | `item_calibration.guessing_c` | `item_calibration.guessing_prior` |
+| `theta` learner ability | `learner_mastery_kp.theta_mu` hoặc session theta | `0.0` cho user mới |
+| uncertainty | `theta_sigma` | prior rộng, ví dụ `1.0-1.5` |
+
+Database fields cần có để audit và giải thích được theo paper:
+
+| Bảng | Field nên thêm | Lý do |
+| --- | --- | --- |
+| `sessions` | `selection_strategy`, `calibration_mode`, `theta_initial`, `theta_final`, `theta_sigma_initial`, `theta_sigma_final`, `target_se`, `stop_reason` | Biết session dùng random/prior/IRT và dừng vì gì |
+| `interactions` | `selection_strategy`, `theta_before`, `theta_after`, `theta_sigma_before`, `theta_sigma_after`, `predicted_probability`, `item_information`, `item_difficulty_at_time`, `item_discrimination_at_time`, `item_guessing_at_time` | Snapshot đúng tại thời điểm user trả lời, phục vụ audit và fit/debug IRT |
+| `item_calibration` | `standard_error_a`, `standard_error_c`, `calibration_run_id`, `calibration_dataset_version`, `real_response_count`, `synthetic_response_count` | Biết fitted params tin cậy tới đâu và sinh từ dataset nào |
+| `calibration_runs` | `run_id`, `method`, `dataset_version`, `started_at`, `finished_at`, `status`, `metrics_json`, `notes` | Lưu mỗi lần fit calibration để audit/rollback |
+| `item_exposure_stats` | `item_id`, `phase`, `shown_count`, `answered_count`, `last_shown_at`, `exposure_rate` | CAT cần tránh overuse item có Fisher information cao |
+
+Validator bắt buộc:
+
+- `item_kp_map.weight` của mỗi item phải sum bằng `1.0` trong tolerance nhỏ.
+- Nếu `item_calibration.is_calibrated=true` thì bắt buộc có `difficulty_b`, `discrimination_a`, `standard_error_b`, `irt_calibration_n`.
+- Nếu dùng 3PL thì `guessing_c` và `standard_error_c` cũng phải có hoặc phải ghi rõ fallback.
+- Nếu thiếu fitted params hoặc standard error vượt ngưỡng thì selector phải fallback về `spread_by_prior`.
+- Synthetic-only calibration không được set `is_calibrated=true`.
+- `irt_adaptive` không được auto-promote chỉ dựa vào response count; phải dựa vào calibration pass + standard errors.
+
+Admin dashboard sau này cần hiện được:
+
+- calibration run nào tạo ra params đang dùng
+- mỗi item có bao nhiêu real responses và synthetic responses
+- item nào chưa đủ calibration
+- item nào bị overexposed trong CAT
+- item nào có calibration bất thường và cần review
+- session nào dùng `random_uniform`, `spread_by_prior`, hoặc `irt_adaptive`
 
 #### Provenance mapping
 
@@ -648,6 +741,9 @@ Cần có validator tập trung trước khi export canonical:
 - reject nếu `primary_kp_id` không tồn tại trong `concepts_kp`
 - reject nếu `question_intent`/`review_status`/`phase` ngoài enum
 - reject nếu `qa_gate_passed=false` sau repair limit
+- reject hoặc đưa vào repair nếu `concept_alignment_cosine < 0.75`
+- reject nếu `distractor_cosine_upper > 0.9`
+- reject nếu `distractor_cosine_lower < 0.3`
 - reject nếu MCQ không có đúng 4 choices hoặc `answer_index` out of range
 - reject nếu distractor quá giống đáp án hoặc quá vô lý theo embedding/rule check
 - auto-revise nếu procedural/diagnostic question có video grounding nhưng thiếu `frame_evidence`
@@ -821,6 +917,24 @@ Mục đích:
 - runtime chỉ nhìn bản sạch cuối
 - pipeline bên trong có thể thay đổi mà không làm vỡ app
 
+### 4.5. Concept ID Reconciliation
+
+`Lecture Structuring` và `Course Concept Cleanup` có thể dùng `local_kp_id` vì lúc đó course chưa nối vào kho concept chung.
+
+Trước khi export runtime bundle, code phải chạy bước reconciliation:
+
+```text
+local_kp_id -> local_to_global_map -> global kp_id
+```
+
+Rules:
+
+- `unit_kp_map.kp_id`, `question_bank.primary_kp_id`, `item_kp_map.kp_id`, và edge candidate phải dùng global `kp_id` trong bundle cuối.
+- Artifact final không được còn `local_kp_id` ở bất kỳ field canonical nào.
+- Khi `Shared Concept Matching` merge concept mới vào concept cũ, code phải append `course_id` vào `concepts_kp.source_course_ids`.
+- Nếu concept description đổi sau merge/rename, code phải invalidate và rebuild `description_embedding`.
+- Nếu schema v4 thêm `description_embedding_version`, field đó phải update cùng lúc với embedding.
+
 ---
 
 ## 5. Chuẩn bị cho admin dashboard sau này
@@ -926,6 +1040,36 @@ Nguyên tắc quan trọng:
 ---
 
 ## 7. Đợt 0 — Lát nền
+
+### 7.0. Schema patch v4 trước khi code
+
+Trước khi gõ code Đợt 0, cần viết một schema patch v4 gom toàn bộ thay đổi thay vì để thay đổi rải rác trong plan.
+
+Patch này phải nói rõ field nào là:
+
+- canonical artifact field
+- DB runtime field
+- admin/dashboard audit field
+- derived field do code tính, không do LLM sinh
+
+Patch v4 cần chốt các nhóm sau:
+
+| Nhóm | Nội dung cần chốt |
+| --- | --- |
+| Incremental ingest | `content_hash`, `active/deprecated_at`, `evidence_ledger`, `kp_migration`, run snapshots |
+| Concept registry | enum đúng cho `structural_role`, `importance_scope`, mapping `difficulty_level enum -> float`, `source_course_ids` append rule |
+| Learning salience | `is_worth_learning` + `salience_score` là schema field; `core/reference/skip` chỉ là nhãn derived nếu cần UI |
+| Question QA | hard-fail thresholds cho `concept_alignment_cosine`, `distractor_cosine_upper/lower`, evidence substring match |
+| IRT/CAT | audit fields cho `sessions`/`interactions`, calibration metadata, `calibration_runs`, `item_exposure_stats` |
+| Graph | `edge_kind` có dùng production không, `edge_strength` derive từ confidence hay nullable, `bidirectional_score` fate |
+| Runtime boundaries | ingest không ghi `waived_units`; user runtime mới ghi sau skip verification pass |
+
+Các quyết định đã verify với DB live hiện tại:
+
+- Current response log table là `interactions`, không phải `interaction_log`.
+- Current mastery table là `learner_mastery_kp`, không phải `learner_mastery`.
+- Current repo đặt `difficulty_prior`, `discrimination_prior`, `guessing_prior` trong `item_calibration`. Nếu external schema doc nói priors nằm ở `question_bank`, schema patch v4 phải chọn một source of truth; plan này chọn `item_calibration` vì DB/model/importer hiện tại đang dùng như vậy.
+- Current DB có bảng `pruned_edges`, nên `pruned_edges.jsonl` là canonical artifact/table hiện hữu, không phải chỉ là view ảo.
 
 ### 7.1. Vấn đề cần giải
 
@@ -1318,6 +1462,30 @@ Tức là:
 - validate semantic dùng agent
 - validate cấu trúc graph dùng code
 
+### 10.10. Graph Cleanup xử lý verdict thế nào
+
+`Edge Review Agent` chỉ trả verdict. Việc ghi artifact/DB là trách nhiệm của code.
+
+Rules:
+
+- `keep`: giữ edge `source_kp_id -> target_kp_id`.
+- `prune`: đưa edge vào `pruned_edges` với `prune_reason` và rationale.
+- `flip_direction`: deactivate/prune edge cũ `A -> B`, tạo edge mới `B -> A`, ghi `adjudication_trace.direction_flipped=true`.
+- `defer`: đưa vào review queue hoặc retry queue, không silently ingest như edge chắc chắn.
+- `downgrade_to_soft`: chỉ được dùng nếu schema và Planner đã hỗ trợ `edge_kind=soft`. Nếu chưa, phải chuyển thành `defer` hoặc `prune`, không được ingest như hard edge.
+
+ModernBERT không còn là luồng chính. Nếu Planner vẫn cần số `edge_strength`, code có thể derive deterministic từ agent confidence:
+
+| Agent confidence | Default `edge_strength` |
+| --- | --- |
+| `high` | `0.85` |
+| `medium` | `0.60` |
+| `low` | `0.35` |
+
+Nếu edge có nhiều evidence ledger độc lập, code có thể tăng nhẹ trong giới hạn `<= 0.95`. Nếu evidence yếu hoặc chỉ có 1 nguồn, không tăng.
+
+`bidirectional_score` từng phục vụ ModernBERT direction check. Khi bỏ ModernBERT, field này nên để `null` và Planner không được phụ thuộc vào nó.
+
 ---
 
 ## 11. Đường chạy chính hằng ngày — update lecture
@@ -1460,6 +1628,8 @@ Plan này chỉ được coi là thành công nếu tất cả các điều sau 
 6. không còn phụ thuộc ModernBERT trong luồng quyết định chính
 7. các case mơ hồ hoặc tác động lớn luôn có đường `HITL optional`, không ép AI tự quyết 100%
 8. run history, review queue, artifact versions và import status đủ rõ để dựng admin dashboard
+9. question/assessment data phân biệt rõ `prior_only` và `calibrated IRT`, không gọi CAT calibrated khi item chưa có fitted params
+10. mỗi assessment session và mỗi response có đủ snapshot để giải thích selection strategy, theta, predicted probability và item information
 
 ---
 
@@ -1469,22 +1639,29 @@ Tuần này chỉ nên tập trung vào Đợt 0.
 
 ### Checklist
 
-1. thêm `Course Bootstrap` để seed `courses.course_config`
-2. thêm hash cho lecture, unit, concept
-3. thêm `evidence_ledger` cho edge
-4. thêm `active`, `inactive`, `deprecated_at`
-5. thêm `kp_migration`
-6. thêm bảng log run và snapshot input/output
-7. thêm review queue cho case cần người xem lại
-8. thêm artifact version state và import job status
-9. thêm centralized validators cho hard-fail rules
-10. thêm generation logic cho `item_calibration`, `item_phase_map`, `item_kp_map`
-11. thêm tool diff để biết:
+1. soạn schema patch v4 trước, gom toàn bộ thay đổi enum/field/table và mapping derived value
+2. sửa prompt contract lệch schema: `structural_role`, `importance_scope`, `difficulty_level` mapping, `is_worth_learning + salience_score`
+3. thêm `Course Bootstrap` để seed `courses.course_config`
+4. thêm hash cho lecture, unit, concept
+5. thêm `evidence_ledger` cho edge
+6. thêm `active`, `inactive`, `deprecated_at`
+7. thêm `kp_migration`
+8. thêm bảng log run và snapshot input/output
+9. thêm review queue cho case cần người xem lại
+10. thêm artifact version state và import job status
+11. thêm centralized validators cho hard-fail rules và cosine thresholds
+12. thêm generation logic cho `item_calibration`, `item_phase_map`, `item_kp_map`, đủ 7 phase gồm `review`
+13. thêm `Concept ID Reconciliation` để final artifact không còn local KP ID
+14. thêm Graph Cleanup rule cho `flip_direction`, `defer`, `edge_strength` mapping, `bidirectional_score=null`
+15. thêm tool diff để biết:
    - lecture nào đổi
    - concept nào bị ảnh hưởng
    - edge nào cần xét lại
-12. giữ cột `edge_strength` cũ ở DB ở trạng thái nullable nếu muốn để dành cho tương lai, nhưng không dùng trong flow mới
-13. quyết định rõ schema/Planner có hỗ trợ `edge_kind=soft` chưa; nếu chưa thì bỏ soft edge khỏi production output
+16. thêm field audit cho IRT/CAT vào `sessions` và `interactions` bằng migration ADD-only, dùng `interactions` làm response log canonical thay vì tạo `assessment_responses` mới
+17. thêm metadata calibration vào `item_calibration`: `standard_error_a`, `standard_error_c`, `calibration_run_id`, `calibration_dataset_version`, `real_response_count`, `synthetic_response_count`
+18. thêm `calibration_runs` để lưu mỗi lần fit IRT và `item_exposure_stats` để theo dõi item overexposure trong CAT
+19. giữ cột `edge_strength` cũ bằng mapping deterministic từ agent confidence nếu Planner cần số; nếu không dùng thì nullable
+20. quyết định rõ schema/Planner có hỗ trợ `edge_kind=soft` chưa; nếu chưa thì bỏ soft edge khỏi production output
 
 Sau khi xong các mục này mới nên sang Đợt 1.
 
@@ -1503,6 +1680,9 @@ Các chỉnh sửa đã chốt sau review:
 - Nếu chưa sửa Planner/schema để hiểu `edge_kind=soft`, không được xuất soft edge vào production graph như hard edge.
 - Không dùng ModernBERT trong luồng chính. Rủi ro là mất `edge_strength` numeric, nên Planner phải fallback sang confidence/evidence-count và cần test output path trước khi commit lâu dài.
 - `item_calibration`, `item_phase_map`, `item_kp_map` là deterministic enrichment, không để LLM sinh tự do.
+- `item_calibration.*_prior` là cold-start prior, còn `difficulty_b/discrimination_a/guessing_c` chỉ được fill bởi calibration job sau response thật.
+- Synthetic response không được tự động làm `is_calibrated=true`; calibrated mode cần calibration pass + standard errors đạt ngưỡng.
+- Không tạo bảng `assessment_responses` nếu `interactions` đã ghi đủ canonical response log; thiếu field thì thêm vào `sessions`/`interactions`.
 - HITL vẫn giữ là đường cho case mơ hồ/tác động lớn, không loại yếu tố con người.
 
 ### 16.1. Cập nhật chi phí/call khi dùng video segment
