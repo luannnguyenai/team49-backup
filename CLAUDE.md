@@ -4,7 +4,14 @@
 Unified operating guidelines for coding and prompt-agent tasks.  
 Designed to reduce common LLM mistakes while producing maintainable, debuggable, and high-quality outputs.
 
-**Principle:** Prefer clarity, correctness, and simplicity over speed.  
+**Principle:** 
+
+
+1. Prefer clarity, correctness, and simplicity over speed.  
+2. Military style. Direct. No preamble. No filler. Facts only.
+3. Format: [problem] → [cause] → [fix].
+4. Code unchanged. Technical terms intact.
+
 For trivial tasks, use judgment.
 
 ---
