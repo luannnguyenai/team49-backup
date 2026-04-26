@@ -407,3 +407,71 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
             }
     except Exception:
         return None
+
+
+def _format_hms(seconds: int | float | None) -> str:
+    s = int(seconds or 0)
+    return f"{s // 3600:02d}:{(s % 3600) // 60:02d}:{s % 60:02d}"
+
+
+async def get_lecture_toc(course_slug: str, lecture_order: int) -> dict | None:
+    """Build a per-lecture table-of-contents from CanonicalUnit segments.
+
+    Returns the legacy ToC payload shape consumed by LearningUnitShell:
+        {
+          "lecture_title": str,
+          "table_of_contents": [
+              {"section_number", "timestamp", "topic_title",
+               "detailed_summary", "key_takeaways": [str, ...]}
+          ]
+        }
+
+    Returns None if the lecture has no canonical segments.
+    """
+    try:
+        from sqlalchemy import func
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            result = await db.execute(
+                select(CanonicalUnit)
+                .where(
+                    func.lower(CanonicalUnit.course_id) == course_slug.lower(),
+                    CanonicalUnit.lecture_order == lecture_order,
+                )
+            )
+            segments = list(result.scalars().all())
+    except Exception:
+        return None
+
+    if not segments:
+        return None
+
+    segments.sort(
+        key=lambda u: (
+            (u.content_ref or {}).get("start_s") or 0,
+            u.ordering_index or 0,
+        )
+    )
+
+    sections: list[dict[str, Any]] = []
+    for idx, seg in enumerate(segments, start=1):
+        content_ref = seg.content_ref or {}
+        sections.append(
+            {
+                "section_number": idx,
+                "timestamp": _format_hms(content_ref.get("start_s")),
+                "topic_title": seg.unit_name or seg.description or "",
+                "detailed_summary": seg.summary or seg.description or "",
+                "key_takeaways": [
+                    kp.get("text", "")
+                    for kp in (seg.key_points or [])
+                    if isinstance(kp, dict) and kp.get("text")
+                ],
+            }
+        )
+
+    return {
+        "lecture_title": segments[0].lecture_title or f"Lecture {lecture_order}",
+        "table_of_contents": sections,
+    }

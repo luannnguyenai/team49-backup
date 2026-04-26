@@ -176,6 +176,7 @@ import type {
   CourseOverviewResponse,
   CourseUnitListItem,
   LearningUnitResponse,
+  LectureTocResponse,
   OnboardingPayload,
   ForgotPasswordPayload,
   QuizAnswerResponse,
@@ -249,6 +250,13 @@ export const courseApi = {
         `/api/courses/${courseSlug}/units`
       )
       .then((r) => r.data.units),
+
+  lectureToc: (courseSlug: string, lectureOrder: number) =>
+    api
+      .get<LectureTocResponse>(
+        `/api/courses/${courseSlug}/lectures/${lectureOrder}/toc`,
+      )
+      .then((r) => r.data),
 };
 
 export const canonicalSectionApi = {

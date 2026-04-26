@@ -128,17 +128,6 @@ function formatLectureLabel(orderIndex: number, fallback?: string | null) {
   return fallback?.trim() || `Lecture ${String(orderIndex).padStart(2, "0")}`;
 }
 
-function courseFolderFromSlug(courseSlug: string): string {
-  if (courseSlug === "cs231n") return "CS231n";
-  if (courseSlug === "cs224n") return "CS224n";
-  return courseSlug;
-}
-
-function buildTocSummaryPath(courseSlug: string, lectureOrder: number | null | undefined): string | null {
-  if (!lectureOrder) return null;
-  return `/data/courses/${courseFolderFromSlug(courseSlug)}/ToC_Summary/lecture-${lectureOrder}.json`;
-}
-
 function buildTutorSuggestions(unitTitle: string, activeChapter: ChapterView | null): string[] {
   const chapterTitle = activeChapter?.title ?? unitTitle;
   const firstTakeaway = activeChapter?.key_takeaways[0];
@@ -632,20 +621,14 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   }, [courseSlug]);
 
   useEffect(() => {
-    const tocPath = buildTocSummaryPath(courseSlug, unit.lecture_order);
-    if (!tocPath) {
+    if (!unit.lecture_order) {
       setTocSummary(null);
       return;
     }
 
     let ignore = false;
-    fetch(tocPath)
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load ToC summary (${response.status})`);
-        }
-        return response.json() as Promise<TocSummaryPayload>;
-      })
+    courseApi
+      .lectureToc(courseSlug, unit.lecture_order)
       .then((payload) => {
         if (!ignore) setTocSummary(payload);
       })

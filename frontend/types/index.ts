@@ -271,6 +271,19 @@ export interface CourseUnitListItem {
   lecture_label?: string | null;
 }
 
+export interface LectureTocSection {
+  section_number: number;
+  timestamp: string;
+  topic_title: string;
+  detailed_summary: string;
+  key_takeaways: string[];
+}
+
+export interface LectureTocResponse {
+  lecture_title: string;
+  table_of_contents: LectureTocSection[];
+}
+
 export interface LearningUnitSummary {
   id: string;
   slug: string;
