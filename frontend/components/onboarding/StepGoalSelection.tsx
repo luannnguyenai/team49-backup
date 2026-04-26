@@ -14,6 +14,7 @@ import { useOnboardingStore } from "@/stores/onboardingStore";
 const GOALS = [
   { id: "computer_vision", label: "Computer Vision (CS231n)" },
   { id: "nlp", label: "Natural Language Processing (CS224n)" },
+  { id: "deep_learning", label: "Deep Learning (CS230)" },
 ] as const;
 
 // ---------------------------------------------------------------------------
