@@ -16,6 +16,7 @@ from src.models.user import User
 from src.schemas.course import (
     CourseCatalogResponse,
     CourseOverviewResponse,
+    CourseUnitListResponse,
     LearningUnitResponse,
     StartLearningDecisionResponse,
 )
@@ -123,9 +124,15 @@ async def api_start_course(
 # ---------------------------------------------------------------------------
 
 
-@courses_router.get("/{course_slug}/units")
-async def api_list_course_units(course_slug: str) -> dict:
-    units = await list_course_units_db_first(course_slug)
+@courses_router.get("/{course_slug}/units", response_model=CourseUnitListResponse)
+async def api_list_course_units(
+    course_slug: str,
+    user=Depends(_get_optional_user),
+) -> CourseUnitListResponse:
+    units = await list_course_units_db_first(
+        course_slug,
+        user_id=getattr(user, "id", None),
+    )
     return {
         "units": [
             {
@@ -135,6 +142,7 @@ async def api_list_course_units(course_slug: str) -> dict:
                 "unit_type": u["unit_type"],
                 "order_index": u["order_index"],
                 "lecture_label": u.get("lecture_label"),
+                "is_completed": u.get("is_completed", False),
             }
             for u in units
         ]
