@@ -360,18 +360,18 @@ function InlineQuizOverlay({
       <div
         className="pointer-events-auto w-full max-w-md rounded-3xl border p-4 shadow-2xl backdrop-blur"
         style={{
-          borderColor: "rgba(255,255,255,0.2)",
+          borderColor: "rgba(255,255,255,0.32)",
           background:
-            "linear-gradient(180deg, rgba(15,23,42,0.94) 0%, rgba(30,41,59,0.96) 100%)",
-          color: "white",
+            "linear-gradient(180deg, rgba(255,251,235,0.96) 0%, rgba(239,246,255,0.98) 100%)",
+          color: "#0f172a",
         }}
       >
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-amber-300">
+            <p className="text-xs font-semibold uppercase tracking-widest text-amber-700">
               {CHECKPOINT_LABELS[checkpoint]}
             </p>
-            <p className="mt-1 text-sm text-slate-200">
+            <p className="mt-1 text-sm text-slate-600">
               {session
                 ? "Kiểm tra nhanh ngay trong lúc xem để khóa lại ý chính của bài."
                 : `Review ${checkpointQuestionCount(checkpoint)} câu hỏi liên quan đến đoạn video hiện tại.`}
@@ -389,12 +389,12 @@ function InlineQuizOverlay({
 
         {!session && (
           <div className="space-y-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100">
+            <div className="rounded-2xl border border-amber-200 bg-white/72 px-4 py-3 text-sm text-slate-700">
               Quiz này sẽ chèn ngay trên video, không đẩy bạn sang màn hình khác.
             </div>
             <div className="flex items-center justify-end gap-2">
               <button
-                className="rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-white/10"
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white/80"
                 onClick={onDismiss}
                 type="button"
               >
@@ -413,12 +413,12 @@ function InlineQuizOverlay({
 
         {session && question && session.phase !== "result" && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between text-xs text-slate-300">
+            <div className="flex items-center justify-between text-xs text-slate-500">
               <span>
                 Câu {session.currentIndex + 1} / {session.questions.length}
               </span>
               <button
-                className="rounded-full border border-white/15 px-3 py-1 font-medium transition-colors hover:bg-white/10"
+                className="rounded-full border border-slate-200 px-3 py-1 font-medium transition-colors hover:bg-white/80"
                 onClick={onMinimize}
                 type="button"
               >
@@ -426,8 +426,8 @@ function InlineQuizOverlay({
               </button>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-              <p className="text-sm leading-6 text-white">{question.stem_text}</p>
+            <div className="rounded-2xl border border-sky-100 bg-white/82 px-4 py-4 shadow-sm">
+              <p className="text-sm leading-6 text-slate-800">{question.stem_text}</p>
             </div>
 
             <div className="space-y-2">
@@ -460,12 +460,12 @@ function InlineQuizOverlay({
             </div>
 
             {session.phase === "feedback" && session.feedback ? (
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100">
-                <p className="font-semibold text-amber-300">
+              <div className="rounded-2xl border border-sky-100 bg-white/82 px-4 py-3 text-sm text-slate-700 shadow-sm">
+                <p className="font-semibold text-amber-700">
                   {session.feedback.is_correct ? "Bạn trả lời đúng." : "Cần xem lại ý này."}
                 </p>
                 {session.feedback.explanation_text ? (
-                  <p className="mt-1 text-slate-200">{session.feedback.explanation_text}</p>
+                  <p className="mt-1 text-slate-600">{session.feedback.explanation_text}</p>
                 ) : null}
               </div>
             ) : null}
@@ -500,14 +500,14 @@ function InlineQuizOverlay({
                 Review completed
               </p>
               <h3 className="mt-1 text-xl font-semibold text-white">{result.score}</h3>
-              <p className="mt-1 text-sm text-slate-200">
+              <p className="mt-1 text-sm text-slate-600">
                 {result.percent.toFixed(1)}% đúng trong {CHECKPOINT_LABELS[checkpoint].toLowerCase()}.
               </p>
             </div>
 
             <div className="flex items-center justify-between gap-3">
               <Link
-                className="rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:bg-white/10"
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-white/80"
                 href={`/history?session_id=${session.sessionId}`}
               >
                 Xem lại bài đã làm
@@ -1121,7 +1121,13 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
             ) : null}
 
             <div className="relative">
-              <section className="overflow-hidden rounded-t-3xl border border-b-0 bg-black shadow-card">
+              <section
+                className="overflow-hidden rounded-t-3xl border border-b-0 shadow-card"
+                style={{
+                  background:
+                    "radial-gradient(circle at top, rgba(59,130,246,0.16), rgba(15,23,42,0.94) 58%)",
+                }}
+              >
                 {content.video_url ? (
                   <video
                     ref={videoRef}
@@ -1257,7 +1263,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
 
               {quizSession?.minimized ? (
                 <button
-                  className="absolute bottom-4 right-4 z-20 inline-flex items-center gap-2 rounded-full border bg-slate-950/90 px-4 py-2 text-sm font-medium text-white shadow-lg"
+                  className="absolute bottom-4 right-4 z-20 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/88 px-4 py-2 text-sm font-medium text-slate-800 shadow-lg backdrop-blur"
                   onClick={() => setQuizSession((previous) => (previous ? { ...previous, minimized: false } : previous))}
                   type="button"
                 >
@@ -1268,7 +1274,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
 
               {!quizSession && dismissedPrompts.midpoint && checkpointStatus[0]?.status === "ready" ? (
                 <button
-                  className="absolute bottom-4 right-4 z-20 inline-flex items-center gap-2 rounded-full border bg-slate-950/90 px-4 py-2 text-sm font-medium text-white shadow-lg"
+                  className="absolute bottom-4 right-4 z-20 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/88 px-4 py-2 text-sm font-medium text-slate-800 shadow-lg backdrop-blur"
                   onClick={() => {
                     setDismissedPrompts((previous) => ({ ...previous, midpoint: false }));
                   }}
