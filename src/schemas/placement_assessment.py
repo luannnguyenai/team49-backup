@@ -32,6 +32,8 @@ class PlacementStartResponse(BaseModel):
     total_questions: int
     questions: list[PlacementQuestion]
     topic_unit_ids: list[uuid.UUID]
+    skipped_topics: list[uuid.UUID] = []  # units with no placement items
+    should_skip_step: bool = False         # True when ALL requested units have no items
 
 
 class PlacementAnswerInput(BaseModel):
