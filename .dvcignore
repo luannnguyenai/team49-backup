@@ -1,0 +1,16 @@
+# Add patterns of files dvc should ignore, which could improve
+# the performance. Learn more at
+# https://dvc.org/doc/user-guide/dvcignore
+
+# Raw course assets stay outside DVC by default. They are large and are only
+# needed when re-running ingest, not when loading the app/database.
+data/courses/*/videos/**
+data/courses/*/slides/**
+data/courses/*/transcripts/**
+
+# Working directories, archives, and local experiments should not be pushed as
+# shared data artifacts.
+data/working/**
+data/**/*.zip
+data/**/archive/**
+test/**
