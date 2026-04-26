@@ -1,366 +1,350 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { BookOpen, Lightbulb } from "lucide-react";
+// components/learn/LearningUnitShell.tsx
+// Unified lecture shell with in-context AI Tutor.
+// Replaces the standalone tutor page for course-first learning.
 
-import { courseApi } from "@/lib/api";
-import type { CourseUnitListItem, LearningUnitResponse } from "@/types";
+import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import { api, courseApi } from "@/lib/api";
+import type { LearningUnitResponse } from "@/types";
 import InContextTutor from "@/components/learn/InContextTutor";
 
-interface TocSummarySection {
-  section_number: number;
-  timestamp: string;
-  topic_title: string;
-  detailed_summary: string;
-  key_takeaways: string[];
-}
+// ── Types ──────────────────────────────────────────────────────────────────
 
-interface TocSummaryPayload {
-  lecture_title: string;
-  table_of_contents: TocSummarySection[];
-}
-
-interface ChapterView {
-  id: string;
+interface Chapter {
+  id: number;
+  lecture_id: string;
   title: string;
-  timestamp: string;
+  summary: string;
   start_time: number;
   end_time: number;
-  key_takeaways: string[];
 }
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
+  return [m, s].map((v) => String(v).padStart(2, "0")).join(":");
+}
+
+// ── Props ───────────────────────────────────────────────────────────────────
 
 interface LearningUnitShellProps {
   data: LearningUnitResponse;
   courseSlug: string;
 }
 
-function formatSeconds(seconds: number): string {
-  const safeSeconds = Math.max(0, Math.floor(seconds));
-  const hours = Math.floor(safeSeconds / 3600);
-  const minutes = Math.floor((safeSeconds % 3600) / 60);
-  const secs = safeSeconds % 60;
-  if (hours > 0) {
-    return [hours, minutes, secs].map((value) => String(value).padStart(2, "0")).join(":");
-  }
-  return [minutes, secs].map((value) => String(value).padStart(2, "0")).join(":");
-}
+// ── Component ───────────────────────────────────────────────────────────────
 
-function parseTimestamp(timestamp: string): number {
-  const parts = timestamp.split(":").map((part) => Number(part));
-  if (parts.some(Number.isNaN)) return 0;
-  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  if (parts.length === 2) return parts[0] * 60 + parts[1];
-  return 0;
-}
-
-function formatLectureLabel(orderIndex: number, fallback?: string | null) {
-  return fallback?.trim() || `Lecture ${String(orderIndex).padStart(2, "0")}`;
-}
-
-function courseFolderFromSlug(courseSlug: string): string {
-  if (courseSlug === "cs231n") return "CS231n";
-  if (courseSlug === "cs224n") return "CS224n";
-  return courseSlug;
-}
-
-function buildTocSummaryPath(courseSlug: string, lectureOrder: number | null | undefined): string | null {
-  if (!lectureOrder) return null;
-  return `/data/courses/${courseFolderFromSlug(courseSlug)}/ToC_Summary/lecture-${lectureOrder}.json`;
-}
-
-function buildTutorSuggestions(unitTitle: string, activeChapter: ChapterView | null): string[] {
-  const chapterTitle = activeChapter?.title ?? unitTitle;
-  const firstTakeaway = activeChapter?.key_takeaways[0];
-
-  if (firstTakeaway) {
-    return [
-      "Giải thích ý chính của đoạn này dễ hiểu hơn",
-      `Tại sao "${chapterTitle}" lại quan trọng trong bài này?`,
-    ];
-  }
-
-  return [
-    `Tóm tắt nhanh phần "${chapterTitle}" cho tôi`,
-    "Điểm quan trọng nhất ở đoạn này là gì?",
-  ];
-}
-
-export default function LearningUnitShell({ data, courseSlug }: LearningUnitShellProps) {
+export default function LearningUnitShell({
+  data,
+  courseSlug,
+}: LearningUnitShellProps) {
   const { course, unit, content, tutor } = data;
+  const legacyLectureId = tutor.legacy_lecture_id ?? null;
+
+  const [chapters, setChapters] = useState<Chapter[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [lectureList, setLectureList] = useState<CourseUnitListItem[]>([]);
-  const [tocSummary, setTocSummary] = useState<TocSummaryPayload | null>(null);
+  const [tutorOpen, setTutorOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [unitList, setUnitList] = useState<{ slug: string; title: string; status: string; order_index: number }[]>([]);
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Load unit list for sidebar navigation
   useEffect(() => {
-    let ignore = false;
-    courseApi.listUnits(courseSlug).then((units) => {
-      if (!ignore) setLectureList(units);
-    }).catch(() => {
-      if (!ignore) setLectureList([]);
-    });
-    return () => {
-      ignore = true;
-    };
+    courseApi.listUnits(courseSlug).then(setUnitList).catch(() => {});
   }, [courseSlug]);
 
+  // Load chapters from legacy lecture API if available
   useEffect(() => {
-    const tocPath = buildTocSummaryPath(courseSlug, unit.lecture_order);
-    if (!tocPath) {
-      setTocSummary(null);
+    if (!legacyLectureId) {
+      setChapters([]);
       return;
     }
 
-    let ignore = false;
-    fetch(tocPath)
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to load ToC summary (${response.status})`);
-        }
-        return response.json() as Promise<TocSummaryPayload>;
-      })
-      .then((payload) => {
-        if (!ignore) setTocSummary(payload);
-      })
-      .catch(() => {
-        if (!ignore) setTocSummary(null);
-      });
+    api
+      .get<Chapter[]>(`/api/lectures/${legacyLectureId}/toc`)
+      .then((r) => setChapters(r.data))
+      .catch(() => setChapters([]));
+  }, [legacyLectureId]);
 
-    return () => {
-      ignore = true;
-    };
-  }, [courseSlug, unit.lecture_order]);
+  // Video time tracking
+  const handleTimeUpdate = () => {
+    if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
+  };
 
-  const chapters = useMemo<ChapterView[]>(() => {
-    if (!tocSummary?.table_of_contents?.length) return [];
-    return tocSummary.table_of_contents.map((section, index, sections) => ({
-      id: `${section.section_number}-${section.timestamp}`,
-      title: section.topic_title,
-      timestamp: section.timestamp,
-      start_time: parseTimestamp(section.timestamp),
-      end_time:
-        index + 1 < sections.length
-          ? parseTimestamp(sections[index + 1].timestamp)
-          : Number.POSITIVE_INFINITY,
-      key_takeaways: section.key_takeaways ?? [],
-    }));
-  }, [tocSummary]);
-
-  const activeChapter = useMemo(() => {
-    if (!chapters.length) return null;
-    return (
-      chapters.find(
-        (chapter) => currentTime >= chapter.start_time && currentTime < chapter.end_time,
-      ) ?? chapters[0]
-    );
-  }, [chapters, currentTime]);
-
-  const tutorSuggestions = useMemo(
-    () => buildTutorSuggestions(unit.lecture_title ?? unit.title, activeChapter),
-    [activeChapter, unit.lecture_title, unit.title],
-  );
-
+  // Frame capture for tutor
   const captureFrame = useCallback((): string | null => {
-    const video = videoRef.current;
-    if (!video || !video.videoWidth) return null;
+    const v = videoRef.current;
+    if (!v || !v.videoWidth) return null;
     try {
-      const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext("2d")?.drawImage(video, 0, 0);
-      return canvas.toDataURL("image/jpeg", 0.7).split(",")[1];
+      const c = document.createElement("canvas");
+      c.width = v.videoWidth;
+      c.height = v.videoHeight;
+      c.getContext("2d")!.drawImage(v, 0, 0);
+      return c.toDataURL("image/jpeg", 0.7).split(",")[1];
     } catch {
       return null;
     }
   }, []);
 
-  const lectureHeading = unit.lecture_title ?? unit.title;
-
   return (
     <div
       className="h-[calc(100vh-4.5rem)] overflow-hidden rounded-card-lg border shadow-card"
-      style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}
+      style={{
+        backgroundColor: "var(--bg-card)",
+        borderColor: "var(--border)",
+      }}
     >
       <div className="flex h-full flex-col">
+        {/* Header */}
         <div
-          className="flex items-center gap-2 border-b px-5 py-4 text-xs md:px-6"
+          className="flex flex-wrap items-center gap-3 border-b px-5 py-4 md:px-6"
           style={{ borderColor: "var(--border)" }}
         >
-          <Link
-            href={`/courses/${courseSlug}`}
-            className="font-medium transition-colors hover:underline"
-            style={{ color: "var(--text-muted)" }}
-          >
-            {course.title}
-          </Link>
-          <span style={{ color: "var(--text-muted)" }}>›</span>
-          <span className="truncate font-semibold" style={{ color: "var(--text-primary)" }}>
-            {lectureHeading}
-          </span>
+          {/* Sidebar toggle */}
+          {unitList.length > 0 && (
+            <button
+              onClick={() => setSidebarOpen((o) => !o)}
+              className="inline-flex items-center justify-center rounded-lg p-1.5 transition-colors"
+              style={{
+                backgroundColor: sidebarOpen ? "rgba(37,99,235,0.08)" : "var(--bg-page)",
+                color: sidebarOpen ? "#2563eb" : "var(--text-muted)",
+              }}
+              aria-label="Toggle lesson list"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+            </button>
+          )}
+
+          <div className="flex min-w-0 items-center gap-2 text-xs">
+            <Link
+              href={`/courses/${courseSlug}`}
+              className="font-medium transition-colors hover:underline"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {course.title}
+            </Link>
+            <span style={{ color: "var(--text-muted)" }}>›</span>
+            <span
+              className="truncate font-semibold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {unit.title}
+            </span>
+          </div>
+
+          {tutor.enabled && (
+            <button
+              onClick={() => setTutorOpen((o) => !o)}
+              className="ml-auto inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-200"
+              style={{
+                backgroundColor: tutorOpen ? "rgba(37,99,235,0.08)" : "var(--bg-page)",
+                color: tutorOpen ? "#2563eb" : "var(--text-secondary)",
+                borderColor: tutorOpen ? "rgba(37,99,235,0.25)" : "var(--border)",
+              }}
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              AI Tutor
+            </button>
+          )}
         </div>
 
-        <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[18rem_minmax(0,1fr)_24rem]">
-          <aside
-            className="hidden min-h-0 border-r md:flex md:flex-col"
-            style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-sidebar, var(--bg-card))" }}
-          >
-            <div className="border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
-              <p className="text-xs font-semibold uppercase tracking-widest-sm" style={{ color: "var(--text-muted)" }}>
+        {/* Body row: sidebar + main + tutor */}
+        <div className="flex flex-1 min-h-0 overflow-hidden">
+          {/* Left sidebar — unit list */}
+          {sidebarOpen && unitList.length > 0 && (
+            <aside
+              className="hidden md:flex w-56 shrink-0 flex-col border-r overflow-y-auto"
+              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-sidebar, var(--bg-card))" }}
+            >
+              <p className="px-4 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest"
+                style={{ color: "var(--text-muted)" }}>
                 Bài học
               </p>
-            </div>
-            <div className="flex-1 overflow-y-auto px-3 py-3">
-              {lectureList.map((lecture) => {
-                const isActive =
-                  lecture.order_index === unit.lecture_order || lecture.slug === unit.slug;
+              {unitList.map((u) => {
+                const isActive = u.slug === unit.slug;
                 return (
                   <Link
-                    key={`${lecture.order_index}-${lecture.slug}`}
-                    href={`/courses/${courseSlug}/learn/${lecture.slug}`}
-                    className="mb-2 block rounded-2xl border px-4 py-3 transition-colors"
+                    key={u.slug}
+                    href={`/courses/${courseSlug}/learn/${u.slug}`}
+                    className="flex items-start gap-2 px-4 py-2.5 text-xs transition-colors"
                     style={{
-                      borderColor: isActive ? "rgba(37,99,235,0.28)" : "var(--border)",
                       backgroundColor: isActive ? "rgba(37,99,235,0.08)" : "transparent",
+                      color: isActive ? "#2563eb" : "var(--text-secondary)",
+                      fontWeight: isActive ? 600 : 400,
+                      borderLeft: isActive ? "2px solid #2563eb" : "2px solid transparent",
                     }}
                   >
-                    <p className="text-[11px] font-semibold uppercase tracking-widest-sm text-blue-600">
-                      {formatLectureLabel(lecture.order_index, lecture.lecture_label)}
-                    </p>
-                    <p className="mt-1 text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                      {lecture.title}
-                    </p>
+                    <span className="mt-px shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>
+                      {u.order_index}.
+                    </span>
+                    <span className="leading-snug">{u.title}</span>
                   </Link>
                 );
               })}
-            </div>
-          </aside>
+            </aside>
+          )}
 
-          <main className="min-h-0 overflow-y-auto p-5 md:p-6">
-            <section className="overflow-hidden rounded-card border bg-black shadow-card">
+          {/* Main content */}
+          <div className="min-w-0 flex-1 space-y-5 overflow-y-auto p-5 md:p-6">
+            <div className="overflow-hidden rounded-card border bg-black shadow-card">
               {content.video_url ? (
                 <video
                   ref={videoRef}
-                  className="aspect-video w-full object-contain"
+                  className="aspect-video w-full cursor-pointer object-contain"
                   crossOrigin="anonymous"
-                  src={content.video_url}
-                  onTimeUpdate={() => {
-                    if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
-                  }}
+                  onTimeUpdate={handleTimeUpdate}
                   onDurationChange={() => {
-                    if (videoRef.current) setDuration(videoRef.current.duration || 0);
+                    if (videoRef.current)
+                      setDuration(videoRef.current.duration || 0);
                   }}
-                  controls
+                  onClick={() => {
+                    const v = videoRef.current;
+                    if (v) v.paused ? v.play() : v.pause();
+                  }}
+                  src={content.video_url}
                 />
+              ) : content.body_markdown ? (
+                <div className="prose prose-slate max-w-none bg-[color:var(--bg-card)] p-6 md:p-8">
+                  <ReactMarkdown>{content.body_markdown}</ReactMarkdown>
+                </div>
               ) : (
                 <div className="flex min-h-[24rem] items-center justify-center bg-[color:var(--bg-card)] p-6 text-center">
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    Video is not available for this lecture yet.
+                    Content is being prepared for this unit.
                   </p>
                 </div>
               )}
-            </section>
+            </div>
 
-            {chapters.length > 0 && (
-              <section className="mt-6 rounded-card border px-5 py-5" style={{ borderColor: "var(--border)" }}>
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest-sm text-blue-600">
-                      Timestamps
-                    </p>
-                    <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-                      Chuyển nhanh theo từng phần của video
-                    </p>
-                  </div>
-                  <span className="text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
-                    {formatSeconds(currentTime)} / {formatSeconds(duration)}
-                  </span>
+            {content.video_url && (
+              <div
+                className="rounded-card-sm border px-4 py-3"
+                style={{
+                  backgroundColor: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                }}
+              >
+                <div
+                  className="relative h-1.5 cursor-pointer rounded-full"
+                  style={{ backgroundColor: "var(--bg-page)" }}
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const pct = (e.clientX - rect.left) / rect.width;
+                    if (videoRef.current)
+                      videoRef.current.currentTime = pct * (duration || 0);
+                  }}
+                >
+                  <div
+                    className="pointer-events-none absolute left-0 top-0 h-full rounded-full"
+                    style={{
+                      width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+                      backgroundColor: "#2563eb",
+                    }}
+                  />
                 </div>
 
-                <div className="space-y-2">
-                  {chapters.map((chapter) => {
-                    const isActive = activeChapter?.id === chapter.id;
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <span
+                    className="text-xs tabular-nums"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                  </span>
+                  {chapters.length > 0 && (
+                    <span
+                      className="min-w-0 truncate text-xs"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      {chapters.find(
+                        (ch) =>
+                          currentTime >= ch.start_time &&
+                          currentTime < ch.end_time,
+                      )?.title ?? ""}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {chapters.length > 0 && (
+              <section
+                className="rounded-card-sm border px-4 py-4 md:px-5"
+                style={{
+                  backgroundColor: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                }}
+              >
+                <p
+                  className="text-xs font-semibold uppercase tracking-widest-sm"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Chapters
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {chapters.map((ch) => {
+                    const isActive =
+                      currentTime >= ch.start_time &&
+                      currentTime < ch.end_time;
                     return (
                       <button
-                        key={chapter.id}
-                        type="button"
+                        key={ch.id}
                         onClick={() => {
-                          if (videoRef.current) videoRef.current.currentTime = chapter.start_time;
-                          setCurrentTime(chapter.start_time);
+                          if (videoRef.current)
+                            videoRef.current.currentTime = ch.start_time;
                         }}
-                        className="flex w-full items-start gap-4 rounded-2xl border px-4 py-3 text-left transition-colors"
+                        className="rounded-full px-3 py-1.5 text-xs transition-colors"
                         style={{
-                          borderColor: isActive ? "rgba(37,99,235,0.28)" : "var(--border)",
-                          backgroundColor: isActive ? "rgba(37,99,235,0.08)" : "transparent",
+                          backgroundColor: isActive
+                            ? "rgba(37,99,235,0.1)"
+                            : "var(--bg-page)",
+                          color: isActive
+                            ? "#2563eb"
+                            : "var(--text-secondary)",
+                          fontWeight: isActive ? 600 : 400,
                         }}
                       >
-                        <span className="shrink-0 font-mono text-sm text-blue-600">
-                          {chapter.timestamp}
-                        </span>
-                        <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                          {chapter.title}
-                        </span>
+                        {formatTime(ch.start_time)} · {ch.title}
                       </button>
                     );
                   })}
                 </div>
               </section>
             )}
+          </div>
 
-            {activeChapter && activeChapter.key_takeaways.length > 0 && (
-              <section className="mt-6 rounded-card border px-5 py-5" style={{ borderColor: "var(--border)" }}>
-                <div className="mb-4 flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-500 shadow-sm">
-                    <Lightbulb className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest-sm text-amber-600">
-                      IDEA
-                    </p>
-                    <h2 className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                      Key ideas at this moment
-                    </h2>
-                    <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-                      {activeChapter.title}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {activeChapter.key_takeaways.map((takeaway) => (
-                    <div
-                      key={takeaway}
-                      className="flex items-start gap-3 rounded-2xl border border-amber-200/70 bg-amber-50/70 px-4 py-3"
-                    >
-                      <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-                      <p className="text-sm leading-6" style={{ color: "var(--text-primary)" }}>
-                        {takeaway}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-          </main>
-
-          <aside
-            className="hidden min-h-0 border-l md:flex"
-            style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
-          >
-            {tutor.enabled ? (
-              <div className="min-h-0 flex-1">
-                <InContextTutor
-                  lectureId={tutor.legacy_lecture_id ?? ""}
-                  currentTime={currentTime}
-                  captureFrame={captureFrame}
-                  contextBindingId={tutor.context_binding_id ?? undefined}
-                  unitTitle={lectureHeading}
-                  suggestions={tutorSuggestions}
-                />
-              </div>
-            ) : null}
-          </aside>
+          {/* Tutor panel — right column inside body row */}
+          {tutor.enabled && tutorOpen && (
+            <aside
+              className="w-[22rem] shrink-0 overflow-hidden border-l"
+              style={{
+                borderColor: "var(--border)",
+                backgroundColor: "var(--bg-card)",
+              }}
+            >
+              <InContextTutor
+                lectureId={legacyLectureId ?? ""}
+                currentTime={currentTime}
+                captureFrame={captureFrame}
+                contextBindingId={tutor.context_binding_id ?? undefined}
+                unitTitle={unit.title}
+                onClose={() => setTutorOpen(false)}
+              />
+            </aside>
+          )}
         </div>
       </div>
     </div>

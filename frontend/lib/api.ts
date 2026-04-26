@@ -163,10 +163,7 @@ import type {
   CourseSectionDetail,
   CourseSectionListItem,
   HistoryResponse,
-  InlineQuizStartPayload,
   LearningUnitContentById,
-  LearningUnitProgressPayload,
-  LearningUnitProgressResponse,
   LoginPayload,
   ModuleTestAnswerInput,
   ModuleTestResultResponse,
@@ -182,7 +179,6 @@ import type {
   QuizCompleteResponse,
   QuizStartResponse,
   RegisterPayload,
-  ResumeStateResponse,
   SelectedAnswer,
   SessionDetailResponse,
   SessionType,
@@ -305,27 +301,9 @@ export const canonicalAssessmentApi = {
 };
 
 export const canonicalQuizApi = {
-  start: (payload: string | InlineQuizStartPayload) =>
+  start: (learningUnitId: string) =>
     api
-      .post<QuizStartResponse>(
-        "/api/quiz/start",
-        typeof payload === "string" ? { learning_unit_id: payload } : payload,
-      )
-      .then((r) => r.data),
-};
-
-export const learningSessionApi = {
-  resume: () =>
-    api
-      .get<ResumeStateResponse>("/api/learning-session/resume")
-      .then((r) => r.data),
-
-  updateProgress: (learningUnitId: string, payload: LearningUnitProgressPayload) =>
-    api
-      .put<LearningUnitProgressResponse>(
-        `/api/learning-session/learning-units/${learningUnitId}/progress`,
-        payload,
-      )
+      .post<QuizStartResponse>("/api/quiz/start", { learning_unit_id: learningUnitId })
       .then((r) => r.data),
 };
 

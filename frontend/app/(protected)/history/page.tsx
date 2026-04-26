@@ -8,8 +8,7 @@
 //   • Expandable rows: per-question breakdown, bloom analysis, misconceptions
 //   • Pagination (20 / page)
 
-import { Fragment, useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   BookOpen,
@@ -57,11 +56,6 @@ const TYPE_COLORS: Record<SessionType, string> = {
   quiz: "bg-blue-100 text-blue-700",
   module_test: "bg-amber-100 text-amber-700",
   practice: "bg-slate-100 text-slate-600",
-};
-
-const CHECKPOINT_LABELS: Record<string, string> = {
-  midpoint: "Mid-video quiz",
-  end: "End-of-video quiz",
 };
 
 const BLOOM_VI: Record<string, string> = {
@@ -509,9 +503,6 @@ function Th({
 // ---------------------------------------------------------------------------
 
 export default function HistoryPage() {
-  const searchParams = useSearchParams();
-  const targetSessionId = searchParams.get("session_id");
-
   // ── Filter state ─────────────────────────────────────────────────────────
   const [typeFilter, setTypeFilter] = useState<SessionType | "">("");
   const [moduleFilter, setModuleFilter] = useState<string>("");
@@ -563,14 +554,8 @@ export default function HistoryPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-    setExpandedId(targetSessionId ?? null);
-  }, [typeFilter, moduleFilter, daysFilter, targetSessionId]);
-
-  useEffect(() => {
-    if (targetSessionId) {
-      setExpandedId(targetSessionId);
-    }
-  }, [targetSessionId]);
+    setExpandedId(null);
+  }, [typeFilter, moduleFilter, daysFilter]);
 
   // ── Client-side sort of the current page ─────────────────────────────────
   const handleSort = (key: SortKey) => {
@@ -797,8 +782,9 @@ export default function HistoryPage() {
                 sortedItems.map((item) => {
                   const isExpanded = expandedId === item.session_id;
                   return (
-                    <Fragment key={item.session_id}>
+                    <>
                       <tr
+                        key={item.session_id}
                         className="border-t transition-colors"
                         style={{
                           borderColor: "var(--border)",
@@ -826,20 +812,13 @@ export default function HistoryPage() {
 
                         {/* Subject */}
                         <td className="px-4 py-3">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p
-                              className="max-w-[180px] truncate text-sm"
-                              style={{ color: "var(--text-primary)" }}
-                              title={item.subject}
-                            >
-                              {item.subject}
-                            </p>
-                            {item.source === "inline_video" && item.checkpoint ? (
-                              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
-                                {CHECKPOINT_LABELS[item.checkpoint] ?? item.checkpoint}
-                              </span>
-                            ) : null}
-                          </div>
+                          <p
+                            className="max-w-[180px] truncate text-sm"
+                            style={{ color: "var(--text-primary)" }}
+                            title={item.subject}
+                          >
+                            {item.subject}
+                          </p>
                         </td>
 
                         {/* Score */}
@@ -902,6 +881,7 @@ export default function HistoryPage() {
                       {/* Expanded detail row */}
                       {isExpanded && (
                         <tr
+                          key={`${item.session_id}-detail`}
                           className="border-t"
                           style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
                         >
@@ -913,7 +893,7 @@ export default function HistoryPage() {
                           </td>
                         </tr>
                       )}
-                    </Fragment>
+                    </>
                   );
                 })
               )}
