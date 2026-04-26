@@ -42,14 +42,15 @@ class CourseStartApiContractTests(unittest.IsolatedAsyncioTestCase):
         # Course context must be preserved in the redirect target
         self.assertIn("cs231n", data["target"])
 
-    async def test_start_cs224n_returns_course_unavailable(self):
-        """Start for a coming-soon course → course_unavailable regardless of auth."""
+    async def test_start_cs224n_without_auth_returns_auth_required(self):
+        """Unauthenticated start for a ready course → auth_required."""
         response = await self.client.post("/api/courses/cs224n/start")
 
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["reason"], "course_unavailable")
-        self.assertIn("/courses/cs224n", data["target"])
+        self.assertEqual(data["reason"], "auth_required")
+        self.assertIn("/login", data["target"])
+        self.assertIn("cs224n", data["target"])
 
     async def test_start_nonexistent_course_returns_404(self):
         """Start for a course slug that does not exist → 404."""
