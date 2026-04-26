@@ -5,6 +5,7 @@ Onboarding flow endpoints:
   POST /api/users/me/onboarding/goals
   GET  /api/onboarding/topics
   POST /api/users/me/onboarding/known-topics
+  POST /api/users/me/onboarding/experience-level
 """
 
 from __future__ import annotations
@@ -18,6 +19,8 @@ from src.database import get_async_db
 from src.dependencies.auth import get_current_user
 from src.models.user import User
 from src.schemas.onboarding import (
+    ExperienceLevelRequest,
+    ExperienceLevelResponse,
     GoalsRequest,
     GoalsResponse,
     KnownTopicsRequest,
@@ -26,6 +29,7 @@ from src.schemas.onboarding import (
 )
 from src.services.onboarding_service import (
     get_topics_tree,
+    save_experience_level,
     save_known_topics,
     save_user_goals,
 )
@@ -68,3 +72,15 @@ async def set_known_topics(
     return await save_known_topics(
         db, user_id=current_user.id, topic_unit_ids=body.topic_unit_ids
     )
+
+
+@onboarding_router.post(
+    "/api/users/me/onboarding/experience-level",
+    response_model=ExperienceLevelResponse,
+)
+async def set_experience_level(
+    body: ExperienceLevelRequest,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user),
+) -> ExperienceLevelResponse:
+    return await save_experience_level(db, user_id=current_user.id, level=body.level)

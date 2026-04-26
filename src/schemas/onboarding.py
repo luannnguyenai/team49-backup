@@ -62,3 +62,19 @@ class KnownTopicsResponse(BaseModel):
     saved: bool
     count: int
     skip_placement: bool = False
+
+
+class ExperienceLevelRequest(BaseModel):
+    level: str
+
+    @field_validator("level")
+    @classmethod
+    def validate_level(cls, v: str) -> str:
+        if v not in ("beginner", "experienced"):
+            raise ValueError("level must be 'beginner' or 'experienced'")
+        return v
+
+
+class ExperienceLevelResponse(BaseModel):
+    level: str
+    placement_status: str | None

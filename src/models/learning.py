@@ -259,6 +259,7 @@ class GoalPreference(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     # 'pending' = not yet assessed, 'completed' = finished placement test,
     # 'skipped' = user clicked "I'm a newcomer — skip". NULL = legacy row.
     placement_status: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    experience_level: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     user: Mapped["User"] = relationship("User", back_populates="goal_preferences", lazy="select")  # type: ignore[name-defined]
 

@@ -8,16 +8,12 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Brain,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
-} from "lucide-react";
+import { Brain, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import StepGoalSelection from "@/components/onboarding/StepGoalSelection";
+import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
@@ -46,7 +42,7 @@ import type {
 } from "@/types";
 
 // ---------------------------------------------------------------------------
-// Step metadata
+// Step metadata — two flows share internal indices 0-6
 // ---------------------------------------------------------------------------
 
 const STEPS = [
@@ -80,11 +76,28 @@ const STEPS = [
   },
 ] as const;
 
-// Steps that use the page-level nav buttons (Step 2 = TimeSchedule, 0-indexed)
-// Steps 0, 1, 3, and 4 have their own internal navigation.
-const STEPS_WITH_PAGE_NAV = new Set([2]);
+// Beginner: 5 visible steps (internal indices 0, 1, 3, 4 + done)
+const STEPS_BEGINNER = [
+  { title: "Mục tiêu học tập",  subtitle: "Bạn muốn học gì?" },
+  { title: "Kinh nghiệm",       subtitle: "Bạn đã từng học AI/ML chưa?" },
+  { title: "Thời gian của bạn", subtitle: "Lên lịch học phù hợp" },
+  { title: "Phương pháp học",   subtitle: "Cách bạn học tốt nhất" },
+  { title: "Sinh lộ trình",     subtitle: "Hoàn tất thiết lập" },
+] as const;
 
-// Fields that must pass validation before advancing from each step
+// Maps internal step index → beginner display index (-1 = hidden/skipped)
+const BEGINNER_DISPLAY_IDX: Record<number, number> = {
+  0: 0,
+  1: 1,
+  3: 2,
+  4: 3,
+  // 2, 5, 6 are skipped for beginners
+};
+
+// Steps that use the page-level nav buttons (index 3 = TimeSchedule)
+const STEPS_WITH_PAGE_NAV = new Set([3]);
+
+// Form fields validated before advancing from each internal step
 const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   [],                                                // Step 0: optional
   ["selected_course_ids"],                           // Step 1: required
@@ -100,9 +113,9 @@ function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
-  const { goalIds, knownUnitIds, skipPlacementAssessment } = useOnboardingStore();
+  const { goalIds, knownUnitIds, experienceLevel, skipPlacementAssessment } =
+    useOnboardingStore();
 
-  // Current step (0-indexed) and transition direction
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [animKey, setAnimKey] = useState(0);
@@ -140,7 +153,7 @@ function OnboardingPageInner() {
     },
   });
 
-  // ── Load all sections + learning units on mount ─────────────────────────
+  // ── Load sections on mount ────────────────────────────────────────────────
   useEffect(() => {
     async function loadData() {
       try {
@@ -149,7 +162,7 @@ function OnboardingPageInner() {
           canonicalSectionApi.list(),
         ]);
         const details = await Promise.all(
-          list.map((section) => canonicalSectionApi.detail(section.id))
+          list.map((s) => canonicalSectionApi.detail(s.id))
         );
         const normalizedCourses = normalizeBootstrapCourses(courses);
         setBootstrapCourses(normalizedCourses);
@@ -166,9 +179,9 @@ function OnboardingPageInner() {
     loadData();
   }, []);
 
-  // Generate the placement session UUID when entering Step 4 (only once)
+  // Generate placement session UUID once when entering step 5
   useEffect(() => {
-    if (step === 4 && !enteredStep5.current) {
+    if (step === 5 && !enteredStep5.current) {
       enteredStep5.current = true;
       setPlacementSessionId(crypto.randomUUID());
     }
@@ -217,15 +230,14 @@ function OnboardingPageInner() {
         writePendingCanonicalAssessment(canonicalContext);
 
         if (canonicalContext.canonicalUnitIds.length > 0) {
-          const assessmentTarget = next
-            ? `/assessment?next=${encodeURIComponent(next)}`
-            : "/assessment";
-          router.push(assessmentTarget);
+          router.push(
+            next ? `/assessment?next=${encodeURIComponent(next)}` : "/assessment"
+          );
         } else {
           router.push(next ?? "/dashboard");
         }
       } catch {
-        /* error message is shown from the store */
+        /* error shown from store */
       }
     },
     [clearError, searchParams, sections, selectedSections, goalIds, knownUnitIds, onboard, router]
@@ -236,7 +248,7 @@ function OnboardingPageInner() {
     await submitOnboarding(data);
   };
 
-  // ── Navigation ───────────────────────────────────────────────────────────
+  // ── Navigation ────────────────────────────────────────────────────────────
   const navigate = useCallback(
     (targetStep: number) => {
       clearError();
@@ -303,7 +315,7 @@ function OnboardingPageInner() {
     (decisions: TopicDecision[]) => {
       // Store results and transition to Step 6 (ResultGate)
       setPlacementResults(decisions);
-      navigate(5);
+      navigate(6);
     },
     [navigate]
   );
@@ -317,13 +329,23 @@ function OnboardingPageInner() {
     handleSubmit(submitOnboarding)();
   }, [handleSubmit, submitOnboarding]);
 
-  // ── Derived values ────────────────────────────────────────────────────────
-  const TOTAL_STEPS = STEPS.length;  // 6 steps total
+  // ── Derived display values ────────────────────────────────────────────────
+  const isBeginner = experienceLevel === "beginner";
+  const STEPS = isBeginner ? STEPS_BEGINNER : STEPS_EXPERIENCED;
+  const totalSteps = STEPS.length;
+
+  // Map internal step index to a display index for the progress bar
+  const displayIdx = isBeginner
+    ? (BEGINNER_DISPLAY_IDX[step] ?? 0)
+    : step;
+
+  const progressPercent = Math.round(((displayIdx + 1) / totalSteps) * 100);
+  const { title, subtitle } = STEPS[displayIdx] ?? STEPS[STEPS.length - 1];
+
   const isFirstStep = step === 0;
-  const isLastFormStep = step === 3; // Step 3 = learning method → submit triggers placement
   const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
-  const progressPercent = Math.round(((step + 1) / TOTAL_STEPS) * 100);
-  const { title, subtitle } = STEPS[step];
+  // Step 4 (Learning Method) is the last form step before placement/submit
+  const isLastFormStep = step === 4;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -345,10 +367,7 @@ function OnboardingPageInner() {
             <Brain className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1
-              className="text-xl font-bold"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
               Thiết lập lộ trình học
             </h1>
             <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
@@ -359,28 +378,20 @@ function OnboardingPageInner() {
 
         {/* ── Progress bar ── */}
         <div className="mb-6">
-          {/* Step label row */}
           <div className="mb-2 flex items-center justify-between">
             <div>
-              <span
-                className="text-sm font-semibold"
-                style={{ color: "var(--text-primary)" }}
-              >
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                 {title}
               </span>
-              <span
-                className="ml-2 text-xs"
-                style={{ color: "var(--text-muted)" }}
-              >
+              <span className="ml-2 text-xs" style={{ color: "var(--text-muted)" }}>
                 · {subtitle}
               </span>
             </div>
             <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              {step + 1} / {TOTAL_STEPS}
+              {displayIdx + 1} / {totalSteps}
             </span>
           </div>
 
-          {/* Animated progress track */}
           <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
             <div
               className="h-full rounded-full bg-primary-600 transition-all duration-500 ease-out"
@@ -388,23 +399,22 @@ function OnboardingPageInner() {
             />
           </div>
 
-          {/* Step dots row */}
+          {/* Step dots */}
           <div className="mt-3 flex items-center justify-between">
             {STEPS.map((s, i) => (
               <div key={s.title} className="flex flex-1 items-center">
-                {/* Dot */}
                 <div
                   className={cn(
                     "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
                     "text-xs font-bold transition-all duration-300",
-                    i < step
+                    i < displayIdx
                       ? "bg-primary-600 text-white"
-                      : i === step
+                      : i === displayIdx
                       ? "bg-primary-600 text-white ring-4 ring-primary-600/20"
                       : "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500"
                   )}
                 >
-                  {i < step ? (
+                  {i < displayIdx ? (
                     <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
@@ -412,14 +422,11 @@ function OnboardingPageInner() {
                     i + 1
                   )}
                 </div>
-                {/* Connector line (except after last dot) */}
                 {i < STEPS.length - 1 && (
                   <div
                     className={cn(
                       "mx-1 h-0.5 flex-1 rounded-full transition-all duration-500",
-                      i < step
-                        ? "bg-primary-600"
-                        : "bg-slate-200 dark:bg-slate-700"
+                      i < displayIdx ? "bg-primary-600" : "bg-slate-200 dark:bg-slate-700"
                     )}
                   />
                 )}
@@ -430,14 +437,12 @@ function OnboardingPageInner() {
 
         {/* ── Card ── */}
         <div className="card">
-          {/* Error banner */}
           {error && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
-          {/* Loading state */}
           {loadingData ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <LoadingSpinner size="lg" />
@@ -447,13 +452,10 @@ function OnboardingPageInner() {
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)}>
-              {/* ── Animated step content ── */}
               <div
                 key={animKey}
                 className={
-                  direction === "forward"
-                    ? "animate-slide-in-right"
-                    : "animate-slide-in"
+                  direction === "forward" ? "animate-slide-in-right" : "animate-slide-in"
                 }
               >
                 {/* Step 0 — Goal selection */}
@@ -511,8 +513,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 3 — Learning method */}
-                {step === 3 && (
+                {/* Step 4 — Learning method */}
+                {step === 4 && (
                   <StepLearningMethod
                     register={register}
                     watch={watch}
@@ -520,8 +522,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 4 — Placement assessment */}
-                {step === 4 && placementSessionId && (
+                {/* Step 5 — Placement assessment (experienced flow only) */}
+                {step === 5 && placementSessionId && (
                   <StepPlacementTest
                     sessionId={placementSessionId}
                     unitIds={knownUnitIds}
@@ -530,8 +532,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 5 — Result gate */}
-                {step === 5 && (
+                {/* Step 6 — Result gate */}
+                {step === 6 && (
                   <ResultGate
                     results={placementResults}
                     onConfirm={handleResultGateConfirm}
@@ -541,12 +543,7 @@ function OnboardingPageInner() {
 
               {/* ── Navigation buttons (only for Steps 2 and 3) ── */}
               {showPageNav && (
-                <div
-                  className={cn(
-                    "mt-7 flex gap-3",
-                    isFirstStep ? "justify-end" : "justify-between"
-                  )}
-                >
+                <div className={cn("mt-7 flex gap-3", isFirstStep ? "justify-end" : "justify-between")}>
                   {!isFirstStep && (
                     <Button
                       type="button"
@@ -557,7 +554,6 @@ function OnboardingPageInner() {
                       Quay lại
                     </Button>
                   )}
-
                   <Button
                     type="button"
                     onClick={goNext}
@@ -590,7 +586,7 @@ function OnboardingPageInner() {
                       if (skipPlacementAssessment) {
                         handleSubmit(submitOnboarding)();
                       } else {
-                        navigate(4);
+                        navigate(5);
                       }
                     }}
                     rightIcon={<Sparkles className="h-4 w-4" />}
@@ -603,7 +599,6 @@ function OnboardingPageInner() {
           )}
         </div>
 
-        {/* Skip link */}
         <p className="mt-4 text-center text-xs" style={{ color: "var(--text-muted)" }}>
           Bạn có thể cập nhật thông tin này bất cứ lúc nào trong phần Cài đặt.
         </p>
@@ -616,7 +611,10 @@ export default function OnboardingPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--bg-page)" }}>
+        <div
+          className="flex min-h-screen items-center justify-center"
+          style={{ backgroundColor: "var(--bg-page)" }}
+        >
           <LoadingSpinner size="lg" />
         </div>
       }
