@@ -24,7 +24,8 @@ interface InContextTutorProps {
   captureFrame: () => string | null;
   contextBindingId?: string;
   unitTitle: string;
-  onClose: () => void;
+  onClose?: () => void;
+  suggestions?: string[];
 }
 
 // ── Component ───────────────────────────────────────────────────────────────
@@ -36,6 +37,7 @@ export default function InContextTutor({
   contextBindingId,
   unitTitle,
   onClose,
+  suggestions = [],
 }: InContextTutorProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -46,7 +48,9 @@ export default function InContextTutor({
 
   // Auto-scroll
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (typeof chatEndRef.current?.scrollIntoView === "function") {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   // Rate answer
@@ -60,8 +64,8 @@ export default function InContextTutor({
   };
 
   // Send message
-  const handleSend = useCallback(async () => {
-    const q = input.trim();
+  const handleSend = useCallback(async (question?: string) => {
+    const q = (question ?? input).trim();
     if (!q || streaming || !lectureId) return;
 
     setInput("");
@@ -267,13 +271,16 @@ export default function InContextTutor({
             AI Tutor
           </span>
         </div>
-        <button
-          onClick={onClose}
-          className="rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-          style={{ color: "var(--text-muted)" }}
-        >
-          <X className="h-4 w-4" />
-        </button>
+        {onClose ? (
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <span className="sr-only">Close tutor</span>
+            <X className="h-4 w-4" />
+          </button>
+        ) : null}
       </div>
 
       {/* Chat messages */}
@@ -378,6 +385,29 @@ export default function InContextTutor({
         className="border-t p-3 shrink-0"
         style={{ borderColor: "var(--border)" }}
       >
+        {suggestions.length > 0 ? (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {suggestions.slice(0, 2).map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => {
+                  void handleSend(suggestion);
+                }}
+                disabled={streaming}
+                className="rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
+                style={{
+                  borderColor: "rgba(37,99,235,0.18)",
+                  backgroundColor: "rgba(37,99,235,0.06)",
+                  color: "var(--text-primary)",
+                }}
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         <div
           className="flex items-end gap-2 rounded-xl border p-2"
           style={{
