@@ -101,7 +101,7 @@ export default function StepGoalSelection({ onNext }: Props) {
             "w-full rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-150",
             noneSelected
               ? "cursor-not-allowed bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500"
-              : "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]",
+              : "bg-primary-600 text-white hover:bg-primary-700 active:scale-[0.99]",
           )}
         >
           Tiếp tục

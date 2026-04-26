@@ -15,7 +15,7 @@ import type { CourseSectionDetail } from "@/types";
 // Goal → canonical course ID mapping (must match backend GOAL_COURSE_MAP)
 // ---------------------------------------------------------------------------
 
-const GOAL_COURSE_MAP: Record<string, string> = {
+const GOAL_COURSE_MAP: Record<string, string | undefined> = {
   computer_vision: "cs231n",
   nlp: "cs224n",
 };
@@ -52,6 +52,7 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
 
   const [allSections, setAllSections] = useState<CourseSectionDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // ── Load all sections on mount ─────────────────────────────────────────
   useEffect(() => {
@@ -63,7 +64,7 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
         );
         setAllSections(details);
       } catch {
-        // On API failure: keep sections empty
+        setError("Không thể tải dữ liệu. Vui lòng thử lại.");
       } finally {
         setLoading(false);
       }
@@ -124,7 +125,11 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
         )}
       </p>
 
-      {visibleSections.length === 0 && (
+      {error && (
+        <p className="text-sm text-red-500">{error}</p>
+      )}
+
+      {visibleSections.length === 0 && !error && (
         <div className="py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
           Không có units nào để hiển thị.
         </div>
@@ -218,7 +223,7 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
         <button
           type="button"
           onClick={onNext}
-          className="flex-1 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-blue-700 active:scale-[0.99]"
+          className="flex-1 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99]"
         >
           Tiếp tục
         </button>
