@@ -1,11 +1,11 @@
 "use client";
 // app/onboarding/page.tsx
 // Multi-step onboarding flow (5 steps) for new users.
-// Step 1: Goal selection · Step 2: Known topics · Step 3: Schedule · Step 4: Learning method · Step 5: Placement assessment
+// Step 1: Goal selection · Step 2: Known topics (filtered) · Step 3: Schedule · Step 4: Learning method · Step 5: Placement assessment
 // On submit: PUT /api/users/me/onboarding → redirect to /assessment
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -19,7 +19,6 @@ import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import StepGoalSelection from "@/components/onboarding/StepGoalSelection";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
-import StepDesiredSections from "@/components/onboarding/StepDesiredSections";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 import StepPlacementTest from "@/components/onboarding/StepPlacementTest";
@@ -76,9 +75,9 @@ const STEPS = [
   },
 ] as const;
 
-// Steps that use the page-level nav buttons (Steps 2 and 3, 0-indexed)
-// Steps 0, 1, and 4 have their own internal navigation.
-const STEPS_WITH_PAGE_NAV = new Set([2, 3]);
+// Steps that use the page-level nav buttons (Step 2 = TimeSchedule, 0-indexed)
+// Steps 0, 1, 3, and 4 have their own internal navigation.
+const STEPS_WITH_PAGE_NAV = new Set([2]);
 
 // Fields that must pass validation before advancing from each step
 const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
@@ -159,9 +158,9 @@ function OnboardingPageInner() {
     loadData();
   }, []);
 
-  // Generate the placement session UUID when entering Step 5 (only once)
+  // Generate the placement session UUID when entering Step 4 (only once)
   useEffect(() => {
-    if (step === 5 && !enteredStep5.current) {
+    if (step === 4 && !enteredStep5.current) {
       enteredStep5.current = true;
       setPlacementSessionId(crypto.randomUUID());
     }
@@ -305,10 +304,9 @@ function OnboardingPageInner() {
   };
 
   // ── Derived values ────────────────────────────────────────────────────────
-  const TOTAL_STEPS = STEPS.length;  // 6 entries but step 5 is placement (shown as "Step 6 of 6")
-  // Display steps 0–4 in progress bar (step 5 is the placement assessment, shown inline)
+  const TOTAL_STEPS = STEPS.length;  // 5 steps total
   const isFirstStep = step === 0;
-  const isLastFormStep = step === 4; // Step 4 = learning method → submit triggers placement
+  const isLastFormStep = step === 3; // Step 3 = learning method → submit triggers placement
   const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
   const progressPercent = Math.round(((step + 1) / TOTAL_STEPS) * 100);
   const { title, subtitle } = STEPS[step];
@@ -465,7 +463,7 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 2 — Desired sections */}
+                {/* Step 2 — Schedule */}
                 {step === 2 && (
                   <Controller
                     control={control}
@@ -499,8 +497,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 4 — Learning method */}
-                {step === 4 && (
+                {/* Step 3 — Learning method */}
+                {step === 3 && (
                   <StepLearningMethod
                     register={register}
                     watch={watch}
@@ -508,8 +506,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 5 — Placement assessment */}
-                {step === 5 && placementSessionId && (
+                {/* Step 4 — Placement assessment */}
+                {step === 4 && placementSessionId && (
                   <StepPlacementTest
                     sessionId={placementSessionId}
                     unitIds={knownUnitIds}
@@ -567,7 +565,7 @@ function OnboardingPageInner() {
                         const valid = await trigger(fields);
                         if (!valid) return;
                       }
-                      navigate(5);
+                      navigate(4);
                     }}
                     rightIcon={<Sparkles className="h-4 w-4" />}
                   >
