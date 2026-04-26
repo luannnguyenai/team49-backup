@@ -6,43 +6,23 @@ import { useRouter } from "next/navigation";
 import { courseApi } from "@/lib/api";
 
 interface CourseStartPageProps {
-  params: Promise<{
+  params: {
     courseSlug: string;
-  }>;
+  };
 }
 
 export default function CourseStartPage({ params }: CourseStartPageProps) {
   const router = useRouter();
-  const [courseSlug, setCourseSlug] = useState<string | null>(null);
+  const courseSlug = params.courseSlug;
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let active = true;
-    params
-      .then((resolved) => {
-        if (active) {
-          setCourseSlug(resolved.courseSlug);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setError("Failed to resolve course route.");
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [params]);
-
-  useEffect(() => {
     if (!courseSlug) return;
-    const resolvedCourseSlug = courseSlug;
     let active = true;
 
     async function resolveStart() {
       try {
-        const decision = await courseApi.start(resolvedCourseSlug);
+        const decision = await courseApi.start(courseSlug);
         if (active) {
           router.replace(decision.target);
         }
