@@ -7,7 +7,7 @@ import { create } from "zustand";
 // Types
 // ---------------------------------------------------------------------------
 
-export type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+export type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface PlacementTopicResult {
   topic_unit_id: string;

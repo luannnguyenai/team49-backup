@@ -22,8 +22,10 @@ import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFilt
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 import StepPlacementTest from "@/components/onboarding/StepPlacementTest";
+import ResultGate from "@/components/onboarding/ResultGate";
 
 import { canonicalSectionApi } from "@/lib/api";
+import { saveGoals, saveKnownTopics } from "@/lib/onboarding-api";
 import {
   buildCanonicalAssessmentContext,
   writePendingCanonicalAssessment,
@@ -60,6 +62,10 @@ const STEPS = [
     title: "Đánh giá kiến thức",
     subtitle: "Kiểm tra những gì bạn đã biết",
   },
+  {
+    title: "Kết quả đánh giá",
+    subtitle: "Xác nhận lộ trình của bạn",
+  },
 ] as const;
 
 // Steps that use the page-level nav buttons (Step 2 = TimeSchedule, 0-indexed)
@@ -73,6 +79,7 @@ const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   ["available_hours_per_week", "target_deadline"],   // Step 2: required
   ["preferred_method"],                              // Step 3: required
   [],                                                // Step 4: PlacementTest — no form fields
+  [],                                                // Step 5: ResultGate — no form fields
 ];
 
 // ---------------------------------------------------------------------------
@@ -93,6 +100,9 @@ function OnboardingPageInner() {
   // UUID for the placement assessment session — generated once when Step 5 is entered
   const [placementSessionId, setPlacementSessionId] = useState<string | null>(null);
   const enteredStep5 = useRef(false);
+
+  // Results from placement assessment — used by Step 6 (ResultGate)
+  const [placementResults, setPlacementResults] = useState<TopicDecision[]>([]);
 
   // Content data loaded from the API
   const [sections, setSections] = useState<CourseSectionDetail[]>([]);
@@ -194,19 +204,6 @@ function OnboardingPageInner() {
     await submitOnboarding(data);
   };
 
-  // ── Placement callbacks (Step 5) ─────────────────────────────────────────
-  const handlePlacementComplete = useCallback(
-    (_decisions: TopicDecision[]) => {
-      // Decisions already persisted to store by StepPlacementTest; trigger submit
-      handleSubmit(submitOnboarding)();
-    },
-    [handleSubmit, submitOnboarding]
-  );
-
-  const handlePlacementSkip = useCallback(() => {
-    handleSubmit(submitOnboarding)();
-  }, [handleSubmit, submitOnboarding]);
-
   // ── Navigation ───────────────────────────────────────────────────────────
   const navigate = useCallback(
     (targetStep: number) => {
@@ -231,8 +228,27 @@ function OnboardingPageInner() {
     navigate(step - 1);
   }, [step, navigate]);
 
+  // ── Placement callbacks (Step 5) ─────────────────────────────────────────
+  const handlePlacementComplete = useCallback(
+    (decisions: TopicDecision[]) => {
+      // Store results and transition to Step 6 (ResultGate)
+      setPlacementResults(decisions);
+      navigate(5);
+    },
+    [navigate]
+  );
+
+  const handlePlacementSkip = useCallback(() => {
+    handleSubmit(submitOnboarding)();
+  }, [handleSubmit, submitOnboarding]);
+
+  // ── ResultGate confirm (Step 6) ──────────────────────────────────────────
+  const handleResultGateConfirm = useCallback(() => {
+    handleSubmit(submitOnboarding)();
+  }, [handleSubmit, submitOnboarding]);
+
   // ── Derived values ────────────────────────────────────────────────────────
-  const TOTAL_STEPS = STEPS.length;  // 5 steps total
+  const TOTAL_STEPS = STEPS.length;  // 6 steps total
   const isFirstStep = step === 0;
   const isLastFormStep = step === 3; // Step 3 = learning method → submit triggers placement
   const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
@@ -372,14 +388,26 @@ function OnboardingPageInner() {
               >
                 {/* Step 0 — Goal selection */}
                 {step === 0 && (
-                  <StepGoalSelection onNext={() => navigate(1)} />
+                  <StepGoalSelection
+                    onNext={() => {
+                      saveGoals(goalIds).catch(() => {});
+                      navigate(1);
+                    }}
+                  />
                 )}
 
                 {/* Step 1 — Known topics filtered by goals */}
                 {step === 1 && (
                   <StepKnownTopicsFiltered
-                    onNext={() => navigate(2)}
+                    onNext={() => {
+                      saveKnownTopics(knownUnitIds).catch(() => {});
+                      navigate(2);
+                    }}
                     onBack={() => navigate(0)}
+                    onSkipAll={() => {
+                      useOnboardingStore.getState().setKnownUnitIds([]);
+                      navigate(3);
+                    }}
                   />
                 )}
 
@@ -409,6 +437,14 @@ function OnboardingPageInner() {
                     unitIds={knownUnitIds}
                     onComplete={handlePlacementComplete}
                     onSkip={handlePlacementSkip}
+                  />
+                )}
+
+                {/* Step 5 — Result gate */}
+                {step === 5 && (
+                  <ResultGate
+                    results={placementResults}
+                    onConfirm={handleResultGateConfirm}
                   />
                 )}
               </div>

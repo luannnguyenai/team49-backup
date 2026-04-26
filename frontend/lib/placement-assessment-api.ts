@@ -76,3 +76,10 @@ export async function getPlacementResults(): Promise<PlacementResultsResponse> {
     .get<PlacementResultsResponse>("/api/placement-assessment/results")
     .then((r) => r.data);
 }
+
+export async function setTopicDecision(req: {
+  topic_unit_id: string;
+  user_choice: "skip" | "review";
+}): Promise<void> {
+  await api.patch("/api/placement-assessment/topic-decision", req);
+}
