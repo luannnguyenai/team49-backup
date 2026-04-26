@@ -18,6 +18,7 @@ import type { CourseSectionDetail } from "@/types";
 const GOAL_COURSE_MAP: Record<string, string | undefined> = {
   computer_vision: "cs231n",
   nlp: "cs224n",
+  deep_learning: "cs230",
 };
 
 // ---------------------------------------------------------------------------
