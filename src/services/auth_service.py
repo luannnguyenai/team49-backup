@@ -195,7 +195,7 @@ async def _write_goal_preferences_if_enabled(
             list(
                 dict.fromkeys(
                     (data.selected_course_ids or [])
-                    + [GOAL_COURSE_MAP[g] for g in (data.goal_ids or []) if g in GOAL_COURSE_MAP]
+                    + [c for g in (data.goal_ids or []) if g in GOAL_COURSE_MAP for c in GOAL_COURSE_MAP[g]]
                 )
             )
             or None
