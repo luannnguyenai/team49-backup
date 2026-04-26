@@ -220,6 +220,16 @@ Example:
 
 > A KP can be `structural_role=gateway` but only `importance_level=medium` in one course.
 
+Schema v2 addition:
+
+| Field | Meaning |
+| --- | --- |
+| `description_embedding_version` | Embedding model/version used for `description_embedding` |
+
+Why:
+
+> Embeddings from different models should not be compared silently. If the embedding model changes, old vectors need a version marker and a rebuild path.
+
 ### 5.2 `units`
 
 Canonical learning unit extracted from lecture content.
@@ -417,6 +427,20 @@ Use it to answer:
 - Did an agent/human reject it?
 - Can it be reconsidered later?
 
+Important semantics:
+
+| Storage | Meaning |
+| --- | --- |
+| `prerequisite_edges.active=true` | Edge is currently part of the usable planner graph |
+| `prerequisite_edges.active=false` | Edge was once accepted, but later retired due to update/remove/review |
+| `pruned_edges` | Candidate edge was rejected before becoming an active graph edge |
+
+This avoids duplicate meaning:
+
+- use `active=false` for retired accepted edges
+- use `pruned_edges` for rejected candidates
+- do not write the same edge into both as the same event
+
 ---
 
 ## 6. Current Learner Runtime Layer
@@ -445,6 +469,16 @@ Schema v2 recommended additions for IRT/CAT:
 | `theta_sigma_initial`, `theta_sigma_final` | Uncertainty before/after session |
 | `target_se` | CAT stopping target |
 | `stop_reason` | Why assessment stopped |
+
+Source-of-truth rule:
+
+> `learner_mastery_kp` is the current mastery source of truth. `sessions.theta_initial/final` are session-level audit snapshots only.
+
+Runtime rule:
+
+- when a session is finalized, update `sessions`, `interactions`, and `learner_mastery_kp` in one transaction where possible
+- if a session crashes mid-flow, recovery should recompute session summary from `interactions`
+- do not treat `sessions.theta_final` as the canonical current mastery after later sessions have happened
 
 ### 6.2 `interactions`
 
@@ -483,6 +517,12 @@ Reason for snapshots:
 
 > Item calibration can change later. Audit must know what the model believed when the learner answered.
 
+Storage decision for Schema v2:
+
+- keep these as typed nullable columns on `interactions` first
+- do not split into `interaction_psychometric_snapshot` until row volume or query profile proves it is necessary
+- if a future split happens, keep `interactions` as the canonical event table and make the snapshot table strictly 1-to-1 by `interaction_id`
+
 ### 6.3 `learner_mastery_kp`
 
 Current learner mastery state per `user x kp`.
@@ -513,6 +553,14 @@ Important fields:
 | `selected_course_ids` | Course IDs selected |
 | `goal_embedding` | Goal vector |
 | `derived_from_course_set_hash` | Drift detection |
+
+Embedding version rule:
+
+| Field | Meaning |
+| --- | --- |
+| `goal_embedding_version` | Embedding model/version used for `goal_embedding` |
+
+If the embedding model changes, rebuild `goal_embedding` and any comparable concept/unit embeddings before using cosine similarity across versions.
 
 ### 6.5 `waived_units`
 
@@ -659,6 +707,10 @@ Suggested fields:
 | `suggested_action` | What reviewer should do |
 | `context_json` | Small context payload |
 | `status` | `open`, `resolved`, `rejected`, `deferred` |
+| `assigned_to` | Optional reviewer user ID |
+| `due_at` | Review deadline |
+| `escalated_at` | When this review was escalated |
+| `escalation_target` | Team/person/role that should handle escalation |
 | `reviewed_by`, `reviewed_at` | Human audit |
 
 Use HITL for:
@@ -686,6 +738,7 @@ Suggested fields:
 | `synthetic_response_count` | Synthetic responses included for testing only |
 | `status` | `started`, `passed`, `failed` |
 | `metrics_json` | Fit metrics |
+| `active` | Whether this run is currently used |
 | `started_at`, `finished_at` | Runtime |
 
 Add to `item_calibration`:
@@ -698,6 +751,24 @@ Add to `item_calibration`:
 | `calibration_dataset_version` | Which response snapshot was used |
 | `real_response_count` | Real data count |
 | `synthetic_response_count` | Synthetic data count, audit only |
+
+New optional table: `item_calibration_history`.
+
+Suggested fields:
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Row ID |
+| `item_id` | Question item |
+| `calibration_run_id` | Run that produced this snapshot |
+| `difficulty_b`, `discrimination_a`, `guessing_c` | Fitted parameters from that run |
+| `standard_error_b`, `standard_error_a`, `standard_error_c` | Standard errors from that run |
+| `real_response_count`, `synthetic_response_count` | Dataset composition |
+| `created_at` | Snapshot time |
+
+Rollback rule:
+
+> `item_calibration` stores the active params. `item_calibration_history` stores prior run snapshots. Rollback means copying a previous valid history row back into `item_calibration` and updating `calibration_run_id`.
 
 ### 7.7 Item Exposure Stats
 
@@ -720,6 +791,14 @@ Why:
 - CAT tends to overuse high-information items.
 - Admin dashboard should show overexposed items.
 - Selector can use randomesque/exposure caps.
+
+Refresh strategy:
+
+- treat this table as a denormalized cache, not a source of truth
+- source of truth remains `interactions`
+- refresh aggregate counts by batch/materialized-view style job, default every 15 minutes
+- optionally update `last_shown_at` near real-time when CAT needs immediate exposure caps
+- if cache and `interactions` disagree, rebuild cache from `interactions`
 
 ---
 
@@ -749,16 +828,27 @@ Mode: `spread_by_prior`.
 
 Process:
 
-1. Filter pool by phase and target units/KPs.
-2. Sort by `item_calibration.difficulty_prior`.
-3. Split into quantile bins.
-4. Randomly choose items across bins.
+1. Filter pool by phase, unit, KP, and item validity.
+2. Apply `item_phase_map.suitability_score` as phase-fit.
+3. Sort or bin by `item_calibration.difficulty_prior`.
+4. Split into quantile bins.
+5. Randomly choose items across bins.
+6. Apply exposure limits if available.
 
 Why it is explainable:
 
 - It uses a prior difficulty estimate.
 - It covers the difficulty range better than pure random.
 - It does not pretend to have fitted IRT parameters.
+
+Field semantics:
+
+| Field | Meaning |
+| --- | --- |
+| `item_phase_map.suitability_score` | Whether the item is appropriate for a phase such as placement or mini quiz |
+| `item_calibration.difficulty_prior` | How hard the item is expected to be before empirical calibration |
+
+These fields are orthogonal. A very hard item can be highly suitable for `skip_verification`, but unsuitable for first-touch placement.
 
 ### 8.3 Calibrated IRT Item Selection
 
@@ -806,6 +896,13 @@ If we create a second response table, these models may disagree about what the l
 Rule:
 
 > `interactions` is the canonical answer event table.
+
+Mastery snapshot rule:
+
+- `learner_mastery_kp` stores current state
+- `sessions.theta_*` stores session audit state
+- `interactions.theta_*` stores per-answer audit state
+- future `learner_mastery_kp_history` can store periodic or significant-change snapshots, but should not replace replay from `interactions`
 
 ---
 
@@ -1018,9 +1115,18 @@ Admin dashboard should show:
 - blocking review count
 - entity type
 - severity
+- assigned reviewer
+- due date
+- escalation status
 - suggested action
 - context snapshot
 - reviewer and timestamp
+
+Routing rule:
+
+- `blocking` reviews need `due_at`
+- unresolved `blocking` reviews past `due_at` should set `escalated_at`
+- agent/code may create review items, but only a human or approved admin workflow should mark them `resolved`
 
 ---
 
@@ -1118,6 +1224,16 @@ The future admin dashboard should answer these questions:
 - How many synthetic responses were used for testing?
 - Which items passed calibration?
 - Which items failed standard error thresholds?
+- Which calibration run is active?
+- Which calibration run can be rolled back to?
+- Which exposure stats are stale?
+
+### Review Operations
+
+- Which HITL items are assigned to me?
+- Which blocking items are overdue?
+- Which items were escalated?
+- Which entity types generate the most review load?
 
 ---
 
@@ -1133,6 +1249,10 @@ The future admin dashboard should answer these questions:
 8. Do not hard-delete course/concept/edge rows during normal updates.
 9. Do not treat `review` phase as human review; it is learner re-quiz/spaced repetition.
 10. Do not make planner depend on `edge_kind=soft` until planner supports it.
+11. Do not compare embeddings across different embedding versions.
+12. Do not treat `sessions.theta_final` as the current mastery source of truth.
+13. Do not treat `item_exposure_stats` as source of truth; rebuild it from `interactions` when needed.
+14. Do not put an edge into both `prerequisite_edges.active=false` and `pruned_edges` for the same rejection event.
 
 ---
 
@@ -1156,7 +1276,10 @@ The future admin dashboard should answer these questions:
 - HITL queue
 - IRT/CAT session and interaction audit fields
 - calibration run tracking
+- calibration history / rollback support
 - item exposure stats
+- HITL assignment and SLA fields
+- embedding version fields
 
 ### Future Work
 
@@ -1166,10 +1289,73 @@ The future admin dashboard should answer these questions:
 - BECAT selection policy
 - DKT sequence model
 - admin dashboard for ingest/calibration/review
+- optional `interaction_psychometric_snapshot` split if `interactions` becomes too wide or hot
+- optional `learner_mastery_kp_history` for UI curves/debugging
+- optional generic `kp_edges` table if graph needs non-prerequisite relations
+- GDPR/user-data anonymization policy
 
 ---
 
-## 17. Summary
+## 17. Open Questions and v3 Roadmap
+
+These are real design questions, but they do not block Schema v2.
+
+### 17.1 Interaction Snapshot Table
+
+Schema v2 keeps psychometric snapshots as nullable fields on `interactions`.
+
+Move to `interaction_psychometric_snapshot` only if:
+
+- interaction row width becomes a measurable performance issue
+- most hot-path queries never need the psychometric fields
+- analytics/model jobs benefit from separating event identity from model snapshots
+
+If split later:
+
+- keep `interactions` as source of truth
+- use 1-to-1 `interaction_id`
+- do not create a second answer log
+
+### 17.2 Mastery History
+
+`learner_mastery_kp` is current state only.
+
+Future `learner_mastery_kp_history` can be added for:
+
+- plotting mastery curves
+- debugging assessor drift
+- storing snapshots when `theta_sigma` changes significantly
+
+It is not required for DKT because DKT can replay sequences from `interactions`.
+
+### 17.3 Generic KP Relations
+
+Current graph is prerequisite-focused.
+
+Future `kp_edges` may support:
+
+- `prerequisite_of`
+- `similar_to`
+- `part_of`
+- `extends`
+- `contrasts_with`
+
+Do not generalize now unless planner or tutor actually needs these relations.
+
+### 17.4 Data Retention and User Deletion
+
+Schema v2 should not block GDPR-style deletion/anonymization, but a separate policy is needed.
+
+Open decision:
+
+- hard-delete user PII and interactions
+- or anonymize `user_id` while retaining aggregate calibration stats
+
+Any retention strategy must keep calibration reproducible without exposing personal data.
+
+---
+
+## 18. Summary
 
 Schema v2 keeps the current product and canonical design, but adds the audit fields needed to scale safely.
 
@@ -1178,8 +1364,12 @@ The most important design choices are:
 - `interactions` remains the canonical learner response log.
 - `item_calibration` separates priors from fitted IRT parameters.
 - `item_kp_map` is the foundation for NCD/BECAT/DKT.
+- `learner_mastery_kp` is current mastery source of truth; session/interaction theta fields are audit snapshots.
 - `prerequisite_edges` need evidence ledger and active/deprecated state for incremental updates.
+- `pruned_edges` is for rejected candidate edges, not retired accepted edges.
 - uncertain AI decisions go to HITL instead of being forced.
+- embeddings need model/version fields.
+- exposure stats and calibration history are caches/audit layers, not replacement sources of truth.
 - admin dashboard readiness is designed into the schema instead of added later.
 
 This keeps the current app stable while making the data layer explainable enough for papers, demos, and future adaptive-learning models.
