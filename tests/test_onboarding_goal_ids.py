@@ -47,16 +47,17 @@ class OnboardingGoalIdsTests(unittest.TestCase):
 
     def test_goal_ids_map_to_course_ids(self):
         from src.config.goal_course_map import GOAL_COURSE_MAP
-        self.assertEqual(GOAL_COURSE_MAP["computer_vision"], "cs231n")
-        self.assertEqual(GOAL_COURSE_MAP["nlp"], "cs224n")
+        self.assertEqual(GOAL_COURSE_MAP["computer_vision"], ["cs231n"])
+        self.assertEqual(GOAL_COURSE_MAP["nlp"], ["cs224n"])
+        self.assertEqual(GOAL_COURSE_MAP["deep_learning"], ["cs230"])
 
     def test_merged_course_ids_deduplication(self):
-        # If goal_ids contains "computer_vision" (→ cs231n) and selected_course_ids
+        # If goal_ids contains "computer_vision" (→ [cs231n]) and selected_course_ids
         # already has "cs231n", the merged list should not duplicate it.
         from src.config.goal_course_map import GOAL_COURSE_MAP
         goal_ids = ["computer_vision"]
         selected_course_ids = ["cs231n"]
-        derived = [GOAL_COURSE_MAP[g] for g in goal_ids if g in GOAL_COURSE_MAP]
+        derived = [c for g in goal_ids if g in GOAL_COURSE_MAP for c in GOAL_COURSE_MAP[g]]
         merged = list(dict.fromkeys(selected_course_ids + derived))
         self.assertEqual(merged, ["cs231n"])  # no duplicate
 
