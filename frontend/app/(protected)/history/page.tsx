@@ -123,6 +123,10 @@ function scoreColor(pct: number | null) {
   return "#ef4444";
 }
 
+function questionRowKey(q: QuestionInteractionDetail, index: number) {
+  return q.question_id ?? q.canonical_item_id ?? `${q.sequence_position}-${index}`;
+}
+
 // ---------------------------------------------------------------------------
 // Mini SVG line chart
 // ---------------------------------------------------------------------------
@@ -219,10 +223,8 @@ function BloomBar({ breakdown }: { breakdown: Record<string, string> }) {
 
 function ExpandedDetail({
   sessionId,
-  sessionType,
 }: {
   sessionId: string;
-  sessionType: SessionType;
 }) {
   const [detail, setDetail] = useState<SessionDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -256,6 +258,14 @@ function ExpandedDetail({
 
   return (
     <div className="space-y-5 px-1 py-3">
+      {detail.source === "inline_video" && detail.checkpoint ? (
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
+            {CHECKPOINT_LABELS[detail.checkpoint] ?? detail.checkpoint}
+          </span>
+        </div>
+      ) : null}
+
       {/* Bloom + KCs + misconceptions side-by-side */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* Bloom breakdown */}
@@ -324,7 +334,7 @@ function ExpandedDetail({
         <div className="space-y-1.5">
           {detail.questions.map((q, i) => (
             <QuestionRow
-              key={q.question_id}
+              key={questionRowKey(q, i)}
               q={q}
               num={i + 1}
               open={expandedQIdx === i}
@@ -333,6 +343,28 @@ function ExpandedDetail({
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function LinkedReviewPanel({ sessionId }: { sessionId: string }) {
+  return (
+    <div
+      className="rounded-2xl border p-4"
+      style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+          Review mở từ liên kết
+        </p>
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+          Session {sessionId}
+        </span>
+      </div>
+      <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+        Phiên này không nằm trong trang lịch sử hiện tại, nên nội dung review được tải trực tiếp.
+      </p>
+      <ExpandedDetail sessionId={sessionId} />
     </div>
   );
 }
@@ -602,6 +634,8 @@ export default function HistoryPage() {
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 1;
   const summary = data?.summary;
+  const targetSessionVisible = !!targetSessionId && sortedItems.some((item) => item.session_id === targetSessionId);
+  const showLinkedReviewPanel = !!targetSessionId && !loading && !targetSessionVisible;
 
   // ---------------------------------------------------------------------------
   // Render
@@ -746,6 +780,8 @@ export default function HistoryPage() {
           </span>
         )}
       </div>
+
+      {showLinkedReviewPanel && <LinkedReviewPanel sessionId={targetSessionId} />}
 
       {/* ── Table ─────────────────────────────────────────────────────── */}
       <div
@@ -906,10 +942,7 @@ export default function HistoryPage() {
                           style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
                         >
                           <td colSpan={6} className="px-5 pb-4">
-                            <ExpandedDetail
-                              sessionId={item.session_id}
-                              sessionType={item.session_type}
-                            />
+                            <ExpandedDetail sessionId={item.session_id} />
                           </td>
                         </tr>
                       )}

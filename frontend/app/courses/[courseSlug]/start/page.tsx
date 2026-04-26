@@ -6,21 +6,43 @@ import { useRouter } from "next/navigation";
 import { courseApi } from "@/lib/api";
 
 interface CourseStartPageProps {
-  params: {
+  params: Promise<{
     courseSlug: string;
-  };
+  }>;
 }
 
 export default function CourseStartPage({ params }: CourseStartPageProps) {
   const router = useRouter();
+  const [courseSlug, setCourseSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
+    params
+      .then((resolved) => {
+        if (active) {
+          setCourseSlug(resolved.courseSlug);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setError("Failed to resolve course route.");
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [params]);
+
+  useEffect(() => {
+    if (!courseSlug) return;
+    const resolvedCourseSlug = courseSlug;
+    let active = true;
 
     async function resolveStart() {
       try {
-        const decision = await courseApi.start(params.courseSlug);
+        const decision = await courseApi.start(resolvedCourseSlug);
         if (active) {
           router.replace(decision.target);
         }
@@ -35,7 +57,7 @@ export default function CourseStartPage({ params }: CourseStartPageProps) {
     return () => {
       active = false;
     };
-  }, [params.courseSlug, router]);
+  }, [courseSlug, router]);
 
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef6ff_100%)] px-4 py-10 md:px-8">

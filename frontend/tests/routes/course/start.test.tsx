@@ -43,7 +43,7 @@ describe("course start page", () => {
       reason: "auth_required",
     });
 
-    render(<CourseStartPage params={{ courseSlug: "cs231n" }} />);
+    render(<CourseStartPage params={Promise.resolve({ courseSlug: "cs231n" })} />);
 
     await waitFor(() => {
       expect(navigationMock.replace).toHaveBeenCalledWith(
@@ -59,7 +59,7 @@ describe("course start page", () => {
       reason: "learning_ready",
     });
 
-    render(<CourseStartPage params={{ courseSlug: "cs231n" }} />);
+    render(<CourseStartPage params={Promise.resolve({ courseSlug: "cs231n" })} />);
 
     await waitFor(() => {
       expect(navigationMock.replace).toHaveBeenCalledWith(
