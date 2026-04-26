@@ -9,9 +9,7 @@ export const onboardingSchema = z.object({
 
   known_unit_ids: z.array(z.string()),
 
-  desired_section_ids: z
-    .array(z.string())
-    .min(1, "Chọn ít nhất 1 section để tiếp tục"),
+  desired_section_ids: z.array(z.string()),
 
   selected_course_ids: z.array(z.string()),
 

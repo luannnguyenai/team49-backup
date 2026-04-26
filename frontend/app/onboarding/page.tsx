@@ -145,11 +145,9 @@ function OnboardingPageInner() {
     }
   }, [step]);
 
-  // Derive the selected sections objects (needed for schedule estimate)
-  const selectedSectionIds = watch("desired_section_ids");
-  const selectedSections = sections.filter((section) =>
-    selectedSectionIds.includes(section.id)
-  );
+  // selectedSections was removed when StepDesiredSections was dropped from the flow.
+  // StepTimeSchedule receives an empty array; the estimate block is hidden.
+  const selectedSections: CourseSectionDetail[] = [];
 
   // ── Core submit (shared by placement complete/skip and direct submit) ────
   const submitOnboarding = useCallback(
