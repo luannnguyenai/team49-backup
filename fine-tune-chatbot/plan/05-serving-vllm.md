@@ -1,4 +1,4 @@
-# P5 — Serving (vLLM Docker)
+# P6 — Serving (vLLM Docker)
 
 **Goal**: run `tutor-v1` as an OpenAI-compatible streaming endpoint with
 tool calling and vision support, integrated into the existing
@@ -26,7 +26,7 @@ ship in dev first):
 
 ```yaml
   tutor-llm:
-    image: vllm/vllm-openai:latest    # pin to a Blackwell-verified tag from P1
+    image: vllm/vllm-openai:${VLLM_IMAGE_TAG}   # set after P1 verifies Blackwell support
     container_name: al_tutor_llm
     restart: unless-stopped
     runtime: nvidia
@@ -38,10 +38,10 @@ ship in dev first):
               count: 1
               capabilities: [gpu]
     volumes:
-      - ./fine-tune-chatbot/models/tutor-vl3b-v1-awq:/model:ro
+      - ./fine-tune-chatbot/models/tutor-current:/model:ro    # symlink; swap on update
       - tutor_hf_cache:/root/.cache/huggingface
     environment:
-      VLLM_ATTENTION_BACKEND: FLASHINFER   # if available; else FLASH_ATTN
+      VLLM_ATTENTION_BACKEND: ${VLLM_ATTENTION_BACKEND:-FLASH_ATTN}
       HF_HUB_OFFLINE: "1"
     command:
       - "--model"
@@ -49,9 +49,9 @@ ship in dev first):
       - "--served-model-name"
       - "tutor-v1"
       - "--quantization"
-      - "awq_marlin"
+      - "${TUTOR_QUANTIZATION:-awq_marlin}"   # set per P5 decision tree
       - "--max-model-len"
-      - "8192"
+      - "4096"   # match training ctx; raise to 8192 only if long-ctx eval passes
       - "--max-num-seqs"
       - "4"
       - "--gpu-memory-utilization"

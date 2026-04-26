@@ -1,4 +1,4 @@
-# P7 — Rollout, Risks, Runbook
+# P8 — Rollout, Risks, Runbook
 
 **Goal**: ship `tutor-v1` to 100% traffic safely, with rollback plan.
 
@@ -96,6 +96,30 @@ Cost is low because LangChain client construction is cheap.)
 | GPU memory util | `nvidia-smi` exporter | >95% sustained |
 | GPU temp | `nvidia-smi` | >85°C |
 | Judge score on rolling sample | weekly batch | drops >5% from baseline |
+
+## Stage gates — do not promote until all pass
+
+After each stage (1 → 2 → 3 → 4), verify these gates before advancing:
+
+| Gate | Threshold |
+|---|---|
+| Backend tutor 5xx rate | < 1% over previous 24h |
+| Self-hosted fallback invocation rate | < 5% sustained |
+| p95 first-token latency | < 5s |
+| GPU OOM kills | 0 in previous 24h |
+| User-reported issues | 0 critical, ≤ 2 minor |
+| Rolling judge score on 100 sampled answers | ≥ Stage 0 baseline − 5% |
+
+If any gate fails: **stop, hold at current ratio**, root-cause, then either
+fix forward or roll back via Tier 1 (config-only).
+
+## Kill switch
+
+Set `TUTOR_KILL_SWITCH=true` and restart backend. All tutor traffic
+immediately routes to fallback provider, regardless of override or canary.
+Verifiable in <60s. Use this for any urgent operational issue (model
+producing harmful outputs, sandbox abuse, etc.) without needing a code
+deploy.
 
 ## Risk register
 
