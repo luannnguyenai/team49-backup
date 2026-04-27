@@ -1,11 +1,9 @@
 "use client";
 // components/onboarding/StepKnownTopicsFiltered.tsx
-// Step 3 (experienced flow) — Known topics filtered by goals.
-// Units are shown as a flat grid sorted by their original lecture order.
-// Section headers are hidden; grouping logic replaced by the Experience Level step.
+// Step 3 (experienced flow) — Known topics grouped by goal in accordions.
 
 import { useEffect, useState } from "react";
-import { Check, Clock } from "lucide-react";
+import { Check, ChevronDown, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canonicalSectionApi } from "@/lib/api";
 import { useOnboardingStore } from "@/stores/onboardingStore";
@@ -21,6 +19,12 @@ const GOAL_COURSE_MAP: Record<string, string | undefined> = {
   deep_learning: "cs230",
 };
 
+const GOAL_DISPLAY_NAMES: Record<string, string> = {
+  computer_vision: "Computer Vision",
+  nlp: "Natural Language Processing",
+  deep_learning: "Deep Learning",
+};
+
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
@@ -28,7 +32,7 @@ const GOAL_COURSE_MAP: Record<string, string | undefined> = {
 interface Props {
   onNext: () => void;
   onBack: () => void;
-  onSkipAll: () => void; // called by parent when user proceeds with 0 topics selected
+  onSkipAll: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -43,6 +47,11 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
   const [allSections, setAllSections] = useState<CourseSectionDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Default: open if exactly 1 goal selected, closed if ≥2
+  const [openGoals, setOpenGoals] = useState<Set<string>>(
+    () => new Set(goalIds.length === 1 ? [goalIds[0]] : [])
+  );
 
   // ── Load sections on mount ─────────────────────────────────────────────
   useEffect(() => {
@@ -62,33 +71,36 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
     loadData();
   }, []);
 
-  // ── Filter sections by selected goals ─────────────────────────────────
-  const targetCourseIds =
-    goalIds.length > 0
-      ? new Set(goalIds.map((g) => GOAL_COURSE_MAP[g]).filter(Boolean))
-      : null;
-
-  const visibleSections =
-    targetCourseIds === null
-      ? allSections
-      : allSections.filter(
-          (s) => s.canonical_course_id && targetCourseIds.has(s.canonical_course_id),
-        );
-
-  // Flat list of units preserving section → unit sort order
-  const flatUnits: LearningUnitSelectionItem[] = visibleSections.flatMap(
-    (s) => s.learning_units,
-  );
-
-  // ── Toggle ─────────────────────────────────────────────────────────────
+  // ── Build per-goal unit lists ──────────────────────────────────────────
   const selectedSet = new Set(knownUnitIds);
 
+  // For each goalId, collect units from sections belonging to that goal's course
+  const goalUnits: Array<{ goalId: string; units: LearningUnitSelectionItem[] }> =
+    goalIds.map((goalId) => {
+      const courseId = GOAL_COURSE_MAP[goalId];
+      const sections = courseId
+        ? allSections.filter((s) => s.canonical_course_id === courseId)
+        : [];
+      const units = sections.flatMap((s) => s.learning_units);
+      return { goalId, units };
+    });
+
+  // ── Toggle ─────────────────────────────────────────────────────────────
   function toggle(unitId: string) {
     if (selectedSet.has(unitId)) {
       setKnownUnitIds(knownUnitIds.filter((id) => id !== unitId));
     } else {
       setKnownUnitIds([...knownUnitIds, unitId]);
     }
+  }
+
+  function toggleGoal(goalId: string) {
+    setOpenGoals((prev) => {
+      const next = new Set(prev);
+      if (next.has(goalId)) next.delete(goalId);
+      else next.add(goalId);
+      return next;
+    });
   }
 
   // ── Render ─────────────────────────────────────────────────────────────
@@ -124,67 +136,125 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
-      {flatUnits.length === 0 && !error && (
-        <div className="py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-          Không có units nào để hiển thị.
-        </div>
-      )}
+      {/* Accordion per goal */}
+      <div className="space-y-2">
+        {goalUnits.map(({ goalId, units }) => {
+          const isOpen = openGoals.has(goalId);
+          const selectedCount = units.filter((u) => selectedSet.has(u.id)).length;
+          const goalName = GOAL_DISPLAY_NAMES[goalId] ?? goalId;
 
-      {/* Flat unit grid — no section headers */}
-      {flatUnits.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {flatUnits.map((unit) => {
-            const isSelected = selectedSet.has(unit.id);
-
-            return (
+          return (
+            <div
+              key={goalId}
+              className="overflow-hidden rounded-xl border-2 transition-all duration-150"
+              style={{ borderColor: "var(--border)" }}
+            >
+              {/* Accordion header */}
               <button
-                key={unit.id}
                 type="button"
-                onClick={() => toggle(unit.id)}
-                className={cn(
-                  "relative flex flex-col gap-2 rounded-xl border-2 p-3 text-left",
-                  "transition-all duration-150 hover:shadow-sm active:scale-[0.97]",
-                  isSelected
-                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                    : "hover:border-slate-300 dark:hover:border-slate-600",
-                )}
-                style={{
-                  borderColor: isSelected ? undefined : "var(--border)",
-                  backgroundColor: isSelected ? undefined : "var(--bg-card)",
-                }}
+                onClick={() => toggleGoal(goalId)}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                style={{ backgroundColor: "var(--bg-card)" }}
               >
-                {isSelected && (
-                  <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600">
-                    <Check className="h-3 w-3 text-white" />
-                  </span>
-                )}
+                <span
+                  className="flex-1 text-sm font-semibold"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {goalName}
+                </span>
 
+                {/* X/Y badge */}
                 <span
                   className={cn(
-                    "pr-4 text-xs font-medium leading-snug",
-                    isSelected ? "text-primary-700 dark:text-primary-300" : "",
+                    "rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                    selectedCount > 0
+                      ? "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
+                      : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
                   )}
-                  style={{ color: isSelected ? undefined : "var(--text-primary)" }}
                 >
-                  {unit.title}
+                  {selectedCount}/{units.length} đã chọn
                 </span>
 
-                <span
-                  className="flex items-center gap-1 text-xs"
+                {/* Chevron */}
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 shrink-0 transition-transform duration-200",
+                    isOpen ? "rotate-180" : ""
+                  )}
                   style={{ color: "var(--text-muted)" }}
-                >
-                  <Clock className="h-3 w-3" />
-                  {unit.estimated_hours_beginner != null
-                    ? `${Math.round(unit.estimated_hours_beginner * 60)} phút`
-                    : "—"}
-                </span>
+                />
               </button>
-            );
-          })}
-        </div>
-      )}
 
-      {/* Navigation — no skip button; user can proceed with 0 selected */}
+              {/* Accordion body */}
+              {isOpen && (
+                <div
+                  className="border-t p-4"
+                  style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-page)" }}
+                >
+                  {units.length === 0 ? (
+                    <p className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
+                      Không có units nào cho goal này.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {units.map((unit) => {
+                        const isSelected = selectedSet.has(unit.id);
+
+                        return (
+                          <button
+                            key={unit.id}
+                            type="button"
+                            onClick={() => toggle(unit.id)}
+                            className={cn(
+                              "relative flex flex-col gap-2 rounded-xl border-2 p-3 text-left",
+                              "transition-all duration-150 hover:shadow-sm active:scale-[0.97]",
+                              isSelected
+                                ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                                : "hover:border-slate-300 dark:hover:border-slate-600",
+                            )}
+                            style={{
+                              borderColor: isSelected ? undefined : "var(--border)",
+                              backgroundColor: isSelected ? undefined : "var(--bg-card)",
+                            }}
+                          >
+                            {isSelected && (
+                              <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600">
+                                <Check className="h-3 w-3 text-white" />
+                              </span>
+                            )}
+
+                            <span
+                              className={cn(
+                                "pr-4 text-xs font-medium leading-snug",
+                                isSelected ? "text-primary-700 dark:text-primary-300" : "",
+                              )}
+                              style={{ color: isSelected ? undefined : "var(--text-primary)" }}
+                            >
+                              {unit.title}
+                            </span>
+
+                            <span
+                              className="flex items-center gap-1 text-xs"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              <Clock className="h-3 w-3" />
+                              {unit.estimated_hours_beginner != null
+                                ? `${Math.round(unit.estimated_hours_beginner * 60)} phút`
+                                : "—"}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Navigation */}
       <div className="flex items-center gap-3 pt-2">
         <button
           type="button"

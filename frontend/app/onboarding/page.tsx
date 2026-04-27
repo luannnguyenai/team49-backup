@@ -4,7 +4,7 @@
 // Step 1: Goal selection · Step 2: Known topics (filtered) · Step 3: Schedule · Step 4: Learning method · Step 5: Placement assessment
 // On submit: PUT /api/users/me/onboarding → redirect to /assessment
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,8 +17,6 @@ import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
-import StepPlacementTest from "@/components/onboarding/StepPlacementTest";
-import ResultGate from "@/components/onboarding/ResultGate";
 
 import { bootstrapDataApi, canonicalSectionApi } from "@/lib/api";
 import {
@@ -32,7 +30,6 @@ import {
   writePendingCanonicalAssessment,
 } from "@/lib/canonical-assessment-session";
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
-import type { TopicDecision } from "@/lib/placement-assessment-api";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import type {
@@ -42,7 +39,7 @@ import type {
 } from "@/types";
 
 // ---------------------------------------------------------------------------
-// Step metadata — two flows share internal indices 0-6
+// Step metadata — two flows share internal indices 0-4
 // ---------------------------------------------------------------------------
 
 const STEPS = [
@@ -91,7 +88,7 @@ const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   1: 1,
   3: 2,
   4: 3,
-  // 2, 5, 6 are skipped for beginners
+  // 2 is skipped for beginners
 };
 
 // Steps that use the page-level nav buttons (index 3 = TimeSchedule)
@@ -113,8 +110,7 @@ function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
-  const { goalIds, knownUnitIds, experienceLevel, skipPlacementAssessment } =
-    useOnboardingStore();
+  const { goalIds, knownUnitIds, experienceLevel } = useOnboardingStore();
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
@@ -344,7 +340,6 @@ function OnboardingPageInner() {
 
   const isFirstStep = step === 0;
   const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
-  // Step 4 (Learning Method) is the last form step before placement/submit
   const isLastFormStep = step === 4;
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -521,24 +516,6 @@ function OnboardingPageInner() {
                     errors={errors}
                   />
                 )}
-
-                {/* Step 5 — Placement assessment (experienced flow only) */}
-                {step === 5 && placementSessionId && (
-                  <StepPlacementTest
-                    sessionId={placementSessionId}
-                    unitIds={knownUnitIds}
-                    onComplete={handlePlacementComplete}
-                    onSkip={handlePlacementSkip}
-                  />
-                )}
-
-                {/* Step 6 — Result gate */}
-                {step === 6 && (
-                  <ResultGate
-                    results={placementResults}
-                    onConfirm={handleResultGateConfirm}
-                  />
-                )}
               </div>
 
               {/* ── Navigation buttons (only for Steps 2 and 3) ── */}
@@ -577,21 +554,18 @@ function OnboardingPageInner() {
                   </Button>
                   <Button
                     type="button"
+                    disabled={isLoading}
                     onClick={async () => {
                       const fields = STEP_VALIDATION_FIELDS[step];
                       if (fields.length > 0) {
                         const valid = await trigger(fields);
                         if (!valid) return;
                       }
-                      if (skipPlacementAssessment) {
-                        handleSubmit(submitOnboarding)();
-                      } else {
-                        navigate(5);
-                      }
+                      handleSubmit(submitOnboarding)();
                     }}
                     rightIcon={<Sparkles className="h-4 w-4" />}
                   >
-                    Tiếp tục
+                    {isLoading ? "Đang xử lý..." : "Hoàn tất"}
                   </Button>
                 </div>
               )}
