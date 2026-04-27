@@ -153,6 +153,7 @@ api.interceptors.response.use(
 
 import type {
   AccessToken,
+  AssessmentAISummaryResponse,
   AnswerInput,
   AssessmentResultResponse,
   AssessmentStartResponse,
@@ -213,6 +214,11 @@ export const assessmentApi = {
   results: (sessionId: string) =>
     api
       .get<AssessmentResultResponse>(`/api/assessment/${sessionId}/results`)
+      .then((r) => r.data),
+
+  summary: (sessionId: string) =>
+    api
+      .get<AssessmentAISummaryResponse>(`/api/assessment/${sessionId}/summary`)
       .then((r) => r.data),
 
   updateTopicDecision: (sessionId: string, topicUnitId: string, userChoice: string) =>
