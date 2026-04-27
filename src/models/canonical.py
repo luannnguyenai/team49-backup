@@ -99,6 +99,8 @@ class CanonicalUnit(TimestampMixin, Base):
     __table_args__ = (
         Index("ix_units_course_lecture", "course_id", "lecture_id"),
         Index("ix_units_course_order", "course_id", "lecture_order", "ordering_index"),
+        Index("ix_units_active", "active"),
+        Index("ix_units_content_type", "content_type"),
     )
 
 
