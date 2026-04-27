@@ -46,6 +46,7 @@ import type { CourseSectionDetail } from "@/types";
 import {
   buildPriorCandidateTopics,
   buildPriorShortlistFallback,
+  selectSuggestedKnownUnitIds,
   type PlannerGoalId,
   type PriorCandidateTopic,
 } from "@/components/onboarding/priorCandidateBuilder";
@@ -222,6 +223,9 @@ function OnboardingPageInner() {
       const labelById = new Map(
         (response.topic_summaries ?? []).map((item) => [item.id, item.label ?? null]),
       );
+      const levelById = new Map(
+        (response.topic_summaries ?? []).map((item) => [item.id, item.level ?? null]),
+      );
       const apiTopics: PriorCandidateTopic[] = response.shortlisted_topic_ids.flatMap((id) => {
         const topic = topicById.get(id);
         if (!topic) return [];
@@ -229,16 +233,19 @@ function OnboardingPageInner() {
           {
             ...topic,
             aiDisplayLabel: labelById.get(id) ?? null,
+            suggestedLevel: levelById.get(id) ?? null,
             summary: summaryById.get(id) ?? null,
           },
         ];
       });
 
       setPriorTopics(apiTopics.length > 0 ? apiTopics : fallbackTopics);
+      useOnboardingStore.getState().setKnownUnitIds(selectSuggestedKnownUnitIds(apiTopics));
       setPriorAnalysisFallback(response.fallback || apiTopics.length === 0);
       setPriorAnalysisModel(`${response.provider}/${response.model_used}`);
     } catch {
       setPriorTopics(fallbackTopics);
+      useOnboardingStore.getState().setKnownUnitIds([]);
       setPriorAnalysisFallback(true);
       setPriorAnalysisModel(null);
     } finally {

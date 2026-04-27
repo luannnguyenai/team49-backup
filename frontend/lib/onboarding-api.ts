@@ -36,6 +36,7 @@ export interface PriorAnalysisResponse {
     id: string;
     summary: string;
     label?: string | null;
+    level?: "not_started" | "reviewed" | "confident" | null;
   }>;
   model_used: string;
   provider: string;

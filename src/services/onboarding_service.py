@@ -51,7 +51,7 @@ Given a learner's self-reported background and a list of candidate course topics
 choose only the common topics that should be confirmed with the learner before placement.
 
 Rules:
-- Return JSON only: {"topics": [{"id": "topic-id", "label": "short learner-friendly English label", "summary": "one concise English sentence"}]}.
+- Return JSON only: {"topics": [{"id": "topic-id", "label": "short learner-friendly English label", "summary": "one concise English sentence", "level": "confident|reviewed|not_started"}]}.
 - Select at most 8 topic IDs.
 - Do not return a stable/default shortlist.
 - Select only topics explicitly mentioned by the learner or strongly implied by concrete coding/tools.
@@ -61,6 +61,9 @@ Rules:
 - Label must rewrite unclear lecture titles into understandable topic names, e.g. "What Is Going On Inside My Model?" -> "Model interpretability".
 - Label and summary must be in English.
 - Summary must be one concise English sentence based on unit_titles, rewritten so learners understand the topic without raw lecture numbering.
+- Use level="confident" when the learner explicitly says they know the concrete topic/tool/model.
+- Use level="reviewed" when the learner implies exposure but not confidence.
+- Use level="not_started" only for ambiguous low-confidence topics that are still worth asking the learner to confirm.
 - Self-report is not mastery; this shortlist only decides what to ask next.
 """
 
@@ -179,6 +182,9 @@ def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> tuple[list[
             label = item.get("label")
             if isinstance(label, str) and label.strip():
                 summaries.setdefault(topic_id, {})["label"] = label.strip()
+            level = item.get("level")
+            if level in {"not_started", "reviewed", "confident"}:
+                summaries.setdefault(topic_id, {})["level"] = level
         return result[:_PRIOR_ANALYSIS_LIMIT], summaries
 
     ids = payload.get("shortlisted_topic_ids", [])
@@ -265,6 +271,7 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
                 id=topic_id,
                 summary=summary_data.get("summary", ""),
                 label=summary_data.get("label"),
+                level=summary_data.get("level"),  # type: ignore[arg-type]
             )
             for topic_id, summary_data in summary_map.items()
             if topic_id in shortlisted and summary_data.get("summary")
