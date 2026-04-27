@@ -7,6 +7,26 @@ import type { CourseSectionDetail } from "@/types";
 
 const sections = [
   {
+    id: "dl-intro",
+    course_id: "c-dl",
+    canonical_course_id: "cs230",
+    title: "Lecture 1: Introduction to Deep Learning",
+    description: null,
+    order_index: 1,
+    prerequisite_section_ids: null,
+    learning_units_count: 1,
+    learning_units: [
+      {
+        id: "intro-u",
+        title: "What is deep learning",
+        description: null,
+        order_index: 0,
+        estimated_hours_beginner: 1,
+        estimated_hours_intermediate: 0.5,
+      },
+    ],
+  },
+  {
     id: "dl-career",
     course_id: "c-dl",
     canonical_course_id: "cs230",
@@ -103,6 +123,7 @@ describe("prior candidate builder", () => {
     });
 
     expect(topics.confirmEligible.map((topic) => topic.displayLabel)).toContain("CNN architectures");
+    expect(topics.hidden.map((topic) => topic.rawTitle)).toContain("Lecture 1: Introduction to Deep Learning");
     expect(topics.hidden.map((topic) => topic.rawTitle)).toContain("Lecture 8: Career Advice in AI");
     expect(topics.hidden.map((topic) => topic.rawTitle)).toContain("Lecture 18: Human-Centered AI");
   });
