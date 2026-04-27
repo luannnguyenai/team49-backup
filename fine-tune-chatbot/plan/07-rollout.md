@@ -13,37 +13,24 @@
 - Watch `logs/qa_history.jsonl` and `qa_history` table
 - Acceptance: 20 manual questions, all return reasonable answers
 
-### Stage 1 — Shadow mode (Days 1–3)
+### Stage 1 — Shadow mode (Days 1–3) — OFFLINE REPLAY
 
 - Production: keep `TUTOR_PROVIDER_OVERRIDE=` (unset → Gemini still serves users)
 - Set `TUTOR_SHADOW_RATIO=0.1`
-- For 10% of tutor requests, **also** send to self-hosted in background;
-  don't return that response to the user; log both for comparison
-- Compare outputs offline with judge (re-use `scripts/eval/judge.py`
-  pairwise mode)
+- Request handler logs **eligibility** only (no inline shadow inference);
+  see `06-codebase-changes.md` § 3f offline replay design
+- Cron / systemd timer runs `scripts/eval/shadow_replay.py` hourly to
+  generate shadow answers from `logs/shadow_eligible.jsonl` and write
+  paired log to `eval/runs/shadow/<date>.jsonl`
+- Compare paired outputs with `scripts/eval/judge.py` pairwise mode
 
-Implementation note: shadow logic lives in a new helper that runs in a
-fire-and-forget task. Add to `llm_service.py`:
-
-```python
-import asyncio, random
-
-async def _shadow_self_hosted(inputs, primary_answer, lecture_id, question):
-    if random.random() >= settings.tutor_shadow_ratio:
-        return
-    try:
-        # invoke self-hosted in non-streaming mode, log only
-        from langchain.chat_models import init_chat_model
-        llm = init_chat_model(**build_chat_model_kwargs(
-            model="tutor-v1", temperature=0.2, model_provider="self_hosted"))
-        shadow = llm.invoke(inputs["messages"])
-        qa_logger.info(json.dumps({
-            "shadow": True, "lecture": lecture_id, "q": question,
-            "primary": primary_answer[:500], "shadow_a": str(shadow.content)[:500],
-        }))
-    except Exception as e:
-        qa_logger.warning(f"shadow failed: {e}")
-```
+Why offline (not inline):
+- Inline shadow can starve GPU under spike load and steal capacity from
+  real requests
+- Inline shadow on async path is hard to make truly fire-and-forget
+  without leaking tasks
+- Offline replay is decoupled — primary serving is unaffected by shadow
+  failures or backlog
 
 After 3 days: review judge report for shadow vs primary on 200+ pairs.
 If self-hosted win-rate ≥ 40%, advance to Stage 2.
@@ -136,18 +123,59 @@ deploy.
 
 ## Rollback plan
 
-**Tier 1 — config-only** (instant):
-- Set `TUTOR_PROVIDER_OVERRIDE=` (empty) and restart backend
-- All traffic returns to Gemini in <60s
+**Tier 1 — config-only** (instant, < 60s):
+- Set `TUTOR_PROVIDER_OVERRIDE=` (empty) and restart backend OR
+- Set `TUTOR_KILL_SWITCH=true` (no restart needed if hot-reload is on)
+- All traffic returns to fallback provider
 
-**Tier 2 — disable fallback** (5 min):
-- If fallback itself is buggy, set `TUTOR_PROVIDER_OVERRIDE=` and remove
-  `_run_with_fallback` wrapper via feature flag
+**Tier 2 — disable fallback wrapper** (5 min):
+- Concrete feature flag: `TUTOR_DISABLE_FALLBACK_WRAPPER=true` (NEW
+  setting in `Settings`, defaults `False`). When true,
+  `get_context_and_stream_langgraph` skips `_stream_with_fallback` and
+  goes directly through `_get_compiled_graph(settings.model_provider)`
+  with no fallback logic.
+- Use when fallback wrapper itself is buggy (e.g., causing double-billing,
+  log spam, or stream corruption)
+- Add this flag to `.env.example` and `docker-compose.yml` env block in
+  the same commit as `_stream_with_fallback`
 
 **Tier 3 — full revert** (30 min):
-- `git revert` the codebase changes commit
+- `git revert` the codebase changes commit (single squashed commit per P7)
 - Redeploy backend
 - Stop `tutor-llm` container
+
+## Stage promotion metrics — structured schema
+
+Stage gates rely on a structured metrics log, not text grep. Backend
+emits one JSON line per request to `logs/tutor_metrics.jsonl`:
+
+```json
+{
+  "ts": "2026-04-27T10:15:30Z",
+  "request_id": "uuid",
+  "lecture_id": "...",
+  "provider_selected": "self_hosted" | "google_genai",
+  "fallback_triggered": true | false,
+  "fallback_reason": null | "pre_flight_unreachable" | "capacity_guard" | "kill_switch" | "stream_error_pre_first_token",
+  "kill_switch_active": false,
+  "first_token_ms": 850,
+  "total_stream_ms": 4200,
+  "tokens_emitted": 312,
+  "had_image": false,
+  "tool_calls_emitted": 0,
+  "http_status": 200,
+  "error_class": null
+}
+```
+
+Stage promotion gates query this file (or its loki/prom export) with
+explicit filters, e.g.:
+- `5xx rate` = `count(http_status >= 500) / count(*) over window`
+- `Fallback rate` = `count(fallback_triggered=true) / count(*) over window`
+- `p95 first-token` = percentile of `first_token_ms` over window
+- `Capacity guard hit rate` = `count(fallback_reason="capacity_guard") / count(*)`
+
+This replaces ad-hoc text-log searches and makes the gates objective.
 
 ## Operational runbook
 

@@ -81,7 +81,7 @@ ship in dev first):
       - "--quantization"
       - "${TUTOR_QUANTIZATION:-awq_marlin}"   # set per P5 decision tree
       - "--max-model-len"
-      - "4096"   # match training ctx; raise to 8192 only if long-ctx eval passes
+      - "4096"   # MUST match training `max_seq_length`; only raise after long-ctx eval pass
       - "--max-num-seqs"
       - "4"
       - "--gpu-memory-utilization"
@@ -115,7 +115,7 @@ relevant entries (read `docker-compose.yml` first; only add new volume).
 | Flag | Reason |
 |---|---|
 | `--quantization awq_marlin` | Fast Int4 kernel on Blackwell |
-| `--max-model-len 8192` | Matches training ctx; 8K covers most lecture windows |
+| `--max-model-len 4096` | Matches training `max_seq_length` (locked at 4096 in `03-finetune.md`). 4K covers TOC + transcript window + Q + answer. Raise only after explicit long-ctx eval that proves attention quality holds. |
 | `--max-num-seqs 4` | KV cache fits ~4 concurrent on 16GB; tune via load test |
 | `--gpu-memory-utilization 0.85` | Leave 15% for desktop / driver |
 | `--enable-auto-tool-choice` | vLLM picks tool calls when model emits them |
@@ -219,10 +219,16 @@ cloudflared tunnel run tutor-llm
 sudo cloudflared service install
 ```
 
-### Lock down with Cloudflare Access (optional but recommended)
+### Lock down with Cloudflare Access (REQUIRED for any non-local-dev deployment)
 
-By default, the tunnel URL is reachable by anyone who knows it. To restrict
-it to your VPS only:
+⚠️ **Not optional outside of local dev.** Without Access, the tunnel URL
+is a public unauthenticated GPU endpoint. Anyone who finds it (subdomain
+guesses, leaked log lines, browser history, GitHub Issues) can run
+inference on your hardware indefinitely, exhausting VRAM, electricity,
+and home internet. There is no rate limit at the model layer by default.
+
+Required for any deployment beyond local dev (incl. team demo, internal
+testing, FAST 3-day MVP):
 
 1. Create a Service Token in Cloudflare Zero Trust → Access → Service Auth
 2. Create an Access Application for `tutor-llm.<your-domain>` requiring that
@@ -267,19 +273,39 @@ curl https://tutor-llm.<your-domain>/v1/models
 
 If the VPS gets `200` and the same model list, end-to-end path is verified.
 
-## Load test
+## Load test (baseline-first, then set thresholds)
 
-`fine-tune-chatbot/scripts/serving/load_test.py` — fire 8 concurrent streaming
-requests, measure:
+⚠️ **Do NOT freeze threshold targets before measuring baseline.** Targets
+below are starting hypotheses; actual targets depend on:
+- Home upload bandwidth (tunnel egress is your bottleneck for streaming)
+- Cloudflare PoP-to-VPS RTT (varies +30–80ms by geography)
+- 5060 Ti AWQ/bnb/BF16 throughput (differs per quantization tier)
+- Concurrency-vs-latency tradeoff at chosen `--max-num-seqs`
 
-| Metric | Target |
-|---|---|
-| p50 first-token latency | < 1s |
-| p95 first-token latency | < 3s |
-| p50 throughput | > 30 tok/s |
-| Concurrency without errors | ≥ 4 |
+Procedure:
+1. Run `scripts/serving/load_test.py` against the local vLLM port (8001)
+   for the LOCAL baseline; record p50/p95/throughput per concurrency level
+   1, 2, 4, 8.
+2. Re-run the same script targeting the Cloudflare Tunnel URL from the
+   VPS for the END-TO-END baseline; the delta is the tunnel overhead.
+3. Commit both result tables to `eval/load_test_baseline.md`.
+4. Set production thresholds = local baseline × 1.5 (or end-to-end
+   baseline × 1.2, whichever is larger), recorded in
+   `eval/load_test_thresholds.md`.
 
-If concurrency >4 fails: lower `--max-num-seqs` or `--max-model-len`.
+Starting hypothesis (revise with actual data):
+
+| Metric | Hypothesis | Notes |
+|---|---|---|
+| p50 first-token (local) | < 1s | Achievable on 5060 Ti BF16 at concurrency 2 |
+| p50 first-token (via tunnel) | < 1.5s | +500ms overhead realistic in worst PoP |
+| p95 first-token (via tunnel) | < 4s | Tunnel jitter + concurrency contention |
+| p50 throughput | > 30 tok/s | At concurrency 2; lower at 4 |
+| Concurrency without errors | ≥ 2 (BF16) / ≥ 4 (AWQ) | Tier-dependent |
+
+If concurrency at chosen tier fails: lower `--max-num-seqs` or
+`--max-model-len`, or step down to lower compression tier (re-run §
+"Quantization feasibility ladder" in `04-eval-quantize.md`).
 
 ## Production hardening (post v1)
 
