@@ -48,22 +48,20 @@ _PRIOR_ANALYSIS_LIMIT = 8
 _PRIOR_ANALYSIS_SYSTEM = """\
 You are an onboarding planner for an AI learning platform.
 Given a learner's self-reported background and a list of candidate course topics,
-choose only the common topics that should be confirmed with the learner before placement.
+choose which topics are clearly related to the learner's background before placement.
 
 Rules:
-- Return JSON only: {"topics": [{"id": "topic-id", "label": "short learner-friendly English label", "summary": "one concise English sentence", "level": "confident|reviewed|not_started"}]}.
+- Return JSON only: {"topics": [{"id": "topic-id", "level": "confident|reviewed"}]}.
 - Select at most 8 topic IDs.
 - Do not return a stable/default shortlist.
 - Select only topics explicitly mentioned by the learner or strongly implied by concrete coding/tools.
 - Generic AI/CV/NLP/deep learning/machine learning/Python-only statements are not enough evidence; return {"topics": []} unless concrete concepts are mentioned.
 - Keep common topics such as CNNs, transformers, agents, Python, PyTorch, HuggingFace only when relevant to the learner's text.
 - Do not select niche/admin topics unless clearly requested.
-- Label must rewrite unclear lecture titles into understandable topic names, e.g. "What Is Going On Inside My Model?" -> "Model interpretability".
-- Label and summary must be in English.
-- Summary must be one concise English sentence based on unit_titles, rewritten so learners understand the topic without raw lecture numbering.
+- Interpret learner text in any language, including Vietnamese, but never translate or summarize topics.
 - Use level="confident" when the learner explicitly says they know the concrete topic/tool/model.
 - Use level="reviewed" when the learner implies exposure but not confidence.
-- Use level="not_started" only for ambiguous low-confidence topics that are still worth asking the learner to confirm.
+- Omit ambiguous or low-confidence topics; the frontend will ask the learner about the remaining topics.
 - Self-report is not mastery; this shortlist only decides what to ask next.
 """
 
@@ -80,7 +78,7 @@ def _invoke_openai_responses(system_prompt: str, user_text: str) -> str:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_text},
             ],
-            "max_output_tokens": 1800,
+            "max_output_tokens": 700,
         },
         ensure_ascii=False,
     ).encode("utf-8")
@@ -246,7 +244,7 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
                 **build_chat_model_kwargs(
                     model=DEFAULT_MODEL,
                     temperature=0,
-                    max_tokens=1800,
+                    max_tokens=700,
                 )
             )
             response = llm.invoke(
@@ -274,7 +272,7 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
                 level=summary_data.get("level"),  # type: ignore[arg-type]
             )
             for topic_id, summary_data in summary_map.items()
-            if topic_id in shortlisted and summary_data.get("summary")
+            if topic_id in shortlisted
         ],
         model_used=DEFAULT_MODEL,
         provider=settings.model_provider,

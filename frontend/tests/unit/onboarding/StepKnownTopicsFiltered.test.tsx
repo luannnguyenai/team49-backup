@@ -82,7 +82,7 @@ describe("StepKnownTopicsFiltered", () => {
       />,
     );
 
-    expect(screen.getByText("CNN architectures")).toBeInTheDocument();
+    expect(screen.getByText("CNN architecture design")).toBeInTheDocument();
     expect(screen.queryByText("Transformers")).not.toBeInTheDocument();
     expect(screen.getByText("Shortlist được tạo bởi openai/gpt-5.4-mini.")).toBeInTheDocument();
   });
@@ -104,7 +104,7 @@ describe("StepKnownTopicsFiltered", () => {
     );
 
     expect(screen.getByText("Vision CNN fundamentals")).toBeInTheDocument();
-    expect(screen.queryByText("CNN architectures")).not.toBeInTheDocument();
+    expect(screen.queryByText("CNN architecture design")).not.toBeInTheDocument();
   });
 
   it("preselects representative units from AI-suggested confidence levels", () => {
@@ -145,7 +145,7 @@ describe("StepKnownTopicsFiltered", () => {
       />,
     );
 
-    expect(screen.queryByText("CNN architectures")).not.toBeInTheDocument();
+    expect(screen.queryByText("CNN architecture design")).not.toBeInTheDocument();
     expect(screen.getByText("Maybe CNN details")).toBeInTheDocument();
     expect(screen.getByText("Not mentioned topic")).toBeInTheDocument();
   });
@@ -181,10 +181,10 @@ describe("StepKnownTopicsFiltered", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Đã học qua CNN architectures" }));
+    fireEvent.click(screen.getByRole("button", { name: "Đã học qua CNN architecture design" }));
     expect(useOnboardingStore.getState().knownUnitIds).toContain("u1");
 
-    fireEvent.click(screen.getByRole("button", { name: "Chưa học CNN architectures" }));
+    fireEvent.click(screen.getByRole("button", { name: "Chưa học CNN architecture design" }));
     expect(useOnboardingStore.getState().knownUnitIds).not.toContain("u1");
   });
 
@@ -213,7 +213,7 @@ describe("StepKnownTopicsFiltered", () => {
     );
 
     expect(screen.queryByText("Conv Basics")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Xem nhanh CNN architectures" }));
+    fireEvent.click(screen.getByRole("button", { name: "Xem nhanh CNN architecture design" }));
     expect(
       screen.getByText("Tóm tắt CNN, kiến trúc mạng tích chập và các bài toán thị giác phổ biến."),
     ).toBeInTheDocument();
@@ -232,7 +232,7 @@ describe("StepKnownTopicsFiltered", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Xem nhanh CNN architectures" }));
+    fireEvent.click(screen.getByRole("button", { name: "Xem nhanh CNN architecture design" }));
     expect(screen.getByText("- Conv Basics")).toBeInTheDocument();
   });
 
