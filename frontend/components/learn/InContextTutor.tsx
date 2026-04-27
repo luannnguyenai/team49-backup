@@ -16,6 +16,7 @@ interface ChatMessage {
   role: "user" | "ai" | "error";
   content: string;
   rating?: number | null;
+  isPending?: boolean;
 }
 
 interface InContextTutorProps {
@@ -73,7 +74,11 @@ export default function InContextTutor({
     const img = captureFrame();
 
     const userMsg: ChatMessage = { role: "user", content: q };
-    const aiPlaceholder: ChatMessage = { role: "ai", content: "" };
+    const aiPlaceholder: ChatMessage = {
+      role: "ai",
+      content: "Dang tra loi...",
+      isPending: true,
+    };
 
     setMessages((prev) => [...prev, userMsg, aiPlaceholder]);
     const aiIdx = messages.length + 1;
@@ -133,7 +138,7 @@ export default function InContextTutor({
             if (data.e) {
               setMessages((prev) =>
                 prev.map((m, i) =>
-                  i === aiIdx ? { ...m, role: "error", content: data.e } : m,
+                  i === aiIdx ? { ...m, role: "error", content: data.e, isPending: false } : m,
                 ),
               );
               hasError = true;
@@ -143,7 +148,7 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, role: "error", content: data.message }
+                    ? { ...m, role: "error", content: data.message, isPending: false }
                     : m,
                 ),
               );
@@ -154,7 +159,7 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, role: "error", content: String(data.detail) }
+                    ? { ...m, role: "error", content: String(data.detail), isPending: false }
                     : m,
                 ),
               );
@@ -165,7 +170,7 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, content: fullText || data.status }
+                    ? { ...m, content: fullText || data.status, isPending: !fullText }
                     : m,
                 ),
               );
@@ -174,7 +179,7 @@ export default function InContextTutor({
               fullText += data.a;
               setMessages((prev) =>
                 prev.map((m, i) =>
-                  i === aiIdx ? { ...m, content: fullText } : m,
+                  i === aiIdx ? { ...m, content: fullText, isPending: false } : m,
                 ),
               );
             }
@@ -190,14 +195,14 @@ export default function InContextTutor({
               if (data.e) {
                 setMessages((prev) =>
                   prev.map((m, i) =>
-                    i === aiIdx ? { ...m, role: "error", content: data.e } : m,
+                    i === aiIdx ? { ...m, role: "error", content: data.e, isPending: false } : m,
                   ),
                 );
               } else if (data.blocked && data.message) {
                 setMessages((prev) =>
                   prev.map((m, i) =>
                     i === aiIdx
-                      ? { ...m, role: "error", content: data.message }
+                      ? { ...m, role: "error", content: data.message, isPending: false }
                       : m,
                   ),
                 );
@@ -205,7 +210,7 @@ export default function InContextTutor({
                 setMessages((prev) =>
                   prev.map((m, i) =>
                     i === aiIdx
-                      ? { ...m, role: "error", content: String(data.detail) }
+                      ? { ...m, role: "error", content: String(data.detail), isPending: false }
                       : m,
                   ),
                 );
@@ -214,7 +219,7 @@ export default function InContextTutor({
                   setMessages((prev) =>
                     prev.map((m, i) =>
                       i === aiIdx
-                        ? { ...m, content: fullText || data.status }
+                        ? { ...m, content: fullText || data.status, isPending: !fullText }
                         : m,
                     ),
                   );
@@ -223,7 +228,7 @@ export default function InContextTutor({
                   fullText += data.a;
                   setMessages((prev) =>
                     prev.map((m, i) =>
-                      i === aiIdx ? { ...m, content: fullText } : m,
+                      i === aiIdx ? { ...m, content: fullText, isPending: false } : m,
                     ),
                   );
                 }
@@ -244,7 +249,7 @@ export default function InContextTutor({
       const msg = err instanceof Error ? err.message : "Connection error";
       setMessages((prev) =>
         prev.map((m, i) =>
-          i === aiIdx ? { ...m, role: "error", content: msg } : m,
+          i === aiIdx ? { ...m, role: "error", content: msg, isPending: false } : m,
         ),
       );
     } finally {
@@ -342,15 +347,22 @@ export default function InContextTutor({
               }
             >
               {msg.role === "ai" ? (
-                <div className="prose prose-sm prose-slate max-w-none">
-                  <ReactMarkdown>{msg.content || "..."}</ReactMarkdown>
-                </div>
+                msg.isPending ? (
+                  <div className="flex items-center gap-2 text-slate-500">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>{msg.content}</span>
+                  </div>
+                ) : (
+                  <div className="prose prose-sm prose-slate max-w-none">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                )
               ) : (
                 msg.content
               )}
 
               {/* Rating buttons for AI messages */}
-              {msg.role === "ai" && msg.id && msg.content && (
+              {msg.role === "ai" && msg.id && msg.content && !msg.isPending && (
                 <div className="mt-2 flex items-center gap-2 border-t pt-2 border-slate-200/50">
                   <button
                     onClick={() => rateAnswer(idx, msg.id!, 1)}

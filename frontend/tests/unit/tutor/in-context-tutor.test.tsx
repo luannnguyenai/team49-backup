@@ -68,10 +68,41 @@ describe("InContextTutor", () => {
     });
     fireEvent.click(screen.getAllByRole("button")[1]);
 
+    expect(screen.getByText("Dang tra loi...")).toBeInTheDocument();
+
     await waitFor(() => {
       expect(screen.getByText("Lecture not found")).toBeInTheDocument();
     });
     expect(screen.queryByText("...")).not.toBeInTheDocument();
+  });
+
+  it("shows a clear loading bubble before the first streamed answer tokens arrive", async () => {
+    fetchMock.mockResolvedValue(
+      buildChunkedNdjsonResponse(200, [
+        '{"a":"First streamed answer."}\n{"qa_id":9}\n',
+      ]),
+    );
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Start streaming please" },
+    });
+    fireEvent.click(screen.getAllByRole("button")[1]);
+
+    expect(screen.getByText("Dang tra loi...")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("First streamed answer.")).toBeInTheDocument();
+    });
   });
 
   it("parses NDJSON responses even when JSON objects are split across network chunks", async () => {

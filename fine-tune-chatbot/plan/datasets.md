@@ -242,15 +242,20 @@ Total target: ~16k–18k training samples (was 10–12k pre-KG).
 
 Total target: ~10k samples (drop organic + reduce KG to top-importance).
 
-| Source | Count | Pct |
-|---|---|---|
-| **KG-derived synth (E.1 + E.3 only, importance ≥ high)** | **3000** | **30%** |
-| **Domain MCQ → tutor Q&A (Strategy A, top 3 variants)** | **3500** | **35%** |
-| **VN MCQ translations (Strategy D)** | **1500** | **15%** |
-| `hermes-function-calling-v1` (singleturn) | 1000 | 10% |
-| `Vietnamese-nvidia-OpenMathInstruct-1-50k-gg-translated` | 500 | 5% |
-| `ultrachat_200k` | 300 | 3% |
-| Synthetic refusals | 200 | 2% |
+| Source | Count | Pct | `has_tool_call` |
+|---|---|---|---|
+| **KG-derived synth (E.1 + E.3 only, importance ≥ high)** | **2500** | **25%** | false |
+| **Domain MCQ → tutor Q&A (Strategy A, top 3 variants)** | **3000** | **30%** | false |
+| **VN MCQ translations (Strategy D)** | **1500** | **15%** | false |
+| `hermes-function-calling-v1` (singleturn) | 1500 | 15% | **true** |
+| **Strategy F — synthetic tool-call traces (NEW, see 02b-domain-data.md)** | **800** | **8%** | **true** |
+| `xlam-function-calling-60k` (filtered single-tool) | 200 | 2% | **true** |
+| `Vietnamese-nvidia-OpenMathInstruct-1-50k-gg-translated` | 200 | 2% | false (code_reasoning only) |
+| `ultrachat_200k` | 200 | 2% | false |
+| Synthetic refusals | 100 | 1% | false |
+
+**`has_tool_call=true` total**: 1500 + 800 + 200 = 2500 / 10000 = **25%** ✅
+(meets target; previously 10% claimed but mathematically failed)
 
 **Stratified mix** ensures:
 - Tool-call samples ≥ 25% (combined organic + hermes + xlam + math-with-code)
@@ -258,17 +263,78 @@ Total target: ~10k samples (drop organic + reduce KG to top-importance).
 - Vision ≥ 3% (just enough to prevent VL projector drift)
 - Refusal ≥ 4%
 
+## License allowlist gate (script-enforced, NOT manual checklist)
+
+Manual license audit fails at scale. Replace with `license_allowlist.json`
++ build-time gate:
+
+`fine-tune-chatbot/data/license_allowlist.json`:
+```json
+{
+  "deployment_scope": "research",
+  "scopes": {
+    "research": ["MIT", "Apache-2.0", "BSD-3-Clause", "ODC-BY-1.0",
+                 "CC-BY-4.0", "CC-BY-3.0", "CC-BY-NC-4.0", "CC-BY-NC-3.0",
+                 "NVIDIA Open Model License"],
+    "internal": ["MIT", "Apache-2.0", "BSD-3-Clause", "ODC-BY-1.0",
+                 "CC-BY-4.0", "CC-BY-3.0", "NVIDIA Open Model License"],
+    "commercial": ["MIT", "Apache-2.0", "BSD-3-Clause",
+                   "NVIDIA Open Model License (commercial OK)"]
+  }
+}
+```
+
+Each dataset entry in `datasets/registry.json` carries:
+```json
+{
+  "name": "TIGER-Lab/MAmmoTH-V2-Math-Coding-Subset",
+  "license": "MIT",
+  "license_verified_at": "2026-04-27",
+  "license_verified_via": "https://huggingface.co/datasets/TIGER-Lab/MAmmoTH-V2-Math-Coding-Subset",
+  "verified_exists": true
+}
+```
+
+Build script `scripts/sft/0_validate_licenses.py`:
+1. Read `DEPLOYMENT_SCOPE` env var (`research|internal|commercial`)
+2. For every dataset planned in the mix, look up license
+3. **Fail build** if any license not in allowlist for current scope
+4. Print summary table (dataset, license, allowed?)
+
+This runs BEFORE any data download/processing. CI in pipeline rejects PR
+that adds a non-allowlisted dataset.
+
+## Dataset existence + license runtime verification
+
+Notes in `## Verification snapshot` are not enough. Add a script that
+re-verifies at install time:
+
+`scripts/sft/0_verify_datasets_exist.py`:
+1. For each dataset in the registry, attempt `datasets.load_dataset(repo,
+   subset, split=..., streaming=True)` and pull 1 example
+2. Confirm dataset still exists, license metadata still matches registry
+3. If repo moved/renamed/license changed: fail with actionable message,
+   require registry update before proceeding
+
 ## Dataset selection checklist (before training)
 
-- [ ] License audit: all datasets allow commercial use OR project is research-only
+- [ ] **License gate script `0_validate_licenses.py` passes** for current
+      `DEPLOYMENT_SCOPE`
+- [ ] **Existence verify script `0_verify_datasets_exist.py` passes**
 - [ ] PII check: spot-check 20 random samples per dataset for names/IDs/addresses
 - [ ] Language audit: confirm VN ratio ≥ 60% in final mix
 - [ ] Format consistency: all samples converted to Qwen2.5 ChatML
-- [ ] Tool-call format match: Hermes XML inside `<tools>` and `<tool_call>` tags
+- [ ] Tool-call format match: matches the format committed in P0.5
+      `smoke_results.json` (Hermes XML, Qwen native, OR structured field —
+      one of three, not all)
+- [ ] **`has_tool_call=true` ratio ≥ 25%** (NOT `code_reasoning=true`; see
+      `02b-domain-data.md` § "Tool-call vs code-reasoning metric")
 - [ ] Tokenizer length stats: p95 < 4096 (matches `max_seq_length`)
 - [ ] No data leakage: held-out test set has zero overlap with training mix
-      (run MinHash dedup across train ∪ test)
-- [ ] Manifest: each sample tagged with `source` field for ablation analysis
+      (group-key split + cross-split MinHash 0.85 reports zero matches)
+- [ ] Manifest: each sample tagged with `_meta.source`, `_meta.has_tool_call`,
+      `_meta.code_reasoning`, `_meta.grounding_level`,
+      `_meta.external_api_used` for ablation analysis
 
 ## Download script
 
