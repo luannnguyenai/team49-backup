@@ -1,31 +1,32 @@
 "use client";
-// components/onboarding/StepKnownTopicsFiltered.tsx
-// Step 3 (experienced flow) — Known topics grouped by goal in accordions.
+// Step 3 — experienced users rate DB-backed topic clusters instead of raw units.
 
-import { useEffect, useState } from "react";
-import { Check, ChevronDown, Clock } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Check, Eye, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canonicalSectionApi } from "@/lib/api";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import type { CourseSectionDetail, LearningUnitSelectionItem } from "@/types";
-
-// ---------------------------------------------------------------------------
-// Goal → canonical course ID mapping (must match backend GOAL_COURSE_MAP)
-// ---------------------------------------------------------------------------
 
 const GOAL_COURSE_MAP: Record<string, string[] | undefined> = {
   computer_vision: ["cs230", "cs231n"],
   nlp: ["cs230", "cs224n"],
 };
 
-const GOAL_DISPLAY_NAMES: Record<string, string> = {
-  computer_vision: "Computer Vision",
-  nlp: "Natural Language Processing",
+const COURSE_LABELS: Record<string, string> = {
+  cs230: "Deep Learning foundation",
+  cs231n: "Computer Vision",
+  cs224n: "Natural Language Processing",
 };
 
-// ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
+type ClusterLevel = "not_started" | "reviewed" | "confident";
+
+interface Cluster {
+  id: string;
+  courseId: string;
+  title: string;
+  units: LearningUnitSelectionItem[];
+}
 
 interface Props {
   onNext: () => void;
@@ -33,11 +34,26 @@ interface Props {
   onSkipAll: () => void;
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+function representativeUnitIds(units: LearningUnitSelectionItem[], level: ClusterLevel): string[] {
+  if (level === "not_started") return [];
+  const limit = level === "confident" ? 4 : 2;
+  return units.slice(0, limit).map((unit) => unit.id);
+}
 
-export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
+function clusterLevelFromSelection(cluster: Cluster, selectedSet: Set<string>): ClusterLevel {
+  const selectedCount = cluster.units.filter((unit) => selectedSet.has(unit.id)).length;
+  if (selectedCount >= Math.min(cluster.units.length, 4)) return "confident";
+  if (selectedCount > 0) return "reviewed";
+  return "not_started";
+}
+
+function levelLabel(level: ClusterLevel): string {
+  if (level === "confident") return "Tự tin";
+  if (level === "reviewed") return "Đã học qua";
+  return "Chưa học";
+}
+
+export default function StepKnownTopicsFiltered({ onNext, onBack, onSkipAll }: Props) {
   const goalIds = useOnboardingStore((s) => s.goalIds);
   const knownUnitIds = useOnboardingStore((s) => s.knownUnitIds);
   const setKnownUnitIds = useOnboardingStore((s) => s.setKnownUnitIds);
@@ -45,13 +61,8 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
   const [allSections, setAllSections] = useState<CourseSectionDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedClusterId, setExpandedClusterId] = useState<string | null>(null);
 
-  // Default: open if exactly 1 goal selected, closed if ≥2
-  const [openGoals, setOpenGoals] = useState<Set<string>>(
-    () => new Set(goalIds.length === 1 ? [goalIds[0]] : [])
-  );
-
-  // ── Load sections on mount ─────────────────────────────────────────────
   useEffect(() => {
     async function loadData() {
       try {
@@ -69,190 +80,145 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
     loadData();
   }, []);
 
-  // ── Build per-goal unit lists ──────────────────────────────────────────
-  const selectedSet = new Set(knownUnitIds);
+  const clusters = useMemo<Cluster[]>(() => {
+    const selectedCourseIds = new Set(
+      goalIds.flatMap((goalId) => GOAL_COURSE_MAP[goalId] ?? []),
+    );
 
-  // For each goalId, collect units from sections belonging to that goal's course
-  const goalUnits: Array<{ goalId: string; units: LearningUnitSelectionItem[] }> =
-    goalIds.map((goalId) => {
-      const courseIds = GOAL_COURSE_MAP[goalId];
-      const sections = courseIds
-        ? allSections.filter((s) => courseIds.includes(s.canonical_course_id))
-        : [];
-      const units = sections.flatMap((s) => s.learning_units);
-      return { goalId, units };
-    });
+    return allSections
+      .filter((section) => {
+        const courseId = section.canonical_course_id?.toLowerCase();
+        return courseId ? selectedCourseIds.has(courseId) : false;
+      })
+      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
+      .map((section) => ({
+        id: section.id,
+        courseId: section.canonical_course_id?.toLowerCase() ?? "unknown",
+        title: section.title,
+        units: [...section.learning_units].sort(
+          (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0),
+        ),
+      }))
+      .filter((cluster) => cluster.units.length > 0);
+  }, [allSections, goalIds]);
 
-  // ── Toggle ─────────────────────────────────────────────────────────────
-  function toggle(unitId: string) {
-    if (selectedSet.has(unitId)) {
-      setKnownUnitIds(knownUnitIds.filter((id) => id !== unitId));
-    } else {
-      setKnownUnitIds([...knownUnitIds, unitId]);
-    }
+  const selectedSet = useMemo(() => new Set(knownUnitIds), [knownUnitIds]);
+  const selectedProbeCount = knownUnitIds.length;
+
+  function setClusterLevel(cluster: Cluster, level: ClusterLevel) {
+    const clusterUnitIds = new Set(cluster.units.map((unit) => unit.id));
+    const next = knownUnitIds.filter((unitId) => !clusterUnitIds.has(unitId));
+    setKnownUnitIds([...next, ...representativeUnitIds(cluster.units, level)]);
   }
-
-  function toggleGoal(goalId: string) {
-    setOpenGoals((prev) => {
-      const next = new Set(prev);
-      if (next.has(goalId)) next.delete(goalId);
-      else next.add(goalId);
-      return next;
-    });
-  }
-
-  // ── Render ─────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
-      <div className="py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+      <div className="flex items-center justify-center gap-2 py-10 text-sm" style={{ color: "var(--text-muted)" }}>
+        <Loader2 className="h-4 w-4 animate-spin" />
         Đang tải...
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Warning banner */}
-      <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
-        Chỉ chọn topic bạn thật sự đã học rồi — bạn sẽ phải làm test ngắn để đánh giá năng lực.
+    <div className="space-y-5">
+      <div>
+        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+          Bạn đã học qua cụm nào?
+        </p>
+        <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          Chọn mức tự đánh giá cho từng cụm. Hệ thống chỉ dùng lựa chọn này để lấy một số câu hỏi placement phù hợp.
+        </p>
       </div>
-
-      {/* Description */}
-      <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Chọn những units bạn đã nắm — hệ thống sẽ đánh giá kiến thức của bạn với{" "}
-        <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
-          5 câu hỏi mỗi unit
-        </span>
-        .
-        {knownUnitIds.length > 0 && (
-          <span className="ml-2 font-semibold text-primary-600">
-            ({knownUnitIds.length} unit · {knownUnitIds.length * 5} câu hỏi)
-          </span>
-        )}
-      </p>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
-      {/* Accordion per goal */}
-      <div className="space-y-2">
-        {goalUnits.map(({ goalId, units }) => {
-          const isOpen = openGoals.has(goalId);
-          const selectedCount = units.filter((u) => selectedSet.has(u.id)).length;
-          const goalName = GOAL_DISPLAY_NAMES[goalId] ?? goalId;
+      {clusters.length === 0 ? (
+        <div className="rounded-xl border p-4 text-sm" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
+          Chưa có cụm nội dung cho lộ trình này.
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {clusters.map((cluster) => {
+            const currentLevel = clusterLevelFromSelection(cluster, selectedSet);
+            const isExpanded = expandedClusterId === cluster.id;
 
-          return (
-            <div
-              key={goalId}
-              className="overflow-hidden rounded-xl border-2 transition-all duration-150"
-              style={{ borderColor: "var(--border)" }}
-            >
-              {/* Accordion header */}
-              <button
-                type="button"
-                onClick={() => toggleGoal(goalId)}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                style={{ backgroundColor: "var(--bg-card)" }}
+            return (
+              <div
+                key={cluster.id}
+                className="rounded-xl border-2 p-4"
+                style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
               >
-                <span
-                  className="flex-1 text-sm font-semibold"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  {goalName}
-                </span>
-
-                {/* X/Y badge */}
-                <span
-                  className={cn(
-                    "rounded-full px-2.5 py-0.5 text-xs font-semibold",
-                    selectedCount > 0
-                      ? "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
-                      : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
-                  )}
-                >
-                  {selectedCount}/{units.length} đã chọn
-                </span>
-
-                {/* Chevron */}
-                <ChevronDown
-                  className={cn(
-                    "h-4 w-4 shrink-0 transition-transform duration-200",
-                    isOpen ? "rotate-180" : ""
-                  )}
-                  style={{ color: "var(--text-muted)" }}
-                />
-              </button>
-
-              {/* Accordion body */}
-              {isOpen && (
-                <div
-                  className="border-t p-4"
-                  style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-page)" }}
-                >
-                  {units.length === 0 ? (
-                    <p className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
-                      Không có units nào cho goal này.
+                <div className="flex items-start gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                      {cluster.title}
                     </p>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                      {units.map((unit) => {
-                        const isSelected = selectedSet.has(unit.id);
-
-                        return (
-                          <button
-                            key={unit.id}
-                            type="button"
-                            onClick={() => toggle(unit.id)}
-                            className={cn(
-                              "relative flex flex-col gap-2 rounded-xl border-2 p-3 text-left",
-                              "transition-all duration-150 hover:shadow-sm active:scale-[0.97]",
-                              isSelected
-                                ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                                : "hover:border-slate-300 dark:hover:border-slate-600",
-                            )}
-                            style={{
-                              borderColor: isSelected ? undefined : "var(--border)",
-                              backgroundColor: isSelected ? undefined : "var(--bg-card)",
-                            }}
-                          >
-                            {isSelected && (
-                              <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600">
-                                <Check className="h-3 w-3 text-white" />
-                              </span>
-                            )}
-
-                            <span
-                              className={cn(
-                                "pr-4 text-xs font-medium leading-snug",
-                                isSelected ? "text-primary-700 dark:text-primary-300" : "",
-                              )}
-                              style={{ color: isSelected ? undefined : "var(--text-primary)" }}
-                            >
-                              {unit.title}
-                            </span>
-
-                            <span
-                              className="flex items-center gap-1 text-xs"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              <Clock className="h-3 w-3" />
-                              {unit.estimated_hours_beginner != null
-                                ? `${Math.round(unit.estimated_hours_beginner * 60)} phút`
-                                : "—"}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                    <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                      {COURSE_LABELS[cluster.courseId] ?? cluster.courseId} · {cluster.units.length} unit
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedClusterId(isExpanded ? null : cluster.id)}
+                    className="rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                    style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
+                    aria-label={`Xem nhanh ${cluster.title}`}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </button>
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
 
-      {/* Navigation */}
+                {isExpanded && (
+                  <div
+                    className="mt-3 rounded-lg border p-3"
+                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-page)" }}
+                  >
+                    <p className="mb-2 text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+                      Nội dung đại diện
+                    </p>
+                    <ul className="space-y-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                      {cluster.units.slice(0, 5).map((unit) => (
+                        <li key={unit.id}>- {unit.title}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {(["not_started", "reviewed", "confident"] as const).map((level) => {
+                    const isSelected = currentLevel === level;
+                    return (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => setClusterLevel(cluster, level)}
+                        className={cn(
+                          "flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-xs font-semibold transition-all",
+                          isSelected
+                            ? "border-primary-600 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300"
+                            : "hover:border-slate-300",
+                        )}
+                        style={{ borderColor: isSelected ? undefined : "var(--border)" }}
+                      >
+                        {isSelected && <Check className="h-3 w-3" />}
+                        {levelLabel(level)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {selectedProbeCount > 0 && (
+        <p className="text-xs font-medium text-primary-600">
+          Đã chọn {selectedProbeCount} unit đại diện để placement kiểm chứng.
+        </p>
+      )}
+
       <div className="flex items-center gap-3 pt-2">
         <button
           type="button"
@@ -265,6 +231,18 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
           }}
         >
           Quay lại
+        </button>
+        <button
+          type="button"
+          onClick={onSkipAll}
+          className="rounded-xl border-2 px-6 py-3 text-sm font-semibold transition-all duration-150 hover:shadow-sm active:scale-[0.99]"
+          style={{
+            borderColor: "var(--border)",
+            color: "var(--text-primary)",
+            backgroundColor: "var(--bg-card)",
+          }}
+        >
+          Bỏ qua
         </button>
         <button
           type="button"
