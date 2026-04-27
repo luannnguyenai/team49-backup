@@ -13,6 +13,18 @@ const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/"];
 // Routes that require auth but NOT onboarding
 const ONBOARDING_PATH = "/onboarding";
 
+function applyRelativeRedirectTarget(url: URL, redirectTo: string | null): void {
+  if (!redirectTo || !redirectTo.startsWith("/")) {
+    url.pathname = "/dashboard";
+    url.search = "";
+    return;
+  }
+
+  const resolved = new URL(redirectTo, url.origin);
+  url.pathname = resolved.pathname;
+  url.search = resolved.search;
+}
+
 /**
  * Check if a pathname matches a public route.
  * - Exact matches for PUBLIC_PATHS
@@ -66,9 +78,7 @@ export function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     // If there's a redirect param, honor it instead of dashboard.
     const redirectTo = searchParams.get("next") || searchParams.get("from");
-    url.pathname = redirectTo || "/dashboard";
-    url.searchParams.delete("from");
-    url.searchParams.delete("next");
+    applyRelativeRedirectTarget(url, redirectTo);
     return NextResponse.redirect(url);
   }
 
