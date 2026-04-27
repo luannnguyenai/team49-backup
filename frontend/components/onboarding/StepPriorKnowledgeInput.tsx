@@ -31,6 +31,27 @@ const GOAL_PRIOR_HINTS: Record<PlannerGoalId, string[]> = {
 
 const CODING_HINTS = ["Python", "PyTorch", "HuggingFace", "training loop", "debug model"];
 
+const CODING_LEVELS = [
+  {
+    label: "Beginner",
+    value:
+      "Beginner: basic Python knowledge, limited ML coding experience, little or no PyTorch/HuggingFace practice.",
+    description: "Basic Python, little ML coding.",
+  },
+  {
+    label: "Intermediate",
+    value:
+      "Intermediate: comfortable with Python and basic PyTorch training/debugging, but not advanced production ML tooling.",
+    description: "Can train/debug basic PyTorch models.",
+  },
+  {
+    label: "Advanced",
+    value:
+      "Advanced: comfortable building, training, debugging, and adapting ML models with PyTorch/HuggingFace and related tooling.",
+    description: "Comfortable with model training and tooling.",
+  },
+] as const;
+
 export default function StepPriorKnowledgeInput({
   goalId,
   priorKnowledgeText,
@@ -80,29 +101,39 @@ export default function StepPriorKnowledgeInput({
       </div>
 
       <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)" }}>
-        <label
-          htmlFor="coding-experience"
-          className="text-sm font-semibold"
-          style={{ color: "var(--text-primary)" }}
-        >
+        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
           Kỹ năng coding ML
-        </label>
+        </p>
         <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
           Gợi ý: {CODING_HINTS.join(", ")}.
         </p>
-        <textarea
-          id="coding-experience"
-          aria-label="Kỹ năng coding ML"
-          value={codingExperienceText}
-          onChange={(event) => onCodingExperienceChange(event.target.value)}
-          className="mt-3 min-h-20 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-primary-500"
-          style={{
-            borderColor: "var(--border)",
-            backgroundColor: "var(--bg-card)",
-            color: "var(--text-primary)",
-          }}
-          placeholder="Python ổn, PyTorch mới code model cơ bản, chưa quen HuggingFace..."
-        />
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {CODING_LEVELS.map((level) => {
+            const isSelected = codingExperienceText === level.value;
+            return (
+              <button
+                key={level.label}
+                type="button"
+                aria-label={`${level.label} coding skill`}
+                onClick={() => onCodingExperienceChange(level.value)}
+                className={`rounded-xl border-2 p-3 text-left transition-all ${
+                  isSelected
+                    ? "border-primary-600 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300"
+                    : "hover:border-slate-300"
+                }`}
+                style={{
+                  borderColor: isSelected ? undefined : "var(--border)",
+                  backgroundColor: isSelected ? undefined : "var(--bg-card)",
+                }}
+              >
+                <span className="block text-sm font-semibold">{level.label}</span>
+                <span className="mt-1 block text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                  {level.description}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="flex items-center gap-3 pt-2">
@@ -132,4 +163,3 @@ export default function StepPriorKnowledgeInput({
     </div>
   );
 }
-

@@ -24,13 +24,13 @@ describe("StepPriorKnowledgeInput", () => {
     fireEvent.change(screen.getByLabelText("Kiến thức bạn đã học"), {
       target: { value: "Tôi đã học CNN và ResNet." },
     });
-    fireEvent.change(screen.getByLabelText("Kỹ năng coding ML"), {
-      target: { value: "Python và PyTorch cơ bản." },
-    });
+    fireEvent.click(screen.getByRole("button", { name: "Intermediate coding skill" }));
     fireEvent.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
     expect(onPriorKnowledgeChange).toHaveBeenCalledWith("Tôi đã học CNN và ResNet.");
-    expect(onCodingExperienceChange).toHaveBeenCalledWith("Python và PyTorch cơ bản.");
+    expect(onCodingExperienceChange).toHaveBeenCalledWith(
+      "Intermediate: comfortable with Python and basic PyTorch training/debugging, but not advanced production ML tooling.",
+    );
     expect(onNext).toHaveBeenCalledOnce();
   });
 
@@ -51,4 +51,3 @@ describe("StepPriorKnowledgeInput", () => {
     expect(screen.getByRole("button", { name: "AI thinking..." })).toBeDisabled();
   });
 });
-

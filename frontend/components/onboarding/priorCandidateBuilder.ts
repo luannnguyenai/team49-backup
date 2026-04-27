@@ -10,6 +10,7 @@ export interface PriorCandidateTopic {
   rawTitle: string;
   displayLabel: string;
   aiDisplayLabel?: string | null;
+  suggestedLevel?: PriorTopicLevel | null;
   visibility: PriorTopicVisibility;
   summary?: string | null;
   units: LearningUnitSelectionItem[];
@@ -187,4 +188,17 @@ export function selectRepresentativeUnitIds(
 
   const limit = level === "confident" ? 4 : 2;
   return topic.units.slice(0, limit).map((unit) => unit.id);
+}
+
+export function selectSuggestedKnownUnitIds(topics: PriorCandidateTopic[]): string[] {
+  const selected = new Set<string>();
+  for (const topic of topics) {
+    if (!topic.suggestedLevel || topic.suggestedLevel === "not_started") {
+      continue;
+    }
+    for (const unitId of selectRepresentativeUnitIds(topic, topic.suggestedLevel)) {
+      selected.add(unitId);
+    }
+  }
+  return [...selected];
 }

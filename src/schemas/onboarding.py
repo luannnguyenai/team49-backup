@@ -6,6 +6,7 @@ Pydantic v2 request/response models for the onboarding flow.
 
 from __future__ import annotations
 
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, field_validator
@@ -107,6 +108,7 @@ class PriorAnalysisTopicSummary(BaseModel):
     id: str
     summary: str
     label: str | None = None
+    level: Literal["not_started", "reviewed", "confident"] | None = None
 
 
 class PriorAnalysisResponse(BaseModel):

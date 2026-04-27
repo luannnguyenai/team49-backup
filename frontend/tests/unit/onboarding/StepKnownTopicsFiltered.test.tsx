@@ -5,6 +5,7 @@ import {
   buildPriorCandidateTopics,
   buildPriorShortlistFallback,
   displayLabelForSectionTitle,
+  selectSuggestedKnownUnitIds,
 } from "@/components/onboarding/priorCandidateBuilder";
 import { useOnboardingStore } from "@/stores/onboardingStore";
 import type { CourseSectionDetail } from "@/types";
@@ -104,6 +105,17 @@ describe("StepKnownTopicsFiltered", () => {
 
     expect(screen.getByText("Vision CNN fundamentals")).toBeInTheDocument();
     expect(screen.queryByText("CNN architectures")).not.toBeInTheDocument();
+  });
+
+  it("preselects representative units from AI-suggested confidence levels", () => {
+    const suggested = selectSuggestedKnownUnitIds([
+      {
+        ...cvTopics[0],
+        suggestedLevel: "confident",
+      },
+    ]);
+
+    expect(suggested).toContain("u1");
   });
 
   it("rewrites unclear lecture titles into learner-friendly labels", () => {
