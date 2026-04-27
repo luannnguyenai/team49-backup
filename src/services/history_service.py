@@ -89,8 +89,16 @@ async def get_history(
     )
 
     items: list[HistoryItem] = []
-    for sess, learning_unit_title, section_title in page_rows:
-        items.append(_session_to_item(sess, learning_unit_title, section_title))
+    for sess, learning_unit_title, section_title, course_id, course_slug in page_rows:
+        items.append(
+            _session_to_item(
+                sess,
+                learning_unit_title,
+                section_title,
+                course_id=course_id,
+                course_slug=course_slug,
+            )
+        )
 
     # ── Summary stats from ALL matching sessions ──────────────────────────
     summary = await _compute_summary(db, user_id, filters)
@@ -108,6 +116,9 @@ def _session_to_item(
     sess: Session,
     learning_unit_title: str | None,
     section_title: str | None,
+    *,
+    course_id: uuid.UUID | None,
+    course_slug: str | None,
 ) -> HistoryItem:
     source, checkpoint = _session_source_checkpoint(sess)
     duration: int | None = None
@@ -128,6 +139,8 @@ def _session_to_item(
         completed_at=sess.completed_at,
         duration_seconds=duration,
         subject=subject,
+        course_id=course_id,
+        course_slug=course_slug,
         learning_unit_id=sess.canonical_unit_id or sess.topic_id,
         section_id=sess.canonical_section_id or sess.module_id,
         score_percent=sess.score_percent,

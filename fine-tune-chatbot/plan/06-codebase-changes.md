@@ -6,6 +6,34 @@ supports OpenAI-compatible endpoints — we extend it with a `self_hosted`
 provider, add provider-specific compiled graphs, and inject a pre-stream
 fallback (no mid-stream graph rebuild).
 
+## Preflight — GitNexus impact analysis (mandatory per project CLAUDE.md)
+
+Before editing any symbol below, run:
+
+```
+gitnexus_impact({target: "init_chat_model", direction: "upstream"})
+gitnexus_impact({target: "_get_llm_with_tools", direction: "upstream"})
+gitnexus_impact({target: "build_chat_model_kwargs", direction: "upstream"})
+gitnexus_impact({target: "compiled_graph", direction: "upstream"})
+gitnexus_impact({target: "enforce_llm_rate_limit", direction: "upstream"})
+gitnexus_impact({target: "get_context_and_stream_langgraph", direction: "upstream"})
+```
+
+For each target, report blast radius (direct callers, affected processes,
+risk level) before applying the diff. **Block if any target returns
+HIGH/CRITICAL** until reviewer signs off.
+
+After all changes are applied:
+
+```
+gitnexus_detect_changes()
+```
+
+Verify only the symbols listed in this plan show up in the affected scope.
+Any unexpected symbol = bug — investigate before committing.
+
+If the index is stale, run `npx gitnexus analyze` first.
+
 **Files touched (6 source + 2 config + 2 test = 10 files)**:
 
 Source:
@@ -300,6 +328,26 @@ def _select_provider(lecture_id: str | None = None) -> str:
 
 ### 3c. Pre-stream fallback wrapper (no mid-stream switch)
 
+⚠️ **Iterator semantics MUST be verified against the actual LangGraph
+version in use.** The pseudo-code below uses `next(stream)` assuming a
+sync iterator with eager probe. LangGraph 0.2+ may return:
+- a sync iterator over `(chunk, metadata)` tuples (matches code below), OR
+- an async iterator that requires `anext()`, OR
+- a streaming iterator that defers the first network call until `__next__`
+  (in which case `next()` does NOT probe the model — first failure
+  surfaces only on actual generation)
+
+Before writing the production wrapper:
+1. Add a unit test `tests/services/test_stream_iterator_semantics.py` that
+   inspects the type of `compiled_graph.stream(...)` and asserts whether
+   `next()` triggers model invocation
+2. Choose between sync/async path based on test result
+3. If the iterator is "deferred" (next() does not probe): switch to
+   explicit pre-flight HTTP `GET /v1/models` ping on `self_hosted_base_url`
+   instead of relying on `next()` to detect the failure
+
+Reference implementation (sync, eager-probe path):
+
 ```python
 def _stream_with_fallback(inputs, lecture_id: str | None):
     """Stream from primary; on pre-stream failure, retry with fallback.
@@ -307,6 +355,12 @@ def _stream_with_fallback(inputs, lecture_id: str | None):
     """
     primary = _select_provider(lecture_id)
     fallback = settings.tutor_fallback_provider
+
+    # Pre-flight ping for self_hosted (cheap; ~50ms via tunnel)
+    if primary == "self_hosted":
+        if not _self_hosted_alive(timeout_s=2.0):
+            qa_logger.warning("Self-hosted unreachable; routing to fallback")
+            primary = fallback
 
     # Probe-and-stream pattern: compile graph; first iter() may raise before yielding
     try:
@@ -336,7 +390,34 @@ def _stream_with_fallback(inputs, lecture_id: str | None):
         # Emit a structured error chunk that the caller can render as "[stream error]"
         from langchain_core.messages import AIMessage
         yield (AIMessage(content="\n\n[stream interrupted — please retry]"), None)
+
+
+def _self_hosted_alive(timeout_s: float = 2.0) -> bool:
+    """Cheap reachability check; cached for 5s to avoid hammering on bursts."""
+    import time, requests
+    cache = getattr(_self_hosted_alive, "_cache", (0.0, False))
+    if time.time() - cache[0] < 5.0:
+        return cache[1]
+    try:
+        r = requests.get(
+            f"{settings.self_hosted_base_url}/models",
+            timeout=timeout_s,
+            headers=_self_hosted_headers(),  # CF-Access if configured
+        )
+        ok = r.status_code == 200
+    except Exception:
+        ok = False
+    _self_hosted_alive._cache = (time.time(), ok)
+    return ok
 ```
+
+Required tests:
+- `test_pre_flight_alive_caches` — second call within 5s does not hit network
+- `test_pre_flight_failure_routes_to_fallback` — when alive returns False
+- `test_no_mid_stream_switch` — when first token succeeds, mid-stream
+  exception is logged, NOT silently retried on fallback
+- `test_fallback_path_runs_on_pre_stream_failure` — first call raises,
+  second graph compiled with fallback provider yields tokens
 
 ### 3d. Wire it into the streaming generator
 
@@ -362,52 +443,134 @@ inside the same chat message).
 **No changes** required to the `content_list` building logic at lines
 358–363.
 
-### 3f. Shadow-mode logging (used in P8 rollout)
+### 3f. Shadow-mode logging — OFFLINE REPLAY (revised)
 
-Add a fire-and-forget shadow runner:
+Inline shadow (calling `graph.stream()` from the request path) risks
+blocking the main response or starving the GPU even with `create_task`.
+**V1 uses offline replay instead**: the request handler logs only the
+input + primary answer; a separate batch worker replays sampled inputs
+through self-hosted out-of-band.
+
+Inline change in `get_context_and_stream_langgraph`: after
+`_save_qa_history`, also append a one-line shadow-eligible record to a
+dedicated rotating log when `tutor_shadow_ratio > 0` AND
+`tutor_provider_override != "self_hosted"`:
 
 ```python
-def _shadow_log(inputs, primary_answer: str, lecture_id: str, question: str):
-    """Run self-hosted in shadow mode for comparison; log only, do not emit to user."""
+def _log_shadow_eligible(inputs_meta, primary_answer: str, lecture_id: str, question: str):
+    """Append to shadow eligibility log. NO inference here."""
     if settings.tutor_shadow_ratio <= 0:
         return
     import random
     if random.random() >= settings.tutor_shadow_ratio:
         return
-    try:
-        graph = _get_compiled_graph("self_hosted")
-        msgs = list(graph.stream(inputs, stream_mode="values"))
-        shadow_text = msgs[-1]["messages"][-1].content if msgs else ""
-        jsonl_logger.info(json.dumps({
-            "shadow": True,
-            "lecture": lecture_id,
-            "q": question,
-            "primary_a": primary_answer[:1000],
-            "shadow_a": str(shadow_text)[:1000],
-        }, ensure_ascii=False))
-    except Exception as e:
-        qa_logger.warning(f"shadow run failed: {e}")
+    shadow_jsonl_logger.info(json.dumps({
+        "ts": time.time(),
+        "lecture": lecture_id,
+        "q": question[:2000],
+        "primary_provider": settings.model_provider,
+        "primary_a": primary_answer[:2000],
+        "inputs_meta_hash": _hash_inputs(inputs_meta),
+        # Note: we re-build full inputs offline from lecture_id + at_seconds + question
+    }, ensure_ascii=False))
 ```
 
-Call from the end of `get_context_and_stream_langgraph` (after `_save_qa_history`)
-when `settings.tutor_provider_override != "self_hosted"` (only shadow when
-self-hosted is NOT primary).
+The `shadow_jsonl_logger` writes to `logs/shadow_eligible.jsonl` with
+log rotation (50MB / 7 days).
 
-## Change 4 — Rate limiter
+**Offline replay worker** at `fine-tune-chatbot/scripts/eval/shadow_replay.py`:
+- Reads `logs/shadow_eligible.jsonl`
+- For each row, rebuilds `inputs` from `lecture_id + at_seconds + question`
+  via the existing context fetchers
+- Runs `_get_compiled_graph("self_hosted")` to generate shadow answer
+- Writes paired log to `eval/runs/shadow/<date>.jsonl`
+- Triggered hourly via cron / systemd timer; not in the request path
+
+This decouples observability from request latency entirely. If shadow
+worker fails or falls behind, primary serving is unaffected.
+
+## Change 4 — Rate limiter (bypass external quota + add local capacity guard)
 
 `src/services/llm_rate_limiter.py` currently throttles for Gemini API quota.
-For self-hosted, no API quota → bypass when provider is `self_hosted`.
+For self-hosted, there's no external quota — but local GPU still has
+finite VRAM and `--max-num-seqs` cap. **Bypassing the quota limiter
+without adding a local capacity guard risks OOM under spike load.**
 
-Read the file and add an early return at the top of `enforce_llm_rate_limit`:
+### 4a. Bypass external quota for self-hosted
 
 ```python
 def enforce_llm_rate_limit(model: str, model_provider: str) -> None:
     if model_provider == "self_hosted":
-        return  # no external quota to respect
+        return  # no external quota to respect; local capacity guard runs separately
     # ... existing logic ...
 ```
 
 (Verify exact function signature when applying — do not break existing code.)
+
+### 4b. Add local capacity guard (NEW)
+
+Add a backend-level semaphore that caps concurrent requests to the
+self-hosted endpoint. Match `vllm --max-num-seqs N` minus 1 (leave
+headroom for retries / shadow / fallback probes).
+
+`src/services/llm_capacity_guard.py` (new file):
+
+```python
+"""Local capacity guard for self-hosted vLLM endpoint.
+
+vLLM has its own queue, but backend should backpressure earlier so that
+a queue overflow returns a fast 503 to clients instead of a 30s timeout.
+"""
+from __future__ import annotations
+import asyncio
+from src.config import settings
+
+# vLLM container is configured with --max-num-seqs N; backend caps at N-1
+_LOCAL_MAX_INFLIGHT = max(1, settings.self_hosted_max_inflight - 1)
+_self_hosted_sem = asyncio.Semaphore(_LOCAL_MAX_INFLIGHT)
+
+
+async def acquire_self_hosted_slot(timeout_s: float = 2.0) -> bool:
+    """Acquire a self-hosted inference slot. Returns False if timeout."""
+    try:
+        await asyncio.wait_for(_self_hosted_sem.acquire(), timeout=timeout_s)
+        return True
+    except asyncio.TimeoutError:
+        return False
+
+
+def release_self_hosted_slot() -> None:
+    _self_hosted_sem.release()
+```
+
+Add `self_hosted_max_inflight: int = 4` to `Settings` (matches default
+`--max-num-seqs 4`).
+
+Wire it in `_stream_with_fallback` BEFORE attempting the primary stream:
+
+```python
+def _stream_with_fallback(inputs, lecture_id):
+    primary = _select_provider(lecture_id)
+    if primary == "self_hosted":
+        if not run_async(acquire_self_hosted_slot(timeout_s=2.0)):
+            # Backpressure: route this request straight to fallback
+            qa_logger.warning("Self-hosted at capacity; routing to fallback")
+            primary = settings.tutor_fallback_provider
+        else:
+            try:
+                yield from _stream_primary_with_fallback(primary, inputs, lecture_id)
+            finally:
+                release_self_hosted_slot()
+            return
+    yield from _stream_primary_with_fallback(primary, inputs, lecture_id)
+```
+
+(Pseudo-code; adapt to FastAPI's async streaming generator pattern; if
+the call site is sync, use `anyio` or a sync semaphore.)
+
+Alert on sustained semaphore exhaustion: log when `acquire_self_hosted_slot`
+returns False; if rate > 5% over 5 min, ops should investigate
+(typically: spike traffic, slow generation, or misconfigured `max-num-seqs`).
 
 ## Change 5 — Tests
 
@@ -498,8 +661,31 @@ def test_select_provider_canary_ratio(monkeypatch):
 
 ## Exit criteria
 
-- [ ] All 3 file changes applied (config.py, chat_model_factory.py, llm_service.py)
-- [ ] `.env.example` and `docker-compose.yml` env vars added
-- [ ] Existing test suite green
-- [ ] With `TUTOR_PROVIDER_OVERRIDE=self_hosted`: real tutor question end-to-end works
-- [ ] Fallback verified by killing tutor-llm container
+- [ ] **Preflight GitNexus impact analysis** completed for all 6 target
+      symbols; no HIGH/CRITICAL surprises
+- [ ] All file changes applied (count = files touched in this plan):
+  - `src/config.py`
+  - `src/services/chat_model_factory.py`
+  - `src/services/llm_service.py`
+  - `src/services/llm_rate_limiter.py`
+  - `src/services/llm_capacity_guard.py` (new)
+  - `.env.example`
+  - `docker-compose.yml`
+  - `tests/services/test_chat_model_factory.py` (new)
+  - `tests/services/test_llm_rate_limiter.py` (new or extended)
+  - `tests/services/test_llm_service_provider.py` (new)
+  - `tests/services/test_stream_iterator_semantics.py` (new)
+  - `tests/services/test_llm_capacity_guard.py` (new)
+- [ ] **Patch is based on current source** (not pseudo-code from this plan):
+      each diff inspected against live `src/` files at apply time, with
+      symbol names verified via grep + GitNexus
+- [ ] Existing test suite green (`pytest tests/`)
+- [ ] New tests green (provider selection, fallback pre-first-token,
+      capacity guard, iterator semantics, no mid-stream switch)
+- [ ] **`gitnexus_detect_changes()`** post-edit: only the symbols above
+      show up in affected scope; investigate any extras
+- [ ] With `TUTOR_PROVIDER_OVERRIDE=self_hosted`: real tutor question
+      end-to-end works (text + image + tool-call paths all verified)
+- [ ] Fallback verified by killing tutor-llm container during a request
+- [ ] Capacity guard verified: synthetic load above
+      `self_hosted_max_inflight - 1` returns fast fallback, not timeout

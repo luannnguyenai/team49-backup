@@ -60,14 +60,40 @@ async def update_learning_unit_progress(
         if existing_state is not None and isinstance(existing_state.current_progress, dict)
         else {}
     )
-    merged_inline_quiz = _merge_inline_quiz_progress(existing_progress.get("inline_quiz"), inline_quiz)
+    progress_matches_learning_unit = _progress_belongs_to_learning_unit(
+        existing_progress,
+        learning_unit_id,
+    )
+    progress_repo = LearningProgressRepository(db)
+    get_for_user_unit = getattr(progress_repo, "get_for_user_unit", None)
+    existing_learning_progress = (
+        await get_for_user_unit(user_id, unit.id) if callable(get_for_user_unit) else None
+    )
+    merged_inline_quiz = _merge_inline_quiz_progress(
+        existing_progress.get("inline_quiz") if progress_matches_learning_unit else None,
+        inline_quiz,
+    )
+    completed_final_quiz = _has_completed_final_inline_quiz(merged_inline_quiz)
+    persisted_completion = (
+        existing_learning_progress is not None
+        and getattr(existing_learning_progress, "status", None) == LearningProgressStatus.completed
+    )
     current_stage = "watching"
-    if video_finished and _has_completed_end_inline_quiz(merged_inline_quiz):
+    progress_status = LearningProgressStatus.in_progress
+    completed_at = None
+    if persisted_completion or completed_final_quiz:
         current_stage = "post_quiz"
+        progress_status = LearningProgressStatus.completed
+        completed_at = (
+            existing_learning_progress.completed_at
+            if existing_learning_progress is not None and existing_learning_progress.completed_at is not None
+            else now
+        )
     elif _has_active_inline_quiz(merged_inline_quiz):
         current_stage = "quiz_in_progress"
+    progress = {} if not progress_matches_learning_unit else dict(existing_progress)
     progress = {
-        **existing_progress,
+        **progress,
         "learning_unit_id": str(learning_unit_id),
         "video_progress_s": video_progress_s,
         "video_finished": video_finished,
@@ -76,14 +102,14 @@ async def update_learning_unit_progress(
         progress["watch_percent"] = watch_percent
     if merged_inline_quiz:
         progress["inline_quiz"] = merged_inline_quiz
-    await LearningProgressRepository(db).upsert(
+    await progress_repo.upsert(
         user_id=user_id,
         course_id=unit.course_id,
         learning_unit_id=unit.id,
-        status=LearningProgressStatus.in_progress,
+        status=progress_status,
         last_position_seconds=video_progress_s,
         last_opened_at=now,
-        completed_at=None,
+        completed_at=completed_at,
     )
     await planner_repo.upsert_session_state(
         user_id=user_id,
@@ -116,6 +142,12 @@ def _merge_inline_quiz_progress(existing_inline_quiz: dict | None, incoming_inli
     return merged
 
 
+def _progress_belongs_to_learning_unit(progress: dict | None, learning_unit_id: uuid.UUID) -> bool:
+    if not isinstance(progress, dict):
+        return False
+    return progress.get("learning_unit_id") == str(learning_unit_id)
+
+
 def _has_active_inline_quiz(inline_quiz: dict | None) -> bool:
     if not isinstance(inline_quiz, dict):
         return False
@@ -125,7 +157,7 @@ def _has_active_inline_quiz(inline_quiz: dict | None) -> bool:
     return False
 
 
-def _has_completed_end_inline_quiz(inline_quiz: dict | None) -> bool:
+def _has_completed_final_inline_quiz(inline_quiz: dict | None) -> bool:
     if not isinstance(inline_quiz, dict):
         return False
     end_state = inline_quiz.get("end")

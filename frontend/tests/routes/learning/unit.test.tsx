@@ -18,6 +18,7 @@ const apiMock = vi.hoisted(() => ({
 
 const courseApiMock = vi.hoisted(() => ({
   listUnits: vi.fn(),
+  lectureToc: vi.fn(),
 }));
 
 const learningSessionApiMock = vi.hoisted(() => ({
@@ -63,6 +64,7 @@ vi.mock("@/lib/api", async () => {
     courseApi: {
       ...actual.courseApi,
       listUnits: courseApiMock.listUnits,
+      lectureToc: courseApiMock.lectureToc,
     },
     learningSessionApi: {
       ...actual.learningSessionApi,
@@ -239,6 +241,15 @@ describe("learning unit page (US3)", () => {
     vi.clearAllMocks();
     apiMock.get.mockResolvedValue({ data: [] });
     courseApiMock.listUnits.mockResolvedValue([]);
+    courseApiMock.lectureToc.mockImplementation((courseSlug: string, lectureOrder: number) => {
+      if (courseSlug === "cs231n" && lectureOrder === 1) {
+        return Promise.resolve(TOC_SUMMARY);
+      }
+      if (courseSlug === "cs231n" && lectureOrder === 2) {
+        return Promise.resolve(TOC_SUMMARY_2);
+      }
+      return Promise.resolve({ lecture_title: "", table_of_contents: [] });
+    });
     learningSessionApiMock.resume.mockResolvedValue({
       resume_route: "/courses/cs231n/learn/lecture-1-introduction",
       current_unit_id: null,
@@ -307,6 +318,7 @@ describe("learning unit page (US3)", () => {
         unit_type: "lecture",
         order_index: 1,
         lecture_label: "Lecture 01",
+        is_completed: true,
       },
       {
         slug: "lecture-2-linear-classifiers",
@@ -315,6 +327,7 @@ describe("learning unit page (US3)", () => {
         unit_type: "lecture",
         order_index: 2,
         lecture_label: "Lecture 02",
+        is_completed: false,
       },
     ]);
 
@@ -336,6 +349,7 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByText("Bài học")).toBeInTheDocument();
       expect(screen.getByText("Lecture 01")).toBeInTheDocument();
       expect(screen.getByText("Lecture 02")).toBeInTheDocument();
+      expect(screen.getByLabelText("Lecture 01 completed")).toBeInTheDocument();
       expect(screen.getAllByText("Introduction").length).toBeGreaterThan(0);
       expect(screen.getByText("Key ideas at this moment")).toBeInTheDocument();
       expect(screen.getByText("Neural networks learn layered visual features.")).toBeInTheDocument();
@@ -348,67 +362,50 @@ describe("learning unit page (US3)", () => {
   });
 
   it("ignores stale toc summary responses when switching lectures quickly", async () => {
-    let resolveLecture1: ((value: Response) => void) | undefined;
-    let resolveLecture2: ((value: Response) => void) | undefined;
+    let resolveLecture1: ((value: typeof TOC_SUMMARY) => void) | undefined;
+    let resolveLecture2: ((value: typeof TOC_SUMMARY_2) => void) | undefined;
 
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((url: string | URL | Request) => {
-        const value = String(url);
-        if (value.includes("lecture-1.json")) {
-          return new Promise((resolve) => {
-            resolveLecture1 = resolve;
-          });
-        }
-        if (value.includes("lecture-2.json")) {
-          return new Promise((resolve) => {
-            resolveLecture2 = resolve;
-          });
-        }
-        return Promise.resolve(
-          new Response(JSON.stringify(TOC_SUMMARY), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          }),
-        );
-      }),
-    );
+    courseApiMock.lectureToc.mockImplementation((courseSlug: string, lectureOrder: number) => {
+      if (courseSlug === "cs231n" && lectureOrder === 1) {
+        return new Promise((resolve) => {
+          resolveLecture1 = resolve;
+        });
+      }
+      if (courseSlug === "cs231n" && lectureOrder === 2) {
+        return new Promise((resolve) => {
+          resolveLecture2 = resolve;
+        });
+      }
+      return Promise.resolve({ lecture_title: "", table_of_contents: [] });
+    });
 
     const { rerender } = render(
       <LearningUnitShell data={LECTURE_1_UNIT} courseSlug="cs231n" />,
     );
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        "/data/courses/CS231n/ToC_Summary/lecture-1.json",
+      expect(courseApiMock.lectureToc).toHaveBeenCalledWith(
+        "cs231n",
+        1,
       );
     });
 
     rerender(<LearningUnitShell data={LECTURE_2_UNIT} courseSlug="cs231n" />);
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
-        "/data/courses/CS231n/ToC_Summary/lecture-2.json",
+      expect(courseApiMock.lectureToc).toHaveBeenCalledWith(
+        "cs231n",
+        2,
       );
     });
 
-    resolveLecture2?.(
-      new Response(JSON.stringify(TOC_SUMMARY_2), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
+    resolveLecture2?.(TOC_SUMMARY_2);
 
     await waitFor(() => {
       expect(screen.getByText("Linear classifiers map features to scores.")).toBeInTheDocument();
     });
 
-    resolveLecture1?.(
-      new Response(JSON.stringify(TOC_SUMMARY), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }),
-    );
+    resolveLecture1?.(TOC_SUMMARY);
 
     await waitFor(() => {
       expect(screen.queryByText("Neural networks learn layered visual features.")).not.toBeInTheDocument();
@@ -519,6 +516,47 @@ describe("learning unit page (US3)", () => {
     fireEvent(video!, new Event("durationchange"));
     fireEvent(video!, new Event("timeupdate"));
 
+    expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
+  });
+
+  it("shows the end-of-video quiz overlay when playback finishes", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    const dismissButton = await screen.findByRole("button", { name: "Ẩn tạm" });
+    fireEvent.click(dismissButton);
+
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+
+    fireEvent(video!, new Event("ended"));
+
+    expect(await screen.findAllByText("End-of-video quiz")).toHaveLength(2);
     expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
   });
 

@@ -4,6 +4,7 @@ import base64
 import json
 import logging
 import operator
+import uuid
 from datetime import datetime, timedelta
 from functools import lru_cache
 from typing import Annotated, TypedDict
@@ -13,8 +14,10 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, Base
 from langchain_core.tools import tool
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
+from src.models.canonical import CanonicalUnit
+from src.models.course import Course, LearningUnit
 from src.config import DEFAULT_MODEL, settings
 from src.database import tutor_thread_async_session_factory
 from src.models.store import Lecture, Chapter, TranscriptLine, QAHistory
@@ -46,6 +49,12 @@ def format_timestamp(seconds):
     return str(td).zfill(8)
 
 
+def _chapter_field(chapter, field: str, default=None):
+    if isinstance(chapter, dict):
+        return chapter.get(field, default)
+    return getattr(chapter, field, default)
+
+
 # ---------------------------------------------------------------------------
 # Async DB helpers — called via asyncio.run() from within the sync generator.
 # They use a dedicated NullPool session factory so asyncpg connections are not
@@ -74,6 +83,124 @@ async def _fetch_lecture_context(lecture_id: str) -> tuple:
         return lecture, chapters, past_qas
 
 
+def _parse_context_binding_unit_id(context_binding_id: str | None) -> uuid.UUID | None:
+    if not context_binding_id or not context_binding_id.startswith("ctx_"):
+        return None
+    try:
+        return uuid.UUID(context_binding_id.removeprefix("ctx_"))
+    except ValueError:
+        return None
+
+
+async def _fetch_canonical_tutor_context(
+    lecture_id: str,
+    context_binding_id: str | None,
+) -> dict | None:
+    learning_unit_id = _parse_context_binding_unit_id(context_binding_id)
+    if learning_unit_id is None:
+        return None
+
+    async with tutor_thread_async_session_factory() as db:
+        unit_result = await db.execute(
+            select(LearningUnit, Course, CanonicalUnit)
+            .join(Course, LearningUnit.course_id == Course.id)
+            .outerjoin(CanonicalUnit, LearningUnit.canonical_unit_id == CanonicalUnit.unit_id)
+            .where(LearningUnit.id == learning_unit_id)
+        )
+        row = unit_result.first()
+        if row is None:
+            return None
+
+        learning_unit, course, canonical_unit = row
+        lecture_order = canonical_unit.lecture_order if canonical_unit is not None else None
+        lecture_title = (
+            canonical_unit.lecture_title
+            if canonical_unit is not None and canonical_unit.lecture_title
+            else learning_unit.title
+        )
+        course_key = (
+            canonical_unit.course_id
+            if canonical_unit is not None and canonical_unit.course_id
+            else (course.canonical_course_id or course.slug)
+        )
+
+        segments_result = await db.execute(
+            select(CanonicalUnit)
+            .where(
+                CanonicalUnit.course_id == course_key,
+                CanonicalUnit.lecture_order == lecture_order,
+            )
+            .order_by(CanonicalUnit.ordering_index, CanonicalUnit.unit_id)
+        )
+        segments = list(segments_result.scalars().all())
+        if not segments and canonical_unit is not None:
+            segments = [canonical_unit]
+        if not segments:
+            return None
+
+        history_result = await db.execute(
+            select(QAHistory)
+            .where(
+                or_(
+                    QAHistory.context_binding_id == context_binding_id,
+                    QAHistory.lecture_id == lecture_id,
+                )
+            )
+            .order_by(QAHistory.created_at.desc())
+            .limit(5)
+        )
+        past_qas = list(reversed(history_result.scalars().all()))
+
+    chapters: list[dict] = []
+    transcript_lines: list[dict] = []
+    scope_keywords: list[str] = []
+    core_topics: list[str] = []
+
+    for index, segment in enumerate(segments, start=1):
+        content_ref = segment.content_ref or {}
+        start_time = float(content_ref.get("start_s") or 0)
+        end_time = float(content_ref.get("end_s") or start_time)
+        if end_time <= start_time:
+            end_time = start_time + 90
+        title = segment.unit_name or segment.description or f"Section {index}"
+        summary = segment.summary or segment.description or title
+        chapters.append(
+            {
+                "title": title,
+                "summary": summary,
+                "start_time": start_time,
+                "end_time": end_time,
+            }
+        )
+        transcript_lines.append(
+            {
+                "start_time": start_time,
+                "content": summary,
+            }
+        )
+        if title not in core_topics:
+            core_topics.append(title)
+        for key_point in segment.key_points or []:
+            if isinstance(key_point, dict):
+                text = str(key_point.get("text") or "").strip()
+                if text:
+                    scope_keywords.append(text)
+
+    return {
+        "lecture_id": None,
+        "lecture_title": lecture_title,
+        "chapters": chapters,
+        "transcript_lines": transcript_lines,
+        "past_qas": past_qas,
+        "lecture_scope": {
+            "lecture_title": lecture_title,
+            "course_phase": course.title,
+            "core_topics": core_topics[:8],
+            "scope_keywords": scope_keywords[:12],
+        },
+    }
+
+
 async def _fetch_transcript_window(
     lecture_id: str, start_window: float, end_window: float
 ) -> list:
@@ -91,7 +218,7 @@ async def _fetch_transcript_window(
 
 
 async def _save_qa_history(
-    lecture_id: str,
+    lecture_id: str | None,
     question: str,
     answer: str,
     thoughts: str,
@@ -243,21 +370,45 @@ def get_context_and_stream_langgraph(
     try:
         # Fetch all DB data upfront (asyncio.run is safe in FastAPI threadpool)
         lecture, chapters, past_qas = asyncio.run(_fetch_lecture_context(lecture_id))
-        lecture_title = lecture.title if lecture else lecture_id
+        persisted_lecture_id: str | None = lecture_id if lecture else None
+        lecture_scope = get_lecture_scope_metadata(lecture_id)
+        transcript_line_dicts: list[dict] | None = None
+
+        if lecture is None:
+            canonical_context = asyncio.run(
+                _fetch_canonical_tutor_context(lecture_id, context_binding_id)
+            )
+            if canonical_context is None:
+                raise ValueError("Lecture not found")
+
+            lecture_title = canonical_context["lecture_title"]
+            chapters = canonical_context["chapters"]
+            past_qas = canonical_context["past_qas"]
+            lecture_scope = canonical_context["lecture_scope"]
+            transcript_line_dicts = canonical_context["transcript_lines"]
+        else:
+            lecture_title = lecture.title
 
         toc_context = "TABLE OF CONTENTS:\n"
         context_summary = ""
         for chap in chapters:
-            start_ts = format_timestamp(chap.start_time)
-            end_ts = format_timestamp(chap.end_time)
-            toc_context += f"- [{start_ts} - {end_ts}] {chap.title}: {chap.summary}\n"
-            context_summary += f"- {chap.title}: {chap.summary}\n"
+            start_ts = format_timestamp(float(_chapter_field(chap, "start_time", 0) or 0))
+            end_ts = format_timestamp(float(_chapter_field(chap, "end_time", 0) or 0))
+            title = str(_chapter_field(chap, "title", "") or "")
+            summary = str(_chapter_field(chap, "summary", "") or "")
+            toc_context += f"- [{start_ts} - {end_ts}] {title}: {summary}\n"
+            context_summary += f"- {title}: {summary}\n"
 
         current_chapter = next(
-            (ch.title for ch in chapters if ch.start_time <= current_timestamp < ch.end_time), ""
+            (
+                str(_chapter_field(ch, "title", "") or "")
+                for ch in chapters
+                if float(_chapter_field(ch, "start_time", 0) or 0)
+                <= current_timestamp
+                < float(_chapter_field(ch, "end_time", 0) or 0)
+            ),
+            "",
         )
-        lecture_scope = get_lecture_scope_metadata(lecture_id)
-
         routing = route_question(
             user_question, lecture_title, context_summary,
             current_timestamp=current_timestamp,
@@ -281,7 +432,7 @@ def get_context_and_stream_langgraph(
             thoughts = f"[SIMPLE] {routing.get('reason', '')}"
             _log_qa(lecture_id, current_timestamp, user_question, direct_answer, thoughts)
             qa_id = asyncio.run(_save_qa_history(
-                lecture_id,
+                persisted_lecture_id,
                 user_question,
                 direct_answer,
                 thoughts,
@@ -295,12 +446,22 @@ def get_context_and_stream_langgraph(
         # COMPLEX path — fetch transcript window
         start_window = max(0, current_timestamp - 300)
         end_window = current_timestamp + 300
-        lines = asyncio.run(_fetch_transcript_window(lecture_id, start_window, end_window))
+        if transcript_line_dicts is None:
+            lines = asyncio.run(_fetch_transcript_window(lecture_id, start_window, end_window))
+            transcript_line_dicts = [
+                {"start_time": line.start_time, "content": line.content}
+                for line in lines
+            ]
+        lines = [
+            line
+            for line in transcript_line_dicts
+            if start_window <= float(line.get("start_time") or 0) <= end_window
+        ]
 
         transcript_context = "TRANSCRIPT WINDOW:\n"
         for line in lines:
-            ts = format_timestamp(line.start_time)
-            transcript_context += f"[{ts}] {line.content}\n"
+            ts = format_timestamp(float(line.get("start_time") or 0))
+            transcript_context += f"[{ts}] {line.get('content', '')}\n"
 
         lecture_scope_context = ""
         if lecture_scope:
@@ -417,7 +578,7 @@ Answer the student's question using ONLY the provided lecture context (transcrip
         thoughts = f"[COMPLEX] [SANDBOX]\n{sandbox_output}" if sandbox_output else "[COMPLEX]"
         _log_qa(lecture_id, current_timestamp, user_question, full_answer, thoughts)
         qa_id = asyncio.run(_save_qa_history(
-            lecture_id,
+            persisted_lecture_id,
             user_question,
             full_answer,
             thoughts,

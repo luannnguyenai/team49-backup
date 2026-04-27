@@ -587,3 +587,20 @@ async def test_complete_quiz_end_marks_learning_unit_complete(monkeypatch):
     assert result.learning_path_updated is True
     assert FakeLearningProgressRepository.payload["status"] == LearningProgressStatus.completed
     assert FakeWaivedUnitRepository.called is True
+
+
+@pytest.mark.parametrize(
+    ("canonical_phase", "expected"),
+    [
+        ("inline_midpoint_quiz", False),
+        ("inline_end_quiz", True),
+        ("mini_quiz", True),
+    ],
+)
+def test_should_complete_learning_unit_only_for_standalone_or_end_checkpoint(
+    canonical_phase,
+    expected,
+):
+    session = SimpleNamespace(canonical_phase=canonical_phase)
+
+    assert quiz_service._should_complete_learning_unit(session) is expected

@@ -106,6 +106,46 @@ describe("course catalog routes", () => {
     expect(screen.getAllByRole("link", { name: "Xem khóa học" })).toHaveLength(2);
   });
 
+  it("renders readiness and progress copy on catalog cards", async () => {
+    courseApiMock.catalog.mockResolvedValue({
+      items: [
+        {
+          id: "course_cs231n",
+          slug: "cs231n",
+          title: "CS231n: Deep Learning for Computer Vision",
+          short_description: "Deep learning foundations for computer vision.",
+          status: "ready",
+          cover_image_url: "/courses/cs231n/cover.jpg",
+          hero_badge: "Available now",
+          is_recommended: false,
+          progress_percent: 0,
+        },
+        {
+          id: "course_cs224n",
+          slug: "cs224n",
+          title: "CS224n: Natural Language Processing with Deep Learning",
+          short_description: "Modern NLP systems and language modeling.",
+          status: "ready",
+          cover_image_url: "/courses/cs224n/cover.jpg",
+          hero_badge: "Available now",
+          is_recommended: false,
+          progress_percent: 35,
+        },
+      ],
+    });
+
+    render(<HomePage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Sẵn sàng học")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Sẵn sàng để bắt đầu ngay bây giờ")).toBeInTheDocument();
+    expect(screen.getByText("Tiến độ: 0%")).toBeInTheDocument();
+    expect(screen.getByText("Tiếp tục bài học")).toBeInTheDocument();
+    expect(screen.getByText("Tiến độ: 35%")).toBeInTheDocument();
+  });
+
   it("shows a startable overview for CS231n", async () => {
     const data: CourseOverviewResponse = {
       course: {

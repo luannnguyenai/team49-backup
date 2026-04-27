@@ -8,6 +8,10 @@ tool calling and vision support, integrated into the existing
 
 ## Service design
 
+Two deployment topologies are supported. Pick one based on where the backend runs:
+
+### Topology A — Co-located (backend + vLLM on same host)
+
 ```
 ┌──────────┐  HTTP /v1/*   ┌──────────────┐
 │ backend  │──────────────▶│  tutor-llm   │  ← vLLM, GPU
@@ -18,6 +22,32 @@ tool calling and vision support, integrated into the existing
 - Same docker network (`al_internal`)
 - Backend reaches it as `http://tutor-llm:8000/v1`
 - Host port `8001` exposed for debugging only
+- `SELF_HOSTED_BASE_URL=http://tutor-llm:8000/v1`
+
+### Topology B — Split (backend on VPS, vLLM on home GPU box) — used in FAST variant
+
+```
+[VPS — public]                                [Home — RTX 5060 Ti 16GB]
+┌─────────────────┐                           ┌──────────────────────────┐
+│ frontend +      │  HTTPS  ┌──────────────┐  │ vLLM container           │
+│ FastAPI backend │────────▶│ Cloudflare   │─▶│ Qwen2.5-VL-3B + LoRA     │
+│                 │         │ Tunnel (free)│  │ localhost:8000           │
+└─────────────────┘         └──────────────┘  └──────────────────────────┘
+```
+
+The home GPU box does **not** need a public IP, port-forward, or static
+DNS. Cloudflare Tunnel runs an outbound-only persistent connection to
+Cloudflare; vLLM stays bound to `127.0.0.1:8000`. The VPS calls a public
+Cloudflare URL which Cloudflare proxies into the tunnel.
+
+- Backend (VPS) sets `SELF_HOSTED_BASE_URL=https://tutor-llm.<your-cf-subdomain>.example.com/v1`
+- vLLM container exposes only to `127.0.0.1:8000` on the home box
+- Optional: restrict tunnel to `Cf-Access-Client-Id` header bearing a service token
+  to prevent random internet probes from hitting your model
+
+This is the recommended topology for v1 FAST: **$0/month**, no port-forward,
+no public IP exposure of the GPU box, and integrates without changing
+backend code (only the env var differs from Topology A).
 
 ## docker-compose addition
 
@@ -51,7 +81,7 @@ ship in dev first):
       - "--quantization"
       - "${TUTOR_QUANTIZATION:-awq_marlin}"   # set per P5 decision tree
       - "--max-model-len"
-      - "4096"   # match training ctx; raise to 8192 only if long-ctx eval passes
+      - "4096"   # MUST match training `max_seq_length`; only raise after long-ctx eval pass
       - "--max-num-seqs"
       - "4"
       - "--gpu-memory-utilization"
@@ -85,7 +115,7 @@ relevant entries (read `docker-compose.yml` first; only add new volume).
 | Flag | Reason |
 |---|---|
 | `--quantization awq_marlin` | Fast Int4 kernel on Blackwell |
-| `--max-model-len 8192` | Matches training ctx; 8K covers most lecture windows |
+| `--max-model-len 4096` | Matches training `max_seq_length` (locked at 4096 in `03-finetune.md`). 4K covers TOC + transcript window + Q + answer. Raise only after explicit long-ctx eval that proves attention quality holds. |
 | `--max-num-seqs 4` | KV cache fits ~4 concurrent on 16GB; tune via load test |
 | `--gpu-memory-utilization 0.85` | Leave 15% for desktop / driver |
 | `--enable-auto-tool-choice` | vLLM picks tool calls when model emits them |
@@ -150,19 +180,132 @@ curl http://localhost:8001/v1/chat/completions \
 Expect a response with `tool_calls[].function.name == "execute_python"` and
 valid Python in `arguments.code`.
 
-## Load test
+## Tunnel exposure (Topology B only)
 
-`fine-tune-chatbot/scripts/serving/load_test.py` — fire 8 concurrent streaming
-requests, measure:
+Skip this section if Topology A.
 
-| Metric | Target |
-|---|---|
-| p50 first-token latency | < 1s |
-| p95 first-token latency | < 3s |
-| p50 throughput | > 30 tok/s |
-| Concurrency without errors | ≥ 4 |
+### Quick start (ephemeral URL, dev only)
 
-If concurrency >4 fails: lower `--max-num-seqs` or `--max-model-len`.
+```bash
+# On home box
+cloudflared tunnel --url http://localhost:8001
+```
+
+Outputs a `https://<random>.trycloudflare.com` URL. Use for the first
+end-to-end smoke from VPS. URL changes on every restart — not for production.
+
+### Named tunnel (stable URL, recommended for v1)
+
+```bash
+# One-time setup on home box
+cloudflared tunnel login                              # browser auth to Cloudflare
+cloudflared tunnel create tutor-llm                   # creates UUID
+# Add DNS record: tutor-llm.<your-domain> → tunnel UUID
+cloudflared tunnel route dns tutor-llm tutor-llm.<your-domain>
+
+# Config at ~/.cloudflared/config.yml
+cat <<EOF > ~/.cloudflared/config.yml
+tunnel: <UUID>
+credentials-file: /home/<user>/.cloudflared/<UUID>.json
+ingress:
+  - hostname: tutor-llm.<your-domain>
+    service: http://localhost:8001
+  - service: http_status:404
+EOF
+
+# Run as service
+cloudflared tunnel run tutor-llm
+# Optionally: install as systemd unit (Linux) or NSSM service (Windows)
+sudo cloudflared service install
+```
+
+### Lock down with Cloudflare Access (REQUIRED for any non-local-dev deployment)
+
+⚠️ **Not optional outside of local dev.** Without Access, the tunnel URL
+is a public unauthenticated GPU endpoint. Anyone who finds it (subdomain
+guesses, leaked log lines, browser history, GitHub Issues) can run
+inference on your hardware indefinitely, exhausting VRAM, electricity,
+and home internet. There is no rate limit at the model layer by default.
+
+Required for any deployment beyond local dev (incl. team demo, internal
+testing, FAST 3-day MVP):
+
+1. Create a Service Token in Cloudflare Zero Trust → Access → Service Auth
+2. Create an Access Application for `tutor-llm.<your-domain>` requiring that
+   service token in headers `Cf-Access-Client-Id` + `Cf-Access-Client-Secret`
+3. On VPS, store both as env vars; backend sends them as headers when
+   calling vLLM. LangChain `ChatOpenAI` accepts `default_headers` kwarg —
+   plumb through `chat_model_factory.py`'s `self_hosted` branch:
+
+```python
+if provider == "self_hosted":
+    headers = {}
+    if settings.self_hosted_cf_access_id:
+        headers["CF-Access-Client-Id"] = settings.self_hosted_cf_access_id
+        headers["CF-Access-Client-Secret"] = settings.self_hosted_cf_access_secret
+    kwargs = {
+        "model": model,
+        "model_provider": "openai",
+        "temperature": temperature,
+        "base_url": settings.self_hosted_base_url,
+        "api_key": settings.self_hosted_api_key or "dummy",
+        "default_headers": headers,
+    }
+```
+
+### Tunnel resilience
+
+- Cloudflare Tunnel auto-reconnects on dropped link; backend should retry
+  on transient 502/504 (LangChain's default retry covers this)
+- Latency overhead: typically +30–80ms RTT depending on PoP location
+- Free tier limits: no published bandwidth cap for Tunnel itself; Cloudflare
+  Workers free tier is separate and not used here
+- Outage mode: if home box is offline, tunnel returns 502; `_stream_with_fallback`
+  in `llm_service.py` (P7) catches this and falls back to Gemini
+
+### Smoke test from VPS
+
+```bash
+# From VPS shell
+curl https://tutor-llm.<your-domain>/v1/models
+# Should return same payload as the local 8001 test
+```
+
+If the VPS gets `200` and the same model list, end-to-end path is verified.
+
+## Load test (baseline-first, then set thresholds)
+
+⚠️ **Do NOT freeze threshold targets before measuring baseline.** Targets
+below are starting hypotheses; actual targets depend on:
+- Home upload bandwidth (tunnel egress is your bottleneck for streaming)
+- Cloudflare PoP-to-VPS RTT (varies +30–80ms by geography)
+- 5060 Ti AWQ/bnb/BF16 throughput (differs per quantization tier)
+- Concurrency-vs-latency tradeoff at chosen `--max-num-seqs`
+
+Procedure:
+1. Run `scripts/serving/load_test.py` against the local vLLM port (8001)
+   for the LOCAL baseline; record p50/p95/throughput per concurrency level
+   1, 2, 4, 8.
+2. Re-run the same script targeting the Cloudflare Tunnel URL from the
+   VPS for the END-TO-END baseline; the delta is the tunnel overhead.
+3. Commit both result tables to `eval/load_test_baseline.md`.
+4. Set production thresholds = local baseline × 1.5 (or end-to-end
+   baseline × 1.2, whichever is larger), recorded in
+   `eval/load_test_thresholds.md`.
+
+Starting hypothesis (revise with actual data):
+
+| Metric | Hypothesis | Notes |
+|---|---|---|
+| p50 first-token (local) | < 1s | Achievable on 5060 Ti BF16 at concurrency 2 |
+| p50 first-token (via tunnel) | < 1.5s | +500ms overhead realistic in worst PoP |
+| p95 first-token (via tunnel) | < 4s | Tunnel jitter + concurrency contention |
+| p50 throughput | > 30 tok/s | At concurrency 2; lower at 4 |
+| Concurrency without errors | ≥ 2 (BF16) / ≥ 4 (AWQ) | Tier-dependent |
+
+If concurrency at chosen tier fails: lower `--max-num-seqs` or
+`--max-model-len`, or step down to lower compression tier (re-run §
+"Quantization feasibility ladder" in `04-eval-quantize.md`).
 
 ## Production hardening (post v1)
 

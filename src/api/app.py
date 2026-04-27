@@ -30,6 +30,7 @@ from src.exceptions import DomainError
 from src.dependencies.auth import get_current_user_from_request
 from src.redis_client import connect_redis, disconnect_redis
 from src.models.store import Lecture, Chapter, QAHistory, LearningProgress
+from src.models.course import LearningUnit
 from src.services.asset_signing import verify_signed_asset_url
 from src.services.llm_service import get_context_and_stream_langgraph
 from src.routers.auth import auth_router, users_router
@@ -195,6 +196,7 @@ class AskRequest(BaseModel):
 
 async def _ensure_lecture_exists(
     lecture_id: str,
+    context_binding_id: str | None = None,
     db: AsyncSession | None = None,
 ) -> None:
     if db is not None:
@@ -202,17 +204,42 @@ async def _ensure_lecture_exists(
             select(Lecture.id).where(Lecture.id == lecture_id).limit(1)
         )
         lecture = result.scalar_one_or_none()
-        if not lecture:
-            raise HTTPException(status_code=404, detail="Lecture not found")
-        return
+        if lecture:
+            return
+        if await _canonical_tutor_context_exists(context_binding_id, db):
+            return
+        raise HTTPException(status_code=404, detail="Lecture not found")
 
     async with tutor_thread_async_session_factory() as session:
         result = await session.execute(
             select(Lecture.id).where(Lecture.id == lecture_id).limit(1)
         )
         lecture = result.scalar_one_or_none()
-    if not lecture:
-        raise HTTPException(status_code=404, detail="Lecture not found")
+        if lecture:
+            return
+        if await _canonical_tutor_context_exists(context_binding_id, session):
+            return
+    raise HTTPException(status_code=404, detail="Lecture not found")
+
+
+async def _canonical_tutor_context_exists(
+    context_binding_id: str | None,
+    db: AsyncSession,
+) -> bool:
+    if not context_binding_id or not context_binding_id.startswith("ctx_"):
+        return False
+
+    import uuid
+
+    try:
+        learning_unit_id = uuid.UUID(context_binding_id.removeprefix("ctx_"))
+    except ValueError:
+        return False
+
+    result = await db.execute(
+        select(LearningUnit.id).where(LearningUnit.id == learning_unit_id).limit(1)
+    )
+    return result.scalar_one_or_none() is not None
 
 
 @app.get("/api/lectures", tags=["Lectures"])
@@ -242,7 +269,11 @@ async def ask_question(req: AskRequest, db: AsyncSession = Depends(get_async_db)
     LangGraph streaming remains sync (no async streaming support yet).
     """
     try:
-        await _ensure_lecture_exists(req.lecture_id, db=db)
+        await _ensure_lecture_exists(
+            req.lecture_id,
+            context_binding_id=req.context_binding_id,
+            db=db,
+        )
         generator = get_context_and_stream_langgraph(
             req.lecture_id,
             req.current_timestamp,

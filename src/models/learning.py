@@ -108,6 +108,14 @@ class Session(UUIDPrimaryKeyMixin, Base):
     correct_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     score_percent: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     canonical_phase: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    selection_strategy: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    calibration_mode: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    theta_initial: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    theta_final: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    theta_sigma_initial: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    theta_sigma_final: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    target_se: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    stop_reason: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     canonical_unit_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("learning_units.id", ondelete="SET NULL"),

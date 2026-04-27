@@ -79,14 +79,16 @@ for COURSE_ID in CS230 CS231n CS224n; do
   COURSE_DIR="data/courses/${COURSE_ID}"
   if [ -d "$COURSE_DIR" ]; then
     VIDEO_COUNT=0
-    if [ -d "$COURSE_DIR/videos" ]; then
-      VIDEO_COUNT=$(find "$COURSE_DIR/videos" -name "*.mp4" 2>/dev/null | wc -l)
-    fi
-    
     TRANSCRIPT_COUNT=0
-    if [ -d "$COURSE_DIR/transcripts" ]; then
-      TRANSCRIPT_COUNT=$(find "$COURSE_DIR/transcripts" \( -name "*.txt" -o -name "*.json" \) 2>/dev/null | wc -l)
+
+    if [ -d "$COURSE_DIR/videos" ]; then
+      VIDEO_COUNT=$(find "$COURSE_DIR/videos" -name "*.mp4" 2>/dev/null | wc -l | tr -d '[:space:]')
     fi
+
+    if [ -d "$COURSE_DIR/transcripts" ]; then
+      TRANSCRIPT_COUNT=$(find "$COURSE_DIR/transcripts" \( -name "*.txt" -o -name "*.json" \) 2>/dev/null | wc -l | tr -d '[:space:]')
+    fi
+
     log_ok "Data ${COURSE_ID}: ${VIDEO_COUNT} videos, ${TRANSCRIPT_COUNT} transcripts"
   else
     log_warn "Không tìm thấy ${COURSE_DIR}/ — course này sẽ thiếu lecture assets"
@@ -236,6 +238,47 @@ if [ "$LECTURE_COUNT" = "0" ]; then
     || log_warn "seed_lectures.py thất bại — bỏ qua (có thể không có data/courses/CS231n/)"
 else
   log_ok "Lectures đã có sẵn (${LECTURE_COUNT} bài) — bỏ qua seed"
+fi
+
+# =============================================================================
+# BƯỚC 3.5 — Đồng bộ Schema v2
+# =============================================================================
+log_section "Bước 3.5 — Đồng bộ Schema v2"
+
+log_info "Upsert canonical artifact Schema v2 vào database..."
+if docker compose exec -T backend uv run python -m src.scripts.pipeline.import_canonical_artifacts_to_db 2>&1; then
+  log_ok "Canonical artifact sync hoàn tất"
+else
+  log_error "Canonical artifact sync thất bại"
+  docker compose logs backend | tail -20
+  exit 1
+fi
+
+log_info "Backfill Schema v2 từ database hiện có..."
+if docker compose exec -T backend uv run python -m src.scripts.schema_v2.backfill_schema_v2 --apply --report-path reports/schema_v2_backfill_report.json 2>&1; then
+  log_ok "Schema v2 backfill hoàn tất"
+else
+  log_error "Schema v2 backfill thất bại"
+  docker compose logs backend | tail -20
+  exit 1
+fi
+
+log_info "Validate Schema v2 invariants..."
+if docker compose exec -T backend uv run python -m src.scripts.schema_v2.validate_schema_v2 --report-path reports/schema_v2_validation_report.json 2>&1; then
+  log_ok "Schema v2 validate hoàn tất"
+else
+  log_error "Schema v2 validate thất bại"
+  docker compose logs backend | tail -20
+  exit 1
+fi
+
+log_info "Kiểm tra canonical runtime parity..."
+if docker compose exec -T backend uv run python -m src.scripts.pipeline.check_canonical_runtime_parity 2>&1; then
+  log_ok "Canonical runtime parity OK"
+else
+  log_error "Canonical runtime parity thất bại"
+  docker compose logs backend | tail -20
+  exit 1
 fi
 
 # =============================================================================

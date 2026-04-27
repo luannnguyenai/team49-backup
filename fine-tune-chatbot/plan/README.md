@@ -65,6 +65,10 @@ References for current constraints:
 
 ## Roadmap
 
+Two timeline variants depending on rollout posture:
+
+### Variant FULL (production rollout, 6–8 working days + 1 week shadow)
+
 ```
 P1  Environment        (0.5d)  Verify Blackwell stack (CUDA 12.8, PT 2.7+)
 P2a Data audit         (0.5d)  Schema/row counts of qa_history
@@ -73,12 +77,91 @@ P2  Data pipeline      (1d)    Combine organic + domain + external → ChatML
 P3  Fine-tune          (0.5d)  Unsloth QLoRA on VL-3B (incl. tiny overfit smoke)
 P4  Eval               (0.5d)  Deterministic gates + LLM-judge vs Gemini
 P5  Quantize           (0.5d)  AWQ Int4 + feasibility gate (fallback to bnb/fp16)
-P6  Serve              (0.5d)  vLLM docker service
+P6  Serve              (0.5d)  vLLM docker service + Cloudflare Tunnel
 P7  Codebase changes   (0.5d)  Patch chat_model_factory + config + tests
 P8  Shadow + rollout   (1w)    A/B with 10% → 50% → 100%
 ```
 
-Total: ~6–8 working days excluding shadow period.
+Total: ~6–8 working days excluding shadow period. Use this for production
+traffic switch with safety net.
+
+### Variant FAST (research / MVP self-host, 3 days, no shadow)
+
+For tight deadlines or research builds where the current API path stays
+behind a feature flag and a multi-week canary is unnecessary:
+
+```
+Day 1 (24h)  P2a + P2b + P2     Data: KG-driven synth + MCQ → ChatML, ≥ 8k samples
+Day 2 (24h)  P1 + P3 + P4       Env smoke + Unsloth QLoRA train + eval gate
+Day 3 (24h)  P5 + P6 + P7       AWQ + vLLM + Cloudflare Tunnel + integration + E2E
+```
+
+What is dropped vs FULL:
+- **P8 shadow/canary** — replaced by **single feature flag** `TUTOR_PROVIDER_OVERRIDE`.
+  Default keeps current API. Flip to `self_hosted` to switch instantly. Roll back
+  by unsetting the env var; existing fallback in `_stream_with_fallback` covers
+  pre-stream failures.
+- **Hand-curated fixture sets** — keep deterministic Gate 1 with 50-row seed
+  fixtures only. Defer 500-row LLM-judge eval to post-launch iteration.
+- **Production hardening** — `docker-compose.prod.yml` changes deferred; ship in
+  dev compose first.
+
+What MUST stay even in FAST:
+- **NEW: P0.5 tool-call format proof** (see `01-environment.md`) — must pass
+  before any data expansion or full train. This is the highest-value gate
+  because format mismatch invalidates the entire training corpus.
+- P1 Blackwell smoke tests (skipping these wastes more time when train fails)
+- P4 Gate 1 deterministic checks on ≥ 100 samples (tool-call format, citation
+  format, language match) — these catch silent breakage that kills E2E
+- P5 BF16-first feasibility ladder (NOT AWQ-default — see updated `04-eval-quantize.md`)
+- P7 fallback wrapper (`_stream_with_fallback`) — needed for safe deploy
+
+Decision rule: if user count ≤ 50 / project is academic / current API stays
+behind a flag → FAST. If shipping to ≥ 100 production users without behind-flag
+parallel → FULL.
+
+### FAST auto-escalation rule
+
+FAST is a **happy-path** estimate. Real Blackwell stack risk + Unsloth/vLLM
+kernel compatibility means any single phase blocking on wheel/kernel issues
+can eat half the budget. Hard rule:
+
+- If P1 environment smoke does not fully pass within **8 wall-clock hours**
+  (any of the 4 smoke tests still failing): **FAST is dead**. Switch to
+  FULL schedule, downgrade promise from "3 days" to "8–12 working days +
+  1 week shadow". Notify stakeholder before continuing.
+- If P0.5 tool-call format proof fails (vLLM does not return parseable
+  `tool_calls` from sample adapter): **stop**, do not proceed to P2b/P3.
+  Investigate format converter first. Up to 1 day debug budget; if still
+  failing, escalate.
+- If at any P5 tier the serving smoke fails on vision OR tool-call after
+  AWQ/bnb/GPTQ has been tried, fall back to BF16 unquantized + reduced
+  concurrency (`--max-num-seqs 1`) and document in `eval/v1_quantize_decision.md`.
+
+### Production FULL — realistic estimate revised
+
+The original "6–8 working days excluding shadow" ignored Blackwell
+wheel-build time and feasibility-gate iteration. With #3 tool-call proof
+gate, #5 AWQ feasibility ladder, and realistic data-pipeline implementation
+time:
+
+- **Engineering days (no shadow)**: 8–12 working days
+- **Shadow + canary**: +1 week
+- **Total to 100% rollout**: ~3 weeks calendar time
+
+Budget for FULL accordingly. FAST remains a research/MVP plan, never a
+production-ship plan.
+
+### Deployment topology (both variants)
+
+```
+[Sinh viên] → [VPS frontend + FastAPI backend] → [Cloudflare Tunnel — public HTTPS] → [Home: 5060 Ti + vLLM + Qwen2.5-VL-3B + LoRA]
+                                                                                                      (handles text + image)
+```
+
+The backend connects to vLLM via the tunnel URL configured in
+`SELF_HOSTED_BASE_URL`. vLLM never needs to be exposed directly to the public
+internet. See `05-serving-vllm.md` "Tunnel exposure" section for setup.
 
 File mapping: `01-environment.md` (P1), `02a-data-audit.md` (P2a),
 `02b-domain-data.md` (P2b — course assets), `02-data-pipeline.md` (P2 —
@@ -146,19 +229,39 @@ fine-tune-chatbot/
 
 - [ ] vLLM serves `tutor-v1` endpoint, OpenAI-compatible, streaming works
 - [ ] Tool calling (`execute_python`) works end-to-end via `--tool-call-parser hermes`
+      (proven in P0.5 BEFORE training, re-verified after train+quantize)
 - [ ] **Deterministic eval gates pass** (see `04-eval-quantize.md` Gate 1)
 - [ ] **Per-category LLM-judge gates pass** vs Gemini baseline:
   - Refusal: A score ≥ B − 0.1
   - Tool correctness: A correct rate ≥ B − 10%
   - Factual QA: A score ≥ B − 0.2
-  - Vision subset (frozen-tower v1): A score ≥ B − 0.5
+  - Vision subset (frozen-tower v1, see "Vision scope" below): meets v1 vision targets
   - Aggregate pairwise A vs B win-rate ≥ 45%
-- [ ] p50 streaming latency ≤ 4s, p95 ≤ 10s on production traffic
+- [ ] p50 streaming latency ≤ 4s, p95 ≤ 10s on production traffic (measured
+      AFTER baseline established through tunnel — do NOT freeze targets pre-baseline)
 - [ ] Shadow A/B 1 week passes; 100% rollout with Gemini fallback armed
 - [ ] No user-facing API route changes
 - [ ] Router stays on Gemini in v1 (no migration)
 - [ ] LangGraph topology preserved; only LLM provider injection point and
       fallback wrapper change (see `06-codebase-changes.md`)
+
+### Vision scope (v1, frozen-tower posture)
+
+V1 explicitly does **not** promise Gemini-equivalent vision quality. With
+the vision tower frozen and only 200–500 retention samples, success means:
+
+- [ ] **Preserve base ability**: vision smoke tests from P1 still pass after
+      LoRA train (no projector drift)
+- [ ] **No hallucinated visual claims**: model does not invent slide content
+      when no image is provided (deterministic Gate 1 check ≥ 98%)
+- [ ] **Coherent description**: describes a slide/screenshot in tutor voice;
+      OCR on heavy-text slides may be weaker than Gemini, accepted
+- [ ] **No regression on text path** caused by VL pipeline
+
+What v1 does NOT promise (defer to v2 with full Option B vision FT):
+- ❌ Domain-specific slide VQA at Gemini quality
+- ❌ Diagram/equation interpretation matching API baseline
+- ❌ Multi-image reasoning
 
 ## Data governance
 

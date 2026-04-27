@@ -6,30 +6,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Compass, GraduationCap, PlayCircle } from "lucide-react";
-import { courseApi } from "@/lib/api";
+import { courseApi, historyApi } from "@/lib/api";
 import CourseCatalog from "@/components/course/CourseCatalog";
-import type { CourseCatalogItem } from "@/types";
-
-interface CatalogSplit {
-  enrolled: CourseCatalogItem[];
-  recommended: CourseCatalogItem[];
-  others: CourseCatalogItem[];
-}
-
-function splitCatalog(items: CourseCatalogItem[], activeSlug: string | null): CatalogSplit {
-  const enrolled: CourseCatalogItem[] = [];
-  const recommended: CourseCatalogItem[] = [];
-  const others: CourseCatalogItem[] = [];
-  for (const item of items) {
-    if (activeSlug && item.slug === activeSlug) enrolled.push(item);
-    else if (item.is_recommended) recommended.push(item);
-    else others.push(item);
-  }
-  return { enrolled, recommended, others };
-}
+import { buildUserCourseCollections } from "@/features/course-membership/presenters";
+import type { CourseCatalogItem, HistoryItem } from "@/types";
 
 export default function TutorPage() {
   const [items, setItems] = useState<CourseCatalogItem[]>([]);
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [activeUnitSlug, setActiveUnitSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,15 +34,28 @@ export default function TutorPage() {
 
   useEffect(() => {
     setLoading(true);
-    courseApi
-      .catalog({ view: "all", includeUnavailable: false })
-      .then((res) => setItems(res.items))
+    Promise.all([
+      courseApi.catalog({ view: "all", includeUnavailable: false }),
+      historyApi.list({ page_size: 100 }),
+    ])
+      .then(([catalog, history]) => {
+        setItems(catalog.items);
+        setHistoryItems(history.items);
+      })
       .catch(() => setError("Không thể tải danh sách khoá học. Vui lòng thử lại."))
       .finally(() => setLoading(false));
   }, []);
 
-  const { enrolled, recommended, others } = splitCatalog(items, activeSlug);
-  const hasNothingToShow = enrolled.length === 0 && recommended.length === 0;
+  const { activeCourse, joinedCourses, recommendedCourses } = buildUserCourseCollections(
+    items,
+    historyItems,
+    activeSlug,
+  );
+  const joinedCourseSlugs = new Set(joinedCourses.map((item) => item.slug));
+  const others = items.filter(
+    (item) => !joinedCourseSlugs.has(item.slug) && !recommendedCourses.some((course) => course.slug === item.slug),
+  );
+  const hasNothingToShow = joinedCourses.length === 0 && recommendedCourses.length === 0;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -91,7 +88,7 @@ export default function TutorPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {enrolled.length > 0 && activeUnitSlug && (
+          {activeCourse && activeUnitSlug && (
             <section
               className="flex flex-col gap-4 rounded-2xl border p-5 md:flex-row md:items-center md:justify-between"
               style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
@@ -101,14 +98,14 @@ export default function TutorPage() {
                   Tiếp tục học
                 </p>
                 <h2 className="mt-1 truncate text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-                  {enrolled[0].title}
+                  {activeCourse.title}
                 </h2>
                 <p className="mt-1 line-clamp-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                  {enrolled[0].short_description}
+                  {activeCourse.short_description}
                 </p>
               </div>
               <Link
-                href={`/courses/${enrolled[0].slug}/learn/${activeUnitSlug}`}
+                href={`/courses/${activeCourse.slug}/learn/${activeUnitSlug}`}
                 className="btn-primary flex shrink-0 items-center gap-2"
               >
                 <PlayCircle size={16} />
@@ -117,21 +114,21 @@ export default function TutorPage() {
             </section>
           )}
 
-          {enrolled.length > 0 && (
+          {joinedCourses.length > 0 && (
             <section className="space-y-3">
               <div>
                 <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
                   Khoá của bạn
                 </h2>
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  Các khoá bạn đang theo học.
+                  Các khoá bạn đã tham gia qua lịch sử học tập.
                 </p>
               </div>
-              <CourseCatalog items={enrolled} />
+              <CourseCatalog items={joinedCourses} />
             </section>
           )}
 
-          {recommended.length > 0 && (
+          {recommendedCourses.length > 0 && (
             <section className="space-y-3">
               <div>
                 <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -141,7 +138,7 @@ export default function TutorPage() {
                   Khoá phù hợp với lộ trình cá nhân hoá.
                 </p>
               </div>
-              <CourseCatalog items={recommended} />
+              <CourseCatalog items={recommendedCourses} />
             </section>
           )}
 
