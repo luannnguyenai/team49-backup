@@ -4,6 +4,7 @@ import type {
   BootstrapTopic,
   BootstrapTopicGroup,
   BootstrapTopicOption,
+  CourseSectionDetail,
 } from "@/types";
 
 export function courseSlugToCanonicalCourseId(slug: string): string {
@@ -42,6 +43,43 @@ export function normalizeBootstrapTopics(
         canonical_course_id: matchedCourse?.canonical_course_id ?? null,
       };
     });
+}
+
+export function buildBootstrapTopicsFromCanonicalSections(
+  sections: CourseSectionDetail[],
+  courses: BootstrapCourseOption[],
+): BootstrapTopicOption[] {
+  const sortedSections = [...sections].sort((left, right) => {
+    const courseCompare = (left.canonical_course_id ?? "").localeCompare(
+      right.canonical_course_id ?? "",
+    );
+    if (courseCompare !== 0) {
+      return courseCompare;
+    }
+    return left.order_index - right.order_index;
+  });
+
+  return sortedSections.flatMap((section) => {
+    const matchedCourse =
+      courses.find(
+        (course) => course.canonical_course_id === section.canonical_course_id,
+      ) ?? null;
+
+    return [...section.learning_units]
+      .sort((left, right) => left.order_index - right.order_index)
+      .map((unit) => ({
+        slug: unit.canonical_unit_id ?? unit.id,
+        module_slug: section.id,
+        name: unit.title,
+        description: unit.description ?? "",
+        order_index: section.order_index * 1000 + unit.order_index,
+        estimated_hours_beginner: unit.estimated_hours_beginner,
+        estimated_hours_intermediate: unit.estimated_hours_intermediate,
+        estimated_hours_review: null,
+        course_slug: matchedCourse?.slug ?? null,
+        canonical_course_id: section.canonical_course_id ?? null,
+      }));
+  });
 }
 
 export function buildBootstrapTopicGroups(
