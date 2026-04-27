@@ -32,6 +32,10 @@ export interface PriorAnalysisCandidatePayload {
 
 export interface PriorAnalysisResponse {
   shortlisted_topic_ids: string[];
+  topic_summaries?: Array<{
+    id: string;
+    summary: string;
+  }>;
   model_used: string;
   provider: string;
   fallback: boolean;

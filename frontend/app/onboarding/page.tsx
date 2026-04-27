@@ -8,10 +8,11 @@
 //   2  Prior profile input       (experienced flow only)
 //   3  AI topic confirmation     (experienced flow only)
 //   4  Time / schedule
-//   5  Learning method
+//   5  Assessment depth          (experienced flow only)
+//   6  Learning method
 //
-// Beginner flow:    0 → 1 → 4 → 5 → submit
-// Experienced flow: 0 → 1 → 2 → 3 → 4 → 5 → submit
+// Beginner flow:    0 → 1 → 4 → 6 → submit
+// Experienced flow: 0 → 1 → 2 → 3 → 4 → 5 → 6 → submit
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -26,6 +27,7 @@ import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
 import StepPriorKnowledgeInput from "@/components/onboarding/StepPriorKnowledgeInput";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
+import StepAssessmentDepth from "@/components/onboarding/StepAssessmentDepth";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
 import { canonicalSectionApi } from "@/lib/api";
@@ -57,13 +59,14 @@ import {
 // Step metadata — two flows share internal indices 0-4
 // ---------------------------------------------------------------------------
 
-// Experienced: 5 steps visible
+// Experienced: 7 steps visible
 const STEPS_EXPERIENCED = [
   { title: "Mục tiêu học tập",   subtitle: "Bạn muốn học gì?" },
   { title: "Kinh nghiệm",        subtitle: "Bạn đã từng học AI/ML chưa?" },
   { title: "Nền tảng hiện tại",  subtitle: "Nhập thông tin để AI phân tích" },
   { title: "Xác nhận kiến thức", subtitle: "Chọn cụm cần placement kiểm chứng" },
   { title: "Thời gian của bạn",  subtitle: "Lên lịch học phù hợp" },
+  { title: "Mức kiểm tra",       subtitle: "Chọn độ sâu bài placement" },
   { title: "Phương pháp học",    subtitle: "Cách bạn học tốt nhất" },
 ] as const;
 
@@ -81,8 +84,8 @@ const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   0: 0,
   1: 1,
   4: 2,
-  5: 3,
-  // 2 and 3 are skipped for beginners
+  6: 3,
+  // 2, 3 and 5 are skipped for beginners
 };
 
 // Steps that use the page-level nav buttons (index 4 = TimeSchedule)
@@ -95,7 +98,8 @@ const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   [],                                               // 2: Prior profile input
   [],                                               // 3: KnownTopics (optional)
   ["available_hours_per_week", "target_deadline"],  // 4: required
-  ["preferred_method"],                             // 5: required
+  [],                                               // 5: Assessment depth
+  ["preferred_method"],                             // 6: required
 ];
 
 function goalFromStore(goalIds: string[]): PlannerGoalId {
@@ -198,7 +202,7 @@ function OnboardingPageInner() {
         /* error shown from store */
       }
     },
-    [clearError, searchParams, sections, goalIds, knownUnitIds, onboard, router]
+    [assessmentDepth, clearError, searchParams, sections, goalIds, knownUnitIds, onboard, router]
   );
 
   const onSubmit = async (data: OnboardingFormData) => {
@@ -222,12 +226,20 @@ function OnboardingPageInner() {
       const valid = await trigger(fields);
       if (!valid) return;
     }
+    if (experienceLevel === "beginner" && step === 4) {
+      navigate(6);
+      return;
+    }
     navigate(step + 1);
-  }, [step, trigger, navigate]);
+  }, [experienceLevel, step, trigger, navigate]);
 
   const goBack = useCallback(() => {
     if (experienceLevel === "beginner" && step === 4) {
       navigate(1);
+      return;
+    }
+    if (experienceLevel === "beginner" && step === 6) {
+      navigate(4);
       return;
     }
     navigate(step - 1);
@@ -259,9 +271,19 @@ function OnboardingPageInner() {
         })),
       });
       const topicById = new Map(candidateTopics.map((topic) => [topic.id, topic]));
-      const apiTopics = response.shortlisted_topic_ids
-        .map((id) => topicById.get(id))
-        .filter((topic): topic is PriorCandidateTopic => Boolean(topic));
+      const summaryById = new Map(
+        (response.topic_summaries ?? []).map((item) => [item.id, item.summary]),
+      );
+      const apiTopics: PriorCandidateTopic[] = response.shortlisted_topic_ids.flatMap((id) => {
+        const topic = topicById.get(id);
+        if (!topic) return [];
+        return [
+          {
+            ...topic,
+            summary: summaryById.get(id) ?? null,
+          },
+        ];
+      });
 
       setPriorTopics(apiTopics.length > 0 ? apiTopics : fallbackTopics);
       setPriorAnalysisFallback(response.fallback || apiTopics.length === 0);
@@ -291,7 +313,7 @@ function OnboardingPageInner() {
 
   const isFirstStep = step === 0;
   const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
-  const isLastFormStep = step === 5;
+  const isLastFormStep = step === 6;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -475,8 +497,16 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 5 — Learning method */}
+                {/* Step 5 — Assessment depth (experienced flow only) */}
                 {step === 5 && (
+                  <StepAssessmentDepth
+                    onBack={() => navigate(4)}
+                    onNext={() => navigate(6)}
+                  />
+                )}
+
+                {/* Step 6 — Learning method */}
+                {step === 6 && (
                   <StepLearningMethod
                     register={register}
                     watch={watch}
@@ -508,7 +538,7 @@ function OnboardingPageInner() {
                 </div>
               )}
 
-              {/* ── Step 5 (Learning Method) nav ── */}
+              {/* ── Step 6 (Learning Method) nav ── */}
               {isLastFormStep && (
                 <div className="mt-7 flex gap-3 justify-between">
                   <Button

@@ -51,7 +51,10 @@ const sections = [
 const cvTopics = buildPriorCandidateTopics({
   goalId: "computer_vision",
   sections,
-}).confirmEligible;
+}).confirmEligible.map((topic) => ({
+  ...topic,
+  summary: "Tóm tắt CNN, kiến trúc mạng tích chập và các bài toán thị giác phổ biến.",
+}));
 
 describe("StepKnownTopicsFiltered", () => {
   const onNextMock = vi.fn();
@@ -96,7 +99,7 @@ describe("StepKnownTopicsFiltered", () => {
     expect(useOnboardingStore.getState().knownUnitIds).not.toContain("u1");
   });
 
-  it("lets the user choose assessment depth", () => {
+  it("does not render assessment depth in topic confirmation", () => {
     render(
       <StepKnownTopicsFiltered
         topics={cvTopics}
@@ -106,15 +109,11 @@ describe("StepKnownTopicsFiltered", () => {
       />,
     );
 
-    expect(screen.getByText("Nhanh")).toBeInTheDocument();
-    expect(screen.getByText("tối đa 15 câu")).toBeInTheDocument();
-    expect(screen.getByText("easy/medium")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: /Kỹ/i }));
-    expect(useOnboardingStore.getState().assessmentDepth).toBe("deep");
+    expect(screen.queryByText("Mức kiểm tra")).not.toBeInTheDocument();
+    expect(screen.queryByText("Nhanh")).not.toBeInTheDocument();
   });
 
-  it("eye button reveals representative units without showing them by default", () => {
+  it("eye button reveals a summarized representative content preview", () => {
     render(
       <StepKnownTopicsFiltered
         topics={cvTopics}
@@ -125,6 +124,25 @@ describe("StepKnownTopicsFiltered", () => {
     );
 
     expect(screen.queryByText("Conv Basics")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Xem nhanh CNN architectures" }));
+    expect(
+      screen.getByText("Tóm tắt CNN, kiến trúc mạng tích chập và các bài toán thị giác phổ biến."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("- Conv Basics")).not.toBeInTheDocument();
+  });
+
+  it("falls back to raw representative units when no AI summary exists", () => {
+    const topicsWithoutSummary = cvTopics.map(({ summary: _summary, ...topic }) => topic);
+
+    render(
+      <StepKnownTopicsFiltered
+        topics={topicsWithoutSummary}
+        onNext={onNextMock}
+        onBack={onBackMock}
+        onSkipAll={onSkipAllMock}
+      />,
+    );
+
     fireEvent.click(screen.getByRole("button", { name: "Xem nhanh CNN architectures" }));
     expect(screen.getByText("- Conv Basics")).toBeInTheDocument();
   });
