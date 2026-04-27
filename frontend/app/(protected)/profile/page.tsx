@@ -13,6 +13,7 @@ import type {
 } from "@/types";
 import RadarChart from "@/components/assessment/RadarChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { countJoinedCourseSlugs } from "@/features/course-membership/presenters";
 import { SKILL_COLORS } from "@/lib/ui/skillColors";
 
 const DEFAULT_SKILLS: UserSkillSnapshot[] = [
@@ -243,7 +244,7 @@ export default function ProfilePage() {
                 <StatRow
                   icon={<Trophy className="h-4 w-4 text-emerald-600" />}
                   iconBg="bg-emerald-100 dark:bg-emerald-900/30"
-                  label="Hoàn thành"
+                  label="Phiên đã hoàn thành"
                   value={String(completedSessions)}
                 />
                 <StatRow
