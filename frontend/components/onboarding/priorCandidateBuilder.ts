@@ -29,6 +29,12 @@ export interface PriorAnalysisTopicMetadata {
   level?: PriorTopicLevel | null;
 }
 
+interface CuratedTopicCopy {
+  pattern: RegExp;
+  label: string;
+  summary: string;
+}
+
 const GOAL_COURSE_IDS: Record<PlannerGoalId, string[]> = {
   computer_vision: ["cs230", "cs231n"],
   nlp: ["cs230", "cs224n"],
@@ -47,6 +53,183 @@ const CV_HIDDEN_TITLE_PATTERN = /3d vision|robot learning|distributed training/i
 
 const NLP_CONTEXT_TITLE_PATTERN = /python tutorial|pytorch tutorial|hugging ?face tutorial|coding/i;
 
+const CURATED_TOPIC_COPY: CuratedTopicCopy[] = [
+  {
+    pattern: /supervised,\s*self-supervised,\s*and weakly supervised learning/i,
+    label: "Supervised, self-supervised, and weakly supervised learning",
+    summary:
+      "Learn how labels, pseudo-labels, supervision strength, and weak supervision shape common neural network training setups.",
+  },
+  {
+    pattern: /full cycle of a deep learning project/i,
+    label: "Full cycle of a deep learning project",
+    summary:
+      "Learn how to move from data splits and metrics to bias-variance diagnosis, error analysis, and model iteration.",
+  },
+  {
+    pattern: /adversarial robustness and generative models/i,
+    label: "Adversarial robustness and generative modeling",
+    summary:
+      "Learn how models can fail under adversarial inputs and how generative models create new data-like samples.",
+  },
+  {
+    pattern: /deep reinforcement learning/i,
+    label: "Deep reinforcement learning and agents",
+    summary:
+      "Learn the basics of agents, rewards, policies, and value-based learning for decision-making systems.",
+  },
+  {
+    pattern: /ai project strategy/i,
+    label: "AI project strategy and error analysis",
+    summary:
+      "Learn practical ways to prioritize data, metrics, model changes, and error buckets during an AI project.",
+  },
+  {
+    pattern: /beyond the model|enhancing llm applications/i,
+    label: "LLM application patterns",
+    summary:
+      "Learn how retrieval, tools, prompting, and evaluation improve real-world LLM applications beyond the base model.",
+  },
+  {
+    pattern: /what is going on inside my model|inside my model/i,
+    label: "Model interpretability for computer vision",
+    summary:
+      "Learn how to inspect what CNNs and vision transformers focus on using saliency, activation maps, and related visualization tools.",
+  },
+  {
+    pattern: /image classification with linear classifiers/i,
+    label: "Image classification with simple linear models",
+    summary:
+      "Learn how k-NN, linear classifiers, SVM, and softmax build the foundation for image classification.",
+  },
+  {
+    pattern: /regularization and optimization/i,
+    label: "Regularization and training optimization",
+    summary:
+      "Learn how regularization, optimization choices, and validation behavior affect neural network training.",
+  },
+  {
+    pattern: /neural networks and backpropagation|backpropagation,\s*neural network/i,
+    label: "Neural networks and backpropagation",
+    summary:
+      "Learn how fully connected neural networks compute predictions and use backpropagation to update weights.",
+  },
+  {
+    pattern: /image classification with cnns/i,
+    label: "CNN-based image classification",
+    summary:
+      "Learn how convolution, pooling, normalization, and local receptive fields make CNNs effective for image classification.",
+  },
+  {
+    pattern: /cnn architectures|convolutional nets|convolutional neural/i,
+    label: "CNN architecture design",
+    summary:
+      "Learn how architectures such as AlexNet, VGG, ResNet, and transfer learning improve CNN performance.",
+  },
+  {
+    pattern: /recurrent neural networks/i,
+    label: "Recurrent neural networks for sequence data",
+    summary:
+      "Learn how recurrent models process ordered inputs and why sequence modeling matters for language and vision tasks.",
+  },
+  {
+    pattern: /attention and transformers|self-attention and transformers/i,
+    label: "Attention and transformer models",
+    summary:
+      "Learn how attention lets models focus on relevant tokens or patches and why transformers became the default architecture.",
+  },
+  {
+    pattern: /object detection|image segmentation|visualizing and understanding/i,
+    label: "Object detection and image segmentation",
+    summary:
+      "Learn how models localize objects, segment pixels, and connect classification features to detection and segmentation tasks.",
+  },
+  {
+    pattern: /video understanding/i,
+    label: "Video understanding",
+    summary:
+      "Learn how vision models handle motion, temporal context, and actions across frames instead of single images.",
+  },
+  {
+    pattern: /self-supervised learning/i,
+    label: "Self-supervised visual representation learning",
+    summary:
+      "Learn how contrastive and pretext tasks help vision models learn useful features without manual labels.",
+  },
+  {
+    pattern: /generative models/i,
+    label: "Generative vision models",
+    summary:
+      "Learn how generative models such as VAEs, GANs, and diffusion-style methods create or transform images.",
+  },
+  {
+    pattern: /vision and language/i,
+    label: "Vision-language models",
+    summary:
+      "Learn how image encoders and language models connect visual content with captions, retrieval, and multimodal reasoning.",
+  },
+  {
+    pattern: /intro and word vectors|word vectors and language models|word vectors/i,
+    label: "Word vectors and language modeling",
+    summary:
+      "Learn how words become vectors and how language models use context to predict and represent text.",
+  },
+  {
+    pattern: /dependency parsing/i,
+    label: "Dependency parsing",
+    summary:
+      "Learn how NLP systems represent grammatical relationships between words and use parsing for sentence structure.",
+  },
+  {
+    pattern: /sequence to sequence/i,
+    label: "Sequence-to-sequence models",
+    summary:
+      "Learn how encoder-decoder models transform one sequence into another for tasks like translation and summarization.",
+  },
+  {
+    pattern: /pretraining/i,
+    label: "Pretraining and foundation models",
+    summary:
+      "Learn why large models are pretrained on broad data before being adapted to downstream tasks.",
+  },
+  {
+    pattern: /post-training/i,
+    label: "Post-training and alignment",
+    summary:
+      "Learn how instruction tuning, preference optimization, and alignment steps adapt pretrained models for users.",
+  },
+  {
+    pattern: /natural language generation/i,
+    label: "Natural language generation",
+    summary:
+      "Learn how language models generate fluent text and how decoding choices affect output quality and behavior.",
+  },
+  {
+    pattern: /reasoning and agents|agents/i,
+    label: "LLM reasoning and agents",
+    summary:
+      "Learn how LLMs plan, use tools, follow multi-step reasoning patterns, and act as agentic systems.",
+  },
+  {
+    pattern: /python tutorial/i,
+    label: "Python coding basics",
+    summary:
+      "Review Python syntax and basic programming patterns used throughout AI coursework.",
+  },
+  {
+    pattern: /pytorch tutorial/i,
+    label: "PyTorch coding basics",
+    summary:
+      "Review tensors, modules, training loops, and the core PyTorch workflow for neural networks.",
+  },
+  {
+    pattern: /hugging ?face tutorial/i,
+    label: "Hugging Face tooling",
+    summary:
+      "Review the Hugging Face workflow for loading models, tokenizers, datasets, and common NLP pipelines.",
+  },
+];
+
 function normalizeCourseId(courseId: string | null | undefined): string {
   return courseId?.trim().toLowerCase() ?? "";
 }
@@ -57,6 +240,14 @@ function stripLecturePrefix(title: string): string {
     .replace(/\s+by\s+.+$/i, "")
     .replace(/,\s+[A-Z][A-Za-z .'-]+$/g, "")
     .trim();
+}
+
+function curatedCopyForSectionTitle(title: string): { label: string; summary: string } | null {
+  const normalizedTitle = stripLecturePrefix(title);
+  const copy = CURATED_TOPIC_COPY.find(
+    (item) => item.pattern.test(title) || item.pattern.test(normalizedTitle),
+  );
+  return copy ? { label: copy.label, summary: copy.summary } : null;
 }
 
 export function displayLabelForSectionTitle(title: string): string {
@@ -123,12 +314,14 @@ function classifyVisibility(goalId: PlannerGoalId, title: string): PriorTopicVis
 
 function toCandidateTopic(goalId: PlannerGoalId, section: CourseSectionDetail): PriorCandidateTopic {
   const visibility = classifyVisibility(goalId, section.title);
+  const curatedCopy = curatedCopyForSectionTitle(section.title);
   return {
     id: section.id,
     courseId: normalizeCourseId(section.canonical_course_id),
     rawTitle: section.title,
-    displayLabel: displayLabelForSectionTitle(section.title),
+    displayLabel: curatedCopy?.label ?? displayLabelForSectionTitle(section.title),
     visibility,
+    summary: curatedCopy?.summary ?? null,
     units: [...section.learning_units].sort(
       (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0),
     ),
@@ -222,9 +415,9 @@ export function mergePriorAnalysisIntoCandidates(
 
     return {
       ...topic,
-      aiDisplayLabel: item.label ?? null,
+      aiDisplayLabel: item.label ?? topic.aiDisplayLabel ?? null,
       suggestedLevel: item.level ?? null,
-      summary: item.summary ?? null,
+      summary: item.summary?.trim() ? item.summary : topic.summary ?? null,
     };
   });
 }

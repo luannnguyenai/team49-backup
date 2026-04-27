@@ -214,7 +214,7 @@ function OnboardingPageInner() {
           id: topic.id,
           display_label: topic.displayLabel,
           raw_title: topic.rawTitle,
-          unit_titles: topic.units.map((unit) => unit.title),
+          unit_titles: [],
         })),
       });
       const analyzedTopics = mergePriorAnalysisIntoCandidates(

@@ -123,7 +123,7 @@ describe("prior candidate builder", () => {
       sections,
     });
 
-    expect(topics.confirmEligible.map((topic) => topic.displayLabel)).toContain("CNN architectures");
+    expect(topics.confirmEligible.map((topic) => topic.displayLabel)).toContain("CNN architecture design");
     expect(topics.hidden.map((topic) => topic.rawTitle)).toContain("Lecture 1: Introduction to Deep Learning");
     expect(topics.hidden.map((topic) => topic.rawTitle)).toContain("Lecture 8: Career Advice in AI");
     expect(topics.hidden.map((topic) => topic.rawTitle)).toContain("Lecture 18: Human-Centered AI");
@@ -172,6 +172,49 @@ describe("prior candidate builder", () => {
       aiDisplayLabel: "CNN architecture design",
       summary: "Covers AlexNet, VGG, and ResNet.",
       suggestedLevel: "confident",
+    });
+  });
+
+  it("uses curated web copy before AI analysis and keeps it when AI only returns level", () => {
+    const topics = buildPriorCandidateTopics({
+      goalId: "computer_vision",
+      sections: [
+        {
+          id: "cv-interpretability",
+          course_id: "c-cv",
+          canonical_course_id: "cs231n",
+          title: "Lecture 9: What Is Going On Inside My Model?",
+          description: null,
+          order_index: 9,
+          prerequisite_section_ids: null,
+          learning_units_count: 1,
+          learning_units: [
+            {
+              id: "interp-u",
+              title: "Class activation maps",
+              description: null,
+              order_index: 0,
+              estimated_hours_beginner: 1,
+              estimated_hours_intermediate: 0.5,
+            },
+          ],
+        },
+      ],
+    }).confirmEligible;
+
+    expect(topics[0]).toMatchObject({
+      displayLabel: "Model interpretability for computer vision",
+      summary: "Learn how to inspect what CNNs and vision transformers focus on using saliency, activation maps, and related visualization tools.",
+    });
+
+    const merged = mergePriorAnalysisIntoCandidates(topics, [
+      { id: "cv-interpretability", level: "not_started" },
+    ]);
+
+    expect(merged[0]).toMatchObject({
+      displayLabel: "Model interpretability for computer vision",
+      summary: "Learn how to inspect what CNNs and vision transformers focus on using saliency, activation maps, and related visualization tools.",
+      suggestedLevel: "not_started",
     });
   });
 });
