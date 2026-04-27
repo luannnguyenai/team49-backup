@@ -118,6 +118,15 @@ class Session(UUIDPrimaryKeyMixin, Base):
         ForeignKey("course_sections.id", ondelete="SET NULL"),
         nullable=True,
     )
+    # Commit C: audit fields for strategy and theta tracking
+    selection_strategy: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    calibration_mode: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    theta_initial: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    theta_final: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    theta_sigma_initial: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    theta_sigma_final: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    target_se: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    stop_reason: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
 
     user: Mapped["User"] = relationship("User", back_populates="sessions")  # type: ignore[name-defined]
     interactions: Mapped[list["Interaction"]] = relationship(
@@ -172,6 +181,17 @@ class Interaction(UUIDPrimaryKeyMixin, Base):
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+    # Commit C: audit fields for strategy and IRT theta snapshot
+    selection_strategy: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    theta_before: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    theta_after: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    theta_sigma_before: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    theta_sigma_after: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    predicted_probability: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    item_information: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    item_difficulty_at_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    item_discrimination_at_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    item_guessing_at_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
     user: Mapped["User"] = relationship("User", back_populates="interactions")  # type: ignore[name-defined]
     session: Mapped["Session"] = relationship("Session", back_populates="interactions")

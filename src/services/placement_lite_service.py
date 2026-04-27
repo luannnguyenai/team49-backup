@@ -75,6 +75,10 @@ async def start_placement_lite_session(
     # Commit B: populate audit fields
     calibration_mode = "prior_only"  # Commit B: all cold-start, no calibration yet
 
+    # Commit C: theta initialization (aggregate from learner_mastery_kp per unit)
+    theta_initial = 0.0  # Default: new user or no prior mastery
+    theta_sigma_initial = 1.0  # Default uncertainty
+
     session = Session(
         user_id=user_id,
         session_type=SessionType.assessment,
@@ -83,6 +87,11 @@ async def start_placement_lite_session(
         canonical_phase="placement_lite",
         total_questions=len(items),
         correct_count=0,
+        # Commit B/C: audit fields
+        selection_strategy=strategy.name,
+        calibration_mode=calibration_mode,
+        theta_initial=theta_initial,
+        theta_sigma_initial=theta_sigma_initial,
     )
     db.add(session)
     await db.flush()
