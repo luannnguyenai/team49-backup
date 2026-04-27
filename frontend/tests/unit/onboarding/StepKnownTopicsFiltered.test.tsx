@@ -118,7 +118,7 @@ describe("StepKnownTopicsFiltered", () => {
     expect(suggested).toContain("u1");
   });
 
-  it("hides AI-confident topics while keeping uncertain topics visible", () => {
+  it("hides AI-confident topics while keeping all remaining candidate topics visible", () => {
     render(
       <StepKnownTopicsFiltered
         topics={[
@@ -132,6 +132,12 @@ describe("StepKnownTopicsFiltered", () => {
             aiDisplayLabel: "Maybe CNN details",
             suggestedLevel: "reviewed",
           },
+          {
+            ...cvTopics[0],
+            id: "not-mentioned",
+            aiDisplayLabel: "Not mentioned topic",
+            suggestedLevel: null,
+          },
         ]}
         onNext={onNextMock}
         onBack={onBackMock}
@@ -141,6 +147,7 @@ describe("StepKnownTopicsFiltered", () => {
 
     expect(screen.queryByText("CNN architectures")).not.toBeInTheDocument();
     expect(screen.getByText("Maybe CNN details")).toBeInTheDocument();
+    expect(screen.getByText("Not mentioned topic")).toBeInTheDocument();
   });
 
   it("rewrites unclear lecture titles into learner-friendly labels", () => {
