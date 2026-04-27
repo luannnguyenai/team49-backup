@@ -21,4 +21,18 @@ describe("auth middleware public route handling", () => {
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toContain("/dashboard");
   });
+
+  it("preserves redirect query strings when an authenticated user lands on an auth page", () => {
+    const request = new NextRequest(
+      "http://localhost:3000/login?next=%2Fassessment%3Fnext%3D%252Fdashboard",
+    );
+    request.cookies.set("al_access_token", "token");
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/assessment?next=%2Fdashboard",
+    );
+  });
 });
