@@ -34,6 +34,8 @@ class HistoryItem(BaseModel):
 
     # Subject: learning unit title for quiz/assessment rows, section title for module_test
     subject: str
+    course_id: uuid.UUID | None
+    course_slug: str | None
     learning_unit_id: uuid.UUID | None
     section_id: uuid.UUID | None
 
