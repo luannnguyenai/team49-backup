@@ -7,25 +7,22 @@
 //   1  Experience level
 //   2  Prior profile input       (experienced flow only)
 //   3  AI topic confirmation     (experienced flow only)
-//   4  Time / schedule
-//   5  Assessment depth          (experienced flow only)
+//   4  Assessment depth          (experienced flow only)
 //
-// Beginner flow:    0 → 1 → 4 → submit
-// Experienced flow: 0 → 1 → 2 → 3 → 4 → 5 → submit
+// Beginner flow:    0 → 1 → submit
+// Experienced flow: 0 → 1 → 2 → 3 → 4 → submit
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Brain, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Brain } from "lucide-react";
 
-import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import StepGoalSelection from "@/components/onboarding/StepGoalSelection";
 import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
 import StepPriorKnowledgeInput from "@/components/onboarding/StepPriorKnowledgeInput";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
-import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepAssessmentDepth from "@/components/onboarding/StepAssessmentDepth";
 
 import { canonicalSectionApi } from "@/lib/api";
@@ -57,43 +54,27 @@ import {
 // Step metadata — two flows share internal indices 0-4
 // ---------------------------------------------------------------------------
 
-// Experienced: 6 steps visible
+// Experienced: 5 steps visible
 const STEPS_EXPERIENCED = [
   { title: "Mục tiêu học tập",   subtitle: "Bạn muốn học gì?" },
   { title: "Kinh nghiệm",        subtitle: "Bạn đã từng học AI/ML chưa?" },
   { title: "Nền tảng hiện tại",  subtitle: "Nhập thông tin để AI phân tích" },
   { title: "Xác nhận kiến thức", subtitle: "Chọn cụm cần placement kiểm chứng" },
-  { title: "Thời gian của bạn",  subtitle: "Lên lịch học phù hợp" },
   { title: "Mức kiểm tra",       subtitle: "Chọn độ sâu bài placement" },
 ] as const;
 
-// Beginner: 3 visible steps (internal indices 0, 1, 4)
+// Beginner: 2 visible steps (internal indices 0, 1)
 const STEPS_BEGINNER = [
   { title: "Mục tiêu học tập",  subtitle: "Bạn muốn học gì?" },
   { title: "Kinh nghiệm",       subtitle: "Bạn đã từng học AI/ML chưa?" },
-  { title: "Thời gian của bạn", subtitle: "Lên lịch học phù hợp" },
 ] as const;
 
 // Maps internal step index → beginner display index (-1 = hidden/skipped)
 const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   0: 0,
   1: 1,
-  4: 2,
-  // 2, 3 and 5 are skipped for beginners
+  // 2, 3 and 4 are skipped for beginners
 };
-
-// Steps that use the page-level nav buttons (index 4 = TimeSchedule)
-const STEPS_WITH_PAGE_NAV = new Set([4]);
-
-// Form fields validated before advancing from each internal step
-const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
-  [],                                               // 0: GoalSelection
-  [],                                               // 1: ExperienceLevel
-  [],                                               // 2: Prior profile input
-  [],                                               // 3: KnownTopics (optional)
-  ["available_hours_per_week", "target_deadline"],  // 4: required
-  [],                                               // 5: Assessment depth
-];
 
 function goalFromStore(goalIds: string[]): PlannerGoalId {
   return goalIds.includes("nlp") ? "nlp" : "computer_vision";
@@ -123,7 +104,7 @@ function OnboardingPageInner() {
   const [analyzingPrior, setAnalyzingPrior] = useState(false);
 
   // ── React Hook Form ───────────────────────────────────────────────────────
-  const { register, handleSubmit, watch, trigger, formState: { errors } } =
+  const { handleSubmit } =
     useForm<OnboardingFormData>({
       resolver: zodResolver(onboardingSchema),
       defaultValues: {
@@ -132,7 +113,7 @@ function OnboardingPageInner() {
         desired_section_ids: [],
         selected_course_ids: [],
         available_hours_per_week: 5,
-        target_deadline: "",
+        target_deadline: undefined,
         preferred_method: "video",
       },
     });
@@ -198,10 +179,6 @@ function OnboardingPageInner() {
     [assessmentDepth, clearError, searchParams, sections, goalIds, knownUnitIds, onboard, router]
   );
 
-  const onSubmit = async (data: OnboardingFormData) => {
-    await submitOnboarding(data);
-  };
-
   // ── Navigation ────────────────────────────────────────────────────────────
   const navigate = useCallback(
     (targetStep: number) => {
@@ -212,23 +189,6 @@ function OnboardingPageInner() {
     },
     [step, clearError]
   );
-
-  const goNext = useCallback(async () => {
-    const fields = STEP_VALIDATION_FIELDS[step];
-    if (fields.length > 0) {
-      const valid = await trigger(fields);
-      if (!valid) return;
-    }
-    navigate(step + 1);
-  }, [step, trigger, navigate]);
-
-  const goBack = useCallback(() => {
-    if (experienceLevel === "beginner" && step === 4) {
-      navigate(1);
-      return;
-    }
-    navigate(step - 1);
-  }, [experienceLevel, step, navigate]);
 
   const runPriorAnalysis = useCallback(async () => {
     const selectedGoal = goalFromStore(goalIds);
@@ -295,10 +255,6 @@ function OnboardingPageInner() {
 
   const progressPercent = Math.round(((displayIdx + 1) / totalSteps) * 100);
   const { title, subtitle } = STEPS[displayIdx] ?? STEPS[STEPS.length - 1];
-
-  const isFirstStep = step === 0;
-  const isLastFormStep = isBeginner && step === 4;
-  const showPageNav = STEPS_WITH_PAGE_NAV.has(step) && !isLastFormStep;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -404,7 +360,7 @@ function OnboardingPageInner() {
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(submitOnboarding)}>
               <div
                 key={animKey}
                 className={
@@ -431,7 +387,7 @@ function OnboardingPageInner() {
                         const store = useOnboardingStore.getState();
                         store.setKnownUnitIds([]);
                         store.setSkipPlacementAssessment(true);
-                        navigate(4); // skip prior analysis + known topics → Schedule
+                        handleSubmit(submitOnboarding)();
                       } else {
                         navigate(2);
                       }
@@ -471,19 +427,10 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 4 — Schedule */}
+                {/* Step 4 — Assessment depth (experienced flow only) */}
                 {step === 4 && (
-                  <StepTimeSchedule
-                    register={register}
-                    errors={errors}
-                    watch={watch}
-                  />
-                )}
-
-                {/* Step 5 — Assessment depth (experienced flow only) */}
-                {step === 5 && (
                   <StepAssessmentDepth
-                    onBack={() => navigate(4)}
+                    onBack={() => navigate(3)}
                     onNext={() => {
                       handleSubmit(submitOnboarding)();
                     }}
@@ -492,57 +439,6 @@ function OnboardingPageInner() {
                 )}
               </div>
 
-              {/* ── Page-level nav (Step 4: Schedule only) ── */}
-              {showPageNav && (
-                <div className={cn("mt-7 flex gap-3", isFirstStep ? "justify-end" : "justify-between")}>
-                  {!isFirstStep && (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={goBack}
-                      leftIcon={<ChevronLeft className="h-4 w-4" />}
-                    >
-                      Quay lại
-                    </Button>
-                  )}
-                  <Button
-                    type="button"
-                    onClick={goNext}
-                    rightIcon={<ChevronRight className="h-4 w-4" />}
-                  >
-                    Tiếp tục
-                  </Button>
-                </div>
-              )}
-
-              {/* ── Beginner final nav (Schedule) ── */}
-              {isLastFormStep && (
-                <div className="mt-7 flex gap-3 justify-between">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={goBack}
-                    leftIcon={<ChevronLeft className="h-4 w-4" />}
-                  >
-                    Quay lại
-                  </Button>
-                  <Button
-                    type="button"
-                    disabled={isLoading}
-                    onClick={async () => {
-                      const fields = STEP_VALIDATION_FIELDS[step];
-                      if (fields.length > 0) {
-                        const valid = await trigger(fields);
-                        if (!valid) return;
-                      }
-                      handleSubmit(submitOnboarding)();
-                    }}
-                    rightIcon={<Sparkles className="h-4 w-4" />}
-                  >
-                    {isLoading ? "Đang xử lý..." : "Hoàn tất"}
-                  </Button>
-                </div>
-              )}
             </form>
           )}
         </div>
