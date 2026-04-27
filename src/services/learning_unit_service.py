@@ -21,7 +21,6 @@ import re
 from typing import Any
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_paths import CS231N_DIR, UNITS_FILE as BOOTSTRAP_UNITS_FILE
 from src.data_paths import CS224N_DIR, CS230_DIR
@@ -33,7 +32,6 @@ from src.models.course import (
     LearningProgressStatus,
     LearningUnit,
 )
-from src.models.store import Lecture
 from src.schemas.course import (
     LearningUnitContentPayload,
     LearningUnitCourseSummary,
@@ -261,7 +259,7 @@ async def get_learning_unit_payload(
     tutor_enabled = (
         unit_row["status"] == "ready"
         and video_url is not None
-        and await _legacy_tutor_lecture_exists(runtime_lecture_id)
+        and runtime_lecture_id is not None
     )
     tutor_bridge = build_tutor_bridge_payload(
         tutor_enabled=tutor_enabled,
@@ -371,32 +369,6 @@ async def _get_completed_learning_unit_ids(
         return set()
 
 
-async def _legacy_tutor_lecture_exists(
-    lecture_id: str | None,
-    *,
-    db: AsyncSession | None = None,
-) -> bool:
-    if not lecture_id:
-        return False
-
-    if db is not None:
-        result = await db.execute(
-            select(Lecture.id).where(Lecture.id == lecture_id).limit(1)
-        )
-        return result.scalar_one_or_none() is not None
-
-    try:
-        from src.database import async_session_factory
-
-        async with async_session_factory() as db:
-            result = await db.execute(
-                select(Lecture.id).where(Lecture.id == lecture_id).limit(1)
-            )
-            return result.scalar_one_or_none() is not None
-    except Exception:
-        return False
-
-
 def _course_dir_for_slug(course_slug: str) -> Path | None:
     if course_slug == "cs231n":
         return CS231N_DIR
@@ -473,7 +445,7 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
             )
             tutor_enabled = (
                 video_url is not None
-                and await _legacy_tutor_lecture_exists(runtime_lecture_id, db=db)
+                and runtime_lecture_id is not None
             )
 
             tutor_bridge = build_tutor_bridge_payload(

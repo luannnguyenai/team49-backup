@@ -151,11 +151,73 @@ Watch:
 throttling (5060 Ti can hit 80°C+ under sustained load — clean fans, ensure
 case airflow).
 
-## Estimated training time
+## Estimated training time (target, NOT guarantee)
+
+These numbers assume happy-path Blackwell wheels and stable Unsloth
+kernels. Actual time can be 2–3x higher on first run due to compile/jit
+overhead. Treat as target; record actual in `runs/<run_id>/metrics.json`.
 
 - 10k samples × 3 epochs / (effective batch 16) = ~1875 steps
 - 5060 Ti at ~0.7 it/s with bs=2 ctx=4096 VL = ~2700s ≈ **45 min per epoch**
-- Plus vision samples are heavier: realistic **2–4 hours total**
+- Plus vision samples are heavier: realistic **2–4 hours total** (target)
+- First run includes ~10–20 min compile/jit overhead
+
+## Tiny overfit gate (MANDATORY before full train)
+
+Before committing to a full multi-hour run, prove the loss can drop on a
+deliberately tiny dataset. This catches misconfigured loss masking,
+broken data collator, or wrong target_modules.
+
+Procedure:
+1. Take 16 random training samples from `data/sft/train.jsonl`
+2. Run train with `max_steps=80, per_device_train_batch_size=2,
+   grad_accum=1, lr=5e-4` (bigger LR for fast overfit)
+3. Loss MUST drop from initial value to **< 0.1** by step 80 (the model
+   should be able to memorize 16 samples if config is correct)
+4. Sample-decode the 16 samples after train: model should reproduce
+   answers near-verbatim
+
+If tiny overfit fails: stop. Likely causes:
+- Loss not masking the user/system prompts (model only sees assistant
+  tokens for loss); verify `train_on_responses_only` or equivalent
+- Data collator dropping image tokens; fix `UnslothVisionDataCollator`
+- Wrong `target_modules`; broaden to `all-linear`
+
+Output: append to `runs/<run_id>/tiny_overfit.json`:
+```json
+{"initial_loss": 3.4, "final_loss_step80": 0.06, "passed": true,
+ "decoded_match_rate": "16/16"}
+```
+
+## Run metadata + reproducibility (MANDATORY)
+
+Every training run produces a `runs/<run_id>/` directory:
+
+```
+fine-tune-chatbot/runs/<run_id>/
+├── config.yaml             # full hyperparameters used (incl. seed, target_modules)
+├── train_command.sh        # exact CLI invoked (env vars, args)
+├── manifest_hash.txt       # sha256 of data/sft/manifest.json (proves dataset version)
+├── git_commit.txt          # `git rev-parse HEAD` of repo at train start
+├── env-frozen.txt          # `uv pip freeze` output
+├── tiny_overfit.json       # gate result (above)
+├── tensorboard/            # event files
+├── checkpoint-<step>/      # per save_steps
+├── metrics.json            # final train/eval metrics, wallclock, throughput
+└── model_card.md           # auto-generated summary (base, dataset hash, eval scores)
+```
+
+`run_id` format: `tutor-vl3b-{YYYYMMDD-HHMM}-{git_short_sha}`.
+
+Resume protocol (e.g., GPU OOM mid-run, power loss):
+```bash
+python scripts/train/train_tutor.py --resume_from_checkpoint runs/<run_id>/checkpoint-1200
+```
+
+The script must accept `--resume_from_checkpoint` and pass through to
+`trainer.train(resume_from_checkpoint=...)`. After resume, append a new
+entry to `metrics.json["resumes"]` with timestamp + reason, do NOT
+overwrite original metrics.
 
 ## Post-train sanity check
 
@@ -182,10 +244,16 @@ before merging.
 
 ## Exit criteria
 
+- [ ] **Tiny overfit gate passes** (loss < 0.1 on 16 samples × 80 steps)
 - [ ] Best `eval_loss` ≤ 1.5 (rough heuristic — depends on data)
 - [ ] No OOM, no NaN losses
 - [ ] `models/tutor-vl3b-v1-merged/` exists with valid `config.json` +
       tokenizer + safetensors
-- [ ] 5 manual sample outputs look reasonable (subjective gate)
-- [ ] Tool-call format preserved in at least one of 5 samples (look for
-      `<tool_call>` tags or function-call JSON)
+- [ ] **Tool-call format check on 50 tool-required prompts via vLLM** (not 5):
+  - ≥ 90% emit valid `tool_calls` field per `--tool-call-parser hermes`
+  - 100% of populated `tool_calls[].function.arguments` parse as valid JSON
+  - This re-runs the P0.5 gate with the production-trained adapter
+- [ ] **Run metadata complete**: `runs/<run_id>/` contains `config.yaml`,
+      `train_command.sh`, `manifest_hash.txt`, `git_commit.txt`,
+      `env-frozen.txt`, `metrics.json`, `model_card.md`
+- [ ] Resume from latest checkpoint verified working (smoke restart)
