@@ -162,7 +162,7 @@ function OnboardingPageInner() {
         const next = searchParams.get("next");
         const canonicalContext = buildCanonicalAssessmentContext({
           sections,
-          knownUnitIds: data.known_unit_ids,
+          knownUnitIds: knownUnitIds,
           desiredSectionIds: data.desired_section_ids,
         });
         await onboard({
