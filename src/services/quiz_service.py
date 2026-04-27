@@ -774,6 +774,10 @@ def _quiz_checkpoint_for_session(session: Session) -> str | None:
 
 
 def _should_complete_learning_unit(session: Session) -> bool:
+    """A lesson completes after standalone quiz completion or the final inline quiz.
+
+    Video watch progress is resume/analytics state only and must not gate completion.
+    """
     checkpoint = _quiz_checkpoint_for_session(session)
     if checkpoint is None:
         return True
