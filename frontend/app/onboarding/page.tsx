@@ -24,10 +24,10 @@ import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
 import { bootstrapDataApi, canonicalSectionApi } from "@/lib/api";
 import {
+  buildBootstrapTopicsFromCanonicalSections,
   buildBootstrapTopicGroups,
   estimateSelectedCourseHours,
   normalizeBootstrapCourses,
-  normalizeBootstrapTopics,
 } from "@/lib/bootstrap-onboarding";
 import {
   buildCanonicalAssessmentContext,
@@ -117,9 +117,8 @@ function OnboardingPageInner() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [courses, topics, list] = await Promise.all([
+        const [courses, list] = await Promise.all([
           bootstrapDataApi.courses(),
-          bootstrapDataApi.topics(),
           canonicalSectionApi.list(),
         ]);
         const details = await Promise.all(
@@ -127,7 +126,9 @@ function OnboardingPageInner() {
         );
         const normalizedCourses = normalizeBootstrapCourses(courses);
         setBootstrapCourses(normalizedCourses);
-        setBootstrapTopics(normalizeBootstrapTopics(topics, normalizedCourses));
+        setBootstrapTopics(
+          buildBootstrapTopicsFromCanonicalSections(details, normalizedCourses),
+        );
         setCanonicalSections(details);
       } catch {
         // Keep bootstrap/canonical lists empty; user can still complete the form
