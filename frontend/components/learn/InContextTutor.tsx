@@ -17,6 +17,7 @@ interface ChatMessage {
   content: string;
   rating?: number | null;
   isPending?: boolean;
+  statusText?: string | null;
 }
 
 interface InContextTutorProps {
@@ -76,8 +77,9 @@ export default function InContextTutor({
     const userMsg: ChatMessage = { role: "user", content: q };
     const aiPlaceholder: ChatMessage = {
       role: "ai",
-      content: "Dang tra loi...",
+      content: "",
       isPending: true,
+      statusText: "Dang tra loi...",
     };
 
     setMessages((prev) => [...prev, userMsg, aiPlaceholder]);
@@ -170,7 +172,11 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, content: fullText || data.status, isPending: !fullText }
+                    ? {
+                        ...m,
+                        isPending: !fullText,
+                        statusText: String(data.status),
+                      }
                     : m,
                 ),
               );
@@ -179,7 +185,9 @@ export default function InContextTutor({
               fullText += data.a;
               setMessages((prev) =>
                 prev.map((m, i) =>
-                  i === aiIdx ? { ...m, content: fullText, isPending: false } : m,
+                  i === aiIdx
+                    ? { ...m, content: fullText, isPending: false, statusText: null }
+                    : m,
                 ),
               );
             }
@@ -219,7 +227,11 @@ export default function InContextTutor({
                   setMessages((prev) =>
                     prev.map((m, i) =>
                       i === aiIdx
-                        ? { ...m, content: fullText || data.status, isPending: !fullText }
+                        ? {
+                            ...m,
+                            isPending: !fullText,
+                            statusText: String(data.status),
+                          }
                         : m,
                     ),
                   );
@@ -228,7 +240,9 @@ export default function InContextTutor({
                   fullText += data.a;
                   setMessages((prev) =>
                     prev.map((m, i) =>
-                      i === aiIdx ? { ...m, content: fullText, isPending: false } : m,
+                      i === aiIdx
+                        ? { ...m, content: fullText, isPending: false, statusText: null }
+                        : m,
                     ),
                   );
                 }
@@ -350,7 +364,7 @@ export default function InContextTutor({
                 msg.isPending ? (
                   <div className="flex items-center gap-2 text-slate-500">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>{msg.content}</span>
+                    <span>{msg.statusText || "Dang tra loi..."}</span>
                   </div>
                 ) : (
                   <div className="prose prose-sm prose-slate max-w-none">
