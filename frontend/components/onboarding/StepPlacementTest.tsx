@@ -68,15 +68,22 @@ export default function StepPlacementTest({ unitIds, onComplete, onSkip }: Props
 
   const [topicDecisions, setTopicDecisions] = useState<TopicDecision[] | null>(null);
 
-  const aliveRef = useRef(true);
-  useEffect(() => () => { aliveRef.current = false; }, []);
+  // Tracks mount state for handleSubmit (useEffect-managed so StrictMode remount resets it).
+  const isMountedRef = useRef(false);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   // ── Fetch questions on mount ──────────────────────────────────────────────
   useEffect(() => {
+    // Local flag — correct under StrictMode (each effect invocation gets its own closure).
+    let mounted = true;
+
     // 20-second UI timeout independent of axios; shows actionable error instead
     // of an infinite spinner if the backend hangs past the axios 15s timeout.
     const timeoutId = setTimeout(() => {
-      if (aliveRef.current && loading) {
+      if (mounted) {
         setTimedOut(true);
         setLoading(false);
       }
@@ -85,7 +92,7 @@ export default function StepPlacementTest({ unitIds, onComplete, onSkip }: Props
     async function load() {
       try {
         const res = await startPlacementAssessment(unitIds);
-        if (!aliveRef.current) return;
+        if (!mounted) return;
 
         clearTimeout(timeoutId);
 
@@ -99,13 +106,13 @@ export default function StepPlacementTest({ unitIds, onComplete, onSkip }: Props
         setQuestions(res.questions);
         setBackendSessionId(res.session_id);
       } catch {
-        if (aliveRef.current) {
+        if (mounted) {
           clearTimeout(timeoutId);
           setError("Không thể tải câu hỏi. Vui lòng thử lại.");
           setLoading(false);
         }
       } finally {
-        if (aliveRef.current) {
+        if (mounted) {
           clearTimeout(timeoutId);
           setLoading(false);
         }
@@ -114,7 +121,7 @@ export default function StepPlacementTest({ unitIds, onComplete, onSkip }: Props
 
     load();
 
-    return () => clearTimeout(timeoutId);
+    return () => { mounted = false; clearTimeout(timeoutId); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally run once — unitIds stable after mount at this step
 
@@ -133,12 +140,12 @@ export default function StepPlacementTest({ unitIds, onComplete, onSkip }: Props
         session_id: backendSessionId,
         answers: answerList,
       });
-      if (!aliveRef.current) return;
+      if (!isMountedRef.current) return;
       setTopicDecisions(res.topic_decisions);
     } catch {
-      if (aliveRef.current) setError("Gửi bài thất bại. Vui lòng thử lại.");
+      if (isMountedRef.current) setError("Gửi bài thất bại. Vui lòng thử lại.");
     } finally {
-      if (aliveRef.current) setSubmitting(false);
+      if (isMountedRef.current) setSubmitting(false);
     }
   }
 
