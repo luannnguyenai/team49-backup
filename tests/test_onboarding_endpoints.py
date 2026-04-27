@@ -29,6 +29,7 @@ from src.services.onboarding_service import (
     _derive_course_ids,
     _all_course_ids,
     _COURSE_TO_GOAL,
+    _parse_prior_analysis_response,
     save_user_goals,
     save_known_topics,
 )
@@ -176,6 +177,32 @@ class TestCourseToGoalMap(unittest.TestCase):
     def test_cs224n_maps_to_nlp(self):
         self.assertEqual(_COURSE_TO_GOAL.get("cs224n"), "nlp")
 
+
+class TestPriorAnalysisParsing(unittest.TestCase):
+    def test_parse_topics_with_summaries(self):
+        ids, summaries = _parse_prior_analysis_response(
+            json.dumps(
+                {
+                    "topics": [
+                        {"id": "cnn", "summary": "Tóm tắt CNN ngắn gọn."},
+                        {"id": "invalid", "summary": "ignored"},
+                    ]
+                }
+            ),
+            {"cnn"},
+        )
+
+        self.assertEqual(ids, ["cnn"])
+        self.assertEqual(summaries, {"cnn": "Tóm tắt CNN ngắn gọn."})
+
+    def test_parse_legacy_shortlisted_topic_ids(self):
+        ids, summaries = _parse_prior_analysis_response(
+            json.dumps({"shortlisted_topic_ids": ["cnn"]}),
+            {"cnn"},
+        )
+
+        self.assertEqual(ids, ["cnn"])
+        self.assertEqual(summaries, {})
 
 # ---------------------------------------------------------------------------
 # Service async tests (mocked DB)

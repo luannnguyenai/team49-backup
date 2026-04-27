@@ -17,6 +17,7 @@ import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
 import StepPriorKnowledgeInput from "@/components/onboarding/StepPriorKnowledgeInput";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
+import StepAssessmentDepth from "@/components/onboarding/StepAssessmentDepth";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
 import { bootstrapDataApi, canonicalSectionApi } from "@/lib/api";
@@ -88,8 +89,8 @@ const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   0: 0,
   1: 1,
   4: 2,
-  5: 3,
-  // 2 and 3 are skipped for beginners
+  6: 3,
+  // 2, 3 and 5 are skipped for beginners
 };
 
 // Steps that use the page-level nav buttons (index 4 = TimeSchedule)
@@ -272,8 +273,12 @@ function OnboardingPageInner() {
       const valid = await trigger(fields);
       if (!valid) return;
     }
+    if (experienceLevel === "beginner" && step === 4) {
+      navigate(6);
+      return;
+    }
     navigate(step + 1);
-  }, [step, trigger, navigate]);
+  }, [experienceLevel, step, trigger, navigate]);
 
   const goBack = useCallback(() => {
     clearError();
@@ -351,7 +356,7 @@ function OnboardingPageInner() {
 
   const isFirstStep = step === 0;
   const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
-  const isLastFormStep = step === 5;
+  const isLastFormStep = step === 6;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -519,8 +524,16 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 5 — Learning method */}
+                {/* Step 5 — Assessment depth (experienced flow only) */}
                 {step === 5 && (
+                  <StepAssessmentDepth
+                    onBack={() => navigate(4)}
+                    onNext={() => navigate(6)}
+                  />
+                )}
+
+                {/* Step 6 — Learning method */}
+                {step === 6 && (
                   <StepLearningMethod
                     register={register}
                     watch={watch}

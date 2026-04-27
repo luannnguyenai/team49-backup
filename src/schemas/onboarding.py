@@ -103,8 +103,14 @@ class PriorAnalysisRequest(BaseModel):
         return v
 
 
+class PriorAnalysisTopicSummary(BaseModel):
+    id: str
+    summary: str
+
+
 class PriorAnalysisResponse(BaseModel):
     shortlisted_topic_ids: list[str]
+    topic_summaries: list[PriorAnalysisTopicSummary] = []
     model_used: str
     provider: str
     fallback: bool = False

@@ -10,6 +10,7 @@ export interface PriorCandidateTopic {
   rawTitle: string;
   displayLabel: string;
   visibility: PriorTopicVisibility;
+  summary?: string | null;
   units: LearningUnitSelectionItem[];
 }
 

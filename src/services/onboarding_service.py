@@ -26,6 +26,7 @@ from src.schemas.onboarding import (
     KnownTopicsResponse,
     PriorAnalysisRequest,
     PriorAnalysisResponse,
+    PriorAnalysisTopicSummary,
     SectionSummary,
     TopicsResponse,
     UnitSummary,
@@ -48,11 +49,12 @@ Given a learner's self-reported background and a list of candidate course topics
 choose only the common topics that should be confirmed with the learner before placement.
 
 Rules:
-- Return JSON only: {"shortlisted_topic_ids": ["topic-id", ...]}.
+- Return JSON only: {"topics": [{"id": "topic-id", "summary": "Vietnamese one-sentence summary"}]}.
 - Select at most 8 topic IDs.
 - Prefer topics explicitly mentioned by the learner or strongly implied by coding/tools.
 - Keep common topics such as CNNs, transformers, agents, Python, PyTorch, HuggingFace when relevant.
 - Do not select niche/admin topics unless clearly requested.
+- Summary must be one concise Vietnamese sentence based on unit_titles, rewritten so learners understand the topic without raw lecture numbering.
 - Self-report is not mastery; this shortlist only decides what to ask next.
 """
 
@@ -106,7 +108,7 @@ def _fallback_prior_shortlist(body: PriorAnalysisRequest) -> list[str]:
     ]
 
 
-def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> list[str]:
+def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> tuple[list[str], dict[str, str]]:
     text = raw.strip()
     if text.startswith("```"):
         text = text.split("```")[1]
@@ -114,15 +116,32 @@ def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> list[str]:
             text = text[4:]
         text = text.strip()
     payload = json.loads(text)
-    ids = payload.get("shortlisted_topic_ids", [])
-    if not isinstance(ids, list):
-        return []
 
     result: list[str] = []
+    summaries: dict[str, str] = {}
+
+    topics = payload.get("topics")
+    if isinstance(topics, list):
+        for item in topics:
+            if not isinstance(item, dict):
+                continue
+            topic_id = item.get("id")
+            if not isinstance(topic_id, str) or topic_id not in valid_ids or topic_id in result:
+                continue
+            result.append(topic_id)
+            summary = item.get("summary")
+            if isinstance(summary, str) and summary.strip():
+                summaries[topic_id] = summary.strip()
+        return result[:_PRIOR_ANALYSIS_LIMIT], summaries
+
+    ids = payload.get("shortlisted_topic_ids", [])
+    if not isinstance(ids, list):
+        return [], {}
+
     for value in ids:
         if isinstance(value, str) and value in valid_ids and value not in result:
             result.append(value)
-    return result[:_PRIOR_ANALYSIS_LIMIT]
+    return result[:_PRIOR_ANALYSIS_LIMIT], {}
 
 
 async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResponse:
@@ -134,6 +153,7 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
     if not body.candidates:
         return PriorAnalysisResponse(
             shortlisted_topic_ids=[],
+            topic_summaries=[],
             model_used=DEFAULT_MODEL,
             provider=settings.model_provider,
             fallback=True,
@@ -175,19 +195,26 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
                 HumanMessage(content=user_text),
             ]
         )
-        shortlisted = _parse_prior_analysis_response(str(response.content), valid_ids)
+        shortlisted, summary_map = _parse_prior_analysis_response(str(response.content), valid_ids)
         if not shortlisted:
             shortlisted = _fallback_prior_shortlist(body)
+            summary_map = {}
             fallback = True
         else:
             fallback = False
     except Exception as exc:
         logger.warning("prior analysis LLM failed; using fallback: %s", exc)
         shortlisted = _fallback_prior_shortlist(body)
+        summary_map = {}
         fallback = True
 
     return PriorAnalysisResponse(
         shortlisted_topic_ids=shortlisted,
+        topic_summaries=[
+            PriorAnalysisTopicSummary(id=topic_id, summary=summary)
+            for topic_id, summary in summary_map.items()
+            if topic_id in shortlisted
+        ],
         model_used=DEFAULT_MODEL,
         provider=settings.model_provider,
         fallback=fallback,
