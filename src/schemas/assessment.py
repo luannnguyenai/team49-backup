@@ -57,6 +57,15 @@ class AssessmentStartResponse(BaseModel):
     session_id: uuid.UUID
     total_questions: int
     questions: list[QuestionForAssessment]
+    # Commit B: audit fields (ADD-only, backwards compatible)
+    selection_strategy: str | None = Field(
+        default=None,
+        description="Strategy used for item selection (legacy | random_uniform | spread_by_prior | irt_adaptive)",
+    )
+    calibration_mode: str | None = Field(
+        default=None,
+        description="Calibration mode (prior_only | calibrated_2pl | calibrated_3pl)",
+    )
 
 
 # ===========================================================================

@@ -6,6 +6,7 @@ from typing import Protocol
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import Settings
 from src.exceptions import ValidationError
 from src.models.learning import Session, SessionType
 from src.repositories.canonical_question_repo import CanonicalQuestionRepository
@@ -64,10 +65,15 @@ async def start_placement_lite_session(
     if not pool:
         raise ValidationError("No canonical placement questions found for selected courses.")
 
-    strategy = get_strategy(mode="legacy")  # Commit A: default to legacy for regression
+    # Commit B: use configured strategy (default: spread_by_prior)
+    settings = Settings()
+    strategy = get_strategy(mode=settings.cold_start_mode)
     items = await strategy.select(pool, n=count)
     if not items:
         raise ValidationError("Strategy selection returned no items.")
+
+    # Commit B: populate audit fields
+    calibration_mode = "prior_only"  # Commit B: all cold-start, no calibration yet
 
     session = Session(
         user_id=user_id,
@@ -82,10 +88,17 @@ async def start_placement_lite_session(
     await db.flush()
     await db.refresh(session)
 
+    log.info(
+        f"placement_lite start: user={user_id} strategy={strategy.name} "
+        f"total_items={len(items)} calibration_mode={calibration_mode}"
+    )
+
     return PlacementLiteStartResponse(
         session_id=session.id,
         total_questions=len(items),
         questions=[_canonical_item_to_assessment_question(item) for item in items],
         selected_course_ids=course_ids,
         sampled_canonical_unit_ids=canonical_unit_ids,
+        selection_strategy=strategy.name,
+        calibration_mode=calibration_mode,
     )

@@ -11,6 +11,8 @@ log = logging.getLogger(__name__)
 
 # Ensure strategies are registered on import
 from src.services.placement.strategies.legacy_selector import LegacySelectorStrategy  # noqa: F401, E402
+from src.services.placement.strategies.random_uniform import RandomUniformStrategy  # noqa: F401, E402
+from src.services.placement.strategies.spread_by_prior import SpreadByPriorStrategy  # noqa: F401, E402
 
 
 def get_strategy(
