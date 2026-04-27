@@ -9,10 +9,9 @@
 //   3  AI topic confirmation     (experienced flow only)
 //   4  Time / schedule
 //   5  Assessment depth          (experienced flow only)
-//   6  Learning method
 //
-// Beginner flow:    0 → 1 → 4 → 6 → submit
-// Experienced flow: 0 → 1 → 2 → 3 → 4 → 5 → 6 → submit
+// Beginner flow:    0 → 1 → 4 → submit
+// Experienced flow: 0 → 1 → 2 → 3 → 4 → 5 → submit
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -28,7 +27,6 @@ import StepPriorKnowledgeInput from "@/components/onboarding/StepPriorKnowledgeI
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepAssessmentDepth from "@/components/onboarding/StepAssessmentDepth";
-import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
 import { canonicalSectionApi } from "@/lib/api";
 import {
@@ -59,7 +57,7 @@ import {
 // Step metadata — two flows share internal indices 0-4
 // ---------------------------------------------------------------------------
 
-// Experienced: 7 steps visible
+// Experienced: 6 steps visible
 const STEPS_EXPERIENCED = [
   { title: "Mục tiêu học tập",   subtitle: "Bạn muốn học gì?" },
   { title: "Kinh nghiệm",        subtitle: "Bạn đã từng học AI/ML chưa?" },
@@ -67,16 +65,13 @@ const STEPS_EXPERIENCED = [
   { title: "Xác nhận kiến thức", subtitle: "Chọn cụm cần placement kiểm chứng" },
   { title: "Thời gian của bạn",  subtitle: "Lên lịch học phù hợp" },
   { title: "Mức kiểm tra",       subtitle: "Chọn độ sâu bài placement" },
-  { title: "Phương pháp học",    subtitle: "Cách bạn học tốt nhất" },
 ] as const;
 
-// Beginner: 5 visible steps (internal indices 0, 1, 3, 4 + done)
+// Beginner: 3 visible steps (internal indices 0, 1, 4)
 const STEPS_BEGINNER = [
   { title: "Mục tiêu học tập",  subtitle: "Bạn muốn học gì?" },
   { title: "Kinh nghiệm",       subtitle: "Bạn đã từng học AI/ML chưa?" },
   { title: "Thời gian của bạn", subtitle: "Lên lịch học phù hợp" },
-  { title: "Phương pháp học",   subtitle: "Cách bạn học tốt nhất" },
-  { title: "Sinh lộ trình",     subtitle: "Hoàn tất thiết lập" },
 ] as const;
 
 // Maps internal step index → beginner display index (-1 = hidden/skipped)
@@ -84,7 +79,6 @@ const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   0: 0,
   1: 1,
   4: 2,
-  6: 3,
   // 2, 3 and 5 are skipped for beginners
 };
 
@@ -99,7 +93,6 @@ const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   [],                                               // 3: KnownTopics (optional)
   ["available_hours_per_week", "target_deadline"],  // 4: required
   [],                                               // 5: Assessment depth
-  ["preferred_method"],                             // 6: required
 ];
 
 function goalFromStore(goalIds: string[]): PlannerGoalId {
@@ -140,7 +133,7 @@ function OnboardingPageInner() {
         selected_course_ids: [],
         available_hours_per_week: 5,
         target_deadline: "",
-        preferred_method: undefined,
+        preferred_method: "video",
       },
     });
 
@@ -226,20 +219,12 @@ function OnboardingPageInner() {
       const valid = await trigger(fields);
       if (!valid) return;
     }
-    if (experienceLevel === "beginner" && step === 4) {
-      navigate(6);
-      return;
-    }
     navigate(step + 1);
-  }, [experienceLevel, step, trigger, navigate]);
+  }, [step, trigger, navigate]);
 
   const goBack = useCallback(() => {
     if (experienceLevel === "beginner" && step === 4) {
       navigate(1);
-      return;
-    }
-    if (experienceLevel === "beginner" && step === 6) {
-      navigate(4);
       return;
     }
     navigate(step - 1);
@@ -312,8 +297,8 @@ function OnboardingPageInner() {
   const { title, subtitle } = STEPS[displayIdx] ?? STEPS[STEPS.length - 1];
 
   const isFirstStep = step === 0;
-  const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
-  const isLastFormStep = step === 6;
+  const isLastFormStep = isBeginner && step === 4;
+  const showPageNav = STEPS_WITH_PAGE_NAV.has(step) && !isLastFormStep;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -492,8 +477,6 @@ function OnboardingPageInner() {
                     register={register}
                     errors={errors}
                     watch={watch}
-                    selectedCourseCount={goalIds.length}
-                    totalHours={0}
                   />
                 )}
 
@@ -501,16 +484,10 @@ function OnboardingPageInner() {
                 {step === 5 && (
                   <StepAssessmentDepth
                     onBack={() => navigate(4)}
-                    onNext={() => navigate(6)}
-                  />
-                )}
-
-                {/* Step 6 — Learning method */}
-                {step === 6 && (
-                  <StepLearningMethod
-                    register={register}
-                    watch={watch}
-                    errors={errors}
+                    onNext={() => {
+                      handleSubmit(submitOnboarding)();
+                    }}
+                    nextLabel="Hoàn tất"
                   />
                 )}
               </div>
@@ -538,7 +515,7 @@ function OnboardingPageInner() {
                 </div>
               )}
 
-              {/* ── Step 6 (Learning Method) nav ── */}
+              {/* ── Beginner final nav (Schedule) ── */}
               {isLastFormStep && (
                 <div className="mt-7 flex gap-3 justify-between">
                   <Button

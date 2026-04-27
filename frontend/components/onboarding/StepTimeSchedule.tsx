@@ -1,9 +1,9 @@
 "use client";
 // components/onboarding/StepTimeSchedule.tsx
 // Step 3 — "Thời gian của bạn"
-// Range slider (hours/week) + date picker + weeks-estimate preview.
+// Range slider (hours/week) + date picker.
 
-import { Calendar, Clock, TrendingUp } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import type { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import type { OnboardingFormData } from "@/lib/onboarding-schema";
@@ -12,8 +12,6 @@ interface Props {
   register: UseFormRegister<OnboardingFormData>;
   errors: FieldErrors<OnboardingFormData>;
   watch: UseFormWatch<OnboardingFormData>;
-  selectedCourseCount: number;
-  totalHours: number;
 }
 
 // Minimum selectable date: tomorrow
@@ -27,11 +25,8 @@ export default function StepTimeSchedule({
   register,
   errors,
   watch,
-  selectedCourseCount,
-  totalHours,
 }: Props) {
   const hours = watch("available_hours_per_week") ?? 5;
-  const weeksNeeded = hours > 0 ? Math.ceil(totalHours / hours) : null;
 
   return (
     <div className="space-y-6">
@@ -98,33 +93,6 @@ export default function StepTimeSchedule({
           <p className="error-msg">{errors.target_deadline.message}</p>
         )}
       </div>
-
-      {/* ── Estimate preview ── */}
-      {selectedCourseCount > 0 && weeksNeeded !== null && (
-        <div className="rounded-xl border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/20 p-4">
-          <div className="flex items-start gap-3">
-            <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-primary-600" />
-            <div>
-              <p className="text-sm font-semibold text-primary-700 dark:text-primary-300">
-                Dự kiến hoàn thành
-              </p>
-              <p
-                className="mt-1 text-sm leading-relaxed"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                Với{" "}
-                <strong className="text-primary-600">
-                  {Number(hours) % 1 === 0 ? hours : Number(hours).toFixed(1)} giờ/tuần
-                </strong>
-                , bạn cần khoảng{" "}
-                <strong className="text-primary-600">{weeksNeeded} tuần</strong> để
-                hoàn thành {selectedCourseCount} khóa học được chọn (
-                {totalHours.toFixed(1)} giờ nội dung).
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );
