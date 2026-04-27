@@ -78,8 +78,15 @@ log_ok "GEMINI_API_KEY đã cấu hình"
 for COURSE_ID in CS230 CS231n CS224n; do
   COURSE_DIR="data/courses/${COURSE_ID}"
   if [ -d "$COURSE_DIR" ]; then
-    VIDEO_COUNT=$(find "$COURSE_DIR/videos" -name "*.mp4" 2>/dev/null | wc -l)
-    TRANSCRIPT_COUNT=$(find "$COURSE_DIR/transcripts" \( -name "*.txt" -o -name "*.json" \) 2>/dev/null | wc -l)
+    VIDEO_COUNT=0
+    if [ -d "$COURSE_DIR/videos" ]; then
+      VIDEO_COUNT=$(find "$COURSE_DIR/videos" -name "*.mp4" 2>/dev/null | wc -l)
+    fi
+    
+    TRANSCRIPT_COUNT=0
+    if [ -d "$COURSE_DIR/transcripts" ]; then
+      TRANSCRIPT_COUNT=$(find "$COURSE_DIR/transcripts" \( -name "*.txt" -o -name "*.json" \) 2>/dev/null | wc -l)
+    fi
     log_ok "Data ${COURSE_ID}: ${VIDEO_COUNT} videos, ${TRANSCRIPT_COUNT} transcripts"
   else
     log_warn "Không tìm thấy ${COURSE_DIR}/ — course này sẽ thiếu lecture assets"
