@@ -7,8 +7,7 @@ Create Date: 2026-04-27
 
 from collections.abc import Sequence
 
-import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
+from sqlalchemy import text
 
 from alembic import op
 
@@ -18,202 +17,198 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
+def _add_col_if_not_exists(conn, table: str, col: str, col_def: str) -> None:
+    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_def}"))
+
+
+def _create_index_if_not_exists(conn, name: str, table: str, col: str) -> None:
+    conn.execute(text(f"CREATE INDEX IF NOT EXISTS {name} ON {table}({col})"))
+
+
 def upgrade() -> None:
-    jsonb = postgresql.JSONB(astext_type=sa.Text())
+    conn = op.get_bind()
 
-    op.add_column("courses", sa.Column("course_config", jsonb, nullable=True))
+    # --- courses ---
+    _add_col_if_not_exists(conn, "courses", "course_config", "JSONB")
 
-    op.add_column(
-        "learning_units",
-        sa.Column("has_quiz_items", sa.Boolean(), nullable=False, server_default=sa.false()),
-    )
-    op.add_column("learning_units", sa.Column("salience_decision", sa.String(length=40), nullable=True))
+    # --- learning_units ---
+    _add_col_if_not_exists(conn, "learning_units", "has_quiz_items", "BOOLEAN NOT NULL DEFAULT FALSE")
+    _add_col_if_not_exists(conn, "learning_units", "salience_decision", "VARCHAR(40)")
 
-    op.add_column("units", sa.Column("content_hash", sa.String(length=128), nullable=True))
-    op.add_column("units", sa.Column("active", sa.Boolean(), nullable=False, server_default=sa.true()))
-    op.add_column("units", sa.Column("deprecated_at", sa.DateTime(timezone=True), nullable=True))
-    op.add_column("units", sa.Column("deprecated_reason", sa.Text(), nullable=True))
-    op.add_column("units", sa.Column("content_type", sa.String(length=80), nullable=True))
-    op.add_column("units", sa.Column("content_type_confidence", sa.String(length=40), nullable=True))
-    op.add_column("units", sa.Column("is_worth_learning", sa.Boolean(), nullable=True))
-    op.add_column("units", sa.Column("salience_score", sa.String(length=40), nullable=True))
-    op.add_column("units", sa.Column("salience_confidence", sa.String(length=40), nullable=True))
-    op.add_column(
-        "units",
-        sa.Column("override_critical_kp", sa.Boolean(), nullable=False, server_default=sa.false()),
-    )
-    op.add_column("units", sa.Column("has_quiz_items", sa.Boolean(), nullable=False, server_default=sa.false()))
+    # --- units (may already exist from 20260430_units_cat_fields) ---
+    _add_col_if_not_exists(conn, "units", "content_hash", "VARCHAR(128)")
+    _add_col_if_not_exists(conn, "units", "active", "BOOLEAN NOT NULL DEFAULT TRUE")
+    _add_col_if_not_exists(conn, "units", "deprecated_at", "TIMESTAMPTZ")
+    _add_col_if_not_exists(conn, "units", "deprecated_reason", "TEXT")
+    _add_col_if_not_exists(conn, "units", "content_type", "VARCHAR(80)")
+    _add_col_if_not_exists(conn, "units", "content_type_confidence", "VARCHAR(40)")
+    _add_col_if_not_exists(conn, "units", "is_worth_learning", "BOOLEAN")
+    _add_col_if_not_exists(conn, "units", "salience_score", "VARCHAR(40)")
+    _add_col_if_not_exists(conn, "units", "salience_confidence", "VARCHAR(40)")
+    _add_col_if_not_exists(conn, "units", "override_critical_kp", "BOOLEAN NOT NULL DEFAULT FALSE")
+    _add_col_if_not_exists(conn, "units", "has_quiz_items", "BOOLEAN NOT NULL DEFAULT FALSE")
 
-    op.add_column("concepts_kp", sa.Column("content_hash", sa.String(length=128), nullable=True))
-    op.add_column("concepts_kp", sa.Column("active", sa.Boolean(), nullable=False, server_default=sa.true()))
-    op.add_column("concepts_kp", sa.Column("deprecated_at", sa.DateTime(timezone=True), nullable=True))
-    op.add_column("concepts_kp", sa.Column("deprecated_reason", sa.Text(), nullable=True))
-    op.add_column(
-        "concepts_kp",
-        sa.Column("description_embedding_version", sa.String(length=120), nullable=True),
-    )
+    # --- concepts_kp ---
+    _add_col_if_not_exists(conn, "concepts_kp", "content_hash", "VARCHAR(128)")
+    _add_col_if_not_exists(conn, "concepts_kp", "active", "BOOLEAN NOT NULL DEFAULT TRUE")
+    _add_col_if_not_exists(conn, "concepts_kp", "deprecated_at", "TIMESTAMPTZ")
+    _add_col_if_not_exists(conn, "concepts_kp", "deprecated_reason", "TEXT")
+    _add_col_if_not_exists(conn, "concepts_kp", "description_embedding_version", "VARCHAR(120)")
 
-    op.add_column("prerequisite_edges", sa.Column("evidence_ledger", jsonb, nullable=True))
-    op.add_column(
-        "prerequisite_edges",
-        sa.Column("active", sa.Boolean(), nullable=False, server_default=sa.true()),
-    )
-    op.add_column("prerequisite_edges", sa.Column("deprecated_at", sa.DateTime(timezone=True), nullable=True))
-    op.add_column("prerequisite_edges", sa.Column("deprecated_reason", sa.Text(), nullable=True))
-    op.add_column("prerequisite_edges", sa.Column("edge_kind", sa.String(length=40), nullable=True))
-    op.add_column("prerequisite_edges", sa.Column("adjudication_trace", jsonb, nullable=True))
+    # --- prerequisite_edges ---
+    _add_col_if_not_exists(conn, "prerequisite_edges", "evidence_ledger", "JSONB")
+    _add_col_if_not_exists(conn, "prerequisite_edges", "active", "BOOLEAN NOT NULL DEFAULT TRUE")
+    _add_col_if_not_exists(conn, "prerequisite_edges", "deprecated_at", "TIMESTAMPTZ")
+    _add_col_if_not_exists(conn, "prerequisite_edges", "deprecated_reason", "TEXT")
+    _add_col_if_not_exists(conn, "prerequisite_edges", "edge_kind", "VARCHAR(40)")
+    _add_col_if_not_exists(conn, "prerequisite_edges", "adjudication_trace", "JSONB")
 
-    op.add_column("pruned_edges", sa.Column("active", sa.Boolean(), nullable=False, server_default=sa.false()))
-    op.add_column("pruned_edges", sa.Column("deprecated_at", sa.DateTime(timezone=True), nullable=True))
-    op.add_column("pruned_edges", sa.Column("deprecated_reason", sa.Text(), nullable=True))
-    op.add_column("pruned_edges", sa.Column("adjudication_trace", jsonb, nullable=True))
+    # --- pruned_edges ---
+    _add_col_if_not_exists(conn, "pruned_edges", "active", "BOOLEAN NOT NULL DEFAULT FALSE")
+    _add_col_if_not_exists(conn, "pruned_edges", "deprecated_at", "TIMESTAMPTZ")
+    _add_col_if_not_exists(conn, "pruned_edges", "deprecated_reason", "TEXT")
+    _add_col_if_not_exists(conn, "pruned_edges", "adjudication_trace", "JSONB")
 
-    op.add_column("sessions", sa.Column("selection_strategy", sa.String(length=80), nullable=True))
-    op.add_column("sessions", sa.Column("calibration_mode", sa.String(length=80), nullable=True))
-    op.add_column("sessions", sa.Column("theta_initial", sa.Float(), nullable=True))
-    op.add_column("sessions", sa.Column("theta_final", sa.Float(), nullable=True))
-    op.add_column("sessions", sa.Column("theta_sigma_initial", sa.Float(), nullable=True))
-    op.add_column("sessions", sa.Column("theta_sigma_final", sa.Float(), nullable=True))
-    op.add_column("sessions", sa.Column("target_se", sa.Float(), nullable=True))
-    op.add_column("sessions", sa.Column("stop_reason", sa.String(length=120), nullable=True))
+    # --- sessions ---
+    _add_col_if_not_exists(conn, "sessions", "selection_strategy", "VARCHAR(80)")
+    _add_col_if_not_exists(conn, "sessions", "calibration_mode", "VARCHAR(80)")
+    _add_col_if_not_exists(conn, "sessions", "theta_initial", "FLOAT")
+    _add_col_if_not_exists(conn, "sessions", "theta_final", "FLOAT")
+    _add_col_if_not_exists(conn, "sessions", "theta_sigma_initial", "FLOAT")
+    _add_col_if_not_exists(conn, "sessions", "theta_sigma_final", "FLOAT")
+    _add_col_if_not_exists(conn, "sessions", "target_se", "FLOAT")
+    _add_col_if_not_exists(conn, "sessions", "stop_reason", "VARCHAR(120)")
 
-    op.add_column("interactions", sa.Column("selection_strategy", sa.String(length=80), nullable=True))
-    op.add_column("interactions", sa.Column("theta_before", sa.Float(), nullable=True))
-    op.add_column("interactions", sa.Column("theta_after", sa.Float(), nullable=True))
-    op.add_column("interactions", sa.Column("theta_sigma_before", sa.Float(), nullable=True))
-    op.add_column("interactions", sa.Column("theta_sigma_after", sa.Float(), nullable=True))
-    op.add_column("interactions", sa.Column("predicted_probability", sa.Float(), nullable=True))
-    op.add_column("interactions", sa.Column("item_information", sa.Float(), nullable=True))
-    op.add_column("interactions", sa.Column("item_difficulty_at_time", sa.Float(), nullable=True))
-    op.add_column("interactions", sa.Column("item_discrimination_at_time", sa.Float(), nullable=True))
-    op.add_column("interactions", sa.Column("item_guessing_at_time", sa.Float(), nullable=True))
+    # --- interactions ---
+    _add_col_if_not_exists(conn, "interactions", "selection_strategy", "VARCHAR(80)")
+    _add_col_if_not_exists(conn, "interactions", "theta_before", "FLOAT")
+    _add_col_if_not_exists(conn, "interactions", "theta_after", "FLOAT")
+    _add_col_if_not_exists(conn, "interactions", "theta_sigma_before", "FLOAT")
+    _add_col_if_not_exists(conn, "interactions", "theta_sigma_after", "FLOAT")
+    _add_col_if_not_exists(conn, "interactions", "predicted_probability", "FLOAT")
+    _add_col_if_not_exists(conn, "interactions", "item_information", "FLOAT")
+    _add_col_if_not_exists(conn, "interactions", "item_difficulty_at_time", "FLOAT")
+    _add_col_if_not_exists(conn, "interactions", "item_discrimination_at_time", "FLOAT")
+    _add_col_if_not_exists(conn, "interactions", "item_guessing_at_time", "FLOAT")
 
-    op.add_column("item_calibration", sa.Column("standard_error_a", sa.Float(), nullable=True))
-    op.add_column("item_calibration", sa.Column("standard_error_c", sa.Float(), nullable=True))
-    op.add_column("item_calibration", sa.Column("calibration_run_id", sa.String(length=160), nullable=True))
-    op.add_column(
-        "item_calibration",
-        sa.Column("calibration_dataset_version", sa.String(length=120), nullable=True),
-    )
-    op.add_column(
-        "item_calibration",
-        sa.Column("real_response_count", sa.Integer(), nullable=False, server_default="0"),
-    )
-    op.add_column(
-        "item_calibration",
-        sa.Column("synthetic_response_count", sa.Integer(), nullable=False, server_default="0"),
-    )
+    # --- item_calibration (may already exist from 20260429_calibration_tables) ---
+    _add_col_if_not_exists(conn, "item_calibration", "standard_error_a", "FLOAT")
+    _add_col_if_not_exists(conn, "item_calibration", "standard_error_c", "FLOAT")
+    _add_col_if_not_exists(conn, "item_calibration", "calibration_run_id", "VARCHAR(160)")
+    _add_col_if_not_exists(conn, "item_calibration", "calibration_dataset_version", "VARCHAR(120)")
+    _add_col_if_not_exists(conn, "item_calibration", "real_response_count", "INTEGER NOT NULL DEFAULT 0")
+    _add_col_if_not_exists(conn, "item_calibration", "synthetic_response_count", "INTEGER NOT NULL DEFAULT 0")
 
-    op.create_table(
-        "ingest_runs",
-        sa.Column("run_id", sa.String(length=160), primary_key=True),
-        sa.Column("course_id", sa.String(length=80), nullable=True),
-        sa.Column("run_type", sa.String(length=80), nullable=False),
-        sa.Column("input_hashes", jsonb, nullable=True),
-        sa.Column("artifact_version", sa.String(length=120), nullable=True),
-        sa.Column("status", sa.String(length=40), nullable=False),
-        sa.Column("metrics_json", jsonb, nullable=True),
-        sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-    )
+    # --- standalone tables (IF NOT EXISTS to handle prior migration) ---
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS ingest_runs (
+            run_id VARCHAR(160) PRIMARY KEY,
+            course_id VARCHAR(80),
+            run_type VARCHAR(80) NOT NULL,
+            input_hashes JSONB,
+            artifact_version VARCHAR(120),
+            status VARCHAR(40) NOT NULL,
+            metrics_json JSONB,
+            started_at TIMESTAMPTZ,
+            finished_at TIMESTAMPTZ,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """))
 
-    op.create_table(
-        "kp_migration",
-        sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
-        sa.Column("run_id", sa.String(length=160), nullable=True),
-        sa.Column("migration_type", sa.String(length=80), nullable=False),
-        sa.Column("source_kp_id", sa.String(length=160), nullable=False),
-        sa.Column("target_kp_id", sa.String(length=160), nullable=True),
-        sa.Column("status", sa.String(length=80), nullable=False),
-        sa.Column("rationale", sa.Text(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-    )
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS kp_migration (
+            id BIGSERIAL PRIMARY KEY,
+            run_id VARCHAR(160),
+            migration_type VARCHAR(80) NOT NULL,
+            source_kp_id VARCHAR(160) NOT NULL,
+            target_kp_id VARCHAR(160),
+            status VARCHAR(80) NOT NULL,
+            rationale TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """))
 
-    op.create_table(
-        "calibration_runs",
-        sa.Column("run_id", sa.String(length=160), primary_key=True),
-        sa.Column("method", sa.String(length=80), nullable=False),
-        sa.Column("dataset_version", sa.String(length=120), nullable=True),
-        sa.Column("real_response_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("synthetic_response_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("status", sa.String(length=40), nullable=False),
-        sa.Column("active", sa.Boolean(), nullable=False, server_default=sa.false()),
-        sa.Column("metrics_json", jsonb, nullable=True),
-        sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-    )
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS calibration_runs (
+            run_id VARCHAR(160) PRIMARY KEY,
+            method VARCHAR(80) NOT NULL,
+            dataset_version VARCHAR(120),
+            real_response_count INTEGER NOT NULL DEFAULT 0,
+            synthetic_response_count INTEGER NOT NULL DEFAULT 0,
+            status VARCHAR(40) NOT NULL,
+            active BOOLEAN NOT NULL DEFAULT FALSE,
+            metrics_json JSONB,
+            started_at TIMESTAMPTZ,
+            finished_at TIMESTAMPTZ,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """))
 
-    op.create_table(
-        "item_calibration_history",
-        sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
-        sa.Column(
-            "item_id",
-            sa.String(length=180),
-            sa.ForeignKey("question_bank.item_id", ondelete="CASCADE"),
-            nullable=False,
-        ),
-        sa.Column("calibration_run_id", sa.String(length=160), nullable=True),
-        sa.Column("difficulty_b", sa.Float(), nullable=True),
-        sa.Column("discrimination_a", sa.Float(), nullable=True),
-        sa.Column("guessing_c", sa.Float(), nullable=True),
-        sa.Column("standard_error_b", sa.Float(), nullable=True),
-        sa.Column("standard_error_a", sa.Float(), nullable=True),
-        sa.Column("standard_error_c", sa.Float(), nullable=True),
-        sa.Column("real_response_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("synthetic_response_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-    )
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS item_calibration_history (
+            id BIGSERIAL PRIMARY KEY,
+            item_id VARCHAR(180) NOT NULL REFERENCES question_bank(item_id) ON DELETE CASCADE,
+            calibration_run_id VARCHAR(160),
+            difficulty_b FLOAT,
+            discrimination_a FLOAT,
+            guessing_c FLOAT,
+            standard_error_b FLOAT,
+            standard_error_a FLOAT,
+            standard_error_c FLOAT,
+            real_response_count INTEGER NOT NULL DEFAULT 0,
+            synthetic_response_count INTEGER NOT NULL DEFAULT 0,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """))
 
-    op.create_table(
-        "item_exposure_stats",
-        sa.Column(
-            "item_id",
-            sa.String(length=180),
-            sa.ForeignKey("question_bank.item_id", ondelete="CASCADE"),
-            primary_key=True,
-        ),
-        sa.Column("phase", sa.String(length=80), primary_key=True),
-        sa.Column("shown_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("answered_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("correct_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("last_shown_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("exposure_rate", sa.Float(), nullable=True),
-        sa.Column("refreshed_at", sa.DateTime(timezone=True), nullable=True),
-    )
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS item_exposure_stats (
+            item_id VARCHAR(180) NOT NULL REFERENCES question_bank(item_id) ON DELETE CASCADE,
+            phase VARCHAR(80) NOT NULL,
+            shown_count INTEGER NOT NULL DEFAULT 0,
+            answered_count INTEGER NOT NULL DEFAULT 0,
+            correct_count INTEGER NOT NULL DEFAULT 0,
+            last_shown_at TIMESTAMPTZ,
+            exposure_rate FLOAT,
+            refreshed_at TIMESTAMPTZ,
+            PRIMARY KEY (item_id, phase)
+        )
+    """))
 
-    op.create_table(
-        "human_review_queue",
-        sa.Column("id", sa.BigInteger(), primary_key=True, autoincrement=True),
-        sa.Column("entity_type", sa.String(length=80), nullable=False),
-        sa.Column("entity_id", sa.String(length=220), nullable=False),
-        sa.Column("reason", sa.String(length=160), nullable=False),
-        sa.Column("severity", sa.String(length=40), nullable=False),
-        sa.Column("suggested_action", sa.Text(), nullable=True),
-        sa.Column("context_json", jsonb, nullable=True),
-        sa.Column("status", sa.String(length=40), nullable=False, server_default="open"),
-        sa.Column("assigned_to", postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column("due_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("escalated_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("escalation_target", sa.String(length=160), nullable=True),
-        sa.Column("reviewed_by", postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column("reviewed_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-    )
+    conn.execute(text("""
+        CREATE TABLE IF NOT EXISTS human_review_queue (
+            id BIGSERIAL PRIMARY KEY,
+            entity_type VARCHAR(80) NOT NULL,
+            entity_id VARCHAR(220) NOT NULL,
+            reason VARCHAR(160) NOT NULL,
+            severity VARCHAR(40) NOT NULL,
+            suggested_action TEXT,
+            context_json JSONB,
+            status VARCHAR(40) NOT NULL DEFAULT 'open',
+            assigned_to UUID,
+            due_at TIMESTAMPTZ,
+            escalated_at TIMESTAMPTZ,
+            escalation_target VARCHAR(160),
+            reviewed_by UUID,
+            reviewed_at TIMESTAMPTZ,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+    """))
 
-    op.create_index("ix_units_content_hash", "units", ["content_hash"])
-    op.create_index("ix_units_active", "units", ["active"])
-    op.create_index("ix_concepts_kp_content_hash", "concepts_kp", ["content_hash"])
-    op.create_index("ix_concepts_kp_active", "concepts_kp", ["active"])
-    op.create_index("ix_prerequisite_edges_active", "prerequisite_edges", ["active"])
-    op.create_index("ix_interactions_selection_strategy", "interactions", ["selection_strategy"])
-    op.create_index("ix_item_calibration_run", "item_calibration", ["calibration_run_id"])
-    op.create_index("ix_kp_migration_source", "kp_migration", ["source_kp_id"])
-    op.create_index("ix_human_review_queue_status", "human_review_queue", ["status", "severity"])
+    # --- indexes (IF NOT EXISTS) ---
+    _create_index_if_not_exists(conn, "ix_units_content_hash", "units", "content_hash")
+    _create_index_if_not_exists(conn, "ix_units_active", "units", "active")
+    _create_index_if_not_exists(conn, "ix_units_content_type", "units", "content_type")
+    _create_index_if_not_exists(conn, "ix_concepts_kp_content_hash", "concepts_kp", "content_hash")
+    _create_index_if_not_exists(conn, "ix_concepts_kp_active", "concepts_kp", "active")
+    _create_index_if_not_exists(conn, "ix_prerequisite_edges_active", "prerequisite_edges", "active")
+    _create_index_if_not_exists(conn, "ix_interactions_selection_strategy", "interactions", "selection_strategy")
+    _create_index_if_not_exists(conn, "ix_item_calibration_run", "item_calibration", "calibration_run_id")
+    _create_index_if_not_exists(conn, "ix_kp_migration_source", "kp_migration", "source_kp_id")
+    _create_index_if_not_exists(conn, "ix_human_review_queue_status", "human_review_queue", "status, severity")
 
 
 def downgrade() -> None:
