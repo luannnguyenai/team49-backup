@@ -80,3 +80,31 @@ class ExperienceLevelRequest(BaseModel):
 class ExperienceLevelResponse(BaseModel):
     level: str
     placement_status: str | None
+
+
+class PriorAnalysisCandidate(BaseModel):
+    id: str
+    display_label: str
+    raw_title: str
+    unit_titles: list[str] = []
+
+
+class PriorAnalysisRequest(BaseModel):
+    goal_id: str
+    prior_knowledge_text: str = ""
+    coding_experience_text: str = ""
+    candidates: list[PriorAnalysisCandidate]
+
+    @field_validator("goal_id")
+    @classmethod
+    def validate_goal_id(cls, v: str) -> str:
+        if v not in VALID_GOAL_IDS:
+            raise ValueError(f"Invalid goal_id: {v}. Valid: {sorted(VALID_GOAL_IDS)}")
+        return v
+
+
+class PriorAnalysisResponse(BaseModel):
+    shortlisted_topic_ids: list[str]
+    model_used: str
+    provider: str
+    fallback: bool = False

@@ -1,37 +1,15 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const { mockSectionList, mockSectionDetails } = vi.hoisted(() => {
-  const mockSectionList = [
-  { id: "s0", title: "Deep Learning Basics", canonical_course_id: "cs230" },
-  { id: "s1", title: "Convolutional Nets", canonical_course_id: "cs231n" },
-  { id: "s2", title: "Transformers", canonical_course_id: "cs224n" },
-  ];
+import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
+import { buildPriorCandidateTopics } from "@/components/onboarding/priorCandidateBuilder";
+import { useOnboardingStore } from "@/stores/onboardingStore";
+import type { CourseSectionDetail } from "@/types";
 
-  const mockSectionDetails = {
-  s0: {
-    id: "s0",
-    course_id: "c0",
-    title: "Deep Learning Basics",
-    description: null,
-    order_index: 0,
-    prerequisite_section_ids: null,
-    learning_units_count: 1,
-    canonical_course_id: "cs230",
-    learning_units: [
-      {
-        id: "u0",
-        title: "Neural Networks",
-        description: null,
-        order_index: 0,
-        estimated_hours_beginner: 1,
-        estimated_hours_intermediate: 0.5,
-      },
-    ],
-  },
-  s1: {
+const sections = [
+  {
     id: "s1",
     course_id: "c1",
-    title: "Convolutional Nets",
+    title: "Lecture 6: CNN Architectures",
     description: null,
     order_index: 1,
     prerequisite_section_ids: null,
@@ -48,7 +26,7 @@ const { mockSectionList, mockSectionDetails } = vi.hoisted(() => {
       },
     ],
   },
-  s2: {
+  {
     id: "s2",
     course_id: "c2",
     title: "Transformers",
@@ -68,92 +46,88 @@ const { mockSectionList, mockSectionDetails } = vi.hoisted(() => {
       },
     ],
   },
-  };
+] satisfies CourseSectionDetail[];
 
-  return { mockSectionList, mockSectionDetails };
-});
-
-import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
-import { useOnboardingStore } from "@/stores/onboardingStore";
-
-vi.mock("@/lib/api", () => ({
-  canonicalSectionApi: {
-    list: vi.fn().mockResolvedValue(mockSectionList),
-    detail: vi.fn((id: string) => Promise.resolve(mockSectionDetails[id as keyof typeof mockSectionDetails])),
-  },
-}));
+const cvTopics = buildPriorCandidateTopics({
+  goalId: "computer_vision",
+  sections,
+}).confirmEligible;
 
 describe("StepKnownTopicsFiltered", () => {
   const onNextMock = vi.fn();
   const onBackMock = vi.fn();
+  const onSkipAllMock = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     useOnboardingStore.getState().reset();
   });
 
-  it("shows loading state initially", () => {
-    render(<StepKnownTopicsFiltered onNext={onNextMock} onBack={onBackMock} />);
-    expect(screen.getByText("Đang tải...")).toBeInTheDocument();
-  });
-
-  it("renders sections after data loads", async () => {
-    useOnboardingStore.getState().setGoalIds(["computer_vision"]);
-    render(<StepKnownTopicsFiltered onNext={onNextMock} onBack={onBackMock} />);
-    await waitFor(() => expect(screen.getByText("Convolutional Nets")).toBeInTheDocument());
-    expect(screen.getByText("Deep Learning Basics")).toBeInTheDocument();
-  });
-
-  it("shows error message when API fails", async () => {
-    const { canonicalSectionApi } = await import("@/lib/api");
-    vi.mocked(canonicalSectionApi.list).mockRejectedValueOnce(new Error("network error"));
-
-    render(<StepKnownTopicsFiltered onNext={onNextMock} onBack={onBackMock} />);
-    await waitFor(() =>
-      expect(screen.getByText("Không thể tải dữ liệu. Vui lòng thử lại.")).toBeInTheDocument(),
+  it("renders only the AI-selected confirmation shortlist", () => {
+    render(
+      <StepKnownTopicsFiltered
+        topics={cvTopics}
+        modelLabel="openai/gpt-5.4-mini"
+        onNext={onNextMock}
+        onBack={onBackMock}
+        onSkipAll={onSkipAllMock}
+      />,
     );
+
+    expect(screen.getByText("CNN architectures")).toBeInTheDocument();
+    expect(screen.queryByText("Transformers")).not.toBeInTheDocument();
+    expect(screen.getByText("Shortlist được tạo bởi openai/gpt-5.4-mini.")).toBeInTheDocument();
   });
 
-  it("calls onBack when Back button clicked", async () => {
-    useOnboardingStore.getState().setGoalIds(["computer_vision"]);
-    render(<StepKnownTopicsFiltered onNext={onNextMock} onBack={onBackMock} />);
-    await waitFor(() => screen.getByText("Convolutional Nets"));
+  it("lets the user select representative units", () => {
+    render(
+      <StepKnownTopicsFiltered
+        topics={cvTopics}
+        onNext={onNextMock}
+        onBack={onBackMock}
+        onSkipAll={onSkipAllMock}
+      />,
+    );
 
-    fireEvent.click(screen.getByRole("button", { name: "Quay lại" }));
-    expect(onBackMock).toHaveBeenCalledOnce();
-  });
-
-  it("rating a cluster selects representative units", async () => {
-    useOnboardingStore.getState().setGoalIds(["computer_vision"]);
-    render(<StepKnownTopicsFiltered onNext={onNextMock} onBack={onBackMock} />);
-    await waitFor(() => screen.getByText("Convolutional Nets"));
-
-    fireEvent.click(screen.getAllByRole("button", { name: "Đã học qua" })[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Đã học qua CNN architectures" }));
     expect(useOnboardingStore.getState().knownUnitIds).toContain("u1");
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Chưa học" })[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Chưa học CNN architectures" }));
     expect(useOnboardingStore.getState().knownUnitIds).not.toContain("u1");
   });
 
-  it("filters to foundation and target sections when goalIds contains computer_vision", async () => {
-    useOnboardingStore.getState().setGoalIds(["computer_vision"]);
-
-    render(<StepKnownTopicsFiltered onNext={onNextMock} onBack={onBackMock} />);
-    await waitFor(() => screen.getByText("Convolutional Nets"));
-
-    expect(screen.getByText("Deep Learning Basics")).toBeInTheDocument();
-    expect(screen.getByText("Convolutional Nets")).toBeInTheDocument();
-    expect(screen.queryByText("Transformers")).not.toBeInTheDocument();
-  });
-
-  it("eye button reveals representative units without rendering raw checklist by default", async () => {
-    useOnboardingStore.getState().setGoalIds(["computer_vision"]);
-
-    render(<StepKnownTopicsFiltered onNext={onNextMock} onBack={onBackMock} />);
-    await waitFor(() => screen.getByText("Convolutional Nets"));
+  it("eye button reveals representative units without showing them by default", () => {
+    render(
+      <StepKnownTopicsFiltered
+        topics={cvTopics}
+        onNext={onNextMock}
+        onBack={onBackMock}
+        onSkipAll={onSkipAllMock}
+      />,
+    );
 
     expect(screen.queryByText("Conv Basics")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Xem nhanh Convolutional Nets" }));
+    fireEvent.click(screen.getByRole("button", { name: "Xem nhanh CNN architectures" }));
     expect(screen.getByText("- Conv Basics")).toBeInTheDocument();
   });
+
+  it("calls navigation handlers", () => {
+    render(
+      <StepKnownTopicsFiltered
+        topics={cvTopics}
+        onNext={onNextMock}
+        onBack={onBackMock}
+        onSkipAll={onSkipAllMock}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Quay lại" }));
+    fireEvent.click(screen.getByRole("button", { name: "Bỏ qua" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục" }));
+
+    expect(onBackMock).toHaveBeenCalledOnce();
+    expect(onSkipAllMock).toHaveBeenCalledOnce();
+    expect(onNextMock).toHaveBeenCalledOnce();
+  });
 });
+

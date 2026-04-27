@@ -5,12 +5,13 @@
 // Internal step indices:
 //   0  Goal selection
 //   1  Experience level
-//   2  Known topics      (experienced flow only)
-//   3  Time / schedule
-//   4  Learning method
+//   2  Prior profile input       (experienced flow only)
+//   3  AI topic confirmation     (experienced flow only)
+//   4  Time / schedule
+//   5  Learning method
 //
-// Beginner flow:    0 → 1 → 3 → 4 → submit
-// Experienced flow: 0 → 1 → 2 → 3 → 4 → submit
+// Beginner flow:    0 → 1 → 4 → 5 → submit
+// Experienced flow: 0 → 1 → 2 → 3 → 4 → 5 → submit
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -22,12 +23,18 @@ import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import StepGoalSelection from "@/components/onboarding/StepGoalSelection";
 import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
+import StepPriorKnowledgeInput from "@/components/onboarding/StepPriorKnowledgeInput";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
 import { canonicalSectionApi } from "@/lib/api";
-import { saveGoals, saveKnownTopics, saveExperienceLevel } from "@/lib/onboarding-api";
+import {
+  analyzePriorProfile,
+  saveGoals,
+  saveKnownTopics,
+  saveExperienceLevel,
+} from "@/lib/onboarding-api";
 import {
   buildCanonicalAssessmentContext,
   writePendingCanonicalAssessment,
@@ -39,6 +46,12 @@ import { useLearningPathStore } from "@/features/learning-path/store";
 import { useAuthStore } from "@/stores/authStore";
 import { useOnboardingStore, type ExperienceLevel } from "@/stores/onboardingStore";
 import type { CourseSectionDetail } from "@/types";
+import {
+  buildPriorCandidateTopics,
+  buildPriorShortlistFallback,
+  type PlannerGoalId,
+  type PriorCandidateTopic,
+} from "@/components/onboarding/priorCandidateBuilder";
 
 // ---------------------------------------------------------------------------
 // Step metadata — two flows share internal indices 0-4
@@ -48,7 +61,8 @@ import type { CourseSectionDetail } from "@/types";
 const STEPS_EXPERIENCED = [
   { title: "Mục tiêu học tập",   subtitle: "Bạn muốn học gì?" },
   { title: "Kinh nghiệm",        subtitle: "Bạn đã từng học AI/ML chưa?" },
-  { title: "Kiến thức hiện tại", subtitle: "Tick những units bạn đã nắm" },
+  { title: "Nền tảng hiện tại",  subtitle: "Nhập thông tin để AI phân tích" },
+  { title: "Xác nhận kiến thức", subtitle: "Chọn cụm cần placement kiểm chứng" },
   { title: "Thời gian của bạn",  subtitle: "Lên lịch học phù hợp" },
   { title: "Phương pháp học",    subtitle: "Cách bạn học tốt nhất" },
 ] as const;
@@ -66,22 +80,27 @@ const STEPS_BEGINNER = [
 const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   0: 0,
   1: 1,
-  3: 2,
-  4: 3,
-  // 2 is skipped for beginners
+  4: 2,
+  5: 3,
+  // 2 and 3 are skipped for beginners
 };
 
-// Steps that use the page-level nav buttons (index 3 = TimeSchedule)
-const STEPS_WITH_PAGE_NAV = new Set([3]);
+// Steps that use the page-level nav buttons (index 4 = TimeSchedule)
+const STEPS_WITH_PAGE_NAV = new Set([4]);
 
 // Form fields validated before advancing from each internal step
 const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   [],                                               // 0: GoalSelection
   [],                                               // 1: ExperienceLevel
-  [],                                               // 2: KnownTopics (optional)
-  ["available_hours_per_week", "target_deadline"],  // 3: required
-  ["preferred_method"],                             // 4: required
+  [],                                               // 2: Prior profile input
+  [],                                               // 3: KnownTopics (optional)
+  ["available_hours_per_week", "target_deadline"],  // 4: required
+  ["preferred_method"],                             // 5: required
 ];
+
+function goalFromStore(goalIds: string[]): PlannerGoalId {
+  return goalIds.includes("nlp") ? "nlp" : "computer_vision";
+}
 
 // ---------------------------------------------------------------------------
 // Page component
@@ -99,6 +118,12 @@ function OnboardingPageInner() {
 
   const [sections, setSections] = useState<CourseSectionDetail[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [priorKnowledgeText, setPriorKnowledgeText] = useState("");
+  const [codingExperienceText, setCodingExperienceText] = useState("");
+  const [priorTopics, setPriorTopics] = useState<PriorCandidateTopic[]>([]);
+  const [priorAnalysisFallback, setPriorAnalysisFallback] = useState(false);
+  const [priorAnalysisModel, setPriorAnalysisModel] = useState<string | null>(null);
+  const [analyzingPrior, setAnalyzingPrior] = useState(false);
 
   // ── React Hook Form ───────────────────────────────────────────────────────
   const { register, handleSubmit, watch, trigger, formState: { errors } } =
@@ -199,7 +224,56 @@ function OnboardingPageInner() {
     navigate(step + 1);
   }, [step, trigger, navigate]);
 
-  const goBack = useCallback(() => navigate(step - 1), [step, navigate]);
+  const goBack = useCallback(() => {
+    if (experienceLevel === "beginner" && step === 4) {
+      navigate(1);
+      return;
+    }
+    navigate(step - 1);
+  }, [experienceLevel, step, navigate]);
+
+  const runPriorAnalysis = useCallback(async () => {
+    const selectedGoal = goalFromStore(goalIds);
+    const candidateTopics = buildPriorCandidateTopics({
+      goalId: selectedGoal,
+      sections,
+    }).confirmEligible;
+    const fallbackTopics = buildPriorShortlistFallback({
+      topics: candidateTopics,
+      priorKnowledgeText,
+      codingExperienceText,
+    });
+
+    setAnalyzingPrior(true);
+    try {
+      const response = await analyzePriorProfile({
+        goal_id: selectedGoal,
+        prior_knowledge_text: priorKnowledgeText,
+        coding_experience_text: codingExperienceText,
+        candidates: candidateTopics.map((topic) => ({
+          id: topic.id,
+          display_label: topic.displayLabel,
+          raw_title: topic.rawTitle,
+          unit_titles: topic.units.map((unit) => unit.title),
+        })),
+      });
+      const topicById = new Map(candidateTopics.map((topic) => [topic.id, topic]));
+      const apiTopics = response.shortlisted_topic_ids
+        .map((id) => topicById.get(id))
+        .filter((topic): topic is PriorCandidateTopic => Boolean(topic));
+
+      setPriorTopics(apiTopics.length > 0 ? apiTopics : fallbackTopics);
+      setPriorAnalysisFallback(response.fallback || apiTopics.length === 0);
+      setPriorAnalysisModel(`${response.provider}/${response.model_used}`);
+    } catch {
+      setPriorTopics(fallbackTopics);
+      setPriorAnalysisFallback(true);
+      setPriorAnalysisModel(null);
+    } finally {
+      setAnalyzingPrior(false);
+    }
+    navigate(3);
+  }, [codingExperienceText, goalIds, navigate, priorKnowledgeText, sections]);
 
   // ── Derived display values ────────────────────────────────────────────────
   const isBeginner = experienceLevel === "beginner";
@@ -216,7 +290,7 @@ function OnboardingPageInner() {
 
   const isFirstStep = step === 0;
   const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
-  const isLastFormStep = step === 4;
+  const isLastFormStep = step === 5;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -349,7 +423,7 @@ function OnboardingPageInner() {
                         const store = useOnboardingStore.getState();
                         store.setKnownUnitIds([]);
                         store.setSkipPlacementAssessment(true);
-                        navigate(3); // skip Known Topics → go to Schedule
+                        navigate(4); // skip prior analysis + known topics → Schedule
                       } else {
                         navigate(2);
                       }
@@ -357,23 +431,40 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 2 — Known topics (experienced flow only) */}
+                {/* Step 2 — Manual prior profile input (experienced flow only) */}
                 {step === 2 && (
+                  <StepPriorKnowledgeInput
+                    goalId={goalFromStore(goalIds)}
+                    priorKnowledgeText={priorKnowledgeText}
+                    codingExperienceText={codingExperienceText}
+                    isAnalyzing={analyzingPrior}
+                    onPriorKnowledgeChange={setPriorKnowledgeText}
+                    onCodingExperienceChange={setCodingExperienceText}
+                    onBack={() => navigate(1)}
+                    onNext={runPriorAnalysis}
+                  />
+                )}
+
+                {/* Step 3 — AI topic confirmation (experienced flow only) */}
+                {step === 3 && (
                   <StepKnownTopicsFiltered
+                    topics={priorTopics}
+                    analysisFallback={priorAnalysisFallback}
+                    modelLabel={priorAnalysisModel}
                     onNext={() => {
                       saveKnownTopics(knownUnitIds).catch(() => {});
-                      navigate(3);
+                      navigate(4);
                     }}
-                    onBack={() => navigate(1)}
+                    onBack={() => navigate(2)}
                     onSkipAll={() => {
                       saveKnownTopics([]).catch(() => {});
-                      navigate(3);
+                      navigate(4);
                     }}
                   />
                 )}
 
-                {/* Step 3 — Schedule */}
-                {step === 3 && (
+                {/* Step 4 — Schedule */}
+                {step === 4 && (
                   <StepTimeSchedule
                     register={register}
                     errors={errors}
@@ -383,8 +474,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 4 — Learning method */}
-                {step === 4 && (
+                {/* Step 5 — Learning method */}
+                {step === 5 && (
                   <StepLearningMethod
                     register={register}
                     watch={watch}
@@ -393,7 +484,7 @@ function OnboardingPageInner() {
                 )}
               </div>
 
-              {/* ── Page-level nav (Step 3: Schedule only) ── */}
+              {/* ── Page-level nav (Step 4: Schedule only) ── */}
               {showPageNav && (
                 <div className={cn("mt-7 flex gap-3", isFirstStep ? "justify-end" : "justify-between")}>
                   {!isFirstStep && (
@@ -416,7 +507,7 @@ function OnboardingPageInner() {
                 </div>
               )}
 
-              {/* ── Step 4 (Learning Method) nav ── */}
+              {/* ── Step 5 (Learning Method) nav ── */}
               {isLastFormStep && (
                 <div className="mt-7 flex gap-3 justify-between">
                   <Button
