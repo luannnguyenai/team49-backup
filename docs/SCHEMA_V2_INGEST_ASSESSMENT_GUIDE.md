@@ -1355,7 +1355,56 @@ Any retention strategy must keep calibration reproducible without exposing perso
 
 ---
 
-## 18. Summary
+## 18. Schema v2 Migration Runbook
+
+Default teammate workflow:
+
+```bash
+git pull
+dvc pull
+bash start.sh
+```
+
+`start.sh` is the supported full-sync path. It starts Docker services, runs Alembic migrations, imports canonical/product data when the local DB is empty, then runs Schema v2 backfill, Schema v2 validation, and canonical runtime parity checks.
+
+Current behavior:
+
+- canonical artifacts are upserted on every `start.sh` run before Schema v2 backfill;
+- final artifact files include reviewed unit-level Schema v2 labels for all 376 canonical units;
+- deterministic DB-safe fields are filled by the backfill script after import;
+- semantic graph fields such as `edge_kind` should only be written to artifacts after separate reviewed edge batches.
+
+Manual fallback:
+
+```bash
+alembic upgrade head
+python -m src.scripts.pipeline.import_canonical_artifacts_to_db
+python -m src.scripts.schema_v2.backfill_schema_v2 --apply --report-path reports/schema_v2_backfill_report.json
+python -m src.scripts.schema_v2.validate_schema_v2 --report-path reports/schema_v2_validation_report.json
+python -m src.scripts.pipeline.check_canonical_runtime_parity
+```
+
+If local DB needs a fresh canonical import before backfill:
+
+```bash
+python -m src.scripts.schema_v2.sync_schema_v2 --import-bundle data/final_artifacts/cs224n_cs231n_cs230_v1/canonical
+```
+
+This migration does not rerun ingest and does not call LLMs.
+
+If final artifacts need additional Schema v2 semantic fields, do it as a reviewed batch patch:
+
+1. select a small batch of edges/items or a future unit relabel batch;
+2. inspect summary, section flags, KP mappings, quiz coverage, and graph evidence;
+3. write explicit row-level updates;
+4. run canonical artifact validation;
+5. update DVC only after review passes.
+
+Generated reports under `reports/` are local verification artifacts. Commit them only if the team decides reports should be versioned for release evidence.
+
+---
+
+## 19. Summary
 
 Schema v2 keeps the current product and canonical design, but adds the audit fields needed to scale safely.
 
