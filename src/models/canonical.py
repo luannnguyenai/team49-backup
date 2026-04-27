@@ -180,6 +180,17 @@ class ItemCalibration(TimestampMixin, Base):
     standard_error_b: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     last_calibrated_at: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
     source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    # Commit E: additional SE and calibration metadata
+    standard_error_a: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    standard_error_c: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    calibration_run_id: Mapped[Optional[str]] = mapped_column(
+        String(80),
+        nullable=True,
+        comment="FK to calibration_runs.run_id (added Commit E)",
+    )
+    calibration_dataset_version: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    real_response_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    synthetic_response_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=0)
 
     __table_args__ = (
         Index("ix_item_calibration_unit", "unit_id"),
