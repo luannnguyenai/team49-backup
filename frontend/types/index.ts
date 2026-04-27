@@ -566,6 +566,8 @@ export interface HistoryItem {
   completed_at: string | null;
   duration_seconds: number | null;
   subject: string;
+  course_id: string | null;
+  course_slug: string | null;
   learning_unit_id: string | null;
   section_id: string | null;
   score_percent: number | null;
