@@ -3,9 +3,7 @@ $sourceBranch = "ed-fix-merge-1"
 $remote = "origin"
 
 $commits = @(
-  "03239da",
-  "1f1135a",
-  "0d61509"
+
 )
 
 # Tránh file script bị Git add nhầm
