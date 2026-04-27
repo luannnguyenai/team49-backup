@@ -7,7 +7,7 @@ Merges original A20-App-049 config (LLM keys) with AI Personalized config (DB, A
 
 import json
 from collections.abc import Mapping
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -127,6 +127,37 @@ class Settings(BaseSettings):
     read_canonical_planner_enabled: bool = Field(
         default=True,
         description="Read planner candidates from canonical learning units and prerequisite graph.",
+    )
+
+    # ---- Placement Assessment Strategies ----
+    cold_start_mode: Literal["random_uniform", "spread_by_prior", "irt_adaptive", "auto"] = Field(
+        default="spread_by_prior",
+        description="Item selection strategy for placement assessments: random_uniform | spread_by_prior | irt_adaptive | auto",
+    )
+    irt_min_avg_responses: int = Field(
+        default=200,
+        ge=1,
+        description="Minimum average responses per item to qualify for IRT adaptive selection",
+    )
+    irt_min_calibrated_ratio: float = Field(
+        default=0.8,
+        ge=0.0,
+        le=1.0,
+        description="Minimum fraction of items with is_calibrated=true for IRT adaptive",
+    )
+    irt_max_median_se_b: float = Field(
+        default=0.3,
+        ge=0.0,
+        description="Maximum median standard error of difficulty parameter for IRT adaptive",
+    )
+    irt_exposure_cap_hours: int = Field(
+        default=24,
+        ge=0,
+        description="Hours to look back for item exposure cap in IRT adaptive selection",
+    )
+    irt_use_2pl: bool = Field(
+        default=False,
+        description="Use 2PL (guessing=0) instead of 3PL-lite (guessing=0.25) for IRT Fisher info",
     )
 
     @field_validator("cors_origins", mode="before")

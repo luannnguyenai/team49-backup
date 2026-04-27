@@ -39,6 +39,7 @@ from src.models.learning import (  # noqa: F401
     Session,
     WaivedUnit,
 )
+from src.models.placement import PlacementAssessmentResult  # noqa: F401
 
 # Original lecture models
 from src.models.store import Chapter, Lecture, QAHistory, TranscriptLine  # noqa: F401
@@ -85,4 +86,6 @@ __all__ = [
     "PlanHistory",
     "RationaleLog",
     "PlannerSessionState",
+    # Placement assessment
+    "PlacementAssessmentResult",
 ]

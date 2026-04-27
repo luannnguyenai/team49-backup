@@ -12,10 +12,13 @@ import { api } from "@/lib/api";
 // ── Types ──────────────────────────────────────────────────────────────────
 
 interface ChatMessage {
+  localId: string;
   id?: number;
   role: "user" | "ai" | "error";
   content: string;
   rating?: number | null;
+  isPending?: boolean;
+  statusText?: string | null;
 }
 
 interface InContextTutorProps {
@@ -45,13 +48,21 @@ export default function InContextTutor({
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const messageIdRef = useRef(0);
+
+  const nextMessageId = useCallback(() => {
+    messageIdRef.current += 1;
+    return `chat-msg-${messageIdRef.current}`;
+  }, []);
 
   // Auto-scroll
   useEffect(() => {
     if (typeof chatEndRef.current?.scrollIntoView === "function") {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+      chatEndRef.current.scrollIntoView({
+        behavior: streaming ? "auto" : "smooth",
+      });
     }
-  }, [messages]);
+  }, [messages, streaming]);
 
   // Rate answer
   const rateAnswer = async (msgIdx: number, qaId: number, rating: number) => {
@@ -72,8 +83,18 @@ export default function InContextTutor({
     setStreaming(true);
     const img = captureFrame();
 
-    const userMsg: ChatMessage = { role: "user", content: q };
-    const aiPlaceholder: ChatMessage = { role: "ai", content: "" };
+    const userMsg: ChatMessage = {
+      localId: nextMessageId(),
+      role: "user",
+      content: q,
+    };
+    const aiPlaceholder: ChatMessage = {
+      localId: nextMessageId(),
+      role: "ai",
+      content: "",
+      isPending: true,
+      statusText: "Dang tra loi...",
+    };
 
     setMessages((prev) => [...prev, userMsg, aiPlaceholder]);
     const aiIdx = messages.length + 1;
@@ -133,7 +154,7 @@ export default function InContextTutor({
             if (data.e) {
               setMessages((prev) =>
                 prev.map((m, i) =>
-                  i === aiIdx ? { ...m, role: "error", content: data.e } : m,
+                  i === aiIdx ? { ...m, role: "error", content: data.e, isPending: false } : m,
                 ),
               );
               hasError = true;
@@ -143,7 +164,7 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, role: "error", content: data.message }
+                    ? { ...m, role: "error", content: data.message, isPending: false }
                     : m,
                 ),
               );
@@ -154,7 +175,7 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, role: "error", content: String(data.detail) }
+                    ? { ...m, role: "error", content: String(data.detail), isPending: false }
                     : m,
                 ),
               );
@@ -165,7 +186,11 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, content: fullText || data.status }
+                    ? {
+                        ...m,
+                        isPending: !fullText,
+                        statusText: String(data.status),
+                      }
                     : m,
                 ),
               );
@@ -174,7 +199,9 @@ export default function InContextTutor({
               fullText += data.a;
               setMessages((prev) =>
                 prev.map((m, i) =>
-                  i === aiIdx ? { ...m, content: fullText } : m,
+                  i === aiIdx
+                    ? { ...m, content: fullText, isPending: false, statusText: null }
+                    : m,
                 ),
               );
             }
@@ -190,14 +217,14 @@ export default function InContextTutor({
               if (data.e) {
                 setMessages((prev) =>
                   prev.map((m, i) =>
-                    i === aiIdx ? { ...m, role: "error", content: data.e } : m,
+                    i === aiIdx ? { ...m, role: "error", content: data.e, isPending: false } : m,
                   ),
                 );
               } else if (data.blocked && data.message) {
                 setMessages((prev) =>
                   prev.map((m, i) =>
                     i === aiIdx
-                      ? { ...m, role: "error", content: data.message }
+                      ? { ...m, role: "error", content: data.message, isPending: false }
                       : m,
                   ),
                 );
@@ -205,7 +232,7 @@ export default function InContextTutor({
                 setMessages((prev) =>
                   prev.map((m, i) =>
                     i === aiIdx
-                      ? { ...m, role: "error", content: String(data.detail) }
+                      ? { ...m, role: "error", content: String(data.detail), isPending: false }
                       : m,
                   ),
                 );
@@ -214,7 +241,11 @@ export default function InContextTutor({
                   setMessages((prev) =>
                     prev.map((m, i) =>
                       i === aiIdx
-                        ? { ...m, content: fullText || data.status }
+                        ? {
+                            ...m,
+                            isPending: !fullText,
+                            statusText: String(data.status),
+                          }
                         : m,
                     ),
                   );
@@ -223,7 +254,9 @@ export default function InContextTutor({
                   fullText += data.a;
                   setMessages((prev) =>
                     prev.map((m, i) =>
-                      i === aiIdx ? { ...m, content: fullText } : m,
+                      i === aiIdx
+                        ? { ...m, content: fullText, isPending: false, statusText: null }
+                        : m,
                     ),
                   );
                 }
@@ -244,14 +277,16 @@ export default function InContextTutor({
       const msg = err instanceof Error ? err.message : "Connection error";
       setMessages((prev) =>
         prev.map((m, i) =>
-          i === aiIdx ? { ...m, role: "error", content: msg } : m,
+          i === aiIdx ? { ...m, role: "error", content: msg, isPending: false } : m,
         ),
       );
     } finally {
       setStreaming(false);
-      inputRef.current?.focus();
+      window.setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
     }
-  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame]);
+  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId]);
 
   const hasMessages = messages.length > 0;
 
@@ -321,7 +356,7 @@ export default function InContextTutor({
 
         {messages.map((msg, idx) => (
           <div
-            key={idx}
+            key={msg.localId}
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
@@ -330,7 +365,7 @@ export default function InContextTutor({
                   ? "bg-blue-600 text-white rounded-br-md"
                   : msg.role === "error"
                     ? "bg-red-50 text-red-700 border border-red-200 rounded-bl-md"
-                    : "rounded-bl-md"
+                    : "rounded-bl-md transition-all duration-200"
               }`}
               style={
                 msg.role === "ai"
@@ -342,15 +377,25 @@ export default function InContextTutor({
               }
             >
               {msg.role === "ai" ? (
-                <div className="prose prose-sm prose-slate max-w-none">
-                  <ReactMarkdown>{msg.content || "..."}</ReactMarkdown>
-                </div>
+                msg.isPending ? (
+                  <div
+                    aria-live="polite"
+                    className="flex items-center gap-2 text-slate-500"
+                  >
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>{msg.statusText || "Dang tra loi..."}</span>
+                  </div>
+                ) : (
+                  <div aria-live="polite" className="prose prose-sm prose-slate max-w-none">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                )
               ) : (
                 msg.content
               )}
 
               {/* Rating buttons for AI messages */}
-              {msg.role === "ai" && msg.id && msg.content && (
+              {msg.role === "ai" && msg.id && msg.content && !msg.isPending && (
                 <div className="mt-2 flex items-center gap-2 border-t pt-2 border-slate-200/50">
                   <button
                     onClick={() => rateAnswer(idx, msg.id!, 1)}
@@ -418,6 +463,7 @@ export default function InContextTutor({
           <textarea
             ref={inputRef}
             rows={1}
+            aria-busy={streaming}
             className="flex-1 resize-none bg-transparent text-sm outline-none"
             style={{ color: "var(--text-primary)" }}
             placeholder="Ask about this lecture..."
@@ -432,6 +478,7 @@ export default function InContextTutor({
             disabled={streaming}
           />
           <button
+            aria-label={streaming ? "Tutor is replying" : "Send question"}
             onClick={() => {
               void handleSend();
             }}

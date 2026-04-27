@@ -18,6 +18,7 @@ class CourseCatalogItem(BaseModel):
     cover_image_url: str | None = None
     hero_badge: str | None = None
     is_recommended: bool = False
+    progress_percent: int | None = None
 
 
 class CourseCatalogResponse(BaseModel):
@@ -48,6 +49,20 @@ class CourseOverviewResponse(BaseModel):
     course: CourseCatalogItem
     overview: CourseOverviewContent
     entry: StartLearningDecisionResponse
+
+
+class CourseUnitListItem(BaseModel):
+    slug: str
+    title: str
+    status: str
+    unit_type: str
+    order_index: int
+    lecture_label: str | None = None
+    is_completed: bool = False
+
+
+class CourseUnitListResponse(BaseModel):
+    units: list[CourseUnitListItem] = Field(default_factory=list)
 
 
 class LearningUnitCourseSummary(BaseModel):

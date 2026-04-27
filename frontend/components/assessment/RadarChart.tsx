@@ -166,7 +166,8 @@ export default function RadarChart({ data, size = 320 }: Props) {
             fillOpacity={0.85}
             className="text-slate-700 dark:text-slate-200"
           >
-            {lb.label.length > 14 ? lb.label.slice(0, 13) + "…" : lb.label}
+              <title>{lb.label}</title>
+            {lb.label.length > 20 ? lb.label.slice(0, 19) + "…" : lb.label}
           </text>
           <text
             x={lb.x}

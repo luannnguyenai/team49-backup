@@ -66,6 +66,9 @@ def _path_item_response(lp, learning_unit_title: str, section_title: str | None)
         has_quiz_items=getattr(lp, "has_quiz_items", None),
         is_worth_learning=getattr(lp, "is_worth_learning", None),
         override_critical_kp=bool(getattr(lp, "override_critical_kp", False)),
+        phase_tag=getattr(lp, "phase_tag", None),
+        is_locked=bool(getattr(lp, "is_locked", False)),
+        rationale_log=getattr(lp, "rationale_log", None),
     )
 
 

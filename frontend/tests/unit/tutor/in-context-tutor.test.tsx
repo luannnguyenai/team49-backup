@@ -35,6 +35,29 @@ function buildChunkedNdjsonResponse(status: number, chunks: string[]): Response 
   });
 }
 
+function buildDelayedNdjsonResponse(
+  status: number,
+  chunks: Array<{ chunk: string; delayMs?: number }>,
+): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      for (const { chunk, delayMs = 0 } of chunks) {
+        if (delayMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+        controller.enqueue(encoder.encode(chunk));
+      }
+      controller.close();
+    },
+  });
+
+  return new Response(stream, {
+    status,
+    headers: { "Content-Type": "application/x-ndjson" },
+  });
+}
+
 describe("InContextTutor", () => {
   const fetchMock = vi.fn();
 
@@ -68,10 +91,41 @@ describe("InContextTutor", () => {
     });
     fireEvent.click(screen.getAllByRole("button")[1]);
 
+    expect(screen.getByText("Dang tra loi...")).toBeInTheDocument();
+
     await waitFor(() => {
       expect(screen.getByText("Lecture not found")).toBeInTheDocument();
     });
     expect(screen.queryByText("...")).not.toBeInTheDocument();
+  });
+
+  it("shows a clear loading bubble before the first streamed answer tokens arrive", async () => {
+    fetchMock.mockResolvedValue(
+      buildChunkedNdjsonResponse(200, [
+        '{"a":"First streamed answer."}\n{"qa_id":9}\n',
+      ]),
+    );
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Start streaming please" },
+    });
+    fireEvent.click(screen.getAllByRole("button")[1]);
+
+    expect(screen.getByText("Dang tra loi...")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("First streamed answer.")).toBeInTheDocument();
+    });
   });
 
   it("parses NDJSON responses even when JSON objects are split across network chunks", async () => {
@@ -105,6 +159,37 @@ describe("InContextTutor", () => {
     });
   });
 
+  it("shows backend status text separately before streamed answer content arrives", async () => {
+    fetchMock.mockResolvedValue(
+      buildDelayedNdjsonResponse(200, [
+        { chunk: '{"status":"Dang doc ngu canh bai hoc..."}\n' },
+        { chunk: '{"a":"Answer starts here."}\n{"qa_id":12}\n', delayMs: 150 },
+      ]),
+    );
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Explain the context first" },
+    });
+    fireEvent.click(screen.getAllByRole("button")[1]);
+
+    expect(await screen.findByText("Dang doc ngu canh bai hoc...")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("Answer starts here.")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Dang doc ngu canh bai hoc...")).not.toBeInTheDocument();
+  });
+
   it("includes context_binding_id in tutor requests when provided", async () => {
     fetchMock.mockResolvedValue(
       buildChunkedNdjsonResponse(200, ['{"a":"Bound to unit context."}\n{"qa_id":7}\n']),
@@ -133,6 +218,43 @@ describe("InContextTutor", () => {
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(JSON.parse(String(init.body))).toMatchObject({
       context_binding_id: "ctx_unit_lecture_01",
+    });
+  });
+
+  it("disables input while streaming and restores focus when the reply completes", async () => {
+    fetchMock.mockResolvedValue(
+      buildDelayedNdjsonResponse(200, [
+        { chunk: '{"status":"Dang suy luan..."}\n' },
+        { chunk: '{"a":"Done."}\n{"qa_id":14}\n', delayMs: 120 },
+      ]),
+    );
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={120}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText("Ask about this lecture...");
+    fireEvent.change(input, {
+      target: { value: "Tell me more" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
+
+    expect(input).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Tutor is replying" })).toBeDisabled();
+
+    await waitFor(() => {
+      expect(screen.getByText("Done.")).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(input).not.toBeDisabled();
+      expect(document.activeElement).toBe(input);
     });
   });
 });

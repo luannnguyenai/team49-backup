@@ -21,11 +21,73 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
     """Contract tests for the learning unit endpoint."""
 
     async def asyncSetUp(self) -> None:
+        self.cs231n_payload = {
+            "course": {
+                "slug": "cs231n",
+                "title": "CS231n: Deep Learning for Computer Vision",
+            },
+            "unit": {
+                "id": "unit-lecture-1",
+                "slug": "lecture-1-introduction",
+                "title": "Lecture 1: Introduction",
+                "lecture_title": "Lecture 1: Introduction",
+                "lecture_order": 1,
+                "unit_type": "lecture",
+                "status": "ready",
+                "entry_mode": "video",
+            },
+            "content": {
+                "body_markdown": None,
+                "video_url": "/data/courses/CS231n/videos/cs231n-2025-lecture01-introduction.mp4?exp=123&sig=abc",
+                "transcript_available": True,
+                "slides_available": True,
+            },
+            "tutor": {
+                "enabled": True,
+                "mode": "in_context",
+                "context_binding_id": "ctx_unit-lecture-1",
+                "legacy_lecture_id": "cs231n-lecture-1",
+            },
+        }
+        self.cs230_payload = {
+            "course": {
+                "slug": "cs230",
+                "title": "CS230: Deep Learning",
+            },
+            "unit": {
+                "id": "unit-cs230-1",
+                "slug": "lecture-01-seg1",
+                "title": "Why deep learning won and where CS230 fits",
+                "lecture_title": "Lecture 1: Introduction to Deep Learning",
+                "lecture_order": 1,
+                "unit_type": "lesson",
+                "status": "ready",
+                "entry_mode": "hybrid",
+            },
+            "content": {
+                "body_markdown": "summary",
+                "video_url": "/data/courses/CS230/videos/cs230-2025-lecture01-introduction-to-deep-learning.mp4?exp=123&sig=abc",
+                "transcript_available": True,
+                "slides_available": True,
+            },
+            "tutor": {
+                "enabled": True,
+                "mode": "in_context",
+                "context_binding_id": "ctx_unit-cs230-1",
+                "legacy_lecture_id": "cs230-2025-lecture01-introduction-to-deep-learning",
+            },
+        }
+
         self._access_patcher = patch(
             "src.routers.courses.assert_learning_access",
             new=AsyncMock(),
         )
         self._access_patcher.start()
+        self._payload_patcher = patch(
+            "src.routers.courses.get_learning_unit_payload",
+            new=AsyncMock(side_effect=self._fake_learning_unit_payload),
+        )
+        self._payload_patcher.start()
         app.dependency_overrides[get_current_onboarded_user] = lambda: SimpleNamespace(
             id=uuid.uuid4(),
             is_onboarded=True,
@@ -37,8 +99,23 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
 
     async def asyncTearDown(self) -> None:
         self._access_patcher.stop()
+        self._payload_patcher.stop()
         app.dependency_overrides.clear()
         await self.client.aclose()
+
+    async def _fake_learning_unit_payload(self, course_slug: str, unit_slug: str):
+        if course_slug == "cs231n" and unit_slug in {
+            "lecture-1-introduction",
+            "lecture-2-linear-classifiers",
+            "lecture-8-attention-transformers",
+        }:
+            payload = dict(self.cs231n_payload)
+            payload["unit"] = dict(self.cs231n_payload["unit"])
+            payload["unit"]["slug"] = unit_slug
+            return payload
+        if course_slug == "cs230" and unit_slug == "lecture-01-seg1":
+            return self.cs230_payload
+        return None
 
     # ------------------------------------------------------------------
     # GET /api/courses/{slug}/units/{unit_slug}
@@ -106,6 +183,23 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(data["tutor"]["enabled"])
             self.assertEqual(data["tutor"]["mode"], "in_context")
             self.assertIsNotNone(data["tutor"]["context_binding_id"])
+
+    async def test_cs230_unit_keeps_tutor_enabled_for_course_first_context(self):
+        """Course-first units keep tutor enabled even without a legacy lecture row."""
+        response = await self.client.get(
+            "/api/courses/cs230/units/lecture-01-seg1"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        self.assertTrue(data["tutor"]["enabled"])
+        self.assertEqual(data["tutor"]["mode"], "in_context")
+        self.assertEqual(data["tutor"]["context_binding_id"], "ctx_unit-cs230-1")
+        self.assertEqual(
+            data["tutor"]["legacy_lecture_id"],
+            "cs230-2025-lecture01-introduction-to-deep-learning",
+        )
 
     async def test_response_shape_matches_contract(self):
         """Response must contain all required top-level keys."""

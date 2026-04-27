@@ -4,6 +4,8 @@ repositories/base.py
 Generic BaseRepository[T] — all concrete repos inherit from this.
 """
 
+from __future__ import annotations
+
 from typing import Generic, TypeVar
 from uuid import UUID
 

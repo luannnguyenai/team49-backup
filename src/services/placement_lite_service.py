@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import logging
 import uuid
 from typing import Protocol
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import Settings
 from src.exceptions import ValidationError
 from src.models.learning import Session, SessionType
 from src.repositories.canonical_question_repo import CanonicalQuestionRepository
@@ -12,7 +14,10 @@ from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.schemas.placement_lite import PlacementLiteStartResponse
 from src.services.assessment_service import _canonical_item_to_assessment_question
-from src.services.canonical_question_selector import CanonicalQuestionSelector
+from src.services.placement.strategy_selector import get_strategy
+from src.services.placement.strategies.legacy_selector import LegacySelectorStrategy  # noqa: F401
+
+log = logging.getLogger(__name__)
 
 
 class PlacementUnit(Protocol):
@@ -50,13 +55,41 @@ async def start_placement_lite_session(
     if not canonical_unit_ids:
         raise ValidationError("Placement-lite could not find canonical units for selected courses.")
 
-    items = await CanonicalQuestionSelector(CanonicalQuestionRepository(db)).select_for_phase(
+    # Get pool of placement items and apply strategy
+    repo = CanonicalQuestionRepository(db)
+    pool = await repo.get_items_for_phase(
         phase="placement",
         canonical_unit_ids=canonical_unit_ids,
-        count=count,
+        limit=max(count * 4, count),
     )
-    if not items:
+    if not pool:
         raise ValidationError("No canonical placement questions found for selected courses.")
+
+    # Commit B: use configured strategy (default: spread_by_prior)
+    settings = Settings()
+    strategy = get_strategy(mode=settings.cold_start_mode)
+
+    # Commit D: theta_init aggregation (if mastery data exists)
+    # TODO: Commit D+ implements learner_mastery_kp theta aggregation via unit_kp_map weights
+    # For now: default to 0.0 (new user or no prior mastery)
+    theta_init = 0.0
+
+    # Commit D: pass context to strategy (theta_init, user_id, use_2pl override)
+    context = {
+        "theta_init": theta_init,
+        "user_id": user_id,
+        "use_2pl": getattr(settings, "irt_use_2pl", False),
+    }
+    items = await strategy.select(pool, n=count, **context)
+    if not items:
+        raise ValidationError("Strategy selection returned no items.")
+
+    # Commit B: populate audit fields
+    calibration_mode = "prior_only"  # Commit B: all cold-start, no calibration yet
+
+    # Commit C: theta initialization (aggregate from learner_mastery_kp per unit)
+    theta_initial = 0.0  # Default: new user or no prior mastery
+    theta_sigma_initial = 1.0  # Default uncertainty
 
     session = Session(
         user_id=user_id,
@@ -66,10 +99,20 @@ async def start_placement_lite_session(
         canonical_phase="placement_lite",
         total_questions=len(items),
         correct_count=0,
+        # Commit B/C: audit fields
+        selection_strategy=strategy.name,
+        calibration_mode=calibration_mode,
+        theta_initial=theta_initial,
+        theta_sigma_initial=theta_sigma_initial,
     )
     db.add(session)
     await db.flush()
     await db.refresh(session)
+
+    log.info(
+        f"placement_lite start: user={user_id} strategy={strategy.name} "
+        f"total_items={len(items)} calibration_mode={calibration_mode}"
+    )
 
     return PlacementLiteStartResponse(
         session_id=session.id,
@@ -77,4 +120,6 @@ async def start_placement_lite_session(
         questions=[_canonical_item_to_assessment_question(item) for item in items],
         selected_course_ids=course_ids,
         sampled_canonical_unit_ids=canonical_unit_ids,
+        selection_strategy=strategy.name,
+        calibration_mode=calibration_mode,
     )

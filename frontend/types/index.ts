@@ -54,6 +54,7 @@ export interface ForgotPasswordPayload {
 }
 
 export interface OnboardingPayload {
+  goal_ids: string[];
   known_unit_ids: string[];
   desired_section_ids: string[];
   selected_course_ids: string[];
@@ -178,11 +179,22 @@ export interface LearningUnitResult {
   misconceptions_detected: string[];
 }
 
+export interface TopicDecisionResult {
+  topic_unit_id: string;
+  topic_unit_name: string;
+  score_pct: number;
+  decision: string; // "skip" | "review" | "relearn"
+  mastery_level: string;
+  questions_total: number;
+  questions_correct: number;
+}
+
 export interface AssessmentResultResponse {
   session_id: string;
   completed_at: string;
   overall_score_percent: number;
   learning_unit_results: LearningUnitResult[];
+  topic_decisions?: TopicDecisionResult[];
 }
 
 // ---- Topic content ----
@@ -216,6 +228,7 @@ export interface CourseCatalogItem {
   hero_kicker?: string | null;
   hero_badge: string | null;
   is_recommended: boolean;
+  progress_percent?: number | null;
 }
 
 export interface CourseCatalogResponse {
@@ -269,6 +282,7 @@ export interface CourseUnitListItem {
   unit_type: string;
   order_index: number;
   lecture_label?: string | null;
+  is_completed?: boolean;
 }
 
 export interface LectureTocSection {

@@ -5,7 +5,16 @@ format with text + vision + tool-call samples.
 
 **Duration**: 1–3 days depending on whether image recovery is needed.
 
-## ⚠️ BLOCKER: Image data is truncated
+## Decision locked (was BLOCKER): Vision tower frozen, no organic image data needed
+
+The original blocker around truncated `image_base64` is **resolved** for
+v1 by the locked decision: freeze vision tower, retain only ~200–500
+public Strategy B vision samples. Organic vision data is NOT used in v1.
+
+The history below is kept for context; v2 may revisit Option B once
+production observability and slide library access are in place.
+
+## (Historical) BLOCKER: Image data is truncated
 
 `src/services/llm_service.py:110`:
 ```python
@@ -117,7 +126,25 @@ Manual spot-check: dump 100 random samples to `data/sft/spot_check_100.jsonl`
 and review by hand. Reject batch if >10% have wrong/lazy answers from base
 model. Iterate filters until quality bar met.
 
-## Step 04 — Format ChatML
+## Step 04 — Format ChatML (validated against vLLM parser)
+
+⚠️ **Format must round-trip through vLLM `--tool-call-parser hermes`
+before bulk emit.** P0.5 in `01-environment.md` proves the format choice;
+this step's converter MUST match the format committed in
+`smoke_results.json -> p0_5_toolcall_format.format_used_in_training`.
+
+If P0.5 chose `hermes_xml`: emit Hermes XML inside assistant `content`
+text spans, not the structured `tool_calls` field.
+If P0.5 chose `qwen_native`: use Qwen's native tool format syntax.
+If P0.5 chose `structured_field`: continue with `tool_calls` JSON field as
+shown below — but only because P0.5 verified vLLM accepts it.
+
+**Validation gate before bulk emit**: convert 50 random samples, push
+through a tiny smoke vLLM serve, confirm 45+/50 produce parseable
+`tool_calls` in API response. If <45, fix converter before emitting the
+remaining ~5400 tool-call samples.
+
+
 
 Qwen2.5-VL chat template (text-only sample):
 
@@ -187,18 +214,42 @@ Pipeline:
 
 Estimated cost: 500 × ~2K input tokens + ~500 output = ~$10–20 with Flash.
 
-## Step 07 — Split
+## Step 07 — Split (group-key, NOT random sample-level)
 
-Stratified by `(route, has_image, has_tool_call, lang)`:
+⚠️ See `02b-domain-data.md` "Group-key split" section. Random sample-level
+split causes silent train/test leakage when MCQ → 3 variants and KG → 5
+flavors. **Always split by group key BEFORE expanding variants.**
 
-| Split | Ratio | Size target |
+Group keys per source:
+- MCQ: `item_id`
+- KG: `global_kp_id`
+- Transcript synth: `(lecture_id, time_window_start_s)`
+- Refusal: `(lecture_id, refusal_seed_id)`
+- Cross-course: tuple of `global_kp_id` × course pair
+- Organic: normalized `question_hash` (post PII scrub)
+
+Pipeline order:
+1. Build `groups.jsonl` (group_id, source_type, optional difficulty band)
+2. Stratified split groups → train/val/test on (source_type, difficulty
+   band) — not on samples
+3. Expand each group to its variants AFTER assignment
+4. Final stratification check: ratio of `route`, `lang`, `has_tool_call`,
+   `code_reasoning`, `has_image`, `grounding_level` should match across
+   splits within ±2 percentage points
+5. Cross-split MinHash 0.85: must report **zero** matches; abort if any
+
+| Split | Ratio (groups) | Size target (samples after expand) |
 |---|---|---|
-| train | 90% | 8k–14k |
-| val | 5% | 500 |
-| test | 5% | 500 |
+| train | 90% | 8k–14k (FULL) / 8k–10k (FAST) |
+| val | 5% | 400–700 |
+| test | 5% | 400–700 |
 
 Test set is **held out forever** — only used for final eval and never for
-hyperparameter selection.
+hyperparameter selection. Test-split groups feed into `eval/fixtures/`
+for Gate 1 deterministic checks.
+
+Output: `data/sft/groups_split.json` (committed) + `train/val/test.jsonl`
+(gitignored).
 
 ## Volume target for v1
 

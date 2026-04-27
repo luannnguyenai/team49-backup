@@ -126,14 +126,6 @@ export default function StepTimeSchedule({
         </div>
       )}
 
-      {selectedCourseCount === 0 && (
-        <div
-          className="rounded-xl border border-dashed p-4 text-center text-sm"
-          style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-        >
-          Quay lại bước 2 để chọn khóa học — dự kiến thời gian sẽ xuất hiện ở đây.
-        </div>
-      )}
     </div>
   );
 }

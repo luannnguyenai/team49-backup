@@ -11,10 +11,10 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
-from src.models.course import Course, CourseOverview
+from src.models.course import Course, CourseOverview, LearningProgressRecord, LearningProgressStatus, LearningUnit
 from src.schemas.course import (
     CourseCatalogItem,
     CourseCatalogResponse,
@@ -33,7 +33,12 @@ if TYPE_CHECKING:
     from src.models.user import User
 
 
-def _to_catalog_item(row: dict, *, is_recommended: bool = False) -> CourseCatalogItem:
+def _to_catalog_item(
+    row: dict,
+    *,
+    is_recommended: bool = False,
+    progress_percent: int | None = None,
+) -> CourseCatalogItem:
     return CourseCatalogItem(
         id=row["id"],
         slug=row["slug"],
@@ -43,6 +48,7 @@ def _to_catalog_item(row: dict, *, is_recommended: bool = False) -> CourseCatalo
         cover_image_url=row.get("cover_image_url"),
         hero_badge=row.get("hero_badge"),
         is_recommended=is_recommended,
+        progress_percent=progress_percent,
     )
 
 
@@ -71,6 +77,13 @@ async def list_course_catalog(
     if not include_unavailable:
         rows = [row for row in rows if row["status"] == "ready"]
 
+    progress_percents: dict[str, int] = {}
+    if user is not None:
+        progress_percents = await _get_course_progress_percents(
+            user.id,
+            [row["id"] for row in rows],
+        )
+
     if view == "recommended":
         if user is None:
             # Contract: unauthenticated recommended view returns empty
@@ -81,7 +94,11 @@ async def list_course_catalog(
         if recommended_slugs:
             # Return only recommended courses, marked as recommended
             items = [
-                _to_catalog_item(row, is_recommended=True)
+                _to_catalog_item(
+                    row,
+                    is_recommended=True,
+                    progress_percent=progress_percents.get(row["id"]),
+                )
                 for row in rows
                 if row["slug"] in recommended_slugs
             ]
@@ -102,6 +119,7 @@ async def list_course_catalog(
             _to_catalog_item(
                 row,
                 is_recommended=row["slug"] in recommended_slugs,
+                progress_percent=progress_percents.get(row["id"]),
             )
         )
 
@@ -176,6 +194,60 @@ async def _get_recommended_course_slugs(user_id: uuid.UUID) -> set[str]:
             return await repo.get_recommended_slugs_for_user(user_id)
     except Exception:
         return set()
+
+
+async def _get_course_progress_percents(
+    user_id: uuid.UUID,
+    course_ids: list[str],
+) -> dict[str, int]:
+    if not course_ids:
+        return {}
+
+    try:
+        course_uuid_ids = [uuid.UUID(course_id) for course_id in course_ids]
+    except (TypeError, ValueError):
+        return {}
+
+    try:
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            total_result = await db.execute(
+                select(LearningUnit.course_id, func.count(LearningUnit.id))
+                .where(LearningUnit.course_id.in_(course_uuid_ids))
+                .group_by(LearningUnit.course_id)
+            )
+            totals = {str(course_id): total_units for course_id, total_units in total_result.all()}
+
+            completed_result = await db.execute(
+                select(
+                    LearningProgressRecord.course_id,
+                    func.count(LearningProgressRecord.learning_unit_id),
+                )
+                .where(
+                    LearningProgressRecord.user_id == user_id,
+                    LearningProgressRecord.course_id.in_(course_uuid_ids),
+                    LearningProgressRecord.status == LearningProgressStatus.completed,
+                )
+                .group_by(LearningProgressRecord.course_id)
+            )
+            completed = {
+                str(course_id): completed_units
+                for course_id, completed_units in completed_result.all()
+            }
+
+            progress_percents: dict[str, int] = {}
+            for course_id in course_ids:
+                total_units = totals.get(course_id)
+                if total_units is None:
+                    continue
+                completed_units = completed.get(course_id, 0)
+                progress_percents[course_id] = (
+                    round((completed_units / total_units) * 100) if total_units else 0
+                )
+            return progress_percents
+    except Exception:
+        return {}
 
 
 async def _list_catalog_from_db() -> list[dict]:

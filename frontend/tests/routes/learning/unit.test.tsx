@@ -318,6 +318,7 @@ describe("learning unit page (US3)", () => {
         unit_type: "lecture",
         order_index: 1,
         lecture_label: "Lecture 01",
+        is_completed: true,
       },
       {
         slug: "lecture-2-linear-classifiers",
@@ -326,6 +327,7 @@ describe("learning unit page (US3)", () => {
         unit_type: "lecture",
         order_index: 2,
         lecture_label: "Lecture 02",
+        is_completed: false,
       },
     ]);
 
@@ -347,6 +349,7 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByText("Bài học")).toBeInTheDocument();
       expect(screen.getByText("Lecture 01")).toBeInTheDocument();
       expect(screen.getByText("Lecture 02")).toBeInTheDocument();
+      expect(screen.getByLabelText("Lecture 01 completed")).toBeInTheDocument();
       expect(screen.getAllByText("Introduction").length).toBeGreaterThan(0);
       expect(screen.getByText("Key ideas at this moment")).toBeInTheDocument();
       expect(screen.getByText("Neural networks learn layered visual features.")).toBeInTheDocument();
@@ -513,6 +516,47 @@ describe("learning unit page (US3)", () => {
     fireEvent(video!, new Event("durationchange"));
     fireEvent(video!, new Event("timeupdate"));
 
+    expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
+  });
+
+  it("shows the end-of-video quiz overlay when playback finishes", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    const dismissButton = await screen.findByRole("button", { name: "Ẩn tạm" });
+    fireEvent.click(dismissButton);
+
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+
+    fireEvent(video!, new Event("ended"));
+
+    expect(await screen.findAllByText("End-of-video quiz")).toHaveLength(2);
     expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
   });
 

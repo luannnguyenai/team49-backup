@@ -74,6 +74,9 @@ class PathItemResponse(BaseModel):
     has_quiz_items: bool | None = None
     is_worth_learning: bool | None = None
     override_critical_kp: bool = False
+    phase_tag: str | None = None
+    is_locked: bool = False
+    rationale_log: str | None = None
 
 
 # ---------------------------------------------------------------------------

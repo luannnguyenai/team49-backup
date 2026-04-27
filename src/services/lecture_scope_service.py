@@ -13,6 +13,9 @@ _LECTURE_ID_PATTERN = re.compile(r"lecture[-_ ]?0*(\d+)", re.IGNORECASE)
 
 @lru_cache(maxsize=1)
 def _load_syllabus() -> dict[str, dict[str, Any]]:
+    if not _SYLLABUS_PATH.exists():
+        return {}
+
     with _SYLLABUS_PATH.open(encoding="utf-8") as handle:
         payload = json.load(handle)
 
