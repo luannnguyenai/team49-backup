@@ -46,6 +46,29 @@ learning_path_router = APIRouter(
 )
 
 
+def _path_item_response(lp, learning_unit_title: str, section_title: str | None) -> PathItemResponse:
+    return PathItemResponse(
+        id=lp.id,
+        learning_unit_id=lp.learning_unit_id,
+        learning_unit_title=learning_unit_title,
+        section_title=section_title,
+        action=lp.action,
+        estimated_hours=lp.estimated_hours,
+        order_index=lp.order_index,
+        week_number=lp.week_number,
+        status=lp.status,
+        canonical_unit_id=lp.canonical_unit_id,
+        reason_codes=list(getattr(lp, "reason_codes", []) or []),
+        prerequisite_gap_kp_ids=list(getattr(lp, "prerequisite_gap_kp_ids", []) or []),
+        segment_policy=getattr(lp, "segment_policy", None),
+        content_type=getattr(lp, "content_type", None),
+        salience_score=getattr(lp, "salience_score", None),
+        has_quiz_items=getattr(lp, "has_quiz_items", None),
+        is_worth_learning=getattr(lp, "is_worth_learning", None),
+        override_critical_kp=bool(getattr(lp, "override_critical_kp", False)),
+    )
+
+
 # ---------------------------------------------------------------------------
 # POST /api/learning-path/generate
 # ---------------------------------------------------------------------------
@@ -87,18 +110,7 @@ async def api_get_learning_path(
     rows = await get_learning_path(db, user.id)
 
     items: list[PathItemResponse] = [
-        PathItemResponse(
-            id=lp.id,
-            learning_unit_id=lp.learning_unit_id,
-            learning_unit_title=learning_unit_title,
-            section_title=section_title,
-            action=lp.action,
-            estimated_hours=lp.estimated_hours,
-            order_index=lp.order_index,
-            week_number=lp.week_number,
-            status=lp.status,
-            canonical_unit_id=lp.canonical_unit_id,
-        )
+        _path_item_response(lp, learning_unit_title, section_title)
         for lp, learning_unit_title, section_title in rows
     ]
 
@@ -136,18 +148,7 @@ async def api_get_timeline(
     for week_num in sorted(grouped.keys()):
         rows = grouped[week_num]
         week_items: list[PathItemResponse] = [
-            PathItemResponse(
-                id=lp.id,
-                learning_unit_id=lp.learning_unit_id,
-                learning_unit_title=learning_unit_title,
-                section_title=section_title,
-                action=lp.action,
-                estimated_hours=lp.estimated_hours,
-                order_index=lp.order_index,
-                week_number=lp.week_number,
-                status=lp.status,
-                canonical_unit_id=lp.canonical_unit_id,
-            )
+            _path_item_response(lp, learning_unit_title, section_title)
             for lp, learning_unit_title, section_title in rows
         ]
         total_hours = round(sum(i.estimated_hours or 0.0 for i in week_items), 4)

@@ -96,9 +96,13 @@ Future onboarding/path-selection adapter contract:
 
 ```ts
 export interface OnboardingLearningProfileInput {
-  selected_path_key: PlannerPathKey;
+  selected_path_key: unknown;
   available_hours_per_week: number | null;
   preferred_method?: "reading" | "video" | null;
+}
+
+export function isPlannerPathKey(value: unknown): value is PlannerPathKey {
+  return value === "dl_cv" || value === "dl_nlp";
 }
 
 export function onboardingToLearningProfile(
@@ -233,6 +237,15 @@ describe("learning path profile contract", () => {
       source: "onboarding",
     });
     expect(profile.generatedFromProfileHash).toBe(profileHash(profile));
+  });
+
+  it("rejects invalid or combined path keys at runtime", () => {
+    expect(() =>
+      onboardingToLearningProfile({
+        selected_path_key: "dl_cv_nlp",
+        available_hours_per_week: 6,
+      }),
+    ).toThrow(/requires exactly one path/i);
   });
 });
 ```
@@ -371,6 +384,10 @@ export function createLearningProfileForPath(
 export function onboardingToLearningProfile(
   input: OnboardingLearningProfileInput,
 ): LearningProfile {
+  if (!isPlannerPathKey(input.selected_path_key)) {
+    throw new Error("Planner V1 requires exactly one path: dl_cv or dl_nlp");
+  }
+
   return createLearningProfileForPath(input.selected_path_key, {
     weeklyHours: input.available_hours_per_week,
     source: "onboarding",
@@ -775,14 +792,14 @@ Create `frontend/features/learning-path/components/PathRequiredState.tsx`:
 "use client";
 
 import Link from "next/link";
-import { Map } from "lucide-react";
+import { MapIcon } from "lucide-react";
 
 export default function PathRequiredState() {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white px-6 py-10 text-center">
       <div className="mx-auto flex max-w-xl flex-col items-center">
         <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
-          <Map className="h-6 w-6" aria-hidden="true" />
+          <MapIcon className="h-6 w-6" aria-hidden="true" />
         </span>
         <h2 className="mt-4 text-xl font-black text-slate-950">Chọn một lộ trình để bắt đầu</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -854,12 +871,9 @@ Create `frontend/features/learning-path/components/RoadmapNodeCard.tsx`:
 import { Check, Circle, Lock, Play, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { RoadmapNodeModel } from "../roadmap-model";
-import type { PlayerInsight } from "../player-insights";
-import PlayerInsightBadge from "./PlayerInsightBadge";
 
 interface RoadmapNodeCardProps {
   node: RoadmapNodeModel;
-  insight?: PlayerInsight | null;
   onSelectItem: (id: string) => void;
   onSelectSection: (sectionKey: string) => void;
 }
@@ -873,7 +887,6 @@ function statusIcon(status: RoadmapNodeModel["status"], recommended: boolean) {
 
 export default function RoadmapNodeCard({
   node,
-  insight,
   onSelectItem,
   onSelectSection,
 }: RoadmapNodeCardProps) {
@@ -923,7 +936,6 @@ export default function RoadmapNodeCard({
         {node.subtitle && !isTopic && (
           <span className="mt-1 block text-xs text-slate-500">{node.subtitle}</span>
         )}
-        {!isTopic && insight ? <PlayerInsightBadge insight={insight} /> : null}
       </span>
       {isTopic && <Circle className="ml-2 h-3 w-3 fill-current" aria-hidden="true" />}
     </button>
@@ -941,23 +953,17 @@ Create `frontend/features/learning-path/components/RoadmapPlanner.tsx`:
 import { useMemo } from "react";
 import { buildRoadmapModel } from "../roadmap-model";
 import type { PathItemResponse } from "@/types";
-import {
-  derivePlayerInsight,
-  type PlayerProgressSnapshot,
-} from "../player-insights";
 import RoadmapConnectorLayer from "./RoadmapConnectorLayer";
 import RoadmapNodeCard from "./RoadmapNodeCard";
 
 interface RoadmapPlannerProps {
   items: PathItemResponse[];
-  currentProgress?: PlayerProgressSnapshot | null;
   onSelectItem: (id: string) => void;
   onSelectSection: (sectionKey: string) => void;
 }
 
 export default function RoadmapPlanner({
   items,
-  currentProgress,
   onSelectItem,
   onSelectSection,
 }: RoadmapPlannerProps) {
@@ -987,22 +993,14 @@ export default function RoadmapPlanner({
           height={model.height}
           connectors={model.connectors}
         />
-        {model.nodes.map((node) => {
-          const insight =
-            node.item?.learning_unit_id === currentProgress?.learning_unit_id
-              ? derivePlayerInsight(currentProgress)
-              : null;
-
-          return (
-            <RoadmapNodeCard
-              key={node.id}
-              node={node}
-              insight={insight}
-              onSelectItem={onSelectItem}
-              onSelectSection={onSelectSection}
-            />
-          );
-        })}
+        {model.nodes.map((node) => (
+          <RoadmapNodeCard
+            key={node.id}
+            node={node}
+            onSelectItem={onSelectItem}
+            onSelectSection={onSelectSection}
+          />
+        ))}
       </div>
     </div>
   );
@@ -1186,10 +1184,10 @@ Read profile from store:
 const profile = useLearningPathStore((s) => s.profile);
 ```
 
-After existing loading/error branches, render `PathRequiredState` before the planner header if no concrete profile/path exists:
+After existing loading/error branches, render `PathRequiredState` before the planner header if no concrete profile/path exists or if the selected profile has no generated items:
 
 ```tsx
-if (!profile) {
+if (!profile || items.length === 0) {
   return <PathRequiredState />;
 }
 ```
@@ -1207,7 +1205,7 @@ Replace the existing title/header block with:
 />
 ```
 
-Keep loading, error, graph/timeline, and drawer branches unchanged. Empty path data should show `PathRequiredState` rather than a default roadmap.
+Keep loading, error, graph/timeline, and drawer branches unchanged. `LearningPathShell` is the source of truth for path-required UX. `RoadmapCanvas` may keep a defensive guard, but normal empty path data should be handled at the shell level before rendering header/canvas.
 
 - [ ] **Step 4: Run focused frontend tests**
 
@@ -1608,6 +1606,7 @@ export interface PlayerProgressSnapshot {
   watch_percent?: number | null;
   video_finished?: boolean | null;
   inline_quiz?: LearningSessionInlineQuizProgress | null;
+  has_end_quiz?: boolean | null;
   last_opened_at?: string | null;
   review_due_count?: number | null;
   mastery_stale?: boolean | null;
@@ -1657,8 +1656,12 @@ export function derivePlayerInsight(snapshot: PlayerProgressSnapshot | null): Pl
     return { tone: "quiz_active", label: "End quiz đang dở", hrefSuffix: "#end-quiz" };
   }
 
-  if (snapshot.video_finished || watchPercent >= 95) {
+  if ((snapshot.video_finished || watchPercent >= 95) && snapshot.has_end_quiz !== false) {
     return { tone: "quiz_ready", label: "End quiz đã mở", hrefSuffix: "#end-quiz" };
+  }
+
+  if (snapshot.video_finished) {
+    return { tone: "complete", label: "Đã xem xong", hrefSuffix: null };
   }
 
   if (checkpointActive(inlineQuiz, "midpoint")) {
@@ -1716,6 +1719,19 @@ Modify `RoadmapPlanner.tsx` and `RoadmapNodeCard.tsx` so the active/resume unit 
 - `RoadmapPlanner` computes `derivePlayerInsight(currentProgress)` only when `node.item?.learning_unit_id === currentProgress?.learning_unit_id`.
 - `RoadmapNodeCard` receives `insight?: PlayerInsight | null`.
 - Do not fetch per-node progress in V1 because that would create an N+1 API pattern.
+
+Modify `RoadmapCanvas.tsx` to pass the current progress snapshot into `RoadmapPlanner`. Use the existing store/API field that carries player progress; if the store does not expose it yet, add a nullable `currentProgress` field populated from the learning-path response.
+
+```tsx
+const currentProgress = useLearningPathStore((s) => s.currentProgress);
+
+<RoadmapPlanner
+  items={items}
+  currentProgress={currentProgress}
+  onSelectItem={selectItem}
+  onSelectSection={selectSection}
+/>
+```
 
 - [ ] **Step 5: Deep-link checkpoint actions from planner to player**
 
@@ -1844,9 +1860,10 @@ Before implementation handoff or final commit, scan for broken JSX style snippet
 
 ```bash
 rg -n "style=\\s+|style=\\s*borderColor|style=\\s*color|left: node\\.x,\\s+top: node\\.y|width: model\\.width,\\s+height: model\\.height" frontend
+rg -n "style=\\{\\{[0-9]+\\}\\}" frontend
 ```
 
-Expected: no invalid `style=` placeholder snippets. Valid React style objects should use `style={{ ... }}`.
+Expected: no invalid `style=` placeholder snippets. Valid React style objects should use explicit object properties, e.g. `style={{ borderColor: "var(--border)" }}`.
 
 - [ ] **Step 6: Final commit**
 
@@ -2075,12 +2092,19 @@ async def get_quiz_item_counts_by_unit_ids(
     self,
     unit_ids: list[str],
     *,
-    phases: tuple[str, ...] = ("placement", "mini_quiz", "skip_quiz", "review"),
+    phases: tuple[str, ...] = (
+        "placement",
+        "mini_quiz",
+        "skip_verification",
+        "bridge_check",
+        "final_quiz",
+        "review",
+    ),
 ) -> dict[str, int]:
     if not unit_ids:
         return {}
     result = await self.session.execute(
-        select(QuestionBankItem.unit_id, func.count(QuestionBankItem.id))
+        select(QuestionBankItem.unit_id, func.count(func.distinct(QuestionBankItem.item_id)))
         .join(ItemPhaseMap, ItemPhaseMap.item_id == QuestionBankItem.item_id)
         .where(QuestionBankItem.unit_id.in_(unit_ids))
         .where(ItemPhaseMap.phase.in_(phases))
@@ -2223,7 +2247,8 @@ def classify_schema_v2_unit_priority(
     explicit_quiz = getattr(unit, "has_quiz_items", None)
     has_quiz_items = bool(explicit_quiz) if explicit_quiz is not None else quiz_item_count > 0
     critical = bool(getattr(unit, "override_critical_kp", False)) or _has_critical_gateway_kp(unit_kp_rows, kp_by_id)
-    active = bool(getattr(unit, "active", True))
+    active_value = getattr(unit, "active", True)
+    active = True if active_value is None else bool(active_value)
     segment_policy = classify_segment_policy(
         unit,
         has_quiz_items=has_quiz_items,
@@ -2347,7 +2372,7 @@ prereq_gaps = find_prerequisite_gaps(
 )
 ```
 
-5. Change action classification. `PathAction.remediate` exists in the current backend/frontend enum; if the enum changes before implementation, keep prerequisite gaps on the strongest existing action and preserve `required_prerequisite` in `reason_codes`.
+5. Change action classification. `PathAction.remediate` exists in the current backend/frontend enum; if the enum changes before implementation, keep prerequisite gaps on the strongest existing action and preserve `required_prerequisite` in `reason_codes`. Hidden segment `skip` below is a display exclusion only, not learner skip/waive evidence, and must not create a `WaivedUnit` or mark user progress as skipped.
 
 ```python
 if prereq_gaps:
@@ -2429,6 +2454,8 @@ export type PlannerReasonCode =
   | "quiz_available"
   | "optional_low_salience"
   | "required_prerequisite"
+  | "quick_review"
+  | "skip_by_mastery"
   | "inactive"
   | "reference_only"
   | "hidden_logistics"
@@ -2448,6 +2475,10 @@ export function describePlannerReason(code: string): { label: string; details: s
       return { label: "Prerequisite", details: "Nên học trước các phần phụ thuộc." };
     case "optional_low_salience":
       return { label: "Optional", details: "Có thể rút gọn nếu đã đủ nền tảng." };
+    case "quick_review":
+      return { label: "Quick review", details: "Chỉ cần ôn nhanh vì mastery khá ổn." };
+    case "skip_by_mastery":
+      return { label: "Skip by mastery", details: "Có evidence đủ mạnh để bỏ qua." };
     case "inactive":
       return { label: "Inactive", details: "Không nên đưa vào lộ trình mới." };
     case "reference_only":

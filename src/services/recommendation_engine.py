@@ -50,6 +50,81 @@ from src.services.skip_policy_service import can_skip_unit
 # ---------------------------------------------------------------------------
 
 
+def _unit_active(unit: object | None) -> bool:
+    active_value = getattr(unit, "active", True)
+    return True if active_value is None else bool(active_value)
+
+
+def _section_flags(unit: object | None) -> set[str]:
+    flags = getattr(unit, "section_flags", None)
+    if not isinstance(flags, list):
+        return set()
+    return {str(flag).strip().lower() for flag in flags if str(flag).strip()}
+
+
+def _segment_policy(unit: object | None) -> str:
+    if not _unit_active(unit):
+        return "hidden"
+    flags = _section_flags(unit)
+    content_type = str(getattr(unit, "content_type", "") or "").strip().lower()
+    if flags.intersection({"logistics", "admin", "administrative"}) or content_type in {
+        "logistics",
+        "admin",
+        "administrative",
+    }:
+        return "hidden"
+    if "reference" in flags or content_type == "reference":
+        return "reference"
+    if getattr(unit, "is_worth_learning", None) is False:
+        return "reference"
+    return "core"
+
+
+def _high_salience(unit: object | None) -> bool:
+    raw = getattr(unit, "salience_score", None)
+    if raw is None:
+        return False
+    if isinstance(raw, (int, float)):
+        return float(raw) >= 0.75
+    value = str(raw).strip().lower()
+    if value in {"critical", "high"}:
+        return True
+    try:
+        return float(value) >= 0.75
+    except ValueError:
+        return False
+
+
+def _planner_reason_codes(
+    *,
+    action: PathAction,
+    canonical_unit: object | None,
+    has_quiz_items: bool,
+    segment_policy: str,
+) -> list[str]:
+    reason_codes: list[str] = []
+    content_type = str(getattr(canonical_unit, "content_type", "") or "").strip().lower()
+
+    if getattr(canonical_unit, "override_critical_kp", False):
+        reason_codes.append("critical_kp")
+    if _high_salience(canonical_unit):
+        reason_codes.append("high_salience")
+    if has_quiz_items:
+        reason_codes.append("quiz_available")
+    if content_type in {"prerequisite", "foundation"}:
+        reason_codes.append("required_prerequisite")
+    if action == PathAction.skip:
+        reason_codes.append("skip_by_mastery")
+    if action == PathAction.quick_review:
+        reason_codes.append("quick_review")
+    if segment_policy == "hidden":
+        reason_codes.append("hidden_logistics")
+    if segment_policy == "reference":
+        reason_codes.append("reference_only")
+
+    return reason_codes
+
+
 async def generate_learning_path(
     db: AsyncSession,
     user: User,
@@ -83,6 +158,8 @@ async def _generate_canonical_learning_path(
     )
     canonical_unit_ids = [unit.canonical_unit_id for unit in units if unit.canonical_unit_id]
     unit_kp_rows = await content_repo.get_unit_kp_rows(canonical_unit_ids)
+    canonical_unit_by_id = await content_repo.get_canonical_units_by_ids(canonical_unit_ids)
+    quiz_counts_by_unit_id = await content_repo.get_quiz_item_counts_by_unit_ids(canonical_unit_ids)
     kp_ids = sorted({row.kp_id for row in unit_kp_rows})
 
     mastery_repo = LearnerMasteryKPRepository(db)
@@ -93,6 +170,11 @@ async def _generate_canonical_learning_path(
     recommended_path_json = []
 
     for order_index, unit in enumerate(units):
+        canonical_unit = (
+            canonical_unit_by_id.get(unit.canonical_unit_id)
+            if unit.canonical_unit_id
+            else None
+        )
         unit_kps = [row.kp_id for row in unit_kp_rows if row.unit_id == unit.canonical_unit_id]
         mastery_values = [
             estimate_mastery_lcb_on_read(mastery_by_kp[kp_id], now=generated_at)
@@ -102,7 +184,21 @@ async def _generate_canonical_learning_path(
         mastery_lcb = min(mastery_values) if mastery_values else 0.0
         action_value = classify_unit_action(mastery_lcb)
         action = PathAction(action_value)
-        estimated_hours = 0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
+        segment_policy = _segment_policy(canonical_unit)
+        has_quiz_items = bool(
+            getattr(canonical_unit, "has_quiz_items", False)
+            or quiz_counts_by_unit_id.get(unit.canonical_unit_id or "", 0) > 0
+        )
+        reason_codes = _planner_reason_codes(
+            action=action,
+            canonical_unit=canonical_unit,
+            has_quiz_items=has_quiz_items,
+            segment_policy=segment_policy,
+        )
+        if segment_policy == "hidden":
+            estimated_hours = 0.0
+        else:
+            estimated_hours = 0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
 
         item = PathItemResponse(
             id=unit.id,
@@ -117,6 +213,14 @@ async def _generate_canonical_learning_path(
             week_number=None,
             status=status_by_unit.get(unit.id, PathStatus.pending),
             canonical_unit_id=unit.canonical_unit_id,
+            reason_codes=reason_codes,
+            prerequisite_gap_kp_ids=[],
+            segment_policy=segment_policy,
+            content_type=getattr(canonical_unit, "content_type", None),
+            salience_score=getattr(canonical_unit, "salience_score", None),
+            has_quiz_items=has_quiz_items,
+            is_worth_learning=getattr(canonical_unit, "is_worth_learning", None),
+            override_critical_kp=bool(getattr(canonical_unit, "override_critical_kp", False)),
         )
         items.append(item)
         recommended_path_json.append(
@@ -128,6 +232,14 @@ async def _generate_canonical_learning_path(
                 "order_index": order_index,
                 "kp_ids": unit_kps,
                 "mastery_lcb": mastery_lcb,
+                "reason_codes": reason_codes,
+                "prerequisite_gap_kp_ids": [],
+                "segment_policy": segment_policy,
+                "content_type": getattr(canonical_unit, "content_type", None),
+                "salience_score": getattr(canonical_unit, "salience_score", None),
+                "has_quiz_items": has_quiz_items,
+                "is_worth_learning": getattr(canonical_unit, "is_worth_learning", None),
+                "override_critical_kp": bool(getattr(canonical_unit, "override_critical_kp", False)),
             }
         )
 
@@ -211,6 +323,8 @@ async def get_learning_path_timeline(
         lp = row[0]
         if lp.action == PathAction.skip:
             continue
+        if getattr(lp, "segment_policy", None) == "hidden":
+            continue
         week = lp.week_number or 1
         grouped.setdefault(week, []).append(row)
     return grouped
@@ -271,6 +385,14 @@ async def _get_canonical_learning_path_rows(
             status=status_by_unit.get(unit_id, PathStatus.pending),
             learning_unit_id=unit_id,
             canonical_unit_id=item.get("canonical_unit_id"),
+            reason_codes=list(item.get("reason_codes") or []),
+            prerequisite_gap_kp_ids=list(item.get("prerequisite_gap_kp_ids") or []),
+            segment_policy=item.get("segment_policy"),
+            content_type=item.get("content_type"),
+            salience_score=item.get("salience_score"),
+            has_quiz_items=item.get("has_quiz_items"),
+            is_worth_learning=item.get("is_worth_learning"),
+            override_critical_kp=bool(item.get("override_critical_kp", False)),
         )
         section_title = None
         if unit is not None:

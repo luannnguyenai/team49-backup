@@ -441,6 +441,14 @@ export interface PathItemResponse {
   week_number: number | null;
   status: PathStatus;
   canonical_unit_id: string | null;
+  reason_codes?: string[];
+  prerequisite_gap_kp_ids?: string[];
+  segment_policy?: "core" | "reference" | "hidden";
+  content_type?: string | null;
+  salience_score?: number | string | null;
+  has_quiz_items?: boolean;
+  is_worth_learning?: boolean | null;
+  override_critical_kp?: boolean;
 }
 
 export interface LearningPathResponse {

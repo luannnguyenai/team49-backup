@@ -1,4 +1,3 @@
-import type { Edge, Node } from "reactflow";
 import type { PathItemResponse, TimelineResponse, WeekEntry } from "@/types";
 import { isVisibleInTimeline } from "./lib/status";
 
@@ -23,9 +22,24 @@ export interface SubtopicNodeData {
 
 export type LearningPathNodeData = TopicNodeData | SubtopicNodeData;
 
+export interface FlowNode<TData = LearningPathNodeData> {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: TData;
+}
+
+export interface FlowEdge {
+  id: string;
+  source: string;
+  target: string;
+  type?: string;
+  animated?: boolean;
+}
+
 export interface FlowModel {
-  nodes: Node<LearningPathNodeData>[];
-  edges: Edge[];
+  nodes: FlowNode[];
+  edges: FlowEdge[];
   sectionSummaries: SectionSummary[];
 }
 
@@ -88,8 +102,8 @@ export function pathToFlow(items: PathItemResponse[]): FlowModel {
     section.items.push(item);
   }
 
-  const nodes: Node<LearningPathNodeData>[] = [];
-  const edges: Edge[] = [];
+  const nodes: FlowNode[] = [];
+  const edges: FlowEdge[] = [];
 
   for (const section of sections) {
     const topicId = `topic-${section.key}`;

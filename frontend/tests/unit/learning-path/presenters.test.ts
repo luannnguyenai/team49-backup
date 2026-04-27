@@ -14,6 +14,7 @@ function item(overrides: Partial<PathItemResponse> & { id: string; order_index: 
     week_number: overrides.week_number ?? null,
     status: overrides.status ?? "pending",
     canonical_unit_id: overrides.canonical_unit_id ?? null,
+    segment_policy: overrides.segment_policy,
   };
 }
 
@@ -41,6 +42,7 @@ describe("learning path presenters", () => {
       item({ id: "a", order_index: 0, week_number: null, estimated_hours: 1.5 }),
       item({ id: "b", order_index: 1, week_number: 2, estimated_hours: 2 }),
       item({ id: "c", order_index: 2, week_number: 2, action: "skip" }),
+      item({ id: "d", order_index: 3, week_number: 2, segment_policy: "hidden" }),
     ]);
 
     expect(timeline.total_weeks).toBe(2);

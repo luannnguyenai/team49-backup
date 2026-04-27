@@ -39,11 +39,18 @@ def test_path_item_response_allows_canonical_unit_without_legacy_topic_fields():
         week_number=None,
         status=PathStatus.pending,
         canonical_unit_id="local::lecture01::seg1",
+        reason_codes=["critical_kp", "quiz_available"],
+        segment_policy="core",
+        content_type="concept",
+        has_quiz_items=True,
+        override_critical_kp=True,
     )
 
     assert item.learning_unit_title == "Unit 1"
     assert item.section_title == "Section 1"
     assert item.canonical_unit_id == "local::lecture01::seg1"
+    assert item.reason_codes == ["critical_kp", "quiz_available"]
+    assert item.segment_policy == "core"
 
 
 @pytest.mark.asyncio
@@ -66,6 +73,11 @@ async def test_get_learning_path_reads_latest_canonical_plan(monkeypatch):
                         "action": "deep_practice",
                         "estimated_hours": 0.5,
                         "order_index": 2,
+                        "reason_codes": ["critical_kp"],
+                        "segment_policy": "core",
+                        "content_type": "concept",
+                        "has_quiz_items": True,
+                        "override_critical_kp": True,
                     }
                 ]
             )
@@ -102,6 +114,10 @@ async def test_get_learning_path_reads_latest_canonical_plan(monkeypatch):
     assert lp.canonical_unit_id == "cs231n::u1"
     assert lp.action == PathAction.deep_practice
     assert lp.status == PathStatus.completed
+    assert lp.reason_codes == ["critical_kp"]
+    assert lp.segment_policy == "core"
+    assert lp.has_quiz_items is True
+    assert lp.override_critical_kp is True
     assert learning_unit_title == "Convolution Basics"
     assert section_title == "CNN Section"
 
@@ -128,8 +144,19 @@ async def test_get_learning_path_timeline_groups_canonical_non_skip_items(monkey
                     action=PathAction.skip,
                     week_number=None,
                     order_index=1,
+                    segment_policy=None,
                 ),
                 "Unit 2",
+                "canonical_unit",
+            ),
+            (
+                SimpleNamespace(
+                    action=PathAction.deep_practice,
+                    week_number=None,
+                    order_index=2,
+                    segment_policy="hidden",
+                ),
+                "Hidden logistics",
                 "canonical_unit",
             ),
         ]

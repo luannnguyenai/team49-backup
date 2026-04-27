@@ -66,6 +66,14 @@ class PathItemResponse(BaseModel):
     week_number: int | None
     status: PathStatus
     canonical_unit_id: str | None = None
+    reason_codes: list[str] = Field(default_factory=list)
+    prerequisite_gap_kp_ids: list[str] = Field(default_factory=list)
+    segment_policy: str | None = None
+    content_type: str | None = None
+    salience_score: str | None = None
+    has_quiz_items: bool | None = None
+    is_worth_learning: bool | None = None
+    override_critical_kp: bool = False
 
 
 # ---------------------------------------------------------------------------

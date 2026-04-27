@@ -30,5 +30,5 @@ export function getStatusClassName(status: PathStatus, isRecommended = false): s
 }
 
 export function isVisibleInTimeline(item: PathItemResponse): boolean {
-  return item.action !== "skip";
+  return item.action !== "skip" && item.segment_policy !== "hidden";
 }

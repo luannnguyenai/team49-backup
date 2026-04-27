@@ -590,6 +590,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   );
   const quizProgressRef = useRef<InlineQuizProgress>({});
   const lastWatchSyncRef = useRef(0);
+  const handledCheckpointHashRef = useRef<string | null>(null);
 
   useEffect(() => {
     quizProgressRef.current = inlineQuizProgress;
@@ -892,6 +893,34 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
     },
     [resumeInlineQuiz],
   );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleCheckpointHash = () => {
+      const hash = window.location.hash;
+      const checkpoint =
+        hash === "#midpoint-quiz"
+          ? "midpoint"
+          : hash === "#end-quiz"
+            ? "end"
+            : null;
+      if (!checkpoint) return;
+      if (handledCheckpointHashRef.current === hash) return;
+
+      const status = checkpointStatus.find((entry) => entry.checkpoint === checkpoint);
+      if (!status || status.completed || (!status.active && !status.available)) return;
+
+      handledCheckpointHashRef.current = hash;
+      void startCheckpointQuiz(checkpoint);
+    };
+
+    handleCheckpointHash();
+    window.addEventListener("hashchange", handleCheckpointHash);
+    return () => {
+      window.removeEventListener("hashchange", handleCheckpointHash);
+    };
+  }, [checkpointStatus, startCheckpointQuiz]);
 
   const submitInlineQuizAnswer = useCallback(async () => {
     if (!quizSession || !activeQuizQuestion || quizSession.selectedAnswer === null) return;
