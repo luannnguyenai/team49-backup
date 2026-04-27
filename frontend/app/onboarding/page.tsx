@@ -18,7 +18,6 @@ import StepPriorKnowledgeInput from "@/components/onboarding/StepPriorKnowledgeI
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepAssessmentDepth from "@/components/onboarding/StepAssessmentDepth";
-import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
 
 import { bootstrapDataApi, canonicalSectionApi } from "@/lib/api";
 import {
@@ -75,13 +74,11 @@ const STEPS = [
   },
 ] as const;
 
-// Beginner: 5 visible steps (internal indices 0, 1, 3, 4 + done)
+// Beginner: 3 visible steps (internal indices 0, 1, 4)
 const STEPS_BEGINNER = [
   { title: "Mục tiêu học tập",  subtitle: "Bạn muốn học gì?" },
   { title: "Kinh nghiệm",       subtitle: "Bạn đã từng học AI/ML chưa?" },
   { title: "Thời gian của bạn", subtitle: "Lên lịch học phù hợp" },
-  { title: "Phương pháp học",   subtitle: "Cách bạn học tốt nhất" },
-  { title: "Sinh lộ trình",     subtitle: "Hoàn tất thiết lập" },
 ] as const;
 
 // Maps internal step index → beginner display index (-1 = hidden/skipped)
@@ -89,7 +86,6 @@ const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   0: 0,
   1: 1,
   4: 2,
-  6: 3,
   // 2, 3 and 5 are skipped for beginners
 };
 
@@ -273,12 +269,8 @@ function OnboardingPageInner() {
       const valid = await trigger(fields);
       if (!valid) return;
     }
-    if (experienceLevel === "beginner" && step === 4) {
-      navigate(6);
-      return;
-    }
     navigate(step + 1);
-  }, [experienceLevel, step, trigger, navigate]);
+  }, [step, trigger, navigate]);
 
   const goBack = useCallback(() => {
     clearError();
@@ -355,8 +347,8 @@ function OnboardingPageInner() {
   const { title, subtitle } = STEPS[displayIdx] ?? STEPS[STEPS.length - 1];
 
   const isFirstStep = step === 0;
-  const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
-  const isLastFormStep = step === 6;
+  const isLastFormStep = isBeginner && step === 4;
+  const showPageNav = STEPS_WITH_PAGE_NAV.has(step) && !isLastFormStep;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -528,16 +520,10 @@ function OnboardingPageInner() {
                 {step === 5 && (
                   <StepAssessmentDepth
                     onBack={() => navigate(4)}
-                    onNext={() => navigate(6)}
-                  />
-                )}
-
-                {/* Step 6 — Learning method */}
-                {step === 6 && (
-                  <StepLearningMethod
-                    register={register}
-                    watch={watch}
-                    errors={errors}
+                    onNext={() => {
+                      handleSubmit(submitOnboarding)();
+                    }}
+                    nextLabel="Hoàn tất"
                   />
                 )}
               </div>

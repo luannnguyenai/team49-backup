@@ -26,9 +26,7 @@ export const onboardingSchema = z.object({
       "Deadline phải sau ngày hôm nay"
     ),
 
-  preferred_method: z.enum(["reading", "video"], {
-    required_error: "Vui lòng chọn phương pháp học",
-  }),
+  preferred_method: z.enum(["reading", "video"]).default("video"),
 });
 
 export type OnboardingFormData = z.infer<typeof onboardingSchema>;

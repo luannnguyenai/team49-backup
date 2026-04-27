@@ -1,9 +1,9 @@
 "use client";
 // components/onboarding/StepTimeSchedule.tsx
 // Step 3 — "Thời gian của bạn"
-// Range slider (hours/week) + date picker + weeks-estimate preview.
+// Range slider (hours/week) + date picker.
 
-import { Calendar, Clock, TrendingUp } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import type { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import type { OnboardingFormData } from "@/lib/onboarding-schema";
@@ -12,8 +12,6 @@ interface Props {
   register: UseFormRegister<OnboardingFormData>;
   errors: FieldErrors<OnboardingFormData>;
   watch: UseFormWatch<OnboardingFormData>;
-  selectedCourseCount: number;
-  totalHours: number;
 }
 
 // Minimum selectable date: tomorrow
@@ -27,11 +25,8 @@ export default function StepTimeSchedule({
   register,
   errors,
   watch,
-  selectedCourseCount,
-  totalHours,
 }: Props) {
   const hours = watch("available_hours_per_week") ?? 5;
-  const weeksNeeded = hours > 0 ? Math.ceil(totalHours / hours) : null;
 
   return (
     <div className="space-y-6">

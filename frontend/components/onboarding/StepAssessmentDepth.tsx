@@ -8,6 +8,7 @@ import type { AssessmentDepth } from "@/stores/onboardingStore";
 interface Props {
   onBack: () => void;
   onNext: () => void;
+  nextLabel?: string;
 }
 
 const DEPTH_OPTIONS: Array<{
@@ -36,7 +37,7 @@ const DEPTH_OPTIONS: Array<{
   },
 ];
 
-export default function StepAssessmentDepth({ onBack, onNext }: Props) {
+export default function StepAssessmentDepth({ onBack, onNext, nextLabel = "Tiếp tục" }: Props) {
   const assessmentDepth = useOnboardingStore((s) => s.assessmentDepth);
   const setAssessmentDepth = useOnboardingStore((s) => s.setAssessmentDepth);
 
@@ -105,7 +106,7 @@ export default function StepAssessmentDepth({ onBack, onNext }: Props) {
           onClick={onNext}
           className="rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99]"
         >
-          Tiếp tục
+          {nextLabel}
         </button>
       </div>
     </div>
