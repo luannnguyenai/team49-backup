@@ -7,7 +7,7 @@ Merges original A20-App-049 config (LLM keys) with AI Personalized config (DB, A
 
 import json
 from collections.abc import Mapping
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -127,6 +127,12 @@ class Settings(BaseSettings):
     read_canonical_planner_enabled: bool = Field(
         default=True,
         description="Read planner candidates from canonical learning units and prerequisite graph.",
+    )
+
+    # ---- Placement Assessment Strategies ----
+    cold_start_mode: Literal["random_uniform", "spread_by_prior", "irt_adaptive", "auto"] = Field(
+        default="spread_by_prior",
+        description="Item selection strategy for placement assessments: random_uniform | spread_by_prior | irt_adaptive | auto",
     )
 
     @field_validator("cors_origins", mode="before")
