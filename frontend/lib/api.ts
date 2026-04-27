@@ -189,6 +189,7 @@ import type {
   SessionType,
   StartLearningDecisionResponse,
   TokenPair,
+  TopicDecisionResult,
   User,
   UserSkillOverview,
 } from "@/types";
@@ -212,6 +213,15 @@ export const assessmentApi = {
   results: (sessionId: string) =>
     api
       .get<AssessmentResultResponse>(`/api/assessment/${sessionId}/results`)
+      .then((r) => r.data),
+
+  updateTopicDecision: (sessionId: string, topicUnitId: string, userChoice: string) =>
+    api
+      .patch<TopicDecisionResult>("/api/assessment/topic-decision", {
+        session_id: sessionId,
+        topic_unit_id: topicUnitId,
+        user_choice: userChoice,
+      })
       .then((r) => r.data),
 };
 

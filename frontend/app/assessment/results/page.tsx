@@ -1,12 +1,11 @@
 "use client";
 // app/assessment/results/page.tsx
-// Assessment results: overall score · radar chart · per-learning-unit table · misconceptions · CTA
+// Assessment results: overall score · radar chart · per-unit decision table · misconceptions · CTA
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
-  ArrowRight,
   Brain,
   CheckCircle2,
   ChevronDown,
@@ -20,21 +19,21 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import RadarChart from "@/components/assessment/RadarChart";
 import { assessmentApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import type { AssessmentResultResponse, MasteryLevel } from "@/types";
+import type { AssessmentResultResponse, MasteryLevel, TopicDecisionResult } from "@/types";
 
 // ---------------------------------------------------------------------------
-// Mastery level display config
+// Config
 // ---------------------------------------------------------------------------
 
 const MASTERY_CONFIG: Record<
   MasteryLevel,
   { label: string; color: string; bg: string }
 > = {
-  not_started: { label: "Chưa bắt đầu", color: "text-slate-500 dark:text-slate-400",  bg: "bg-slate-100 dark:bg-slate-800"   },
-  novice:     { label: "Mới bắt đầu",  color: "text-red-600 dark:text-red-400",    bg: "bg-red-50 dark:bg-red-900/20"    },
-  developing: { label: "Đang phát triển", color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-900/20" },
-  proficient: { label: "Thành thạo",   color: "text-blue-600 dark:text-blue-400",   bg: "bg-blue-50 dark:bg-blue-900/20"   },
-  mastered:   { label: "Chuyên sâu",   color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
+  not_started: { label: "Chưa bắt đầu", color: "text-slate-500 dark:text-slate-400",      bg: "bg-slate-100 dark:bg-slate-800"        },
+  novice:      { label: "Mới bắt đầu",  color: "text-red-600 dark:text-red-400",           bg: "bg-red-50 dark:bg-red-900/20"          },
+  developing:  { label: "Đang phát triển", color: "text-orange-600 dark:text-orange-400",  bg: "bg-orange-50 dark:bg-orange-900/20"    },
+  proficient:  { label: "Thành thạo",   color: "text-blue-600 dark:text-blue-400",          bg: "bg-blue-50 dark:bg-blue-900/20"        },
+  mastered:    { label: "Chuyên sâu",   color: "text-emerald-600 dark:text-emerald-400",    bg: "bg-emerald-50 dark:bg-emerald-900/20"  },
 };
 
 const BLOOM_VI: Record<string, string> = {
@@ -44,8 +43,20 @@ const BLOOM_VI: Record<string, string> = {
   analyze:    "Phân tích",
 };
 
+const DECISION_OPTIONS: { value: string; label: string }[] = [
+  { value: "skip",    label: "Bỏ qua"  },
+  { value: "review",  label: "Ôn tập"  },
+  { value: "relearn", label: "Học lại" },
+];
+
+const DECISION_LABEL: Record<string, string> = {
+  skip:    "Bỏ qua",
+  review:  "Ôn tập",
+  relearn: "Học lại",
+};
+
 // ---------------------------------------------------------------------------
-// Overall score → message
+// Helpers
 // ---------------------------------------------------------------------------
 
 function scoreMessage(pct: number): { emoji: string; text: string } {
@@ -55,23 +66,114 @@ function scoreMessage(pct: number): { emoji: string; text: string } {
   return { emoji: "🌱", text: "Hãy bắt đầu từ nền tảng — bạn sẽ tiến bộ nhanh thôi!" };
 }
 
-// ---------------------------------------------------------------------------
-// Skeleton
-// ---------------------------------------------------------------------------
-
 function Skeleton({ className }: { className?: string }) {
   return (
-    <div
-      className={cn(
-        "animate-pulse rounded-xl bg-slate-200 dark:bg-slate-700",
-        className
-      )}
-    />
+    <div className={cn("animate-pulse rounded-xl bg-slate-200 dark:bg-slate-700", className)} />
   );
 }
 
 // ---------------------------------------------------------------------------
-// Page
+// Toast (inline, no library)
+// ---------------------------------------------------------------------------
+
+interface ToastItem { id: number; message: string; type: "success" | "error" }
+
+function Toast({ items }: { items: ToastItem[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 flex flex-col gap-2 items-center">
+      {items.map((t) => (
+        <div
+          key={t.id}
+          className={cn(
+            "rounded-xl px-5 py-2.5 text-sm font-medium shadow-lg",
+            t.type === "success"
+              ? "bg-emerald-600 text-white"
+              : "bg-red-600 text-white"
+          )}
+        >
+          {t.message}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Topic decision table row
+// ---------------------------------------------------------------------------
+
+interface DecisionRowProps {
+  row: TopicDecisionResult;
+  sessionId: string;
+  currentDecision: string;
+  onDecisionChange: (unitId: string, newDecision: string, oldDecision: string) => void;
+}
+
+function DecisionRow({ row, sessionId, currentDecision, onDecisionChange }: DecisionRowProps) {
+  return (
+    <tr className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
+      {/* Unit name */}
+      <td className="px-4 py-3 text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+        {row.topic_unit_name}
+      </td>
+
+      {/* Mastery */}
+      <td className="px-4 py-3 text-center">
+        <span
+          className={cn(
+            "inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold",
+            MASTERY_CONFIG[row.mastery_level as MasteryLevel]?.bg ?? "bg-slate-100",
+            MASTERY_CONFIG[row.mastery_level as MasteryLevel]?.color ?? "text-slate-600"
+          )}
+        >
+          {MASTERY_CONFIG[row.mastery_level as MasteryLevel]?.label ?? row.mastery_level}
+        </span>
+      </td>
+
+      {/* Score */}
+      <td className="px-4 py-3 text-center">
+        <span className="text-sm font-semibold text-primary-600">
+          {row.score_pct.toFixed(0)}%
+        </span>
+        <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
+          ({row.questions_correct}/{row.questions_total})
+        </span>
+      </td>
+
+      {/* Gợi ý */}
+      <td className="px-4 py-3 text-center text-xs" style={{ color: "var(--text-secondary)" }}>
+        {DECISION_LABEL[currentDecision] ?? currentDecision}
+      </td>
+
+      {/* Radio buttons */}
+      <td className="px-4 py-3">
+        <div className="flex items-center justify-center gap-3">
+          {DECISION_OPTIONS.map((opt) => (
+            <label
+              key={opt.value}
+              className="flex cursor-pointer items-center gap-1 text-xs"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              <input
+                type="radio"
+                name={`decision-${row.topic_unit_id}`}
+                value={opt.value}
+                checked={currentDecision === opt.value}
+                onChange={() => onDecisionChange(row.topic_unit_id, opt.value, currentDecision)}
+                className="accent-primary-600"
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main inner component
 // ---------------------------------------------------------------------------
 
 function AssessmentResultsInner() {
@@ -86,6 +188,19 @@ function AssessmentResultsInner() {
   const [expandedLearningUnit, setExpandedLearningUnit] = useState<string | null>(null);
   const [navigating, setNavigating] = useState(false);
 
+  // Decision override state: unitId → decision string
+  const [decisions, setDecisions] = useState<Record<string, string>>({});
+
+  // Toast
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const toastCounter = useRef(0);
+
+  function showToast(message: string, type: "success" | "error" = "success") {
+    const id = ++toastCounter.current;
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 1500);
+  }
+
   // ── Fetch results ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!sessionId) {
@@ -98,6 +213,14 @@ function AssessmentResultsInner() {
       .results(sessionId)
       .then((data) => {
         setResult(data);
+        // Seed decision state from server-computed decisions
+        if (data.topic_decisions) {
+          const initial: Record<string, string> = {};
+          for (const td of data.topic_decisions) {
+            initial[td.topic_unit_id] = td.decision;
+          }
+          setDecisions(initial);
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -105,6 +228,23 @@ function AssessmentResultsInner() {
         setLoading(false);
       });
   }, [sessionId]);
+
+  // ── Decision change handler ───────────────────────────────────────────────
+  async function handleDecisionChange(unitId: string, newDecision: string, oldDecision: string) {
+    if (!sessionId || newDecision === oldDecision) return;
+
+    // Optimistic update
+    setDecisions((prev) => ({ ...prev, [unitId]: newDecision }));
+
+    try {
+      await assessmentApi.updateTopicDecision(sessionId, unitId, newDecision);
+      showToast("Đã cập nhật", "success");
+    } catch {
+      // Rollback
+      setDecisions((prev) => ({ ...prev, [unitId]: oldDecision }));
+      showToast("Cập nhật thất bại", "error");
+    }
+  }
 
   // ── Go to dashboard ───────────────────────────────────────────────────────
   const goToDashboard = () => {
@@ -115,10 +255,7 @@ function AssessmentResultsInner() {
   // ── Loading skeleton ──────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div
-        className="min-h-screen py-10 px-4"
-        style={{ backgroundColor: "var(--bg-page)" }}
-      >
+      <div className="min-h-screen py-10 px-4" style={{ backgroundColor: "var(--bg-page)" }}>
         <div className="mx-auto max-w-2xl space-y-6">
           <Skeleton className="h-40 w-full" />
           <Skeleton className="h-72 w-full" />
@@ -149,7 +286,7 @@ function AssessmentResultsInner() {
   }
 
   // ── Derived values ────────────────────────────────────────────────────────
-  const { overall_score_percent: overall, learning_unit_results } = result;
+  const { overall_score_percent: overall, learning_unit_results, topic_decisions } = result;
   const { emoji, text: msg } = scoreMessage(overall);
 
   const radarData = learning_unit_results.map((tr) => ({
@@ -162,17 +299,16 @@ function AssessmentResultsInner() {
     tr.misconceptions_detected.map((m) => ({ learningUnit: tr.learning_unit_title, id: m }))
   );
 
-  // ── Results UI ────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div
-      className="min-h-screen py-10 px-4"
-      style={{ backgroundColor: "var(--bg-page)" }}
-    >
+    <div className="min-h-screen py-10 px-4" style={{ backgroundColor: "var(--bg-page)" }}>
       {/* Background blobs */}
       <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary-600/10 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
       </div>
+
+      <Toast items={toasts} />
 
       <div className="relative mx-auto w-full max-w-2xl space-y-6 animate-fade-in">
 
@@ -181,10 +317,7 @@ function AssessmentResultsInner() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-600 shadow-lg shadow-primary-600/30">
             <Brain className="h-6 w-6 text-white" />
           </div>
-          <h1
-            className="text-xl font-bold"
-            style={{ color: "var(--text-primary)" }}
-          >
+          <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
             Kết quả Assessment
           </h1>
         </div>
@@ -223,16 +356,12 @@ function AssessmentResultsInner() {
         {/* ── Radar chart ── */}
         {radarData.length > 1 && (
           <div className="card flex flex-col items-center gap-4">
-            <h2
-              className="self-start text-sm font-semibold"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <h2 className="self-start text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
               Mastery theo learning unit
             </h2>
             <div className="w-full max-w-xs">
               <RadarChart data={radarData} size={300} />
             </div>
-            {/* Legend */}
             <div className="flex flex-wrap justify-center gap-3">
               {(["novice", "developing", "proficient", "mastered"] as MasteryLevel[]).map((lvl) => {
                 const cfg = MASTERY_CONFIG[lvl];
@@ -247,16 +376,51 @@ function AssessmentResultsInner() {
           </div>
         )}
 
+        {/* ── Topic decision table ── */}
+        {topic_decisions && topic_decisions.length > 0 && (
+          <div className="card overflow-hidden p-0">
+            <div className="border-b px-6 py-4" style={{ borderColor: "var(--border)" }}>
+              <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                📋 Chi tiết theo unit
+              </h2>
+              <p className="mt-0.5 text-xs" style={{ color: "var(--text-muted)" }}>
+                Điều chỉnh gợi ý nếu cần — hệ thống sẽ tự động lưu.
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr
+                    className="border-b text-xs font-medium"
+                    style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                  >
+                    <th className="px-4 py-2.5">Unit</th>
+                    <th className="px-4 py-2.5 text-center">Mastery</th>
+                    <th className="px-4 py-2.5 text-center">Score</th>
+                    <th className="px-4 py-2.5 text-center">Gợi ý</th>
+                    <th className="px-4 py-2.5 text-center">Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topic_decisions.map((td) => (
+                    <DecisionRow
+                      key={td.topic_unit_id}
+                      row={td}
+                      sessionId={sessionId!}
+                      currentDecision={decisions[td.topic_unit_id] ?? td.decision}
+                      onDecisionChange={handleDecisionChange}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* ── Per-learning-unit detail table ── */}
         <div className="card overflow-hidden p-0">
-          <div
-            className="border-b px-6 py-4"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <h2
-              className="text-sm font-semibold"
-              style={{ color: "var(--text-primary)" }}
-            >
+          <div className="border-b px-6 py-4" style={{ borderColor: "var(--border)" }}>
+            <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
               Chi tiết theo learning unit
             </h2>
           </div>
@@ -276,7 +440,6 @@ function AssessmentResultsInner() {
             const cfg = MASTERY_CONFIG[tr.mastery_level];
             const isExpanded = expandedLearningUnit === tr.learning_unit_id;
 
-            // Highest bloom level achieved from breakdown
             const bloomMaxKey = Object.entries(tr.bloom_breakdown)
               .filter(([, val]) => {
                 const [correct] = val.split("/").map(Number);
@@ -287,22 +450,16 @@ function AssessmentResultsInner() {
 
             return (
               <div key={tr.learning_unit_id} style={{ borderColor: "var(--border)" }} className="border-b last:border-0">
-                {/* Main row */}
                 <button
                   type="button"
                   className="flex w-full items-center px-6 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
                   onClick={() => setExpandedLearningUnit(isExpanded ? null : tr.learning_unit_id)}
                 >
                   <div className="flex flex-1 flex-col gap-1 sm:grid sm:grid-cols-4 sm:items-center sm:gap-4">
-                    {/* Learning unit title */}
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: "var(--text-primary)" }}
-                    >
+                    <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                       {tr.learning_unit_title}
                     </span>
 
-                    {/* Score bar */}
                     <div className="flex items-center gap-2 sm:justify-center">
                       <div className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                         <div
@@ -315,45 +472,27 @@ function AssessmentResultsInner() {
                       </span>
                     </div>
 
-                    {/* Level badge */}
                     <div className="sm:text-center">
-                      <span
-                        className={cn(
-                          "inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold",
-                          cfg.bg,
-                          cfg.color
-                        )}
-                      >
+                      <span className={cn("inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold", cfg.bg, cfg.color)}>
                         {cfg.label}
                       </span>
                     </div>
 
-                    {/* Bloom max */}
-                    <span
-                      className="text-xs sm:text-center"
-                      style={{ color: "var(--text-muted)" }}
-                    >
+                    <span className="text-xs sm:text-center" style={{ color: "var(--text-muted)" }}>
                       {bloomMaxKey ? BLOOM_VI[bloomMaxKey] ?? bloomMaxKey : "—"}
                     </span>
                   </div>
 
-                  {/* Expand icon */}
                   <span className="ml-3 shrink-0" style={{ color: "var(--text-muted)" }}>
-                    {isExpanded ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
+                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </span>
                 </button>
 
-                {/* Expanded detail */}
                 {isExpanded && (
                   <div
                     className="animate-fade-in border-t px-6 py-4"
                     style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-page)" }}
                   >
-                    {/* Bloom breakdown */}
                     <p className="mb-2 text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
                       Bloom breakdown
                     </p>
@@ -376,7 +515,6 @@ function AssessmentResultsInner() {
                       })}
                     </div>
 
-                    {/* Weak KCs */}
                     {tr.weak_kcs.length > 0 && (
                       <div className="mb-2">
                         <p className="mb-1.5 text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
@@ -406,10 +544,7 @@ function AssessmentResultsInner() {
           <div className="card space-y-3">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <h2
-                className="text-sm font-semibold"
-                style={{ color: "var(--text-primary)" }}
-              >
+              <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                 Hiểu nhầm phát hiện ({allMisconceptions.length})
               </h2>
             </div>
@@ -463,9 +598,8 @@ function AssessmentResultsInner() {
             onClick={goToDashboard}
             loading={navigating}
             size="lg"
-            rightIcon={!navigating ? <ArrowRight className="h-4 w-4" /> : undefined}
           >
-            Xem lộ trình học
+            {navigating ? "Đang chuyển..." : "Xác nhận và bắt đầu học"}
           </Button>
         </div>
 

@@ -2,19 +2,17 @@
 // app/onboarding/page.tsx
 // Multi-step onboarding wizard.
 //
-// Internal step indices (always used for routing logic):
+// Internal step indices:
 //   0  Goal selection
-//   1  Experience level  ← NEW
+//   1  Experience level
 //   2  Known topics      (experienced flow only)
 //   3  Time / schedule
 //   4  Learning method
-//   5  Placement test    (experienced flow only)
-//   6  Result gate       (experienced flow only)
 //
-// Beginner flow:   0 → 1 → 3 → 4 → submit
-// Experienced flow: 0 → 1 → 2 → 3 → 4 → 5 → 6 → submit
+// Beginner flow:    0 → 1 → 3 → 4 → submit
+// Experienced flow: 0 → 1 → 2 → 3 → 4 → submit
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -27,8 +25,6 @@ import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
-import StepPlacementTest from "@/components/onboarding/StepPlacementTest";
-import ResultGate from "@/components/onboarding/ResultGate";
 
 import { canonicalSectionApi } from "@/lib/api";
 import { saveGoals, saveKnownTopics, saveExperienceLevel } from "@/lib/onboarding-api";
@@ -37,25 +33,22 @@ import {
   writePendingCanonicalAssessment,
 } from "@/lib/canonical-assessment-session";
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
-import type { TopicDecision } from "@/lib/placement-assessment-api";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { useOnboardingStore, type ExperienceLevel } from "@/stores/onboardingStore";
 import type { CourseSectionDetail } from "@/types";
 
 // ---------------------------------------------------------------------------
-// Step metadata — two flows share internal indices 0-6
+// Step metadata — two flows share internal indices 0-4
 // ---------------------------------------------------------------------------
 
-// Experienced: all 7 steps visible
+// Experienced: 5 steps visible
 const STEPS_EXPERIENCED = [
-  { title: "Mục tiêu học tập",     subtitle: "Bạn muốn học gì?" },
-  { title: "Kinh nghiệm",          subtitle: "Bạn đã từng học AI/ML chưa?" },
-  { title: "Kiến thức hiện tại",   subtitle: "Tick những units bạn đã nắm" },
-  { title: "Thời gian của bạn",    subtitle: "Lên lịch học phù hợp" },
-  { title: "Phương pháp học",      subtitle: "Cách bạn học tốt nhất" },
-  { title: "Đánh giá kiến thức",   subtitle: "Kiểm tra những gì bạn đã biết" },
-  { title: "Kết quả đánh giá",     subtitle: "Xác nhận lộ trình của bạn" },
+  { title: "Mục tiêu học tập",   subtitle: "Bạn muốn học gì?" },
+  { title: "Kinh nghiệm",        subtitle: "Bạn đã từng học AI/ML chưa?" },
+  { title: "Kiến thức hiện tại", subtitle: "Tick những units bạn đã nắm" },
+  { title: "Thời gian của bạn",  subtitle: "Lên lịch học phù hợp" },
+  { title: "Phương pháp học",    subtitle: "Cách bạn học tốt nhất" },
 ] as const;
 
 // Beginner: 5 visible steps (internal indices 0, 1, 3, 4 + done)
@@ -73,7 +66,7 @@ const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   1: 1,
   3: 2,
   4: 3,
-  // 2, 5, 6 are skipped for beginners
+  // 2 is skipped for beginners
 };
 
 // Steps that use the page-level nav buttons (index 3 = TimeSchedule)
@@ -86,8 +79,6 @@ const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   [],                                               // 2: KnownTopics (optional)
   ["available_hours_per_week", "target_deadline"],  // 3: required
   ["preferred_method"],                             // 4: required
-  [],                                               // 5: PlacementTest
-  [],                                               // 6: ResultGate
 ];
 
 // ---------------------------------------------------------------------------
@@ -98,17 +89,11 @@ function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
-  const { goalIds, knownUnitIds, experienceLevel, skipPlacementAssessment } =
-    useOnboardingStore();
+  const { goalIds, knownUnitIds, experienceLevel } = useOnboardingStore();
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [animKey, setAnimKey] = useState(0);
-
-  const [placementSessionId, setPlacementSessionId] = useState<string | null>(null);
-  const enteredStep5 = useRef(false);
-
-  const [placementResults, setPlacementResults] = useState<TopicDecision[]>([]);
 
   const [sections, setSections] = useState<CourseSectionDetail[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -145,14 +130,6 @@ function OnboardingPageInner() {
     }
     loadData();
   }, []);
-
-  // Generate placement session UUID once when entering step 5
-  useEffect(() => {
-    if (step === 5 && !enteredStep5.current) {
-      enteredStep5.current = true;
-      setPlacementSessionId(crypto.randomUUID());
-    }
-  }, [step]);
 
   // ── Submit ────────────────────────────────────────────────────────────────
   const submitOnboarding = useCallback(
@@ -213,23 +190,6 @@ function OnboardingPageInner() {
 
   const goBack = useCallback(() => navigate(step - 1), [step, navigate]);
 
-  // ── Placement callbacks ───────────────────────────────────────────────────
-  const handlePlacementComplete = useCallback(
-    (decisions: TopicDecision[]) => {
-      setPlacementResults(decisions);
-      navigate(6);
-    },
-    [navigate]
-  );
-
-  const handlePlacementSkip = useCallback(() => {
-    handleSubmit(submitOnboarding)();
-  }, [handleSubmit, submitOnboarding]);
-
-  const handleResultGateConfirm = useCallback(() => {
-    handleSubmit(submitOnboarding)();
-  }, [handleSubmit, submitOnboarding]);
-
   // ── Derived display values ────────────────────────────────────────────────
   const isBeginner = experienceLevel === "beginner";
   const STEPS = isBeginner ? STEPS_BEGINNER : STEPS_EXPERIENCED;
@@ -245,7 +205,6 @@ function OnboardingPageInner() {
 
   const isFirstStep = step === 0;
   const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
-  // Step 4 (Learning Method) is the last form step before placement/submit
   const isLastFormStep = step === 4;
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -379,8 +338,6 @@ function OnboardingPageInner() {
                         const store = useOnboardingStore.getState();
                         store.setKnownUnitIds([]);
                         store.setSkipPlacementAssessment(true);
-                        // known-topics with [] triggers placement_status='skipped' server-side
-                        // but experience-level endpoint already handles this double-write
                         navigate(3); // skip Known Topics → go to Schedule
                       } else {
                         navigate(2);
@@ -398,7 +355,6 @@ function OnboardingPageInner() {
                     }}
                     onBack={() => navigate(1)}
                     onSkipAll={() => {
-                      // User is in experienced flow but selected no topics — proceed to schedule
                       saveKnownTopics([]).catch(() => {});
                       navigate(3);
                     }}
@@ -422,24 +378,6 @@ function OnboardingPageInner() {
                     register={register}
                     watch={watch}
                     errors={errors}
-                  />
-                )}
-
-                {/* Step 5 — Placement assessment (experienced flow only) */}
-                {step === 5 && placementSessionId && (
-                  <StepPlacementTest
-                    sessionId={placementSessionId}
-                    unitIds={knownUnitIds}
-                    onComplete={handlePlacementComplete}
-                    onSkip={handlePlacementSkip}
-                  />
-                )}
-
-                {/* Step 6 — Result gate */}
-                {step === 6 && (
-                  <ResultGate
-                    results={placementResults}
-                    onConfirm={handleResultGateConfirm}
                   />
                 )}
               </div>
@@ -480,21 +418,18 @@ function OnboardingPageInner() {
                   </Button>
                   <Button
                     type="button"
+                    disabled={isLoading}
                     onClick={async () => {
                       const fields = STEP_VALIDATION_FIELDS[step];
                       if (fields.length > 0) {
                         const valid = await trigger(fields);
                         if (!valid) return;
                       }
-                      if (skipPlacementAssessment) {
-                        handleSubmit(submitOnboarding)();
-                      } else {
-                        navigate(5);
-                      }
+                      handleSubmit(submitOnboarding)();
                     }}
                     rightIcon={<Sparkles className="h-4 w-4" />}
                   >
-                    Tiếp tục
+                    {isLoading ? "Đang xử lý..." : "Hoàn tất"}
                   </Button>
                 </div>
               )}

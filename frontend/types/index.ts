@@ -179,11 +179,22 @@ export interface LearningUnitResult {
   misconceptions_detected: string[];
 }
 
+export interface TopicDecisionResult {
+  topic_unit_id: string;
+  topic_unit_name: string;
+  score_pct: number;
+  decision: string; // "skip" | "review" | "relearn"
+  mastery_level: string;
+  questions_total: number;
+  questions_correct: number;
+}
+
 export interface AssessmentResultResponse {
   session_id: string;
   completed_at: string;
   overall_score_percent: number;
   learning_unit_results: LearningUnitResult[];
+  topic_decisions?: TopicDecisionResult[];
 }
 
 // ---- Topic content ----
