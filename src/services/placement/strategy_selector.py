@@ -19,6 +19,7 @@ _CALIBRATION_SUMMARY_CACHE_TTL = 300  # 5 minutes
 from src.services.placement.strategies.legacy_selector import LegacySelectorStrategy  # noqa: F401, E402
 from src.services.placement.strategies.random_uniform import RandomUniformStrategy  # noqa: F401, E402
 from src.services.placement.strategies.spread_by_prior import SpreadByPriorStrategy  # noqa: F401, E402
+from src.services.placement.strategies.irt_adaptive import IRTAdaptiveStrategy  # noqa: F401, E402
 
 
 def get_strategy(

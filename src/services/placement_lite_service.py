@@ -68,7 +68,19 @@ async def start_placement_lite_session(
     # Commit B: use configured strategy (default: spread_by_prior)
     settings = Settings()
     strategy = get_strategy(mode=settings.cold_start_mode)
-    items = await strategy.select(pool, n=count)
+
+    # Commit D: theta_init aggregation (if mastery data exists)
+    # TODO: Commit D+ implements learner_mastery_kp theta aggregation via unit_kp_map weights
+    # For now: default to 0.0 (new user or no prior mastery)
+    theta_init = 0.0
+
+    # Commit D: pass context to strategy (theta_init, user_id, use_2pl override)
+    context = {
+        "theta_init": theta_init,
+        "user_id": user_id,
+        "use_2pl": getattr(settings, "irt_use_2pl", False),
+    }
+    items = await strategy.select(pool, n=count, **context)
     if not items:
         raise ValidationError("Strategy selection returned no items.")
 
