@@ -1,6 +1,6 @@
 "use client";
 // app/assessment/results/page.tsx
-// Assessment results: overall score · radar chart · per-unit decision table · misconceptions · CTA
+// Assessment results: compact summary · priority units · CTA
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,18 +8,23 @@ import {
   AlertTriangle,
   Brain,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   Lightbulb,
   Trophy,
 } from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import RadarChart from "@/components/assessment/RadarChart";
 import { assessmentApi } from "@/lib/api";
+import {
+  buildAssessmentResultViewModel,
+  type AssessmentPriorityItem,
+} from "@/lib/assessment-results-view-model";
 import { cn } from "@/lib/utils";
-import type { AssessmentResultResponse, MasteryLevel, TopicDecisionResult } from "@/types";
+import type {
+  AssessmentAISummaryResponse,
+  AssessmentResultResponse,
+  MasteryLevel,
+} from "@/types";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -34,13 +39,6 @@ const MASTERY_CONFIG: Record<
   developing:  { label: "Đang phát triển", color: "text-orange-600 dark:text-orange-400",  bg: "bg-orange-50 dark:bg-orange-900/20"    },
   proficient:  { label: "Thành thạo",   color: "text-blue-600 dark:text-blue-400",          bg: "bg-blue-50 dark:bg-blue-900/20"        },
   mastered:    { label: "Chuyên sâu",   color: "text-emerald-600 dark:text-emerald-400",    bg: "bg-emerald-50 dark:bg-emerald-900/20"  },
-};
-
-const BLOOM_VI: Record<string, string> = {
-  remember:   "Nhớ",
-  understand: "Hiểu",
-  apply:      "Áp dụng",
-  analyze:    "Phân tích",
 };
 
 const DECISION_OPTIONS: { value: string; label: string }[] = [
@@ -100,75 +98,67 @@ function Toast({ items }: { items: ToastItem[] }) {
 }
 
 // ---------------------------------------------------------------------------
-// Topic decision table row
+// Compact decision row
 // ---------------------------------------------------------------------------
 
 interface DecisionRowProps {
-  row: TopicDecisionResult;
-  sessionId: string;
+  item: AssessmentPriorityItem;
   currentDecision: string;
   onDecisionChange: (unitId: string, newDecision: string, oldDecision: string) => void;
 }
 
-function DecisionRow({ row, sessionId, currentDecision, onDecisionChange }: DecisionRowProps) {
+function DecisionRow({ item, currentDecision, onDecisionChange }: DecisionRowProps) {
+  const cfg = MASTERY_CONFIG[item.masteryLevel as MasteryLevel] ?? MASTERY_CONFIG.not_started;
+
   return (
-    <tr className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
-      {/* Unit name */}
-      <td className="px-4 py-3 text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-        {row.topic_unit_name}
-      </td>
-
-      {/* Mastery */}
-      <td className="px-4 py-3 text-center">
-        <span
-          className={cn(
-            "inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold",
-            MASTERY_CONFIG[row.mastery_level as MasteryLevel]?.bg ?? "bg-slate-100",
-            MASTERY_CONFIG[row.mastery_level as MasteryLevel]?.color ?? "text-slate-600"
-          )}
-        >
-          {MASTERY_CONFIG[row.mastery_level as MasteryLevel]?.label ?? row.mastery_level}
-        </span>
-      </td>
-
-      {/* Score */}
-      <td className="px-4 py-3 text-center">
-        <span className="text-sm font-semibold text-primary-600">
-          {row.score_pct.toFixed(0)}%
-        </span>
-        <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
-          ({row.questions_correct}/{row.questions_total})
-        </span>
-      </td>
-
-      {/* Gợi ý */}
-      <td className="px-4 py-3 text-center text-xs" style={{ color: "var(--text-secondary)" }}>
-        {DECISION_LABEL[currentDecision] ?? currentDecision}
-      </td>
-
-      {/* Radio buttons */}
-      <td className="px-4 py-3">
-        <div className="flex items-center justify-center gap-3">
-          {DECISION_OPTIONS.map((opt) => (
-            <label
-              key={opt.value}
-              className="flex cursor-pointer items-center gap-1 text-xs"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              <input
-                type="radio"
-                name={`decision-${row.topic_unit_id}`}
-                value={opt.value}
-                checked={currentDecision === opt.value}
-                onChange={() => onDecisionChange(row.topic_unit_id, opt.value, currentDecision)}
-                className="accent-primary-600"
-              />
-              {opt.label}
-            </label>
-          ))}
+    <div
+      className="grid gap-3 rounded-xl border p-3 sm:grid-cols-[1fr_auto_auto] sm:items-center"
+      style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
+    >
+      <div className="min-w-0">
+        <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text-primary)" }}>
+          {item.title}
+        </p>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", cfg.bg, cfg.color)}>
+            {cfg.label}
+          </span>
+          <span className="text-xs font-medium text-primary-600">
+            {item.scorePercent.toFixed(0)}%
+            {typeof item.questionsCorrect === "number" && typeof item.questionsTotal === "number"
+              ? ` (${item.questionsCorrect}/${item.questionsTotal})`
+              : null}
+          </span>
         </div>
-      </td>
-    </tr>
+      </div>
+
+      <span
+        className={cn(
+          "w-fit rounded-full px-3 py-1 text-xs font-semibold",
+          currentDecision === "relearn"
+            ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
+            : currentDecision === "review"
+              ? "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+              : "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300",
+        )}
+      >
+        {DECISION_LABEL[currentDecision] ?? currentDecision}
+      </span>
+
+      <select
+        aria-label={`Điều chỉnh ${item.title}`}
+        value={currentDecision}
+        onChange={(event) => onDecisionChange(item.id, event.target.value, currentDecision)}
+        className="rounded-lg border bg-white px-3 py-2 text-xs font-medium dark:bg-slate-900"
+        style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
+      >
+        {DECISION_OPTIONS.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
 
@@ -183,9 +173,10 @@ function AssessmentResultsInner() {
   const next = searchParams.get("next");
 
   const [result, setResult] = useState<AssessmentResultResponse | null>(null);
+  const [aiSummary, setAiSummary] = useState<AssessmentAISummaryResponse | null>(null);
+  const [aiSummaryLoading, setAiSummaryLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedLearningUnit, setExpandedLearningUnit] = useState<string | null>(null);
   const [navigating, setNavigating] = useState(false);
 
   // Decision override state: unitId → decision string
@@ -222,6 +213,20 @@ function AssessmentResultsInner() {
           setDecisions(initial);
         }
         setLoading(false);
+        setAiSummaryLoading(true);
+        assessmentApi
+          .summary(sessionId)
+          .then((summary) => {
+            if (summary.available && summary.summary) {
+              setAiSummary(summary);
+            }
+          })
+          .catch(() => {
+            setAiSummary(null);
+          })
+          .finally(() => {
+            setAiSummaryLoading(false);
+          });
       })
       .catch(() => {
         setError("Không thể tải kết quả. Vui lòng thử lại.");
@@ -286,18 +291,11 @@ function AssessmentResultsInner() {
   }
 
   // ── Derived values ────────────────────────────────────────────────────────
-  const { overall_score_percent: overall, learning_unit_results, topic_decisions } = result;
+  const { overall_score_percent: overall } = result;
   const { emoji, text: msg } = scoreMessage(overall);
-
-  const radarData = learning_unit_results.map((tr) => ({
-    label: tr.learning_unit_title,
-    value: tr.score_percent,
-    level: tr.mastery_level,
-  }));
-
-  const allMisconceptions = learning_unit_results.flatMap((tr) =>
-    tr.misconceptions_detected.map((m) => ({ learningUnit: tr.learning_unit_title, id: m }))
-  );
+  const viewModel = buildAssessmentResultViewModel(result);
+  const allMisconceptions = viewModel.misconceptions;
+  const displayedMisconceptions = allMisconceptions.slice(0, 3);
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -323,221 +321,126 @@ function AssessmentResultsInner() {
         </div>
 
         {/* ── Overall score card ── */}
-        <div className="card text-center space-y-3">
-          <span className="text-5xl">{emoji}</span>
-          <div>
-            <p className="text-4xl font-extrabold text-primary-600">
-              {overall.toFixed(1)}%
-            </p>
-            <p className="mt-1 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-              tổng thể
-            </p>
-          </div>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            {msg}
-          </p>
-
-          {/* Quick mastery summary chips */}
-          <div className="flex flex-wrap justify-center gap-2 pt-1">
-            {learning_unit_results.map((tr) => {
-              const cfg = MASTERY_CONFIG[tr.mastery_level];
-              return (
-                <span
-                  key={tr.learning_unit_id}
-                  className={cn("rounded-full px-3 py-1 text-xs font-semibold", cfg.bg, cfg.color)}
-                >
-                  {tr.learning_unit_title}: {cfg.label}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── Radar chart ── */}
-        {radarData.length > 1 && (
-          <div className="card flex flex-col items-center gap-4">
-            <h2 className="self-start text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              Mastery theo learning unit
-            </h2>
-            <div className="w-full max-w-xs">
-              <RadarChart data={radarData} size={300} />
-            </div>
-            <div className="flex flex-wrap justify-center gap-3">
-              {(["novice", "developing", "proficient", "mastered"] as MasteryLevel[]).map((lvl) => {
-                const cfg = MASTERY_CONFIG[lvl];
-                return (
-                  <span key={lvl} className={cn("flex items-center gap-1.5 text-xs font-medium", cfg.color)}>
-                    <span className={cn("h-2.5 w-2.5 rounded-full", cfg.bg.replace("bg-", "bg-").replace("/20", ""))} />
-                    {cfg.label}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ── Topic decision table ── */}
-        {topic_decisions && topic_decisions.length > 0 && (
-          <div className="card overflow-hidden p-0">
-            <div className="border-b px-6 py-4" style={{ borderColor: "var(--border)" }}>
-              <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                📋 Chi tiết theo unit
-              </h2>
-              <p className="mt-0.5 text-xs" style={{ color: "var(--text-muted)" }}>
-                Điều chỉnh gợi ý nếu cần — hệ thống sẽ tự động lưu.
-              </p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr
-                    className="border-b text-xs font-medium"
-                    style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-                  >
-                    <th className="px-4 py-2.5">Unit</th>
-                    <th className="px-4 py-2.5 text-center">Mastery</th>
-                    <th className="px-4 py-2.5 text-center">Score</th>
-                    <th className="px-4 py-2.5 text-center">Gợi ý</th>
-                    <th className="px-4 py-2.5 text-center">Hành động</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topic_decisions.map((td) => (
-                    <DecisionRow
-                      key={td.topic_unit_id}
-                      row={td}
-                      sessionId={sessionId!}
-                      currentDecision={decisions[td.topic_unit_id] ?? td.decision}
-                      onDecisionChange={handleDecisionChange}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* ── Per-learning-unit detail table ── */}
         <div className="card overflow-hidden p-0">
-          <div className="border-b px-6 py-4" style={{ borderColor: "var(--border)" }}>
-            <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              Chi tiết theo learning unit
-            </h2>
+          <div className="bg-gradient-to-br from-primary-600 to-blue-700 p-5 text-white sm:p-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
+                  Đánh giá nhanh
+                </p>
+                <h2 className="text-xl font-bold leading-tight">Tóm tắt kết quả</h2>
+                <p className="max-w-xl text-sm leading-relaxed text-white/80">
+                  {msg}
+                </p>
+              </div>
+              <div className="shrink-0 rounded-3xl bg-white/15 px-5 py-4 text-center ring-1 ring-white/20">
+                <span className="text-3xl">{emoji}</span>
+                <p className="text-4xl font-extrabold">{overall.toFixed(1)}%</p>
+                <p className="mt-1 text-xs font-medium text-white/70">điểm tổng</p>
+              </div>
+            </div>
           </div>
 
-          {/* Table header */}
-          <div
-            className="hidden grid-cols-4 gap-4 border-b px-6 py-2.5 text-xs font-medium sm:grid"
-            style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-          >
-            <span>Learning unit</span>
-            <span className="text-center">Score</span>
-            <span className="text-center">Level</span>
-            <span className="text-center">Bloom Max</span>
-          </div>
+          <div className="space-y-4 p-5 sm:p-6">
+            {aiSummaryLoading && (
+              <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-sm text-primary-800 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-200">
+                AI đang tóm tắt kết quả...
+              </div>
+            )}
 
-          {learning_unit_results.map((tr) => {
-            const cfg = MASTERY_CONFIG[tr.mastery_level];
-            const isExpanded = expandedLearningUnit === tr.learning_unit_id;
-
-            const bloomMaxKey = Object.entries(tr.bloom_breakdown)
-              .filter(([, val]) => {
-                const [correct] = val.split("/").map(Number);
-                return correct > 0;
-              })
-              .map(([k]) => k)
-              .at(-1);
-
-            return (
-              <div key={tr.learning_unit_id} style={{ borderColor: "var(--border)" }} className="border-b last:border-0">
-                <button
-                  type="button"
-                  className="flex w-full items-center px-6 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                  onClick={() => setExpandedLearningUnit(isExpanded ? null : tr.learning_unit_id)}
-                >
-                  <div className="flex flex-1 flex-col gap-1 sm:grid sm:grid-cols-4 sm:items-center sm:gap-4">
-                    <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                      {tr.learning_unit_title}
-                    </span>
-
-                    <div className="flex items-center gap-2 sm:justify-center">
-                      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                        <div
-                          className="h-full rounded-full bg-primary-600 transition-all"
-                          style={{ width: `${tr.score_percent}%` }}
-                        />
-                      </div>
-                      <span className="text-sm font-semibold text-primary-600">
-                        {tr.score_percent.toFixed(0)}%
-                      </span>
-                    </div>
-
-                    <div className="sm:text-center">
-                      <span className={cn("inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold", cfg.bg, cfg.color)}>
-                        {cfg.label}
-                      </span>
-                    </div>
-
-                    <span className="text-xs sm:text-center" style={{ color: "var(--text-muted)" }}>
-                      {bloomMaxKey ? BLOOM_VI[bloomMaxKey] ?? bloomMaxKey : "—"}
-                    </span>
-                  </div>
-
-                  <span className="ml-3 shrink-0" style={{ color: "var(--text-muted)" }}>
-                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </span>
-                </button>
-
-                {isExpanded && (
-                  <div
-                    className="animate-fade-in border-t px-6 py-4"
-                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-page)" }}
-                  >
-                    <p className="mb-2 text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-                      Bloom breakdown
-                    </p>
-                    <div className="mb-3 flex flex-wrap gap-2">
-                      {Object.entries(tr.bloom_breakdown).map(([bloom, val]) => {
-                        const [correct, total] = val.split("/").map(Number);
-                        if (total === 0) return null;
-                        return (
-                          <span
-                            key={bloom}
-                            className="rounded-lg border px-2.5 py-1 text-xs"
-                            style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
-                          >
-                            {BLOOM_VI[bloom] ?? bloom}:{" "}
-                            <strong style={{ color: "var(--text-primary)" }}>
-                              {correct}/{total}
-                            </strong>
-                          </span>
-                        );
-                      })}
-                    </div>
-
-                    {tr.weak_kcs.length > 0 && (
-                      <div className="mb-2">
-                        <p className="mb-1.5 text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-                          Kiến thức cần ôn
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {tr.weak_kcs.map((kc) => (
-                            <span
-                              key={kc}
-                              className="rounded-full bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 text-xs text-amber-700 dark:text-amber-300"
-                            >
-                              {kc}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+            {aiSummary?.summary && (
+              <div className="space-y-3 rounded-2xl border border-primary-100 bg-primary-50 p-4 dark:border-primary-900/40 dark:bg-primary-900/20">
+                <div className="flex items-center gap-2 text-primary-800 dark:text-primary-200">
+                  <Brain className="h-4 w-4" />
+                  <p className="text-sm font-semibold">Nhận xét AI</p>
+                </div>
+                <p className="text-sm leading-relaxed text-primary-900 dark:text-primary-100">
+                  {aiSummary.summary}
+                </p>
+                {aiSummary.highlights.length > 0 && (
+                  <ul className="space-y-1.5">
+                    {aiSummary.highlights.map((highlight) => (
+                      <li key={highlight} className="text-sm text-primary-800 dark:text-primary-200">
+                        - {highlight}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {aiSummary.next_step && (
+                  <p className="text-sm font-medium text-primary-900 dark:text-primary-100">
+                    {aiSummary.next_step}
+                  </p>
                 )}
               </div>
-            );
-          })}
+            )}
+
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div className="rounded-2xl bg-red-50 p-3 dark:bg-red-900/20">
+                <p className="text-2xl font-bold text-red-600 dark:text-red-300">
+                  {viewModel.counts.relearn}
+                </p>
+                <p className="text-xs font-medium text-red-700 dark:text-red-300">học lại</p>
+              </div>
+              <div className="rounded-2xl bg-amber-50 p-3 dark:bg-amber-900/20">
+                <p className="text-2xl font-bold text-amber-600 dark:text-amber-300">
+                  {viewModel.counts.review}
+                </p>
+                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">ôn tập</p>
+              </div>
+              <div className="rounded-2xl bg-emerald-50 p-3 dark:bg-emerald-900/20">
+                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-300">
+                  {viewModel.counts.skip}
+                </p>
+                <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">bỏ qua</p>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* ── Compact priority list ── */}
+        <div className="card space-y-4">
+          <div>
+            <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+              Ưu tiên cho lộ trình
+            </h2>
+            <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+              Chỉ hiển thị tối đa 5 phần cần xử lý. Không lặp lại toàn bộ danh sách đã kiểm tra.
+            </p>
+          </div>
+
+          {viewModel.priorityItems.length > 0 ? (
+            <div className="space-y-2">
+              {viewModel.priorityItems.map((item) => (
+                <DecisionRow
+                  key={item.id}
+                  item={item}
+                  currentDecision={decisions[item.id] ?? item.decision}
+                  onDecisionChange={handleDecisionChange}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+              Không có phần nào cần học lại. Lộ trình sẽ bỏ qua các phần bạn đã nắm vững.
+            </div>
+          )}
+        </div>
+
+        {/* ── Skipped/mastered summary ── */}
+        {viewModel.counts.skip > 0 && (
+          <div className="card flex items-start gap-3">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
+            <div>
+              <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                {viewModel.counts.skip} phần sẽ được bỏ qua
+              </h2>
+              <p className="mt-1 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                Đây là phần đã đủ vững theo bài test. Trang kết quả không liệt kê lại toàn bộ để tránh rối;
+                planner sẽ tự dùng quyết định này khi tạo lộ trình.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* ── Misconceptions ── */}
         {allMisconceptions.length > 0 && (
@@ -552,7 +455,7 @@ function AssessmentResultsInner() {
               Những misconception này được phát hiện dựa trên đáp án sai của bạn. Lộ trình học sẽ ưu tiên giải quyết chúng.
             </p>
             <div className="space-y-2">
-              {allMisconceptions.map((m, i) => (
+              {displayedMisconceptions.map((m, i) => (
                 <div
                   key={i}
                   className="flex items-start gap-2.5 rounded-lg border px-3 py-2.5"
@@ -569,6 +472,11 @@ function AssessmentResultsInner() {
                   </div>
                 </div>
               ))}
+              {allMisconceptions.length > displayedMisconceptions.length && (
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  Và {allMisconceptions.length - displayedMisconceptions.length} misconception khác sẽ được xử lý trong lộ trình.
+                </p>
+              )}
             </div>
           </div>
         )}

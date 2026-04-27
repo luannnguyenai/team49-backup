@@ -10,6 +10,7 @@ placement_assessment_results.
 
 from __future__ import annotations
 
+import json
 import logging
 import uuid
 from dataclasses import dataclass
@@ -19,7 +20,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.config import settings
+from src.config import DEFAULT_MODEL, settings
 from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.models.canonical import ConceptKP, ItemKPMap, QuestionBankItem
 from src.models.content import DifficultyBucket
@@ -29,6 +30,7 @@ from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.placement_assessment_repo import PlacementAssessmentRepository
 from src.schemas.assessment import (
     AnswerInput,
+    AssessmentAISummaryResponse,
     AssessmentResultResponse,
     AssessmentStartResponse,
     LearningUnitResult,
@@ -40,6 +42,24 @@ from src.services.mastery_evaluator import classify_mastery
 from src.services.strategy_router import pick_strategy
 
 log = logging.getLogger(__name__)
+
+_ASSESSMENT_SUMMARY_SYSTEM = """\
+You write concise Vietnamese feedback for an AI learning assessment result.
+
+Return JSON only:
+{
+  "summary": "2 short sentences, natural and specific",
+  "highlights": ["max 3 short bullets"],
+  "next_step": "1 short next-step sentence"
+}
+
+Rules:
+- Base the feedback only on the provided scores and decisions.
+- Do not list every unit.
+- Do not over-praise if there are relearn/review items.
+- Mention skip/review/relearn in learner-friendly Vietnamese.
+- Keep the tone direct, calm, and useful.
+"""
 
 
 # ---------------------------------------------------------------------------
@@ -441,6 +461,128 @@ async def get_assessment_results(
         rows=rows,
         placement_overrides=placement_overrides,
     )
+
+
+def _parse_assessment_ai_summary(raw: str) -> AssessmentAISummaryResponse:
+    text = raw.strip()
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
+
+    payload = json.loads(text)
+    summary = payload.get("summary")
+    next_step = payload.get("next_step")
+    highlights_payload = payload.get("highlights", [])
+    highlights = [
+        item.strip()
+        for item in highlights_payload
+        if isinstance(item, str) and item.strip()
+    ][:3]
+
+    if not isinstance(summary, str) or not summary.strip():
+        return AssessmentAISummaryResponse(
+            available=False,
+            model_used=DEFAULT_MODEL,
+            provider=settings.model_provider,
+        )
+
+    return AssessmentAISummaryResponse(
+        available=True,
+        summary=summary.strip(),
+        highlights=highlights,
+        next_step=next_step.strip() if isinstance(next_step, str) and next_step.strip() else None,
+        model_used=DEFAULT_MODEL,
+        provider=settings.model_provider,
+    )
+
+
+def _assessment_summary_input(result: AssessmentResultResponse) -> str:
+    decisions = result.topic_decisions or []
+    priority = [
+        {
+            "title": item.topic_unit_name,
+            "score_pct": item.score_pct,
+            "decision": item.decision,
+            "questions": f"{item.questions_correct}/{item.questions_total}",
+        }
+        for item in sorted(
+            decisions,
+            key=lambda item: (
+                {"relearn": 0, "review": 1, "skip": 2}.get(item.decision, 9),
+                item.score_pct,
+            ),
+        )[:8]
+    ]
+    counts = {
+        "relearn": sum(1 for item in decisions if item.decision == "relearn"),
+        "review": sum(1 for item in decisions if item.decision == "review"),
+        "skip": sum(1 for item in decisions if item.decision == "skip"),
+        "total": len(decisions),
+    }
+    weak_units = [
+        {
+            "title": unit.learning_unit_title,
+            "score_percent": unit.score_percent,
+            "mastery_level": str(unit.mastery_level),
+            "weak_kcs": unit.weak_kcs[:5],
+            "misconceptions": unit.misconceptions_detected[:5],
+        }
+        for unit in sorted(result.learning_unit_results, key=lambda unit: unit.score_percent)[:8]
+    ]
+    return json.dumps(
+        {
+            "overall_score_percent": result.overall_score_percent,
+            "decision_counts": counts,
+            "priority_units": priority,
+            "weak_units": weak_units,
+        },
+        ensure_ascii=False,
+    )
+
+
+async def generate_assessment_ai_summary(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    session_id: uuid.UUID,
+) -> AssessmentAISummaryResponse:
+    """Generate optional LLM feedback for an assessment result.
+
+    This intentionally has no deterministic copy fallback. If the LLM is
+    unavailable or invalid, the frontend should omit the AI summary block.
+    """
+    try:
+        from langchain.chat_models import init_chat_model
+        from langchain_core.messages import HumanMessage, SystemMessage
+
+        from src.services.chat_model_factory import build_chat_model_kwargs
+        from src.services.llm_rate_limiter import enforce_llm_rate_limit
+
+        result = await get_assessment_results(db, user_id, session_id)
+        enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
+        llm = init_chat_model(
+            **build_chat_model_kwargs(
+                model=DEFAULT_MODEL,
+                temperature=0.4,
+                max_tokens=500,
+            )
+        )
+        response = llm.invoke(
+            [
+                SystemMessage(content=_ASSESSMENT_SUMMARY_SYSTEM),
+                HumanMessage(content=_assessment_summary_input(result)),
+            ]
+        )
+        parsed = _parse_assessment_ai_summary(str(response.content))
+        return parsed
+    except Exception as exc:
+        log.warning("assessment AI summary unavailable: %s", exc)
+        return AssessmentAISummaryResponse(
+            available=False,
+            model_used=DEFAULT_MODEL,
+            provider=settings.model_provider,
+        )
 
 
 # ---------------------------------------------------------------------------

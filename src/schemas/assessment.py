@@ -138,3 +138,18 @@ class AssessmentResultResponse(BaseModel):
     overall_score_percent: float
     learning_unit_results: list[LearningUnitResult]
     topic_decisions: list[TopicDecisionResult] | None = None
+
+
+class AssessmentAISummaryResponse(BaseModel):
+    """Optional LLM-written result summary.
+
+    If generation fails or returns invalid content, available=false and the
+    frontend should simply omit the AI summary block.
+    """
+
+    available: bool = False
+    summary: str | None = None
+    highlights: list[str] = Field(default_factory=list)
+    next_step: str | None = None
+    model_used: str | None = None
+    provider: str | None = None

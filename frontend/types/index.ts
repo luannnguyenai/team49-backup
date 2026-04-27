@@ -198,6 +198,15 @@ export interface AssessmentResultResponse {
   topic_decisions?: TopicDecisionResult[];
 }
 
+export interface AssessmentAISummaryResponse {
+  available: boolean;
+  summary: string | null;
+  highlights: string[];
+  next_step: string | null;
+  model_used: string | null;
+  provider: string | null;
+}
+
 // ---- Topic content ----
 
 export interface LearningUnitContentById {

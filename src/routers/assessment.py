@@ -28,6 +28,7 @@ from src.database import get_async_db
 from src.dependencies.auth import get_current_user
 from src.models.user import User
 from src.schemas.assessment import (
+    AssessmentAISummaryResponse,
     AssessmentResultResponse,
     AssessmentStartRequest,
     AssessmentStartResponse,
@@ -36,6 +37,7 @@ from src.schemas.assessment import (
     TopicDecisionUpdateRequest,
 )
 from src.services.assessment_service import (
+    generate_assessment_ai_summary,
     get_assessment_results,
     start_assessment,
     submit_assessment,
@@ -134,6 +136,19 @@ async def api_get_assessment_results_by_query(
     db: AsyncSession = Depends(get_async_db),
 ) -> AssessmentResultResponse:
     return await get_assessment_results(db, user.id, session_id)
+
+
+@assessment_router.get(
+    "/{session_id}/summary",
+    response_model=AssessmentAISummaryResponse,
+    summary="Generate optional AI feedback for a completed assessment result",
+)
+async def api_get_assessment_ai_summary(
+    session_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AssessmentAISummaryResponse:
+    return await generate_assessment_ai_summary(db, user.id, session_id)
 
 
 # ---------------------------------------------------------------------------
