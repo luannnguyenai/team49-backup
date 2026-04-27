@@ -1193,6 +1193,15 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                     onDurationChange={() => {
                       if (videoRef.current) setDuration(videoRef.current.duration || 0);
                     }}
+                    onEnded={() => {
+                      const video = videoRef.current;
+                      if (!video) return;
+                      const finalDuration = video.duration || duration || 0;
+                      if (finalDuration > 0) {
+                        setDuration(finalDuration);
+                        setCurrentTime(finalDuration);
+                      }
+                    }}
                     controls
                   />
                 ) : (

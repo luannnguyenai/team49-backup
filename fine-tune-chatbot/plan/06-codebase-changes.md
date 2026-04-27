@@ -6,6 +6,34 @@ supports OpenAI-compatible endpoints — we extend it with a `self_hosted`
 provider, add provider-specific compiled graphs, and inject a pre-stream
 fallback (no mid-stream graph rebuild).
 
+## Preflight — GitNexus impact analysis (mandatory per project CLAUDE.md)
+
+Before editing any symbol below, run:
+
+```
+gitnexus_impact({target: "init_chat_model", direction: "upstream"})
+gitnexus_impact({target: "_get_llm_with_tools", direction: "upstream"})
+gitnexus_impact({target: "build_chat_model_kwargs", direction: "upstream"})
+gitnexus_impact({target: "compiled_graph", direction: "upstream"})
+gitnexus_impact({target: "enforce_llm_rate_limit", direction: "upstream"})
+gitnexus_impact({target: "get_context_and_stream_langgraph", direction: "upstream"})
+```
+
+For each target, report blast radius (direct callers, affected processes,
+risk level) before applying the diff. **Block if any target returns
+HIGH/CRITICAL** until reviewer signs off.
+
+After all changes are applied:
+
+```
+gitnexus_detect_changes()
+```
+
+Verify only the symbols listed in this plan show up in the affected scope.
+Any unexpected symbol = bug — investigate before committing.
+
+If the index is stale, run `npx gitnexus analyze` first.
+
 **Files touched (6 source + 2 config + 2 test = 10 files)**:
 
 Source:

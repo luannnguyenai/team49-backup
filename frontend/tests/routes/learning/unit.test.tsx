@@ -519,6 +519,47 @@ describe("learning unit page (US3)", () => {
     expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
   });
 
+  it("shows the end-of-video quiz overlay when playback finishes", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    const dismissButton = await screen.findByRole("button", { name: "Ẩn tạm" });
+    fireEvent.click(dismissButton);
+
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+
+    fireEvent(video!, new Event("ended"));
+
+    expect(await screen.findAllByText("End-of-video quiz")).toHaveLength(2);
+    expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
+  });
+
   it("does not show AI Tutor toggle when tutor is disabled", async () => {
     render(
       <LearningPageScreen

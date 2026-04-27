@@ -21,6 +21,7 @@ import re
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data_paths import CS231N_DIR, UNITS_FILE as BOOTSTRAP_UNITS_FILE
 from src.data_paths import CS224N_DIR, CS230_DIR
@@ -32,6 +33,7 @@ from src.models.course import (
     LearningProgressStatus,
     LearningUnit,
 )
+from src.models.store import Lecture
 from src.schemas.course import (
     LearningUnitContentPayload,
     LearningUnitCourseSummary,
@@ -250,12 +252,16 @@ async def get_learning_unit_payload(
 
     # Determine if tutor should be enabled
     # Tutor is enabled when the unit is ready and has video content
-    tutor_enabled = unit_row["status"] == "ready" and video_url is not None
     runtime_lecture_id = build_course_runtime_lecture_id(
         course_slug=course_slug,
         lecture_order=unit_row.get("order_index"),
         explicit_lecture_id=unit_row.get("legacy_lecture_id"),
         video_filename=video_filename or fallback_video_filename,
+    )
+    tutor_enabled = (
+        unit_row["status"] == "ready"
+        and video_url is not None
+        and await _legacy_tutor_lecture_exists(runtime_lecture_id)
     )
     tutor_bridge = build_tutor_bridge_payload(
         tutor_enabled=tutor_enabled,
@@ -365,6 +371,32 @@ async def _get_completed_learning_unit_ids(
         return set()
 
 
+async def _legacy_tutor_lecture_exists(
+    lecture_id: str | None,
+    *,
+    db: AsyncSession | None = None,
+) -> bool:
+    if not lecture_id:
+        return False
+
+    if db is not None:
+        result = await db.execute(
+            select(Lecture.id).where(Lecture.id == lecture_id).limit(1)
+        )
+        return result.scalar_one_or_none() is not None
+
+    try:
+        from src.database import async_session_factory
+
+        async with async_session_factory() as db:
+            result = await db.execute(
+                select(Lecture.id).where(Lecture.id == lecture_id).limit(1)
+            )
+            return result.scalar_one_or_none() is not None
+    except Exception:
+        return False
+
+
 def _course_dir_for_slug(course_slug: str) -> Path | None:
     if course_slug == "cs231n":
         return CS231N_DIR
@@ -439,7 +471,10 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
                 explicit_lecture_id=canonical_unit.lecture_id if canonical_unit is not None else None,
                 video_filename=video_filename,
             )
-            tutor_enabled = video_url is not None and runtime_lecture_id is not None
+            tutor_enabled = (
+                video_url is not None
+                and await _legacy_tutor_lecture_exists(runtime_lecture_id, db=db)
+            )
 
             tutor_bridge = build_tutor_bridge_payload(
                 tutor_enabled=tutor_enabled,
