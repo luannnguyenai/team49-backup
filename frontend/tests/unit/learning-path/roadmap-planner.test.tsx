@@ -88,10 +88,10 @@ describe("RoadmapPlanner", () => {
   it("lets the user pick exactly one temporary path while onboarding is unavailable", () => {
     render(<PathRequiredState />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Deep Learning → NLP/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Natural Language Processing/ }));
 
     expect(useLearningPathStore.getState().profile).toMatchObject({
-      pathKey: "dl_nlp",
+      pathKey: "nlp",
       selectedCourseIds: ["CS230", "CS224n"],
       source: "manual",
     });

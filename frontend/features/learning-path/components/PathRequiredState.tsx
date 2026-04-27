@@ -8,7 +8,7 @@ import { useLearningPathStore } from "../store";
 export default function PathRequiredState() {
   const setProfile = useLearningPathStore((state) => state.setProfile);
 
-  const choosePath = (pathKey: "dl_cv" | "dl_nlp") => {
+  const choosePath = (pathKey: "computer_vision" | "nlp") => {
     setProfile(
       createLearningProfileForPath(pathKey, {
         weeklyHours: null,
@@ -29,17 +29,17 @@ export default function PathRequiredState() {
         Chọn lộ trình trước khi học
       </h2>
       <p className="mt-2 max-w-xl text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-        Planner V1 chỉ render lộ trình cụ thể. Hãy chọn một path: Deep Learning → Computer Vision hoặc Deep Learning → NLP.
+        Planner V1 chỉ render lộ trình cụ thể. Hãy chọn một path: Computer Vision hoặc NLP.
       </p>
       <div className="mt-6 grid w-full max-w-2xl gap-3 sm:grid-cols-2">
         <button
           type="button"
-          onClick={() => choosePath("dl_cv")}
+          onClick={() => choosePath("computer_vision")}
           className="rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-950"
           style={{ borderColor: "var(--border)" }}
         >
           <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-            Deep Learning → Computer Vision
+            Computer Vision
           </span>
           <span className="mt-1 block text-xs" style={{ color: "var(--text-secondary)" }}>
             CS230 → CS231n
@@ -47,12 +47,12 @@ export default function PathRequiredState() {
         </button>
         <button
           type="button"
-          onClick={() => choosePath("dl_nlp")}
+          onClick={() => choosePath("nlp")}
           className="rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-950"
           style={{ borderColor: "var(--border)" }}
         >
           <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-            Deep Learning → NLP
+            Natural Language Processing
           </span>
           <span className="mt-1 block text-xs" style={{ color: "var(--text-secondary)" }}>
             CS230 → CS224n

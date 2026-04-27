@@ -1,4 +1,4 @@
-export type PlannerPathKey = "dl_cv" | "dl_nlp";
+export type PlannerPathKey = "computer_vision" | "nlp";
 
 export interface LearningProfile {
   pathKey: PlannerPathKey;
@@ -36,7 +36,7 @@ function normalizeCourseIdsForHash(courseIds: string[]): string[] {
 }
 
 export function isPlannerPathKey(value: unknown): value is PlannerPathKey {
-  return value === "dl_cv" || value === "dl_nlp";
+  return value === "computer_vision" || value === "nlp";
 }
 
 export type ProfileHashInput = Pick<
@@ -78,15 +78,15 @@ function withHashes(base: ProfileHashInput & { label: string }): LearningProfile
 }
 
 export const SUPPORTED_LEARNING_PATHS = {
-  dl_cv: {
-    pathKey: "dl_cv",
-    label: "Deep Learning -> Computer Vision",
+  computer_vision: {
+    pathKey: "computer_vision",
+    label: "Computer Vision",
     startCourse: "CS230",
     selectedCourseIds: ["CS230", "CS231n"],
   },
-  dl_nlp: {
-    pathKey: "dl_nlp",
-    label: "Deep Learning -> NLP",
+  nlp: {
+    pathKey: "nlp",
+    label: "Natural Language Processing",
     startCourse: "CS230",
     selectedCourseIds: ["CS230", "CS224n"],
   },
@@ -120,7 +120,7 @@ export function createLearningProfileForPath(
 
 export function onboardingToLearningProfile(input: OnboardingLearningProfileInput): LearningProfile {
   if (!isPlannerPathKey(input.selected_path_key)) {
-    throw new Error("Planner V1 requires exactly one path: dl_cv or dl_nlp");
+    throw new Error("Planner V1 requires exactly one path: computer_vision or nlp");
   }
 
   return createLearningProfileForPath(input.selected_path_key, {
@@ -141,10 +141,10 @@ export function describeProfileChange(
   previousProfile: LearningProfile,
   currentProfile: LearningProfile,
 ): string {
-  if (previousProfile.pathKey === "dl_cv" && currentProfile.pathKey === "dl_nlp") {
+  if (previousProfile.pathKey === "computer_vision" && currentProfile.pathKey === "nlp") {
     return "Bạn đang đổi lộ trình từ Computer Vision sang NLP.";
   }
-  if (previousProfile.pathKey === "dl_nlp" && currentProfile.pathKey === "dl_cv") {
+  if (previousProfile.pathKey === "nlp" && currentProfile.pathKey === "computer_vision") {
     return "Bạn đang đổi lộ trình từ NLP sang Computer Vision.";
   }
   return `Bạn đang đổi lộ trình từ ${previousProfile.label} sang ${currentProfile.label}.`;

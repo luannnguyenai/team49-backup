@@ -9,14 +9,14 @@ import {
 
 describe("learning path profile", () => {
   it("creates a concrete CV path without mutating display order", () => {
-    const profile = createLearningProfileForPath("dl_cv", {
+    const profile = createLearningProfileForPath("computer_vision", {
       weeklyHours: 6,
       source: "onboarding",
     });
 
     expect(profile).toMatchObject({
-      pathKey: "dl_cv",
-      label: "Deep Learning -> Computer Vision",
+      pathKey: "computer_vision",
+      label: "Computer Vision",
       startCourse: "CS230",
       selectedCourseIds: ["CS230", "CS231n"],
       weeklyHours: 6,
@@ -27,7 +27,7 @@ describe("learning path profile", () => {
   });
 
   it("uses sorted course IDs only for hash stability", () => {
-    const first = createLearningProfileForPath("dl_nlp", {
+    const first = createLearningProfileForPath("nlp", {
       weeklyHours: null,
       source: "manual",
     });
@@ -42,11 +42,11 @@ describe("learning path profile", () => {
 
   it("normalizes lowercase onboarding path courses through the selected path", () => {
     const profile = onboardingToLearningProfile({
-      selected_path_key: "dl_nlp",
+      selected_path_key: "nlp",
       available_hours_per_week: 8,
     });
 
-    expect(profile.pathKey).toBe("dl_nlp");
+    expect(profile.pathKey).toBe("nlp");
     expect(profile.selectedCourseIds).toEqual(["CS230", "CS224n"]);
     expect(profile.pacingHash).toBe("weekly:8");
   });
@@ -68,15 +68,15 @@ describe("learning path profile", () => {
   });
 
   it("marks stale only when topology changes, not pacing", () => {
-    const generated = createLearningProfileForPath("dl_cv", {
+    const generated = createLearningProfileForPath("computer_vision", {
       weeklyHours: 4,
       source: "onboarding",
     });
-    const sameTopologyNewPacing = createLearningProfileForPath("dl_cv", {
+    const sameTopologyNewPacing = createLearningProfileForPath("computer_vision", {
       weeklyHours: 12,
       source: "onboarding",
     });
-    const differentTopology = createLearningProfileForPath("dl_nlp", {
+    const differentTopology = createLearningProfileForPath("nlp", {
       weeklyHours: 4,
       source: "onboarding",
     });
