@@ -12,8 +12,7 @@ Schema v2 Commit E: Calibration job infrastructure.
 All ADD-only; no drop/rename. Indexes for performance.
 """
 from alembic import op
-import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy import text
 
 
 revision = "20260429_calibration_tables"
@@ -22,61 +21,86 @@ branch_labels = None
 depends_on = None
 
 
+def _exec(sql: str) -> None:
+    op.get_bind().execute(text(sql))
+
+
+def _add_col_if_not_exists(table: str, col: str, col_def: str) -> None:
+    _exec(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_def}")
+
+
+def _create_index_if_not_exists(name: str, table: str, col: str) -> None:
+    _exec(f"CREATE INDEX IF NOT EXISTS {name} ON {table}({col})")
+
+
 def upgrade() -> None:
     # Create calibration_runs table
-    op.create_table(
-        "calibration_runs",
-        sa.Column("run_id", sa.String(80), primary_key=True),
-        sa.Column("method", sa.String(80), nullable=False),  # 1pl, 2pl, 3pl, mirt
-        sa.Column("dataset_version", sa.String(255), nullable=False),
-        sa.Column("real_response_count", sa.Integer, nullable=False),
-        sa.Column("synthetic_response_count", sa.Integer, nullable=False, server_default="0"),
-        sa.Column("status", sa.String(80), nullable=False),  # started, passed, failed
-        sa.Column("metrics_json", JSON, nullable=True),
-        sa.Column("started_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("finished_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("active", sa.Boolean, nullable=False, server_default="false"),
+    _exec(
+        """
+        CREATE TABLE IF NOT EXISTS calibration_runs (
+            run_id VARCHAR(160) PRIMARY KEY,
+            method VARCHAR(80) NOT NULL,
+            dataset_version VARCHAR(255),
+            real_response_count INTEGER NOT NULL DEFAULT 0,
+            synthetic_response_count INTEGER NOT NULL DEFAULT 0,
+            status VARCHAR(80) NOT NULL,
+            metrics_json JSONB,
+            started_at TIMESTAMPTZ DEFAULT now(),
+            finished_at TIMESTAMPTZ,
+            active BOOLEAN NOT NULL DEFAULT FALSE
+        )
+        """
     )
-    op.create_index("ix_calibration_runs_active", "calibration_runs", ["active"])
-    op.create_index("ix_calibration_runs_status", "calibration_runs", ["status"])
+    _create_index_if_not_exists("ix_calibration_runs_active", "calibration_runs", "active")
+    _create_index_if_not_exists("ix_calibration_runs_status", "calibration_runs", "status")
 
     # Create item_calibration_history table
-    op.create_table(
-        "item_calibration_history",
-        sa.Column("id", sa.BigInteger, primary_key=True),
-        sa.Column("item_id", sa.String(180), nullable=False),
-        sa.Column("calibration_run_id", sa.String(80), nullable=False),
-        sa.Column("difficulty_b", sa.Float, nullable=True),
-        sa.Column("discrimination_a", sa.Float, nullable=True),
-        sa.Column("guessing_c", sa.Float, nullable=True),
-        sa.Column("standard_error_b", sa.Float, nullable=True),
-        sa.Column("standard_error_a", sa.Float, nullable=True),
-        sa.Column("standard_error_c", sa.Float, nullable=True),
-        sa.Column("real_response_count", sa.Integer, nullable=False),
-        sa.Column("synthetic_response_count", sa.Integer, nullable=False, server_default="0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.ForeignKeyConstraint(["item_id"], ["question_bank.item_id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["calibration_run_id"], ["calibration_runs.run_id"], ondelete="CASCADE"),
+    _exec(
+        """
+        CREATE TABLE IF NOT EXISTS item_calibration_history (
+            id BIGSERIAL PRIMARY KEY,
+            item_id VARCHAR(180) NOT NULL REFERENCES question_bank(item_id) ON DELETE CASCADE,
+            calibration_run_id VARCHAR(160),
+            difficulty_b FLOAT,
+            discrimination_a FLOAT,
+            guessing_c FLOAT,
+            standard_error_b FLOAT,
+            standard_error_a FLOAT,
+            standard_error_c FLOAT,
+            real_response_count INTEGER NOT NULL DEFAULT 0,
+            synthetic_response_count INTEGER NOT NULL DEFAULT 0,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+        """
     )
-    op.create_index("ix_item_calibration_history_item", "item_calibration_history", ["item_id"])
-    op.create_index("ix_item_calibration_history_run", "item_calibration_history", ["calibration_run_id"])
+    _create_index_if_not_exists("ix_item_calibration_history_item", "item_calibration_history", "item_id")
+    _create_index_if_not_exists("ix_item_calibration_history_run", "item_calibration_history", "calibration_run_id")
 
     # Add columns to item_calibration (Commit E scaffold)
-    op.add_column("item_calibration", sa.Column("standard_error_a", sa.Float, nullable=True))
-    op.add_column("item_calibration", sa.Column("standard_error_c", sa.Float, nullable=True))
-    op.add_column("item_calibration", sa.Column("calibration_run_id", sa.String(80), nullable=True))
-    op.add_column("item_calibration", sa.Column("calibration_dataset_version", sa.String(255), nullable=True))
-    op.add_column("item_calibration", sa.Column("real_response_count", sa.Integer, nullable=True))
-    op.add_column("item_calibration", sa.Column("synthetic_response_count", sa.Integer, nullable=True, server_default="0"))
+    _add_col_if_not_exists("item_calibration", "standard_error_a", "FLOAT")
+    _add_col_if_not_exists("item_calibration", "standard_error_c", "FLOAT")
+    _add_col_if_not_exists("item_calibration", "calibration_run_id", "VARCHAR(160)")
+    _add_col_if_not_exists("item_calibration", "calibration_dataset_version", "VARCHAR(255)")
+    _add_col_if_not_exists("item_calibration", "real_response_count", "INTEGER")
+    _add_col_if_not_exists("item_calibration", "synthetic_response_count", "INTEGER DEFAULT 0")
 
     # Foreign key from item_calibration to calibration_runs
-    op.create_foreign_key(
-        "fk_item_calibration_calibration_run_id",
-        "item_calibration",
-        "calibration_runs",
-        ["calibration_run_id"],
-        ["run_id"],
-        ondelete="SET NULL",
+    _exec(
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_constraint
+                WHERE conname = 'fk_item_calibration_calibration_run_id'
+            ) THEN
+                ALTER TABLE item_calibration
+                ADD CONSTRAINT fk_item_calibration_calibration_run_id
+                FOREIGN KEY (calibration_run_id)
+                REFERENCES calibration_runs(run_id)
+                ON DELETE SET NULL;
+            END IF;
+        END $$;
+        """
     )
 
 
