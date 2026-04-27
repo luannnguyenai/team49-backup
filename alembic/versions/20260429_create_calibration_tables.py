@@ -16,7 +16,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSON
 
 
-revision = "20260429_create_calibration_tables"
+revision = "20260429_calibration_tables"
 down_revision = "20260428_add_audit_fields"
 branch_labels = None
 depends_on = None
