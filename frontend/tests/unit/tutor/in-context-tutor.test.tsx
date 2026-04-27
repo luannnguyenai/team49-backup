@@ -35,6 +35,29 @@ function buildChunkedNdjsonResponse(status: number, chunks: string[]): Response 
   });
 }
 
+function buildDelayedNdjsonResponse(
+  status: number,
+  chunks: Array<{ chunk: string; delayMs?: number }>,
+): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      for (const { chunk, delayMs = 0 } of chunks) {
+        if (delayMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+        controller.enqueue(encoder.encode(chunk));
+      }
+      controller.close();
+    },
+  });
+
+  return new Response(stream, {
+    status,
+    headers: { "Content-Type": "application/x-ndjson" },
+  });
+}
+
 describe("InContextTutor", () => {
   const fetchMock = vi.fn();
 
@@ -134,6 +157,37 @@ describe("InContextTutor", () => {
         screen.getByText(/Measure brain activity means recording neural signals\./),
       ).toBeInTheDocument();
     });
+  });
+
+  it("shows backend status text separately before streamed answer content arrives", async () => {
+    fetchMock.mockResolvedValue(
+      buildDelayedNdjsonResponse(200, [
+        { chunk: '{"status":"Dang doc ngu canh bai hoc..."}\n' },
+        { chunk: '{"a":"Answer starts here."}\n{"qa_id":12}\n', delayMs: 150 },
+      ]),
+    );
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Explain the context first" },
+    });
+    fireEvent.click(screen.getAllByRole("button")[1]);
+
+    expect(await screen.findByText("Dang doc ngu canh bai hoc...")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("Answer starts here.")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Dang doc ngu canh bai hoc...")).not.toBeInTheDocument();
   });
 
   it("includes context_binding_id in tutor requests when provided", async () => {
