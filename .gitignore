@@ -28,6 +28,7 @@ data/**
 app.db
 *.log
 logs/
+reports/schema_v2_*_report.json
 
 # Frontend
 node_modules/

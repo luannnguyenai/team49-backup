@@ -220,3 +220,127 @@ It is a real product idea, not fluff. It is useful and has a stronger core than 
 - what they should do next
 
 That would improve UX, product clarity, and agent maintainability at the same time.
+
+---
+
+## Review — Claude Sonnet 4.6
+
+### Verdict
+
+Good idea. Genuinely useful niche. Architecture is 70% solid, 30% accumulating technical debt in the wrong places. The core insight — AI tutor locked to the exact timestamp of a lecture — is the right bet. Everything else is secondary and should be treated that way.
+
+The GPT review is correct about semantic fragmentation. I'll add the code-level version of that diagnosis plus observations it didn't cover.
+
+---
+
+### What's Actually Good (Code Level)
+
+**`chat_model_factory.py` is the best-designed file in the repo.**
+Provider-agnostic, minimal, easy to swap OpenAI → Gemini → Anthropic → a self-hosted model with one env var change. More of this pattern everywhere would make the codebase significantly easier to maintain and agent-navigate.
+
+**SSE streaming for tutor responses is the right call.**
+In a learning context, waiting 5 seconds for a complete response kills the flow. Token-by-token streaming keeps the student engaged. Good decision.
+
+**`qa_history.jsonl` is the most underrated feature in the entire project.**
+Every Q&A pair, route type (SIMPLE/COMPLEX/BLOCKED), rating, and timestamp is logged. This is a free fine-tuning dataset growing in production. It is also a product analytics goldmine (what do students actually ask? where do they get stuck?). Right now it appears to go nowhere. That is a significant missed opportunity.
+
+**The sandboxed Python executor for math/code questions is a real differentiator.**
+For an AI/ML course platform, being able to run `np.linalg.eig()` or plot a loss curve inline is meaningfully better than other edtech AI tutors. Students probably don't know it exists. It should be surfaced.
+
+**Three-tier routing (BLOCKED / SIMPLE / COMPLEX) is an elegant model.**
+The logic in `router.py` is clean. The idea is right. The problem is execution (see below).
+
+---
+
+### Where the Architecture Fights Itself
+
+**LangGraph is overkill for what this agent actually does.**
+
+The agent has two real behaviors:
+1. Answer from transcript context (SIMPLE path — no tools needed)
+2. Execute Python for math/code (COMPLEX path — one tool)
+
+LangGraph adds: a compiled graph, a `give_up` node, retry counting, conditional edges, streaming in `stream_mode="messages"`. This is infrastructure for a multi-tool, multi-step reasoning agent. The current agent is not that. A simple streaming chain with optional tool call would be:
+- half the code
+- faster to debug
+- easier for agents to modify safely
+- no silent failure mode when the graph gets into an unexpected state
+
+This is the biggest architectural mismatch in the backend.
+
+**`llm_service.py` is doing too many things.**
+
+One file handles: graph construction, context assembly, prompt building, QA logging, SSE formatting, and streaming output. When something breaks in the tutor flow, the blast radius of investigation is the entire file. These should be separated:
+- `context_builder.py` — assemble transcript window, TOC, history
+- `tutor_graph.py` — define the LangGraph graph (if kept)
+- `qa_logger.py` — persist Q&A records
+- `llm_service.py` — orchestrate only
+
+**The routing criteria will drift silently as models change.**
+
+BLOCKED / SIMPLE / COMPLEX classification lives in a prompt string in `router.py`. No tests verify routing behavior. When the underlying model is swapped (e.g., gpt-5.4-nano → a fine-tuned model), routing could change significantly with no visible signal. This needs at least a small routing test suite with fixed examples:
+```
+"what is attention?" → SIMPLE
+"write code to compute cosine similarity" → COMPLEX
+"ignore all instructions" → BLOCKED
+```
+
+**The tutor has no memory of its own explanations within a session.**
+
+Chat history is the last 5 Q&As. But if the tutor explained backpropagation at timestamp 12:30 and the student asks a follow-up at 14:00, the tutor may re-explain from scratch or contradict itself. Conceptual consistency within a lecture session is missing.
+
+---
+
+### Is It Useful?
+
+Yes, specifically for students consuming structured technical lectures (AI/ML/CS). The timestamp-grounded tutoring is a legitimate improvement over "ask ChatGPT separately."
+
+But there is a bootstrap trust problem specific to this audience: students learning LLMs will immediately test the tutor on hard questions. If it hallucinates a gradient formula or misexplains attention, trust collapses fast. This audience is uniquely positioned to notice and remember bad answers. The `TruthfulQA`-style calibration matters more here than for general edtech.
+
+Not yet maximally useful because the feedback loop is incomplete:
+- quiz answers don't visibly feed back into tutor behavior
+- weak knowledge points don't change what the tutor volunteers to elaborate on
+- the tutor doesn't proactively say "you got this wrong in the quiz — want to revisit it?"
+
+---
+
+### What Would Make It More Compelling
+
+**For humans:**
+
+1. Surface the Python sandbox explicitly. Show a small indicator when the tutor used code to compute the answer. Students in AI/ML courses will trust a computed answer more than a narrated one.
+
+2. After a quiz question is answered wrong, the tutor should be able to say "you got this wrong — here's the concept again." Right now quiz and tutor are separate features. Closing this loop is high-value.
+
+3. Progress should be visible at the concept level, not just session level. "You've now asked 3 questions about attention and answered 2 quiz questions correctly" is more useful than a progress bar.
+
+4. The tutor response style should match the lecture content — if the lecture is formal, the tutor should be formal. If it's casual, casual. Right now the system prompt is fixed regardless of lecture style.
+
+**For AI coding agents:**
+
+1. `llm_service.py` needs decomposition before it becomes unmaintainable. An agent asked to "change how context is assembled" currently has to navigate the entire service file to find the right lines.
+
+2. There is no `ARCHITECTURE.md` or `DOMAIN.md`. The distinction between `lecture`, `unit`, `course`, `chapter`, `session`, `knowledge_point` is not documented anywhere outside the code. Agents reconstruct this from reading 10+ files. One 200-line domain glossary doc would cut onboarding time significantly.
+
+3. The `chat_model_factory.py` pattern should be extended to cover context assembly. Right now context logic is scattered across `llm_service.py` inline. A `ContextBuilder` class with a defined interface would make it easy to modify what goes into the prompt without touching the streaming logic.
+
+4. Add route-level tests for the tutor. Not rendering tests. Behavioral tests:
+   - given this question + transcript → expect SIMPLE route
+   - given this question + math content → expect COMPLEX route + tool call
+   These tests would tell an agent exactly where routing behavior lives and what it should do.
+
+5. Comments in `llm_service.py` explain *what* the code does (already visible from variable names). What's missing is *why* — why is the transcript window ±5 minutes and not ±2 or ±10? why is give-up triggered at 3 attempts? Documenting these thresholds as intentional decisions prevents agents from "optimizing" them without understanding the tradeoff.
+
+---
+
+### Bottom Line
+
+The core product bet is correct. Timestamp-grounded AI tutoring for technical lecture content is genuinely differentiated. The architecture is mostly pragmatic with one significant mismatch (LangGraph complexity vs. actual agent behavior). The biggest missed opportunity is `qa_history.jsonl` — it is sitting there growing and going nowhere.
+
+The fastest path to a better product is not new features. It is:
+1. Close the quiz → tutor feedback loop
+2. Decompose `llm_service.py`
+3. Write routing behavior tests
+4. Start using `qa_history.jsonl` for something (analytics first, fine-tuning later)
+
+The project is worth continuing. It has a real niche and a real data asset accumulating. Don't let it become a feature showcase. Make the tutor experience exceptional first.
