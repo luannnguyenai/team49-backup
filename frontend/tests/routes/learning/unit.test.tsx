@@ -318,6 +318,7 @@ describe("learning unit page (US3)", () => {
         unit_type: "lecture",
         order_index: 1,
         lecture_label: "Lecture 01",
+        is_completed: true,
       },
       {
         slug: "lecture-2-linear-classifiers",
@@ -326,6 +327,7 @@ describe("learning unit page (US3)", () => {
         unit_type: "lecture",
         order_index: 2,
         lecture_label: "Lecture 02",
+        is_completed: false,
       },
     ]);
 
@@ -347,6 +349,7 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByText("Bài học")).toBeInTheDocument();
       expect(screen.getByText("Lecture 01")).toBeInTheDocument();
       expect(screen.getByText("Lecture 02")).toBeInTheDocument();
+      expect(screen.getByLabelText("Lecture 01 completed")).toBeInTheDocument();
       expect(screen.getAllByText("Introduction").length).toBeGreaterThan(0);
       expect(screen.getByText("Key ideas at this moment")).toBeInTheDocument();
       expect(screen.getByText("Neural networks learn layered visual features.")).toBeInTheDocument();

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as R
 import Link from "next/link";
 import {
   BookOpen,
+  CheckCircle2,
   ChevronsLeft,
   ChevronsRight,
   CircleDot,
@@ -1104,9 +1105,22 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                       backgroundColor: isActive ? "rgba(37,99,235,0.08)" : "transparent",
                     }}
                   >
-                    <p className="text-[11px] font-semibold uppercase tracking-widest-sm text-blue-600">
-                      {formatLectureLabel(lecture.order_index, lecture.lecture_label)}
-                    </p>
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-widest-sm text-blue-600">
+                        {formatLectureLabel(lecture.order_index, lecture.lecture_label)}
+                      </p>
+                      {lecture.is_completed ? (
+                        <span
+                          aria-label={`${formatLectureLabel(
+                            lecture.order_index,
+                            lecture.lecture_label,
+                          )} completed`}
+                          className="text-emerald-500"
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="mt-1 text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                       {lecture.title}
                     </p>
