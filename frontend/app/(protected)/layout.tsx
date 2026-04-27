@@ -14,7 +14,11 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [checking, setChecking] = useState(() => !tokenStorage.getAccess());
+  // Always start as `checking` to keep server and client renders in sync.
+  // The useEffect below resolves auth on the first client tick. Reading
+  // tokenStorage during the render phase would diverge SSR (no cookie) from
+  // CSR (cookie present) and cause a hydration mismatch.
+  const [checking, setChecking] = useState(true);
   const router = useRouter();
   const { user, fetchMe } = useAuthStore();
 

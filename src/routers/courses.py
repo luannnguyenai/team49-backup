@@ -23,6 +23,7 @@ from src.services.course_catalog_service import get_course_overview, list_course
 from src.services.course_entry_service import assert_learning_access, get_start_learning_decision
 from src.services.learning_unit_service import (
     get_learning_unit_payload,
+    get_lecture_toc,
     list_course_units_db_first,
 )
 
@@ -160,5 +161,29 @@ async def api_get_learning_unit(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Learning unit '{unit_slug}' not found for course '{course_slug}'.",
+        )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# GET /api/courses/{slug}/lectures/{lecture_order}/toc — chapter timeline
+# ---------------------------------------------------------------------------
+# Synthesises the legacy ToC_Summary payload from CanonicalUnit segments
+# (course_id + lecture_order). Replaces the static
+# data/courses/{Folder}/ToC_Summary/lecture-{N}.json files.
+
+
+@courses_router.get("/{course_slug}/lectures/{lecture_order}/toc")
+async def api_get_lecture_toc(
+    course_slug: str,
+    lecture_order: int,
+    current_user: User = Depends(get_current_onboarded_user),
+) -> dict:
+    await assert_learning_access(course_slug, current_user)
+    result = await get_lecture_toc(course_slug, lecture_order)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No table of contents for course '{course_slug}' lecture {lecture_order}.",
         )
     return result

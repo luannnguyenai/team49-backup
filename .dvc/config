@@ -1,0 +1,7 @@
+[core]
+    remote = gdrive_remote
+    site_cache_dir = .dvc/site-cache
+['remote "gdrive_remote"']
+    url = gdrive://1WR1L85InApYeAO8_6Up_hKTuOUFiLlD9
+    gdrive_acknowledge_abuse = true
+    gdrive_client_id = 1030966103129-1irchqdlng3n4i9qj3uagispgfudfan4.apps.googleusercontent.com

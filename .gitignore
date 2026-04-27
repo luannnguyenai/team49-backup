@@ -18,8 +18,11 @@ build/
 # AI logs — tracked structure, ignored content
 .ai-log/*.jsonl
 
-# Data — ignore all data
-data/
+# Data — ignore raw/generated data contents by default, but keep DVC pointers.
+data/**
+!data/**/
+!data/**/*.dvc
+!data/**/.gitignore
 
 # Project local files
 app.db
