@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Optional, Union
 
-from sqlalchemy import Float, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import Boolean, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -76,10 +76,24 @@ class CanonicalUnit(TimestampMixin, Base):
     video_clip_ref: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     topic_embedding: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
     source_file: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    # CAT academic fields added in bundle v1
+    active: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True, default=True, server_default="true")
+    content_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    content_type: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    content_type_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    deprecated_at: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    deprecated_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    has_quiz_items: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    is_worth_learning: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    override_critical_kp: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    salience_confidence: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    salience_score: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
 
     __table_args__ = (
         Index("ix_units_course_lecture", "course_id", "lecture_id"),
         Index("ix_units_course_order", "course_id", "lecture_order", "ordering_index"),
+        Index("ix_units_active", "active"),
+        Index("ix_units_content_type", "content_type"),
     )
 
 
