@@ -3,7 +3,14 @@ from uuid import UUID
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.canonical import CanonicalUnit, ItemPhaseMap, PrerequisiteEdge, QuestionBankItem, UnitKPMap
+from src.models.canonical import (
+    CanonicalUnit,
+    ConceptKP,
+    ItemPhaseMap,
+    PrerequisiteEdge,
+    QuestionBankItem,
+    UnitKPMap,
+)
 from src.models.course import Course, CourseSection, LearningUnit
 
 
@@ -68,6 +75,14 @@ class CanonicalContentRepository:
             select(CanonicalUnit).where(CanonicalUnit.unit_id.in_(canonical_unit_ids))
         )
         return {unit.unit_id: unit for unit in result.scalars().all()}
+
+    async def get_concepts_by_ids(self, kp_ids: list[str]) -> dict[str, ConceptKP]:
+        if not kp_ids:
+            return {}
+        result = await self.session.execute(
+            select(ConceptKP).where(ConceptKP.kp_id.in_(kp_ids))
+        )
+        return {concept.kp_id: concept for concept in result.scalars().all()}
 
     async def get_quiz_item_counts_by_unit_ids(
         self,
