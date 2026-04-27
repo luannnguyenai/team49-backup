@@ -96,6 +96,24 @@ describe("StepKnownTopicsFiltered", () => {
     expect(useOnboardingStore.getState().knownUnitIds).not.toContain("u1");
   });
 
+  it("lets the user choose assessment depth", () => {
+    render(
+      <StepKnownTopicsFiltered
+        topics={cvTopics}
+        onNext={onNextMock}
+        onBack={onBackMock}
+        onSkipAll={onSkipAllMock}
+      />,
+    );
+
+    expect(screen.getByText("Nhanh")).toBeInTheDocument();
+    expect(screen.getByText("tối đa 15 câu")).toBeInTheDocument();
+    expect(screen.getByText("easy/medium")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Kỹ/i }));
+    expect(useOnboardingStore.getState().assessmentDepth).toBe("deep");
+  });
+
   it("eye button reveals representative units without showing them by default", () => {
     render(
       <StepKnownTopicsFiltered
@@ -130,4 +148,3 @@ describe("StepKnownTopicsFiltered", () => {
     expect(onNextMock).toHaveBeenCalledOnce();
   });
 });
-

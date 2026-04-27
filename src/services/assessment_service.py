@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from dataclasses import dataclass
 from collections import defaultdict
 from datetime import UTC, datetime
 
@@ -44,6 +45,56 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class AssessmentDepthPolicy:
+    max_questions: int
+    questions_per_unit: int
+    allowed_difficulties: set[str]
+    allow_application: bool
+
+
+def _assessment_depth_policy(depth: str) -> AssessmentDepthPolicy:
+    if depth == "quick":
+        return AssessmentDepthPolicy(
+            max_questions=15,
+            questions_per_unit=2,
+            allowed_difficulties={"easy", "medium"},
+            allow_application=False,
+        )
+    if depth == "deep":
+        return AssessmentDepthPolicy(
+            max_questions=50,
+            questions_per_unit=5,
+            allowed_difficulties={"easy", "medium", "hard"},
+            allow_application=True,
+        )
+    return AssessmentDepthPolicy(
+        max_questions=30,
+        questions_per_unit=3,
+        allowed_difficulties={"easy", "medium", "hard"},
+        allow_application=False,
+    )
+
+
+def _filter_unit_pools_for_depth(
+    unit_pools: UnitPools,
+    policy: AssessmentDepthPolicy,
+) -> UnitPools:
+    filtered: UnitPools = {}
+    for unit_id, pairs in unit_pools.items():
+        depth_pairs = [
+            (item, difficulty_prior)
+            for item, difficulty_prior in pairs
+            if str(getattr(item, "difficulty", "")).lower() in policy.allowed_difficulties
+            and (
+                policy.allow_application
+                or str(getattr(item, "question_intent", "")).lower() != "application"
+            )
+        ]
+        filtered[unit_id] = depth_pairs
+    return filtered
 
 
 def _selected_answer_to_index(answer: SelectedAnswer) -> int:
@@ -95,6 +146,7 @@ async def start_assessment(
     learning_unit_ids: list[uuid.UUID],
     canonical_unit_ids: list[str] | None = None,
     phase: str = "placement",
+    assessment_depth: str = "standard",
 ) -> AssessmentStartResponse:
     selected_unit_ids = await _resolve_canonical_unit_ids(
         db,
@@ -115,8 +167,13 @@ async def start_assessment(
             "assessment_start: unit=%s candidates=%d", unit_id, len(pairs)
         )
 
-    strategy = pick_strategy(unit_pools)
-    items = strategy.select(unit_pools, k=5)
+    policy = _assessment_depth_policy(assessment_depth)
+    filtered_unit_pools = _filter_unit_pools_for_depth(unit_pools, policy)
+    strategy = pick_strategy(filtered_unit_pools)
+    items = strategy.select(
+        filtered_unit_pools,
+        k=policy.questions_per_unit,
+    )[: policy.max_questions]
 
     if not items:
         raise ValidationError("No eligible canonical assessment questions found.")

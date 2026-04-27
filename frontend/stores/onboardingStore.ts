@@ -20,12 +20,14 @@ export interface PlacementTopicResult {
 // ---------------------------------------------------------------------------
 
 export type ExperienceLevel = "beginner" | "experienced";
+export type AssessmentDepth = "quick" | "standard" | "deep";
 
 interface OnboardingState {
   currentStep: OnboardingStep;
   goalIds: string[];                    // selected goals from Step 1
   experienceLevel: ExperienceLevel | null; // selected at Step 2
   knownUnitIds: string[];               // selected known topics from Step 3 (experienced only)
+  assessmentDepth: AssessmentDepth;      // placement verification length selected after prior analysis
   desiredSectionIds: string[];          // from Step 4
   weeklyHours: number | null;           // from Step 4
   learningMethod: string | null;        // from Step 5
@@ -38,6 +40,7 @@ interface OnboardingState {
   setGoalIds: (ids: string[]) => void;
   setExperienceLevel: (level: ExperienceLevel) => void;
   setKnownUnitIds: (ids: string[]) => void;
+  setAssessmentDepth: (depth: AssessmentDepth) => void;
   setDesiredSectionIds: (ids: string[]) => void;
   setWeeklyHours: (hours: number) => void;
   setLearningMethod: (method: string) => void;
@@ -56,6 +59,7 @@ const initialState = {
   goalIds: [],
   experienceLevel: null as ExperienceLevel | null,
   knownUnitIds: [],
+  assessmentDepth: "standard" as AssessmentDepth,
   desiredSectionIds: [],
   weeklyHours: null,
   learningMethod: null,
@@ -75,6 +79,7 @@ export const useOnboardingStore = create<OnboardingState>()((set) => ({
   setGoalIds: (ids) => set({ goalIds: ids }),
   setExperienceLevel: (level) => set({ experienceLevel: level }),
   setKnownUnitIds: (ids) => set({ knownUnitIds: ids }),
+  setAssessmentDepth: (depth) => set({ assessmentDepth: depth }),
   setDesiredSectionIds: (ids) => set({ desiredSectionIds: ids }),
   setWeeklyHours: (hours) => set({ weeklyHours: hours }),
   setLearningMethod: (method) => set({ learningMethod: method }),

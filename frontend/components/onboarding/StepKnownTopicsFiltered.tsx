@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Check, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOnboardingStore } from "@/stores/onboardingStore";
+import type { AssessmentDepth } from "@/stores/onboardingStore";
 import {
   selectRepresentativeUnitIds,
   type PriorCandidateTopic,
@@ -18,6 +19,32 @@ interface Props {
   onBack: () => void;
   onSkipAll: () => void;
 }
+
+const DEPTH_OPTIONS: Array<{
+  value: AssessmentDepth;
+  label: string;
+  questionCopy: string;
+  levelCopy: string;
+}> = [
+  {
+    value: "quick",
+    label: "Nhanh",
+    questionCopy: "tối đa 15 câu",
+    levelCopy: "easy/medium",
+  },
+  {
+    value: "standard",
+    label: "Vừa",
+    questionCopy: "tối đa 30 câu",
+    levelCopy: "easy/medium/hard",
+  },
+  {
+    value: "deep",
+    label: "Kỹ",
+    questionCopy: "tối đa 50 câu",
+    levelCopy: "easy/medium/hard/application",
+  },
+];
 
 function levelLabel(level: PriorTopicLevel): string {
   if (level === "confident") return "Tự tin";
@@ -46,6 +73,8 @@ export default function StepKnownTopicsFiltered({
 }: Props) {
   const knownUnitIds = useOnboardingStore((s) => s.knownUnitIds);
   const setKnownUnitIds = useOnboardingStore((s) => s.setKnownUnitIds);
+  const assessmentDepth = useOnboardingStore((s) => s.assessmentDepth);
+  const setAssessmentDepth = useOnboardingStore((s) => s.setAssessmentDepth);
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
 
   const selectedSet = useMemo(() => new Set(knownUnitIds), [knownUnitIds]);
@@ -167,6 +196,45 @@ export default function StepKnownTopicsFiltered({
         </p>
       )}
 
+      <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)" }}>
+        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+          Mức kiểm tra
+        </p>
+        <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+          Số câu sẽ scale theo số cụm bạn chọn, nhưng không vượt quá giới hạn của từng mức.
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {DEPTH_OPTIONS.map((option) => {
+            const isSelected = assessmentDepth === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                aria-label={`${option.label}: ${option.questionCopy}, level ${option.levelCopy}`}
+                onClick={() => setAssessmentDepth(option.value)}
+                className={cn(
+                  "rounded-lg border px-3 py-3 text-left transition-all",
+                  isSelected
+                    ? "border-primary-600 bg-primary-50 dark:bg-primary-900/20"
+                    : "hover:border-slate-300",
+                )}
+                style={{ borderColor: isSelected ? undefined : "var(--border)" }}
+              >
+                <span className="block text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                  {option.label}
+                </span>
+                <span className="mt-1 block text-xs" style={{ color: "var(--text-muted)" }}>
+                  {option.questionCopy}
+                </span>
+                <span className="mt-1 block text-xs font-medium text-primary-600">
+                  {option.levelCopy}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex items-center gap-3 pt-2">
         <button
           type="button"
@@ -203,4 +271,3 @@ export default function StepKnownTopicsFiltered({
     </div>
   );
 }
-

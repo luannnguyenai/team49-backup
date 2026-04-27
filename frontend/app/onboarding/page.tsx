@@ -115,7 +115,7 @@ function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
-  const { goalIds, knownUnitIds, experienceLevel } = useOnboardingStore();
+  const { goalIds, knownUnitIds, experienceLevel, assessmentDepth } = useOnboardingStore();
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");

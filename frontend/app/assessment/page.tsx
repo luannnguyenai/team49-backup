@@ -99,7 +99,7 @@ function AssessmentPageInner() {
 
     async function bootstrap() {
       try {
-        const { canonicalUnitIds, unitNameMap } = readPendingCanonicalAssessment();
+        const { canonicalUnitIds, unitNameMap, assessmentDepth } = readPendingCanonicalAssessment();
         if (canonicalUnitIds.length === 0) {
           if (!cancelled) {
             setErrorMsg("Không tìm thấy learning units cho assessment. Hãy quay lại onboarding.");
@@ -110,6 +110,7 @@ function AssessmentPageInner() {
 
         const resp = await canonicalAssessmentApi.start({
           canonical_unit_ids: canonicalUnitIds,
+          assessment_depth: assessmentDepth,
         });
         if (cancelled) return;
 

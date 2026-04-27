@@ -72,6 +72,7 @@ async def api_start_assessment(
         body.learning_unit_ids,
         canonical_unit_ids=body.canonical_unit_ids,
         phase=body.phase,
+        assessment_depth=body.assessment_depth,
     )
 
 

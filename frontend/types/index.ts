@@ -160,6 +160,7 @@ export interface AssessmentStartResponse {
 
 export interface CanonicalAssessmentStartPayload {
   canonical_unit_ids: string[];
+  assessment_depth?: "quick" | "standard" | "deep";
 }
 
 export interface AnswerInput {
