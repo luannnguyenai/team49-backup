@@ -299,12 +299,25 @@ Trivial vs. external dataset download bandwidth and licensing complexity.
 
 ## Data governance compliance
 
-- ✅ All course data is local; no upload to external services for training data prep
-- ⚠️ Strategy B/C/D send transcripts/MCQs to **Gemini Flash API** — this is
-  Google's API, transcripts are public Stanford courseware, so OK. But
-  document this in the manifest as `source: synthetic_gemini-flash`
-- ✅ No `qa_history` data goes to external API in this pipeline
-- ✅ All output samples carry `_meta.source` for ablation/audit
+Per-source policy table (replaces ad-hoc rules; enforced by manifest gate):
+
+| Data class | External API allowed? | Rationale | Manifest tag |
+|---|---|---|---|
+| `student_qa` (`qa_history` rows) | ❌ NEVER | Private user content, may contain PII even after scrub | `external_api_used=false` (mandatory) |
+| `db_exports` (lectures, chapters, transcript_lines tables) | ❌ NEVER | Internal schema may leak structure | `external_api_used=false` |
+| `public_course_transcripts` (Stanford CS224n/CS230/CS231n) | ✅ Allowed (Gemini Flash) | Publicly available courseware; no derivative restriction | `external_api_used=true, source=synthetic_gemini-flash` |
+| `public_MCQ_assets` (`question_bank.json`, P3c, P4) | ✅ Allowed if license permits derivative | Verify license per file before use | `external_api_used=true, source=synthetic_gemini-flash` |
+| `KG artifacts` (`final_artifacts/...`) | ✅ Allowed for polish-only use | Already derived from public courseware | `external_api_used=true, source=kg_synthetic` |
+| `model weights trained on course data` | ❌ Not redistributed externally | Copyright + commercial scope unclear | — |
+
+The data pipeline manifest (`data/sft/manifest.json`) MUST carry
+`external_api_used: bool` per source row. Build script fails if any
+`student_qa` source has `external_api_used=true`.
+
+- ✅ All output samples carry `_meta.source` and `_meta.external_api_used` for
+  ablation/audit
+- ✅ Manifest gate enforced in `scripts/sft/30_merge_domain.py` (raises if
+  governance violated)
 
 ## Schema mapping reference
 
@@ -352,6 +365,148 @@ HH:MM:SS
 <text line>
 ...
 ```
+
+## Group-key split (mandatory — prevents eval leakage)
+
+⚠️ **Random sample-level split causes silent train/test leakage** when
+multiple variants are derived from the same source entity. Strategy A
+emits 3 variants per MCQ; Strategy E emits up to 5 flavors per KP.
+Random split puts variants of the same MCQ/KP in both train and test.
+
+**Rule**: split BY group key BEFORE expanding variants:
+
+| Source | Group key |
+|---|---|
+| MCQ (Strategy A, D) | `item_id` (from `question_bank.json` / P4 / P3c) |
+| KG (Strategy E.1–E.5) | `global_kp_id` |
+| Transcript (Strategy B) | `(lecture_id, time_window_start_s)` |
+| Refusal (Strategy C) | `(lecture_id, refusal_seed_id)` |
+| Cross-course (Strategy E.4) | tuple of `global_kp_id` × source pair |
+| Organic `qa_history` | normalized `question_hash` (after PII scrub) |
+
+Pipeline:
+
+1. Collect all source entities into a `groups.jsonl` with `(group_id,
+   source_type)`.
+2. Stratified split groups → train/val/test (e.g., 90/5/5 by group count,
+   stratified by `source_type` and `difficulty_level` band).
+3. Hold-out eval fixtures (P4 `eval/fixtures/*.jsonl`) MUST come from groups
+   in the test split — never from train groups.
+4. Only AFTER splitting groups, expand each group's variants into
+   training samples.
+5. Final dedup: MinHash 0.85 within each split (catches accidental
+   near-duplicate phrasings); cross-split MinHash MUST find zero matches.
+
+Output: `data/sft/groups_split.json`:
+```json
+{
+  "train_groups": ["mcq_001", "kp_3d_cnn", ...],
+  "val_groups":   [...],
+  "test_groups":  [...],
+  "checksum": "sha256:..."
+}
+```
+
+`scripts/sft/07_split.py` consumes this JSON and refuses to assign a
+sample to a split if its group is not in the corresponding list. Build
+fails on group-leak.
+
+## Tool-call vs code-reasoning metric (clarification)
+
+Two distinct flags MUST be tracked separately in `_meta`:
+
+- `_meta.has_tool_call: bool` — assistant message has structured `tool_calls`
+  field (the format Hermes parser is supposed to emit). Counts toward the
+  "≥ 25% tool-call samples" target.
+- `_meta.code_reasoning: bool` — answer contains code blocks in plain text
+  (e.g., MathInstruct PoT samples) but no `tool_calls` field. Does NOT count
+  toward tool-call target.
+
+Why this matters: training on `code_reasoning=true` teaches the model to
+write code in chat answers, NOT to invoke the sandbox tool. These are
+different behaviors. Conflating them inflates apparent tool-call coverage
+in the mix and produces a model that explains code instead of calling
+`execute_python` when needed.
+
+**Updated tool-call ratio target**: `has_tool_call=true` ≥ 25% of total
+training samples. To hit this with FULL mix ~18k:
+- Hermes singleturn + agentic: 2000
+- xLAM filtered: 1000 (was 500)
+- **NEW Strategy F — synthetic tool-call traces from KG/MCQ math+code seeds**:
+  ~1500 (see below)
+- Organic with sandbox marker: ~900 (kept conservative)
+- **Total has_tool_call ≈ 5400 / 18000 = 30%** ✅
+
+For FAST mix ~10k, target is ~2500 `has_tool_call=true`:
+- Hermes singleturn: 1500 (was 1000)
+- Strategy F synthetic: 800
+- xLAM filtered: 200
+- **Total ≈ 2500 / 10000 = 25%** ✅
+
+### Strategy F — synthetic tool-call traces (NEW)
+
+For each KP/MCQ where the answer naturally requires computation (math,
+algorithm steps, statistics), generate a multi-turn ChatML sample:
+
+```json
+{"messages": [
+  {"role": "user", "content": "Question requiring computation..."},
+  {"role": "assistant", "content": null,
+   "tool_calls": [{"id": "call_1", "type": "function",
+                   "function": {"name": "execute_python",
+                                "arguments": "{\"code\": \"...\"}"}}]},
+  {"role": "tool", "tool_call_id": "call_1", "content": "<simulated stdout>"},
+  {"role": "assistant", "content": "<final answer using tool result>"}
+]}
+```
+
+Generate using template + Gemini Flash to author code body and final
+answer; sandbox-execute the code locally to fill `<simulated stdout>`
+with real output. Yield ~1500 samples for ~$5–8.
+
+**P0.5 format gate applies**: at least 50 of these 1500 must round-trip
+through vLLM with `--tool-call-parser hermes` and produce parseable
+`tool_calls` in the API response. If <50 round-trip: stop; format
+converter is wrong.
+
+## KG sample grounding metadata (mandatory)
+
+Each Strategy E sample MUST carry:
+
+```json
+"_meta": {
+  "source": "kg_e1_definition" | "kg_e2_prereq" | ...,
+  "grounding_level": "kg_only" | "kg_plus_transcript" | "mcq_evidence" | "teacher_synthetic",
+  "kp_id": "kp_3d_cnn_and_slow_fusion",
+  "difficulty_level": 0.7,
+  "importance_level": "critical",
+  "source_course_ids": ["CS231n"],
+  "external_api_used": false | true,
+  "has_tool_call": false,
+  "code_reasoning": false
+}
+```
+
+`grounding_level` semantics:
+- `kg_only`: answer derived purely from KP description / edges (Strategy
+  E.1 default)
+- `kg_plus_transcript`: enriched with transcript window evidence
+  (Strategy E.3 with transcript injection)
+- `mcq_evidence`: backed by MCQ.evidence.transcript_quotes + timestamps
+- `teacher_synthetic`: free-form Gemini answer, no graph/transcript
+  grounding (riskiest; minimize)
+
+**Citation training rule**: P4 eval Gate 1 "citation HH:MM:SS format ≥ 95%"
+applies only to samples with `grounding_level in {kg_plus_transcript,
+mcq_evidence}`. Training the citation behavior on `kg_only` samples
+produces a model that fabricates timestamps. Filter accordingly when
+sampling for the citation-required training subset.
+
+Strategy E.3 prompt (Gemini Flash) MUST include the constraint:
+> "If the provided KP description and prereq context do not contain
+> enough information to derive the requested explanation, respond with
+> the description verbatim and add 'Cần xem lại lecture <X> để hiểu sâu
+> hơn'. Do NOT invent derivations or proofs not present in the input."
 
 ## Exit criteria for P2b
 

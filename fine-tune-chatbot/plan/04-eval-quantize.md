@@ -29,6 +29,22 @@ if Gate 1 passes do we run LLM-judge (Gate 2). Both must pass to proceed.
   from candidate B to avoid self-bias).
 - Pairwise: judge sees `(question, context, answer_X, answer_Y)` shuffled,
   picks winner or tie. Run A-vs-B and A-vs-C.
+- **Blinding**: candidate identity (A/B/C) MUST be hidden from judge.
+  Replace with random labels per sample (e.g., "X" / "Y") and rotate
+  positions 50/50 to defeat positional bias.
+- **Reproducibility logging**: every judge run writes `eval/runs/v1/judge_log.jsonl`
+  with one line per judged comparison:
+  ```json
+  {"sample_id": "...", "judge_model": "claude-sonnet-4.6",
+   "judge_prompt_version": "v1.0", "judge_prompt_sha256": "...",
+   "x_label": "X", "x_actual_candidate": "B",
+   "y_label": "Y", "y_actual_candidate": "A",
+   "winner_label": "Y", "winner_actual": "A",
+   "winning_dim_breakdown": {...}, "judge_seed": 42}
+  ```
+- Judge prompt template stored as a versioned file
+  `eval/judge_prompts/pairwise_v1.0.md`; bumping the prompt requires a
+  new version number and re-baseline of the historical comparison set.
 - Pointwise rubric (1–5) on 4 dimensions:
 
 | Dimension | Definition |
@@ -217,40 +233,65 @@ If AWQ fails on VL architecture, fallback to:
 - **bitsandbytes 4-bit at serve time** in vLLM (`--quantization bitsandbytes`,
   slower but works on any architecture)
 
-### Quantization feasibility gate (formal decision tree)
+### Quantization feasibility ladder — RE-ORDERED (BF16 first, AWQ last)
 
-Try in order; commit to first option that passes all checks:
+⚠️ **Reordered from prior plan** based on AWQ-on-VLM risk. Qwen2.5-VL has
+a vision tower that AWQ does not quantize cleanly; offline AWQ can break
+load path, vision path, or remote-code config. Start from the safest
+serving mode and step up to higher compression only when each tier passes
+all smoke gates.
 
-**Tier 1 — AWQ Int4 + vLLM `awq_marlin`** (preferred)
-- Quantize succeeds without error
-- vLLM loads model successfully (text path)
-- Vision smoke test: ≥ 8/10 lecture-frame samples produce coherent description
-- Tool-call smoke test: ≥ 18/20 samples emit valid JSON
-- Pairwise judge tie-rate vs merged fp16 ≥ 75% on 50 samples
-- → ship this; serving plan unchanged
+Decision tree (try in order, commit to **first** that passes all checks):
 
-**Tier 2 — GPTQ Int4** (if AWQ fails)
-- Use `optimum.gptq` quantization
-- Same checks as Tier 1
-- vLLM `--quantization gptq_marlin`
-- → update serving compose flag, ship
+**Tier 1 — Merged BF16/FP16 unquantized in vLLM** (start here, NOT AWQ)
+- Goal: prove the merged model can be served at all
+- vLLM `--dtype bfloat16` (or `auto`); no `--quantization` flag
+- Memory: ~7 GB weights + KV cache → fits 16GB with `--max-num-seqs 2`
+- Smoke gates: text + vision + tool-call (criteria below)
+- → **If pass: this is the v1 serving path.** Quantization is optional optimization, not required for ship.
 
-**Tier 3 — bitsandbytes Int4 at serve time** (if both above fail)
-- Skip offline quantization; serve merged fp16 weights
+**Tier 2 — bitsandbytes Int4 load-time quantization** (if Tier 1 needs more concurrency)
 - vLLM `--quantization bitsandbytes --load-format bitsandbytes`
-- Slower; lower max-num-seqs (likely 2–3 instead of 4)
-- → ship if quality good but expect higher latency
+- No offline calibration needed — quantize at serve startup
+- Permissive: works on most VL architectures including Qwen2.5-VL
+- Slower than AWQ Marlin but correct
+- → ship if Tier 1 OOM at desired concurrency and bnb quality acceptable
 
-**Tier 4 — BF16 merged + reduced concurrency** (last resort)
-- No quantization; serve merged 16-bit
-- `--max-num-seqs 1 --max-model-len 4096`
-- Single-user serving only; document in runbook
-- → ship only if Tier 1–3 all fail and quality is critical
+**Tier 3 — GPTQ Int4** (if more headroom needed)
+- `optimum.gptq` calibration ~30 min
+- vLLM `--quantization gptq_marlin`
+- Often more permissive than AWQ on VLM architectures
+- Same smoke gates as Tier 1
+
+**Tier 4 — AWQ Int4 + `awq_marlin`** (last, only if T1–T3 insufficient)
+- Highest compression and throughput
+- Highest risk on VL architecture — vision tower may load broken
+- Calibration text-only (vision excluded); verify vision still works post-quantize
+- Same smoke gates as Tier 1
+- → ship only if T1–T3 cannot meet concurrency target
 
 **Tier 5 — Abort self-hosting**
-- All quantization paths fail or quality unacceptable
-- Rollback decision: stay on Gemini, escalate to product team
-- Document failure mode in `eval/v1_quantize_failure.md`
+- All four serving modes fail or quality unacceptable
+- Stay on Gemini, escalate to product team
+- Document in `eval/v1_quantize_failure.md`
+
+### Smoke gates (apply to whichever tier is being tested)
+
+For each tier, run all four smoke tests:
+
+| Smoke | Sample size | Pass threshold |
+|---|---|---|
+| Load + `/v1/models` returns model name | 1 | 200 OK with served model name |
+| Text generation streaming | 10 prompts | 10/10 produce coherent answer, no NaN tokens |
+| Vision (lecture frame) | 10 frames | ≥ 8/10 coherent description (preserve base ability, see README vision scope) |
+| Tool-call (re-runs P0.5 gate) | 20 prompts | ≥ 18/20 produce parseable `tool_calls`, 20/20 args valid JSON |
+| Pairwise judge vs prior tier | 50 samples | tie-rate ≥ 75% (no quality regression vs uncompressed) |
+
+If any tier fails any smoke: drop to next safer tier. Do NOT skip tiers.
+
+**Backend integration is BLOCKED until at least one tier passes all smokes.**
+The plan's original assumption that AWQ would just work is invalidated;
+P7 codebase changes must wait for serving proof.
 
 ### Exit criteria
 

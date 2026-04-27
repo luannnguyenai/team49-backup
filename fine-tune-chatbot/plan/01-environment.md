@@ -41,7 +41,26 @@ We use **two virtualenvs** — train and serve have conflicting dependencies
 Serving will run via **docker container** in production (see `05-serving-vllm.md`),
 so `.venv-serve` is only for local smoke tests.
 
-## Train env setup
+## Train env setup — VERIFY-THEN-INSTALL
+
+⚠️ **The commands below are CANDIDATES, not locked.** Blackwell support
+moves week-to-week across Unsloth, vLLM, bitsandbytes, PyTorch, xformers.
+Do NOT run any command without first verifying it against the current
+official docs at install time.
+
+### Step 1 — Read official docs first (mandatory)
+
+Open in browser before running anything:
+- Unsloth Blackwell install guide: <https://docs.unsloth.ai/get-started/installing-+-updating>
+- vLLM compatibility matrix: <https://docs.vllm.ai/en/latest/getting_started/installation.html>
+- PyTorch nightly index: <https://download.pytorch.org/whl/nightly/>
+- bitsandbytes Blackwell status: <https://github.com/bitsandbytes-foundation/bitsandbytes/issues>
+  (search "sm_120" / "Blackwell")
+
+If any of these doc pages contradict the candidate commands below at the
+time you run them, **trust the docs, not this plan**.
+
+### Step 2 — Candidate commands (verify first)
 
 ```bash
 cd D:/VSCODE/VINAI/A20-App-049/fine-tune-chatbot
@@ -49,7 +68,7 @@ uv venv .venv-train --python 3.11
 source .venv-train/Scripts/activate    # Windows Git Bash
 # or: .venv-train\Scripts\activate     # PowerShell
 
-# PyTorch nightly with CUDA 12.8
+# PyTorch nightly with CUDA 12.8 — VERIFY index URL/version per docs
 uv pip install --pre torch torchvision \
   --index-url https://download.pytorch.org/whl/nightly/cu128
 
@@ -57,12 +76,53 @@ uv pip install --pre torch torchvision \
 python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0), torch.cuda.get_device_capability())"
 # Expected: True NVIDIA GeForce RTX 5060 Ti (12, 0)
 
-# Unsloth (latest dev — has Blackwell wheels)
+# Unsloth — CANDIDATE; the [cu128] extra may not exist or may be renamed
+# Verify on https://github.com/unslothai/unsloth README before running
 uv pip install "unsloth[cu128] @ git+https://github.com/unslothai/unsloth.git"
+# Common alternatives if [cu128] extra is missing:
+#   uv pip install "unsloth @ git+https://github.com/unslothai/unsloth.git"
+#   uv pip install unsloth-zoo  # may also be needed depending on Unsloth release
+
 uv pip install --upgrade transformers datasets accelerate trl peft bitsandbytes pillow
 
-# AWQ for quantization (P5)
+# AWQ for quantization (P5) — also verify version Blackwell support
 uv pip install autoawq
+```
+
+### Step 3 — Mandatory output artifacts after install
+
+```
+fine-tune-chatbot/scripts/env/
+├── env-frozen.txt          # uv pip freeze > env-frozen.txt
+├── install-notes.md        # ACTUAL commands run + any deviations from candidates
+└── smoke_results.json      # machine-readable results from smoke tests below
+```
+
+`install-notes.md` template:
+```
+# Install run YYYY-MM-DD HH:MM
+- OS: Windows 11 / WSL2 / Linux ...
+- Driver version: ...
+- CUDA version: ...
+- PyTorch version installed: ...
+- Unsloth install command actually used (after verifying docs): ...
+- bitsandbytes version: ...
+- Any deviation from plan candidates: ...
+- Issues encountered: ...
+```
+
+`smoke_results.json` schema:
+```json
+{
+  "torch_version": "...",
+  "torch_cuda_capability": [12, 0],
+  "bnb_available": true,
+  "smoke_01_load_vl3b": {"passed": true, "vram_gb": 2.7, "notes": "..."},
+  "smoke_02_inference": {"passed": true, "first_token_ms": 450, "notes": "..."},
+  "smoke_03_train_step": {"passed": true, "final_loss": 1.8, "notes": "..."},
+  "smoke_04_vllm": {"passed": true, "image_tag_used": "...", "notes": "..."},
+  "p0_5_toolcall_format": {"passed": true, "vllm_returned_tool_calls_field": true}
+}
 ```
 
 ## Smoke test 1 — load Qwen2.5-VL-3B in 4-bit
@@ -167,6 +227,94 @@ curl http://localhost:8001/v1/chat/completions -H "Content-Type: application/jso
 Pass = response returned. If `CUDA error: no kernel image is available for execution on the device`
 → Blackwell unsupported in this image, see fallbacks below.
 
+## Smoke test 5 (P0.5) — Tool-call format compatibility proof — BLOCKING
+
+**This gate is the single highest-value check in P1. Skipping it risks
+invalidating the entire training corpus.**
+
+The plan trains on Qwen ChatML messages with assistant `tool_calls` JSON
+field. At inference, vLLM with `--tool-call-parser hermes` parses the
+**model's text output** to construct `choices[].message.tool_calls`.
+**Training format ≠ inference format** is a real failure mode — model
+learns the structured field but does not emit Hermes-parseable text at
+inference.
+
+### Procedure
+
+1. **Author 20 sample tool-call training examples** in your candidate
+   converter format (the format that `scripts/sft/convert_hermes_to_chatml.py`
+   would emit). Save to `fine-tune-chatbot/data/format_proof/sample20.jsonl`.
+
+2. **Tiny adapter run** (~50 steps) on these 20 samples using the same
+   Unsloth config as the real train, but `max_steps=50, num_train_epochs=ignored`.
+   Save adapter to `checkpoints/p0_5_format_proof/`.
+
+3. **Serve the tiny adapter via vLLM** with full production flags:
+   ```bash
+   docker run --rm --gpus all -p 8002:8000 \
+     -v $(pwd)/checkpoints/p0_5_format_proof:/model \
+     -v ~/.cache/huggingface:/root/.cache/huggingface \
+     vllm/vllm-openai:<verified-tag> \
+     --model /model \
+     --enable-auto-tool-choice \
+     --tool-call-parser hermes \
+     --max-model-len 2048 \
+     --gpu-memory-utilization 0.6 \
+     --trust-remote-code
+   ```
+   (If LoRA hot-load preferred, use `--enable-lora --lora-modules` instead;
+   either path must produce parsed tool calls.)
+
+4. **Send 10 tool-required test prompts** matching the production tutor
+   shape (e.g., "Tính tổng các số nguyên tố nhỏ hơn 100"):
+   ```bash
+   for q in "${test_qs[@]}"; do
+     curl -s http://localhost:8002/v1/chat/completions -H 'Content-Type: application/json' -d '{
+       "model": "/model",
+       "messages": [{"role":"user","content":"'"$q"'"}],
+       "tools": [...execute_python schema...],
+       "tool_choice": "auto"
+     }' | jq '.choices[0].message'
+   done
+   ```
+
+### Pass criteria (must all hold)
+
+- [ ] At least **8 of 10** responses contain non-null `tool_calls` array
+- [ ] Each populated `tool_calls[].function.name == "execute_python"`
+- [ ] Each `tool_calls[].function.arguments` is valid JSON parseable into
+      `{"code": "..."}`
+- [ ] No raw Hermes XML leaks into `content` field (parser ate the markers
+      cleanly)
+
+### If fails
+
+Plan stops. Investigate format converter:
+- Try **Qwen native tool format** (Qwen 2.5 supports it; may not need Hermes
+  parser); if so, switch to `--tool-call-parser qwen` if available, OR train
+  on Qwen native tool format syntax
+- Try **explicit Hermes XML in training data** (`<tool_call>...</tool_call>`
+  text spans in assistant content) instead of structured `tool_calls` field
+- Inspect raw model output (set `tool_choice: "none"` to see what tokens the
+  model actually emits when it wants to call a tool)
+
+Do NOT proceed to P2b/P3 until format proof passes. Up to **1 working day**
+debug budget; if still failing, escalate before continuing.
+
+### Output
+
+Append to `smoke_results.json`:
+```json
+"p0_5_toolcall_format": {
+  "passed": true,
+  "samples_with_toolcalls": 9,
+  "argument_parse_success": 9,
+  "format_used_in_training": "hermes_xml" | "qwen_native" | "structured_field",
+  "vllm_parser_flag": "--tool-call-parser hermes",
+  "notes": "..."
+}
+```
+
 ## Fallbacks if Blackwell fails
 
 | Symptom | Workaround |
@@ -176,12 +324,16 @@ Pass = response returned. If `CUDA error: no kernel image is available for execu
 | vLLM prebuilt fails | Build from source: `git clone vllm-project/vllm && pip install -e . --no-build-isolation` (45–90 min) |
 | All else fails | Use **Hugging Face TGI** (`ghcr.io/huggingface/text-generation-inference`) or **SGLang** as alt servers — both support Blackwell earlier than vLLM historically |
 
-## Exit criteria for P1
+## Exit criteria for P1 + P0.5
 
 - [ ] All 4 smoke tests pass
+- [ ] **P0.5 tool-call format proof passes** (≥ 8/10 parsed, format choice
+      committed and documented in `smoke_results.json`)
 - [ ] VRAM headroom verified: 3B-VL 4bit + LoRA + ctx 4K + bs 2 ≤ 12GB
 - [ ] vLLM (or alt server) returns valid responses for VL-3B base model
-- [ ] Document exact pinned versions in `fine-tune-chatbot/scripts/env-frozen.txt`
-      (`uv pip freeze > scripts/env-frozen.txt`)
+- [ ] Document exact pinned versions in `fine-tune-chatbot/scripts/env/env-frozen.txt`
+      (`uv pip freeze > scripts/env/env-frozen.txt`)
+- [ ] `install-notes.md` and `smoke_results.json` committed (no secrets)
 
-Only then proceed to P2.
+If any of the above fails: do NOT proceed to P2. Apply auto-escalation
+rule from README (FAST → FULL switch if > 8h spent here).

@@ -71,10 +71,10 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
                 "slides_available": True,
             },
             "tutor": {
-                "enabled": False,
-                "mode": "disabled",
-                "context_binding_id": None,
-                "legacy_lecture_id": None,
+                "enabled": True,
+                "mode": "in_context",
+                "context_binding_id": "ctx_unit-cs230-1",
+                "legacy_lecture_id": "cs230-2025-lecture01-introduction-to-deep-learning",
             },
         }
 
@@ -184,8 +184,8 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(data["tutor"]["mode"], "in_context")
             self.assertIsNotNone(data["tutor"]["context_binding_id"])
 
-    async def test_cs230_unit_disables_tutor_when_no_legacy_lecture_exists(self):
-        """Tutor should stay disabled when the legacy lecture stack cannot resolve the unit."""
+    async def test_cs230_unit_keeps_tutor_enabled_for_course_first_context(self):
+        """Course-first units keep tutor enabled even without a legacy lecture row."""
         response = await self.client.get(
             "/api/courses/cs230/units/lecture-01-seg1"
         )
@@ -193,10 +193,13 @@ class LearningUnitApiContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
 
-        self.assertFalse(data["tutor"]["enabled"])
-        self.assertEqual(data["tutor"]["mode"], "disabled")
-        self.assertIsNone(data["tutor"]["context_binding_id"])
-        self.assertIsNone(data["tutor"]["legacy_lecture_id"])
+        self.assertTrue(data["tutor"]["enabled"])
+        self.assertEqual(data["tutor"]["mode"], "in_context")
+        self.assertEqual(data["tutor"]["context_binding_id"], "ctx_unit-cs230-1")
+        self.assertEqual(
+            data["tutor"]["legacy_lecture_id"],
+            "cs230-2025-lecture01-introduction-to-deep-learning",
+        )
 
     async def test_response_shape_matches_contract(self):
         """Response must contain all required top-level keys."""

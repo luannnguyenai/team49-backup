@@ -42,6 +42,15 @@ empty_question = 0
 distinct_lectures = set()
 
 if JSONL.exists():
+    # Use langdetect (more reliable than diacritic char check, which
+    # misclassifies Vietnamese-without-diacritics as English).
+    from langdetect import detect, DetectorFactory, LangDetectException
+    DetectorFactory.seed = 42  # deterministic
+    seen_question_hashes = set()
+    duplicate_questions = 0
+    token_lengths_q = []
+    token_lengths_a = []
+    image_truncation_lengths = []  # length of truncated base64 if present
     for line in JSONL.open(encoding="utf-8"):
         try:
             r = json.loads(line)
@@ -55,15 +64,59 @@ if JSONL.exists():
         q = r.get("question", "") or ""
         if len(ans) < 20: short_answer += 1
         if len(q) < 5: empty_question += 1
-        # crude lang detection
-        is_vi = any(c in ans for c in "ăâđêôơưĂÂĐÊÔƠƯ")
-        by_lang["vi" if is_vi else "en/other"] += 1
+
+        # Robust language detection on answer (longer signal than question)
+        try:
+            lang = detect(ans) if len(ans) >= 30 else (detect(q) if len(q) >= 30 else "und")
+            lang = "vi" if lang == "vi" else ("en" if lang == "en" else "other")
+        except LangDetectException:
+            lang = "other"
+        by_lang[lang] += 1
+
+        # Duplicate detection on normalized question
+        import hashlib, re
+        norm_q = re.sub(r"\s+", " ", q.strip().lower())
+        h = hashlib.md5(norm_q.encode("utf-8")).hexdigest()
+        if h in seen_question_hashes:
+            duplicate_questions += 1
+        seen_question_hashes.add(h)
+
+        # Token length proxy (chars/4) — for max_seq_length budgeting
+        token_lengths_q.append(len(q) // 4)
+        token_lengths_a.append(len(ans) // 4)
+
+        # Image truncation distribution (production logs truncate to 500 chars
+        # — confirm distribution; if some rows have full image we may have
+        # extractable vision data)
+        img = r.get("image_base64")
+        if img:
+            image_truncation_lengths.append(len(img))
+
         distinct_lectures.add(r.get("lecture", ""))
         length_buckets[
             "<200" if len(ans) < 200 else
             "200-1000" if len(ans) < 1000 else
             "1000-3000" if len(ans) < 3000 else ">3000"
         ] += 1
+
+# Token length percentiles
+def _pct(xs, p):
+    if not xs: return None
+    xs = sorted(xs)
+    return xs[min(int(len(xs) * p / 100), len(xs) - 1)]
+
+token_stats = {
+    "q_p50": _pct(token_lengths_q, 50), "q_p95": _pct(token_lengths_q, 95),
+    "q_p99": _pct(token_lengths_q, 99),
+    "a_p50": _pct(token_lengths_a, 50), "a_p95": _pct(token_lengths_a, 95),
+    "a_p99": _pct(token_lengths_a, 99),
+}
+image_stats = {
+    "rows_with_image": len(image_truncation_lengths),
+    "image_len_min": min(image_truncation_lengths) if image_truncation_lengths else None,
+    "image_len_max": max(image_truncation_lengths) if image_truncation_lengths else None,
+    "image_len_p50": _pct(image_truncation_lengths, 50),
+}
 
 # 2. DB audit
 import asyncio
@@ -98,16 +151,19 @@ async def db_audit():
 
 db_stats = asyncio.run(db_audit())
 
-# 3. Print report
+# 3. Print report (AGGREGATES ONLY — no raw questions/answers committed)
 report = {
     "jsonl_total": total,
     "jsonl_short_answer_dropped": short_answer,
     "jsonl_empty_question_dropped": empty_question,
-    "jsonl_usable_estimate": total - short_answer - empty_question,
+    "jsonl_duplicate_questions": duplicate_questions,
+    "jsonl_usable_estimate": total - short_answer - empty_question - duplicate_questions,
     "by_route": dict(by_route),
     "by_lang": dict(by_lang),
     "with_tool": with_tool,
     "length_distribution": dict(length_buckets),
+    "token_stats_chars_div_4": token_stats,
+    "image_stats": image_stats,
     "distinct_lectures_jsonl": len(distinct_lectures),
     **db_stats,
 }
@@ -117,6 +173,12 @@ Path("fine-tune-chatbot/data/audit_report.json").write_text(
     json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8"
 )
 ```
+
+⚠️ **PII safety**: `audit_report.json` MUST contain aggregates only. Do
+NOT print or write any raw `question` / `answer` content, lecture IDs
+that map to specific instructors, or row-level data. The fields above
+are all aggregates and safe to commit. If extending this script, run
+through a reviewer before committing the new output.
 
 ## Required output
 
