@@ -9,6 +9,7 @@ export interface PriorCandidateTopic {
   courseId: string;
   rawTitle: string;
   displayLabel: string;
+  aiDisplayLabel?: string | null;
   visibility: PriorTopicVisibility;
   summary?: string | null;
   units: LearningUnitSelectionItem[];
@@ -80,6 +81,9 @@ export function displayLabelForSectionTitle(title: string): string {
   }
   if (/generative|diffusion/i.test(title)) {
     return "Generative vision models";
+  }
+  if (/what is going on inside my model|inside my model|interpretability/i.test(title)) {
+    return "Model interpretability";
   }
   if (/backprop|neural networks/i.test(title)) {
     return "Neural networks and backpropagation";
@@ -171,9 +175,8 @@ export function buildPriorShortlistFallback({
   const matched = combinedText
     ? topics.filter((topic) => textMatchesTopic(combinedText, topic))
     : [];
-  const fallback = topics.filter((topic) => !matched.some((item) => item.id === topic.id));
 
-  return [...matched, ...fallback].slice(0, limit);
+  return matched.slice(0, limit);
 }
 
 export function selectRepresentativeUnitIds(

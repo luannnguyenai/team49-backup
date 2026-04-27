@@ -184,7 +184,7 @@ class TestPriorAnalysisParsing(unittest.TestCase):
             json.dumps(
                 {
                     "topics": [
-                        {"id": "cnn", "summary": "Tóm tắt CNN ngắn gọn."},
+                        {"id": "cnn", "label": "CNN basics", "summary": "Short CNN summary."},
                         {"id": "invalid", "summary": "ignored"},
                     ]
                 }
@@ -193,7 +193,10 @@ class TestPriorAnalysisParsing(unittest.TestCase):
         )
 
         self.assertEqual(ids, ["cnn"])
-        self.assertEqual(summaries, {"cnn": "Tóm tắt CNN ngắn gọn."})
+        self.assertEqual(
+            summaries,
+            {"cnn": {"label": "CNN basics", "summary": "Short CNN summary."}},
+        )
 
     def test_parse_legacy_shortlisted_topic_ids(self):
         ids, summaries = _parse_prior_analysis_response(

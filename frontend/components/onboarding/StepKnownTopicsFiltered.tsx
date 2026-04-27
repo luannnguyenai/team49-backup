@@ -25,8 +25,12 @@ function levelLabel(level: PriorTopicLevel): string {
   return "Chưa học";
 }
 
+function topicLabel(topic: PriorCandidateTopic): string {
+  return topic.aiDisplayLabel?.trim() || topic.displayLabel;
+}
+
 function levelButtonAria(level: PriorTopicLevel, topic: PriorCandidateTopic): string {
-  return `${levelLabel(level)} ${topic.displayLabel}`;
+  return `${levelLabel(level)} ${topicLabel(topic)}`;
 }
 
 function topicLevelFromSelection(topic: PriorCandidateTopic, selectedSet: Set<string>): PriorTopicLevel {
@@ -94,6 +98,7 @@ export default function StepKnownTopicsFiltered({
             const currentLevel = topicLevelFromSelection(topic, selectedSet);
             const isExpanded = expandedTopicId === topic.id;
             const summary = topicSummary(topic);
+            const label = topicLabel(topic);
 
             return (
               <div
@@ -104,7 +109,7 @@ export default function StepKnownTopicsFiltered({
                 <div className="flex items-start gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {topic.displayLabel}
+                      {label}
                     </p>
                     <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
                       {topic.units.length} unit đại diện để placement kiểm chứng
@@ -115,7 +120,7 @@ export default function StepKnownTopicsFiltered({
                     onClick={() => setExpandedTopicId(isExpanded ? null : topic.id)}
                     className="rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
                     style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
-                    aria-label={`Xem nhanh ${topic.displayLabel}`}
+                    aria-label={`Xem nhanh ${label}`}
                   >
                     <Eye className="h-4 w-4" />
                   </button>
