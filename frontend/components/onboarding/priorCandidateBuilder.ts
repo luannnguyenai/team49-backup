@@ -22,6 +22,13 @@ export interface PriorCandidateTopics {
   hidden: PriorCandidateTopic[];
 }
 
+export interface PriorAnalysisTopicMetadata {
+  id: string;
+  label?: string | null;
+  summary?: string | null;
+  level?: PriorTopicLevel | null;
+}
+
 const GOAL_COURSE_IDS: Record<PlannerGoalId, string[]> = {
   computer_vision: ["cs230", "cs231n"],
   nlp: ["cs230", "cs224n"],
@@ -201,4 +208,23 @@ export function selectSuggestedKnownUnitIds(topics: PriorCandidateTopic[]): stri
     }
   }
   return [...selected];
+}
+
+export function mergePriorAnalysisIntoCandidates(
+  topics: PriorCandidateTopic[],
+  metadata: PriorAnalysisTopicMetadata[],
+): PriorCandidateTopic[] {
+  const metadataById = new Map(metadata.map((item) => [item.id, item]));
+
+  return topics.map((topic) => {
+    const item = metadataById.get(topic.id);
+    if (!item) return topic;
+
+    return {
+      ...topic,
+      aiDisplayLabel: item.label ?? null,
+      suggestedLevel: item.level ?? null,
+      summary: item.summary ?? null,
+    };
+  });
 }

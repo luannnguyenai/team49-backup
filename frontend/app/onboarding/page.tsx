@@ -46,6 +46,7 @@ import type { CourseSectionDetail } from "@/types";
 import {
   buildPriorCandidateTopics,
   buildPriorShortlistFallback,
+  mergePriorAnalysisIntoCandidates,
   selectSuggestedKnownUnitIds,
   type PlannerGoalId,
   type PriorCandidateTopic,
@@ -216,35 +217,17 @@ function OnboardingPageInner() {
           unit_titles: topic.units.map((unit) => unit.title),
         })),
       });
-      const topicById = new Map(candidateTopics.map((topic) => [topic.id, topic]));
-      const summaryById = new Map(
-        (response.topic_summaries ?? []).map((item) => [item.id, item.summary]),
+      const analyzedTopics = mergePriorAnalysisIntoCandidates(
+        candidateTopics,
+        response.topic_summaries ?? [],
       );
-      const labelById = new Map(
-        (response.topic_summaries ?? []).map((item) => [item.id, item.label ?? null]),
-      );
-      const levelById = new Map(
-        (response.topic_summaries ?? []).map((item) => [item.id, item.level ?? null]),
-      );
-      const apiTopics: PriorCandidateTopic[] = response.shortlisted_topic_ids.flatMap((id) => {
-        const topic = topicById.get(id);
-        if (!topic) return [];
-        return [
-          {
-            ...topic,
-            aiDisplayLabel: labelById.get(id) ?? null,
-            suggestedLevel: levelById.get(id) ?? null,
-            summary: summaryById.get(id) ?? null,
-          },
-        ];
-      });
 
-      setPriorTopics(apiTopics.length > 0 ? apiTopics : fallbackTopics);
-      useOnboardingStore.getState().setKnownUnitIds(selectSuggestedKnownUnitIds(apiTopics));
-      setPriorAnalysisFallback(response.fallback || apiTopics.length === 0);
+      setPriorTopics(analyzedTopics.length > 0 ? analyzedTopics : fallbackTopics);
+      useOnboardingStore.getState().setKnownUnitIds(selectSuggestedKnownUnitIds(analyzedTopics));
+      setPriorAnalysisFallback(response.fallback);
       setPriorAnalysisModel(`${response.provider}/${response.model_used}`);
     } catch {
-      setPriorTopics(fallbackTopics);
+      setPriorTopics(candidateTopics.length > 0 ? candidateTopics : fallbackTopics);
       useOnboardingStore.getState().setKnownUnitIds([]);
       setPriorAnalysisFallback(true);
       setPriorAnalysisModel(null);

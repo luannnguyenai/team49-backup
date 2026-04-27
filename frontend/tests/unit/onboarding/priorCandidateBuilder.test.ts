@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPriorCandidateTopics,
+  mergePriorAnalysisIntoCandidates,
   selectRepresentativeUnitIds,
 } from "@/components/onboarding/priorCandidateBuilder";
 import type { CourseSectionDetail } from "@/types";
@@ -149,5 +150,28 @@ describe("prior candidate builder", () => {
     expect(selectRepresentativeUnitIds(topic!, "reviewed")).toEqual(["cnn-1", "cnn-2"]);
     expect(selectRepresentativeUnitIds(topic!, "confident")).toEqual(["cnn-1", "cnn-2", "cnn-3"]);
     expect(selectRepresentativeUnitIds(topic!, "not_started")).toEqual([]);
+  });
+
+  it("merges AI metadata into all candidates instead of dropping unmentioned topics", () => {
+    const topics = buildPriorCandidateTopics({
+      goalId: "computer_vision",
+      sections,
+    }).confirmEligible;
+
+    const merged = mergePriorAnalysisIntoCandidates(topics, [
+      {
+        id: "cv-cnn",
+        label: "CNN architecture design",
+        summary: "Covers AlexNet, VGG, and ResNet.",
+        level: "confident",
+      },
+    ]);
+
+    expect(merged).toHaveLength(topics.length);
+    expect(merged.find((topic) => topic.id === "cv-cnn")).toMatchObject({
+      aiDisplayLabel: "CNN architecture design",
+      summary: "Covers AlexNet, VGG, and ResNet.",
+      suggestedLevel: "confident",
+    });
   });
 });
