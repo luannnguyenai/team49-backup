@@ -23,6 +23,26 @@ function getGradientClass(slug: string) {
   return gradients[hash % gradients.length];
 }
 
+function getLearningProgressCopy(course: CourseCatalogItem) {
+  if (course.status !== "ready" || typeof course.progress_percent !== "number") {
+    return null;
+  }
+
+  if (course.progress_percent > 0) {
+    return {
+      title: "Tiếp tục bài học",
+      subtitle: null,
+      progressLabel: `Tiến độ: ${course.progress_percent}%`,
+    };
+  }
+
+  return {
+    title: "Sẵn sàng học",
+    subtitle: "Sẵn sàng để bắt đầu ngay bây giờ",
+    progressLabel: "Tiến độ: 0%",
+  };
+}
+
 export default function CourseCatalog({ items }: CourseCatalogProps) {
   if (items.length === 0) {
     return (
@@ -37,56 +57,76 @@ export default function CourseCatalog({ items }: CourseCatalogProps) {
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       {items.map((course) => (
-        <article
-          key={course.slug}
-          className="card group overflow-hidden rounded-card border p-0 shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover"
-        >
-          <div
-            className={`relative overflow-hidden bg-gradient-to-br px-6 py-6 text-white ${
-              getGradientClass(course.slug)
-            }`}
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.22),_transparent_36%)]" />
-            <div className="relative flex min-h-[160px] flex-col justify-between gap-6">
-              <div className="flex items-start justify-between gap-4">
-                <CourseStatusBadge status={course.status} />
-                <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
-                  {course.hero_badge ?? "Xem tổng quan"}
-                </span>
-              </div>
+        (() => {
+          const progressCopy = getLearningProgressCopy(course);
 
-              <div className="space-y-3">
-                {course.hero_kicker && (
-                  <p className="text-xs font-semibold uppercase tracking-widest-md text-white/70">
-                    {course.hero_kicker}
-                  </p>
-                )}
-                <h2 className="text-2xl font-semibold leading-tight">{course.title}</h2>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-1 flex-col gap-4 p-6">
-            <div className="flex flex-wrap items-center gap-2">
-              {course.is_recommended && (
-                <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
-                  Đề xuất
-                </span>
-              )}
-            </div>
-
-            <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-              {course.short_description}
-            </p>
-
-            <Link
-              href={`/courses/${course.slug}`}
-              className="mt-auto inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+          return (
+            <article
+              key={course.slug}
+              className="card group overflow-hidden rounded-card border p-0 shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover"
             >
-              Xem khóa học
-            </Link>
-          </div>
-        </article>
+              <div
+                className={`relative overflow-hidden bg-gradient-to-br px-6 py-6 text-white ${
+                  getGradientClass(course.slug)
+                }`}
+              >
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.22),_transparent_36%)]" />
+                <div className="relative flex min-h-[160px] flex-col justify-between gap-6">
+                  <div className="flex items-start justify-between gap-4">
+                    {progressCopy ? (
+                      <div className="rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-white">
+                        <p className="text-xs font-semibold uppercase tracking-widest-sm text-white/80">
+                          {progressCopy.title}
+                        </p>
+                        {progressCopy.subtitle ? (
+                          <p className="mt-1 text-xs text-white/70">{progressCopy.subtitle}</p>
+                        ) : null}
+                        <p className="mt-1 text-sm font-semibold text-white">
+                          {progressCopy.progressLabel}
+                        </p>
+                      </div>
+                    ) : (
+                      <CourseStatusBadge status={course.status} />
+                    )}
+                    <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
+                      {course.hero_badge ?? "Xem tổng quan"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {course.hero_kicker && (
+                      <p className="text-xs font-semibold uppercase tracking-widest-md text-white/70">
+                        {course.hero_kicker}
+                      </p>
+                    )}
+                    <h2 className="text-2xl font-semibold leading-tight">{course.title}</h2>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-1 flex-col gap-4 p-6">
+                <div className="flex flex-wrap items-center gap-2">
+                  {course.is_recommended && (
+                    <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
+                      Đề xuất
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+                  {course.short_description}
+                </p>
+
+                <Link
+                  href={`/courses/${course.slug}`}
+                  className="mt-auto inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                >
+                  Xem khóa học
+                </Link>
+              </div>
+            </article>
+          );
+        })()
       ))}
     </div>
   );

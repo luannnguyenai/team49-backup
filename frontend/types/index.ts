@@ -216,6 +216,7 @@ export interface CourseCatalogItem {
   hero_kicker?: string | null;
   hero_badge: string | null;
   is_recommended: boolean;
+  progress_percent?: number | null;
 }
 
 export interface CourseCatalogResponse {
@@ -269,6 +270,7 @@ export interface CourseUnitListItem {
   unit_type: string;
   order_index: number;
   lecture_label?: string | null;
+  is_completed?: boolean;
 }
 
 export interface LectureTocSection {
