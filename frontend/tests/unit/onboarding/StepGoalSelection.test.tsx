@@ -14,8 +14,9 @@ describe("StepGoalSelection", () => {
   it("renders 2 goal cards", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
-    expect(screen.getByText("Computer Vision (CS231n)")).toBeInTheDocument();
-    expect(screen.getByText("Natural Language Processing (CS224n)")).toBeInTheDocument();
+    expect(screen.getByText("Hướng bạn muốn tập trung là gì?")).toBeInTheDocument();
+    expect(screen.getByText("Computer Vision (CV)")).toBeInTheDocument();
+    expect(screen.getByText("Natural Language Processing")).toBeInTheDocument();
   });
 
   it("Continue button is disabled when no goals are selected", () => {
@@ -28,7 +29,7 @@ describe("StepGoalSelection", () => {
   it("clicking a card adds it to the store", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
-    fireEvent.click(screen.getByText("Computer Vision (CS231n)"));
+    fireEvent.click(screen.getByText("Computer Vision (CV)"));
 
     expect(useOnboardingStore.getState().goalIds).toContain("computer_vision");
   });
@@ -36,26 +37,27 @@ describe("StepGoalSelection", () => {
   it("Continue button is enabled after selecting a goal", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
-    fireEvent.click(screen.getByText("Computer Vision (CS231n)"));
+    fireEvent.click(screen.getByText("Computer Vision (CV)"));
 
     const continueButton = screen.getByRole("button", { name: "Tiếp tục" });
     expect(continueButton).not.toBeDisabled();
   });
 
-  it("clicking a selected card deselects it", () => {
+  it("clicking another card replaces the current selection", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
-    fireEvent.click(screen.getByText("Computer Vision (CS231n)"));
+    fireEvent.click(screen.getByText("Computer Vision (CV)"));
     expect(useOnboardingStore.getState().goalIds).toContain("computer_vision");
 
-    fireEvent.click(screen.getByText("Computer Vision (CS231n)"));
+    fireEvent.click(screen.getByText("Natural Language Processing"));
     expect(useOnboardingStore.getState().goalIds).not.toContain("computer_vision");
+    expect(useOnboardingStore.getState().goalIds).toEqual(["nlp"]);
   });
 
   it("clicking Continue calls onNext when a goal is selected", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
-    fireEvent.click(screen.getByText("Natural Language Processing (CS224n)"));
+    fireEvent.click(screen.getByText("Natural Language Processing"));
     fireEvent.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
     expect(onNextMock).toHaveBeenCalledOnce();
@@ -69,15 +71,13 @@ describe("StepGoalSelection", () => {
     expect(onNextMock).not.toHaveBeenCalled();
   });
 
-  it("multiple goals can be selected simultaneously", () => {
+  it("only one goal can be selected at a time", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
-    fireEvent.click(screen.getByText("Computer Vision (CS231n)"));
-    fireEvent.click(screen.getByText("Natural Language Processing (CS224n)"));
+    fireEvent.click(screen.getByText("Computer Vision (CV)"));
+    fireEvent.click(screen.getByText("Natural Language Processing"));
 
     const { goalIds } = useOnboardingStore.getState();
-    expect(goalIds).toContain("computer_vision");
-    expect(goalIds).toContain("nlp");
-    expect(goalIds).toHaveLength(2);
+    expect(goalIds).toEqual(["nlp"]);
   });
 });

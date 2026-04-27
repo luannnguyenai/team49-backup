@@ -45,8 +45,8 @@ class TestGoalsRequestSchema(unittest.TestCase):
         self.assertEqual(req.goal_ids, ["computer_vision"])
 
     def test_valid_multiple_goals(self):
-        req = GoalsRequest(goal_ids=["nlp", "deep_learning"])
-        self.assertEqual(len(req.goal_ids), 2)
+        with self.assertRaises(ValidationError):
+            GoalsRequest(goal_ids=["computer_vision", "nlp"])
 
     def test_invalid_goal_raises(self):
         with self.assertRaises(ValidationError):
@@ -61,8 +61,9 @@ class TestGoalsRequestSchema(unittest.TestCase):
             GoalsRequest(goal_ids=["nlp", "not_real"])
 
     def test_all_valid_goal_ids(self):
-        req = GoalsRequest(goal_ids=list(VALID_GOAL_IDS))
-        self.assertEqual(set(req.goal_ids), VALID_GOAL_IDS)
+        for goal_id in VALID_GOAL_IDS:
+            req = GoalsRequest(goal_ids=[goal_id])
+            self.assertEqual(req.goal_ids, [goal_id])
 
 
 class TestKnownTopicsRequestSchema(unittest.TestCase):
@@ -82,10 +83,10 @@ class TestKnownTopicsRequestSchema(unittest.TestCase):
 
 class TestGoalsResponseSchema(unittest.TestCase):
     def test_round_trip(self):
-        resp = GoalsResponse(goal_ids=["nlp"], course_ids=["cs224n"])
+        resp = GoalsResponse(goal_ids=["nlp"], course_ids=["cs230", "cs224n"])
         data = resp.model_dump()
         self.assertEqual(data["goal_ids"], ["nlp"])
-        self.assertEqual(data["course_ids"], ["cs224n"])
+        self.assertEqual(data["course_ids"], ["cs230", "cs224n"])
 
 
 class TestTopicsResponseSchema(unittest.TestCase):
@@ -131,7 +132,7 @@ class TestDeriveCourseIds(unittest.TestCase):
         self.assertEqual(result, GOAL_COURSE_MAP["computer_vision"])
 
     def test_multiple_goals_deduped(self):
-        result = _derive_course_ids(["nlp", "deep_learning"])
+        result = _derive_course_ids(["computer_vision", "nlp"])
         # No duplicates
         self.assertEqual(len(result), len(set(result)))
 
@@ -169,6 +170,9 @@ class TestCourseToGoalMap(unittest.TestCase):
     def test_cs231n_maps_to_computer_vision(self):
         self.assertEqual(_COURSE_TO_GOAL.get("cs231n"), "computer_vision")
 
+    def test_cs230_maps_to_a_supported_goal_as_shared_prerequisite(self):
+        self.assertIn(_COURSE_TO_GOAL.get("cs230"), {"computer_vision", "nlp"})
+
     def test_cs224n_maps_to_nlp(self):
         self.assertEqual(_COURSE_TO_GOAL.get("cs224n"), "nlp")
 
@@ -193,7 +197,7 @@ class TestSaveUserGoals(unittest.IsolatedAsyncioTestCase):
         mock_repo.upsert_for_user.assert_called_once()
         mock_db.commit.assert_called_once()
         self.assertEqual(result.goal_ids, ["nlp"])
-        self.assertEqual(result.course_ids, ["cs224n"])
+        self.assertEqual(result.course_ids, ["cs230", "cs224n"])
 
     async def test_save_goals_derives_correct_courses(self):
         mock_db = AsyncMock()
@@ -207,10 +211,10 @@ class TestSaveUserGoals(unittest.IsolatedAsyncioTestCase):
             result = await save_user_goals(
                 mock_db,
                 user_id=uuid4(),
-                goal_ids=["computer_vision", "nlp"],
+                goal_ids=["computer_vision"],
             )
 
-        expected = _derive_course_ids(["computer_vision", "nlp"])
+        expected = _derive_course_ids(["computer_vision"])
         self.assertEqual(result.course_ids, expected)
 
 

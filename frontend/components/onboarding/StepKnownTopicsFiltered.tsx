@@ -13,16 +13,14 @@ import type { CourseSectionDetail, LearningUnitSelectionItem } from "@/types";
 // Goal → canonical course ID mapping (must match backend GOAL_COURSE_MAP)
 // ---------------------------------------------------------------------------
 
-const GOAL_COURSE_MAP: Record<string, string | undefined> = {
-  computer_vision: "cs231n",
-  nlp: "cs224n",
-  deep_learning: "cs230",
+const GOAL_COURSE_MAP: Record<string, string[] | undefined> = {
+  computer_vision: ["cs230", "cs231n"],
+  nlp: ["cs230", "cs224n"],
 };
 
 const GOAL_DISPLAY_NAMES: Record<string, string> = {
   computer_vision: "Computer Vision",
   nlp: "Natural Language Processing",
-  deep_learning: "Deep Learning",
 };
 
 // ---------------------------------------------------------------------------
@@ -77,9 +75,9 @@ export default function StepKnownTopicsFiltered({ onNext, onBack }: Props) {
   // For each goalId, collect units from sections belonging to that goal's course
   const goalUnits: Array<{ goalId: string; units: LearningUnitSelectionItem[] }> =
     goalIds.map((goalId) => {
-      const courseId = GOAL_COURSE_MAP[goalId];
-      const sections = courseId
-        ? allSections.filter((s) => s.canonical_course_id === courseId)
+      const courseIds = GOAL_COURSE_MAP[goalId];
+      const sections = courseIds
+        ? allSections.filter((s) => courseIds.includes(s.canonical_course_id))
         : [];
       const units = sections.flatMap((s) => s.learning_units);
       return { goalId, units };

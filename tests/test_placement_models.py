@@ -6,8 +6,8 @@ class GoalCourseMapTests(unittest.TestCase):
         from src.config.goal_course_map import GOAL_COURSE_MAP, GOAL_LABELS
         self.assertIn("computer_vision", GOAL_COURSE_MAP)
         self.assertIn("nlp", GOAL_COURSE_MAP)
-        self.assertEqual(GOAL_COURSE_MAP["computer_vision"], "cs231n")
-        self.assertEqual(GOAL_COURSE_MAP["nlp"], "cs224n")
+        self.assertEqual(GOAL_COURSE_MAP["computer_vision"], ["cs230", "cs231n"])
+        self.assertEqual(GOAL_COURSE_MAP["nlp"], ["cs230", "cs224n"])
         self.assertIn("computer_vision", GOAL_LABELS)
         self.assertIn("nlp", GOAL_LABELS)
 

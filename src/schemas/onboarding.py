@@ -24,6 +24,8 @@ class GoalsRequest(BaseModel):
             raise ValueError(f"Invalid goal_ids: {invalid}. Valid: {sorted(VALID_GOAL_IDS)}")
         if not v:
             raise ValueError("goal_ids must not be empty")
+        if len(v) != 1:
+            raise ValueError("Planner V1 requires exactly one goal_id")
         return v
 
 
