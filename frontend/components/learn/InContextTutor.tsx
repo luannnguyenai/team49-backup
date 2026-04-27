@@ -12,6 +12,7 @@ import { api } from "@/lib/api";
 // ── Types ──────────────────────────────────────────────────────────────────
 
 interface ChatMessage {
+  localId: string;
   id?: number;
   role: "user" | "ai" | "error";
   content: string;
@@ -47,13 +48,21 @@ export default function InContextTutor({
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const messageIdRef = useRef(0);
+
+  const nextMessageId = useCallback(() => {
+    messageIdRef.current += 1;
+    return `chat-msg-${messageIdRef.current}`;
+  }, []);
 
   // Auto-scroll
   useEffect(() => {
     if (typeof chatEndRef.current?.scrollIntoView === "function") {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+      chatEndRef.current.scrollIntoView({
+        behavior: streaming ? "auto" : "smooth",
+      });
     }
-  }, [messages]);
+  }, [messages, streaming]);
 
   // Rate answer
   const rateAnswer = async (msgIdx: number, qaId: number, rating: number) => {
@@ -74,8 +83,13 @@ export default function InContextTutor({
     setStreaming(true);
     const img = captureFrame();
 
-    const userMsg: ChatMessage = { role: "user", content: q };
+    const userMsg: ChatMessage = {
+      localId: nextMessageId(),
+      role: "user",
+      content: q,
+    };
     const aiPlaceholder: ChatMessage = {
+      localId: nextMessageId(),
       role: "ai",
       content: "",
       isPending: true,
@@ -268,9 +282,11 @@ export default function InContextTutor({
       );
     } finally {
       setStreaming(false);
-      inputRef.current?.focus();
+      window.setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
     }
-  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame]);
+  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId]);
 
   const hasMessages = messages.length > 0;
 
@@ -340,7 +356,7 @@ export default function InContextTutor({
 
         {messages.map((msg, idx) => (
           <div
-            key={idx}
+            key={msg.localId}
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
@@ -349,7 +365,7 @@ export default function InContextTutor({
                   ? "bg-blue-600 text-white rounded-br-md"
                   : msg.role === "error"
                     ? "bg-red-50 text-red-700 border border-red-200 rounded-bl-md"
-                    : "rounded-bl-md"
+                    : "rounded-bl-md transition-all duration-200"
               }`}
               style={
                 msg.role === "ai"
@@ -362,12 +378,15 @@ export default function InContextTutor({
             >
               {msg.role === "ai" ? (
                 msg.isPending ? (
-                  <div className="flex items-center gap-2 text-slate-500">
+                  <div
+                    aria-live="polite"
+                    className="flex items-center gap-2 text-slate-500"
+                  >
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>{msg.statusText || "Dang tra loi..."}</span>
                   </div>
                 ) : (
-                  <div className="prose prose-sm prose-slate max-w-none">
+                  <div aria-live="polite" className="prose prose-sm prose-slate max-w-none">
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                   </div>
                 )
@@ -444,6 +463,7 @@ export default function InContextTutor({
           <textarea
             ref={inputRef}
             rows={1}
+            aria-busy={streaming}
             className="flex-1 resize-none bg-transparent text-sm outline-none"
             style={{ color: "var(--text-primary)" }}
             placeholder="Ask about this lecture..."
@@ -458,6 +478,7 @@ export default function InContextTutor({
             disabled={streaming}
           />
           <button
+            aria-label={streaming ? "Tutor is replying" : "Send question"}
             onClick={() => {
               void handleSend();
             }}

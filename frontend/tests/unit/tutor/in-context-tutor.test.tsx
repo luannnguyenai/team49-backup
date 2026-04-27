@@ -220,4 +220,41 @@ describe("InContextTutor", () => {
       context_binding_id: "ctx_unit_lecture_01",
     });
   });
+
+  it("disables input while streaming and restores focus when the reply completes", async () => {
+    fetchMock.mockResolvedValue(
+      buildDelayedNdjsonResponse(200, [
+        { chunk: '{"status":"Dang suy luan..."}\n' },
+        { chunk: '{"a":"Done."}\n{"qa_id":14}\n', delayMs: 120 },
+      ]),
+    );
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={120}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText("Ask about this lecture...");
+    fireEvent.change(input, {
+      target: { value: "Tell me more" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
+
+    expect(input).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Tutor is replying" })).toBeDisabled();
+
+    await waitFor(() => {
+      expect(screen.getByText("Done.")).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(input).not.toBeDisabled();
+      expect(document.activeElement).toBe(input);
+    });
+  });
 });
