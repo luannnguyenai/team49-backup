@@ -65,4 +65,13 @@ describe("canonical content mappers", () => {
       canonical_unit_ids: [LECTURE_1_UNIT.unit.id, "unit_lecture_02"],
     });
   });
+
+  it("includes assessment depth when provided", () => {
+    expect(
+      buildCanonicalAssessmentStartPayload([LECTURE_1_UNIT.unit.id], "deep"),
+    ).toEqual({
+      canonical_unit_ids: [LECTURE_1_UNIT.unit.id],
+      assessment_depth: "deep",
+    });
+  });
 });

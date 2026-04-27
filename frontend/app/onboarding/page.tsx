@@ -110,7 +110,7 @@ function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
-  const { goalIds, knownUnitIds, experienceLevel } = useOnboardingStore();
+  const { goalIds, knownUnitIds, experienceLevel, assessmentDepth } = useOnboardingStore();
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
@@ -169,6 +169,7 @@ function OnboardingPageInner() {
           knownUnitIds: knownUnitIds,
           desiredSectionIds: data.desired_section_ids,
         });
+        canonicalContext.assessmentDepth = assessmentDepth;
         await onboard({
           ...data,
           goal_ids: goalIds,

@@ -6,6 +6,7 @@ Pydantic v2 schemas for the Assessment Engine API.
 
 import uuid
 from datetime import datetime
+from typing import Literal
 
 from pydantic import AliasChoices, BaseModel, Field
 
@@ -30,6 +31,10 @@ class AssessmentStartRequest(BaseModel):
     phase: str = Field(
         default="placement",
         description="Canonical assessment phase used with item_phase_map.",
+    )
+    assessment_depth: Literal["quick", "standard", "deep"] = Field(
+        default="standard",
+        description="Placement length/depth: quick<=15, standard<=30, deep<=50.",
     )
 
 
