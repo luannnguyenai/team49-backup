@@ -2,8 +2,21 @@
 
 import Link from "next/link";
 import { ArrowRight, MapIcon } from "lucide-react";
+import { createLearningProfileForPath } from "../profile";
+import { useLearningPathStore } from "../store";
 
 export default function PathRequiredState() {
+  const setProfile = useLearningPathStore((state) => state.setProfile);
+
+  const choosePath = (pathKey: "dl_cv" | "dl_nlp") => {
+    setProfile(
+      createLearningProfileForPath(pathKey, {
+        weeklyHours: null,
+        source: "manual",
+      }),
+    );
+  };
+
   return (
     <div
       className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border p-8 text-center"
@@ -18,11 +31,39 @@ export default function PathRequiredState() {
       <p className="mt-2 max-w-xl text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
         Planner V1 chỉ render lộ trình cụ thể. Hãy chọn một path: Deep Learning → Computer Vision hoặc Deep Learning → NLP.
       </p>
+      <div className="mt-6 grid w-full max-w-2xl gap-3 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => choosePath("dl_cv")}
+          className="rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-950"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+            Deep Learning → Computer Vision
+          </span>
+          <span className="mt-1 block text-xs" style={{ color: "var(--text-secondary)" }}>
+            CS230 → CS231n
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => choosePath("dl_nlp")}
+          className="rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-950"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+            Deep Learning → NLP
+          </span>
+          <span className="mt-1 block text-xs" style={{ color: "var(--text-secondary)" }}>
+            CS230 → CS224n
+          </span>
+        </button>
+      </div>
       <Link
         href="/onboarding?next=/learn"
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700"
+        className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary-600 underline-offset-4 hover:underline"
       >
-        Chọn path học
+        Đi tới onboarding đầy đủ
         <ArrowRight className="h-4 w-4" />
       </Link>
     </div>

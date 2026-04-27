@@ -1,8 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PathItemResponse } from "@/types";
 import RoadmapPlanner from "@/features/learning-path/components/RoadmapPlanner";
 import PathRequiredState from "@/features/learning-path/components/PathRequiredState";
+import { useLearningPathStore } from "@/features/learning-path/store";
 
 function item(overrides: Partial<PathItemResponse> & { id: string; order_index: number }): PathItemResponse {
   return {
@@ -21,6 +22,14 @@ function item(overrides: Partial<PathItemResponse> & { id: string; order_index: 
 }
 
 describe("RoadmapPlanner", () => {
+  beforeEach(() => {
+    useLearningPathStore.setState({
+      profile: null,
+      previousProfile: null,
+      generatedTopologyHash: null,
+    });
+  });
+
   it("renders section topics and visible learning units", () => {
     render(
       <RoadmapPlanner
@@ -74,5 +83,17 @@ describe("RoadmapPlanner", () => {
     render(<PathRequiredState />);
 
     expect(screen.getByText("Chọn lộ trình trước khi học")).toBeInTheDocument();
+  });
+
+  it("lets the user pick exactly one temporary path while onboarding is unavailable", () => {
+    render(<PathRequiredState />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Deep Learning → NLP/ }));
+
+    expect(useLearningPathStore.getState().profile).toMatchObject({
+      pathKey: "dl_nlp",
+      selectedCourseIds: ["CS230", "CS224n"],
+      source: "manual",
+    });
   });
 });
