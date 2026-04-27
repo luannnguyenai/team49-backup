@@ -8,6 +8,10 @@ tool calling and vision support, integrated into the existing
 
 ## Service design
 
+Two deployment topologies are supported. Pick one based on where the backend runs:
+
+### Topology A — Co-located (backend + vLLM on same host)
+
 ```
 ┌──────────┐  HTTP /v1/*   ┌──────────────┐
 │ backend  │──────────────▶│  tutor-llm   │  ← vLLM, GPU
@@ -18,6 +22,32 @@ tool calling and vision support, integrated into the existing
 - Same docker network (`al_internal`)
 - Backend reaches it as `http://tutor-llm:8000/v1`
 - Host port `8001` exposed for debugging only
+- `SELF_HOSTED_BASE_URL=http://tutor-llm:8000/v1`
+
+### Topology B — Split (backend on VPS, vLLM on home GPU box) — used in FAST variant
+
+```
+[VPS — public]                                [Home — RTX 5060 Ti 16GB]
+┌─────────────────┐                           ┌──────────────────────────┐
+│ frontend +      │  HTTPS  ┌──────────────┐  │ vLLM container           │
+│ FastAPI backend │────────▶│ Cloudflare   │─▶│ Qwen2.5-VL-3B + LoRA     │
+│                 │         │ Tunnel (free)│  │ localhost:8000           │
+└─────────────────┘         └──────────────┘  └──────────────────────────┘
+```
+
+The home GPU box does **not** need a public IP, port-forward, or static
+DNS. Cloudflare Tunnel runs an outbound-only persistent connection to
+Cloudflare; vLLM stays bound to `127.0.0.1:8000`. The VPS calls a public
+Cloudflare URL which Cloudflare proxies into the tunnel.
+
+- Backend (VPS) sets `SELF_HOSTED_BASE_URL=https://tutor-llm.<your-cf-subdomain>.example.com/v1`
+- vLLM container exposes only to `127.0.0.1:8000` on the home box
+- Optional: restrict tunnel to `Cf-Access-Client-Id` header bearing a service token
+  to prevent random internet probes from hitting your model
+
+This is the recommended topology for v1 FAST: **$0/month**, no port-forward,
+no public IP exposure of the GPU box, and integrates without changing
+backend code (only the env var differs from Topology A).
 
 ## docker-compose addition
 
@@ -149,6 +179,93 @@ curl http://localhost:8001/v1/chat/completions \
 
 Expect a response with `tool_calls[].function.name == "execute_python"` and
 valid Python in `arguments.code`.
+
+## Tunnel exposure (Topology B only)
+
+Skip this section if Topology A.
+
+### Quick start (ephemeral URL, dev only)
+
+```bash
+# On home box
+cloudflared tunnel --url http://localhost:8001
+```
+
+Outputs a `https://<random>.trycloudflare.com` URL. Use for the first
+end-to-end smoke from VPS. URL changes on every restart — not for production.
+
+### Named tunnel (stable URL, recommended for v1)
+
+```bash
+# One-time setup on home box
+cloudflared tunnel login                              # browser auth to Cloudflare
+cloudflared tunnel create tutor-llm                   # creates UUID
+# Add DNS record: tutor-llm.<your-domain> → tunnel UUID
+cloudflared tunnel route dns tutor-llm tutor-llm.<your-domain>
+
+# Config at ~/.cloudflared/config.yml
+cat <<EOF > ~/.cloudflared/config.yml
+tunnel: <UUID>
+credentials-file: /home/<user>/.cloudflared/<UUID>.json
+ingress:
+  - hostname: tutor-llm.<your-domain>
+    service: http://localhost:8001
+  - service: http_status:404
+EOF
+
+# Run as service
+cloudflared tunnel run tutor-llm
+# Optionally: install as systemd unit (Linux) or NSSM service (Windows)
+sudo cloudflared service install
+```
+
+### Lock down with Cloudflare Access (optional but recommended)
+
+By default, the tunnel URL is reachable by anyone who knows it. To restrict
+it to your VPS only:
+
+1. Create a Service Token in Cloudflare Zero Trust → Access → Service Auth
+2. Create an Access Application for `tutor-llm.<your-domain>` requiring that
+   service token in headers `Cf-Access-Client-Id` + `Cf-Access-Client-Secret`
+3. On VPS, store both as env vars; backend sends them as headers when
+   calling vLLM. LangChain `ChatOpenAI` accepts `default_headers` kwarg —
+   plumb through `chat_model_factory.py`'s `self_hosted` branch:
+
+```python
+if provider == "self_hosted":
+    headers = {}
+    if settings.self_hosted_cf_access_id:
+        headers["CF-Access-Client-Id"] = settings.self_hosted_cf_access_id
+        headers["CF-Access-Client-Secret"] = settings.self_hosted_cf_access_secret
+    kwargs = {
+        "model": model,
+        "model_provider": "openai",
+        "temperature": temperature,
+        "base_url": settings.self_hosted_base_url,
+        "api_key": settings.self_hosted_api_key or "dummy",
+        "default_headers": headers,
+    }
+```
+
+### Tunnel resilience
+
+- Cloudflare Tunnel auto-reconnects on dropped link; backend should retry
+  on transient 502/504 (LangChain's default retry covers this)
+- Latency overhead: typically +30–80ms RTT depending on PoP location
+- Free tier limits: no published bandwidth cap for Tunnel itself; Cloudflare
+  Workers free tier is separate and not used here
+- Outage mode: if home box is offline, tunnel returns 502; `_stream_with_fallback`
+  in `llm_service.py` (P7) catches this and falls back to Gemini
+
+### Smoke test from VPS
+
+```bash
+# From VPS shell
+curl https://tutor-llm.<your-domain>/v1/models
+# Should return same payload as the local 8001 test
+```
+
+If the VPS gets `200` and the same model list, end-to-end path is verified.
 
 ## Load test
 

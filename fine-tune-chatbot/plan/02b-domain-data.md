@@ -17,9 +17,20 @@ public datasets because it matches the production tutor's actual content.
 | ToC summaries | `data/courses/*/ToC_Summary/*.json` | 44 files | EN, sectioned |
 | Segmented units (P1) | `data/courses/*/processed/P1/*.json` | 41 files | EN |
 | Slide PDFs | `data/courses/*/slides/*.pdf` | 28 PDFs | EN, visual |
+| **Knowledge Graph (canonical KPs)** | `data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json` | ~1.4MB structured KPs | EN metadata |
+| **KP edge labels (prereq, related)** | `data/final_artifacts/cs224n_cs231n_cs230_v1/gpt54_edge_labels.json` | ~532K edges | — |
+| **Pruned transitive edge graph** | `data/final_artifacts/cs224n_cs231n_cs230_v1/p5_output_transitive_pruned.json` | ~224K | — |
 
 **Total MCQs available: ~1634 with full metadata** (rationale, evidence
 quotes, timestamps, KP IDs, distractor explanations, difficulty).
+
+**Knowledge Graph asset (NEW source for v1)**: each KP carries `name`,
+`description`, `difficulty_level` (0–1 float), `importance_level`
+(critical/high/medium/low), `domain_tags`, `career_path_tags`,
+`structural_role` (gateway/foundation/application/etc.), `source_course_ids`,
+and `merged_from_local_ids`. Edges encode prereq / related-to / part-of
+relationships across CS224n/CS230/CS231n. This dwarfs the MCQ count for
+*generative* synthesis purposes — see Strategy E below.
 
 ## Why this beats external datasets for v1
 
@@ -116,6 +127,122 @@ Skip translation for MCQs with heavy code blocks or formulas.
 
 **Yield**: ~700 additional VN MCQs → 700 × 3 variants = +2100 VN samples.
 
+### Strategy E — Knowledge-Graph-driven synthetic Q&A (Gemini Flash, $8–15)
+
+The KG in `data/final_artifacts/cs224n_cs231n_cs230_v1/` contains
+canonicalized knowledge points (KPs) with rich metadata and prereq/related
+edges. This is the highest-structure data source we have — Q&A generated
+from it is **graph-grounded** rather than free-form, which means each
+sample carries explicit metadata (difficulty, importance, source course,
+prereq chain) that can be used for stratified mixing and ablation.
+
+Generate 5 KP-grounded Q&A flavors:
+
+#### E.1 Definition Q&A (deterministic, free)
+
+For each KP with `difficulty_level` and `description`:
+
+```json
+{"messages": [
+  {"role": "user", "content": "Trong {source_course_ids[0]}, {kp.name} là gì?"},
+  {"role": "assistant", "content": "{kp.description}\n\nĐây là khái niệm {importance_level} ở mức độ khó {difficulty_level:.0%}, thuộc {domain_tags joined}. {if structural_role == 'gateway': 'Nhiều khái niệm sau dựa trên ý này.'}"}
+]}
+```
+
+No LLM call needed. **Yield**: ~1 sample per KP × ~1500 KPs = ~1500 samples
+(filter KPs with description < 50 chars).
+
+#### E.2 Prerequisite-aware Q&A (deterministic + Gemini polish)
+
+For each edge `(src) --prereq--> (dst)`:
+
+```
+Q (vi): "Trước khi học {dst.name} em cần nắm những gì?"
+A: enumerate all incoming prereq edges of dst, deepest-first via topological order,
+   include short {kp.name} + 1-line description for each prereq.
+```
+
+Use Gemini Flash only to **polish phrasing** (not to invent content):
+template-fill the answer, ask Gemini to rewrite in tutor voice. Keeps
+factual content graph-grounded; prevents hallucination. **Yield**: ~600
+prereq-chain samples × 2 langs = ~1200 samples.
+
+#### E.3 Difficulty-stratified deep-dive (Gemini Flash)
+
+Group KPs by `difficulty_level` band:
+- **Easy band (≤ 0.4)**: generate "Em đang bắt đầu — giải thích {kp.name} cho người mới"
+- **Mid band (0.4–0.7)**: generate "Giải thích {kp.name} kèm ví dụ thực tế"
+- **Hard band (> 0.7)**: generate "Trình bày {kp.name} ở mức nâng cao, kèm derivation/proof nếu có"
+
+For each KP, produce one sample at the matching depth. The hard band
+explicitly trains the model to derive — a capability current API output
+in `qa_history` may not have signal for. **Yield**: ~1500 samples × 60% VN
+selection = ~900 VN + 600 EN.
+
+#### E.4 Cross-course linking (Gemini Flash, free for KPs with `len(source_course_ids) ≥ 2`)
+
+When the same canonical KP appears in ≥ 2 courses (e.g., backprop in CS230
+and CS224n), generate a comparison sample: how does each course frame this
+concept? Different angles, different formalism, common ground. This is
+unique training signal — the API baseline does not see cross-course KP
+canonicalization. **Yield**: estimated ~150–300 samples depending on
+overlap rate.
+
+#### E.5 Misconception → correction (deterministic from edges + Gemini)
+
+For each KP that has a `related-but-distinct` edge (graph signal that two
+concepts are commonly confused — e.g., "self-supervised" vs "weakly
+supervised"), generate:
+
+```
+Q: "Em nghĩ {kp_a.name} và {kp_b.name} là một phải không?"
+A: short explanation of the distinction, citing both KP descriptions.
+```
+
+This is a powerful trainer for the tutor's "polite correction" voice and
+tests boundary knowledge. **Yield**: ~200 samples assuming 100 such pairs
+× 2 langs.
+
+#### Cost summary for Strategy E
+
+| Sub-strategy | Samples | Gemini Flash cost |
+|---|---|---|
+| E.1 Definition | 1500 | $0 (deterministic) |
+| E.2 Prereq chain | 1200 | $3–5 (polish only) |
+| E.3 Difficulty deep-dive | 1500 | $5–8 |
+| E.4 Cross-course | 200 | $1 |
+| E.5 Misconception | 200 | $1 |
+| **Total** | **~4600** | **~$10–15** |
+
+#### Why this matters more than Strategy A/B for v1
+
+- **Higher generative leverage**: 1 KG → 4600 samples vs MCQ → 4900 (similar
+  count, but KG samples carry explicit prereq/difficulty/cross-course
+  signal absent in MCQ-derived samples)
+- **Built-in stratification**: every sample tagged with `kp_id`,
+  `difficulty_level`, `importance_level` → free metadata for ablation and
+  curriculum-style training (`logging_steps` can break out loss by
+  difficulty band)
+- **Graph consistency**: prereq chains in answers come from the actual
+  graph, not LLM imagination → reduces hallucination training signal
+- **Cross-course samples are unique**: cannot be obtained from per-course
+  MCQ data; only KG canonicalization produces these
+
+### Conversion script additions
+
+Add to the script list:
+```
+fine-tune-chatbot/scripts/sft/domain/
+├── ... (existing 10–30 scripts)
+├── 14_load_knowledge_graph.py       # parse p2_output + edge_labels + p5_pruned → KP+edge tables
+├── 24_kg_definition_qa.py           # Strategy E.1 (deterministic)
+├── 25_kg_prereq_qa.py               # Strategy E.2 (template + Gemini polish)
+├── 26_kg_difficulty_deepdive.py     # Strategy E.3 (Gemini)
+├── 27_kg_cross_course.py            # Strategy E.4 (Gemini)
+├── 28_kg_misconception.py           # Strategy E.5 (deterministic + Gemini)
+└── 30_merge_domain.py               # combine all → domain.jsonl  (update to include KG sources)
+```
+
 ## Conversion scripts
 
 ```
@@ -131,23 +258,33 @@ fine-tune-chatbot/scripts/sft/domain/
 └── 30_merge_domain.py            # combine all → domain.jsonl
 ```
 
-## Updated mixing recipe (v1 final)
+## Updated mixing recipe (v1 final, KG-augmented)
 
 | Source | Count | Pct | Origin |
 |---|---|---|---|
-| Organic `qa_history` (post-clean) | 3000–5000 | 25–35% | DB + JSONL |
-| **Domain MCQ → tutor Q&A (Strategy A)** | **4900** | **35%** | course_assets (free) |
-| **Transcript-grounded synth (Strategy B)** | **800** | **6%** | Gemini Flash |
-| **VN MCQ translations (Strategy D)** | **2100** | **15%** | Gemini Flash |
-| **Synthetic refusals (Strategy C)** | **410** | **3%** | Gemini Flash |
-| Hermes function-calling | 2000 | 14% | NousResearch |
-| xLAM filtered single-tool | 500 | 4% | Salesforce |
+| Organic `qa_history` (post-clean) | 3000–5000 | 18–25% | DB + JSONL |
+| **Domain MCQ → tutor Q&A (Strategy A)** | **4900** | **27%** | course_assets (free) |
+| **Knowledge-Graph synth (Strategy E.1–E.5)** | **4600** | **25%** | KG + Gemini Flash |
+| **Transcript-grounded synth (Strategy B)** | **800** | **4%** | Gemini Flash |
+| **VN MCQ translations (Strategy D)** | **2100** | **12%** | Gemini Flash |
+| **Synthetic refusals (Strategy C)** | **410** | **2%** | Gemini Flash |
+| Hermes function-calling | 2000 | 11% | NousResearch |
+| xLAM filtered single-tool | 500 | 3% | Salesforce |
 | Viet-Visual-Instructions retain | 300 | 2% | 5CD-AI |
-| **TOTAL** | **~14000** | **100%** | — |
+| **TOTAL** | **~18000** | **100%** | — |
 
-**VN ratio**: 310 + 2100 + (organic est. 60%) + 200 + 200 ≈ 65–70% ✅
-**Tool-call samples**: 2000 + 500 + (organic est. 30%) ≈ 30% ✅
-**Domain alignment**: 60% from course assets directly ✅
+For **FAST 3-day variant**: drop organic `qa_history` extraction entirely
+(P2a still runs as audit but does not feed FAST training); cap total at
+~10–12k by reducing Strategy E to top-importance KPs only (filter
+`importance_level in {critical, high}`) and skipping E.4/E.5 cross-course +
+misconception sub-strategies. Yields ~10k samples deliverable in Day 1.
+
+**VN ratio**: 310 + 2100 + KG_E_VN_share (~50% of 4600 = 2300) + organic
+est. 60% + 200 + 200 ≈ 70%+ ✅
+**Tool-call samples**: 2000 + 500 + (organic est. 30%) ≈ 25–30% ✅
+**Domain alignment**: 70%+ from course assets + KG directly ✅
+**Hallucination resistance**: KG-grounded samples (~25%) carry verifiable
+graph paths — model trained on these is less likely to invent prereqs
 
 ## Cost estimate
 

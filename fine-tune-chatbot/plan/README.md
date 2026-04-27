@@ -65,6 +65,10 @@ References for current constraints:
 
 ## Roadmap
 
+Two timeline variants depending on rollout posture:
+
+### Variant FULL (production rollout, 6–8 working days + 1 week shadow)
+
 ```
 P1  Environment        (0.5d)  Verify Blackwell stack (CUDA 12.8, PT 2.7+)
 P2a Data audit         (0.5d)  Schema/row counts of qa_history
@@ -73,12 +77,56 @@ P2  Data pipeline      (1d)    Combine organic + domain + external → ChatML
 P3  Fine-tune          (0.5d)  Unsloth QLoRA on VL-3B (incl. tiny overfit smoke)
 P4  Eval               (0.5d)  Deterministic gates + LLM-judge vs Gemini
 P5  Quantize           (0.5d)  AWQ Int4 + feasibility gate (fallback to bnb/fp16)
-P6  Serve              (0.5d)  vLLM docker service
+P6  Serve              (0.5d)  vLLM docker service + Cloudflare Tunnel
 P7  Codebase changes   (0.5d)  Patch chat_model_factory + config + tests
 P8  Shadow + rollout   (1w)    A/B with 10% → 50% → 100%
 ```
 
-Total: ~6–8 working days excluding shadow period.
+Total: ~6–8 working days excluding shadow period. Use this for production
+traffic switch with safety net.
+
+### Variant FAST (research / MVP self-host, 3 days, no shadow)
+
+For tight deadlines or research builds where the current API path stays
+behind a feature flag and a multi-week canary is unnecessary:
+
+```
+Day 1 (24h)  P2a + P2b + P2     Data: KG-driven synth + MCQ → ChatML, ≥ 8k samples
+Day 2 (24h)  P1 + P3 + P4       Env smoke + Unsloth QLoRA train + eval gate
+Day 3 (24h)  P5 + P6 + P7       AWQ + vLLM + Cloudflare Tunnel + integration + E2E
+```
+
+What is dropped vs FULL:
+- **P8 shadow/canary** — replaced by **single feature flag** `TUTOR_PROVIDER_OVERRIDE`.
+  Default keeps current API. Flip to `self_hosted` to switch instantly. Roll back
+  by unsetting the env var; existing fallback in `_stream_with_fallback` covers
+  pre-stream failures.
+- **Hand-curated fixture sets** — keep deterministic Gate 1 with 50-row seed
+  fixtures only. Defer 500-row LLM-judge eval to post-launch iteration.
+- **Production hardening** — `docker-compose.prod.yml` changes deferred; ship in
+  dev compose first.
+
+What MUST stay even in FAST:
+- P1 Blackwell smoke tests (skipping these wastes more time when train fails)
+- P4 Gate 1 deterministic checks on ≥ 100 samples (tool-call format, citation
+  format, language match) — these catch silent breakage that kills E2E
+- P5 Tier-1 AWQ feasibility check before P6 — failing here mid-Day-3 is fatal
+- P7 fallback wrapper (`_stream_with_fallback`) — needed for safe deploy
+
+Decision rule: if user count ≤ 50 / project is academic / current API stays
+behind a flag → FAST. If shipping to ≥ 100 production users without behind-flag
+parallel → FULL.
+
+### Deployment topology (both variants)
+
+```
+[Sinh viên] → [VPS frontend + FastAPI backend] → [Cloudflare Tunnel — public HTTPS] → [Home: 5060 Ti + vLLM + Qwen2.5-VL-3B + LoRA]
+                                                                                                      (handles text + image)
+```
+
+The backend connects to vLLM via the tunnel URL configured in
+`SELF_HOSTED_BASE_URL`. vLLM never needs to be exposed directly to the public
+internet. See `05-serving-vllm.md` "Tunnel exposure" section for setup.
 
 File mapping: `01-environment.md` (P1), `02a-data-audit.md` (P2a),
 `02b-domain-data.md` (P2b — course assets), `02-data-pipeline.md` (P2 —
