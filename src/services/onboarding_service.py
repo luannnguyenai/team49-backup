@@ -7,11 +7,15 @@ Business logic for the onboarding flow.
 from __future__ import annotations
 
 import json
+import logging
 from collections import defaultdict
 from uuid import UUID
 
+from langchain.chat_models import init_chat_model
+from langchain_core.messages import HumanMessage, SystemMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import DEFAULT_MODEL, settings
 from src.config.goal_course_map import GOAL_COURSE_MAP
 from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
@@ -20,15 +24,37 @@ from src.schemas.onboarding import (
     ExperienceLevelResponse,
     GoalsResponse,
     KnownTopicsResponse,
+    PriorAnalysisRequest,
+    PriorAnalysisResponse,
     SectionSummary,
     TopicsResponse,
     UnitSummary,
 )
+from src.services.chat_model_factory import build_chat_model_kwargs
+from src.services.llm_rate_limiter import enforce_llm_rate_limit
+
+logger = logging.getLogger(__name__)
 
 # Average minutes per hour — used to convert estimated_minutes → hours
 _MINUTES_PER_HOUR = 60.0
 # Fallback when estimated_minutes is None
 _DEFAULT_HOURS = 1.0
+_PRIOR_ANALYSIS_LIMIT = 8
+
+
+_PRIOR_ANALYSIS_SYSTEM = """\
+You are an onboarding planner for an AI learning platform.
+Given a learner's self-reported background and a list of candidate course topics,
+choose only the common topics that should be confirmed with the learner before placement.
+
+Rules:
+- Return JSON only: {"shortlisted_topic_ids": ["topic-id", ...]}.
+- Select at most 8 topic IDs.
+- Prefer topics explicitly mentioned by the learner or strongly implied by coding/tools.
+- Keep common topics such as CNNs, transformers, agents, Python, PyTorch, HuggingFace when relevant.
+- Do not select niche/admin topics unless clearly requested.
+- Self-report is not mastery; this shortlist only decides what to ask next.
+"""
 
 
 def _derive_course_ids(goal_ids: list[str]) -> list[str]:
@@ -52,6 +78,120 @@ def _all_course_ids() -> list[str]:
                 seen.add(cid)
                 result.append(cid)
     return result
+
+
+def _candidate_match_score(candidate, text: str) -> int:
+    haystack = " ".join(
+        [
+            candidate.display_label,
+            candidate.raw_title,
+            " ".join(candidate.unit_titles or []),
+        ]
+    ).lower()
+    tokens = [token for token in text.lower().replace("/", " ").split() if len(token) >= 3]
+    return sum(1 for token in tokens if token in haystack)
+
+
+def _fallback_prior_shortlist(body: PriorAnalysisRequest) -> list[str]:
+    text = f"{body.prior_knowledge_text} {body.coding_experience_text}".strip()
+    scored = [
+        (_candidate_match_score(candidate, text), idx, candidate.id)
+        for idx, candidate in enumerate(body.candidates)
+    ]
+    matched = [item for item in scored if item[0] > 0]
+    source = matched if matched else scored
+    return [
+        item[2]
+        for item in sorted(source, key=lambda item: (-item[0], item[1]))[:_PRIOR_ANALYSIS_LIMIT]
+    ]
+
+
+def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> list[str]:
+    text = raw.strip()
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
+    payload = json.loads(text)
+    ids = payload.get("shortlisted_topic_ids", [])
+    if not isinstance(ids, list):
+        return []
+
+    result: list[str] = []
+    for value in ids:
+        if isinstance(value, str) and value in valid_ids and value not in result:
+            result.append(value)
+    return result[:_PRIOR_ANALYSIS_LIMIT]
+
+
+async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResponse:
+    """Use the configured reasoning model to shortlist prior-knowledge topics.
+
+    The endpoint is intentionally stateless: the frontend sends already-filtered
+    candidate topics, and this service returns topic IDs to confirm with the user.
+    """
+    if not body.candidates:
+        return PriorAnalysisResponse(
+            shortlisted_topic_ids=[],
+            model_used=DEFAULT_MODEL,
+            provider=settings.model_provider,
+            fallback=True,
+        )
+
+    valid_ids = {candidate.id for candidate in body.candidates}
+    candidates_json = json.dumps(
+        [
+            {
+                "id": candidate.id,
+                "display_label": candidate.display_label,
+                "raw_title": candidate.raw_title,
+                "unit_titles": candidate.unit_titles[:8],
+            }
+            for candidate in body.candidates[:40]
+        ],
+        ensure_ascii=False,
+    )
+
+    user_text = (
+        f"Goal: {body.goal_id}\n"
+        f"Prior knowledge: {body.prior_knowledge_text or '(empty)'}\n"
+        f"Coding/tools: {body.coding_experience_text or '(empty)'}\n"
+        f"Candidate topics JSON:\n{candidates_json}"
+    )
+
+    try:
+        enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
+        llm = init_chat_model(
+            **build_chat_model_kwargs(
+                model=DEFAULT_MODEL,
+                temperature=0,
+                max_tokens=700,
+            )
+        )
+        response = llm.invoke(
+            [
+                SystemMessage(content=_PRIOR_ANALYSIS_SYSTEM),
+                HumanMessage(content=user_text),
+            ]
+        )
+        shortlisted = _parse_prior_analysis_response(str(response.content), valid_ids)
+        if not shortlisted:
+            shortlisted = _fallback_prior_shortlist(body)
+            fallback = True
+        else:
+            fallback = False
+    except Exception as exc:
+        logger.warning("prior analysis LLM failed; using fallback: %s", exc)
+        shortlisted = _fallback_prior_shortlist(body)
+        fallback = True
+
+    return PriorAnalysisResponse(
+        shortlisted_topic_ids=shortlisted,
+        model_used=DEFAULT_MODEL,
+        provider=settings.model_provider,
+        fallback=fallback,
+    )
 
 
 # Reverse map: canonical_course_id → goal_id (first match wins)

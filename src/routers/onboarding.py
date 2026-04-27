@@ -25,9 +25,12 @@ from src.schemas.onboarding import (
     GoalsResponse,
     KnownTopicsRequest,
     KnownTopicsResponse,
+    PriorAnalysisRequest,
+    PriorAnalysisResponse,
     TopicsResponse,
 )
 from src.services.onboarding_service import (
+    analyze_prior_profile,
     get_topics_tree,
     save_experience_level,
     save_known_topics,
@@ -84,3 +87,15 @@ async def set_experience_level(
     current_user: User = Depends(get_current_user),
 ) -> ExperienceLevelResponse:
     return await save_experience_level(db, user_id=current_user.id, level=body.level)
+
+
+@onboarding_router.post(
+    "/api/onboarding/prior-analysis",
+    response_model=PriorAnalysisResponse,
+)
+async def analyze_prior_knowledge(
+    body: PriorAnalysisRequest,
+    current_user: User = Depends(get_current_user),
+) -> PriorAnalysisResponse:
+    _ = current_user
+    return await analyze_prior_profile(body)

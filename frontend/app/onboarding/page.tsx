@@ -14,6 +14,7 @@ import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import StepGoalSelection from "@/components/onboarding/StepGoalSelection";
 import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
+import StepPriorKnowledgeInput from "@/components/onboarding/StepPriorKnowledgeInput";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
 import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
@@ -86,13 +87,13 @@ const STEPS_BEGINNER = [
 const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   0: 0,
   1: 1,
-  3: 2,
-  4: 3,
-  // 2 is skipped for beginners
+  4: 2,
+  5: 3,
+  // 2 and 3 are skipped for beginners
 };
 
-// Steps that use the page-level nav buttons (index 3 = TimeSchedule)
-const STEPS_WITH_PAGE_NAV = new Set([3]);
+// Steps that use the page-level nav buttons (index 4 = TimeSchedule)
+const STEPS_WITH_PAGE_NAV = new Set([4]);
 
 // Form fields validated before advancing from each internal step
 const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
@@ -101,6 +102,10 @@ const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
   ["available_hours_per_week", "target_deadline"],   // Step 2: required
   ["preferred_method"],                              // Step 3: required
 ];
+
+function goalFromStore(goalIds: string[]): PlannerGoalId {
+  return goalIds.includes("nlp") ? "nlp" : "computer_vision";
+}
 
 // ---------------------------------------------------------------------------
 // Page component
@@ -128,6 +133,12 @@ function OnboardingPageInner() {
   const [bootstrapCourses, setBootstrapCourses] = useState<BootstrapCourseOption[]>([]);
   const [bootstrapTopics, setBootstrapTopics] = useState<BootstrapTopicOption[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [priorKnowledgeText, setPriorKnowledgeText] = useState("");
+  const [codingExperienceText, setCodingExperienceText] = useState("");
+  const [priorTopics, setPriorTopics] = useState<PriorCandidateTopic[]>([]);
+  const [priorAnalysisFallback, setPriorAnalysisFallback] = useState(false);
+  const [priorAnalysisModel, setPriorAnalysisModel] = useState<string | null>(null);
+  const [analyzingPrior, setAnalyzingPrior] = useState(false);
 
   // ── React Hook Form ──────────────────────────────────────────────────────
   const {
@@ -340,7 +351,7 @@ function OnboardingPageInner() {
 
   const isFirstStep = step === 0;
   const showPageNav = STEPS_WITH_PAGE_NAV.has(step);
-  const isLastFormStep = step === 4;
+  const isLastFormStep = step === 5;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -497,8 +508,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 3 — Schedule */}
-                {step === 3 && (
+                {/* Step 4 — Schedule */}
+                {step === 4 && (
                   <StepTimeSchedule
                     register={register}
                     errors={errors}
@@ -508,8 +519,8 @@ function OnboardingPageInner() {
                   />
                 )}
 
-                {/* Step 4 — Learning method */}
-                {step === 4 && (
+                {/* Step 5 — Learning method */}
+                {step === 5 && (
                   <StepLearningMethod
                     register={register}
                     watch={watch}

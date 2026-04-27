@@ -23,6 +23,20 @@ export interface TopicsResponse {
   }>;
 }
 
+export interface PriorAnalysisCandidatePayload {
+  id: string;
+  display_label: string;
+  raw_title: string;
+  unit_titles: string[];
+}
+
+export interface PriorAnalysisResponse {
+  shortlisted_topic_ids: string[];
+  model_used: string;
+  provider: string;
+  fallback: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // API functions
 // ---------------------------------------------------------------------------
@@ -61,5 +75,16 @@ export async function saveExperienceLevel(
       "/api/users/me/onboarding/experience-level",
       { level },
     )
+    .then((r) => r.data);
+}
+
+export async function analyzePriorProfile(payload: {
+  goal_id: string;
+  prior_knowledge_text: string;
+  coding_experience_text: string;
+  candidates: PriorAnalysisCandidatePayload[];
+}): Promise<PriorAnalysisResponse> {
+  return api
+    .post<PriorAnalysisResponse>("/api/onboarding/prior-analysis", payload)
     .then((r) => r.data);
 }

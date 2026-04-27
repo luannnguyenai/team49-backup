@@ -1,169 +1,116 @@
 "use client";
-// Step 3 — experienced users rate DB-backed topic clusters instead of raw units.
 
-import { useEffect, useMemo, useState } from "react";
-import { Check, Eye, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { canonicalSectionApi } from "@/lib/api";
 import { useOnboardingStore } from "@/stores/onboardingStore";
-import type { CourseSectionDetail, LearningUnitSelectionItem } from "@/types";
-
-const GOAL_COURSE_MAP: Record<string, string[] | undefined> = {
-  computer_vision: ["cs230", "cs231n"],
-  nlp: ["cs230", "cs224n"],
-};
-
-const COURSE_LABELS: Record<string, string> = {
-  cs230: "Deep Learning foundation",
-  cs231n: "Computer Vision",
-  cs224n: "Natural Language Processing",
-};
-
-type ClusterLevel = "not_started" | "reviewed" | "confident";
-
-interface Cluster {
-  id: string;
-  courseId: string;
-  title: string;
-  units: LearningUnitSelectionItem[];
-}
+import {
+  selectRepresentativeUnitIds,
+  type PriorCandidateTopic,
+  type PriorTopicLevel,
+} from "./priorCandidateBuilder";
 
 interface Props {
+  topics: PriorCandidateTopic[];
+  analysisFallback?: boolean;
+  modelLabel?: string | null;
   onNext: () => void;
   onBack: () => void;
   onSkipAll: () => void;
 }
 
-function representativeUnitIds(units: LearningUnitSelectionItem[], level: ClusterLevel): string[] {
-  if (level === "not_started") return [];
-  const limit = level === "confident" ? 4 : 2;
-  return units.slice(0, limit).map((unit) => unit.id);
-}
-
-function clusterLevelFromSelection(cluster: Cluster, selectedSet: Set<string>): ClusterLevel {
-  const selectedCount = cluster.units.filter((unit) => selectedSet.has(unit.id)).length;
-  if (selectedCount >= Math.min(cluster.units.length, 4)) return "confident";
-  if (selectedCount > 0) return "reviewed";
-  return "not_started";
-}
-
-function levelLabel(level: ClusterLevel): string {
+function levelLabel(level: PriorTopicLevel): string {
   if (level === "confident") return "Tự tin";
   if (level === "reviewed") return "Đã học qua";
   return "Chưa học";
 }
 
-export default function StepKnownTopicsFiltered({ onNext, onBack, onSkipAll }: Props) {
-  const goalIds = useOnboardingStore((s) => s.goalIds);
+function levelButtonAria(level: PriorTopicLevel, topic: PriorCandidateTopic): string {
+  return `${levelLabel(level)} ${topic.displayLabel}`;
+}
+
+function topicLevelFromSelection(topic: PriorCandidateTopic, selectedSet: Set<string>): PriorTopicLevel {
+  const selectedCount = topic.units.filter((unit) => selectedSet.has(unit.id)).length;
+  if (selectedCount >= Math.min(topic.units.length, 4)) return "confident";
+  if (selectedCount > 0) return "reviewed";
+  return "not_started";
+}
+
+export default function StepKnownTopicsFiltered({
+  topics,
+  analysisFallback = false,
+  modelLabel = null,
+  onNext,
+  onBack,
+  onSkipAll,
+}: Props) {
   const knownUnitIds = useOnboardingStore((s) => s.knownUnitIds);
   const setKnownUnitIds = useOnboardingStore((s) => s.setKnownUnitIds);
-
-  const [allSections, setAllSections] = useState<CourseSectionDetail[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [expandedClusterId, setExpandedClusterId] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const list = await canonicalSectionApi.list();
-        const details = await Promise.all(
-          list.map((section) => canonicalSectionApi.detail(section.id)),
-        );
-        setAllSections(details);
-      } catch {
-        setError("Không thể tải dữ liệu. Vui lòng thử lại.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
-
-  const clusters = useMemo<Cluster[]>(() => {
-    const selectedCourseIds = new Set(
-      goalIds.flatMap((goalId) => GOAL_COURSE_MAP[goalId] ?? []),
-    );
-
-    return allSections
-      .filter((section) => {
-        const courseId = section.canonical_course_id?.toLowerCase();
-        return courseId ? selectedCourseIds.has(courseId) : false;
-      })
-      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
-      .map((section) => ({
-        id: section.id,
-        courseId: section.canonical_course_id?.toLowerCase() ?? "unknown",
-        title: section.title,
-        units: [...section.learning_units].sort(
-          (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0),
-        ),
-      }))
-      .filter((cluster) => cluster.units.length > 0);
-  }, [allSections, goalIds]);
+  const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
 
   const selectedSet = useMemo(() => new Set(knownUnitIds), [knownUnitIds]);
-  const selectedProbeCount = knownUnitIds.length;
 
-  function setClusterLevel(cluster: Cluster, level: ClusterLevel) {
-    const clusterUnitIds = new Set(cluster.units.map((unit) => unit.id));
-    const next = knownUnitIds.filter((unitId) => !clusterUnitIds.has(unitId));
-    setKnownUnitIds([...next, ...representativeUnitIds(cluster.units, level)]);
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center gap-2 py-10 text-sm" style={{ color: "var(--text-muted)" }}>
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Đang tải...
-      </div>
-    );
+  function setTopicLevel(topic: PriorCandidateTopic, level: PriorTopicLevel) {
+    const topicUnitIds = new Set(topic.units.map((unit) => unit.id));
+    const next = knownUnitIds.filter((unitId) => !topicUnitIds.has(unitId));
+    setKnownUnitIds([...next, ...selectRepresentativeUnitIds(topic, level)]);
   }
 
   return (
     <div className="space-y-5">
       <div>
         <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-          Bạn đã học qua cụm nào?
+          Xác nhận các cụm AI gợi ý
         </p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-          Chọn mức tự đánh giá cho từng cụm. Hệ thống chỉ dùng lựa chọn này để lấy một số câu hỏi placement phù hợp.
+          AI đã lọc còn vài cụm phổ biến. Chọn mức bạn tự tin để hệ thống lấy câu hỏi placement
+          phù hợp; đây vẫn chưa được tính là mastery.
         </p>
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      <div
+        className="rounded-xl border p-4 text-xs leading-relaxed"
+        style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+      >
+        {analysisFallback
+          ? "AI chưa trả kết quả hợp lệ, đang dùng shortlist fallback từ nội dung bạn nhập."
+          : `Shortlist được tạo bởi ${modelLabel ?? "AI reasoning model"}.`}
+      </div>
 
-      {clusters.length === 0 ? (
-        <div className="rounded-xl border p-4 text-sm" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
-          Chưa có cụm nội dung cho lộ trình này.
+      {topics.length === 0 ? (
+        <div
+          className="rounded-xl border p-4 text-sm"
+          style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+        >
+          Chưa có cụm phổ biến để xác nhận cho lộ trình này.
         </div>
       ) : (
         <div className="space-y-3">
-          {clusters.map((cluster) => {
-            const currentLevel = clusterLevelFromSelection(cluster, selectedSet);
-            const isExpanded = expandedClusterId === cluster.id;
+          {topics.map((topic) => {
+            const currentLevel = topicLevelFromSelection(topic, selectedSet);
+            const isExpanded = expandedTopicId === topic.id;
 
             return (
               <div
-                key={cluster.id}
+                key={topic.id}
                 className="rounded-xl border-2 p-4"
                 style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
               >
                 <div className="flex items-start gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {cluster.title}
+                      {topic.displayLabel}
                     </p>
                     <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                      {COURSE_LABELS[cluster.courseId] ?? cluster.courseId} · {cluster.units.length} unit
+                      {topic.units.length} unit đại diện để placement kiểm chứng
                     </p>
                   </div>
                   <button
                     type="button"
-                    onClick={() => setExpandedClusterId(isExpanded ? null : cluster.id)}
+                    onClick={() => setExpandedTopicId(isExpanded ? null : topic.id)}
                     className="rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
                     style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
-                    aria-label={`Xem nhanh ${cluster.title}`}
+                    aria-label={`Xem nhanh ${topic.displayLabel}`}
                   >
                     <Eye className="h-4 w-4" />
                   </button>
@@ -178,7 +125,7 @@ export default function StepKnownTopicsFiltered({ onNext, onBack, onSkipAll }: P
                       Nội dung đại diện
                     </p>
                     <ul className="space-y-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                      {cluster.units.slice(0, 5).map((unit) => (
+                      {topic.units.slice(0, 5).map((unit) => (
                         <li key={unit.id}>- {unit.title}</li>
                       ))}
                     </ul>
@@ -192,7 +139,8 @@ export default function StepKnownTopicsFiltered({ onNext, onBack, onSkipAll }: P
                       <button
                         key={level}
                         type="button"
-                        onClick={() => setClusterLevel(cluster, level)}
+                        aria-label={levelButtonAria(level, topic)}
+                        onClick={() => setTopicLevel(topic, level)}
                         className={cn(
                           "flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-xs font-semibold transition-all",
                           isSelected
@@ -213,9 +161,9 @@ export default function StepKnownTopicsFiltered({ onNext, onBack, onSkipAll }: P
         </div>
       )}
 
-      {selectedProbeCount > 0 && (
+      {knownUnitIds.length > 0 && (
         <p className="text-xs font-medium text-primary-600">
-          Đã chọn {selectedProbeCount} unit đại diện để placement kiểm chứng.
+          Đã chọn {knownUnitIds.length} unit đại diện để placement kiểm chứng.
         </p>
       )}
 
@@ -255,3 +203,4 @@ export default function StepKnownTopicsFiltered({ onNext, onBack, onSkipAll }: P
     </div>
   );
 }
+
