@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import uuid
 from typing import Protocol
 
@@ -12,7 +13,10 @@ from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.schemas.placement_lite import PlacementLiteStartResponse
 from src.services.assessment_service import _canonical_item_to_assessment_question
-from src.services.canonical_question_selector import CanonicalQuestionSelector
+from src.services.placement.strategy_selector import get_strategy
+from src.services.placement.strategies.legacy_selector import LegacySelectorStrategy  # noqa: F401
+
+log = logging.getLogger(__name__)
 
 
 class PlacementUnit(Protocol):
@@ -50,13 +54,20 @@ async def start_placement_lite_session(
     if not canonical_unit_ids:
         raise ValidationError("Placement-lite could not find canonical units for selected courses.")
 
-    items = await CanonicalQuestionSelector(CanonicalQuestionRepository(db)).select_for_phase(
+    # Get pool of placement items and apply strategy
+    repo = CanonicalQuestionRepository(db)
+    pool = await repo.get_items_for_phase(
         phase="placement",
         canonical_unit_ids=canonical_unit_ids,
-        count=count,
+        limit=max(count * 4, count),
     )
-    if not items:
+    if not pool:
         raise ValidationError("No canonical placement questions found for selected courses.")
+
+    strategy = get_strategy(mode="legacy")  # Commit A: default to legacy for regression
+    items = await strategy.select(pool, n=count)
+    if not items:
+        raise ValidationError("Strategy selection returned no items.")
 
     session = Session(
         user_id=user_id,
