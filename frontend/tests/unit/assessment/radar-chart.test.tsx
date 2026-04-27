@@ -17,6 +17,10 @@ describe("RadarChart", () => {
 
     const svg = screen.getByRole("img", { name: "Mastery radar chart" });
     expect(svg).toHaveAttribute("viewBox", expect.stringMatching(/^0 0 (?!280 280\b)\d+(\.\d+)? \d+(\.\d+)?$/));
+
+    const viewBox = svg.getAttribute("viewBox");
+    const width = Number(viewBox?.split(" ")[2]);
+    expect(width).toBeGreaterThan(392);
   });
 
   it("renders full skill labels instead of truncating them with ellipses", () => {
