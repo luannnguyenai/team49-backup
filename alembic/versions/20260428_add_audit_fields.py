@@ -9,7 +9,7 @@ Schema v2 Commit C: ADD-only migration (no drop, no rename).
 - interactions: add selection_strategy, theta_before/after, predicted_probability, item_information, etc.
 """
 from alembic import op
-import sqlalchemy as sa
+from sqlalchemy import text
 
 
 revision = "20260428_add_audit_fields"
@@ -18,28 +18,32 @@ branch_labels = None
 depends_on = None
 
 
+def _add_col_if_not_exists(table: str, col: str, col_def: str) -> None:
+    op.get_bind().execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_def}"))
+
+
 def upgrade() -> None:
     # Add audit fields to sessions table
-    op.add_column("sessions", sa.Column("selection_strategy", sa.String(80), nullable=True))
-    op.add_column("sessions", sa.Column("calibration_mode", sa.String(80), nullable=True))
-    op.add_column("sessions", sa.Column("theta_initial", sa.Float, nullable=True))
-    op.add_column("sessions", sa.Column("theta_final", sa.Float, nullable=True))
-    op.add_column("sessions", sa.Column("theta_sigma_initial", sa.Float, nullable=True))
-    op.add_column("sessions", sa.Column("theta_sigma_final", sa.Float, nullable=True))
-    op.add_column("sessions", sa.Column("target_se", sa.Float, nullable=True))
-    op.add_column("sessions", sa.Column("stop_reason", sa.String(80), nullable=True))
+    _add_col_if_not_exists("sessions", "selection_strategy", "VARCHAR(80)")
+    _add_col_if_not_exists("sessions", "calibration_mode", "VARCHAR(80)")
+    _add_col_if_not_exists("sessions", "theta_initial", "FLOAT")
+    _add_col_if_not_exists("sessions", "theta_final", "FLOAT")
+    _add_col_if_not_exists("sessions", "theta_sigma_initial", "FLOAT")
+    _add_col_if_not_exists("sessions", "theta_sigma_final", "FLOAT")
+    _add_col_if_not_exists("sessions", "target_se", "FLOAT")
+    _add_col_if_not_exists("sessions", "stop_reason", "VARCHAR(80)")
 
     # Add audit fields to interactions table
-    op.add_column("interactions", sa.Column("selection_strategy", sa.String(80), nullable=True))
-    op.add_column("interactions", sa.Column("theta_before", sa.Float, nullable=True))
-    op.add_column("interactions", sa.Column("theta_after", sa.Float, nullable=True))
-    op.add_column("interactions", sa.Column("theta_sigma_before", sa.Float, nullable=True))
-    op.add_column("interactions", sa.Column("theta_sigma_after", sa.Float, nullable=True))
-    op.add_column("interactions", sa.Column("predicted_probability", sa.Float, nullable=True))
-    op.add_column("interactions", sa.Column("item_information", sa.Float, nullable=True))
-    op.add_column("interactions", sa.Column("item_difficulty_at_time", sa.Float, nullable=True))
-    op.add_column("interactions", sa.Column("item_discrimination_at_time", sa.Float, nullable=True))
-    op.add_column("interactions", sa.Column("item_guessing_at_time", sa.Float, nullable=True))
+    _add_col_if_not_exists("interactions", "selection_strategy", "VARCHAR(80)")
+    _add_col_if_not_exists("interactions", "theta_before", "FLOAT")
+    _add_col_if_not_exists("interactions", "theta_after", "FLOAT")
+    _add_col_if_not_exists("interactions", "theta_sigma_before", "FLOAT")
+    _add_col_if_not_exists("interactions", "theta_sigma_after", "FLOAT")
+    _add_col_if_not_exists("interactions", "predicted_probability", "FLOAT")
+    _add_col_if_not_exists("interactions", "item_information", "FLOAT")
+    _add_col_if_not_exists("interactions", "item_difficulty_at_time", "FLOAT")
+    _add_col_if_not_exists("interactions", "item_discrimination_at_time", "FLOAT")
+    _add_col_if_not_exists("interactions", "item_guessing_at_time", "FLOAT")
 
 
 def downgrade() -> None:

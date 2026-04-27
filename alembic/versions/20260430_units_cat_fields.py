@@ -16,7 +16,7 @@ data is dropped or renamed. Two covering indexes are added for the most common
 query patterns (filtering by active flag, filtering by content_type).
 """
 from alembic import op
-import sqlalchemy as sa
+from sqlalchemy import text
 
 
 revision = "20260430_units_cat_fields"
@@ -25,21 +25,33 @@ branch_labels = None
 depends_on = None
 
 
-def upgrade() -> None:
-    op.add_column("units", sa.Column("active", sa.Boolean, nullable=True, server_default="true"))
-    op.add_column("units", sa.Column("content_hash", sa.String(64), nullable=True))
-    op.add_column("units", sa.Column("content_type", sa.String(80), nullable=True))
-    op.add_column("units", sa.Column("content_type_confidence", sa.String(40), nullable=True))
-    op.add_column("units", sa.Column("deprecated_at", sa.String(80), nullable=True))
-    op.add_column("units", sa.Column("deprecated_reason", sa.Text, nullable=True))
-    op.add_column("units", sa.Column("has_quiz_items", sa.Boolean, nullable=True))
-    op.add_column("units", sa.Column("is_worth_learning", sa.Boolean, nullable=True))
-    op.add_column("units", sa.Column("override_critical_kp", sa.Boolean, nullable=True))
-    op.add_column("units", sa.Column("salience_confidence", sa.String(40), nullable=True))
-    op.add_column("units", sa.Column("salience_score", sa.String(80), nullable=True))
+def _exec(sql: str) -> None:
+    op.get_bind().execute(text(sql))
 
-    op.create_index("ix_units_active", "units", ["active"])
-    op.create_index("ix_units_content_type", "units", ["content_type"])
+
+def _add_col_if_not_exists(table: str, col: str, col_def: str) -> None:
+    _exec(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {col} {col_def}")
+
+
+def _create_index_if_not_exists(name: str, table: str, col: str) -> None:
+    _exec(f"CREATE INDEX IF NOT EXISTS {name} ON {table}({col})")
+
+
+def upgrade() -> None:
+    _add_col_if_not_exists("units", "active", "BOOLEAN DEFAULT TRUE")
+    _add_col_if_not_exists("units", "content_hash", "VARCHAR(128)")
+    _add_col_if_not_exists("units", "content_type", "VARCHAR(80)")
+    _add_col_if_not_exists("units", "content_type_confidence", "VARCHAR(40)")
+    _add_col_if_not_exists("units", "deprecated_at", "VARCHAR(80)")
+    _add_col_if_not_exists("units", "deprecated_reason", "TEXT")
+    _add_col_if_not_exists("units", "has_quiz_items", "BOOLEAN")
+    _add_col_if_not_exists("units", "is_worth_learning", "BOOLEAN")
+    _add_col_if_not_exists("units", "override_critical_kp", "BOOLEAN DEFAULT FALSE")
+    _add_col_if_not_exists("units", "salience_confidence", "VARCHAR(40)")
+    _add_col_if_not_exists("units", "salience_score", "VARCHAR(80)")
+
+    _create_index_if_not_exists("ix_units_active", "units", "active")
+    _create_index_if_not_exists("ix_units_content_type", "units", "content_type")
 
 
 def downgrade() -> None:
