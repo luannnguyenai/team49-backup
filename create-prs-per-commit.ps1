@@ -1,5 +1,5 @@
 $baseBranch = "main"
-$sourceBranch = "ed-fix-2"
+$sourceBranch = "ed-fix-merge-1"
 $remote = "origin"
 
 $commits = @(
