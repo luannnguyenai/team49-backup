@@ -239,6 +239,7 @@ async def _start_inline_video_quiz(
         if isinstance(current_progress, dict) and isinstance(current_progress.get("inline_quiz"), dict)
         else {}
     )
+    canonical_unit_ids = await _inline_quiz_canonical_unit_scope(db, unit)
     checkpoint_state = _inline_quiz_checkpoint_state(inline_quiz_state, checkpoint)
     midpoint_state = _inline_quiz_checkpoint_state(inline_quiz_state, "midpoint")
 
@@ -277,7 +278,7 @@ async def _start_inline_video_quiz(
     items = await _select_quiz_items(
         selector=selector,
         count=count,
-        canonical_unit_id=unit.canonical_unit_id,
+        canonical_unit_ids=canonical_unit_ids,
         exclude_item_ids=exclude_item_ids,
     )
     if not items:
@@ -683,13 +684,13 @@ async def _select_quiz_items(
     *,
     selector: CanonicalQuestionSelector,
     count: int,
-    canonical_unit_id: str,
+    canonical_unit_ids: list[str],
     exclude_item_ids: list[str],
 ) -> list[QuestionBankItem]:
     exclude_set = {str(item_id) for item_id in exclude_item_ids}
     selected = await selector.select_for_phase(
         phase="mini_quiz",
-        canonical_unit_ids=[canonical_unit_id],
+        canonical_unit_ids=canonical_unit_ids,
         count=count,
     )
     filtered = [item for item in selected if str(item.item_id) not in exclude_set]
@@ -698,7 +699,7 @@ async def _select_quiz_items(
 
     remaining_candidates = await selector.repo.get_items_for_phase(
         phase="mini_quiz",
-        canonical_unit_ids=[canonical_unit_id],
+        canonical_unit_ids=canonical_unit_ids,
         limit=max(count * 4, count + len(exclude_set) * 4),
     )
     ranked_remaining = sorted(
@@ -718,6 +719,26 @@ async def _select_quiz_items(
         if len(filtered) >= count:
             break
     return filtered[:count]
+
+
+async def _inline_quiz_canonical_unit_scope(
+    db: AsyncSession,
+    unit: LearningUnit,
+) -> list[str]:
+    section_id = getattr(unit, "section_id", None)
+    if not section_id:
+        return [unit.canonical_unit_id]
+
+    result = await db.execute(
+        select(LearningUnit.canonical_unit_id)
+        .where(
+            LearningUnit.section_id == section_id,
+            LearningUnit.canonical_unit_id.isnot(None),
+        )
+        .order_by(LearningUnit.sort_order, LearningUnit.slug)
+    )
+    canonical_unit_ids = [str(unit_id) for unit_id in result.scalars().all() if unit_id]
+    return canonical_unit_ids or [unit.canonical_unit_id]
 
 
 def _inline_quiz_checkpoint_state(inline_quiz: dict | None, checkpoint: str | None) -> dict | None:
