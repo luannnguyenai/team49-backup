@@ -3,17 +3,9 @@ $sourceBranch = "ed-fix"
 $remote = "origin"
 
 $commits = @(
-  "7e31550",
-  "f245a5f",
-  "434e902",
-  "2159dc3",
-  "34c9ba9",
-  "94f36b9",
-  "1134abc",
-  "76ff9ed",
-  "fc5bef1",
-  "ab4243f",
-  "f105313"
+  "03239da",
+  "1f1135a",
+  "0d61509"
 )
 
 # Tránh file script bị Git add nhầm
