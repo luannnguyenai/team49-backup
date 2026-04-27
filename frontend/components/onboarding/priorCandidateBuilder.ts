@@ -27,6 +27,9 @@ const GOAL_COURSE_IDS: Record<PlannerGoalId, string[]> = {
 const SHARED_HIDDEN_TITLE_PATTERN =
   /career advice|human[- ]centered|course introduction|historical|history|motivation|administrivia|recap/i;
 
+const INTRO_TITLE_PATTERN =
+  /(^|\b)(lecture|lec\.?)\s*1\s*[:-]\s*(intro|introduction)\b|^intro\b|^introduction\b/i;
+
 const NLP_HIDDEN_TITLE_PATTERN =
   /brain[- ]computer|linguistics|philosophy|interpretability|model editing|benchmarking|efficient training|after dpo/i;
 
@@ -85,7 +88,7 @@ export function displayLabelForSectionTitle(title: string): string {
 }
 
 function classifyVisibility(goalId: PlannerGoalId, title: string): PriorTopicVisibility {
-  if (SHARED_HIDDEN_TITLE_PATTERN.test(title)) {
+  if (SHARED_HIDDEN_TITLE_PATTERN.test(title) || INTRO_TITLE_PATTERN.test(title)) {
     return "hidden";
   }
 
