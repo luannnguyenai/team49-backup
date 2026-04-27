@@ -57,6 +57,11 @@ export default function StepKnownTopicsFiltered({
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
 
   const selectedSet = useMemo(() => new Set(knownUnitIds), [knownUnitIds]);
+  const visibleTopics = useMemo(
+    () => topics.filter((topic) => topic.suggestedLevel !== "confident"),
+    [topics],
+  );
+  const hiddenConfidentCount = topics.length - visibleTopics.length;
 
   function setTopicLevel(topic: PriorCandidateTopic, level: PriorTopicLevel) {
     const topicUnitIds = new Set(topic.units.map((unit) => unit.id));
@@ -71,8 +76,8 @@ export default function StepKnownTopicsFiltered({
           Xác nhận các cụm AI gợi ý
         </p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-          AI đã lọc còn vài cụm phổ biến. Chọn mức bạn tự tin để hệ thống lấy câu hỏi placement
-          phù hợp; đây vẫn chưa được tính là mastery.
+          AI đã tự chọn các cụm khớp rõ với mô tả của bạn. Chỉ những cụm chưa chắc mới hiện ra
+          để bạn quyết định thêm; đây vẫn chưa được tính là mastery.
         </p>
       </div>
 
@@ -85,16 +90,24 @@ export default function StepKnownTopicsFiltered({
           : `Shortlist được tạo bởi ${modelLabel ?? "AI reasoning model"}.`}
       </div>
 
-      {topics.length === 0 ? (
+      {hiddenConfidentCount > 0 && (
+        <div
+          className="rounded-xl border border-primary-100 bg-primary-50 p-3 text-xs font-medium text-primary-700 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-300"
+        >
+          {hiddenConfidentCount} cụm khớp rõ với mô tả của bạn đã được chọn ẩn để placement kiểm chứng.
+        </div>
+      )}
+
+      {visibleTopics.length === 0 ? (
         <div
           className="rounded-xl border p-4 text-sm"
           style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
         >
-          Chưa có cụm phổ biến để xác nhận cho lộ trình này.
+          Không có cụm nào cần hỏi thêm. Bạn có thể tiếp tục để hệ thống tạo placement phù hợp.
         </div>
       ) : (
         <div className="space-y-3">
-          {topics.map((topic) => {
+          {visibleTopics.map((topic) => {
             const currentLevel = topicLevelFromSelection(topic, selectedSet);
             const isExpanded = expandedTopicId === topic.id;
             const summary = topicSummary(topic);

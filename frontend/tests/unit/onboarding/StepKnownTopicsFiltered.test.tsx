@@ -118,6 +118,31 @@ describe("StepKnownTopicsFiltered", () => {
     expect(suggested).toContain("u1");
   });
 
+  it("hides AI-confident topics while keeping uncertain topics visible", () => {
+    render(
+      <StepKnownTopicsFiltered
+        topics={[
+          {
+            ...cvTopics[0],
+            suggestedLevel: "confident",
+          },
+          {
+            ...cvTopics[0],
+            id: "uncertain-cnn",
+            aiDisplayLabel: "Maybe CNN details",
+            suggestedLevel: "reviewed",
+          },
+        ]}
+        onNext={onNextMock}
+        onBack={onBackMock}
+        onSkipAll={onSkipAllMock}
+      />,
+    );
+
+    expect(screen.queryByText("CNN architectures")).not.toBeInTheDocument();
+    expect(screen.getByText("Maybe CNN details")).toBeInTheDocument();
+  });
+
   it("rewrites unclear lecture titles into learner-friendly labels", () => {
     expect(displayLabelForSectionTitle("Lecture 9: What Is Going On Inside My Model?")).toBe(
       "Model interpretability",
