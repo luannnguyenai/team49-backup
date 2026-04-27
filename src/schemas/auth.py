@@ -122,7 +122,7 @@ class OnboardingRequest(BaseModel):
     )
     goal_ids: list[str] = Field(
         default_factory=list,
-        description="Onboarding goal identifiers: 'computer_vision' | 'nlp'",
+        description="Onboarding goal identifier: 'computer_vision' | 'nlp'",
     )
 
     @field_validator("goal_ids")
@@ -131,6 +131,8 @@ class OnboardingRequest(BaseModel):
         invalid = [g for g in v if g not in VALID_GOAL_IDS]
         if invalid:
             raise ValueError(f"Unknown goal_ids: {invalid}. Valid: {sorted(VALID_GOAL_IDS)}")
+        if len(v) > 1:
+            raise ValueError("Planner V1 requires exactly one goal_id")
         return v
 
     available_hours_per_week: float = Field(
