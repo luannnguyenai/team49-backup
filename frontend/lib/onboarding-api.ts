@@ -35,6 +35,7 @@ export interface PriorAnalysisResponse {
   topic_summaries?: Array<{
     id: string;
     summary: string;
+    label?: string | null;
   }>;
   model_used: string;
   provider: string;

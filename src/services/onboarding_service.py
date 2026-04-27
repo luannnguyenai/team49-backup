@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import json
 import logging
+import asyncio
+import urllib.request
 from collections import defaultdict
 from uuid import UUID
 
@@ -49,14 +51,57 @@ Given a learner's self-reported background and a list of candidate course topics
 choose only the common topics that should be confirmed with the learner before placement.
 
 Rules:
-- Return JSON only: {"topics": [{"id": "topic-id", "summary": "Vietnamese one-sentence summary"}]}.
+- Return JSON only: {"topics": [{"id": "topic-id", "label": "short learner-friendly English label", "summary": "one concise English sentence"}]}.
 - Select at most 8 topic IDs.
-- Prefer topics explicitly mentioned by the learner or strongly implied by coding/tools.
-- Keep common topics such as CNNs, transformers, agents, Python, PyTorch, HuggingFace when relevant.
+- Do not return a stable/default shortlist.
+- Select only topics explicitly mentioned by the learner or strongly implied by concrete coding/tools.
+- Generic AI/CV/NLP/deep learning/machine learning/Python-only statements are not enough evidence; return {"topics": []} unless concrete concepts are mentioned.
+- Keep common topics such as CNNs, transformers, agents, Python, PyTorch, HuggingFace only when relevant to the learner's text.
 - Do not select niche/admin topics unless clearly requested.
-- Summary must be one concise Vietnamese sentence based on unit_titles, rewritten so learners understand the topic without raw lecture numbering.
+- Label must rewrite unclear lecture titles into understandable topic names, e.g. "What Is Going On Inside My Model?" -> "Model interpretability".
+- Label and summary must be in English.
+- Summary must be one concise English sentence based on unit_titles, rewritten so learners understand the topic without raw lecture numbering.
 - Self-report is not mastery; this shortlist only decides what to ask next.
 """
+
+
+def _invoke_openai_responses(system_prompt: str, user_text: str) -> str:
+    if not settings.openai_api_key:
+        raise RuntimeError("OPENAI_API_KEY is not configured")
+
+    body = json.dumps(
+        {
+            "model": DEFAULT_MODEL,
+            "reasoning": {"effort": "medium"},
+            "input": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_text},
+            ],
+            "max_output_tokens": 1800,
+        },
+        ensure_ascii=False,
+    ).encode("utf-8")
+    request = urllib.request.Request(
+        "https://api.openai.com/v1/responses",
+        data=body,
+        headers={
+            "Authorization": f"Bearer {settings.openai_api_key}",
+            "Content-Type": "application/json",
+        },
+    )
+
+    with urllib.request.urlopen(request, timeout=120) as response:
+        payload = json.loads(response.read())
+
+    if payload.get("output_text"):
+        return str(payload["output_text"])
+
+    chunks: list[str] = []
+    for item in payload.get("output", []):
+        for part in item.get("content", []) or []:
+            if isinstance(part, dict) and part.get("type") == "output_text":
+                chunks.append(str(part.get("text", "")))
+    return "".join(chunks)
 
 
 def _derive_course_ids(goal_ids: list[str]) -> list[str]:
@@ -101,14 +146,13 @@ def _fallback_prior_shortlist(body: PriorAnalysisRequest) -> list[str]:
         for idx, candidate in enumerate(body.candidates)
     ]
     matched = [item for item in scored if item[0] > 0]
-    source = matched if matched else scored
     return [
         item[2]
-        for item in sorted(source, key=lambda item: (-item[0], item[1]))[:_PRIOR_ANALYSIS_LIMIT]
+        for item in sorted(matched, key=lambda item: (-item[0], item[1]))[:_PRIOR_ANALYSIS_LIMIT]
     ]
 
 
-def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> tuple[list[str], dict[str, str]]:
+def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> tuple[list[str], dict[str, dict[str, str]]]:
     text = raw.strip()
     if text.startswith("```"):
         text = text.split("```")[1]
@@ -118,7 +162,7 @@ def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> tuple[list[
     payload = json.loads(text)
 
     result: list[str] = []
-    summaries: dict[str, str] = {}
+    summaries: dict[str, dict[str, str]] = {}
 
     topics = payload.get("topics")
     if isinstance(topics, list):
@@ -131,7 +175,10 @@ def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> tuple[list[
             result.append(topic_id)
             summary = item.get("summary")
             if isinstance(summary, str) and summary.strip():
-                summaries[topic_id] = summary.strip()
+                summaries.setdefault(topic_id, {})["summary"] = summary.strip()
+            label = item.get("label")
+            if isinstance(label, str) and label.strip():
+                summaries.setdefault(topic_id, {})["label"] = label.strip()
         return result[:_PRIOR_ANALYSIS_LIMIT], summaries
 
     ids = payload.get("shortlisted_topic_ids", [])
@@ -182,26 +229,29 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
 
     try:
         enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
-        llm = init_chat_model(
-            **build_chat_model_kwargs(
-                model=DEFAULT_MODEL,
-                temperature=0,
-                max_tokens=700,
+        if settings.model_provider.lower() == "openai":
+            raw_response = await asyncio.to_thread(
+                _invoke_openai_responses,
+                _PRIOR_ANALYSIS_SYSTEM,
+                user_text,
             )
-        )
-        response = llm.invoke(
-            [
-                SystemMessage(content=_PRIOR_ANALYSIS_SYSTEM),
-                HumanMessage(content=user_text),
-            ]
-        )
-        shortlisted, summary_map = _parse_prior_analysis_response(str(response.content), valid_ids)
-        if not shortlisted:
-            shortlisted = _fallback_prior_shortlist(body)
-            summary_map = {}
-            fallback = True
         else:
-            fallback = False
+            llm = init_chat_model(
+                **build_chat_model_kwargs(
+                    model=DEFAULT_MODEL,
+                    temperature=0,
+                    max_tokens=1800,
+                )
+            )
+            response = llm.invoke(
+                [
+                    SystemMessage(content=_PRIOR_ANALYSIS_SYSTEM),
+                    HumanMessage(content=user_text),
+                ]
+            )
+            raw_response = str(response.content)
+        shortlisted, summary_map = _parse_prior_analysis_response(raw_response, valid_ids)
+        fallback = False
     except Exception as exc:
         logger.warning("prior analysis LLM failed; using fallback: %s", exc)
         shortlisted = _fallback_prior_shortlist(body)
@@ -211,9 +261,13 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
     return PriorAnalysisResponse(
         shortlisted_topic_ids=shortlisted,
         topic_summaries=[
-            PriorAnalysisTopicSummary(id=topic_id, summary=summary)
-            for topic_id, summary in summary_map.items()
-            if topic_id in shortlisted
+            PriorAnalysisTopicSummary(
+                id=topic_id,
+                summary=summary_data.get("summary", ""),
+                label=summary_data.get("label"),
+            )
+            for topic_id, summary_data in summary_map.items()
+            if topic_id in shortlisted and summary_data.get("summary")
         ],
         model_used=DEFAULT_MODEL,
         provider=settings.model_provider,

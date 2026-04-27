@@ -219,12 +219,16 @@ function OnboardingPageInner() {
       const summaryById = new Map(
         (response.topic_summaries ?? []).map((item) => [item.id, item.summary]),
       );
+      const labelById = new Map(
+        (response.topic_summaries ?? []).map((item) => [item.id, item.label ?? null]),
+      );
       const apiTopics: PriorCandidateTopic[] = response.shortlisted_topic_ids.flatMap((id) => {
         const topic = topicById.get(id);
         if (!topic) return [];
         return [
           {
             ...topic,
+            aiDisplayLabel: labelById.get(id) ?? null,
             summary: summaryById.get(id) ?? null,
           },
         ];

@@ -106,6 +106,7 @@ class PriorAnalysisRequest(BaseModel):
 class PriorAnalysisTopicSummary(BaseModel):
     id: str
     summary: str
+    label: str | None = None
 
 
 class PriorAnalysisResponse(BaseModel):
