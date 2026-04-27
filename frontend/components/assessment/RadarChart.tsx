@@ -60,10 +60,28 @@ const GRID_LEVELS = [20, 40, 60, 80, 100] as const;
 export default function RadarChart({ data, size = 320 }: Props) {
   if (data.length === 0) return null;
 
-  const padding = size * 0.2;
-  const svgSize = size + padding * 2;
-  const cx = padding + size / 2;
-  const cy = padding + size / 2;
+  const labelFontSize = size * 0.042;
+  const scoreFontSize = size * 0.036;
+  const wrappedLabels = data.map((d) => wrapLabel(d.label));
+  const maxLabelChars = wrappedLabels.reduce(
+    (max, lines) => Math.max(max, ...lines.map((line) => line.length)),
+    0,
+  );
+  const maxLabelLines = wrappedLabels.reduce((max, lines) => Math.max(max, lines.length), 1);
+
+  const horizontalPadding = Math.max(
+    size * 0.2,
+    maxLabelChars * labelFontSize * 0.62 + size * 0.08,
+  );
+  const verticalPadding = Math.max(
+    size * 0.2,
+    maxLabelLines * labelFontSize + scoreFontSize + size * 0.14,
+  );
+
+  const svgWidth = size + horizontalPadding * 2;
+  const svgHeight = size + verticalPadding * 2;
+  const cx = horizontalPadding + size / 2;
+  const cy = verticalPadding + size / 2;
   const maxR = size * 0.34;        // radius of the outermost grid ring
   const labelR = maxR + size * 0.14; // radius for axis labels
 
@@ -95,14 +113,14 @@ export default function RadarChart({ data, size = 320 }: Props) {
     // Anchor: left-align for right-side labels, right-align for left-side
     const anchor: "middle" | "start" | "end" =
       Math.abs(pos.x - cx) < 4 ? "middle" : pos.x > cx ? "start" : "end";
-    return { ...d, ...pos, anchor, angle, lines: wrapLabel(d.label) };
+    return { ...d, ...pos, anchor, angle, lines: wrappedLabels[i] };
   });
 
   return (
     <svg
-      viewBox={`0 0 ${svgSize} ${svgSize}`}
+      viewBox={`0 0 ${svgWidth} ${svgHeight}`}
       width="100%"
-      style={{ maxWidth: svgSize }}
+      style={{ maxWidth: svgWidth }}
       aria-label="Mastery radar chart"
       role="img"
     >
