@@ -461,6 +461,9 @@ export interface PathItemResponse {
   section_title: string | null;
   course_id?: string | null;
   course_title?: string | null;
+  course_slug?: string | null;
+  unit_slug?: string | null;
+  learn_href?: string | null;
   action: PathAction;
   estimated_hours: number | null;
   order_index: number;

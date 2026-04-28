@@ -137,6 +137,9 @@ def _serialize_plan_item(
         "canonical_unit_id": item.canonical_unit_id,
         "course_id": str(item.course_id) if item.course_id is not None else None,
         "course_title": item.course_title,
+        "course_slug": item.course_slug,
+        "unit_slug": item.unit_slug,
+        "learn_href": item.learn_href,
         "action": item.action.value,
         "estimated_hours": item.estimated_hours or 0.0,
         "order_index": item.order_index,
@@ -421,6 +424,10 @@ async def _generate_canonical_learning_path(
                 else:
                     rationale_log = f"placement_relearn_score={round(score_pct)}"
 
+        course = course_by_id.get(unit.course_id)
+        course_slug = getattr(course, "slug", None)
+        unit_slug = getattr(unit, "slug", None)
+
         item = PathItemResponse(
             id=unit.id,
             learning_unit_id=unit.id,
@@ -429,9 +436,12 @@ async def _generate_canonical_learning_path(
                 section_by_id[unit.section_id].title if unit.section_id in section_by_id else None
             ),
             course_id=unit.course_id,
-            course_title=(
-                course_by_id[unit.course_id].title if unit.course_id in course_by_id else None
-            ),
+            course_title=(course.title if course is not None else None),
+            course_slug=course_slug,
+            unit_slug=unit_slug,
+            learn_href=f"/courses/{course_slug}/learn/{unit_slug}"
+            if course_slug and unit_slug
+            else None,
             action=action,
             estimated_hours=estimated_hours if estimated_hours > 0 else None,
             order_index=order_index,
@@ -698,14 +708,22 @@ async def _get_canonical_learning_path_rows(
             phase_tag=item.get("phase_tag"),
             is_locked=bool(item.get("is_locked", False)),
             rationale_log=item.get("rationale_log"),
+            unit_slug=(
+                getattr(unit, "slug", None)
+                if unit is not None
+                else item.get("unit_slug")
+            ),
         )
         section_title = None
         course_title = item.get("course_title")
+        course_slug = item.get("course_slug")
         if unit is not None:
             section = section_by_id.get(unit.section_id)
             section_title = section.title if section is not None else None
             course = course_by_id.get(unit.course_id)
             course_title = course.title if course is not None else course_title
+            course_slug = getattr(course, "slug", None) if course is not None else course_slug
+        row.course_slug = course_slug
         rows.append(
             (
                 row,

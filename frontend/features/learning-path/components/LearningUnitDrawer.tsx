@@ -22,6 +22,10 @@ function summarizeMarkdown(markdown: string | null | undefined): string | null {
     .slice(0, 420);
 }
 
+function learningPlayerHref(item: { learn_href?: string | null; learning_unit_id: string }): string {
+  return item.learn_href || `/learn/${item.learning_unit_id}`;
+}
+
 export default function LearningUnitDrawer() {
   const items = useLearningPathStore((s) => s.items);
   const selectedItemId = useLearningPathStore((s) => s.selectedItemId);
@@ -184,7 +188,7 @@ export default function LearningUnitDrawer() {
             </div>
 
             <Link
-              href={`/learn/${selectedItem.learning_unit_id}`}
+              href={learningPlayerHref(selectedItem)}
               className="flex w-full items-center justify-center rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
             >
               Bắt đầu học

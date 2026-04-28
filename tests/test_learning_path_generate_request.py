@@ -17,6 +17,7 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
     user = SimpleNamespace(id=uuid.uuid4())
     unit = SimpleNamespace(
         id=unit_id,
+        slug="lecture-01-seg1",
         title="Unit Title",
         section_id=section_id,
         canonical_unit_id=str(uuid.uuid4()),
@@ -24,7 +25,7 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
         course_id=uuid.uuid4(),
     )
     section = SimpleNamespace(id=section_id, title="Deep Learning")
-    course = SimpleNamespace(id=unit.course_id, title="CS230: Deep Learning")
+    course = SimpleNamespace(id=unit.course_id, slug="cs230", title="CS230: Deep Learning")
     plan = SimpleNamespace(id=uuid.uuid4())
     db = MagicMock()
     db.execute = AsyncMock()
@@ -66,6 +67,9 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
 
     content.get_linked_learning_units.assert_awaited_once_with(["CS230", "CS231n"])
     assert response.total_units == 1
+    assert response.items[0].course_slug == "cs230"
+    assert response.items[0].unit_slug == "lecture-01-seg1"
+    assert response.items[0].learn_href == "/courses/cs230/learn/lecture-01-seg1"
 
 
 @pytest.mark.asyncio

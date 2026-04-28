@@ -52,6 +52,8 @@ def _path_item_response(
     section_title: str | None,
     course_title: str | None,
 ) -> PathItemResponse:
+    course_slug = getattr(lp, "course_slug", None)
+    unit_slug = getattr(lp, "unit_slug", None)
     return PathItemResponse(
         id=lp.id,
         learning_unit_id=lp.learning_unit_id,
@@ -59,6 +61,11 @@ def _path_item_response(
         section_title=section_title,
         course_id=getattr(lp, "course_id", None),
         course_title=course_title,
+        course_slug=course_slug,
+        unit_slug=unit_slug,
+        learn_href=f"/courses/{course_slug}/learn/{unit_slug}"
+        if course_slug and unit_slug
+        else None,
         action=lp.action,
         estimated_hours=lp.estimated_hours,
         order_index=lp.order_index,
