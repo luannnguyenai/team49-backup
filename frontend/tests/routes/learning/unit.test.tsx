@@ -599,4 +599,24 @@ describe("learning unit page (US3)", () => {
 
     expect(screen.queryByRole("link", { name: "Courses" })).not.toBeInTheDocument();
   });
+
+  it("renders desktop top nav in the order logo, search, then navigation links", async () => {
+    render(<TopNav />);
+
+    const brand = screen.getByRole("link", { name: "AI Learning Hub" });
+    const search = screen.getByLabelText("Tìm kiếm khóa học");
+    const tutorLink = screen.getByRole("link", { name: "AI Tutor" });
+
+    const headerRow = brand.closest("header")?.firstElementChild;
+    expect(headerRow).not.toBeNull();
+    expect(headerRow?.contains(brand)).toBe(true);
+    expect(headerRow?.contains(search)).toBe(true);
+    expect(headerRow?.contains(tutorLink)).toBe(true);
+    expect(
+      brand.compareDocumentPosition(search) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      search.compareDocumentPosition(tutorLink) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
 });

@@ -5,19 +5,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Brain,
-  Moon,
-  Sun,
-  Bell,
-  LogOut,
-  Search,
-  Menu,
-  X,
-} from "lucide-react";
+import { Moon, Sun, Bell, LogOut, Search, Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
+import BrandLogo from "@/components/layout/BrandLogo";
 import { NAV_ITEMS, type NavItem } from "@/components/layout/navItems";
 
 export default function TopNav() {
@@ -61,17 +53,31 @@ export default function TopNav() {
       >
         <div className="flex h-16 items-center gap-4 px-4 md:px-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600">
-              <Brain className="h-4 w-4 text-white" />
-            </div>
-            <span className="hidden sm:block text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-              AI Learning Hub
-            </span>
-          </Link>
+          <div className="shrink-0">
+            <BrandLogo compact />
+          </div>
+
+          {/* Search — center, flex-1 */}
+          <div className="hidden flex-1 sm:block">
+            <label
+              className="mx-auto flex max-w-md items-center gap-2 rounded-full border px-3 py-2"
+              style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}
+            >
+              <Search className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
+              <input
+                aria-label="Tìm kiếm khóa học"
+                placeholder="Tìm kiếm khóa học..."
+                readOnly
+                tabIndex={-1}
+                value=""
+                className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
+                style={{ color: "var(--text-primary)" }}
+              />
+            </label>
+          </div>
 
           {/* Desktop nav links */}
-          <nav className="hidden md:flex items-center gap-1 ml-4">
+          <nav className="ml-auto hidden items-center gap-1 md:flex">
             {visibleNavItems.map((navItem) => {
               const { href, label, icon: Icon } = navItem;
               const active = isNavItemActive(navItem);
@@ -95,27 +101,8 @@ export default function TopNav() {
             })}
           </nav>
 
-          {/* Search — center, flex-1 */}
-          <div className="flex-1 max-w-xs mx-auto hidden sm:block">
-            <label
-              className="flex items-center gap-2 rounded-full border px-3 py-2"
-              style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}
-            >
-              <Search className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
-              <input
-                aria-label="Tìm kiếm khóa học"
-                placeholder="Tìm kiếm khóa học..."
-                readOnly
-                tabIndex={-1}
-                value=""
-                className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
-                style={{ color: "var(--text-primary)" }}
-              />
-            </label>
-          </div>
-
           {/* Right actions */}
-          <div className="ml-auto flex items-center gap-1">
+          <div className="flex items-center gap-1">
             {/* Dark mode toggle */}
             <button
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}

@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Brain, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+
+import BrandLogo from "@/components/layout/BrandLogo";
 
 const NAV_ITEMS = [
   { href: "#product", label: "Sản phẩm" },
@@ -12,15 +14,7 @@ export default function PublicTopNav() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/60 bg-white/75 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 md:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-cyan-500 to-teal-400 text-white shadow-lg shadow-cyan-500/20">
-            <Brain className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-slate-950">AI Learning Hub</p>
-            <p className="text-xs text-slate-500">Guided AI skill development</p>
-          </div>
-        </Link>
+        <BrandLogo subtitle="Guided AI skill development" />
 
         <nav className="ml-auto hidden items-center gap-6 md:flex">
           {NAV_ITEMS.map((item) => (
