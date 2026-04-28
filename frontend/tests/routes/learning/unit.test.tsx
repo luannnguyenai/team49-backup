@@ -592,14 +592,11 @@ describe("learning unit page (US3)", () => {
     });
   });
 
-  it("keeps the Courses nav item active on a nested learning route", async () => {
+  it("hides the Courses nav item after login on a nested learning route", async () => {
     navigationMock.pathname = "/courses/cs231n/learn/lecture-1-introduction";
 
     render(<TopNav />);
 
-    expect(screen.getByRole("link", { name: "Courses" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
+    expect(screen.queryByRole("link", { name: "Courses" })).not.toBeInTheDocument();
   });
 });
