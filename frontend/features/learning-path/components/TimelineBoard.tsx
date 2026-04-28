@@ -79,7 +79,7 @@ export default function TimelineBoard() {
 
   return (
     <div className="space-y-5">
-      <section className="relative overflow-visible rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-slate-50 to-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] md:p-8">
+      <section className="relative overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-slate-50 to-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] md:p-8">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.05]"
           style={{
@@ -122,11 +122,8 @@ export default function TimelineBoard() {
 
             {settingsOpen ? (
               <div
-                className="absolute right-0 top-0 z-50 w-72 rounded-2xl border bg-white p-4 text-left shadow-xl"
-                style={{
-                  borderColor: "var(--border)",
-                  transform: "translateY(calc(-100% - 0.5rem))",
-                }}
+                className="absolute right-0 top-full z-20 mt-2 w-72 rounded-2xl border bg-white p-4 text-left shadow-xl"
+                style={{ borderColor: "var(--border)" }}
               >
                 <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
                   Weekly time budget
