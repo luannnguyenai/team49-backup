@@ -1,3 +1,5 @@
+ "use client";
+
 import Link from "next/link";
 import {
   ArrowRight,
@@ -12,6 +14,7 @@ import {
 } from "lucide-react";
 
 import PublicTopNav from "@/components/layout/PublicTopNav";
+import ScrollReveal from "@/components/landing/ScrollReveal";
 
 const audienceCards = [
   {
@@ -70,14 +73,14 @@ export default function LandingPage() {
     <div className="bg-slate-50 text-slate-950">
       <PublicTopNav />
 
-      <main className="md:snap-y md:snap-proximity">
+      <main className="landing-scroll-shell md:snap-y md:snap-proximity">
         <section
           id="product"
-          className="relative overflow-hidden border-b border-slate-200/70 md:snap-start"
+          className="landing-panel relative overflow-hidden border-b border-slate-200/70 md:snap-start"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_45%,#ecfeff_100%)]" />
+          <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_45%,#ecfeff_100%)]" />
           <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl gap-14 px-4 py-16 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-center lg:py-20">
-            <div className="space-y-8">
+            <ScrollReveal className="space-y-8">
               <SectionLabel>Sản phẩm học AI có định hướng</SectionLabel>
 
               <div className="space-y-5">
@@ -108,8 +111,10 @@ export default function LandingPage() {
 
               <div className="grid gap-4 md:grid-cols-3">
                 {audienceCards.map(({ title, description, icon: Icon }) => (
-                  <article
+                  <ScrollReveal
+                    as="article"
                     key={title}
+                    delayMs={80}
                     className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.35)] backdrop-blur"
                   >
                     <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-cyan-500 to-teal-400 text-white">
@@ -117,12 +122,12 @@ export default function LandingPage() {
                     </div>
                     <h2 className="text-base font-semibold text-slate-950">{title}</h2>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-                  </article>
+                  </ScrollReveal>
                 ))}
               </div>
-            </div>
+            </ScrollReveal>
 
-            <div className="relative">
+            <ScrollReveal className="relative" delayMs={120}>
               <div className="absolute inset-x-6 top-10 h-32 rounded-full bg-cyan-400/25 blur-3xl" />
               <div className="relative overflow-hidden rounded-[32px] border border-slate-200/80 bg-slate-950 p-6 text-white shadow-[0_30px_80px_-40px_rgba(8,145,178,0.65)]">
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
@@ -179,16 +184,16 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         <section
           id="roadmap"
-          className="relative border-b border-slate-200/70 bg-white md:snap-start"
+          className="landing-panel relative border-b border-slate-200/70 bg-white md:snap-start"
         >
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
-            <div className="space-y-6">
+            <ScrollReveal className="space-y-6">
               <SectionLabel>Cá nhân hóa lộ trình học</SectionLabel>
               <div className="space-y-4">
                 <h2 className="text-3xl font-semibold leading-tight text-slate-950 md:text-4xl">
@@ -200,41 +205,52 @@ export default function LandingPage() {
                 </p>
               </div>
               <BulletList items={roadmapPoints} />
-            </div>
+            </ScrollReveal>
 
             <div className="grid gap-4 md:grid-cols-3">
-              <article className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 shadow-sm">
+              <ScrollReveal
+                as="article"
+                className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 shadow-sm"
+              >
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">01</p>
                 <h3 className="mt-3 text-lg font-semibold text-slate-950">Mục tiêu</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
                   Chọn hướng học AI/ML/CV/NLP phù hợp với nhu cầu hiện tại.
                 </p>
-              </article>
-              <article className="rounded-[28px] border border-cyan-200 bg-cyan-50 p-5 shadow-sm">
+              </ScrollReveal>
+              <ScrollReveal
+                as="article"
+                delayMs={80}
+                className="rounded-[28px] border border-cyan-200 bg-cyan-50 p-5 shadow-sm"
+              >
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">02</p>
                 <h3 className="mt-3 text-lg font-semibold text-slate-950">Đánh giá nền tảng</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
                   Xác định điểm bắt đầu hợp lý để học nhanh hơn và ít vòng vo hơn.
                 </p>
-              </article>
-              <article className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 shadow-sm">
+              </ScrollReveal>
+              <ScrollReveal
+                as="article"
+                delayMs={160}
+                className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 shadow-sm"
+              >
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">03</p>
                 <h3 className="mt-3 text-lg font-semibold text-slate-950">Tiến trình rõ ràng</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
                   Học theo roadmap có thứ tự thay vì nhảy giữa các chủ đề rời rạc.
                 </p>
-              </article>
+              </ScrollReveal>
             </div>
           </div>
         </section>
 
         <section
           id="tutor"
-          className="relative overflow-hidden border-b border-slate-800 bg-slate-950 text-white md:snap-start"
+          className="landing-panel relative overflow-hidden border-b border-slate-800 bg-slate-950 text-white md:snap-start"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),radial-gradient(circle_at_bottom_left,_rgba(99,102,241,0.18),_transparent_32%)]" />
+          <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),radial-gradient(circle_at_bottom_left,_rgba(99,102,241,0.18),_transparent_32%)]" />
           <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
-            <div className="space-y-6">
+            <ScrollReveal className="space-y-6">
               <SectionLabel>AI Tutor đồng hành khi học</SectionLabel>
               <div className="space-y-4">
                 <h2 className="text-3xl font-semibold leading-tight text-white md:text-4xl">
@@ -246,9 +262,12 @@ export default function LandingPage() {
                 </p>
               </div>
               <BulletList items={tutorPoints} />
-            </div>
+            </ScrollReveal>
 
-            <div className="rounded-[32px] border border-white/10 bg-white/5 p-5 shadow-[0_30px_80px_-40px_rgba(34,211,238,0.5)] backdrop-blur">
+            <ScrollReveal
+              className="rounded-[32px] border border-white/10 bg-white/5 p-5 shadow-[0_30px_80px_-40px_rgba(34,211,238,0.5)] backdrop-blur"
+              delayMs={120}
+            >
               <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
                 <div className="rounded-[28px] border border-white/10 bg-slate-900/80 p-5">
                   <div className="flex items-center gap-3">
@@ -301,12 +320,12 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
-        <section className="border-b border-slate-200/70 bg-white md:snap-start">
-          <div className="mx-auto max-w-5xl px-4 py-20 text-center md:px-6">
+        <section className="landing-panel border-b border-slate-200/70 bg-white md:snap-start">
+          <ScrollReveal className="mx-auto max-w-5xl px-4 py-20 text-center md:px-6">
             <SectionLabel>Bắt đầu học có định hướng</SectionLabel>
             <h2 className="mt-6 text-3xl font-semibold leading-tight text-slate-950 md:text-4xl">
               Nếu bạn muốn học AI bài bản hơn, bắt đầu từ đây
@@ -330,13 +349,13 @@ export default function LandingPage() {
                 Đăng nhập
               </Link>
             </div>
-          </div>
+          </ScrollReveal>
         </section>
       </main>
 
       <footer id="contact" className="bg-slate-950 text-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 md:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)] md:px-6">
-          <div className="space-y-4">
+          <ScrollReveal className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
               Đội ngũ phát triển
             </p>
@@ -345,16 +364,19 @@ export default function LandingPage() {
               Landing page này đại diện cho định hướng sản phẩm: giúp người học tiếp cận AI/ML/CV/NLP
               theo cách có cấu trúc, có hỗ trợ, và bớt phụ thuộc vào việc tự nối các mảnh kiến thức rời rạc.
             </p>
-          </div>
+          </ScrollReveal>
 
-          <div className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+          <ScrollReveal
+            delayMs={120}
+            className="rounded-[28px] border border-white/10 bg-white/5 p-6"
+          >
             <p className="text-sm font-semibold text-white">Liên hệ</p>
             <div className="mt-4 space-y-3 text-sm text-slate-300">
               <p>Kênh hỗ trợ: đội ngũ phát triển nội bộ của dự án AI Learning Hub</p>
               <p>Liên hệ kỹ thuật: qua repository dự án và kênh phối hợp nội bộ hiện tại</p>
               <p>Phạm vi sản phẩm: guided learning, roadmap support, AI tutor for AI/ML/CV/NLP</p>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </footer>
     </div>
