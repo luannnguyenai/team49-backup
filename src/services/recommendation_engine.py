@@ -126,6 +126,132 @@ def _planner_reason_codes(
     return reason_codes
 
 
+def _derive_salience_from_kp_rows(unit_kp_rows: list[object]) -> str | None:
+    weights: list[float] = []
+    for row in unit_kp_rows:
+        planner_role = str(getattr(row, "planner_role", "") or "").strip().lower()
+        coverage_level = str(getattr(row, "coverage_level", "") or "").strip().lower()
+        if planner_role not in {"", "main", "prereq", "prerequisite"}:
+            continue
+        if coverage_level == "mention":
+            continue
+        weight = getattr(row, "coverage_weight", None)
+        if isinstance(weight, (int, float)):
+            weights.append(float(weight))
+
+    if not weights:
+        return None
+    return f"{max(weights):g}"
+
+
+def _has_critical_gateway_kp(
+    unit_kp_rows: list[object],
+    kp_by_id: dict[str, object],
+) -> bool:
+    for row in unit_kp_rows:
+        planner_role = str(getattr(row, "planner_role", "") or "").strip().lower()
+        if planner_role not in {"", "main", "prereq", "prerequisite"}:
+            continue
+        kp = kp_by_id.get(str(getattr(row, "kp_id", "") or ""))
+        if kp is None:
+            continue
+        importance = str(getattr(kp, "importance_level", "") or "").strip().lower()
+        structural_role = str(getattr(kp, "structural_role", "") or "").strip().lower()
+        if importance == "critical" and structural_role == "gateway":
+            return True
+    return False
+
+
+def classify_schema_v2_unit_priority(
+    unit: object,
+    *,
+    unit_kp_rows: list[object],
+    kp_by_id: dict[str, object],
+    quiz_item_count: int,
+    action: PathAction,
+) -> SimpleNamespace:
+    """Classify a canonical unit using denormalized fields first, graph fallback second."""
+
+    segment_policy = _segment_policy(unit)
+    derived_salience = _derive_salience_from_kp_rows(unit_kp_rows)
+    salience_score = getattr(unit, "salience_score", None) or derived_salience
+    has_quiz_items = bool(getattr(unit, "has_quiz_items", False) or quiz_item_count > 0)
+    override_critical = bool(getattr(unit, "override_critical_kp", False)) or _has_critical_gateway_kp(
+        unit_kp_rows,
+        kp_by_id,
+    )
+
+    canonical_unit = SimpleNamespace(
+        content_type=getattr(unit, "content_type", None),
+        salience_score=salience_score,
+        has_quiz_items=has_quiz_items,
+        is_worth_learning=getattr(unit, "is_worth_learning", None),
+        override_critical_kp=override_critical,
+        active=getattr(unit, "active", True),
+        section_flags=getattr(unit, "section_flags", []),
+    )
+    reason_codes = _planner_reason_codes(
+        action=action,
+        canonical_unit=canonical_unit,
+        has_quiz_items=has_quiz_items,
+        segment_policy=segment_policy,
+    )
+
+    return SimpleNamespace(
+        segment_policy=segment_policy,
+        reason_codes=reason_codes,
+        has_quiz_items=has_quiz_items,
+        salience_score=str(salience_score) if salience_score is not None else None,
+        override_critical_kp=override_critical,
+    )
+
+
+def find_prerequisite_gaps(
+    *,
+    target_kp_ids: list[str],
+    prerequisite_edges: list[object],
+    mastered_kp_ids: set[str],
+    max_depth: int = 2,
+) -> list[str]:
+    """Walk prerequisite edges backwards and return unmastered KP gaps up to `max_depth`."""
+
+    parents_by_target: dict[str, list[str]] = {}
+    for edge in prerequisite_edges:
+        if getattr(edge, "active", True) is False:
+            continue
+        source = str(getattr(edge, "source_kp_id", "") or "")
+        target = str(getattr(edge, "target_kp_id", "") or "")
+        if source and target:
+            parents_by_target.setdefault(target, []).append(source)
+
+    gaps: list[str] = []
+    seen = set(target_kp_ids)
+    frontier = [(kp_id, 0) for kp_id in target_kp_ids]
+    while frontier:
+        current, depth = frontier.pop(0)
+        if depth >= max_depth:
+            continue
+        for parent in parents_by_target.get(current, []):
+            if parent in seen:
+                continue
+            seen.add(parent)
+            if parent not in mastered_kp_ids:
+                gaps.append(parent)
+                frontier.append((parent, depth + 1))
+
+    return gaps
+
+
+def is_mastery_evidence_backed(mastery: object | None) -> bool:
+    if mastery is None:
+        return False
+    updated_by = str(getattr(mastery, "updated_by", "") or "").strip().lower()
+    observed = int(getattr(mastery, "n_items_observed", 0) or 0)
+    if observed <= 0:
+        return False
+    return updated_by not in {"self_report", "self-report", "manual_prior"}
+
+
 async def generate_learning_path(
     db: AsyncSession,
     user: User,
@@ -162,6 +288,10 @@ async def _generate_canonical_learning_path(
     canonical_unit_by_id = await content_repo.get_canonical_units_by_ids(canonical_unit_ids)
     quiz_counts_by_unit_id = await content_repo.get_quiz_item_counts_by_unit_ids(canonical_unit_ids)
     kp_ids = sorted({row.kp_id for row in unit_kp_rows})
+    kp_by_id = await content_repo.get_concepts_by_ids(kp_ids)
+    unit_kp_rows_by_unit_id: dict[str, list[object]] = {}
+    for row in unit_kp_rows:
+        unit_kp_rows_by_unit_id.setdefault(row.unit_id, []).append(row)
 
     mastery_repo = LearnerMasteryKPRepository(db)
     mastery_by_kp = await mastery_repo.bulk_get_for_user(user.id, kp_ids)
@@ -188,7 +318,8 @@ async def _generate_canonical_learning_path(
             if unit.canonical_unit_id
             else None
         )
-        unit_kps = [row.kp_id for row in unit_kp_rows if row.unit_id == unit.canonical_unit_id]
+        current_unit_kp_rows = unit_kp_rows_by_unit_id.get(unit.canonical_unit_id or "", [])
+        unit_kps = [row.kp_id for row in current_unit_kp_rows]
         mastery_values = [
             estimate_mastery_lcb_on_read(mastery_by_kp[kp_id], now=generated_at)
             for kp_id in unit_kps
@@ -197,17 +328,16 @@ async def _generate_canonical_learning_path(
         mastery_lcb = min(mastery_values) if mastery_values else 0.0
         action_value = classify_unit_action(mastery_lcb)
         action = PathAction(action_value)
-        segment_policy = _segment_policy(canonical_unit)
-        has_quiz_items = bool(
-            getattr(canonical_unit, "has_quiz_items", False)
-            or quiz_counts_by_unit_id.get(unit.canonical_unit_id or "", 0) > 0
-        )
-        reason_codes = _planner_reason_codes(
+        priority = classify_schema_v2_unit_priority(
+            canonical_unit or SimpleNamespace(active=True),
+            unit_kp_rows=current_unit_kp_rows,
+            kp_by_id=kp_by_id,
+            quiz_item_count=quiz_counts_by_unit_id.get(unit.canonical_unit_id or "", 0),
             action=action,
-            canonical_unit=canonical_unit,
-            has_quiz_items=has_quiz_items,
-            segment_policy=segment_policy,
         )
+        segment_policy = priority.segment_policy
+        has_quiz_items = priority.has_quiz_items
+        reason_codes = priority.reason_codes
         if segment_policy == "hidden":
             estimated_hours = 0.0
         else:
@@ -261,10 +391,10 @@ async def _generate_canonical_learning_path(
             prerequisite_gap_kp_ids=[],
             segment_policy=segment_policy,
             content_type=getattr(canonical_unit, "content_type", None),
-            salience_score=getattr(canonical_unit, "salience_score", None),
+            salience_score=priority.salience_score,
             has_quiz_items=has_quiz_items,
             is_worth_learning=getattr(canonical_unit, "is_worth_learning", None),
-            override_critical_kp=bool(getattr(canonical_unit, "override_critical_kp", False)),
+            override_critical_kp=bool(priority.override_critical_kp),
             phase_tag=phase_tag,
             is_locked=is_locked,
             rationale_log=rationale_log,
@@ -284,10 +414,10 @@ async def _generate_canonical_learning_path(
                 "prerequisite_gap_kp_ids": [],
                 "segment_policy": segment_policy,
                 "content_type": getattr(canonical_unit, "content_type", None),
-                "salience_score": getattr(canonical_unit, "salience_score", None),
+                "salience_score": priority.salience_score,
                 "has_quiz_items": has_quiz_items,
                 "is_worth_learning": getattr(canonical_unit, "is_worth_learning", None),
-                "override_critical_kp": bool(getattr(canonical_unit, "override_critical_kp", False)),
+                "override_critical_kp": bool(priority.override_critical_kp),
                 "phase_tag": phase_tag,
                 "is_locked": is_locked,
                 "rationale_log": rationale_log,
