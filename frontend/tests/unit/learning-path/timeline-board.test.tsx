@@ -65,4 +65,23 @@ describe("TimelineBoard", () => {
     fireEvent.click(screen.getByRole("button", { name: /Second unit/ }));
     expect(selectItem).toHaveBeenCalledWith("b");
   });
+
+  it("updates weekly hours from the settings popover", () => {
+    useLearningPathStore.setState({
+      items: [
+        item({ id: "a", order_index: 0, learning_unit_title: "First unit", estimated_hours: 0.5 }),
+        item({ id: "b", order_index: 1, learning_unit_title: "Second unit", estimated_hours: 0.75 }),
+      ],
+    });
+
+    render(<TimelineBoard />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Weekly time settings" }));
+    fireEvent.change(screen.getByLabelText("Weekly hours input"), { target: { value: "8" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+
+    expect(useLearningPathStore.getState().profile?.weeklyHours).toBe(8);
+    expect(screen.getAllByText(/1 giờ 15 phút/).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: /Weekly time settings/ })).toHaveTextContent("8 giờ");
+  });
 });
