@@ -9,9 +9,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Routes that don't require authentication
 const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/"];
+const REDIRECT_AUTHENTICATED_AUTH_PATHS = ["/login", "/register"];
 
 // Routes that require auth but NOT onboarding
 const ONBOARDING_PATH = "/onboarding";
+
+function applyRelativeRedirectTarget(url: URL, redirectTo: string | null): void {
+  if (!redirectTo || !redirectTo.startsWith("/")) {
+    url.pathname = "/dashboard";
+    url.search = "";
+    return;
+  }
+
+  const resolved = new URL(redirectTo, url.origin);
+  url.pathname = resolved.pathname;
+  url.search = resolved.search;
+}
 
 /**
  * Check if a pathname matches a public route.
@@ -59,16 +72,19 @@ export function middleware(request: NextRequest) {
   }
 
   // ② Authenticated but already going to auth pages → redirect away
-  if (
-    isAuthenticated &&
-    (pathname === "/login" || pathname === "/register" || pathname === "/forgot-password")
-  ) {
+  if (isAuthenticated && REDIRECT_AUTHENTICATED_AUTH_PATHS.includes(pathname)) {
     const url = request.nextUrl.clone();
     // If there's a redirect param, honor it instead of dashboard.
     const redirectTo = searchParams.get("next") || searchParams.get("from");
-    url.pathname = redirectTo || "/dashboard";
-    url.searchParams.delete("from");
-    url.searchParams.delete("next");
+    applyRelativeRedirectTarget(url, redirectTo);
+    return NextResponse.redirect(url);
+  }
+
+  // ③ Authenticated users should not land on the public marketing homepage.
+  if (isAuthenticated && pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/tutor";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

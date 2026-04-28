@@ -5,7 +5,10 @@ import type { CourseCatalogItem } from "@/types";
 
 interface CourseCatalogProps {
   items: CourseCatalogItem[];
+  emptyMessage?: string;
 }
+
+const DEFAULT_EMPTY_MESSAGE = "Chưa có khóa học nào trong mục này.";
 
 function getGradientClass(slug: string) {
   const gradients = [
@@ -43,12 +46,15 @@ function getLearningProgressCopy(course: CourseCatalogItem) {
   };
 }
 
-export default function CourseCatalog({ items }: CourseCatalogProps) {
+export default function CourseCatalog({
+  items,
+  emptyMessage = DEFAULT_EMPTY_MESSAGE,
+}: CourseCatalogProps) {
   if (items.length === 0) {
     return (
       <div className="card rounded-card border-dashed p-10 text-center">
         <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-          Chưa có khóa học nào trong mục này.
+          {emptyMessage}
         </p>
       </div>
     );
@@ -107,7 +113,7 @@ export default function CourseCatalog({ items }: CourseCatalogProps) {
               <div className="flex flex-1 flex-col gap-4 p-6">
                 <div className="flex flex-wrap items-center gap-2">
                   {course.is_recommended && (
-                    <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
+                    <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">
                       Đề xuất
                     </span>
                   )}

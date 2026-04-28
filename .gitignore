@@ -49,3 +49,4 @@ playwright-report/
 .claude/settings.local.json
 /.claude
 .gitnexus
+create-prs-per-commit.ps1

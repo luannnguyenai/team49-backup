@@ -404,11 +404,10 @@ async def _generate_canonical_learning_path(
         else:
             if decision is None:
                 # Not assessed means "not verified yet", not "skip".
-                # Keep it in the plan but lock it behind the verified Phase A work
-                # so the main roadmap does not dump the full raw course upfront.
-                phase_tag = "phase_b"
-                is_locked = True
-                rationale_log = "placement_unassessed_locked"
+                # Keep it in Phase A so the learner can still learn or verify it.
+                phase_tag = "phase_a"
+                is_locked = False
+                rationale_log = "placement_prereq_unassessed"
             elif decision == "skip":
                 # Already mastered — Phase B, locked
                 phase_tag = "phase_b"

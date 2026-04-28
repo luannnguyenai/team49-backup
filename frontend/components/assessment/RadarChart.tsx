@@ -28,6 +28,27 @@ function toPoints(pts: { x: number; y: number }[]) {
   return pts.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
 }
 
+function wrapLabel(label: string, maxLineLength = 16) {
+  if (label.length <= maxLineLength) return [label];
+
+  const words = label.split(" ");
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length <= maxLineLength || current.length === 0) {
+      current = next;
+      continue;
+    }
+    lines.push(current);
+    current = word;
+  }
+
+  if (current) lines.push(current);
+  return lines.slice(0, 2);
+}
+
 import { SKILL_COLORS, BRAND_PRIMARY } from "@/lib/ui/skillColors";
 
 const GRID_LEVELS = [20, 40, 60, 80, 100] as const;
@@ -39,8 +60,28 @@ const GRID_LEVELS = [20, 40, 60, 80, 100] as const;
 export default function RadarChart({ data, size = 320 }: Props) {
   if (data.length === 0) return null;
 
-  const cx = size / 2;
-  const cy = size / 2;
+  const labelFontSize = size * 0.042;
+  const scoreFontSize = size * 0.036;
+  const wrappedLabels = data.map((d) => wrapLabel(d.label));
+  const maxLabelChars = wrappedLabels.reduce(
+    (max, lines) => Math.max(max, ...lines.map((line) => line.length)),
+    0,
+  );
+  const maxLabelLines = wrappedLabels.reduce((max, lines) => Math.max(max, lines.length), 1);
+
+  const horizontalPadding = Math.max(
+    size * 0.2,
+    maxLabelChars * labelFontSize * 0.62 + size * 0.08,
+  );
+  const verticalPadding = Math.max(
+    size * 0.2,
+    maxLabelLines * labelFontSize + scoreFontSize + size * 0.14,
+  );
+
+  const svgWidth = size + horizontalPadding * 2;
+  const svgHeight = size + verticalPadding * 2;
+  const cx = horizontalPadding + size / 2;
+  const cy = verticalPadding + size / 2;
   const maxR = size * 0.34;        // radius of the outermost grid ring
   const labelR = maxR + size * 0.14; // radius for axis labels
 
@@ -52,7 +93,7 @@ export default function RadarChart({ data, size = 320 }: Props) {
     const pts = Array.from({ length: N }, (_, i) =>
       polar(angleStep * i, (pct / 100) * maxR, cx, cy)
     );
-    return { pct, pts };
+    return { pct, pts, radius: (pct / 100) * maxR };
   });
 
   // ── Axis lines ─────────────────────────────────────────────────────────────
@@ -72,14 +113,14 @@ export default function RadarChart({ data, size = 320 }: Props) {
     // Anchor: left-align for right-side labels, right-align for left-side
     const anchor: "middle" | "start" | "end" =
       Math.abs(pos.x - cx) < 4 ? "middle" : pos.x > cx ? "start" : "end";
-    return { ...d, ...pos, anchor, angle };
+    return { ...d, ...pos, anchor, angle, lines: wrappedLabels[i] };
   });
 
   return (
     <svg
-      viewBox={`0 0 ${size} ${size}`}
+      viewBox={`0 0 ${svgWidth} ${svgHeight}`}
       width="100%"
-      style={{ maxWidth: size }}
+      style={{ maxWidth: svgWidth }}
       aria-label="Mastery radar chart"
       role="img"
     >
@@ -97,12 +138,12 @@ export default function RadarChart({ data, size = 320 }: Props) {
       ))}
 
       {/* ── Grid ring labels (20 / 40 / …) ── */}
-      {gridPolygons.map(({ pct, pts }) => (
+      {gridPolygons.map(({ pct, pts, radius }) => (
         <text
           key={`label-${pct}`}
-          x={(pts[0].x + cx) / 2}
-          y={(pts[0].y + cy) / 2}
-          textAnchor="middle"
+          x={cx + size * 0.028}
+          y={cy - radius + size * 0.018}
+          textAnchor="start"
           fontSize={size * 0.034}
           fill="currentColor"
           fillOpacity={0.35}
@@ -158,7 +199,7 @@ export default function RadarChart({ data, size = 320 }: Props) {
         <g key={i}>
           <text
             x={lb.x}
-            y={lb.y - size * 0.012}
+            y={lb.y - size * 0.03 * Math.max(lb.lines.length - 1, 0)}
             textAnchor={lb.anchor}
             fontSize={size * 0.042}
             fontWeight="600"
@@ -166,12 +207,19 @@ export default function RadarChart({ data, size = 320 }: Props) {
             fillOpacity={0.85}
             className="text-slate-700 dark:text-slate-200"
           >
-              <title>{lb.label}</title>
-            {lb.label.length > 20 ? lb.label.slice(0, 19) + "…" : lb.label}
+            {lb.lines.map((line, lineIndex) => (
+              <tspan
+                key={`${lb.label}-${lineIndex}`}
+                x={lb.x}
+                dy={lineIndex === 0 ? 0 : size * 0.042}
+              >
+                {line}
+              </tspan>
+            ))}
           </text>
           <text
             x={lb.x}
-            y={lb.y + size * 0.046}
+            y={lb.y + size * (0.05 + 0.042 * Math.max(lb.lines.length - 1, 0))}
             textAnchor={lb.anchor}
             fontSize={size * 0.036}
             fill={SKILL_COLORS[lb.level] ?? BRAND_PRIMARY}

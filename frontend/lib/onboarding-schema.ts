@@ -13,11 +13,13 @@ function defaultTargetDeadline(): string {
 export const onboardingSchema = z.object({
   goal_ids: z.array(z.string()).default([]),
 
-  known_unit_ids: z.array(z.string()),
+  known_unit_ids: z.array(z.string()).default([]),
 
-  desired_section_ids: z.array(z.string()),
+  known_topic_slugs: z.array(z.string()).default([]),
 
-  selected_course_ids: z.array(z.string()),
+  desired_section_ids: z.array(z.string()).default([]),
+
+  selected_course_ids: z.array(z.string()).default([]),
 
   available_hours_per_week: z
     .number({ invalid_type_error: "Phải là số" })

@@ -114,6 +114,96 @@ async def test_start_quiz_inline_midpoint_sets_metadata_and_excludes_items(monke
 
 
 @pytest.mark.asyncio
+async def test_start_quiz_inline_scopes_item_selection_to_all_units_in_same_section(monkeypatch):
+    db = FakeDB()
+    user_id = uuid4()
+    learning_unit_id = uuid4()
+    canonical_unit_id = "canonical-unit-1"
+    sibling_canonical_unit_id = "canonical-unit-2"
+    sync_calls = []
+
+    async def fake_get_learning_unit_or_404(db_arg, actual_learning_unit_id):
+        assert db_arg is db
+        assert actual_learning_unit_id == learning_unit_id
+        return SimpleNamespace(
+            id=learning_unit_id,
+            canonical_unit_id=canonical_unit_id,
+            section_id=uuid4(),
+        )
+
+    async def fake_inline_quiz_scope(db_arg, unit):
+        assert db_arg is db
+        assert unit.id == learning_unit_id
+        return [canonical_unit_id, sibling_canonical_unit_id]
+
+    class FakePlannerAuditRepository:
+        def __init__(self, db_arg):
+            assert db_arg is db
+
+        async def get_session_state(self, actual_user_id, session_id):
+            assert actual_user_id == user_id
+            assert session_id == quiz_service.CANONICAL_SESSION_ID
+            return SimpleNamespace(current_progress=None)
+
+    class FakeSelector:
+        def __init__(self, repo):
+            async def fake_get_items_for_phase(*, phase, canonical_unit_ids, limit, kp_ids=None):
+                assert phase == "mini_quiz"
+                assert canonical_unit_ids == [canonical_unit_id, sibling_canonical_unit_id]
+                assert limit >= 5
+                return [
+                    _item("item-a", "easy"),
+                    _item("item-b", "medium"),
+                    _item("item-c", "medium"),
+                    _item("item-d", "hard"),
+                    _item("item-e", "medium"),
+                ]
+
+            self.repo = SimpleNamespace(get_items_for_phase=fake_get_items_for_phase)
+
+        async def select_for_phase(self, *, phase, canonical_unit_ids, count):
+            assert phase == "mini_quiz"
+            assert canonical_unit_ids == [canonical_unit_id, sibling_canonical_unit_id]
+            assert count == 5
+            return [
+                _item("item-a", "easy"),
+                _item("item-b", "medium"),
+                _item("item-c", "medium"),
+                _item("item-d", "hard"),
+                _item("item-e", "medium"),
+            ]
+
+    async def fake_sync_quiz_progress_state(db_arg, **payload):
+        assert db_arg is db
+        sync_calls.append(payload)
+
+    monkeypatch.setattr(quiz_service, "_get_learning_unit_or_404", fake_get_learning_unit_or_404)
+    monkeypatch.setattr(
+        quiz_service,
+        "_inline_quiz_canonical_unit_scope",
+        fake_inline_quiz_scope,
+    )
+    monkeypatch.setattr(quiz_service, "PlannerAuditRepository", FakePlannerAuditRepository)
+    monkeypatch.setattr(quiz_service, "CanonicalQuestionSelector", FakeSelector)
+    monkeypatch.setattr(quiz_service, "_sync_quiz_progress_state", fake_sync_quiz_progress_state)
+
+    result = await quiz_service.start_quiz(
+        db,
+        user_id,
+        learning_unit_id,
+        count=5,
+        source="inline_video",
+        checkpoint="end",
+        exclude_item_ids=["item-a", "item-b"],
+    )
+
+    assert result.total_questions == 3
+    assert result.checkpoint == "end"
+    assert [question.item_id for question in result.questions] == ["item-c", "item-d", "item-e"]
+    assert sync_calls[0]["item_ids"] == ["item-c", "item-d", "item-e"]
+
+
+@pytest.mark.asyncio
 async def test_start_quiz_inline_treats_malformed_progress_as_empty(monkeypatch):
     db = FakeDB()
     user_id = uuid4()

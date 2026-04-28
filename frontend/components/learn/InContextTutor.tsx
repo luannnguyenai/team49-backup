@@ -6,10 +6,12 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, X, ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
+import { Send, X, ThumbsUp, ThumbsDown, Loader2, Check } from "lucide-react";
 import { api } from "@/lib/api";
 
 // ── Types ──────────────────────────────────────────────────────────────────
+
+const DEFAULT_TUTOR_STATUS = "Đang suy nghĩ...";
 
 interface ChatMessage {
   localId: string;
@@ -19,6 +21,25 @@ interface ChatMessage {
   rating?: number | null;
   isPending?: boolean;
   statusText?: string | null;
+  statusSteps?: string[];
+}
+
+function appendStatusStep(steps: string[] | undefined, nextStatus: string): string[] {
+  const normalizedStatus = nextStatus.trim();
+  if (!normalizedStatus) {
+    return steps ?? [DEFAULT_TUTOR_STATUS];
+  }
+
+  const previousSteps = steps ?? [];
+  if (previousSteps[previousSteps.length - 1] === normalizedStatus) {
+    return previousSteps;
+  }
+
+  if (previousSteps.includes(normalizedStatus)) {
+    return previousSteps;
+  }
+
+  return [...previousSteps, normalizedStatus];
 }
 
 interface InContextTutorProps {
@@ -93,7 +114,8 @@ export default function InContextTutor({
       role: "ai",
       content: "",
       isPending: true,
-      statusText: "Dang tra loi...",
+      statusText: DEFAULT_TUTOR_STATUS,
+      statusSteps: [DEFAULT_TUTOR_STATUS],
     };
 
     setMessages((prev) => [...prev, userMsg, aiPlaceholder]);
@@ -190,6 +212,7 @@ export default function InContextTutor({
                         ...m,
                         isPending: !fullText,
                         statusText: String(data.status),
+                        statusSteps: appendStatusStep(m.statusSteps, String(data.status)),
                       }
                     : m,
                 ),
@@ -200,7 +223,13 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, content: fullText, isPending: false, statusText: null }
+                    ? {
+                        ...m,
+                        content: fullText,
+                        isPending: false,
+                        statusText: null,
+                        statusSteps: [],
+                      }
                     : m,
                 ),
               );
@@ -245,6 +274,7 @@ export default function InContextTutor({
                             ...m,
                             isPending: !fullText,
                             statusText: String(data.status),
+                            statusSteps: appendStatusStep(m.statusSteps, String(data.status)),
                           }
                         : m,
                     ),
@@ -255,7 +285,13 @@ export default function InContextTutor({
                   setMessages((prev) =>
                     prev.map((m, i) =>
                       i === aiIdx
-                        ? { ...m, content: fullText, isPending: false, statusText: null }
+                        ? {
+                            ...m,
+                            content: fullText,
+                            isPending: false,
+                            statusText: null,
+                            statusSteps: [],
+                          }
                         : m,
                     ),
                   );
@@ -380,10 +416,31 @@ export default function InContextTutor({
                 msg.isPending ? (
                   <div
                     aria-live="polite"
-                    className="flex items-center gap-2 text-slate-500"
+                    className="space-y-2 italic"
+                    style={{ color: "var(--text-secondary)" }}
                   >
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>{msg.statusText || "Dang tra loi..."}</span>
+                    {(msg.statusSteps?.length ? msg.statusSteps : [msg.statusText || DEFAULT_TUTOR_STATUS]).map(
+                      (step, stepIdx, allSteps) => {
+                        const isCurrentStep = stepIdx === allSteps.length - 1;
+
+                        return (
+                          <div
+                            key={`${msg.localId}-status-${stepIdx}`}
+                            className="flex items-start gap-2"
+                            style={{
+                              color: isCurrentStep ? "var(--text-secondary)" : "var(--text-muted)",
+                            }}
+                          >
+                            {isCurrentStep ? (
+                              <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin" />
+                            ) : (
+                              <Check className="mt-0.5 h-4 w-4 shrink-0" />
+                            )}
+                            <span>{step}</span>
+                          </div>
+                        );
+                      },
+                    )}
                   </div>
                 ) : (
                   <div aria-live="polite" className="prose prose-sm prose-slate max-w-none">
@@ -396,14 +453,18 @@ export default function InContextTutor({
 
               {/* Rating buttons for AI messages */}
               {msg.role === "ai" && msg.id && msg.content && !msg.isPending && (
-                <div className="mt-2 flex items-center gap-2 border-t pt-2 border-slate-200/50">
+                <div
+                  className="mt-2 flex items-center gap-2 border-t pt-2"
+                  style={{ borderColor: "var(--border)" }}
+                >
                   <button
                     onClick={() => rateAnswer(idx, msg.id!, 1)}
                     className={`p-1 rounded transition-colors ${
                       msg.rating === 1
                         ? "text-emerald-500"
-                        : "text-slate-400 hover:text-emerald-500"
+                        : "hover:text-emerald-500"
                     }`}
+                    style={msg.rating === 1 ? undefined : { color: "var(--text-muted)" }}
                   >
                     <ThumbsUp className="h-3.5 w-3.5" />
                   </button>
@@ -412,8 +473,9 @@ export default function InContextTutor({
                     className={`p-1 rounded transition-colors ${
                       msg.rating === -1
                         ? "text-red-400"
-                        : "text-slate-400 hover:text-red-400"
+                        : "hover:text-red-400"
                     }`}
+                    style={msg.rating === -1 ? undefined : { color: "var(--text-muted)" }}
                   >
                     <ThumbsDown className="h-3.5 w-3.5" />
                   </button>

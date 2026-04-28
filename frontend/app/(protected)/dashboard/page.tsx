@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { BookOpen, TrendingUp, Clock, Play, ChevronDown } from "lucide-react";
 
 import CourseStatusBadge from "@/components/course/CourseStatusBadge";
@@ -12,6 +13,10 @@ import {
   type DashboardCourseTab,
 } from "@/features/dashboard/presenters";
 import { courseApi, historyApi } from "@/lib/api";
+import {
+  filterCoursesByQuery,
+  normalizeCourseSearchQuery,
+} from "@/lib/course-search";
 import { useAuthStore } from "@/stores/authStore";
 import type { CourseCatalogItem, HistorySummary } from "@/types";
 
@@ -134,10 +139,14 @@ function CourseCard({ course, idx }: { course: CourseCatalogItem; idx: number })
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const searchParams = useSearchParams();
   const [courses, setCourses] = useState<CourseCatalogItem[]>([]);
   const [summary, setSummary] = useState<HistorySummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<DashboardCourseTab>("for-you");
+  const rawQuery = searchParams.get("q") ?? "";
+  const normalizedQuery = normalizeCourseSearchQuery(rawQuery);
+  const hasActiveSearch = normalizedQuery.length >= 2;
 
   useEffect(() => {
     Promise.all([courseApi.catalog({ includeUnavailable: true }), historyApi.list({ page_size: 1 })])
@@ -149,7 +158,8 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = filterDashboardCourses(courses, activeTab);
+  const filteredByTab = filterDashboardCourses(courses, activeTab);
+  const filtered = filterCoursesByQuery(filteredByTab, rawQuery);
   const totalHours = summary ? Math.round((summary.total_study_seconds ?? 0) / 3600) : 0;
   const avgScore = summary?.avg_score != null ? Math.round(summary.avg_score) : 0;
   const firstName = user?.full_name.split(" ")[0] ?? "bạn";
@@ -233,6 +243,18 @@ export default function DashboardPage() {
           <div className="flex h-40 items-center justify-center">
             <LoadingSpinner size="md" />
           </div>
+        ) : hasActiveSearch && filtered.length === 0 ? (
+          <>
+            <p className="sr-only" aria-live="polite">
+              0 kết quả cho từ khóa {rawQuery}
+            </p>
+            <div
+              className="flex h-40 items-center justify-center rounded-xl border text-center"
+              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+            >
+              Không tìm thấy khóa học phù hợp với từ khóa &quot;{rawQuery}&quot;.
+            </div>
+          </>
         ) : filtered.length === 0 ? (
           <div
             className="flex h-40 items-center justify-center rounded-xl border"
@@ -241,11 +263,17 @@ export default function DashboardPage() {
             Không có khóa học nào trong mục này.
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((course, idx) => (
-              <CourseCard key={course.id} course={course} idx={idx} />
-            ))}
-          </div>
+          <>
+            <p className="sr-only" aria-live="polite">
+              {filtered.length} kết quả
+              {hasActiveSearch ? ` cho từ khóa ${rawQuery}` : ""}
+            </p>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((course, idx) => (
+                <CourseCard key={course.id} course={course} idx={idx} />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

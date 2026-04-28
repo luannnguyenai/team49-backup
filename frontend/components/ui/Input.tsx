@@ -23,7 +23,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {leftElement && (
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5"
+              style={{ color: "var(--text-muted)" }}
+            >
               {leftElement}
             </div>
           )}
@@ -42,7 +45,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightElement && (
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+            <div
+              className="absolute inset-y-0 right-0 flex items-center pr-3.5"
+              style={{ color: "var(--text-muted)" }}
+            >
               {rightElement}
             </div>
           )}

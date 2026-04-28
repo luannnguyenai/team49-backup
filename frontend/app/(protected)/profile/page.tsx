@@ -202,7 +202,7 @@ export default function ProfilePage() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
+    <div className="mx-auto max-w-6xl space-y-6 animate-fade-in xl:max-w-7xl">
       <div>
         <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
           Hồ sơ của bạn
@@ -214,7 +214,7 @@ export default function ProfilePage() {
           <LoadingSpinner size="md" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           {/* ── LEFT: User info card ── */}
           <div className="space-y-4">
             <div className="card space-y-4">
@@ -315,7 +315,7 @@ export default function ProfilePage() {
           </div>
 
           {/* ── RIGHT: Skills radar chart ── */}
-          <div className="card space-y-6">
+          <div className="card space-y-6 xl:px-8">
             <div>
               <h3 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
                 Kỹ năng AI của bạn
@@ -326,8 +326,8 @@ export default function ProfilePage() {
             </div>
 
             {/* Radar chart */}
-            <div className="flex justify-center">
-              <RadarChart data={skills} size={280} />
+            <div className="flex justify-center overflow-x-auto">
+              <RadarChart data={skills} size={340} />
             </div>
 
             {/* Legend */}

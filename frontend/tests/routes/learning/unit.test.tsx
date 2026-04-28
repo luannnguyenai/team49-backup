@@ -37,6 +37,7 @@ const quizApiMock = vi.hoisted(() => ({
 
 const navigationMock = vi.hoisted(() => ({
   pathname: "/",
+  searchParams: new URLSearchParams(),
   router: {
     push: vi.fn(),
     replace: vi.fn(),
@@ -97,6 +98,7 @@ vi.mock("next/navigation", async () => {
   return {
     ...actual,
     usePathname: () => navigationMock.pathname,
+    useSearchParams: () => navigationMock.searchParams,
     useRouter: () => navigationMock.router,
   };
 });
@@ -279,6 +281,7 @@ describe("learning unit page (US3)", () => {
       ),
     );
     navigationMock.pathname = "/";
+    navigationMock.searchParams = new URLSearchParams();
   });
 
   it("renders route loading state while the server component is resolving", () => {
@@ -660,14 +663,193 @@ describe("learning unit page (US3)", () => {
     });
   });
 
-  it("keeps the Courses nav item active on a nested learning route", async () => {
+  it("hides the Courses nav item after login on a nested learning route", async () => {
     navigationMock.pathname = "/courses/cs231n/learn/lecture-1-introduction";
 
     render(<TopNav />);
 
-    expect(screen.getByRole("link", { name: "Courses" })).toHaveAttribute(
-      "aria-current",
-      "page",
+    expect(screen.queryByRole("link", { name: "Courses" })).not.toBeInTheDocument();
+  });
+
+  it("renders desktop top nav in the order logo, search, then navigation links", async () => {
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    const brand = screen.getByRole("link", { name: "AI Learning Hub" });
+    const search = screen.getByLabelText("Tìm kiếm khóa học");
+    const tutorLink = screen.getByRole("link", { name: "AI Tutor" });
+
+    const headerRow = brand.closest("header")?.firstElementChild;
+    expect(headerRow).not.toBeNull();
+    expect(headerRow?.contains(brand)).toBe(true);
+    expect(headerRow?.contains(search)).toBe(true);
+    expect(headerRow?.contains(tutorLink)).toBe(true);
+    expect(
+      brand.compareDocumentPosition(search) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      search.compareDocumentPosition(tutorLink) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("returns to the landing page after logout from top nav", async () => {
+    render(<TopNav />);
+
+    fireEvent.click(screen.getByRole("button", { name: /đăng xuất/i }));
+
+    expect(authStoreMock.logout).toHaveBeenCalledTimes(1);
+    expect(navigationMock.router.push).toHaveBeenCalledWith("/");
+  });
+
+  it("shows the search input on allowlisted dashboard route", async () => {
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    expect(screen.getByLabelText("Tìm kiếm khóa học")).toBeInTheDocument();
+  });
+
+  it("shows the search input on allowlisted tutor route", async () => {
+    navigationMock.pathname = "/tutor";
+
+    render(<TopNav />);
+
+    expect(screen.getByLabelText("Tìm kiếm khóa học")).toBeInTheDocument();
+  });
+
+  it("hides the search input on non-allowlisted routes", async () => {
+    navigationMock.pathname = "/history";
+
+    render(<TopNav />);
+
+    expect(screen.queryByLabelText("Tìm kiếm khóa học")).not.toBeInTheDocument();
+  });
+
+  it("hydrates the search input from the current q param", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cs231n");
+
+    render(<TopNav />);
+
+    expect(screen.getByLabelText("Tìm kiếm khóa học")).toHaveValue("cs231n");
+  });
+
+  it("updates the URL query with router.replace after typing in the search input", async () => {
+    vi.useFakeTimers();
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    fireEvent.change(input, { target: { value: "transformer" } });
+
+    vi.advanceTimersByTime(250);
+
+    expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard?q=transformer");
+    vi.useRealTimers();
+  });
+
+  it("flushes the pending query immediately when Enter is pressed", async () => {
+    vi.useFakeTimers();
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    fireEvent.change(input, { target: { value: "deep learning & vision" } });
+
+    expect(navigationMock.router.replace).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(navigationMock.router.replace).toHaveBeenCalledWith(
+      "/dashboard?q=deep+learning+%26+vision",
     );
+
+    vi.runOnlyPendingTimers();
+    expect(navigationMock.router.replace).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
+  it("carries q across allowlisted nav routes and drops it for other routes", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cnn");
+
+    render(<TopNav />);
+
+    expect(screen.getByRole("link", { name: "AI Tutor" })).toHaveAttribute(
+      "href",
+      "/tutor?q=cnn",
+    );
+    expect(screen.getByRole("link", { name: "Lịch sử" })).toHaveAttribute("href", "/history");
+  });
+
+  it("cancels a pending debounce when the route changes", async () => {
+    vi.useFakeTimers();
+    navigationMock.pathname = "/dashboard";
+
+    const { rerender } = render(<TopNav />);
+
+    fireEvent.change(screen.getByLabelText("Tìm kiếm khóa học"), {
+      target: { value: "transformer" },
+    });
+
+    navigationMock.pathname = "/history";
+    navigationMock.searchParams = new URLSearchParams();
+    rerender(<TopNav />);
+
+    vi.advanceTimersByTime(250);
+
+    expect(navigationMock.router.replace).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it("hides the clear button when the search input is empty", async () => {
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    expect(
+      screen.queryByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the clear button when the search input has a value", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cs231n");
+
+    render(<TopNav />);
+
+    expect(
+      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+    ).toBeInTheDocument();
+  });
+
+  it("clears the search input and removes q from the URL when clear button is pressed", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cs231n");
+
+    render(<TopNav />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+    );
+
+    expect(screen.getByLabelText("Tìm kiếm khóa học")).toHaveValue("");
+    expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard");
+  });
+
+  it("preserves other query params when clearing the search query", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cs231n&tab=ready");
+
+    render(<TopNav />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+    );
+
+    expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard?tab=ready");
   });
 });
