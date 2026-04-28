@@ -66,6 +66,8 @@ class PathItemResponse(BaseModel):
     learning_unit_id: uuid.UUID
     learning_unit_title: str
     section_title: str | None = None
+    course_id: uuid.UUID | None = None
+    course_title: str | None = None
     action: PathAction
     estimated_hours: float | None
     order_index: int

@@ -28,6 +28,30 @@ function statusLabel(status: RoadmapNodeModel["status"]): string {
 }
 
 export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectSection }: RoadmapNodeCardProps) {
+  if (node.kind === "course") {
+    return (
+      <div
+        className="pointer-events-none absolute z-0 rounded-[28px] border border-blue-100 bg-white/80 shadow-sm ring-1 ring-blue-50 dark:border-slate-800 dark:bg-slate-900/70 dark:ring-slate-800"
+        style={{
+          left: node.x,
+          top: node.y,
+          width: node.width,
+          height: node.height,
+        }}
+      >
+        <div className="px-6 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">
+            Course
+          </p>
+          <p className="mt-1 text-lg font-bold text-slate-950 dark:text-white">{node.title}</p>
+          {node.subtitle ? (
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{node.subtitle}</p>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
   const isTopic = node.kind === "topic";
   const label = isTopic ? `${node.title} ${node.subtitle ?? ""}` : `${node.title} ${statusLabel(node.status)}`;
 
@@ -47,7 +71,7 @@ export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectS
       aria-label={label}
       onClick={handleClick}
       className={cn(
-        "absolute rounded-2xl border text-left shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-950",
+        "absolute z-20 rounded-2xl border text-left shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-950",
         isTopic
           ? "bg-yellow-300 px-5 py-4 text-slate-950 hover:bg-yellow-200"
           : "bg-white px-5 py-4 hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-950",
@@ -64,12 +88,12 @@ export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectS
       }}
     >
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className={cn("font-semibold leading-snug", isTopic ? "text-base" : "text-sm")} style={!isTopic ? { color: "var(--text-primary)" } : undefined}>
+        <div className="min-w-0">
+          <p className={cn("line-clamp-2 font-semibold leading-snug", isTopic ? "text-base" : "text-sm")} style={!isTopic ? { color: "var(--text-primary)" } : undefined}>
             {node.title}
           </p>
           {node.subtitle ? (
-            <p className="mt-1 text-xs" style={!isTopic ? { color: "var(--text-secondary)" } : undefined}>
+            <p className="mt-1 line-clamp-1 text-xs" style={!isTopic ? { color: "var(--text-secondary)" } : undefined}>
               {node.subtitle}
             </p>
           ) : null}
@@ -88,7 +112,7 @@ export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectS
       ) : null}
       {!isTopic && insight ? <PlayerInsightBadge insight={insight} /> : null}
       {!isTopic && node.item?.reason_codes?.length ? (
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {node.item.reason_codes.slice(0, 3).map((code) => {
             const reason = describePlannerReason(code);
             return (

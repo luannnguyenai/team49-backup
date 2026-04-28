@@ -286,6 +286,7 @@ async def _generate_canonical_learning_path(
     if not units:
         raise NotFoundError("No linked canonical learning units found for selected courses.")
 
+    course_by_id = await content_repo.get_courses_by_ids([unit.course_id for unit in units])
     section_by_id = await content_repo.get_sections_by_ids([unit.section_id for unit in units])
     status_by_unit = await _get_canonical_path_status_map(
         db,
@@ -390,6 +391,10 @@ async def _generate_canonical_learning_path(
             section_title=(
                 section_by_id[unit.section_id].title if unit.section_id in section_by_id else None
             ),
+            course_id=unit.course_id,
+            course_title=(
+                course_by_id[unit.course_id].title if unit.course_id in course_by_id else None
+            ),
             action=action,
             estimated_hours=estimated_hours if estimated_hours > 0 else None,
             order_index=order_index,
@@ -414,6 +419,10 @@ async def _generate_canonical_learning_path(
             {
                 "learning_unit_id": str(unit.id),
                 "canonical_unit_id": unit.canonical_unit_id,
+                "course_id": str(unit.course_id),
+                "course_title": (
+                    course_by_id[unit.course_id].title if unit.course_id in course_by_id else None
+                ),
                 "action": action.value,
                 "estimated_hours": estimated_hours,
                 "order_index": order_index,
@@ -517,7 +526,7 @@ async def _generate_canonical_learning_path(
 async def get_learning_path(
     db: AsyncSession,
     user_id: uuid.UUID,
-) -> list[tuple[SimpleNamespace, str, str]]:
+) -> list[tuple[SimpleNamespace, str, str, str | None]]:
     """Return the latest canonical planner path rows for the user."""
     return await _get_canonical_learning_path_rows(db, user_id)
 
@@ -530,7 +539,7 @@ async def get_learning_path(
 async def get_learning_path_timeline(
     db: AsyncSession,
     user_id: uuid.UUID,
-) -> dict[int, list[tuple[SimpleNamespace, str, str]]]:
+) -> dict[int, list[tuple[SimpleNamespace, str, str, str | None]]]:
     """Return canonical planner rows grouped by week number."""
     rows = await _get_canonical_learning_path_rows(db, user_id)
     grouped: dict[int, list] = {}
@@ -600,7 +609,7 @@ async def _phase_b_unlocked(
 async def _get_canonical_learning_path_rows(
     db: AsyncSession,
     user_id: uuid.UUID,
-) -> list[tuple[SimpleNamespace, str, str]]:
+) -> list[tuple[SimpleNamespace, str, str, str | None]]:
     audit_repo = PlannerAuditRepository(db)
     plan = await audit_repo.get_latest_plan_for_user(
         user_id,
@@ -621,6 +630,7 @@ async def _get_canonical_learning_path_rows(
 
     content_repo = CanonicalContentRepository(db)
     unit_by_id = await content_repo.get_learning_units_by_ids(learning_unit_ids)
+    course_by_id = await content_repo.get_courses_by_ids([unit.course_id for unit in unit_by_id.values()])
     section_by_id = await content_repo.get_sections_by_ids(
         [unit.section_id for unit in unit_by_id.values()]
     )
@@ -629,7 +639,7 @@ async def _get_canonical_learning_path_rows(
         user_id=user_id,
         learning_unit_ids=learning_unit_ids,
     )
-    rows: list[tuple[SimpleNamespace, str, str]] = []
+    rows: list[tuple[SimpleNamespace, str, str, str | None]] = []
     for fallback_order, item in enumerate(plan.recommended_path_json):
         if not isinstance(item, dict):
             continue
@@ -652,6 +662,7 @@ async def _get_canonical_learning_path_rows(
             week_number=item.get("week_number"),
             status=status_by_unit.get(unit_id, PathStatus.pending),
             learning_unit_id=unit_id,
+            course_id=unit.course_id if unit is not None else item.get("course_id"),
             canonical_unit_id=item.get("canonical_unit_id"),
             reason_codes=list(item.get("reason_codes") or []),
             prerequisite_gap_kp_ids=list(item.get("prerequisite_gap_kp_ids") or []),
@@ -666,10 +677,20 @@ async def _get_canonical_learning_path_rows(
             rationale_log=item.get("rationale_log"),
         )
         section_title = None
+        course_title = item.get("course_title")
         if unit is not None:
             section = section_by_id.get(unit.section_id)
             section_title = section.title if section is not None else None
-        rows.append((row, unit.title if unit is not None else str(unit_id), section_title or "canonical_unit"))
+            course = course_by_id.get(unit.course_id)
+            course_title = course.title if course is not None else course_title
+        rows.append(
+            (
+                row,
+                unit.title if unit is not None else str(unit_id),
+                section_title or "canonical_unit",
+                course_title,
+            )
+        )
 
     # Fix 3: Dynamic gate — recompute is_locked for Phase B based on current Phase A mastery
     phase_a_unit_ids = [

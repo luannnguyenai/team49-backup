@@ -7,7 +7,7 @@ interface RoadmapConnectorLayerProps {
 
 export default function RoadmapConnectorLayer({ connectors, nodesById }: RoadmapConnectorLayerProps) {
   return (
-    <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
+    <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full" aria-hidden="true">
       {connectors.map((connector) => {
         const from = nodesById.get(connector.fromId);
         const to = nodesById.get(connector.toId);

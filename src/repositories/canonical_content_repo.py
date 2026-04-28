@@ -55,6 +55,12 @@ class CanonicalContentRepository:
         )
         return {unit.id: unit for unit in result.scalars().all()}
 
+    async def get_courses_by_ids(self, course_ids: list[UUID]) -> dict[UUID, Course]:
+        if not course_ids:
+            return {}
+        result = await self.session.execute(select(Course).where(Course.id.in_(course_ids)))
+        return {course.id: course for course in result.scalars().all()}
+
     async def get_sections_by_ids(self, section_ids: list[UUID]) -> dict[UUID, CourseSection]:
         if not section_ids:
             return {}

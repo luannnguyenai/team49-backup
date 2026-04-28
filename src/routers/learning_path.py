@@ -46,12 +46,19 @@ learning_path_router = APIRouter(
 )
 
 
-def _path_item_response(lp, learning_unit_title: str, section_title: str | None) -> PathItemResponse:
+def _path_item_response(
+    lp,
+    learning_unit_title: str,
+    section_title: str | None,
+    course_title: str | None,
+) -> PathItemResponse:
     return PathItemResponse(
         id=lp.id,
         learning_unit_id=lp.learning_unit_id,
         learning_unit_title=learning_unit_title,
         section_title=section_title,
+        course_id=getattr(lp, "course_id", None),
+        course_title=course_title,
         action=lp.action,
         estimated_hours=lp.estimated_hours,
         order_index=lp.order_index,
@@ -113,8 +120,8 @@ async def api_get_learning_path(
     rows = await get_learning_path(db, user.id)
 
     items: list[PathItemResponse] = [
-        _path_item_response(lp, learning_unit_title, section_title)
-        for lp, learning_unit_title, section_title in rows
+        _path_item_response(lp, learning_unit_title, section_title, course_title)
+        for lp, learning_unit_title, section_title, course_title in rows
     ]
 
     from src.models.learning import PathStatus
@@ -151,8 +158,8 @@ async def api_get_timeline(
     for week_num in sorted(grouped.keys()):
         rows = grouped[week_num]
         week_items: list[PathItemResponse] = [
-            _path_item_response(lp, learning_unit_title, section_title)
-            for lp, learning_unit_title, section_title in rows
+            _path_item_response(lp, learning_unit_title, section_title, course_title)
+            for lp, learning_unit_title, section_title, course_title in rows
         ]
         total_hours = round(sum(i.estimated_hours or 0.0 for i in week_items), 4)
         week_entries.append(

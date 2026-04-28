@@ -85,18 +85,20 @@ export function pathToFlow(items: PathItemResponse[]): FlowModel {
   const ordered = sortByOrder(items);
   const recommendedId = computeRecommendedNext(ordered);
   const sections: SectionSummary[] = [];
-  const sectionByTitle = new Map<string, SectionSummary>();
+  const sectionByKey = new Map<string, SectionSummary>();
 
   for (const item of ordered) {
     const title = item.section_title || "Khác";
-    let section = sectionByTitle.get(title);
+    const courseKey = item.course_id || `course-${slugify(item.course_title || "course")}`;
+    const sectionKey = `${courseKey}:${slugify(title)}`;
+    let section = sectionByKey.get(sectionKey);
     if (!section) {
       section = {
-        key: `section-${item.order_index}-${slugify(title)}`,
+        key: sectionKey,
         title,
         items: [],
       };
-      sectionByTitle.set(title, section);
+      sectionByKey.set(sectionKey, section);
       sections.push(section);
     }
     section.items.push(item);

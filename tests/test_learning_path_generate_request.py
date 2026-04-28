@@ -24,6 +24,7 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
         course_id=uuid.uuid4(),
     )
     section = SimpleNamespace(id=section_id, title="Deep Learning")
+    course = SimpleNamespace(id=unit.course_id, title="CS230: Deep Learning")
     plan = SimpleNamespace(id=uuid.uuid4())
     db = MagicMock()
     db.execute = AsyncMock()
@@ -39,6 +40,7 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
     ):
         content = MockContent.return_value
         content.get_linked_learning_units = AsyncMock(return_value=[unit])
+        content.get_courses_by_ids = AsyncMock(return_value={unit.course_id: course})
         content.get_sections_by_ids = AsyncMock(return_value={section_id: section})
         content.get_unit_kp_rows = AsyncMock(return_value=[])
         content.get_canonical_units_by_ids = AsyncMock(return_value={})

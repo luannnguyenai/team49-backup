@@ -14,6 +14,8 @@ function item(overrides: Partial<PathItemResponse> & { id: string; order_index: 
     week_number: overrides.week_number ?? null,
     status: overrides.status ?? "pending",
     canonical_unit_id: overrides.canonical_unit_id ?? null,
+    course_id: overrides.course_id ?? "course-a",
+    course_title: overrides.course_title ?? "Course A",
     segment_policy: overrides.segment_policy,
   };
 }
@@ -21,27 +23,33 @@ function item(overrides: Partial<PathItemResponse> & { id: string; order_index: 
 describe("roadmap model", () => {
   it("returns a safe empty canvas", () => {
     expect(buildRoadmapModel([])).toMatchObject({
-      width: 1000,
+      width: 760,
       height: 520,
       nodes: [],
       connectors: [],
     });
   });
 
-  it("groups visible units under section topic rows and filters hidden segments", () => {
+  it("groups visible units under course containers and lecture topic rows", () => {
     const model = buildRoadmapModel([
       item({ id: "hidden", order_index: 0, segment_policy: "hidden" }),
-      item({ id: "a", order_index: 1, section_title: "Deep Learning" }),
-      item({ id: "b", order_index: 2, section_title: "Computer Vision" }),
+      item({ id: "a", order_index: 1, course_id: "cs230", course_title: "CS230", section_title: "Deep Learning" }),
+      item({ id: "b", order_index: 2, course_id: "cs231n", course_title: "CS231n", section_title: "Computer Vision" }),
     ]);
 
     expect(model.nodes.map((node) => node.id)).toEqual([
-      "topic-section-1-deep-learning",
+      "course-cs230",
+      "topic-cs230-deep-learning",
       "unit-a",
-      "topic-section-2-computer-vision",
+      "course-cs231n",
+      "topic-cs231n-computer-vision",
       "unit-b",
     ]);
-    expect(model.nodes.find((node) => node.id === "topic-section-1-deep-learning")).toMatchObject({
+    expect(model.nodes.find((node) => node.id === "course-cs230")).toMatchObject({
+      kind: "course",
+      title: "CS230",
+    });
+    expect(model.nodes.find((node) => node.id === "topic-cs230-deep-learning")).toMatchObject({
       kind: "topic",
       title: "Deep Learning",
       item: null,
@@ -61,6 +69,6 @@ describe("roadmap model", () => {
     ]);
 
     expect(model.connectors).toHaveLength(2);
-    expect(connectorPath(model.nodes[0], model.nodes[1])).toMatch(/^M \d+ \d+ C \d+ \d+/);
+    expect(connectorPath(model.nodes[1], model.nodes[2])).toMatch(/^M \d+ \d+ C \d+ \d+/);
   });
 });
