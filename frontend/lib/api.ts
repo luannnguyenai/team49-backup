@@ -12,6 +12,11 @@ import {
   buildCanonicalAssessmentStartPayload,
   mapCourseCatalogItemToSectionCard,
 } from "@/lib/canonical-content";
+import {
+  findMockCourseOverview,
+  getMockCourseStartDecision,
+  mergeMockCourses,
+} from "@/lib/mock-course-catalog";
 
 // ---------------------------------------------------------------------------
 // Token cookie helpers
@@ -242,18 +247,38 @@ export const courseApi = {
       q.set("include_unavailable", String(params.includeUnavailable));
     }
     const suffix = q.toString() ? `?${q.toString()}` : "";
-    return api.get<CourseCatalogResponse>(`/api/courses${suffix}`).then((r) => r.data);
+    return api.get<CourseCatalogResponse>(`/api/courses${suffix}`).then((r) => {
+      if (params?.view === "recommended") {
+        return r.data;
+      }
+
+      return mergeMockCourses(r.data);
+    });
   },
 
   overview: (courseSlug: string) =>
     api
       .get<CourseOverviewResponse>(`/api/courses/${courseSlug}/overview`)
-      .then((r) => r.data),
+      .then((r) => r.data)
+      .catch((err) => {
+        const fallback = findMockCourseOverview(courseSlug);
+        if (fallback) {
+          return fallback;
+        }
+        return Promise.reject(err);
+      }),
 
   start: (courseSlug: string) =>
     api
       .post<StartLearningDecisionResponse>(`/api/courses/${courseSlug}/start`)
-      .then((r) => r.data),
+      .then((r) => r.data)
+      .catch((err) => {
+        const fallback = getMockCourseStartDecision(courseSlug);
+        if (fallback) {
+          return fallback;
+        }
+        return Promise.reject(err);
+      }),
 
   learningUnit: (courseSlug: string, unitSlug: string) =>
     api

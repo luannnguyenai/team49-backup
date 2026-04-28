@@ -23,60 +23,60 @@ export default function CourseOverview({
         <div className="grid gap-0 lg:grid-cols-[minmax(0,1.25fr)_minmax(300px,0.85fr)]">
           <div className="space-y-6 p-6 md:p-8">
             <div className="flex flex-wrap items-center gap-3">
-              <p className="text-xs font-semibold uppercase tracking-widest-md text-primary-700">
+              <p className="text-xs font-semibold uppercase tracking-widest-md text-primary-700 dark:text-primary-300">
                 Tổng quan khóa học
               </p>
               <CourseStatusBadge status={data.course.status} />
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl font-semibold leading-tight text-slate-950 lg:text-4xl">
+              <h1 className="text-3xl font-semibold leading-tight text-slate-950 dark:text-white lg:text-4xl">
                 {data.overview.headline}
               </h1>
               {data.overview.subheadline && (
-                <p className="max-w-2xl text-base leading-7 text-slate-600">
+                <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-200">
                   {data.overview.subheadline}
                 </p>
               )}
             </div>
 
-            <div className="prose prose-sm max-w-2xl text-slate-600 prose-p:my-0 prose-ul:my-3 prose-li:my-1">
+            <div className="prose prose-sm max-w-2xl text-slate-600 prose-p:my-0 prose-ul:my-3 prose-li:my-1 dark:prose-invert dark:text-slate-200">
               <ReactMarkdown>{data.overview.summary_markdown}</ReactMarkdown>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-white">
                 {model.courseTitle}
               </span>
-              <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
+              <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">
                 {data.overview.estimated_duration_text ?? "Thời lượng sẽ được cập nhật"}
               </span>
               {data.course.hero_badge && (
-                <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
+                <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">
                   {data.course.hero_badge}
                 </span>
               )}
             </div>
           </div>
 
-          <aside className="border-t bg-slate-50/80 p-6 md:p-8 lg:border-l lg:border-t-0">
+          <aside className="border-t bg-slate-50/80 p-6 dark:bg-slate-900 lg:border-l lg:border-t-0 md:p-8">
             <div className="space-y-5">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest-sm text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-widest-sm text-slate-500 dark:text-slate-300">
                   Những gì bạn sẽ học
                 </p>
-                <p className="mt-2 text-2xl font-semibold text-slate-950">
+                <p className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
                   {model.courseTitle}
                 </p>
               </div>
 
-              <div className="space-y-3 text-sm leading-6 text-slate-600">
+              <div className="space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-200">
                 <p>
-                  <span className="font-semibold text-slate-950">Đối tượng:</span>{" "}
+                  <span className="font-semibold text-slate-950 dark:text-white">Đối tượng:</span>{" "}
                   {data.overview.target_audience ?? "Dành cho tất cả học viên"}
                 </p>
                 <p>
-                  <span className="font-semibold text-slate-950">Yêu cầu trước:</span>{" "}
+                  <span className="font-semibold text-slate-950 dark:text-white">Yêu cầu trước:</span>{" "}
                   {data.overview.prerequisites_summary ?? "Chưa có yêu cầu"}
                 </p>
               </div>
@@ -102,7 +102,7 @@ export default function CourseOverview({
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
         <article className="card rounded-card p-7">
-          <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700">
+          <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700 dark:text-primary-300">
             Kết quả học tập
           </p>
           <ul className="mt-5 space-y-4">
@@ -119,7 +119,7 @@ export default function CourseOverview({
         </article>
 
         <article className="card rounded-card p-7">
-          <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700">
+          <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700 dark:text-primary-300">
             Cấu trúc khóa học
           </p>
           <p className="mt-5 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>

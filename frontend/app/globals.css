@@ -21,9 +21,9 @@
     --bg-card:       #1e293b;
     --bg-sidebar:    #1e293b;
     --border:        #334155;
-    --text-primary:  #f1f5f9;
-    --text-secondary:#94a3b8;
-    --text-muted:    #475569;
+    --text-primary:  #f8fafc;
+    --text-secondary:#e2e8f0;
+    --text-muted:    #cbd5e1;
   }
 
   * { border-color: var(--border); }
