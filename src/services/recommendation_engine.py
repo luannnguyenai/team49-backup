@@ -126,6 +126,36 @@ def _planner_reason_codes(
     return reason_codes
 
 
+def _serialize_plan_item(
+    item: PathItemResponse,
+    *,
+    kp_ids: list[str],
+    mastery_lcb: float,
+) -> dict[str, object]:
+    return {
+        "learning_unit_id": str(item.learning_unit_id),
+        "canonical_unit_id": item.canonical_unit_id,
+        "course_id": str(item.course_id) if item.course_id is not None else None,
+        "course_title": item.course_title,
+        "action": item.action.value,
+        "estimated_hours": item.estimated_hours or 0.0,
+        "order_index": item.order_index,
+        "kp_ids": kp_ids,
+        "mastery_lcb": mastery_lcb,
+        "reason_codes": item.reason_codes,
+        "prerequisite_gap_kp_ids": item.prerequisite_gap_kp_ids,
+        "segment_policy": item.segment_policy,
+        "content_type": item.content_type,
+        "salience_score": item.salience_score,
+        "has_quiz_items": item.has_quiz_items,
+        "is_worth_learning": item.is_worth_learning,
+        "override_critical_kp": item.override_critical_kp,
+        "phase_tag": item.phase_tag,
+        "is_locked": item.is_locked,
+        "rationale_log": item.rationale_log,
+    }
+
+
 def _derive_salience_from_kp_rows(unit_kp_rows: list[object]) -> str | None:
     weights: list[float] = []
     for row in unit_kp_rows:
@@ -319,8 +349,8 @@ async def _generate_canonical_learning_path(
 
     generated_at = datetime.now(UTC)
     items: list[PathItemResponse] = []
-    recommended_path_json = []
     course_id_by_unit: dict[uuid.UUID, uuid.UUID] = {}
+    plan_metadata_by_unit: dict[uuid.UUID, dict[str, object]] = {}
 
     for order_index, unit in enumerate(units):
         canonical_unit = (
@@ -422,32 +452,10 @@ async def _generate_canonical_learning_path(
         )
         items.append(item)
         course_id_by_unit[unit.id] = unit.course_id
-        recommended_path_json.append(
-            {
-                "learning_unit_id": str(unit.id),
-                "canonical_unit_id": unit.canonical_unit_id,
-                "course_id": str(unit.course_id),
-                "course_title": (
-                    course_by_id[unit.course_id].title if unit.course_id in course_by_id else None
-                ),
-                "action": action.value,
-                "estimated_hours": estimated_hours,
-                "order_index": order_index,
-                "kp_ids": unit_kps,
-                "mastery_lcb": mastery_lcb,
-                "reason_codes": reason_codes,
-                "prerequisite_gap_kp_ids": [],
-                "segment_policy": segment_policy,
-                "content_type": getattr(canonical_unit, "content_type", None),
-                "salience_score": priority.salience_score,
-                "has_quiz_items": has_quiz_items,
-                "is_worth_learning": getattr(canonical_unit, "is_worth_learning", None),
-                "override_critical_kp": bool(priority.override_critical_kp),
-                "phase_tag": phase_tag,
-                "is_locked": is_locked,
-                "rationale_log": rationale_log,
-            }
-        )
+        plan_metadata_by_unit[unit.id] = {
+            "kp_ids": unit_kps,
+            "mastery_lcb": mastery_lcb,
+        }
 
     # Sort: Phase A interleaved round-robin by course, then Phase B
     if has_placement and not placement_skipped:
@@ -475,6 +483,14 @@ async def _generate_canonical_learning_path(
             item.order_index = new_order
 
     total_hours = sum(item.estimated_hours or 0.0 for item in items)
+    recommended_path_json = [
+        _serialize_plan_item(
+            item,
+            kp_ids=list(plan_metadata_by_unit.get(item.learning_unit_id, {}).get("kp_ids", [])),
+            mastery_lcb=float(plan_metadata_by_unit.get(item.learning_unit_id, {}).get("mastery_lcb", 0.0)),
+        )
+        for item in items
+    ]
     plan = await audit_repo.create_plan(
         user_id=user.id,
         trigger="generate_canonical_learning_path",

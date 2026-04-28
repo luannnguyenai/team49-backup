@@ -51,7 +51,7 @@ describe("RoadmapPlanner", () => {
     expect(screen.queryByText("Unit hidden")).not.toBeInTheDocument();
   });
 
-  it("does not dump skipped, reference, hidden, or locked phase B items into the main roadmap", () => {
+  it("hides skipped/reference items but keeps locked phase B units as upcoming path content", () => {
     render(
       <RoadmapPlanner
         items={[
@@ -78,7 +78,7 @@ describe("RoadmapPlanner", () => {
     expect(screen.queryByText("User Skipped")).not.toBeInTheDocument();
     expect(screen.queryByText("Reference Only")).not.toBeInTheDocument();
     expect(screen.queryByText("Hidden Logistics")).not.toBeInTheDocument();
-    expect(screen.queryByText("Locked Phase B")).not.toBeInTheDocument();
+    expect(screen.getByText("Locked Phase B")).toBeInTheDocument();
   });
 
   it("calls unit selection when a unit card is clicked", () => {

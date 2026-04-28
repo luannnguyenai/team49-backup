@@ -38,6 +38,5 @@ export function isVisibleInMainPath(item: PathItemResponse): boolean {
   if (item.segment_policy === "reference") return false;
   if (item.action === "skip") return false;
   if (item.status === "skipped") return false;
-  if (item.phase_tag === "phase_b" && item.is_locked) return false;
   return true;
 }

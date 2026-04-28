@@ -315,6 +315,11 @@ function UnitCard({
                 Next up
               </span>
             ) : null}
+            {item.phase_tag === "phase_b" && item.is_locked ? (
+              <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-500">
+                Upcoming
+              </span>
+            ) : null}
           </div>
         </div>
         <div className="mt-0.5 shrink-0">{statusIcon(item.status)}</div>

@@ -56,7 +56,7 @@ describe("learning path status helpers", () => {
     expect(isVisibleInMainPath({ ...base, status: "skipped" })).toBe(false);
     expect(isVisibleInMainPath({ ...base, segment_policy: "reference" })).toBe(false);
     expect(isVisibleInMainPath({ ...base, segment_policy: "hidden" })).toBe(false);
-    expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: true })).toBe(false);
+    expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: true })).toBe(true);
     expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: false })).toBe(true);
   });
 });

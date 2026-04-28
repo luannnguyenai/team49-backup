@@ -164,3 +164,10 @@ async def test_generate_learning_path_uses_placement_decision_for_action():
     assert by_title["Later Unit"].estimated_hours == 1.0
     assert by_title["Later Unit"].phase_tag == "phase_b"
     assert by_title["Later Unit"].is_locked is True
+
+    saved_path = audit.create_plan.await_args.kwargs["recommended_path_json"]
+    assert [item["learning_unit_id"] for item in saved_path] == [
+        str(item.learning_unit_id) for item in response.items
+    ]
+    assert [item["order_index"] for item in saved_path] == [0, 1, 2]
+    assert saved_path[0]["phase_tag"] == "phase_a"
