@@ -94,7 +94,33 @@ function groupItemsByCourseAndLecture(items: PathItemResponse[]): CourseGroup[] 
     lecture.items.push(item);
   }
 
+  for (const course of courses) {
+    course.lectures.sort(compareLectures);
+  }
+
   return courses;
+}
+
+function extractLectureNumber(title: string): number | null {
+  const match = title.match(/\blecture\s+(\d+)\b/i);
+  if (!match) return null;
+  return Number.parseInt(match[1], 10);
+}
+
+function compareLectures(a: LectureGroup, b: LectureGroup): number {
+  const aNumber = extractLectureNumber(a.title);
+  const bNumber = extractLectureNumber(b.title);
+
+  if (aNumber != null && bNumber != null && aNumber !== bNumber) {
+    return aNumber - bNumber;
+  }
+
+  if (aNumber != null && bNumber == null) return -1;
+  if (aNumber == null && bNumber != null) return 1;
+
+  const aOrder = Math.min(...a.items.map((item) => item.order_index ?? Number.MAX_SAFE_INTEGER));
+  const bOrder = Math.min(...b.items.map((item) => item.order_index ?? Number.MAX_SAFE_INTEGER));
+  return aOrder - bOrder;
 }
 
 function statusIcon(status: PathStatus) {
@@ -151,11 +177,46 @@ function countCompleted(items: PathItemResponse[]): number {
   return items.filter((item) => item.status === "completed").length;
 }
 
-function CourseCodeBadge({ course }: { course: CourseGroup }) {
-  if (!course.courseId) return null;
+function isUuidLike(value: string | null | undefined): boolean {
+  return Boolean(
+    value?.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i),
+  );
+}
+
+function courseCodeFromTitle(title: string): string | null {
+  const match = title.match(/^\s*([A-Z]{2,}\d{2,}[a-zA-Z]?)\s*:\s*/);
+  return match?.[1] ?? null;
+}
+
+function cleanCourseTitle(title: string): string {
+  const withoutCode = title.replace(/^\s*[A-Z]{2,}\d{2,}[a-zA-Z]?\s*:\s*/, "").trim();
+  return withoutCode.replace(/^Deep Learning for\s+/i, "").trim() || title;
+}
+
+function courseDisplay(course: CourseGroup): { code: string | null; title: string } {
+  const codeFromTitle = courseCodeFromTitle(course.title);
+  const codeFromId = course.courseId && !isUuidLike(course.courseId) ? course.courseId : null;
+
+  return {
+    code: codeFromTitle ?? codeFromId,
+    title: cleanCourseTitle(course.title),
+  };
+}
+
+function formatEstimatedHours(hours: number | null | undefined): string | null {
+  if (hours == null) return null;
+  if (hours <= 0) return null;
+  if (hours < 1) return `${Math.max(1, Math.round(hours * 60))}m`;
+
+  const rounded = Math.round(hours * 10) / 10;
+  return `${Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1)}h`;
+}
+
+function CourseCodeBadge({ code }: { code: string | null }) {
+  if (!code) return null;
   return (
-    <span className="-rotate-1 inline-flex rounded-lg border-2 border-blue-200 bg-blue-50 px-3 py-1 text-sm font-extrabold tracking-wide text-blue-700">
-      {course.courseId}
+    <span className="-rotate-2 inline-flex rounded-lg border-2 border-blue-200 bg-blue-50 px-3.5 py-1 text-lg font-extrabold tracking-wide text-blue-600 shadow-[2px_2px_0px_#bfdbfe]">
+      {code}
     </span>
   );
 }
@@ -175,6 +236,7 @@ function UnitCard({
     item.learning_unit_id === currentProgress?.learning_unit_id
       ? derivePlayerInsight(currentProgress)
       : null;
+  const estimatedTime = formatEstimatedHours(item.estimated_hours);
 
   return (
     <button
@@ -209,10 +271,10 @@ function UnitCard({
             {item.learning_unit_title}
           </h4>
           <div className="mt-1.5 flex flex-wrap items-center gap-3">
-            {item.estimated_hours != null ? (
+            {estimatedTime ? (
               <span className="flex items-center gap-1 text-xs font-semibold text-slate-500">
                 <span aria-hidden="true">~</span>
-                {item.estimated_hours}h est.
+                {estimatedTime} est.
               </span>
             ) : null}
             {isRecommended ? (
@@ -278,28 +340,30 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1100px] py-6">
+    <div className="mx-auto w-full max-w-[980px] py-8">
       {groupedCourses.map((course) => {
         const completedUnits = countCompleted(course.items);
         const totalUnits = course.items.length;
         const progressPercent = totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0;
+        const display = courseDisplay(course);
 
         return (
-          <section key={course.key} className="mb-12 md:mb-16">
-            <div className="relative overflow-hidden rounded-2xl border-2 border-slate-800 bg-white p-5 shadow-[4px_4px_0px_#e2e8f0] md:p-8 md:shadow-[8px_8px_0px_#e2e8f0]">
+          <section key={course.key} className="mb-16 md:mb-20">
+            <div className="relative overflow-hidden rounded-[28px] border-2 border-slate-900 bg-white p-6 shadow-[6px_6px_0px_#dbe4f0] md:p-10 md:shadow-[10px_10px_0px_#dbe4f0]">
               <div
-                className="pointer-events-none absolute inset-0 opacity-[0.03]"
+                className="pointer-events-none absolute inset-0"
                 style={{
-                  backgroundImage: "radial-gradient(circle at 2px 2px, #000 1px, transparent 0)",
-                  backgroundSize: "24px 24px",
+                  backgroundImage:
+                    "radial-gradient(circle at 1px 1px, rgba(37, 99, 235, 0.13) 1px, transparent 0)",
+                  backgroundSize: "28px 28px",
                 }}
               />
 
-              <div className="relative z-10 mb-10 flex flex-col justify-between gap-4 border-b-2 border-slate-100 pb-6 md:flex-row md:items-end">
+              <div className="relative z-10 mb-12 flex flex-col justify-between gap-6 border-b-2 border-slate-100 pb-8 md:flex-row md:items-end">
                 <div>
-                  <CourseCodeBadge course={course} />
-                  <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
-                    {course.title}
+                  <CourseCodeBadge code={display.code} />
+                  <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+                    {display.title}
                   </h2>
                 </div>
                 <div className="flex shrink-0 flex-col gap-1 md:items-end">
@@ -321,7 +385,7 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
               </div>
 
               <div className="relative isolate px-0 md:px-4">
-                <div className="absolute bottom-4 left-[23px] top-6 -z-10 w-0 border-l-2 border-dashed border-blue-400 md:left-[47px]" />
+                <div className="absolute bottom-7 left-[23px] top-8 -z-10 w-0 border-l-2 border-dashed border-blue-500 md:left-[47px]" />
 
                 {course.lectures.map((lecture, index) => {
                   const isExpanded = expandedLectureKeys.has(lecture.key);
@@ -334,7 +398,7 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
                   const hasRecommended = lecture.items.some((item) => item.id === recommendedNextId);
 
                   return (
-                    <div key={lecture.key} className="relative flex items-start gap-4 pb-2 pt-4 md:gap-6">
+                    <div key={lecture.key} className="relative flex items-start gap-4 pb-5 pt-5 md:gap-7">
                       <button
                         type="button"
                         onClick={() => toggleLecture(lecture.key)}
@@ -343,7 +407,7 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
                       >
                         <span
                           className={cn(
-                            "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-800 shadow-[2px_2px_0px_#1e293b] transition-transform hover:scale-110 md:h-16 md:w-16 md:shadow-[3px_3px_0px_#1e293b]",
+                            "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-900 shadow-[2px_2px_0px_#1e293b] transition-transform hover:scale-110 md:h-16 md:w-16 md:shadow-[3px_3px_0px_#1e293b]",
                             isCompleted && "bg-emerald-400",
                             isInProgress && "bg-yellow-300",
                             hasRecommended && !isCompleted && !isInProgress && "bg-blue-100",
@@ -363,7 +427,7 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
                           type="button"
                           onClick={() => toggleLecture(lecture.key)}
                           className={cn(
-                            "w-full rounded-xl border-2 border-slate-800 bg-white p-4 text-left transition-all md:p-5",
+                            "w-full rounded-2xl border-2 border-slate-900 bg-white p-4 text-left transition-all md:p-5",
                             isExpanded
                               ? "translate-y-[2px] shadow-[2px_2px_0px_#1e293b]"
                               : "shadow-[4px_4px_0px_#1e293b] hover:translate-y-[1px] hover:bg-slate-50 hover:shadow-[3px_3px_0px_#1e293b]",
@@ -393,7 +457,7 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
                         </button>
 
                         {isExpanded && lecture.items.length > 0 ? (
-                          <div className="mt-4 grid grid-cols-1 gap-3 pb-2 pl-0 md:grid-cols-2 md:pl-2">
+                          <div className="mt-5 grid grid-cols-1 gap-3 pb-2 pl-0 lg:grid-cols-2 lg:pl-2">
                             {lecture.items.map((item) => (
                               <UnitCard
                                 key={item.id}
