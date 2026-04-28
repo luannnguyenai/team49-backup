@@ -122,7 +122,7 @@ export default function TimelineBoard() {
 
             {settingsOpen ? (
               <div
-                className="absolute right-0 top-full z-50 mt-2 w-72 rounded-2xl border bg-white p-4 text-left shadow-xl"
+                className="absolute right-0 bottom-full z-50 mb-2 w-72 rounded-2xl border bg-white p-4 text-left shadow-xl"
                 style={{ borderColor: "var(--border)" }}
               >
                 <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
