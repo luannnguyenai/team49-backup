@@ -220,6 +220,7 @@ function OnboardingPageInner() {
       const analyzedTopics = mergePriorAnalysisIntoCandidates(
         candidateTopics,
         response.topic_summaries ?? [],
+        response.shortlisted_topic_ids ?? [],
       );
 
       setPriorTopics(analyzedTopics.length > 0 ? analyzedTopics : fallbackTopics);
@@ -227,8 +228,10 @@ function OnboardingPageInner() {
       setPriorAnalysisFallback(response.fallback);
       setPriorAnalysisModel(`${response.provider}/${response.model_used}`);
     } catch {
-      setPriorTopics(candidateTopics.length > 0 ? candidateTopics : fallbackTopics);
-      useOnboardingStore.getState().setKnownUnitIds([]);
+      const fallbackIds = fallbackTopics.map((topic) => topic.id);
+      const analyzedTopics = mergePriorAnalysisIntoCandidates(candidateTopics, [], fallbackIds);
+      setPriorTopics(analyzedTopics.length > 0 ? analyzedTopics : fallbackTopics);
+      useOnboardingStore.getState().setKnownUnitIds(selectSuggestedKnownUnitIds(analyzedTopics));
       setPriorAnalysisFallback(true);
       setPriorAnalysisModel(null);
     } finally {

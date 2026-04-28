@@ -406,17 +406,26 @@ export function selectSuggestedKnownUnitIds(topics: PriorCandidateTopic[]): stri
 export function mergePriorAnalysisIntoCandidates(
   topics: PriorCandidateTopic[],
   metadata: PriorAnalysisTopicMetadata[],
+  shortlistedTopicIds: string[] = [],
 ): PriorCandidateTopic[] {
   const metadataById = new Map(metadata.map((item) => [item.id, item]));
+  const shortlistedSet = new Set(shortlistedTopicIds);
 
   return topics.map((topic) => {
     const item = metadataById.get(topic.id);
-    if (!item) return topic;
+    if (!item) {
+      return shortlistedSet.has(topic.id)
+        ? {
+            ...topic,
+            suggestedLevel: "confident",
+          }
+        : topic;
+    }
 
     return {
       ...topic,
       aiDisplayLabel: item.label ?? topic.aiDisplayLabel ?? null,
-      suggestedLevel: item.level ?? null,
+      suggestedLevel: item.level ?? (shortlistedSet.has(topic.id) ? "confident" : null),
       summary: item.summary?.trim() ? item.summary : topic.summary ?? null,
     };
   });

@@ -217,4 +217,18 @@ describe("prior candidate builder", () => {
       suggestedLevel: "not_started",
     });
   });
+
+  it("uses shortlisted IDs as confident fallback when AI metadata is missing", () => {
+    const topics = buildPriorCandidateTopics({
+      goalId: "computer_vision",
+      sections,
+    }).confirmEligible;
+
+    const merged = mergePriorAnalysisIntoCandidates(topics, [], ["cv-cnn"]);
+
+    expect(merged.find((topic) => topic.id === "cv-cnn")).toMatchObject({
+      displayLabel: "CNN architecture design",
+      suggestedLevel: "confident",
+    });
+  });
 });
