@@ -60,11 +60,16 @@ export default function TimelineBoard() {
 
   return (
     <div className="space-y-5">
-      <section
-        className="rounded-2xl border p-5"
-        style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
-      >
-        <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      <section className="relative overflow-hidden rounded-2xl border-2 border-slate-800 bg-white p-5 shadow-[4px_4px_0px_#e2e8f0] md:p-8 md:shadow-[8px_8px_0px_#e2e8f0]">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.035]"
+          style={{
+            backgroundImage: "radial-gradient(circle at 2px 2px, #000 1px, transparent 0)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+
+        <div className="relative z-10 mb-8 flex flex-col justify-between gap-4 border-b-2 border-slate-100 pb-6 sm:flex-row sm:items-end">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary-600">
               Tuần {weekPlan.week}
@@ -87,52 +92,58 @@ export default function TimelineBoard() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="relative z-10 space-y-10">
           {weekPlan.courses.map((course) => {
             const display = courseTitleParts(course.course_title);
             return (
-              <div key={course.key} className="rounded-2xl border p-4" style={{ borderColor: "var(--border)" }}>
-                <div className="mb-4 flex items-start justify-between gap-3 border-b pb-4" style={{ borderColor: "var(--border)" }}>
+              <div key={course.key} className="rounded-2xl border-2 border-slate-800 bg-white/90 p-5 shadow-[4px_4px_0px_#e2e8f0] md:p-7">
+                <div className="mb-8 flex items-start justify-between gap-4 border-b-2 border-slate-100 pb-6">
                   <div>
                     {display.code ? (
-                      <span className="inline-flex rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-600">
+                      <span className="-rotate-2 inline-flex rounded-lg border-2 border-blue-200 bg-blue-50 px-3 py-1 text-lg font-extrabold tracking-wide text-blue-600 shadow-[2px_2px_0px_#bfdbfe]">
                         {display.code}
                       </span>
                     ) : null}
-                    <h4 className="mt-2 text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+                    <h4 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 md:text-3xl">
                       {display.title}
                     </h4>
                   </div>
-                  <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-                    {formatDurationFromHours(course.total_hours) ?? "0 phút"}
-                  </p>
+                  <div className="shrink-0 text-right text-sm font-semibold text-slate-500">
+                    <p>{formatDurationFromHours(course.total_hours) ?? "0 phút"}</p>
+                    <p className="mt-1">{course.lectures.length} lecture</p>
+                  </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="relative px-0 md:px-4">
+                  <div className="absolute left-[23px] top-6 bottom-4 w-0 border-l-2 border-dashed border-blue-500 md:left-[47px]" />
                   {course.lectures.map((lecture, index) => {
                     const isExpanded = expandedLectures.has(lecture.key);
                     return (
-                      <div key={lecture.key} className="grid grid-cols-[42px_1fr] gap-3">
-                        <div className="flex justify-center pt-1">
-                          <span className="flex h-9 w-9 items-center justify-center rounded-full border bg-slate-50 text-sm font-bold text-slate-700">
+                      <div key={lecture.key} className="relative flex items-start gap-4 pb-5 md:gap-6">
+                        <div className="relative z-10 mt-3 shrink-0">
+                          <span className={cn(
+                            "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-800 text-lg font-extrabold text-slate-900 shadow-[2px_2px_0px_#1e293b] md:h-16 md:w-16 md:text-2xl",
+                            isExpanded ? "bg-yellow-300" : "bg-white",
+                          )}>
                             {index + 1}
                           </span>
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <button
                             type="button"
                             onClick={() => toggleLecture(lecture.key)}
                             className={cn(
-                              "flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition",
-                              isExpanded ? "border-slate-900 shadow-[2px_2px_0px_#1e293b]" : "hover:border-slate-400",
+                              "flex w-full items-center justify-between gap-4 rounded-xl border-2 bg-white p-4 text-left transition-all md:p-5",
+                              isExpanded
+                                ? "border-slate-800 shadow-[2px_2px_0px_#1e293b] translate-y-[2px]"
+                                : "border-slate-800 shadow-[4px_4px_0px_#1e293b] hover:translate-y-[1px] hover:bg-slate-50 hover:shadow-[3px_3px_0px_#1e293b]",
                             )}
-                            style={{ backgroundColor: "var(--bg-card)" }}
                           >
                             <div>
-                              <p className="font-bold" style={{ color: "var(--text-primary)" }}>
+                              <p className="text-lg font-extrabold leading-tight text-slate-900 md:text-xl">
                                 {lecture.title}
                               </p>
-                              <p className="mt-1 text-xs" style={{ color: "var(--text-secondary)" }}>
+                              <p className="mt-1 text-sm font-semibold text-slate-500">
                                 {lecture.learning_units.length} bài · {formatDurationFromHours(lecture.total_hours) ?? "0 phút"}
                               </p>
                             </div>
@@ -142,12 +153,12 @@ export default function TimelineBoard() {
                                 isExpanded && "rotate-180",
                               )}
                             >
-                              <ChevronDown className="h-4 w-4" />
+                              <ChevronDown className="h-5 w-5 text-slate-600" />
                             </span>
                           </button>
 
                           {isExpanded ? (
-                            <div className="mt-3 grid gap-3 md:grid-cols-2">
+                            <div className="mt-4 grid gap-3 pl-0 md:grid-cols-2 md:pl-2">
                               {lecture.learning_units.map((item) => (
                                 <LearningUnitCard
                                   key={item.id}
