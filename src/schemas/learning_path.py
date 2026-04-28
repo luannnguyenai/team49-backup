@@ -66,6 +66,9 @@ class PathItemResponse(BaseModel):
     week_number: int | None
     status: PathStatus
     canonical_unit_id: str | None = None
+    phase_tag: str | None = None
+    is_locked: bool = False
+    rationale_log: str | None = None
 
 
 # ---------------------------------------------------------------------------

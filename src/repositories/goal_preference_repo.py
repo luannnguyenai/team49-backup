@@ -4,6 +4,8 @@ repositories/goal_preference_repo.py
 Data access for GoalPreference — single row per user with upsert semantics.
 """
 
+from __future__ import annotations
+
 from uuid import UUID
 
 from sqlalchemy import select

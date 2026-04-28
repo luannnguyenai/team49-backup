@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildCanonicalAssessmentContext,
   getAssessmentQuestionKey,
+  readPendingCanonicalAssessment,
+  writePendingCanonicalAssessment,
 } from "@/lib/canonical-assessment-session";
 import type { CourseSectionDetail, QuestionForAssessment } from "@/types";
 
@@ -144,5 +146,19 @@ describe("canonical assessment session helpers", () => {
 
     expect(getAssessmentQuestionKey(canonicalQuestion)).toBe("item::canonical");
     expect(getAssessmentQuestionKey(legacyQuestion)).toBe("question_uuid");
+  });
+
+  it("persists assessment depth with pending canonical assessment context", () => {
+    writePendingCanonicalAssessment({
+      canonicalUnitIds: ["local::lecture01::seg2"],
+      unitNameMap: { "local::lecture01::seg2": "Linear algebra" },
+      assessmentDepth: "quick",
+    });
+
+    expect(readPendingCanonicalAssessment()).toEqual({
+      canonicalUnitIds: ["local::lecture01::seg2"],
+      unitNameMap: { "local::lecture01::seg2": "Linear algebra" },
+      assessmentDepth: "quick",
+    });
   });
 });

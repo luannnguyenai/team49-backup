@@ -1,34 +1,38 @@
 "use client";
 // app/onboarding/page.tsx
-// Multi-step onboarding flow (4 steps) for new users.
-// Collects: known units · desired sections · schedule · learning method
-// On submit: PUT /api/users/me/onboarding → redirect to /assessment
+// Multi-step onboarding wizard.
+//
+// Internal step indices:
+//   0  Goal selection
+//   1  Experience level
+//   2  Prior profile input       (experienced flow only)
+//   3  AI topic confirmation     (experienced flow only)
+//   4  Assessment depth          (experienced flow only)
+//
+// Beginner flow:    0 → 1 → submit
+// Experienced flow: 0 → 1 → 2 → 3 → 4 → submit
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Brain,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
-} from "lucide-react";
+import { Brain } from "lucide-react";
 
-import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import StepKnownUnits from "@/components/onboarding/StepKnownUnits";
-import StepDesiredSections from "@/components/onboarding/StepDesiredSections";
-import StepTimeSchedule from "@/components/onboarding/StepTimeSchedule";
-import StepLearningMethod from "@/components/onboarding/StepLearningMethod";
+import StepGoalSelection from "@/components/onboarding/StepGoalSelection";
+import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
+import StepPriorKnowledgeInput from "@/components/onboarding/StepPriorKnowledgeInput";
+import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
+import StepAssessmentDepth from "@/components/onboarding/StepAssessmentDepth";
+import { buildPostOnboardingHref } from "@/components/onboarding/onboardingNavigation";
 
-import { bootstrapDataApi, canonicalSectionApi } from "@/lib/api";
+import { canonicalSectionApi } from "@/lib/api";
 import {
-  buildBootstrapTopicsFromCanonicalSections,
-  buildBootstrapTopicGroups,
-  estimateSelectedCourseHours,
-  normalizeBootstrapCourses,
-} from "@/lib/bootstrap-onboarding";
+  analyzePriorProfile,
+  saveGoals,
+  saveKnownTopics,
+  saveExperienceLevel,
+} from "@/lib/onboarding-api";
 import {
   buildCanonicalAssessmentContext,
   writePendingCanonicalAssessment,
@@ -36,42 +40,46 @@ import {
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-import type {
-  BootstrapCourseOption,
-  BootstrapTopicOption,
-  CourseSectionDetail,
-} from "@/types";
+import { useOnboardingStore, type ExperienceLevel } from "@/stores/onboardingStore";
+import type { CourseSectionDetail } from "@/types";
+import {
+  buildPriorCandidateTopics,
+  buildPriorShortlistFallback,
+  mergePriorAnalysisIntoCandidates,
+  selectSuggestedKnownUnitIds,
+  type PlannerGoalId,
+  type PriorCandidateTopic,
+} from "@/components/onboarding/priorCandidateBuilder";
 
 // ---------------------------------------------------------------------------
-// Step metadata
+// Step metadata — two flows share internal indices 0-4
 // ---------------------------------------------------------------------------
 
-const STEPS = [
-  {
-    title: "Bạn đã biết gì?",
-    subtitle: "Tick những units bạn đã nắm",
-  },
-  {
-    title: "Bạn muốn học gì?",
-    subtitle: "Chọn khóa học bạn quan tâm",
-  },
-  {
-    title: "Thời gian của bạn",
-    subtitle: "Lên lịch học phù hợp",
-  },
-  {
-    title: "Phương pháp học",
-    subtitle: "Cách bạn học tốt nhất",
-  },
+// Experienced: 5 steps visible
+const STEPS_EXPERIENCED = [
+  { title: "Mục tiêu học tập",   subtitle: "Bạn muốn học gì?" },
+  { title: "Kinh nghiệm",        subtitle: "Bạn đã từng học AI/ML chưa?" },
+  { title: "Nền tảng hiện tại",  subtitle: "Nhập thông tin để AI phân tích" },
+  { title: "Xác nhận kiến thức", subtitle: "Chọn cụm cần placement kiểm chứng" },
+  { title: "Mức kiểm tra",       subtitle: "Chọn độ sâu bài placement" },
 ] as const;
 
-// Fields that must pass validation before advancing from each step
-const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
-  [],                                                // Step 0: optional
-  ["selected_course_ids"],                           // Step 1: required
-  ["available_hours_per_week", "target_deadline"],   // Step 2: required
-  ["preferred_method"],                              // Step 3: required
-];
+// Beginner: 2 visible steps (internal indices 0, 1)
+const STEPS_BEGINNER = [
+  { title: "Mục tiêu học tập",  subtitle: "Bạn muốn học gì?" },
+  { title: "Kinh nghiệm",       subtitle: "Bạn đã từng học AI/ML chưa?" },
+] as const;
+
+// Maps internal step index → beginner display index (-1 = hidden/skipped)
+const BEGINNER_DISPLAY_IDX: Record<number, number> = {
+  0: 0,
+  1: 1,
+  // 2, 3 and 4 are skipped for beginners
+};
+
+function goalFromStore(goalIds: string[]): PlannerGoalId {
+  return goalIds.includes("nlp") ? "nlp" : "computer_vision";
+}
 
 // ---------------------------------------------------------------------------
 // Page component
@@ -81,57 +89,47 @@ function OnboardingPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { onboard, isLoading, error, clearError } = useAuthStore();
+  const { goalIds, knownUnitIds, experienceLevel, assessmentDepth } = useOnboardingStore();
 
-  // Current step (0-indexed) and transition direction
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [animKey, setAnimKey] = useState(0);
 
-  // Content data loaded from the API
-  const [canonicalSections, setCanonicalSections] = useState<CourseSectionDetail[]>([]);
-  const [bootstrapCourses, setBootstrapCourses] = useState<BootstrapCourseOption[]>([]);
-  const [bootstrapTopics, setBootstrapTopics] = useState<BootstrapTopicOption[]>([]);
+  const [sections, setSections] = useState<CourseSectionDetail[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [priorKnowledgeText, setPriorKnowledgeText] = useState("");
+  const [codingExperienceText, setCodingExperienceText] = useState("");
+  const [priorTopics, setPriorTopics] = useState<PriorCandidateTopic[]>([]);
+  const [priorAnalysisFallback, setPriorAnalysisFallback] = useState(false);
+  const [priorAnalysisModel, setPriorAnalysisModel] = useState<string | null>(null);
+  const [analyzingPrior, setAnalyzingPrior] = useState(false);
 
-  // ── React Hook Form ──────────────────────────────────────────────────────
-  const {
-    register,
-    handleSubmit,
-    watch,
-    trigger,
-    control,
-    formState: { errors },
-  } = useForm<OnboardingFormData>({
-    resolver: zodResolver(onboardingSchema),
-    defaultValues: {
-      known_topic_slugs: [],
-      desired_section_ids: [],
-      selected_course_ids: [],
-      available_hours_per_week: 5,
-      target_deadline: "",
-      preferred_method: undefined,
-    },
-  });
+  // ── React Hook Form ───────────────────────────────────────────────────────
+  const { handleSubmit } =
+    useForm<OnboardingFormData>({
+      resolver: zodResolver(onboardingSchema),
+      defaultValues: {
+        goal_ids: [],
+        known_unit_ids: [],
+        desired_section_ids: [],
+        selected_course_ids: [],
+        available_hours_per_week: 5,
+        target_deadline: undefined,
+        preferred_method: "video",
+      },
+    });
 
-  // ── Load all sections + learning units on mount ─────────────────────────
+  // ── Load sections on mount ────────────────────────────────────────────────
   useEffect(() => {
     async function loadData() {
       try {
-        const [courses, list] = await Promise.all([
-          bootstrapDataApi.courses(),
-          canonicalSectionApi.list(),
-        ]);
+        const list = await canonicalSectionApi.list();
         const details = await Promise.all(
-          list.map((section) => canonicalSectionApi.detail(section.id))
+          list.map((s) => canonicalSectionApi.detail(s.id))
         );
-        const normalizedCourses = normalizeBootstrapCourses(courses);
-        setBootstrapCourses(normalizedCourses);
-        setBootstrapTopics(
-          buildBootstrapTopicsFromCanonicalSections(details, normalizedCourses),
-        );
-        setCanonicalSections(details);
+        setSections(details);
       } catch {
-        // Keep bootstrap/canonical lists empty; user can still complete the form
+        // keep sections empty; user can still complete the form
       } finally {
         setLoadingData(false);
       }
@@ -139,83 +137,115 @@ function OnboardingPageInner() {
     loadData();
   }, []);
 
-  // Derive the selected sections objects (needed for schedule estimate)
-  const selectedCourseIds = watch("selected_course_ids");
-  const selectedCourses = bootstrapCourses.filter((course) =>
-    selectedCourseIds.includes(course.canonical_course_id)
-  );
-  const topicGroups = buildBootstrapTopicGroups(bootstrapTopics, bootstrapCourses);
-  const topicCountsByCourseId = bootstrapTopics.reduce<Record<string, number>>((acc, topic) => {
-    if (topic.canonical_course_id) {
-      acc[topic.canonical_course_id] = (acc[topic.canonical_course_id] ?? 0) + 1;
-    }
-    return acc;
-  }, {});
-  const totalSelectedCourseHours = estimateSelectedCourseHours(
-    bootstrapTopics,
-    selectedCourseIds,
-  );
-
-  // ── Navigation ───────────────────────────────────────────────────────────
-  const goNext = useCallback(async () => {
-    const fields = STEP_VALIDATION_FIELDS[step];
-    if (fields.length > 0) {
-      const valid = await trigger(fields);
-      if (!valid) return;
-    }
-    clearError();
-    setDirection("forward");
-    setAnimKey((k) => k + 1);
-    setStep((s) => s + 1);
-  }, [step, trigger, clearError]);
-
-  const goBack = useCallback(() => {
-    clearError();
-    setDirection("backward");
-    setAnimKey((k) => k + 1);
-    setStep((s) => s - 1);
-  }, [clearError]);
-
   // ── Submit ────────────────────────────────────────────────────────────────
-  const onSubmit = async (data: OnboardingFormData) => {
-    clearError();
-    try {
-      const next = searchParams.get("next");
-      const canonicalContext = buildCanonicalAssessmentContext({
-        sections: canonicalSections,
-        knownUnitIds: [],
-        desiredSectionIds: [],
-        selectedCourseIds: data.selected_course_ids,
-      });
-      await onboard({
-        known_unit_ids: [],
-        desired_section_ids: [],
-        selected_course_ids: data.selected_course_ids,
-        available_hours_per_week: data.available_hours_per_week,
-        target_deadline: data.target_deadline,
-        preferred_method: data.preferred_method,
-      });
-      writePendingCanonicalAssessment(canonicalContext);
+  const submitOnboarding = useCallback(
+    async (data: OnboardingFormData) => {
+      clearError();
+      try {
+        const next = searchParams.get("next");
+        const canonicalContext = buildCanonicalAssessmentContext({
+          sections,
+          knownUnitIds: knownUnitIds,
+          desiredSectionIds: data.desired_section_ids,
+        });
+        canonicalContext.assessmentDepth = assessmentDepth;
+        await onboard({
+          ...data,
+          goal_ids: goalIds,
+          known_unit_ids: knownUnitIds,
+          selected_course_ids: [],
+        });
+        writePendingCanonicalAssessment(canonicalContext);
 
-      if (canonicalContext.canonicalUnitIds.length > 0) {
-        const assessmentTarget = next
-          ? `/assessment?next=${encodeURIComponent(next)}`
-          : "/assessment";
-        router.push(assessmentTarget);
-      } else {
-        // No units selected → nothing to assess → go straight to dashboard
-        router.push(next ?? "/dashboard");
+        router.push(
+          buildPostOnboardingHref({
+            hasAssessmentUnits: canonicalContext.canonicalUnitIds.length > 0,
+            requestedNext: next,
+          }),
+        );
+      } catch {
+        /* error shown from store */
       }
-    } catch {
-      /* error message is shown from the store */
-    }
-  };
+    },
+    [assessmentDepth, clearError, searchParams, sections, goalIds, knownUnitIds, onboard, router]
+  );
 
-  // ── Derived values ────────────────────────────────────────────────────────
-  const isFirstStep = step === 0;
-  const isLastStep = step === STEPS.length - 1;
-  const progressPercent = Math.round(((step + 1) / STEPS.length) * 100);
-  const { title, subtitle } = STEPS[step];
+  // ── Navigation ────────────────────────────────────────────────────────────
+  const navigate = useCallback(
+    (targetStep: number) => {
+      clearError();
+      setDirection(targetStep > step ? "forward" : "backward");
+      setAnimKey((k) => k + 1);
+      setStep(targetStep);
+    },
+    [step, clearError]
+  );
+
+  const runPriorAnalysis = useCallback(async () => {
+    const selectedGoal = goalFromStore(goalIds);
+    const candidateTopics = buildPriorCandidateTopics({
+      goalId: selectedGoal,
+      sections,
+    }).confirmEligible;
+    const fallbackTopics = buildPriorShortlistFallback({
+      topics: candidateTopics,
+      priorKnowledgeText,
+      codingExperienceText,
+    });
+
+    setAnalyzingPrior(true);
+    try {
+      const response = await analyzePriorProfile({
+        goal_id: selectedGoal,
+        prior_knowledge_text: priorKnowledgeText,
+        coding_experience_text: codingExperienceText,
+        candidates: candidateTopics.map((topic) => ({
+          id: topic.id,
+          display_label: topic.displayLabel,
+          raw_title: topic.rawTitle,
+          unit_titles: [],
+        })),
+      });
+      const fallbackIds = fallbackTopics.map((topic) => topic.id);
+      const shortlistedIds = response.fallback
+        ? [...new Set([...(response.shortlisted_topic_ids ?? []), ...fallbackIds])]
+        : response.shortlisted_topic_ids ?? [];
+      const analyzedTopics = mergePriorAnalysisIntoCandidates(
+        candidateTopics,
+        response.topic_summaries ?? [],
+        shortlistedIds,
+        response.fallback ? fallbackTopics : [],
+      );
+
+      setPriorTopics(analyzedTopics.length > 0 ? analyzedTopics : fallbackTopics);
+      useOnboardingStore.getState().setKnownUnitIds(selectSuggestedKnownUnitIds(analyzedTopics));
+      setPriorAnalysisFallback(response.fallback);
+      setPriorAnalysisModel(`${response.provider}/${response.model_used}`);
+    } catch {
+      const fallbackIds = fallbackTopics.map((topic) => topic.id);
+      const analyzedTopics = mergePriorAnalysisIntoCandidates(candidateTopics, [], fallbackIds, fallbackTopics);
+      setPriorTopics(analyzedTopics.length > 0 ? analyzedTopics : fallbackTopics);
+      useOnboardingStore.getState().setKnownUnitIds(selectSuggestedKnownUnitIds(analyzedTopics));
+      setPriorAnalysisFallback(true);
+      setPriorAnalysisModel(null);
+    } finally {
+      setAnalyzingPrior(false);
+    }
+    navigate(3);
+  }, [codingExperienceText, goalIds, navigate, priorKnowledgeText, sections]);
+
+  // ── Derived display values ────────────────────────────────────────────────
+  const isBeginner = experienceLevel === "beginner";
+  const STEPS = isBeginner ? STEPS_BEGINNER : STEPS_EXPERIENCED;
+  const totalSteps = STEPS.length;
+
+  // Map internal step index to a display index for the progress bar
+  const displayIdx = isBeginner
+    ? (BEGINNER_DISPLAY_IDX[step] ?? 0)
+    : step;
+
+  const progressPercent = Math.round(((displayIdx + 1) / totalSteps) * 100);
+  const { title, subtitle } = STEPS[displayIdx] ?? STEPS[STEPS.length - 1];
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -237,10 +267,7 @@ function OnboardingPageInner() {
             <Brain className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1
-              className="text-xl font-bold"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
               Thiết lập lộ trình học
             </h1>
             <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
@@ -251,28 +278,20 @@ function OnboardingPageInner() {
 
         {/* ── Progress bar ── */}
         <div className="mb-6">
-          {/* Step label row */}
           <div className="mb-2 flex items-center justify-between">
             <div>
-              <span
-                className="text-sm font-semibold"
-                style={{ color: "var(--text-primary)" }}
-              >
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                 {title}
               </span>
-              <span
-                className="ml-2 text-xs"
-                style={{ color: "var(--text-muted)" }}
-              >
+              <span className="ml-2 text-xs" style={{ color: "var(--text-muted)" }}>
                 · {subtitle}
               </span>
             </div>
             <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              {step + 1} / {STEPS.length}
+              {displayIdx + 1} / {totalSteps}
             </span>
           </div>
 
-          {/* Animated progress track */}
           <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
             <div
               className="h-full rounded-full bg-primary-600 transition-all duration-500 ease-out"
@@ -280,23 +299,22 @@ function OnboardingPageInner() {
             />
           </div>
 
-          {/* Step dots row */}
+          {/* Step dots */}
           <div className="mt-3 flex items-center justify-between">
             {STEPS.map((s, i) => (
               <div key={s.title} className="flex flex-1 items-center">
-                {/* Dot */}
                 <div
                   className={cn(
                     "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
                     "text-xs font-bold transition-all duration-300",
-                    i < step
+                    i < displayIdx
                       ? "bg-primary-600 text-white"
-                      : i === step
+                      : i === displayIdx
                       ? "bg-primary-600 text-white ring-4 ring-primary-600/20"
                       : "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500"
                   )}
                 >
-                  {i < step ? (
+                  {i < displayIdx ? (
                     <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
@@ -304,14 +322,11 @@ function OnboardingPageInner() {
                     i + 1
                   )}
                 </div>
-                {/* Connector line (except after last dot) */}
                 {i < STEPS.length - 1 && (
                   <div
                     className={cn(
                       "mx-1 h-0.5 flex-1 rounded-full transition-all duration-500",
-                      i < step
-                        ? "bg-primary-600"
-                        : "bg-slate-200 dark:bg-slate-700"
+                      i < displayIdx ? "bg-primary-600" : "bg-slate-200 dark:bg-slate-700"
                     )}
                   />
                 )}
@@ -322,14 +337,12 @@ function OnboardingPageInner() {
 
         {/* ── Card ── */}
         <div className="card">
-          {/* Error banner */}
           {error && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
-          {/* Loading state */}
           {loadingData ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <LoadingSpinner size="lg" />
@@ -338,127 +351,89 @@ function OnboardingPageInner() {
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)}>
-              {/* ── Animated step content ── */}
+            <form onSubmit={handleSubmit(submitOnboarding)}>
               <div
                 key={animKey}
                 className={
-                  direction === "forward"
-                    ? "animate-slide-in-right"
-                    : "animate-slide-in"
+                  direction === "forward" ? "animate-slide-in-right" : "animate-slide-in"
                 }
               >
-                {/* Step 0 — Known units */}
+                {/* Step 0 — Goal selection */}
                 {step === 0 && (
-                  <Controller
-                    control={control}
-                    name="known_topic_slugs"
-                    render={({ field }) => (
-                      <StepKnownUnits
-                        topicGroups={topicGroups}
-                        selectedSlugs={field.value}
-                        onToggle={(slug) =>
-                          field.onChange(
-                            field.value.includes(slug)
-                              ? field.value.filter((x) => x !== slug)
-                              : [...field.value, slug]
-                          )
-                        }
-                      />
-                    )}
+                  <StepGoalSelection
+                    onNext={() => {
+                      saveGoals(goalIds).catch(() => {});
+                      navigate(1);
+                    }}
                   />
                 )}
 
-                {/* Step 1 — Desired sections */}
+                {/* Step 1 — Experience level */}
                 {step === 1 && (
-                  <Controller
-                    control={control}
-                    name="selected_course_ids"
-                    render={({ field }) => (
-                      <StepDesiredSections
-                        courses={bootstrapCourses}
-                        topicCountsByCourseId={topicCountsByCourseId}
-                        selectedIds={field.value}
-                        onToggle={(id) =>
-                          field.onChange(
-                            field.value.includes(id)
-                              ? field.value.filter((x) => x !== id)
-                              : [...field.value, id]
-                          )
-                        }
-                        error={errors.selected_course_ids?.message}
-                      />
-                    )}
+                  <StepExperienceLevel
+                    onBack={() => navigate(0)}
+                    onNext={(level: ExperienceLevel) => {
+                      saveExperienceLevel(level).catch(() => {});
+                      if (level === "beginner") {
+                        const store = useOnboardingStore.getState();
+                        store.setKnownUnitIds([]);
+                        store.setSkipPlacementAssessment(true);
+                        handleSubmit(submitOnboarding)();
+                      } else {
+                        navigate(2);
+                      }
+                    }}
                   />
                 )}
 
-                {/* Step 2 — Schedule */}
+                {/* Step 2 — Manual prior profile input (experienced flow only) */}
                 {step === 2 && (
-                  <StepTimeSchedule
-                    register={register}
-                    errors={errors}
-                    watch={watch}
-                    selectedCourseCount={selectedCourses.length}
-                    totalHours={totalSelectedCourseHours}
+                  <StepPriorKnowledgeInput
+                    goalId={goalFromStore(goalIds)}
+                    priorKnowledgeText={priorKnowledgeText}
+                    codingExperienceText={codingExperienceText}
+                    isAnalyzing={analyzingPrior}
+                    onPriorKnowledgeChange={setPriorKnowledgeText}
+                    onCodingExperienceChange={setCodingExperienceText}
+                    onBack={() => navigate(1)}
+                    onNext={runPriorAnalysis}
                   />
                 )}
 
-                {/* Step 3 — Learning method */}
+                {/* Step 3 — AI topic confirmation (experienced flow only) */}
                 {step === 3 && (
-                  <StepLearningMethod
-                    register={register}
-                    watch={watch}
-                    errors={errors}
+                  <StepKnownTopicsFiltered
+                    topics={priorTopics}
+                    analysisFallback={priorAnalysisFallback}
+                    modelLabel={priorAnalysisModel}
+                    onNext={() => {
+                      saveKnownTopics(knownUnitIds).catch(() => {});
+                      navigate(4);
+                    }}
+                    onBack={() => navigate(2)}
+                    onSkipAll={() => {
+                      saveKnownTopics([]).catch(() => {});
+                      navigate(4);
+                    }}
+                  />
+                )}
+
+                {/* Step 4 — Assessment depth (experienced flow only) */}
+                {step === 4 && (
+                  <StepAssessmentDepth
+                    onBack={() => navigate(3)}
+                    onNext={() => {
+                      handleSubmit(submitOnboarding)();
+                    }}
+                    nextLabel="Hoàn tất"
                   />
                 )}
               </div>
 
-              {/* ── Navigation buttons ── */}
-              <div
-                className={cn(
-                  "mt-7 flex gap-3",
-                  isFirstStep ? "justify-end" : "justify-between"
-                )}
-              >
-                {!isFirstStep && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={goBack}
-                    leftIcon={<ChevronLeft className="h-4 w-4" />}
-                  >
-                    Quay lại
-                  </Button>
-                )}
-
-                {!isLastStep ? (
-                  <Button
-                    type="button"
-                    onClick={goNext}
-                    rightIcon={<ChevronRight className="h-4 w-4" />}
-                  >
-                    {isFirstStep ? "Tiếp theo" : "Tiếp tục"}
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    loading={isLoading}
-                    size="lg"
-                    leftIcon={
-                      !isLoading ? (
-                        <Sparkles className="h-4 w-4" />
-                      ) : undefined
-                    }
-                  >
-                    Bắt đầu đánh giá
-                  </Button>
-                )}
-              </div>
             </form>
           )}
         </div>
 
-        {/* Skip link */}
         <p className="mt-4 text-center text-xs" style={{ color: "var(--text-muted)" }}>
           Bạn có thể cập nhật thông tin này bất cứ lúc nào trong phần Cài đặt.
         </p>
@@ -471,7 +446,10 @@ export default function OnboardingPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--bg-page)" }}>
+        <div
+          className="flex min-h-screen items-center justify-center"
+          style={{ backgroundColor: "var(--bg-page)" }}
+        >
           <LoadingSpinner size="lg" />
         </div>
       }

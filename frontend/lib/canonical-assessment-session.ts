@@ -1,4 +1,5 @@
 import type {
+  CanonicalAssessmentStartPayload,
   AnswerInput,
   CourseSectionDetail,
   QuestionForAssessment,
@@ -8,6 +9,7 @@ import type {
 export const ASSESSMENT_STORAGE_KEYS = {
   canonicalUnitIds: "al_pending_canonical_unit_ids",
   unitNames: "al_pending_canonical_unit_names",
+  assessmentDepth: "al_pending_assessment_depth",
 } as const;
 
 interface BuildCanonicalAssessmentContextInput {
@@ -20,6 +22,7 @@ interface BuildCanonicalAssessmentContextInput {
 export interface CanonicalAssessmentContext {
   canonicalUnitIds: string[];
   unitNameMap: Record<string, string>;
+  assessmentDepth?: CanonicalAssessmentStartPayload["assessment_depth"];
 }
 
 function unique<T>(values: T[]): T[] {
@@ -116,6 +119,11 @@ export function readPendingCanonicalAssessment(): CanonicalAssessmentContext {
     unitNameMap: unitNamesRaw
       ? JSON.parse(unitNamesRaw) as Record<string, string>
       : {},
+    assessmentDepth:
+      window.sessionStorage.getItem(ASSESSMENT_STORAGE_KEYS.assessmentDepth) as
+        | CanonicalAssessmentStartPayload["assessment_depth"]
+        | null
+        ?? undefined,
   };
 }
 
@@ -132,6 +140,12 @@ export function writePendingCanonicalAssessment(
     ASSESSMENT_STORAGE_KEYS.unitNames,
     JSON.stringify(context.unitNameMap),
   );
+  if (context.assessmentDepth) {
+    window.sessionStorage.setItem(
+      ASSESSMENT_STORAGE_KEYS.assessmentDepth,
+      context.assessmentDepth,
+    );
+  }
 }
 
 export function clearPendingAssessmentContext(): void {

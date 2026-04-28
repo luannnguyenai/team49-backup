@@ -51,8 +51,10 @@ export function mapLearningUnitToQuizRef(
 
 export function buildCanonicalAssessmentStartPayload(
   canonicalUnitIds: string[],
+  assessmentDepth?: CanonicalAssessmentStartPayload["assessment_depth"],
 ): CanonicalAssessmentStartPayload {
   return {
     canonical_unit_ids: canonicalUnitIds,
+    ...(assessmentDepth ? { assessment_depth: assessmentDepth } : {}),
   };
 }

@@ -34,6 +34,7 @@ from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.learner_mastery_kp_repo import LearnerMasteryKPRepository
 from src.repositories.learning_progress_repo import LearningProgressRepository
+from src.repositories.placement_assessment_repo import PlacementAssessmentRepository
 from src.repositories.planner_audit_repo import PlannerAuditRepository
 from src.repositories.waived_unit_repo import WaivedUnitRepository
 from src.schemas.learning_path import (
@@ -88,9 +89,21 @@ async def _generate_canonical_learning_path(
     mastery_repo = LearnerMasteryKPRepository(db)
     mastery_by_kp = await mastery_repo.bulk_get_for_user(user.id, kp_ids)
 
+    # Load placement results for Phase A/B split
+    placement_results = await PlacementAssessmentRepository(db).get_by_user_id(user.id)
+    placement_by_unit: dict[uuid.UUID, str] = {
+        row.topic_unit_id: row.decision for row in placement_results
+    }
+    placement_score_by_unit: dict[uuid.UUID, float] = {
+        row.topic_unit_id: float(row.score_pct) for row in placement_results
+    }
+    has_placement = len(placement_by_unit) > 0
+    placement_skipped = goal.placement_status == "skipped"
+
     generated_at = datetime.now(UTC)
     items: list[PathItemResponse] = []
     recommended_path_json = []
+    course_id_by_unit: dict[uuid.UUID, uuid.UUID] = {}
 
     for order_index, unit in enumerate(units):
         unit_kps = [row.kp_id for row in unit_kp_rows if row.unit_id == unit.canonical_unit_id]
@@ -103,6 +116,37 @@ async def _generate_canonical_learning_path(
         action_value = classify_unit_action(mastery_lcb)
         action = PathAction(action_value)
         estimated_hours = 0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
+
+        # Determine Phase A/B tag and rationale
+        if placement_skipped:
+            phase_tag = None
+            is_locked = False
+            rationale_log = "placement_skipped_by_user"
+        elif not has_placement:
+            phase_tag = None
+            is_locked = False
+            rationale_log = None
+        else:
+            decision = placement_by_unit.get(unit.id)
+            if decision is None:
+                # Not assessed — include in Phase A as prereq
+                phase_tag = "phase_a"
+                is_locked = False
+                rationale_log = "placement_prereq_unassessed"
+            elif decision == "skip":
+                # Already mastered — Phase B, locked
+                phase_tag = "phase_b"
+                is_locked = True
+                rationale_log = None
+            else:
+                # "review" or "relearn" — Phase A
+                phase_tag = "phase_a"
+                is_locked = False
+                score_pct = placement_score_by_unit.get(unit.id, 0.0)
+                if decision == "review":
+                    rationale_log = f"placement_review_score={round(score_pct)}"
+                else:
+                    rationale_log = f"placement_relearn_score={round(score_pct)}"
 
         item = PathItemResponse(
             id=unit.id,
@@ -117,8 +161,12 @@ async def _generate_canonical_learning_path(
             week_number=None,
             status=status_by_unit.get(unit.id, PathStatus.pending),
             canonical_unit_id=unit.canonical_unit_id,
+            phase_tag=phase_tag,
+            is_locked=is_locked,
+            rationale_log=rationale_log,
         )
         items.append(item)
+        course_id_by_unit[unit.id] = unit.course_id
         recommended_path_json.append(
             {
                 "learning_unit_id": str(unit.id),
@@ -128,8 +176,36 @@ async def _generate_canonical_learning_path(
                 "order_index": order_index,
                 "kp_ids": unit_kps,
                 "mastery_lcb": mastery_lcb,
+                "phase_tag": phase_tag,
+                "is_locked": is_locked,
+                "rationale_log": rationale_log,
             }
         )
+
+    # Sort: Phase A interleaved round-robin by course, then Phase B
+    if has_placement and not placement_skipped:
+        phase_a = [i for i in items if i.phase_tag == "phase_a"]
+        phase_b = [i for i in items if i.phase_tag == "phase_b"]
+
+        # Group Phase A items by course_id, preserving original order within each group
+        phase_a_by_course: dict[uuid.UUID, list[PathItemResponse]] = {}
+        for item in phase_a:
+            cid = course_id_by_unit[item.learning_unit_id]
+            phase_a_by_course.setdefault(cid, []).append(item)
+
+        # Round-robin across courses
+        course_groups = list(phase_a_by_course.values())
+        interleaved: list[PathItemResponse] = []
+        max_len = max((len(g) for g in course_groups), default=0)
+        for idx in range(max_len):
+            for group in course_groups:
+                if idx < len(group):
+                    interleaved.append(group[idx])
+
+        items = interleaved + phase_b
+        # Re-assign order_index to reflect new ordering
+        for new_order, item in enumerate(items):
+            item.order_index = new_order
 
     total_hours = sum(item.estimated_hours or 0.0 for item in items)
     plan = await audit_repo.create_plan(
@@ -216,6 +292,58 @@ async def get_learning_path_timeline(
     return grouped
 
 
+async def _phase_b_unlocked(
+    db: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    phase_a_unit_ids: list[uuid.UUID],
+    unit_by_id: dict[uuid.UUID, object],
+    content_repo: CanonicalContentRepository,
+) -> bool:
+    """Return True if all Phase A units have min mastery_lcb >= 0.7, else False.
+
+    A unit with no mastery records is treated as LCB=0 (not cleared).
+    If there are no Phase A units, Phase B is unlocked.
+    """
+    if not phase_a_unit_ids:
+        return True
+
+    canonical_unit_ids = [
+        unit.canonical_unit_id
+        for uid in phase_a_unit_ids
+        if (unit := unit_by_id.get(uid)) is not None and unit.canonical_unit_id
+    ]
+    if not canonical_unit_ids:
+        return False
+
+    unit_kp_rows = await content_repo.get_unit_kp_rows(canonical_unit_ids)
+    kp_ids = sorted({row.kp_id for row in unit_kp_rows})
+    mastery_by_kp = await LearnerMasteryKPRepository(db).bulk_get_for_user(user_id, kp_ids)
+
+    now = datetime.now(UTC)
+
+    # Build kp_ids per canonical_unit_id
+    kps_by_canonical: dict[str, list[str]] = {}
+    for row in unit_kp_rows:
+        kps_by_canonical.setdefault(row.unit_id, []).append(row.kp_id)
+
+    # For each Phase A unit, compute min LCB across its KPs
+    for uid in phase_a_unit_ids:
+        unit = unit_by_id.get(uid)
+        canonical_id = unit.canonical_unit_id if unit is not None else None
+        kps = kps_by_canonical.get(canonical_id, []) if canonical_id else []
+        mastery_values = [
+            estimate_mastery_lcb_on_read(mastery_by_kp[kp_id], now=now)
+            for kp_id in kps
+            if kp_id in mastery_by_kp
+        ]
+        min_lcb = min(mastery_values) if mastery_values else 0.0
+        if min_lcb < 0.7:
+            return False
+
+    return True
+
+
 async def _get_canonical_learning_path_rows(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -238,8 +366,9 @@ async def _get_canonical_learning_path_rows(
         except (TypeError, ValueError):
             continue
 
-    unit_by_id = await CanonicalContentRepository(db).get_learning_units_by_ids(learning_unit_ids)
-    section_by_id = await CanonicalContentRepository(db).get_sections_by_ids(
+    content_repo = CanonicalContentRepository(db)
+    unit_by_id = await content_repo.get_learning_units_by_ids(learning_unit_ids)
+    section_by_id = await content_repo.get_sections_by_ids(
         [unit.section_id for unit in unit_by_id.values()]
     )
     status_by_unit = await _get_canonical_path_status_map(
@@ -271,12 +400,31 @@ async def _get_canonical_learning_path_rows(
             status=status_by_unit.get(unit_id, PathStatus.pending),
             learning_unit_id=unit_id,
             canonical_unit_id=item.get("canonical_unit_id"),
+            phase_tag=item.get("phase_tag"),
+            is_locked=bool(item.get("is_locked", False)),
+            rationale_log=item.get("rationale_log"),
         )
         section_title = None
         if unit is not None:
             section = section_by_id.get(unit.section_id)
             section_title = section.title if section is not None else None
         rows.append((row, unit.title if unit is not None else str(unit_id), section_title or "canonical_unit"))
+
+    # Fix 3: Dynamic gate — recompute is_locked for Phase B based on current Phase A mastery
+    phase_a_unit_ids = [
+        row[0].learning_unit_id for row in rows if row[0].phase_tag == "phase_a"
+    ]
+    phase_b_unlocked = await _phase_b_unlocked(
+        db,
+        user_id=user_id,
+        phase_a_unit_ids=phase_a_unit_ids,
+        unit_by_id=unit_by_id,
+        content_repo=content_repo,
+    )
+    if phase_b_unlocked:
+        for row_tuple in rows:
+            if row_tuple[0].phase_tag == "phase_b":
+                row_tuple[0].is_locked = False
 
     return sorted(rows, key=lambda row: row[0].order_index)
 
