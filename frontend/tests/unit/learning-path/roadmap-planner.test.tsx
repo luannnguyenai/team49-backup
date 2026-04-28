@@ -30,7 +30,7 @@ describe("RoadmapPlanner", () => {
     });
   });
 
-  it("renders section topics and visible learning units", () => {
+  it("renders collapsed lectures and expands visible learning units", () => {
     render(
       <RoadmapPlanner
         items={[
@@ -40,7 +40,11 @@ describe("RoadmapPlanner", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /Deep Learning 1 bài học/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Deep Learning/ })).toBeInTheDocument();
+    expect(screen.queryByText("Neural Networks")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Expand Deep Learning/ }));
+
     expect(screen.getByText("Neural Networks")).toBeInTheDocument();
     expect(screen.queryByText("Unit hidden")).not.toBeInTheDocument();
   });
@@ -55,6 +59,7 @@ describe("RoadmapPlanner", () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole("button", { name: /Expand Deep Learning/ }));
     fireEvent.click(screen.getByRole("button", { name: /CNN Basics/ }));
 
     expect(onSelectItem).toHaveBeenCalledWith("a");
@@ -75,6 +80,8 @@ describe("RoadmapPlanner", () => {
         }}
       />,
     );
+
+    fireEvent.click(screen.getByRole("button", { name: /Expand Deep Learning/ }));
 
     expect(screen.getByText("End quiz đã mở")).toBeInTheDocument();
   });

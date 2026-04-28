@@ -1,12 +1,23 @@
 "use client";
 
-import { useMemo } from "react";
-import type { PathItemResponse } from "@/types";
+import { useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  ChevronDown,
+  Circle,
+  FileText,
+  HelpCircle,
+  PlayCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { PathItemResponse, PathStatus } from "@/types";
 import { derivePlayerInsight, type PlayerProgressSnapshot } from "../player-insights";
-import { buildRoadmapModel } from "../roadmap-model";
+import { describePlannerReason } from "../planner-reasons";
+import { computeRecommendedNext, sortByOrder } from "../presenters";
 import PathRequiredState from "./PathRequiredState";
-import RoadmapConnectorLayer from "./RoadmapConnectorLayer";
-import RoadmapNodeCard from "./RoadmapNodeCard";
+import PlayerInsightBadge from "./PlayerInsightBadge";
 
 interface RoadmapPlannerProps {
   items: PathItemResponse[];
@@ -15,42 +26,394 @@ interface RoadmapPlannerProps {
   onSelectSection?: (sectionKey: string) => void;
 }
 
-export default function RoadmapPlanner({ items, currentProgress, onSelectItem, onSelectSection }: RoadmapPlannerProps) {
-  const model = useMemo(() => buildRoadmapModel(items), [items]);
-  const nodesById = useMemo(() => new Map(model.nodes.map((node) => [node.id, node])), [model.nodes]);
+interface LectureGroup {
+  key: string;
+  title: string;
+  items: PathItemResponse[];
+}
 
-  if (model.nodes.length === 0) {
+interface CourseGroup {
+  key: string;
+  courseId: string | null;
+  title: string;
+  items: PathItemResponse[];
+  lectures: LectureGroup[];
+}
+
+function slugify(value: string): string {
+  return (
+    value
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "group"
+  );
+}
+
+function courseKeyFor(item: PathItemResponse): string {
+  return item.course_id || `course-${slugify(item.course_title || "course")}`;
+}
+
+function lectureKeyFor(courseKey: string, lectureTitle: string): string {
+  return `${courseKey}:${slugify(lectureTitle)}`;
+}
+
+function groupItemsByCourseAndLecture(items: PathItemResponse[]): CourseGroup[] {
+  const courseByKey = new Map<string, CourseGroup>();
+  const courses: CourseGroup[] = [];
+
+  for (const item of sortByOrder(items).filter((candidate) => candidate.segment_policy !== "hidden")) {
+    const courseKey = courseKeyFor(item);
+    let course = courseByKey.get(courseKey);
+    if (!course) {
+      course = {
+        key: courseKey,
+        courseId: item.course_id ?? null,
+        title: item.course_title || "Learning Path",
+        items: [],
+        lectures: [],
+      };
+      courseByKey.set(courseKey, course);
+      courses.push(course);
+    }
+
+    course.items.push(item);
+
+    const lectureTitle = item.section_title || "Khác";
+    const lectureKey = lectureKeyFor(courseKey, lectureTitle);
+    let lecture = course.lectures.find((candidate) => candidate.key === lectureKey);
+    if (!lecture) {
+      lecture = {
+        key: lectureKey,
+        title: lectureTitle,
+        items: [],
+      };
+      course.lectures.push(lecture);
+    }
+    lecture.items.push(item);
+  }
+
+  return courses;
+}
+
+function statusIcon(status: PathStatus) {
+  if (status === "completed") return <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />;
+  if (status === "in_progress") return <Circle className="h-5 w-5 shrink-0 fill-blue-500/20 text-blue-600" />;
+  if (status === "skipped") return <ArrowRight className="h-5 w-5 shrink-0 text-slate-400" />;
+  return <Circle className="h-5 w-5 shrink-0 text-slate-300" />;
+}
+
+function unitIconFor(item: PathItemResponse) {
+  const color = item.status === "completed" ? "text-emerald-600" : "text-slate-600";
+  if (item.has_quiz_items || item.reason_codes?.includes("quiz_available")) {
+    return <HelpCircle className={cn("h-5 w-5", color)} />;
+  }
+  if (item.content_type === "video") {
+    return <PlayCircle className={cn("h-5 w-5", color)} />;
+  }
+  return <FileText className={cn("h-5 w-5", color)} />;
+}
+
+function reasonIcon(code: string) {
+  if (code === "critical_kp" || code === "required_prerequisite") {
+    return <AlertTriangle className="h-3 w-3" />;
+  }
+  if (code === "quiz_available") {
+    return <HelpCircle className="h-3 w-3" />;
+  }
+  if (code === "quick_review" || code === "skip_by_mastery") {
+    return <CheckCircle2 className="h-3 w-3" />;
+  }
+  return null;
+}
+
+function reasonClassName(code: string): string {
+  if (code === "critical_kp" || code === "required_prerequisite") {
+    return "border-red-200 bg-red-50 text-red-700";
+  }
+  if (code === "quiz_available") {
+    return "border-blue-200 bg-blue-50 text-blue-800";
+  }
+  if (code === "high_salience") {
+    return "border-amber-200 bg-amber-50 text-amber-800";
+  }
+  if (code === "quick_review" || code === "skip_by_mastery") {
+    return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  }
+  if (code === "reference_only") {
+    return "border-slate-200 bg-slate-50 text-slate-600";
+  }
+  return "border-slate-200 bg-slate-100 text-slate-700";
+}
+
+function countCompleted(items: PathItemResponse[]): number {
+  return items.filter((item) => item.status === "completed").length;
+}
+
+function CourseCodeBadge({ course }: { course: CourseGroup }) {
+  if (!course.courseId) return null;
+  return (
+    <span className="-rotate-1 inline-flex rounded-lg border-2 border-blue-200 bg-blue-50 px-3 py-1 text-sm font-extrabold tracking-wide text-blue-700">
+      {course.courseId}
+    </span>
+  );
+}
+
+function UnitCard({
+  item,
+  isRecommended,
+  currentProgress,
+  onSelectItem,
+}: {
+  item: PathItemResponse;
+  isRecommended: boolean;
+  currentProgress?: PlayerProgressSnapshot | null;
+  onSelectItem?: (id: string) => void;
+}) {
+  const insight =
+    item.learning_unit_id === currentProgress?.learning_unit_id
+      ? derivePlayerInsight(currentProgress)
+      : null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelectItem?.(item.id)}
+      className={cn(
+        "group flex w-full flex-col rounded-xl border-2 bg-white p-4 text-left transition-all",
+        onSelectItem && "cursor-pointer",
+        isRecommended
+          ? "border-blue-600 shadow-[3px_3px_0px_#2563eb]"
+          : "border-slate-200 hover:border-slate-800 hover:shadow-[3px_3px_0px_#1e293b]",
+        item.status === "completed" && "opacity-75",
+        item.status === "skipped" && "opacity-55",
+      )}
+    >
+      <div className="flex w-full items-start gap-3">
+        <div
+          className={cn(
+            "mt-0.5 rounded-lg border p-1.5",
+            isRecommended ? "border-blue-200 bg-blue-50" : "border-slate-100 bg-slate-50",
+          )}
+        >
+          {unitIconFor(item)}
+        </div>
+        <div className="min-w-0 flex-1 pr-2">
+          <h4
+            className={cn(
+              "text-sm font-bold leading-tight text-slate-900 md:text-base",
+              item.status === "completed" && "text-slate-500 line-through decoration-slate-300",
+            )}
+          >
+            {item.learning_unit_title}
+          </h4>
+          <div className="mt-1.5 flex flex-wrap items-center gap-3">
+            {item.estimated_hours != null ? (
+              <span className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+                <span aria-hidden="true">~</span>
+                {item.estimated_hours}h est.
+              </span>
+            ) : null}
+            {isRecommended ? (
+              <span className="flex items-center gap-1 text-xs font-bold text-blue-700">
+                <PlayCircle className="h-3 w-3" />
+                Next up
+              </span>
+            ) : null}
+          </div>
+        </div>
+        <div className="mt-0.5 shrink-0">{statusIcon(item.status)}</div>
+      </div>
+
+      {insight ? (
+        <div className="mt-3 border-t border-slate-100 pt-3">
+          <PlayerInsightBadge insight={insight} />
+        </div>
+      ) : null}
+
+      {item.reason_codes?.length ? (
+        <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+          {item.reason_codes.slice(0, 4).map((code) => {
+            const reason = describePlannerReason(code);
+            return (
+              <span
+                key={code}
+                title={reason.details}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase",
+                  reasonClassName(code),
+                )}
+              >
+                {reasonIcon(code)}
+                {reason.label}
+              </span>
+            );
+          })}
+        </div>
+      ) : null}
+    </button>
+  );
+}
+
+export default function RoadmapPlanner({ items, currentProgress, onSelectItem }: RoadmapPlannerProps) {
+  const groupedCourses = useMemo(() => groupItemsByCourseAndLecture(items), [items]);
+  const recommendedNextId = useMemo(() => computeRecommendedNext(items), [items]);
+  const [expandedLectureKeys, setExpandedLectureKeys] = useState<Set<string>>(() => new Set());
+
+  if (!groupedCourses.length) {
     return <PathRequiredState />;
   }
 
+  const toggleLecture = (lectureKey: string) => {
+    setExpandedLectureKeys((current) => {
+      const next = new Set(current);
+      if (next.has(lectureKey)) {
+        next.delete(lectureKey);
+      } else {
+        next.add(lectureKey);
+      }
+      return next;
+    });
+  };
+
   return (
-    <div
-      className="relative min-h-[70vh] overflow-auto rounded-3xl border bg-slate-50 p-4 dark:bg-slate-950"
-      style={{ borderColor: "var(--border)" }}
-    >
-      <div
-        className="relative"
-        style={{
-          width: model.width,
-          height: model.height,
-          minWidth: model.width,
-        }}
-      >
-        <RoadmapConnectorLayer connectors={model.connectors} nodesById={nodesById} />
-        {model.nodes.map((node) => (
-          <RoadmapNodeCard
-            key={node.id}
-            node={node}
-            insight={
-              node.kind === "unit" && node.item?.learning_unit_id === currentProgress?.learning_unit_id
-                ? derivePlayerInsight(currentProgress)
-                : null
-            }
-            onSelectItem={onSelectItem}
-            onSelectSection={onSelectSection}
-          />
-        ))}
-      </div>
+    <div className="mx-auto w-full max-w-[1100px] py-6">
+      {groupedCourses.map((course) => {
+        const completedUnits = countCompleted(course.items);
+        const totalUnits = course.items.length;
+        const progressPercent = totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0;
+
+        return (
+          <section key={course.key} className="mb-12 md:mb-16">
+            <div className="relative overflow-hidden rounded-2xl border-2 border-slate-800 bg-white p-5 shadow-[4px_4px_0px_#e2e8f0] md:p-8 md:shadow-[8px_8px_0px_#e2e8f0]">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.03]"
+                style={{
+                  backgroundImage: "radial-gradient(circle at 2px 2px, #000 1px, transparent 0)",
+                  backgroundSize: "24px 24px",
+                }}
+              />
+
+              <div className="relative z-10 mb-10 flex flex-col justify-between gap-4 border-b-2 border-slate-100 pb-6 md:flex-row md:items-end">
+                <div>
+                  <CourseCodeBadge course={course} />
+                  <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+                    {course.title}
+                  </h2>
+                </div>
+                <div className="flex shrink-0 flex-col gap-1 md:items-end">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-sm font-bold uppercase tracking-widest text-slate-500">
+                      {progressPercent}% done
+                    </span>
+                    <div className="h-3 w-24 overflow-hidden rounded-full border-2 border-slate-800 bg-slate-100 shadow-[1px_1px_0px_#1e293b] transition-all hover:h-4 md:w-32">
+                      <div
+                        className="h-full rounded-r-none bg-blue-600 transition-all duration-500 ease-out"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold text-slate-500">
+                    {course.lectures.length} lectures · {totalUnits} units
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative isolate px-0 md:px-4">
+                <div className="absolute bottom-4 left-[23px] top-6 -z-10 w-0 border-l-2 border-dashed border-blue-400 md:left-[47px]" />
+
+                {course.lectures.map((lecture, index) => {
+                  const isExpanded = expandedLectureKeys.has(lecture.key);
+                  const completedLectureUnits = countCompleted(lecture.items);
+                  const isCompleted =
+                    lecture.items.length > 0 && completedLectureUnits === lecture.items.length;
+                  const isInProgress =
+                    lecture.items.some((item) => item.status === "in_progress" || item.status === "completed") &&
+                    !isCompleted;
+                  const hasRecommended = lecture.items.some((item) => item.id === recommendedNextId);
+
+                  return (
+                    <div key={lecture.key} className="relative flex items-start gap-4 pb-2 pt-4 md:gap-6">
+                      <button
+                        type="button"
+                        onClick={() => toggleLecture(lecture.key)}
+                        className="relative z-10 mt-[14px] flex shrink-0 cursor-pointer"
+                        aria-label={`${isExpanded ? "Collapse" : "Expand"} ${lecture.title}`}
+                      >
+                        <span
+                          className={cn(
+                            "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-800 shadow-[2px_2px_0px_#1e293b] transition-transform hover:scale-110 md:h-16 md:w-16 md:shadow-[3px_3px_0px_#1e293b]",
+                            isCompleted && "bg-emerald-400",
+                            isInProgress && "bg-yellow-300",
+                            hasRecommended && !isCompleted && !isInProgress && "bg-blue-100",
+                            !isCompleted && !isInProgress && !hasRecommended && "bg-white",
+                          )}
+                        >
+                          {isCompleted ? (
+                            <CheckCircle2 className="h-6 w-6 text-slate-900 md:h-8 md:w-8" />
+                          ) : (
+                            <span className="text-lg font-bold text-slate-900 md:text-2xl">{index + 1}</span>
+                          )}
+                        </span>
+                      </button>
+
+                      <div className="min-w-0 flex-1 pb-4">
+                        <button
+                          type="button"
+                          onClick={() => toggleLecture(lecture.key)}
+                          className={cn(
+                            "w-full rounded-xl border-2 border-slate-800 bg-white p-4 text-left transition-all md:p-5",
+                            isExpanded
+                              ? "translate-y-[2px] shadow-[2px_2px_0px_#1e293b]"
+                              : "shadow-[4px_4px_0px_#1e293b] hover:translate-y-[1px] hover:bg-slate-50 hover:shadow-[3px_3px_0px_#1e293b]",
+                            hasRecommended && !isExpanded && "bg-amber-50",
+                          )}
+                          aria-expanded={isExpanded}
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="min-w-0">
+                              <h3 className="text-lg font-extrabold leading-tight text-slate-900 md:text-xl">
+                                {lecture.title}
+                              </h3>
+                              <p className="mt-1 text-sm font-semibold text-slate-500">
+                                {completedLectureUnits} / {lecture.items.length} units
+                                {hasRecommended ? " · next up here" : ""}
+                              </p>
+                            </div>
+                            <span
+                              className={cn(
+                                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 transition-transform",
+                                isExpanded && "rotate-180",
+                              )}
+                            >
+                              <ChevronDown className="h-5 w-5 text-slate-600" />
+                            </span>
+                          </div>
+                        </button>
+
+                        {isExpanded && lecture.items.length > 0 ? (
+                          <div className="mt-4 grid grid-cols-1 gap-3 pb-2 pl-0 md:grid-cols-2 md:pl-2">
+                            {lecture.items.map((item) => (
+                              <UnitCard
+                                key={item.id}
+                                item={item}
+                                isRecommended={item.id === recommendedNextId}
+                                currentProgress={currentProgress}
+                                onSelectItem={onSelectItem}
+                              />
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
