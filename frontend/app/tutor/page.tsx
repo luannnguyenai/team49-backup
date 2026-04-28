@@ -5,13 +5,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Compass, GraduationCap, PlayCircle } from "lucide-react";
 import { courseApi, historyApi } from "@/lib/api";
 import CourseCatalog from "@/components/course/CourseCatalog";
 import { buildUserCourseCollections } from "@/features/course-membership/presenters";
+import { filterCoursesByQuery, normalizeCourseSearchQuery } from "@/lib/course-search";
 import type { CourseCatalogItem, HistoryItem } from "@/types";
 
 export default function TutorPage() {
+  const searchParams = useSearchParams();
   const [items, setItems] = useState<CourseCatalogItem[]>([]);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
@@ -51,10 +54,20 @@ export default function TutorPage() {
     historyItems,
     activeSlug,
   );
+  const rawQuery = searchParams.get("q") ?? "";
+  const normalizedQuery = normalizeCourseSearchQuery(rawQuery);
+  const hasActiveSearch = normalizedQuery.length >= 2;
   const joinedCourseSlugs = new Set(joinedCourses.map((item) => item.slug));
   const others = items.filter(
     (item) => !joinedCourseSlugs.has(item.slug) && !recommendedCourses.some((course) => course.slug === item.slug),
   );
+  const filteredJoinedCourses = filterCoursesByQuery(joinedCourses, rawQuery);
+  const filteredRecommendedCourses = filterCoursesByQuery(recommendedCourses, rawQuery);
+  const filteredOthers = filterCoursesByQuery(others, rawQuery);
+  const hasSearchResults =
+    filteredJoinedCourses.length > 0 ||
+    filteredRecommendedCourses.length > 0 ||
+    filteredOthers.length > 0;
   const hasNothingToShow = joinedCourses.length === 0 && recommendedCourses.length === 0;
 
   return (
@@ -114,7 +127,7 @@ export default function TutorPage() {
             </section>
           )}
 
-          {joinedCourses.length > 0 && (
+          {filteredJoinedCourses.length > 0 && (
             <section className="space-y-3">
               <div>
                 <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -124,11 +137,11 @@ export default function TutorPage() {
                   Các khoá bạn đã tham gia qua lịch sử học tập.
                 </p>
               </div>
-              <CourseCatalog items={joinedCourses} />
+              <CourseCatalog items={filteredJoinedCourses} />
             </section>
           )}
 
-          {recommendedCourses.length > 0 && (
+          {filteredRecommendedCourses.length > 0 && (
             <section className="space-y-3">
               <div>
                 <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -138,8 +151,17 @@ export default function TutorPage() {
                   Khoá phù hợp với lộ trình cá nhân hoá.
                 </p>
               </div>
-              <CourseCatalog items={recommendedCourses} />
+              <CourseCatalog items={filteredRecommendedCourses} />
             </section>
+          )}
+
+          {hasActiveSearch && !hasSearchResults && (
+            <div
+              className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed p-8 text-center"
+              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+            >
+              Không tìm thấy khóa học phù hợp với từ khóa &quot;{rawQuery}&quot;.
+            </div>
           )}
 
           {hasNothingToShow && (
@@ -165,9 +187,9 @@ export default function TutorPage() {
             </section>
           )}
 
-          {others.length > 0 && (
+          {filteredOthers.length > 0 && (
             <div className="pt-2 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-              Còn {others.length} khoá khác trong danh mục.{" "}
+              Còn {filteredOthers.length} khoá khác trong danh mục.{" "}
               <Link
                 href="/tutor"
                 className="font-semibold underline"
