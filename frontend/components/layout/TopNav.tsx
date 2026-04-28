@@ -49,6 +49,10 @@ export default function TopNav() {
         ? pathname === navItem.href
         : pathname === navItem.href || pathname.startsWith(`${navItem.href}/`);
 
+  const visibleNavItems = isAuthenticated
+    ? NAV_ITEMS.filter((navItem) => navItem.label !== "Courses")
+    : NAV_ITEMS;
+
   return (
     <>
       <header
@@ -68,7 +72,7 @@ export default function TopNav() {
 
           {/* Desktop nav links */}
           <nav className="hidden md:flex items-center gap-1 ml-4">
-            {NAV_ITEMS.map((navItem) => {
+            {visibleNavItems.map((navItem) => {
               const { href, label, icon: Icon } = navItem;
               const active = isNavItemActive(navItem);
               return (
@@ -184,7 +188,7 @@ export default function TopNav() {
             className="md:hidden border-t px-4 py-3 space-y-1"
             style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
           >
-            {NAV_ITEMS.map((navItem) => {
+            {visibleNavItems.map((navItem) => {
               const { href, label, icon: Icon } = navItem;
               const active = isNavItemActive(navItem);
               return (
