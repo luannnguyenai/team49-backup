@@ -22,7 +22,7 @@ export default function TopNav() {
 
   const handleLogout = () => {
     logout();
-    router.push("/login");
+    router.push("/");
   };
 
   const initials = user?.full_name

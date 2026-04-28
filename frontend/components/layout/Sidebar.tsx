@@ -28,7 +28,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
 
   const handleLogout = () => {
     logout();
-    router.push("/login");
+    router.push("/");
   };
 
   const sidebarContent = (
