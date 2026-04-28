@@ -416,7 +416,8 @@ export default function InContextTutor({
                 msg.isPending ? (
                   <div
                     aria-live="polite"
-                    className="space-y-2 text-slate-500 italic"
+                    className="space-y-2 italic"
+                    style={{ color: "var(--text-secondary)" }}
                   >
                     {(msg.statusSteps?.length ? msg.statusSteps : [msg.statusText || DEFAULT_TUTOR_STATUS]).map(
                       (step, stepIdx, allSteps) => {
@@ -425,9 +426,10 @@ export default function InContextTutor({
                         return (
                           <div
                             key={`${msg.localId}-status-${stepIdx}`}
-                            className={`flex items-start gap-2 ${
-                              isCurrentStep ? "text-slate-500" : "text-slate-400"
-                            }`}
+                            className="flex items-start gap-2"
+                            style={{
+                              color: isCurrentStep ? "var(--text-secondary)" : "var(--text-muted)",
+                            }}
                           >
                             {isCurrentStep ? (
                               <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin" />
@@ -451,14 +453,18 @@ export default function InContextTutor({
 
               {/* Rating buttons for AI messages */}
               {msg.role === "ai" && msg.id && msg.content && !msg.isPending && (
-                <div className="mt-2 flex items-center gap-2 border-t pt-2 border-slate-200/50">
+                <div
+                  className="mt-2 flex items-center gap-2 border-t pt-2"
+                  style={{ borderColor: "var(--border)" }}
+                >
                   <button
                     onClick={() => rateAnswer(idx, msg.id!, 1)}
                     className={`p-1 rounded transition-colors ${
                       msg.rating === 1
                         ? "text-emerald-500"
-                        : "text-slate-400 hover:text-emerald-500"
+                        : "hover:text-emerald-500"
                     }`}
+                    style={msg.rating === 1 ? undefined : { color: "var(--text-muted)" }}
                   >
                     <ThumbsUp className="h-3.5 w-3.5" />
                   </button>
@@ -467,8 +473,9 @@ export default function InContextTutor({
                     className={`p-1 rounded transition-colors ${
                       msg.rating === -1
                         ? "text-red-400"
-                        : "text-slate-400 hover:text-red-400"
+                        : "hover:text-red-400"
                     }`}
+                    style={msg.rating === -1 ? undefined : { color: "var(--text-muted)" }}
                   >
                     <ThumbsDown className="h-3.5 w-3.5" />
                   </button>

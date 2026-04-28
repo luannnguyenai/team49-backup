@@ -107,7 +107,7 @@ export default function CourseCatalog({ items }: CourseCatalogProps) {
               <div className="flex flex-1 flex-col gap-4 p-6">
                 <div className="flex flex-wrap items-center gap-2">
                   {course.is_recommended && (
-                    <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
+                    <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">
                       Đề xuất
                     </span>
                   )}

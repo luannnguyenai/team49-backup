@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 
+import { findMockCourseOverview } from "@/lib/mock-course-catalog";
 import type { CourseOverviewResponse, LearningUnitResponse } from "@/types";
 
 const API_BASE =
@@ -63,11 +64,19 @@ async function fetchCourseJson<T>(
   return (await response.json()) as T;
 }
 
-export function fetchCourseOverview(courseSlug: string) {
-  return fetchCourseJson<CourseOverviewResponse>(
-    `/api/courses/${courseSlug}/overview`,
-    { cache: "no-store" },
-  );
+export async function fetchCourseOverview(courseSlug: string) {
+  try {
+    return await fetchCourseJson<CourseOverviewResponse>(
+      `/api/courses/${courseSlug}/overview`,
+      { cache: "no-store" },
+    );
+  } catch (error) {
+    const fallback = findMockCourseOverview(courseSlug);
+    if (fallback) {
+      return fallback;
+    }
+    throw error;
+  }
 }
 
 export function fetchLearningUnit(courseSlug: string, unitSlug: string) {
