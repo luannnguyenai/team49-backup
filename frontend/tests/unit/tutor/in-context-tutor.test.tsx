@@ -91,7 +91,7 @@ describe("InContextTutor", () => {
     });
     fireEvent.click(screen.getAllByRole("button")[1]);
 
-    expect(screen.getByText("Dang tra loi...")).toBeInTheDocument();
+    expect(screen.getByText("Đang suy nghĩ...")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText("Lecture not found")).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe("InContextTutor", () => {
     });
     fireEvent.click(screen.getAllByRole("button")[1]);
 
-    expect(screen.getByText("Dang tra loi...")).toBeInTheDocument();
+    expect(screen.getByText("Đang suy nghĩ...")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText("First streamed answer.")).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe("InContextTutor", () => {
   it("parses NDJSON responses even when JSON objects are split across network chunks", async () => {
     fetchMock.mockResolvedValue(
       buildChunkedNdjsonResponse(200, [
-        '{"status":"Thinking',
+        '{"status":"Đang suy nghĩ',
         '..."}\n{"a":"Measure brain ',
         'activity means "}\n{"a":"recording neural signals."}\n{"qa_id":42}\n',
       ]),
@@ -162,7 +162,8 @@ describe("InContextTutor", () => {
   it("shows backend status text separately before streamed answer content arrives", async () => {
     fetchMock.mockResolvedValue(
       buildDelayedNdjsonResponse(200, [
-        { chunk: '{"status":"Dang doc ngu canh bai hoc..."}\n' },
+        { chunk: '{"status":"Đang đọc ngữ cảnh bài giảng..."}\n' },
+        { chunk: '{"status":"Đang tìm phần nội dung liên quan..."}\n', delayMs: 20 },
         { chunk: '{"a":"Answer starts here."}\n{"qa_id":12}\n', delayMs: 150 },
       ]),
     );
@@ -182,12 +183,16 @@ describe("InContextTutor", () => {
     });
     fireEvent.click(screen.getAllByRole("button")[1]);
 
-    expect(await screen.findByText("Dang doc ngu canh bai hoc...")).toBeInTheDocument();
+    expect(await screen.findByText("Đang đọc ngữ cảnh bài giảng...")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Đang tìm phần nội dung liên quan...")).toBeInTheDocument();
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Answer starts here.")).toBeInTheDocument();
     });
-    expect(screen.queryByText("Dang doc ngu canh bai hoc...")).not.toBeInTheDocument();
+    expect(screen.queryByText("Đang đọc ngữ cảnh bài giảng...")).not.toBeInTheDocument();
+    expect(screen.queryByText("Đang tìm phần nội dung liên quan...")).not.toBeInTheDocument();
   });
 
   it("includes context_binding_id in tutor requests when provided", async () => {
@@ -224,7 +229,7 @@ describe("InContextTutor", () => {
   it("disables input while streaming and restores focus when the reply completes", async () => {
     fetchMock.mockResolvedValue(
       buildDelayedNdjsonResponse(200, [
-        { chunk: '{"status":"Dang suy luan..."}\n' },
+        { chunk: '{"status":"Đang suy nghĩ..."}\n' },
         { chunk: '{"a":"Done."}\n{"qa_id":14}\n', delayMs: 120 },
       ]),
     );
@@ -255,6 +260,77 @@ describe("InContextTutor", () => {
     await waitFor(() => {
       expect(input).not.toBeDisabled();
       expect(document.activeElement).toBe(input);
+    });
+  });
+
+  it("shows a step list when the backend emits multiple tutor stages", async () => {
+    fetchMock.mockResolvedValue(
+      buildDelayedNdjsonResponse(200, [
+        { chunk: '{"status":"Đang đọc ngữ cảnh bài giảng..."}\n' },
+        { chunk: '{"status":"Đang tìm phần nội dung liên quan..."}\n', delayMs: 20 },
+        { chunk: '{"status":"Đang suy nghĩ câu trả lời..."}\n', delayMs: 20 },
+        { chunk: '{"a":"Mình đã tổng hợp xong."}\n{"qa_id":18}\n', delayMs: 100 },
+      ]),
+    );
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Tóm tắt giúp mình" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
+
+    expect(await screen.findByText("Đang đọc ngữ cảnh bài giảng...")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Đang tìm phần nội dung liên quan...")).toBeInTheDocument();
+      expect(screen.getByText("Đang suy nghĩ câu trả lời...")).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Mình đã tổng hợp xong.")).toBeInTheDocument();
+    });
+  });
+
+  it("shows a tool-specific step only when the backend actually uses a tool", async () => {
+    fetchMock.mockResolvedValue(
+      buildDelayedNdjsonResponse(200, [
+        { chunk: '{"status":"Đang suy nghĩ câu trả lời..."}\n' },
+        { chunk: '{"status":"Đang kiểm tra phép tính..."}\n', delayMs: 20 },
+        { chunk: '{"status":"Đang hoàn thiện câu trả lời..."}\n', delayMs: 20 },
+        { chunk: '{"a":"Kết quả đã được kiểm tra."}\n{"qa_id":22}\n', delayMs: 100 },
+      ]),
+    );
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Tính giúp mình giá trị này" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
+
+    expect(await screen.findByText("Đang kiểm tra phép tính...")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Đang hoàn thiện câu trả lời...")).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Kết quả đã được kiểm tra.")).toBeInTheDocument();
     });
   });
 });
