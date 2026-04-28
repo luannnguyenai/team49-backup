@@ -278,6 +278,7 @@ async def get_learning_unit_payload(
             title=unit_row["title"],
             lecture_title=unit_row["title"],
             lecture_order=unit_row.get("order_index"),
+            start_seconds=None,
             unit_type=unit_row["unit_type"],
             status=unit_row["status"],
             entry_mode=unit_row["entry_mode"],
@@ -417,6 +418,7 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
                 return None
 
             unit, course, section, canonical_unit = row
+            content_ref = canonical_unit.content_ref if canonical_unit is not None else {}
             lecture_num = (
                 int(canonical_unit.lecture_order)
                 if canonical_unit is not None and canonical_unit.lecture_order is not None
@@ -465,6 +467,7 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
                     "title": unit.title,
                     "lecture_title": canonical_unit.lecture_title if canonical_unit is not None else section.title,
                     "lecture_order": lecture_num,
+                    "start_seconds": content_ref.get("start_s") if content_ref else None,
                     "unit_type": unit.unit_type.value,
                     "status": unit.status.value,
                     "entry_mode": unit.entry_mode.value,

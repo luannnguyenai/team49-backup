@@ -80,6 +80,7 @@ class LearningUnitSummary(BaseModel):
     title: str
     lecture_title: str | None = None
     lecture_order: int | None = None
+    start_seconds: float | None = None
     unit_type: str
     status: str
     entry_mode: str

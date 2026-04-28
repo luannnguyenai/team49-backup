@@ -314,6 +314,7 @@ export interface LearningUnitSummary {
   title: string;
   lecture_title?: string | null;
   lecture_order?: number | null;
+  start_seconds?: number | null;
   unit_type: string;
   status: CourseStatus;
   entry_mode: "text" | "video" | "hybrid";
