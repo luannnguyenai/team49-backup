@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPriorCandidateTopics,
+  buildPriorShortlistFallback,
   mergePriorAnalysisIntoCandidates,
   selectRepresentativeUnitIds,
+  selectSuggestedKnownUnitIds,
 } from "@/components/onboarding/priorCandidateBuilder";
 import type { CourseSectionDetail } from "@/types";
 
@@ -230,5 +232,55 @@ describe("prior candidate builder", () => {
       displayLabel: "CNN architecture design",
       suggestedLevel: "confident",
     });
+  });
+
+  it("marks common foundation topics as reviewed from one year of AI experience", () => {
+    const topics = buildPriorCandidateTopics({
+      goalId: "computer_vision",
+      sections: [
+        {
+          id: "project",
+          course_id: "c-dl",
+          canonical_course_id: "cs230",
+          title: "Lecture 3: Full Cycle of a Deep Learning Project",
+          description: null,
+          order_index: 3,
+          prerequisite_section_ids: null,
+          learning_units_count: 3,
+          learning_units: [
+            { id: "project-1", title: "Train dev test split", description: null, order_index: 0, estimated_hours_beginner: 1, estimated_hours_intermediate: 0.5 },
+            { id: "project-2", title: "Bias variance diagnosis", description: null, order_index: 1, estimated_hours_beginner: 1, estimated_hours_intermediate: 0.5 },
+            { id: "project-3", title: "Error analysis", description: null, order_index: 2, estimated_hours_beginner: 1, estimated_hours_intermediate: 0.5 },
+          ],
+        },
+        {
+          id: "detection",
+          course_id: "c-cv",
+          canonical_course_id: "cs231n",
+          title: "Lecture 9: Object Detection, Image Segmentation, Visualizing and Understanding",
+          description: null,
+          order_index: 9,
+          prerequisite_section_ids: null,
+          learning_units_count: 2,
+          learning_units: [
+            { id: "det-1", title: "Object detection", description: null, order_index: 0, estimated_hours_beginner: 1, estimated_hours_intermediate: 0.5 },
+            { id: "det-2", title: "Segmentation", description: null, order_index: 1, estimated_hours_beginner: 1, estimated_hours_intermediate: 0.5 },
+          ],
+        },
+      ],
+    }).confirmEligible;
+
+    const fallback = buildPriorShortlistFallback({
+      topics,
+      priorKnowledgeText: "I have studied AI for 1 year.",
+      codingExperienceText: "",
+    });
+    const analyzed = mergePriorAnalysisIntoCandidates(topics, [], [], fallback);
+
+    expect(analyzed.find((topic) => topic.id === "project")).toMatchObject({
+      suggestedLevel: "reviewed",
+    });
+    expect(analyzed.find((topic) => topic.id === "detection")?.suggestedLevel).toBeUndefined();
+    expect(selectSuggestedKnownUnitIds(analyzed)).toEqual(["project-1", "project-2"]);
   });
 });

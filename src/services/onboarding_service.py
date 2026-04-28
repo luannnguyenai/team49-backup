@@ -64,6 +64,10 @@ Rules:
 - Interpret learner text in any language, including Vietnamese, but never translate or summarize topics.
 - Use level="confident" when the learner explicitly says they know the concrete topic/tool/model.
 - Use level="reviewed" when the learner implies exposure but not confidence.
+- You may use the learner's stated AI study duration only for common foundation topics.
+- If duration is around 3-6 months, mark common foundation topics as reviewed, not confident.
+- If duration is around 1 year or more, mark broad foundation topics as reviewed when plausible.
+- Duration alone must not select specialized topics such as object detection, segmentation, generative vision, vision-language, model interpretability, deep reinforcement learning, agents, post-training, dependency parsing, or sequence-to-sequence.
 - Omit ambiguous or low-confidence topics; the frontend will ask the learner about the remaining topics.
 - Self-report is not mastery; this shortlist only decides what to ask next.
 """
