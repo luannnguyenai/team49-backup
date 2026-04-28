@@ -87,6 +87,17 @@ function TopNavSearch({ pathname }: { pathname: string }) {
     }, SEARCH_DEBOUNCE_MS);
   };
 
+  const clearQuery = () => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    setDraftQuery("");
+    commitQuery("");
+  };
+
+  const hasDraftQuery = draftQuery.length > 0;
+
   return (
     <div className="hidden flex-1 sm:block">
       <label
@@ -116,6 +127,17 @@ function TopNavSearch({ pathname }: { pathname: string }) {
           className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
           style={{ color: "var(--text-primary)" }}
         />
+        {hasDraftQuery && (
+          <button
+            type="button"
+            aria-label="Xóa từ khóa tìm kiếm"
+            onClick={clearQuery}
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
       </label>
     </div>
   );
