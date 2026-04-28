@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PathItemResponse, PathStatus } from "@/types";
+import { formatDurationFromHours } from "../lib/duration";
 import {
   derivePlayerInsight,
   type PlayerProgressSnapshot,
@@ -245,15 +246,6 @@ function courseDisplay(course: CourseGroup): {
   };
 }
 
-function formatEstimatedHours(hours: number | null | undefined): string | null {
-  if (hours == null) return null;
-  if (hours <= 0) return null;
-  if (hours < 1) return `${Math.max(1, Math.round(hours * 60))}m`;
-
-  const rounded = Math.round(hours * 10) / 10;
-  return `${Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1)}h`;
-}
-
 function CourseCodeBadge({ code }: { code: string | null }) {
   if (!code) return null;
   return (
@@ -280,7 +272,7 @@ function UnitCard({
     item.learning_unit_id === currentProgress?.learning_unit_id
       ? derivePlayerInsight(currentProgress)
       : null;
-  const estimatedTime = formatEstimatedHours(item.estimated_hours);
+  const estimatedTime = formatDurationFromHours(item.estimated_hours);
 
   return (
     <button

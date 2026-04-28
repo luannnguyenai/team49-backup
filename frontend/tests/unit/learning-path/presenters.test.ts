@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { PathItemResponse } from "@/types";
-import { computeRecommendedNext, groupByWeek, pathToFlow } from "@/features/learning-path/presenters";
+import {
+  computeRecommendedNext,
+  groupByWeek,
+  normalizeTimelineOrder,
+  pathToFlow,
+} from "@/features/learning-path/presenters";
 
 function item(overrides: Partial<PathItemResponse> & { id: string; order_index: number }): PathItemResponse {
   return {
@@ -51,6 +56,41 @@ describe("learning path presenters", () => {
     expect(timeline.items[0]).toMatchObject({ week: 1, total_hours: 1.5 });
     expect(timeline.items[1]).toMatchObject({ week: 2, total_hours: 2 });
     expect(timeline.items.flatMap((week) => week.learning_units).map((unit) => unit.id)).toEqual(["a", "b"]);
+  });
+
+  it("orders timeline units by course and lecture display order", () => {
+    const timeline = groupByWeek([
+      item({ id: "lecture-4", order_index: 0, section_title: "Lecture 4: Adversarial" }),
+      item({ id: "lecture-2", order_index: 1, section_title: "Lecture 2: Supervised" }),
+      item({ id: "lecture-3", order_index: 2, section_title: "Lecture 3: Project" }),
+    ]);
+
+    expect(timeline.items[0].learning_units.map((unit) => unit.id)).toEqual([
+      "lecture-2",
+      "lecture-3",
+      "lecture-4",
+    ]);
+  });
+
+  it("normalizes backend timeline unit order before render", () => {
+    const timeline = normalizeTimelineOrder({
+      total_weeks: 1,
+      items: [
+        {
+          week: 1,
+          total_hours: 1,
+          learning_units: [
+            item({ id: "lecture-9", order_index: 0, section_title: "Lecture 9: Interpretability" }),
+            item({ id: "lecture-1", order_index: 1, section_title: "Lecture 1: Intro" }),
+          ],
+        },
+      ],
+    });
+
+    expect(timeline.items[0].learning_units.map((unit) => unit.id)).toEqual([
+      "lecture-1",
+      "lecture-9",
+    ]);
   });
 
   it("computes recommended next as first pending non-skip by global order", () => {

@@ -110,7 +110,7 @@ export function computeRecommendedNext(items: PathItemResponse[]): string | null
 
 export function groupByWeek(items: PathItemResponse[]): TimelineResponse {
   const grouped = new Map<number, PathItemResponse[]>();
-  for (const item of sortByOrder(items)) {
+  for (const item of sortByPlannerDisplayOrder(items)) {
     if (!isVisibleInTimeline(item)) continue;
     const week = item.week_number ?? 1;
     grouped.set(week, [...(grouped.get(week) ?? []), item]);
@@ -127,6 +127,18 @@ export function groupByWeek(items: PathItemResponse[]): TimelineResponse {
     }));
 
   return { total_weeks: entries.length, items: entries };
+}
+
+export function normalizeTimelineOrder(timeline: TimelineResponse): TimelineResponse {
+  return {
+    ...timeline,
+    items: timeline.items
+      .map((week) => ({
+        ...week,
+        learning_units: sortByPlannerDisplayOrder(week.learning_units),
+      }))
+      .sort((a, b) => a.week - b.week),
+  };
 }
 
 export function pathToFlow(items: PathItemResponse[]): FlowModel {

@@ -1,6 +1,7 @@
 import { CheckCircle2, Circle, PlayCircle, SkipForward } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PathItemResponse } from "@/types";
+import { formatDurationFromHours } from "../../lib/duration";
 import { getStatusClassName, getStatusLabel } from "../../lib/status";
 
 function StatusIcon({ status }: { status: PathItemResponse["status"] }) {
@@ -37,7 +38,7 @@ export default function LearningUnitCard({
       <p className="mt-1 line-clamp-1 text-xs opacity-80">{item.section_title ?? "Khác"}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
         <span>{getStatusLabel(item.status)}</span>
-        {item.estimated_hours != null && <span>{item.estimated_hours}h</span>}
+        {item.estimated_hours != null && <span>{formatDurationFromHours(item.estimated_hours)}</span>}
         {isRecommended && <span className="rounded-full bg-primary-600 px-2 py-0.5 text-white">Tiếp theo</span>}
       </div>
     </button>

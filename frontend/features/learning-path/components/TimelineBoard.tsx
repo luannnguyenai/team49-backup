@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { computeRecommendedNext, groupByWeek } from "../presenters";
+import { formatDurationFromHours } from "../lib/duration";
+import { computeRecommendedNext, groupByWeek, normalizeTimelineOrder } from "../presenters";
 import { useLearningPathStore } from "../store";
 import LearningUnitCard from "./cards/LearningUnitCard";
 
@@ -9,7 +10,10 @@ export default function TimelineBoard() {
   const selectItem = useLearningPathStore((s) => s.selectItem);
 
   const fallbackTimeline = useMemo(() => groupByWeek(items), [items]);
-  const effectiveTimeline = timeline ?? fallbackTimeline;
+  const effectiveTimeline = useMemo(
+    () => normalizeTimelineOrder(timeline ?? fallbackTimeline),
+    [fallbackTimeline, timeline],
+  );
   const recommendedId = useMemo(() => computeRecommendedNext(items), [items]);
   const allWeekNumbersMissing = items.length > 0 && items.every((item) => item.week_number == null);
 
@@ -28,7 +32,7 @@ export default function TimelineBoard() {
                 Tuần {week.week}
               </h3>
               <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                {week.total_hours}h · {week.learning_units.length} bài
+                {formatDurationFromHours(week.total_hours) ?? "0 phút"} · {week.learning_units.length} bài
               </p>
             </div>
             <div className="space-y-3">
