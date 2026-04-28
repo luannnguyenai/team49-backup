@@ -118,6 +118,29 @@ describe("StepKnownTopicsFiltered", () => {
     expect(suggested).toContain("u1");
   });
 
+  it("lets the user inspect selected representative units", () => {
+    useOnboardingStore.getState().setKnownUnitIds(["u1"]);
+
+    render(
+      <StepKnownTopicsFiltered
+        topics={[
+          {
+            ...cvTopics[0],
+            suggestedLevel: "confident",
+          },
+        ]}
+        onNext={onNextMock}
+        onBack={onBackMock}
+        onSkipAll={onSkipAllMock}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Xem các unit đã chọn" }));
+
+    expect(screen.getByText("CNN architecture design")).toBeInTheDocument();
+    expect(screen.getByText("Conv Basics")).toBeInTheDocument();
+  });
+
   it("hides AI-confident topics while keeping all remaining candidate topics visible", () => {
     render(
       <StepKnownTopicsFiltered

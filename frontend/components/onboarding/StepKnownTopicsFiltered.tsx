@@ -55,6 +55,7 @@ export default function StepKnownTopicsFiltered({
   const knownUnitIds = useOnboardingStore((s) => s.knownUnitIds);
   const setKnownUnitIds = useOnboardingStore((s) => s.setKnownUnitIds);
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
+  const [showSelectedUnits, setShowSelectedUnits] = useState(false);
 
   const selectedSet = useMemo(() => new Set(knownUnitIds), [knownUnitIds]);
   const visibleTopics = useMemo(
@@ -62,6 +63,16 @@ export default function StepKnownTopicsFiltered({
     [topics],
   );
   const hiddenConfidentCount = topics.length - visibleTopics.length;
+  const selectedTopics = useMemo(
+    () =>
+      topics
+        .map((topic) => ({
+          topic,
+          selectedUnits: topic.units.filter((unit) => selectedSet.has(unit.id)),
+        }))
+        .filter((item) => item.selectedUnits.length > 0),
+    [selectedSet, topics],
+  );
 
   function setTopicLevel(topic: PriorCandidateTopic, level: PriorTopicLevel) {
     const topicUnitIds = new Set(topic.units.map((unit) => unit.id));
@@ -81,14 +92,14 @@ export default function StepKnownTopicsFiltered({
         </p>
       </div>
 
-      <div
-        className="rounded-xl border p-4 text-xs leading-relaxed"
-        style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-      >
-        {analysisFallback
-          ? "AI chưa trả kết quả hợp lệ, đang dùng shortlist fallback từ nội dung bạn nhập."
-          : `Shortlist được tạo bởi ${modelLabel ?? "AI reasoning model"}.`}
-      </div>
+      {!analysisFallback && (
+        <div
+          className="rounded-xl border p-4 text-xs leading-relaxed"
+          style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+        >
+          Shortlist được tạo bởi {modelLabel ?? "AI reasoning model"}.
+        </div>
+      )}
 
       {hiddenConfidentCount > 0 && (
         <div
@@ -191,9 +202,44 @@ export default function StepKnownTopicsFiltered({
       )}
 
       {knownUnitIds.length > 0 && (
-        <p className="text-xs font-medium text-primary-600">
-          Đã chọn {knownUnitIds.length} unit đại diện để placement kiểm chứng.
-        </p>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-primary-600">
+            <p>Đã chọn {knownUnitIds.length} unit đại diện để placement kiểm chứng.</p>
+            <button
+              type="button"
+              aria-label="Xem các unit đã chọn"
+              onClick={() => setShowSelectedUnits((value) => !value)}
+              className="rounded-lg border border-primary-200 bg-primary-50 p-1.5 text-primary-700 transition-colors hover:bg-primary-100 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-300"
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {showSelectedUnits && (
+            <div
+              className="rounded-xl border p-3"
+              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-page)" }}
+            >
+              <p className="mb-2 text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+                Unit đang được đưa vào placement
+              </p>
+              <div className="space-y-3">
+                {selectedTopics.map(({ topic, selectedUnits }) => (
+                  <div key={topic.id}>
+                    <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+                      {topicLabel(topic)}
+                    </p>
+                    <ul className="mt-1 space-y-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                      {selectedUnits.map((unit) => (
+                        <li key={unit.id}>{unit.title}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       <div className="flex items-center gap-3 pt-2">
