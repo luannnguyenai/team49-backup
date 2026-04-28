@@ -336,7 +336,13 @@ async def _generate_canonical_learning_path(
             if kp_id in mastery_by_kp
         ]
         mastery_lcb = min(mastery_values) if mastery_values else 0.0
-        action_value = classify_unit_action(mastery_lcb)
+        decision = placement_by_unit.get(unit.id) if has_placement and not placement_skipped else None
+        if decision == "skip":
+            action_value = PathAction.skip.value
+        elif decision == "review":
+            action_value = PathAction.quick_review.value
+        else:
+            action_value = classify_unit_action(mastery_lcb)
         action = PathAction(action_value)
         priority = classify_schema_v2_unit_priority(
             canonical_unit or SimpleNamespace(active=True),
@@ -363,12 +369,13 @@ async def _generate_canonical_learning_path(
             is_locked = False
             rationale_log = None
         else:
-            decision = placement_by_unit.get(unit.id)
             if decision is None:
-                # Not assessed — include in Phase A as prereq
-                phase_tag = "phase_a"
-                is_locked = False
-                rationale_log = "placement_prereq_unassessed"
+                # Not assessed means "not verified yet", not "skip".
+                # Keep it in the plan but lock it behind the verified Phase A work
+                # so the main roadmap does not dump the full raw course upfront.
+                phase_tag = "phase_b"
+                is_locked = True
+                rationale_log = "placement_unassessed_locked"
             elif decision == "skip":
                 # Already mastered — Phase B, locked
                 phase_tag = "phase_b"
