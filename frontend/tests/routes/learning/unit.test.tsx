@@ -681,4 +681,52 @@ describe("learning unit page (US3)", () => {
     expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard?q=transformer");
     vi.useRealTimers();
   });
+
+  it("hides the clear button when the search input is empty", async () => {
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    expect(
+      screen.queryByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the clear button when the search input has a value", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cs231n");
+
+    render(<TopNav />);
+
+    expect(
+      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+    ).toBeInTheDocument();
+  });
+
+  it("clears the search input and removes q from the URL when clear button is pressed", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cs231n");
+
+    render(<TopNav />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+    );
+
+    expect(screen.getByLabelText("Tìm kiếm khóa học")).toHaveValue("");
+    expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard");
+  });
+
+  it("preserves other query params when clearing the search query", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cs231n&tab=ready");
+
+    render(<TopNav />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+    );
+
+    expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard?tab=ready");
+  });
 });
