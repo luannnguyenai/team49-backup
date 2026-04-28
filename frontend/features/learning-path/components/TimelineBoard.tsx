@@ -60,16 +60,16 @@ export default function TimelineBoard() {
 
   return (
     <div className="space-y-5">
-      <section className="relative overflow-hidden rounded-2xl border-2 border-slate-800 bg-white p-5 shadow-[4px_4px_0px_#e2e8f0] md:p-8 md:shadow-[8px_8px_0px_#e2e8f0]">
+      <section className="relative overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-slate-50 to-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] md:p-8">
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.035]"
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
           style={{
-            backgroundImage: "radial-gradient(circle at 2px 2px, #000 1px, transparent 0)",
-            backgroundSize: "24px 24px",
+            backgroundImage: "radial-gradient(circle at 2px 2px, #2563eb 1px, transparent 0)",
+            backgroundSize: "28px 28px",
           }}
         />
 
-        <div className="relative z-10 mb-8 flex flex-col justify-between gap-4 border-b-2 border-slate-100 pb-6 sm:flex-row sm:items-end">
+        <div className="relative z-10 mb-8 flex flex-col justify-between gap-4 rounded-2xl border border-white/70 bg-white/75 p-5 shadow-sm backdrop-blur sm:flex-row sm:items-end">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary-600">
               Tuần {weekPlan.week}
@@ -92,12 +92,12 @@ export default function TimelineBoard() {
           </div>
         </div>
 
-        <div className="relative z-10 space-y-10">
+        <div className="relative z-10 space-y-8">
           {weekPlan.courses.map((course) => {
             const display = courseTitleParts(course.course_title);
             return (
-              <div key={course.key} className="rounded-2xl border-2 border-slate-800 bg-white/90 p-5 shadow-[4px_4px_0px_#e2e8f0] md:p-7">
-                <div className="mb-8 flex items-start justify-between gap-4 border-b-2 border-slate-100 pb-6">
+              <div key={course.key} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_14px_35px_rgba(15,23,42,0.10)] ring-1 ring-white md:p-7">
+                <div className="mb-8 flex items-start justify-between gap-4 rounded-2xl bg-slate-50 px-4 py-4 ring-1 ring-slate-100">
                   <div>
                     {display.code ? (
                       <span className="-rotate-2 inline-flex rounded-lg border-2 border-blue-200 bg-blue-50 px-3 py-1 text-lg font-extrabold tracking-wide text-blue-600 shadow-[2px_2px_0px_#bfdbfe]">
@@ -115,15 +115,17 @@ export default function TimelineBoard() {
                 </div>
 
                 <div className="relative px-0 md:px-4">
-                  <div className="absolute left-[23px] top-6 bottom-4 w-0 border-l-2 border-dashed border-blue-500 md:left-[47px]" />
+                  <div className="absolute left-[23px] top-7 bottom-6 w-0 border-l-2 border-dashed border-blue-300 md:left-[47px]" />
                   {course.lectures.map((lecture, index) => {
                     const isExpanded = expandedLectures.has(lecture.key);
                     return (
-                      <div key={lecture.key} className="relative flex items-start gap-4 pb-5 md:gap-6">
-                        <div className="relative z-10 mt-3 shrink-0">
+                      <div key={lecture.key} className="relative flex items-start gap-4 pb-6 last:pb-0 md:gap-6">
+                        <div className="relative z-10 mt-4 shrink-0">
                           <span className={cn(
-                            "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-800 text-lg font-extrabold text-slate-900 shadow-[2px_2px_0px_#1e293b] md:h-16 md:w-16 md:text-2xl",
-                            isExpanded ? "bg-yellow-300" : "bg-white",
+                            "flex h-12 w-12 items-center justify-center rounded-full border text-lg font-extrabold shadow-sm md:h-16 md:w-16 md:text-2xl",
+                            isExpanded
+                              ? "border-blue-300 bg-blue-100 text-blue-700"
+                              : "border-slate-200 bg-white text-slate-700",
                           )}>
                             {index + 1}
                           </span>
@@ -133,10 +135,10 @@ export default function TimelineBoard() {
                             type="button"
                             onClick={() => toggleLecture(lecture.key)}
                             className={cn(
-                              "flex w-full items-center justify-between gap-4 rounded-xl border-2 bg-white p-4 text-left transition-all md:p-5",
+                              "flex w-full items-center justify-between gap-4 rounded-2xl border bg-white p-4 text-left transition-all md:p-5",
                               isExpanded
-                                ? "border-slate-800 shadow-[2px_2px_0px_#1e293b] translate-y-[2px]"
-                                : "border-slate-800 shadow-[4px_4px_0px_#1e293b] hover:translate-y-[1px] hover:bg-slate-50 hover:shadow-[3px_3px_0px_#1e293b]",
+                                ? "border-blue-200 shadow-[0_10px_24px_rgba(37,99,235,0.14)] ring-1 ring-blue-100"
+                                : "border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md",
                             )}
                           >
                             <div>
@@ -158,7 +160,8 @@ export default function TimelineBoard() {
                           </button>
 
                           {isExpanded ? (
-                            <div className="mt-4 grid gap-3 pl-0 md:grid-cols-2 md:pl-2">
+                            <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-3 md:p-4">
+                              <div className="grid gap-3 md:grid-cols-2">
                               {lecture.learning_units.map((item) => (
                                 <LearningUnitCard
                                   key={item.id}
@@ -167,6 +170,7 @@ export default function TimelineBoard() {
                                   onClick={() => selectItem(item.id)}
                                 />
                               ))}
+                              </div>
                             </div>
                           ) : null}
                         </div>
