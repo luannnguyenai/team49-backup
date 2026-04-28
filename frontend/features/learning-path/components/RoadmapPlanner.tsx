@@ -19,7 +19,12 @@ import {
   derivePlayerInsight,
   type PlayerProgressSnapshot,
 } from "../player-insights";
-import { isVisibleInMainPath } from "../lib/status";
+import {
+  isDoneForPlannerProgress,
+  isIncludedInMainPath,
+  isOptionalIntroItem,
+  isVisibleInMainPath,
+} from "../lib/status";
 import { describePlannerReason } from "../planner-reasons";
 import { computeRecommendedNext, sortByOrder } from "../presenters";
 import PathRequiredState from "./PathRequiredState";
@@ -71,7 +76,7 @@ function groupItemsByCourseAndLecture(
   const courseByKey = new Map<string, CourseGroup>();
   const courses: CourseGroup[] = [];
 
-  for (const item of sortByOrder(items).filter(isVisibleInMainPath)) {
+  for (const item of sortByOrder(items).filter(isIncludedInMainPath)) {
     const courseKey = courseKeyFor(item);
     let course = courseByKey.get(courseKey);
     if (!course) {
@@ -108,7 +113,9 @@ function groupItemsByCourseAndLecture(
     course.lectures.sort(compareLectures);
   }
 
-  return courses;
+  return courses.sort(
+    (a, b) => Number(isCourseComplete(a.items)) - Number(isCourseComplete(b.items)),
+  );
 }
 
 function extractLectureNumber(title: string): number | null {
@@ -194,7 +201,15 @@ function reasonClassName(code: string): string {
 }
 
 function countCompleted(items: PathItemResponse[]): number {
-  return items.filter((item) => item.status === "completed").length;
+  return items.filter(isDoneForPlannerProgress).length;
+}
+
+function isCourseComplete(items: PathItemResponse[]): boolean {
+  return items.length > 0 && items.every(isDoneForPlannerProgress);
+}
+
+function isOptionalIntroLecture(lecture: LectureGroup): boolean {
+  return lecture.items.length > 0 && lecture.items.every(isOptionalIntroItem);
 }
 
 function isUuidLike(value: string | null | undefined): boolean {
@@ -449,6 +464,10 @@ export default function RoadmapPlanner({
                 {course.lectures.map((lecture, index) => {
                   const isExpanded = expandedLectureKeys.has(lecture.key);
                   const completedLectureUnits = countCompleted(lecture.items);
+                  const visibleLectureItems = lecture.items.filter(
+                    isVisibleInMainPath,
+                  );
+                  const optionalIntro = isOptionalIntroLecture(lecture);
                   const isCompleted =
                     lecture.items.length > 0 &&
                     completedLectureUnits === lecture.items.length;
@@ -478,13 +497,19 @@ export default function RoadmapPlanner({
                             "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-800 shadow-[2px_2px_0px_#1e293b] md:shadow-[3px_3px_0px_#1e293b] transition-transform hover:scale-110 md:h-16 md:w-16",
                             isCompleted && "bg-emerald-400",
                             isInProgress && "bg-[#fde047]",
+                            optionalIntro &&
+                            !isCompleted &&
+                            !isInProgress &&
+                            "bg-blue-100",
                             hasRecommended &&
                             !isCompleted &&
                             !isInProgress &&
+                            !optionalIntro &&
                             "bg-blue-100",
                             !isCompleted &&
                             !isInProgress &&
                             !hasRecommended &&
+                            !optionalIntro &&
                             "bg-white",
                           )}
                         >
@@ -510,6 +535,10 @@ export default function RoadmapPlanner({
                             hasRecommended &&
                             !isExpanded &&
                             "bg-amber-50 border-amber-200",
+                            optionalIntro &&
+                            !hasRecommended &&
+                            !isExpanded &&
+                            "bg-blue-50 border-blue-200",
                           )}
                           aria-expanded={isExpanded}
                         >
@@ -522,6 +551,9 @@ export default function RoadmapPlanner({
                                 {completedLectureUnits} / {lecture.items.length}{" "}
                                 units
                                 {hasRecommended ? " · next up here" : ""}
+                                {optionalIntro && !hasRecommended
+                                  ? " · optional intro"
+                                  : ""}
                               </p>
                             </div>
                             <span
@@ -536,7 +568,7 @@ export default function RoadmapPlanner({
                         </button>
 
                         <AnimatePresence>
-                          {isExpanded && lecture.items.length > 0 && (
+                          {isExpanded && visibleLectureItems.length > 0 && (
                             <motion.div
                               initial={{ opacity: 0, height: 0, marginTop: 0 }}
                               animate={{
@@ -549,7 +581,7 @@ export default function RoadmapPlanner({
                               className="overflow-hidden relative"
                             >
                               <div className="grid grid-cols-1 gap-3 pb-2 pl-0 lg:grid-cols-2 lg:pl-2">
-                                {lecture.items.map((item) => (
+                                {visibleLectureItems.map((item) => (
                                   <UnitCard
                                     key={item.id}
                                     item={item}

@@ -33,10 +33,39 @@ export function isVisibleInTimeline(item: PathItemResponse): boolean {
   return isVisibleInMainPath(item);
 }
 
-export function isVisibleInMainPath(item: PathItemResponse): boolean {
+export function isIncludedInMainPath(item: PathItemResponse): boolean {
   if (item.segment_policy === "hidden") return false;
   if (item.segment_policy === "reference") return false;
+  if (isLockedFutureItem(item)) return false;
+  return true;
+}
+
+export function isVisibleInMainPath(item: PathItemResponse): boolean {
+  if (!isIncludedInMainPath(item)) return false;
   if (item.action === "skip") return false;
   if (item.status === "skipped") return false;
   return true;
+}
+
+export function isDoneForPlannerProgress(item: PathItemResponse): boolean {
+  return (
+    item.status === "completed" ||
+    item.status === "skipped" ||
+    item.action === "skip"
+  );
+}
+
+export function isLockedFutureItem(item: PathItemResponse): boolean {
+  if (item.phase_tag !== "phase_b" || !item.is_locked) return false;
+  if (isDoneForPlannerProgress(item)) return false;
+  if (isOptionalIntroItem(item)) return false;
+  return true;
+}
+
+export function isOptionalIntroItem(item: PathItemResponse): boolean {
+  return Boolean(
+    item.section_title?.match(
+      /(^|\b)(lecture|lec\.?)\s*1\s*[:-]\s*(intro|introduction)\b|^intro\b|^introduction\b/i,
+    ),
+  );
 }

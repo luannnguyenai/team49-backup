@@ -1,5 +1,10 @@
 import type { PathItemResponse, TimelineResponse, WeekEntry } from "@/types";
-import { isVisibleInMainPath, isVisibleInTimeline } from "./lib/status";
+import {
+  isIncludedInMainPath,
+  isOptionalIntroItem,
+  isVisibleInMainPath,
+  isVisibleInTimeline,
+} from "./lib/status";
 
 export interface SectionSummary {
   key: string;
@@ -56,8 +61,51 @@ export function sortByOrder(items: PathItemResponse[]): PathItemResponse[] {
   return [...items].sort((a, b) => a.order_index - b.order_index);
 }
 
+function extractLectureNumber(title: string | null | undefined): number | null {
+  const match = title?.match(/\blecture\s+(\d+)\b/i);
+  if (!match) return null;
+  return Number.parseInt(match[1], 10);
+}
+
+function courseKey(item: PathItemResponse): string {
+  return item.course_id || item.course_title || "";
+}
+
+export function sortByPlannerDisplayOrder(
+  items: PathItemResponse[],
+): PathItemResponse[] {
+  const firstCourseOrder = new Map<string, number>();
+  for (const item of sortByOrder(items)) {
+    const key = courseKey(item);
+    if (!firstCourseOrder.has(key)) {
+      firstCourseOrder.set(key, item.order_index);
+    }
+  }
+
+  return [...items].sort((a, b) => {
+    const courseDiff =
+      (firstCourseOrder.get(courseKey(a)) ?? Number.MAX_SAFE_INTEGER) -
+      (firstCourseOrder.get(courseKey(b)) ?? Number.MAX_SAFE_INTEGER);
+    if (courseDiff !== 0) return courseDiff;
+
+    const aLecture = extractLectureNumber(a.section_title);
+    const bLecture = extractLectureNumber(b.section_title);
+    if (aLecture != null && bLecture != null && aLecture !== bLecture) {
+      return aLecture - bLecture;
+    }
+    if (aLecture != null && bLecture == null) return -1;
+    if (aLecture == null && bLecture != null) return 1;
+
+    return a.order_index - b.order_index;
+  });
+}
+
 export function computeRecommendedNext(items: PathItemResponse[]): string | null {
-  return sortByOrder(items).find((item) => item.status === "pending" && isVisibleInMainPath(item))?.id ?? null;
+  return sortByPlannerDisplayOrder(items).find((item) =>
+    item.status === "pending" &&
+    isVisibleInMainPath(item) &&
+    !isOptionalIntroItem(item)
+  )?.id ?? null;
 }
 
 export function groupByWeek(items: PathItemResponse[]): TimelineResponse {
@@ -82,7 +130,7 @@ export function groupByWeek(items: PathItemResponse[]): TimelineResponse {
 }
 
 export function pathToFlow(items: PathItemResponse[]): FlowModel {
-  const ordered = sortByOrder(items);
+  const ordered = sortByOrder(items).filter(isIncludedInMainPath);
   const recommendedId = computeRecommendedNext(ordered);
   const sections: SectionSummary[] = [];
   const sectionByKey = new Map<string, SectionSummary>();

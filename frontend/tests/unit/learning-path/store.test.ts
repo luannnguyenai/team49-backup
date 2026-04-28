@@ -40,6 +40,8 @@ function pathItem(overrides: Partial<PathItemResponse> & { id: string }): PathIt
     has_quiz_items: overrides.has_quiz_items,
     is_worth_learning: overrides.is_worth_learning,
     override_critical_kp: overrides.override_critical_kp,
+    phase_tag: overrides.phase_tag,
+    is_locked: overrides.is_locked,
   };
 }
 
@@ -188,6 +190,34 @@ describe("learning path store", () => {
       items: [generatedItem],
       generatedTopologyHash: nextProfile.topologyHash,
       previousProfile: oldProfile,
+    });
+  });
+
+  it("summarizes the current main path instead of raw locked future units", async () => {
+    const profile = createLearningProfileForPath("computer_vision", {
+      weeklyHours: null,
+      source: "manual",
+    });
+    const visible = pathItem({ id: "visible", status: "in_progress" });
+    const skipped = pathItem({ id: "skipped", action: "skip" });
+    const locked = pathItem({
+      id: "locked",
+      phase_tag: "phase_b",
+      is_locked: true,
+    });
+
+    useLearningPathStore.getState().setProfile(profile);
+    useLearningPathStore.setState({ generatedTopologyHash: profile.topologyHash });
+    vi.mocked(learningPathApi.getLearningPath).mockResolvedValue(
+      learningPath([visible, skipped, locked]),
+    );
+
+    await useLearningPathStore.getState().loadPath();
+
+    expect(useLearningPathStore.getState().summary).toMatchObject({
+      total_units: 2,
+      completed_units: 1,
+      in_progress_units: 1,
     });
   });
 });

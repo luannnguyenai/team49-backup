@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getStatusIconName,
   getStatusLabel,
+  isIncludedInMainPath,
   isVisibleInMainPath,
   isVisibleInTimeline,
 } from "@/features/learning-path/lib/status";
@@ -56,7 +57,35 @@ describe("learning path status helpers", () => {
     expect(isVisibleInMainPath({ ...base, status: "skipped" })).toBe(false);
     expect(isVisibleInMainPath({ ...base, segment_policy: "reference" })).toBe(false);
     expect(isVisibleInMainPath({ ...base, segment_policy: "hidden" })).toBe(false);
-    expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: true })).toBe(true);
+    expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: true })).toBe(false);
     expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: false })).toBe(true);
+  });
+
+  it("keeps evidence-skipped and optional intro items in progress counts but not future locked content", () => {
+    const base: PathItemResponse = {
+      id: "1",
+      learning_unit_id: "1",
+      learning_unit_title: "Unit",
+      section_title: "Lecture 2: Core",
+      action: "standard_learn",
+      estimated_hours: 1,
+      order_index: 0,
+      week_number: null,
+      status: "pending",
+      canonical_unit_id: null,
+      segment_policy: "core",
+      phase_tag: "phase_b",
+      is_locked: true,
+    };
+
+    expect(isIncludedInMainPath(base)).toBe(false);
+    expect(isIncludedInMainPath({ ...base, action: "skip" })).toBe(true);
+    expect(isVisibleInMainPath({ ...base, action: "skip" })).toBe(false);
+    expect(
+      isIncludedInMainPath({
+        ...base,
+        section_title: "Lecture 1: Introduction to Deep Learning",
+      }),
+    ).toBe(true);
   });
 });

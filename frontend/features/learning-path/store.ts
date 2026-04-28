@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { learningSessionApi } from "@/lib/api";
 import { learningPathApi } from "./api";
+import { isDoneForPlannerProgress, isIncludedInMainPath } from "./lib/status";
 import type { LearningPathResponse, PathItemResponse, PathStatus, TimelineResponse } from "@/types";
 import type { PlayerProgressSnapshot } from "./player-insights";
 import type { LearningProfile } from "./profile";
@@ -34,10 +35,11 @@ function toErrorMessage(error: unknown): string {
 }
 
 function recomputeSummary(items: PathItemResponse[]): Omit<LearningPathResponse, "items"> {
+  const mainPathItems = items.filter(isIncludedInMainPath);
   return {
-    total_units: items.length,
-    completed_units: items.filter((item) => item.status === "completed").length,
-    in_progress_units: items.filter((item) => item.status === "in_progress").length,
+    total_units: mainPathItems.length,
+    completed_units: mainPathItems.filter(isDoneForPlannerProgress).length,
+    in_progress_units: mainPathItems.filter((item) => item.status === "in_progress").length,
   };
 }
 
@@ -147,11 +149,7 @@ export const useLearningPathStore = create<LearningPathState>()(
           ]);
           set({
             items: path.items,
-            summary: {
-              total_units: path.total_units,
-              completed_units: path.completed_units,
-              in_progress_units: path.in_progress_units,
-            },
+            summary: recomputeSummary(path.items),
             timeline,
             currentProgress: toPlayerProgressSnapshot(
               resume?.current_unit_id,

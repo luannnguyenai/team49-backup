@@ -16,6 +16,8 @@ function item(overrides: Partial<PathItemResponse> & { id: string; order_index: 
     order_index: overrides.order_index,
     week_number: overrides.week_number ?? null,
     status: overrides.status ?? "pending",
+    course_id: overrides.course_id,
+    course_title: overrides.course_title,
     canonical_unit_id: overrides.canonical_unit_id ?? null,
     segment_policy: overrides.segment_policy,
     phase_tag: overrides.phase_tag,
@@ -51,7 +53,7 @@ describe("RoadmapPlanner", () => {
     expect(screen.queryByText("Unit hidden")).not.toBeInTheDocument();
   });
 
-  it("hides skipped/reference items but keeps locked phase B units as upcoming path content", () => {
+  it("counts skipped units as done without rendering skipped or locked future cards", () => {
     render(
       <RoadmapPlanner
         items={[
@@ -71,6 +73,8 @@ describe("RoadmapPlanner", () => {
       />,
     );
 
+    expect(screen.getByText(/2 \/ 3 units/)).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: /Expand Deep Learning/ }));
 
     expect(screen.getByText("Core Unit")).toBeInTheDocument();
@@ -78,7 +82,60 @@ describe("RoadmapPlanner", () => {
     expect(screen.queryByText("User Skipped")).not.toBeInTheDocument();
     expect(screen.queryByText("Reference Only")).not.toBeInTheDocument();
     expect(screen.queryByText("Hidden Logistics")).not.toBeInTheDocument();
-    expect(screen.getByText("Locked Phase B")).toBeInTheDocument();
+    expect(screen.queryByText("Locked Phase B")).not.toBeInTheDocument();
+  });
+
+  it("keeps optional intro lectures visible but does not mark them as next up", () => {
+    render(
+      <RoadmapPlanner
+        items={[
+          item({
+            id: "intro",
+            order_index: 0,
+            learning_unit_title: "Course Orientation",
+            section_title: "Lecture 1: Introduction to Deep Learning",
+            phase_tag: "phase_b",
+            is_locked: true,
+          }),
+          item({
+            id: "core",
+            order_index: 1,
+            learning_unit_title: "Core Unit",
+            section_title: "Lecture 2: Core",
+          }),
+        ]}
+      />,
+    );
+
+    expect(screen.getByText(/0 \/ 1 units · optional intro/)).toBeInTheDocument();
+    expect(screen.getByText(/0 \/ 1 units · next up here/)).toBeInTheDocument();
+  });
+
+  it("moves completed courses after the current course", () => {
+    render(
+      <RoadmapPlanner
+        items={[
+          item({
+            id: "done",
+            order_index: 0,
+            course_id: "cs230",
+            course_title: "CS230: Deep Learning",
+            section_title: "Lecture 1",
+            status: "completed",
+          }),
+          item({
+            id: "todo",
+            order_index: 1,
+            course_id: "cs231n",
+            course_title: "CS231n: Deep Learning for Computer Vision",
+            section_title: "Lecture 1",
+          }),
+        ]}
+      />,
+    );
+
+    const courseHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
+    expect(courseHeadings).toEqual(["Computer Vision", "Deep Learning"]);
   });
 
   it("calls unit selection when a unit card is clicked", () => {

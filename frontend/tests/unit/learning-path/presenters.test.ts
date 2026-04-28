@@ -15,6 +15,8 @@ function item(overrides: Partial<PathItemResponse> & { id: string; order_index: 
     status: overrides.status ?? "pending",
     canonical_unit_id: overrides.canonical_unit_id ?? null,
     segment_policy: overrides.segment_policy,
+    phase_tag: overrides.phase_tag,
+    is_locked: overrides.is_locked,
   };
 }
 
@@ -59,6 +61,45 @@ describe("learning path presenters", () => {
         item({ id: "c", order_index: 2, status: "pending" }),
       ]),
     ).toBe("c");
+  });
+
+  it("does not recommend optional intro or locked future units as next", () => {
+    expect(
+      computeRecommendedNext([
+        item({
+          id: "intro",
+          order_index: 0,
+          section_title: "Lecture 1: Introduction to Deep Learning",
+          phase_tag: "phase_b",
+          is_locked: true,
+        }),
+        item({
+          id: "future",
+          order_index: 1,
+          section_title: "Lecture 3: Later",
+          phase_tag: "phase_b",
+          is_locked: true,
+        }),
+        item({ id: "core", order_index: 2, section_title: "Lecture 2: Core" }),
+      ]),
+    ).toBe("core");
+  });
+
+  it("recommends next item by lecture display order rather than phase order", () => {
+    expect(
+      computeRecommendedNext([
+        item({
+          id: "lecture-4",
+          order_index: 0,
+          section_title: "Lecture 4: Adversarial Robustness",
+        }),
+        item({
+          id: "lecture-2",
+          order_index: 1,
+          section_title: "Lecture 2: Supervised Learning",
+        }),
+      ]),
+    ).toBe("lecture-2");
   });
 
   it("returns null when no eligible item exists", () => {
