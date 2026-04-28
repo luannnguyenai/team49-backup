@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { PathItemResponse } from "@/types";
 import {
+  buildCurrentWeekPlan,
   computeRecommendedNext,
   groupByWeek,
   normalizeTimelineOrder,
@@ -89,9 +90,30 @@ describe("learning path presenters", () => {
     });
 
     expect(timeline.items[0].learning_units.map((unit) => unit.id)).toEqual([
-      "lecture-1",
       "lecture-9",
     ]);
+  });
+
+  it("builds a current week plan from next actionable units up to weekly budget", () => {
+    const plan = buildCurrentWeekPlan(
+      [
+        item({ id: "intro", order_index: 0, section_title: "Lecture 1: Introduction" }),
+        item({ id: "done", order_index: 1, section_title: "Lecture 2: Core", status: "completed" }),
+        item({ id: "skip", order_index: 2, section_title: "Lecture 2: Core", action: "skip" }),
+        item({ id: "a", order_index: 3, section_title: "Lecture 2: Core", estimated_hours: 0.5, course_id: "CS230", course_title: "CS230: Deep Learning" }),
+        item({ id: "b", order_index: 4, section_title: "Lecture 2: Core", estimated_hours: 0.75, course_id: "CS230", course_title: "CS230: Deep Learning" }),
+        item({ id: "c", order_index: 5, section_title: "Lecture 3: Next", estimated_hours: 0.5, course_id: "CS230", course_title: "CS230: Deep Learning" }),
+      ],
+      1,
+    );
+
+    expect(plan.total_hours).toBe(1.25);
+    expect(plan.learning_units.map((unit) => unit.id)).toEqual(["a", "b"]);
+    expect(plan.courses).toHaveLength(1);
+    expect(plan.courses[0].lectures[0]).toMatchObject({
+      title: "Lecture 2: Core",
+      total_hours: 1.25,
+    });
   });
 
   it("computes recommended next as first pending non-skip by global order", () => {

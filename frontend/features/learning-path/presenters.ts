@@ -1,5 +1,6 @@
 import type { PathItemResponse, TimelineResponse, WeekEntry } from "@/types";
 import {
+  isDoneForPlannerProgress,
   isIncludedInMainPath,
   isOptionalIntroItem,
   isVisibleInMainPath,
@@ -46,6 +47,28 @@ export interface FlowModel {
   nodes: FlowNode[];
   edges: FlowEdge[];
   sectionSummaries: SectionSummary[];
+}
+
+export interface TimelineLectureGroup {
+  key: string;
+  title: string;
+  learning_units: PathItemResponse[];
+  total_hours: number;
+}
+
+export interface TimelineCourseGroup {
+  key: string;
+  course_id: string | null;
+  course_title: string;
+  lectures: TimelineLectureGroup[];
+  total_hours: number;
+}
+
+export interface CurrentWeekPlan {
+  week: number;
+  learning_units: PathItemResponse[];
+  total_hours: number;
+  courses: TimelineCourseGroup[];
 }
 
 function slugify(value: string): string {
@@ -135,9 +158,74 @@ export function normalizeTimelineOrder(timeline: TimelineResponse): TimelineResp
     items: timeline.items
       .map((week) => ({
         ...week,
-        learning_units: sortByPlannerDisplayOrder(week.learning_units),
+        learning_units: sortByPlannerDisplayOrder(week.learning_units).filter(isVisibleInTimeline),
       }))
       .sort((a, b) => a.week - b.week),
+  };
+}
+
+function roundHours(hours: number): number {
+  return Number(hours.toFixed(4));
+}
+
+export function buildCurrentWeekPlan(
+  items: PathItemResponse[],
+  weeklyHours: number | null | undefined,
+): CurrentWeekPlan {
+  const budget = weeklyHours && weeklyHours > 0 ? weeklyHours : 5;
+  const candidates = sortByPlannerDisplayOrder(items).filter(
+    (item) => isVisibleInTimeline(item) && !isDoneForPlannerProgress(item),
+  );
+  const learningUnits: PathItemResponse[] = [];
+  let totalHours = 0;
+
+  for (const item of candidates) {
+    learningUnits.push(item);
+    totalHours += item.estimated_hours ?? 0;
+    if (totalHours >= budget) break;
+  }
+
+  const courses: TimelineCourseGroup[] = [];
+  const courseByKey = new Map<string, TimelineCourseGroup>();
+
+  for (const item of learningUnits) {
+    const key = courseKey(item) || "course";
+    let course = courseByKey.get(key);
+    if (!course) {
+      course = {
+        key,
+        course_id: item.course_id ?? null,
+        course_title: item.course_title || "Learning Path",
+        lectures: [],
+        total_hours: 0,
+      };
+      courseByKey.set(key, course);
+      courses.push(course);
+    }
+
+    const title = item.section_title || "Khác";
+    const lectureKey = `${key}:${slugify(title)}`;
+    let lecture = course.lectures.find((candidate) => candidate.key === lectureKey);
+    if (!lecture) {
+      lecture = {
+        key: lectureKey,
+        title,
+        learning_units: [],
+        total_hours: 0,
+      };
+      course.lectures.push(lecture);
+    }
+
+    lecture.learning_units.push(item);
+    lecture.total_hours = roundHours(lecture.total_hours + (item.estimated_hours ?? 0));
+    course.total_hours = roundHours(course.total_hours + (item.estimated_hours ?? 0));
+  }
+
+  return {
+    week: 1,
+    learning_units: learningUnits,
+    total_hours: roundHours(totalHours),
+    courses,
   };
 }
 
