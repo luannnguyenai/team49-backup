@@ -100,8 +100,14 @@ export const useLearningPathStore = create<LearningPathState>()(
         try {
           const profile = get().profile;
           let path = await learningPathApi.getLearningPath();
+          const generatedTopologyHash = get().generatedTopologyHash;
 
-          if (profile && path.items.length === 0) {
+          const shouldGenerate =
+            profile &&
+            (path.items.length === 0 ||
+              (generatedTopologyHash !== null && generatedTopologyHash !== profile.topologyHash));
+
+          if (profile && shouldGenerate) {
             const generated = await learningPathApi.generatePath({
               desired_section_ids: [],
               selected_course_ids: toCanonicalCourseIds(profile.selectedCourseIds),

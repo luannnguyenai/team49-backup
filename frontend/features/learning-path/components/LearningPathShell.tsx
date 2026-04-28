@@ -87,6 +87,8 @@ export default function LearningPathShell() {
         previousProfile={previousProfile}
         currentProfile={profile}
         generatedTopologyHash={generatedTopologyHash}
+        onRefreshPath={loadPath}
+        refreshing={loading}
       />
 
       {loading ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 import type { LearningProfile } from "../profile";
 import { describeProfileChange, isProfilePathStale } from "../profile";
 
@@ -8,12 +8,16 @@ interface ProfileChangeBannerProps {
   previousProfile: LearningProfile | null;
   currentProfile: LearningProfile;
   generatedTopologyHash: string | null;
+  onRefreshPath?: () => void;
+  refreshing?: boolean;
 }
 
 export default function ProfileChangeBanner({
   previousProfile,
   currentProfile,
   generatedTopologyHash,
+  onRefreshPath,
+  refreshing = false,
 }: ProfileChangeBannerProps) {
   if (!isProfilePathStale(generatedTopologyHash, currentProfile)) return null;
 
@@ -29,16 +33,18 @@ export default function ProfileChangeBanner({
               : "Path hiện tại khác path đã dùng để sinh lộ trình này."}
           </p>
           <p className="mt-1 text-xs text-amber-800">
-            V1 chưa gọi replan backend. Planner sẽ giữ path đang có cho đến khi replan endpoint sẵn sàng.
+            Planner sẽ tạo lại lộ trình theo profile mới và giữ lịch sử tiến độ đã có.
           </p>
         </div>
       </div>
       <button
         type="button"
-        disabled
-        className="rounded-xl bg-amber-200 px-3 py-2 text-sm font-semibold text-amber-900 opacity-70"
+        onClick={onRefreshPath}
+        disabled={refreshing || !onRefreshPath}
+        className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-200 px-3 py-2 text-sm font-semibold text-amber-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        Replan sắp có
+        <RefreshCw className={refreshing ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
+        {refreshing ? "Đang tạo lại" : "Tạo lại lộ trình"}
       </button>
     </div>
   );
