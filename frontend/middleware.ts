@@ -80,6 +80,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // ③ Authenticated users should not land on the public marketing homepage.
+  if (isAuthenticated && pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/tutor";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
 
