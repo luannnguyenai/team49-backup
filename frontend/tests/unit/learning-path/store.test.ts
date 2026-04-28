@@ -193,7 +193,7 @@ describe("learning path store", () => {
     });
   });
 
-  it("summarizes the current main path instead of raw locked future units", async () => {
+  it("summarizes skipped progress while keeping locked future units in the main path", async () => {
     const profile = createLearningProfileForPath("computer_vision", {
       weeklyHours: null,
       source: "manual",
@@ -215,7 +215,7 @@ describe("learning path store", () => {
     await useLearningPathStore.getState().loadPath();
 
     expect(useLearningPathStore.getState().summary).toMatchObject({
-      total_units: 2,
+      total_units: 3,
       completed_units: 1,
       in_progress_units: 1,
     });

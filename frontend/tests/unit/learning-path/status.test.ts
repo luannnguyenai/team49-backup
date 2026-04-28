@@ -57,11 +57,11 @@ describe("learning path status helpers", () => {
     expect(isVisibleInMainPath({ ...base, status: "skipped" })).toBe(false);
     expect(isVisibleInMainPath({ ...base, segment_policy: "reference" })).toBe(false);
     expect(isVisibleInMainPath({ ...base, segment_policy: "hidden" })).toBe(false);
-    expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: true })).toBe(false);
+    expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: true })).toBe(true);
     expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: false })).toBe(true);
   });
 
-  it("keeps evidence-skipped and optional intro items in progress counts but not future locked content", () => {
+  it("keeps locked future lectures in the main path while hiding skipped unit cards from timeline", () => {
     const base: PathItemResponse = {
       id: "1",
       learning_unit_id: "1",
@@ -78,7 +78,8 @@ describe("learning path status helpers", () => {
       is_locked: true,
     };
 
-    expect(isIncludedInMainPath(base)).toBe(false);
+    expect(isIncludedInMainPath(base)).toBe(true);
+    expect(isVisibleInMainPath(base)).toBe(true);
     expect(isIncludedInMainPath({ ...base, action: "skip" })).toBe(true);
     expect(isVisibleInMainPath({ ...base, action: "skip" })).toBe(false);
     expect(

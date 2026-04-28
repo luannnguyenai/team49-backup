@@ -36,7 +36,6 @@ export function isVisibleInTimeline(item: PathItemResponse): boolean {
 export function isIncludedInMainPath(item: PathItemResponse): boolean {
   if (item.segment_policy === "hidden") return false;
   if (item.segment_policy === "reference") return false;
-  if (isLockedFutureItem(item)) return false;
   return true;
 }
 
@@ -53,13 +52,6 @@ export function isDoneForPlannerProgress(item: PathItemResponse): boolean {
     item.status === "skipped" ||
     item.action === "skip"
   );
-}
-
-export function isLockedFutureItem(item: PathItemResponse): boolean {
-  if (item.phase_tag !== "phase_b" || !item.is_locked) return false;
-  if (isDoneForPlannerProgress(item)) return false;
-  if (isOptionalIntroItem(item)) return false;
-  return true;
 }
 
 export function isOptionalIntroItem(item: PathItemResponse): boolean {

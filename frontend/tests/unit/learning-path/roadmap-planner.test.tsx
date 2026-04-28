@@ -73,8 +73,8 @@ describe("RoadmapPlanner", () => {
       />,
     );
 
-    expect(screen.getByText(/2 \/ 3 units/)).toBeInTheDocument();
-    expect(screen.getByText("2 skipped")).toBeInTheDocument();
+    expect(screen.getByText(/2 \/ 4 units/)).toBeInTheDocument();
+    expect(screen.queryByText("2 skipped")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Expand Deep Learning/ }));
 
@@ -84,7 +84,7 @@ describe("RoadmapPlanner", () => {
     expect(screen.getAllByText("Skip")).toHaveLength(2);
     expect(screen.queryByText("Reference Only")).not.toBeInTheDocument();
     expect(screen.queryByText("Hidden Logistics")).not.toBeInTheDocument();
-    expect(screen.queryByText("Locked Phase B")).not.toBeInTheDocument();
+    expect(screen.getByText("Locked Phase B")).toBeInTheDocument();
   });
 
   it("keeps optional intro lectures visible but does not mark them as next up", () => {

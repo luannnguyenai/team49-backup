@@ -63,7 +63,7 @@ describe("learning path presenters", () => {
     ).toBe("c");
   });
 
-  it("does not recommend optional intro or locked future units as next", () => {
+  it("does not recommend optional intro before the first core lecture", () => {
     expect(
       computeRecommendedNext([
         item({

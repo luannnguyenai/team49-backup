@@ -203,12 +203,6 @@ function countCompleted(items: PathItemResponse[]): number {
   return items.filter(isDoneForPlannerProgress).length;
 }
 
-function countSkipped(items: PathItemResponse[]): number {
-  return items.filter(
-    (item) => item.action === "skip" || item.status === "skipped",
-  ).length;
-}
-
 function isCourseComplete(items: PathItemResponse[]): boolean {
   return items.length > 0 && items.every(isDoneForPlannerProgress);
 }
@@ -481,7 +475,6 @@ export default function RoadmapPlanner({
                 {course.lectures.map((lecture, index) => {
                   const isExpanded = expandedLectureKeys.has(lecture.key);
                   const completedLectureUnits = countCompleted(lecture.items);
-                  const skippedLectureUnits = countSkipped(lecture.items);
                   const expandedLectureItems = lecture.items;
                   const optionalIntro = isOptionalIntroLecture(lecture);
                   const isCompleted =
@@ -570,11 +563,6 @@ export default function RoadmapPlanner({
                                   ? " · optional intro"
                                   : ""}
                               </p>
-                              {skippedLectureUnits > 0 ? (
-                                <span className="mt-2 inline-flex rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-700">
-                                  {skippedLectureUnits} skipped
-                                </span>
-                              ) : null}
                             </div>
                             <span
                               className={cn(
