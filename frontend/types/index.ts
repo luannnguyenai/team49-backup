@@ -475,6 +475,8 @@ export interface PathItemResponse {
   has_quiz_items?: boolean;
   is_worth_learning?: boolean | null;
   override_critical_kp?: boolean;
+  phase_tag?: string | null;
+  is_locked?: boolean;
 }
 
 export interface LearningPathResponse {

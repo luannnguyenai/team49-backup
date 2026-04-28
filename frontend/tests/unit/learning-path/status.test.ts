@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getStatusIconName, getStatusLabel, isVisibleInTimeline } from "@/features/learning-path/lib/status";
+import {
+  getStatusIconName,
+  getStatusLabel,
+  isVisibleInMainPath,
+  isVisibleInTimeline,
+} from "@/features/learning-path/lib/status";
 import type { PathItemResponse } from "@/types";
 
 describe("learning path status helpers", () => {
@@ -29,5 +34,29 @@ describe("learning path status helpers", () => {
     };
     expect(isVisibleInTimeline(base)).toBe(true);
     expect(isVisibleInTimeline({ ...base, action: "skip" })).toBe(false);
+  });
+
+  it("keeps only actionable learning items in the main path", () => {
+    const base: PathItemResponse = {
+      id: "1",
+      learning_unit_id: "1",
+      learning_unit_title: "Unit",
+      section_title: "Section",
+      action: "standard_learn",
+      estimated_hours: 1,
+      order_index: 0,
+      week_number: null,
+      status: "pending",
+      canonical_unit_id: null,
+      segment_policy: "core",
+    };
+
+    expect(isVisibleInMainPath(base)).toBe(true);
+    expect(isVisibleInMainPath({ ...base, action: "skip" })).toBe(false);
+    expect(isVisibleInMainPath({ ...base, status: "skipped" })).toBe(false);
+    expect(isVisibleInMainPath({ ...base, segment_policy: "reference" })).toBe(false);
+    expect(isVisibleInMainPath({ ...base, segment_policy: "hidden" })).toBe(false);
+    expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: true })).toBe(false);
+    expect(isVisibleInMainPath({ ...base, phase_tag: "phase_b", is_locked: false })).toBe(true);
   });
 });

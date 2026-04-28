@@ -1,5 +1,5 @@
 import type { PathItemResponse, TimelineResponse, WeekEntry } from "@/types";
-import { isVisibleInTimeline } from "./lib/status";
+import { isVisibleInMainPath, isVisibleInTimeline } from "./lib/status";
 
 export interface SectionSummary {
   key: string;
@@ -57,7 +57,7 @@ export function sortByOrder(items: PathItemResponse[]): PathItemResponse[] {
 }
 
 export function computeRecommendedNext(items: PathItemResponse[]): string | null {
-  return sortByOrder(items).find((item) => item.status === "pending" && item.action !== "skip")?.id ?? null;
+  return sortByOrder(items).find((item) => item.status === "pending" && isVisibleInMainPath(item))?.id ?? null;
 }
 
 export function groupByWeek(items: PathItemResponse[]): TimelineResponse {

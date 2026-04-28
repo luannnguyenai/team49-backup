@@ -30,5 +30,14 @@ export function getStatusClassName(status: PathStatus, isRecommended = false): s
 }
 
 export function isVisibleInTimeline(item: PathItemResponse): boolean {
-  return item.action !== "skip" && item.segment_policy !== "hidden";
+  return isVisibleInMainPath(item);
+}
+
+export function isVisibleInMainPath(item: PathItemResponse): boolean {
+  if (item.segment_policy === "hidden") return false;
+  if (item.segment_policy === "reference") return false;
+  if (item.action === "skip") return false;
+  if (item.status === "skipped") return false;
+  if (item.phase_tag === "phase_b" && item.is_locked) return false;
+  return true;
 }

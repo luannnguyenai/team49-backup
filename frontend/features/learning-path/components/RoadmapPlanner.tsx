@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -10,10 +11,15 @@ import {
   FileText,
   HelpCircle,
   PlayCircle,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PathItemResponse, PathStatus } from "@/types";
-import { derivePlayerInsight, type PlayerProgressSnapshot } from "../player-insights";
+import {
+  derivePlayerInsight,
+  type PlayerProgressSnapshot,
+} from "../player-insights";
+import { isVisibleInMainPath } from "../lib/status";
 import { describePlannerReason } from "../planner-reasons";
 import { computeRecommendedNext, sortByOrder } from "../presenters";
 import PathRequiredState from "./PathRequiredState";
@@ -59,11 +65,13 @@ function lectureKeyFor(courseKey: string, lectureTitle: string): string {
   return `${courseKey}:${slugify(lectureTitle)}`;
 }
 
-function groupItemsByCourseAndLecture(items: PathItemResponse[]): CourseGroup[] {
+function groupItemsByCourseAndLecture(
+  items: PathItemResponse[],
+): CourseGroup[] {
   const courseByKey = new Map<string, CourseGroup>();
   const courses: CourseGroup[] = [];
 
-  for (const item of sortByOrder(items).filter((candidate) => candidate.segment_policy !== "hidden")) {
+  for (const item of sortByOrder(items).filter(isVisibleInMainPath)) {
     const courseKey = courseKeyFor(item);
     let course = courseByKey.get(courseKey);
     if (!course) {
@@ -82,7 +90,9 @@ function groupItemsByCourseAndLecture(items: PathItemResponse[]): CourseGroup[] 
 
     const lectureTitle = item.section_title || "Khác";
     const lectureKey = lectureKeyFor(courseKey, lectureTitle);
-    let lecture = course.lectures.find((candidate) => candidate.key === lectureKey);
+    let lecture = course.lectures.find(
+      (candidate) => candidate.key === lectureKey,
+    );
     if (!lecture) {
       lecture = {
         key: lectureKey,
@@ -118,20 +128,30 @@ function compareLectures(a: LectureGroup, b: LectureGroup): number {
   if (aNumber != null && bNumber == null) return -1;
   if (aNumber == null && bNumber != null) return 1;
 
-  const aOrder = Math.min(...a.items.map((item) => item.order_index ?? Number.MAX_SAFE_INTEGER));
-  const bOrder = Math.min(...b.items.map((item) => item.order_index ?? Number.MAX_SAFE_INTEGER));
+  const aOrder = Math.min(
+    ...a.items.map((item) => item.order_index ?? Number.MAX_SAFE_INTEGER),
+  );
+  const bOrder = Math.min(
+    ...b.items.map((item) => item.order_index ?? Number.MAX_SAFE_INTEGER),
+  );
   return aOrder - bOrder;
 }
 
 function statusIcon(status: PathStatus) {
-  if (status === "completed") return <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />;
-  if (status === "in_progress") return <Circle className="h-5 w-5 shrink-0 fill-blue-500/20 text-blue-600" />;
-  if (status === "skipped") return <ArrowRight className="h-5 w-5 shrink-0 text-slate-400" />;
+  if (status === "completed")
+    return <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />;
+  if (status === "in_progress")
+    return (
+      <Circle className="h-5 w-5 shrink-0 fill-blue-500/20 text-blue-600" />
+    );
+  if (status === "skipped")
+    return <ArrowRight className="h-5 w-5 shrink-0 text-slate-400" />;
   return <Circle className="h-5 w-5 shrink-0 text-slate-300" />;
 }
 
 function unitIconFor(item: PathItemResponse) {
-  const color = item.status === "completed" ? "text-emerald-600" : "text-slate-600";
+  const color =
+    item.status === "completed" ? "text-emerald-600" : "text-slate-600";
   if (item.has_quiz_items || item.reason_codes?.includes("quiz_available")) {
     return <HelpCircle className={cn("h-5 w-5", color)} />;
   }
@@ -179,7 +199,9 @@ function countCompleted(items: PathItemResponse[]): number {
 
 function isUuidLike(value: string | null | undefined): boolean {
   return Boolean(
-    value?.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i),
+    value?.match(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    ),
   );
 }
 
@@ -189,13 +211,19 @@ function courseCodeFromTitle(title: string): string | null {
 }
 
 function cleanCourseTitle(title: string): string {
-  const withoutCode = title.replace(/^\s*[A-Z]{2,}\d{2,}[a-zA-Z]?\s*:\s*/, "").trim();
+  const withoutCode = title
+    .replace(/^\s*[A-Z]{2,}\d{2,}[a-zA-Z]?\s*:\s*/, "")
+    .trim();
   return withoutCode.replace(/^Deep Learning for\s+/i, "").trim() || title;
 }
 
-function courseDisplay(course: CourseGroup): { code: string | null; title: string } {
+function courseDisplay(course: CourseGroup): {
+  code: string | null;
+  title: string;
+} {
   const codeFromTitle = courseCodeFromTitle(course.title);
-  const codeFromId = course.courseId && !isUuidLike(course.courseId) ? course.courseId : null;
+  const codeFromId =
+    course.courseId && !isUuidLike(course.courseId) ? course.courseId : null;
 
   return {
     code: codeFromTitle ?? codeFromId,
@@ -231,6 +259,7 @@ function UnitCard({
   isRecommended: boolean;
   currentProgress?: PlayerProgressSnapshot | null;
   onSelectItem?: (id: string) => void;
+  key?: React.Key;
 }) {
   const insight =
     item.learning_unit_id === currentProgress?.learning_unit_id
@@ -246,7 +275,7 @@ function UnitCard({
         "group flex w-full flex-col rounded-xl border-2 bg-white p-4 text-left transition-all",
         onSelectItem && "cursor-pointer",
         isRecommended
-          ? "border-blue-600 shadow-[3px_3px_0px_#2563eb]"
+          ? "border-blue-600 shadow-[3px_3px_0px_#3b82f6]"
           : "border-slate-200 hover:border-slate-800 hover:shadow-[3px_3px_0px_#1e293b]",
         item.status === "completed" && "opacity-75",
         item.status === "skipped" && "opacity-55",
@@ -256,7 +285,9 @@ function UnitCard({
         <div
           className={cn(
             "mt-0.5 rounded-lg border p-1.5",
-            isRecommended ? "border-blue-200 bg-blue-50" : "border-slate-100 bg-slate-50",
+            isRecommended
+              ? "border-blue-200 bg-blue-50"
+              : "border-slate-100 bg-slate-50",
           )}
         >
           {unitIconFor(item)}
@@ -264,8 +295,9 @@ function UnitCard({
         <div className="min-w-0 flex-1 pr-2">
           <h4
             className={cn(
-              "text-sm font-bold leading-tight text-slate-900 md:text-base",
-              item.status === "completed" && "text-slate-500 line-through decoration-slate-300",
+              "text-sm font-bold leading-tight text-slate-800 md:text-base",
+              item.status === "completed" &&
+              "text-slate-500 line-through decoration-slate-300",
             )}
           >
             {item.learning_unit_title}
@@ -273,12 +305,12 @@ function UnitCard({
           <div className="mt-1.5 flex flex-wrap items-center gap-3">
             {estimatedTime ? (
               <span className="flex items-center gap-1 text-xs font-semibold text-slate-500">
-                <span aria-hidden="true">~</span>
-                {estimatedTime} est.
+                <Clock className="h-3 w-3" />
+                {estimatedTime}
               </span>
             ) : null}
             {isRecommended ? (
-              <span className="flex items-center gap-1 text-xs font-bold text-blue-700">
+              <span className="flex items-center gap-1 text-[10px] uppercase border font-bold text-blue-800 border-blue-200 bg-blue-100 px-2 py-0.5 rounded-md">
                 <PlayCircle className="h-3 w-3" />
                 Next up
               </span>
@@ -294,7 +326,8 @@ function UnitCard({
         </div>
       ) : null}
 
-      {item.reason_codes?.length ? (
+      {item.reason_codes?.length &&
+        !item.reason_codes.includes("quiz_available") ? (
         <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
           {item.reason_codes.slice(0, 4).map((code) => {
             const reason = describePlannerReason(code);
@@ -314,14 +347,34 @@ function UnitCard({
           })}
         </div>
       ) : null}
+
+      {item.reason_codes?.includes("quiz_available") ? (
+        <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+          <span className="bg-purple-50 text-purple-700 border border-purple-200 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+            <HelpCircle className="w-3 h-3" /> Quiz
+          </span>
+        </div>
+      ) : null}
     </button>
   );
 }
 
-export default function RoadmapPlanner({ items, currentProgress, onSelectItem }: RoadmapPlannerProps) {
-  const groupedCourses = useMemo(() => groupItemsByCourseAndLecture(items), [items]);
-  const recommendedNextId = useMemo(() => computeRecommendedNext(items), [items]);
-  const [expandedLectureKeys, setExpandedLectureKeys] = useState<Set<string>>(() => new Set());
+export default function RoadmapPlanner({
+  items,
+  currentProgress,
+  onSelectItem,
+}: RoadmapPlannerProps) {
+  const groupedCourses = useMemo(
+    () => groupItemsByCourseAndLecture(items),
+    [items],
+  );
+  const recommendedNextId = useMemo(
+    () => computeRecommendedNext(items),
+    [items],
+  );
+  const [expandedLectureKeys, setExpandedLectureKeys] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   if (!groupedCourses.length) {
     return <PathRequiredState />;
@@ -344,25 +397,26 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
       {groupedCourses.map((course) => {
         const completedUnits = countCompleted(course.items);
         const totalUnits = course.items.length;
-        const progressPercent = totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0;
+        const progressPercent =
+          totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0;
         const display = courseDisplay(course);
 
         return (
-          <section key={course.key} className="mb-16 md:mb-20">
-            <div className="relative overflow-hidden rounded-[28px] border-2 border-slate-900 bg-white p-6 shadow-[6px_6px_0px_#dbe4f0] md:p-10 md:shadow-[10px_10px_0px_#dbe4f0]">
+          <section key={course.key} className="mb-12 md:mb-16">
+            <div className="relative overflow-hidden rounded-2xl border-2 border-slate-800 bg-white p-5 shadow-[4px_4px_0px_#e2e8f0] md:p-8 md:shadow-[8px_8px_0px_#e2e8f0]">
               <div
-                className="pointer-events-none absolute inset-0"
+                className="pointer-events-none absolute inset-0 opacity-[0.03]"
                 style={{
                   backgroundImage:
-                    "radial-gradient(circle at 1px 1px, rgba(37, 99, 235, 0.13) 1px, transparent 0)",
-                  backgroundSize: "28px 28px",
+                    "radial-gradient(circle at 2px 2px, #000 1px, transparent 0)",
+                  backgroundSize: "24px 24px",
                 }}
               />
 
-              <div className="relative z-10 mb-12 flex flex-col justify-between gap-6 border-b-2 border-slate-100 pb-8 md:flex-row md:items-end">
+              <div className="relative z-10 mb-10 flex flex-col justify-between gap-4 border-b-2 border-slate-100 pb-6 md:flex-row md:items-end">
                 <div>
                   <CourseCodeBadge code={display.code} />
-                  <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+                  <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-800 md:text-4xl">
                     {display.title}
                   </h2>
                 </div>
@@ -385,20 +439,29 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
               </div>
 
               <div className="relative isolate px-0 md:px-4">
-                <div className="absolute bottom-7 left-[23px] top-8 -z-10 w-0 border-l-2 border-dashed border-blue-500 md:left-[47px]" />
+                <div className="absolute bottom-4 left-[23px] top-6 -z-10 w-0 border-l-[2px] border-dashed border-blue-600 md:left-[47px]" />
 
                 {course.lectures.map((lecture, index) => {
                   const isExpanded = expandedLectureKeys.has(lecture.key);
                   const completedLectureUnits = countCompleted(lecture.items);
                   const isCompleted =
-                    lecture.items.length > 0 && completedLectureUnits === lecture.items.length;
+                    lecture.items.length > 0 &&
+                    completedLectureUnits === lecture.items.length;
                   const isInProgress =
-                    lecture.items.some((item) => item.status === "in_progress" || item.status === "completed") &&
-                    !isCompleted;
-                  const hasRecommended = lecture.items.some((item) => item.id === recommendedNextId);
+                    lecture.items.some(
+                      (item) =>
+                        item.status === "in_progress" ||
+                        item.status === "completed",
+                    ) && !isCompleted;
+                  const hasRecommended = lecture.items.some(
+                    (item) => item.id === recommendedNextId,
+                  );
 
                   return (
-                    <div key={lecture.key} className="relative flex items-start gap-4 pb-5 pt-5 md:gap-7">
+                    <div
+                      key={lecture.key}
+                      className="relative flex items-start gap-4 pb-2 pt-4 md:gap-6 group/lecture"
+                    >
                       <button
                         type="button"
                         onClick={() => toggleLecture(lecture.key)}
@@ -407,17 +470,25 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
                       >
                         <span
                           className={cn(
-                            "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-900 shadow-[2px_2px_0px_#1e293b] transition-transform hover:scale-110 md:h-16 md:w-16 md:shadow-[3px_3px_0px_#1e293b]",
+                            "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-800 shadow-[2px_2px_0px_#1e293b] md:shadow-[3px_3px_0px_#1e293b] transition-transform hover:scale-110 md:h-16 md:w-16",
                             isCompleted && "bg-emerald-400",
-                            isInProgress && "bg-yellow-300",
-                            hasRecommended && !isCompleted && !isInProgress && "bg-blue-100",
-                            !isCompleted && !isInProgress && !hasRecommended && "bg-white",
+                            isInProgress && "bg-[#fde047]",
+                            hasRecommended &&
+                            !isCompleted &&
+                            !isInProgress &&
+                            "bg-blue-100",
+                            !isCompleted &&
+                            !isInProgress &&
+                            !hasRecommended &&
+                            "bg-white",
                           )}
                         >
                           {isCompleted ? (
-                            <CheckCircle2 className="h-6 w-6 text-slate-900 md:h-8 md:w-8" />
+                            <CheckCircle2 className="h-6 w-6 text-slate-800 md:h-8 md:w-8" />
                           ) : (
-                            <span className="text-lg font-bold text-slate-900 md:text-2xl">{index + 1}</span>
+                            <span className="text-lg font-bold text-slate-800 md:text-2xl">
+                              {index + 1}
+                            </span>
                           )}
                         </span>
                       </button>
@@ -427,21 +498,24 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
                           type="button"
                           onClick={() => toggleLecture(lecture.key)}
                           className={cn(
-                            "w-full rounded-2xl border-2 border-slate-900 bg-white p-4 text-left transition-all md:p-5",
+                            "w-full rounded-xl border-2 border-slate-800 bg-white p-4 text-left transition-all md:p-5",
                             isExpanded
                               ? "translate-y-[2px] shadow-[2px_2px_0px_#1e293b]"
                               : "shadow-[4px_4px_0px_#1e293b] hover:translate-y-[1px] hover:bg-slate-50 hover:shadow-[3px_3px_0px_#1e293b]",
-                            hasRecommended && !isExpanded && "bg-amber-50",
+                            hasRecommended &&
+                            !isExpanded &&
+                            "bg-amber-50 border-amber-200",
                           )}
                           aria-expanded={isExpanded}
                         >
                           <div className="flex items-center justify-between gap-4">
                             <div className="min-w-0">
-                              <h3 className="text-lg font-extrabold leading-tight text-slate-900 md:text-xl">
+                              <h3 className="text-lg font-extrabold leading-tight text-slate-800 md:text-xl">
                                 {lecture.title}
                               </h3>
                               <p className="mt-1 text-sm font-semibold text-slate-500">
-                                {completedLectureUnits} / {lecture.items.length} units
+                                {completedLectureUnits} / {lecture.items.length}{" "}
+                                units
                                 {hasRecommended ? " · next up here" : ""}
                               </p>
                             </div>
@@ -456,19 +530,35 @@ export default function RoadmapPlanner({ items, currentProgress, onSelectItem }:
                           </div>
                         </button>
 
-                        {isExpanded && lecture.items.length > 0 ? (
-                          <div className="mt-5 grid grid-cols-1 gap-3 pb-2 pl-0 lg:grid-cols-2 lg:pl-2">
-                            {lecture.items.map((item) => (
-                              <UnitCard
-                                key={item.id}
-                                item={item}
-                                isRecommended={item.id === recommendedNextId}
-                                currentProgress={currentProgress}
-                                onSelectItem={onSelectItem}
-                              />
-                            ))}
-                          </div>
-                        ) : null}
+                        <AnimatePresence>
+                          {isExpanded && lecture.items.length > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                              animate={{
+                                opacity: 1,
+                                height: "auto",
+                                marginTop: 16,
+                              }}
+                              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                              transition={{ duration: 0.2, ease: "easeOut" }}
+                              className="overflow-hidden relative"
+                            >
+                              <div className="grid grid-cols-1 gap-3 pb-2 pl-0 lg:grid-cols-2 lg:pl-2">
+                                {lecture.items.map((item) => (
+                                  <UnitCard
+                                    key={item.id}
+                                    item={item}
+                                    isRecommended={
+                                      item.id === recommendedNextId
+                                    }
+                                    currentProgress={currentProgress}
+                                    onSelectItem={onSelectItem}
+                                  />
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </div>
                   );
