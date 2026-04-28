@@ -49,6 +49,10 @@ function toBoolean(value: unknown): boolean | null {
   return typeof value === "boolean" ? value : null;
 }
 
+function toCanonicalCourseIds(courseIds: string[]): string[] {
+  return courseIds.map((courseId) => courseId.trim().toLowerCase()).filter(Boolean);
+}
+
 function toPlayerProgressSnapshot(
   learningUnitId: string | null | undefined,
   progress: Record<string, unknown> | null | undefined,
@@ -94,8 +98,23 @@ export const useLearningPathStore = create<LearningPathState>()(
       loadPath: async () => {
         set({ loading: true, error: null });
         try {
-          const [path, timeline, resume] = await Promise.all([
-            learningPathApi.getLearningPath(),
+          const profile = get().profile;
+          let path = await learningPathApi.getLearningPath();
+
+          if (profile && path.items.length === 0) {
+            const generated = await learningPathApi.generatePath({
+              desired_section_ids: [],
+              selected_course_ids: toCanonicalCourseIds(profile.selectedCourseIds),
+            });
+            path = {
+              total_units: generated.total_units,
+              completed_units: 0,
+              in_progress_units: 0,
+              items: generated.items,
+            };
+          }
+
+          const [timeline, resume] = await Promise.all([
             learningPathApi.getTimeline().catch(() => null),
             learningSessionApi.resume().catch(() => null),
           ]);

@@ -98,6 +98,9 @@ async def _run_engine(units, placement_results, mastery_by_kp=None):
         content_inst.get_linked_learning_units = AsyncMock(return_value=units)
         content_inst.get_sections_by_ids = AsyncMock(return_value={section_id: fake_section})
         content_inst.get_unit_kp_rows = AsyncMock(return_value=[])
+        content_inst.get_canonical_units_by_ids = AsyncMock(return_value={})
+        content_inst.get_quiz_item_counts_by_unit_ids = AsyncMock(return_value={})
+        content_inst.get_concepts_by_ids = AsyncMock(return_value={})
         content_inst.get_learning_units_by_ids = AsyncMock(return_value={u.id: u for u in units})
 
         MockGoal.return_value.get_by_user_id = AsyncMock(return_value=fake_goal)

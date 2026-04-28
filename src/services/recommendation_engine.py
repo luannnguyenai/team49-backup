@@ -270,10 +270,19 @@ async def _generate_canonical_learning_path(
     audit_repo = PlannerAuditRepository(db)
     goal_repo = GoalPreferenceRepository(db)
     goal = await goal_repo.get_by_user_id(user.id)
-    if goal is None or not goal.selected_course_ids:
-        raise ValidationError("Canonical planner requires goal_preferences.selected_course_ids.")
+    selected_course_ids = list(goal.selected_course_ids) if goal and goal.selected_course_ids else []
+    if not selected_course_ids:
+        selected_course_ids = [
+            str(course_id).strip().lower()
+            for course_id in request.selected_course_ids
+            if str(course_id).strip()
+        ]
+    if not selected_course_ids:
+        raise ValidationError(
+            "Canonical planner requires selected_course_ids or goal_preferences.selected_course_ids."
+        )
 
-    units = await content_repo.get_linked_learning_units(goal.selected_course_ids)
+    units = await content_repo.get_linked_learning_units(selected_course_ids)
     if not units:
         raise NotFoundError("No linked canonical learning units found for selected courses.")
 
@@ -305,7 +314,7 @@ async def _generate_canonical_learning_path(
         row.topic_unit_id: float(row.score_pct) for row in placement_results
     }
     has_placement = len(placement_by_unit) > 0
-    placement_skipped = goal.placement_status == "skipped"
+    placement_skipped = getattr(goal, "placement_status", None) == "skipped"
 
     generated_at = datetime.now(UTC)
     items: list[PathItemResponse] = []
@@ -455,8 +464,8 @@ async def _generate_canonical_learning_path(
         trigger="generate_canonical_learning_path",
         recommended_path_json=recommended_path_json,
         goal_snapshot_json={
-            "selected_course_ids": goal.selected_course_ids,
-            "derived_from_course_set_hash": goal.derived_from_course_set_hash,
+            "selected_course_ids": selected_course_ids,
+            "derived_from_course_set_hash": getattr(goal, "derived_from_course_set_hash", None),
         },
         weights_used_json={"planner": "canonical_unit_bootstrap"},
     )

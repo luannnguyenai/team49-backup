@@ -482,6 +482,20 @@ export interface LearningPathResponse {
   items: PathItemResponse[];
 }
 
+export interface GeneratePathRequest {
+  desired_section_ids?: string[];
+  selected_course_ids?: string[];
+}
+
+export interface GeneratePathResponse {
+  generated_at: string;
+  total_units: number;
+  total_hours: number;
+  required_hours_per_week: number | null;
+  warnings: string[];
+  items: PathItemResponse[];
+}
+
 export interface WeekEntry {
   week: number;
   learning_units: PathItemResponse[];

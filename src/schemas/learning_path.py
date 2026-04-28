@@ -30,15 +30,21 @@ class GeneratePathRequest(BaseModel):
     Body for the generate endpoint.
 
     desired_section_ids: UUIDs of the course sections the user wants to learn.
+    selected_course_ids: Optional canonical course IDs used when no saved
+                         goal preference exists yet.
     mastery_overrides:  Optional per-learning-unit score overrides (used in tests /
                         re-generation after additional practice). When absent
                         the engine reads live canonical mastery rows from the DB.
     """
 
     desired_section_ids: list[uuid.UUID] = Field(
-        min_length=1,
+        default_factory=list,
         validation_alias=AliasChoices("desired_section_ids", "desired_module_ids"),
         description="Course sections chosen during onboarding",
+    )
+    selected_course_ids: list[str] = Field(
+        default_factory=list,
+        description="Canonical course IDs to generate from when goal preferences are not persisted yet",
     )
     mastery_overrides: dict[str, float] | None = Field(
         default=None,
