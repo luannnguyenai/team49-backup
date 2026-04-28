@@ -43,6 +43,13 @@ jsonl_handler = logging.FileHandler(os.path.join(LOG_DIR, "qa_history.jsonl"), e
 jsonl_handler.setFormatter(logging.Formatter('%(message)s'))
 jsonl_logger.addHandler(jsonl_handler)
 
+STATUS_READING_CONTEXT = "Đang đọc ngữ cảnh bài giảng..."
+STATUS_FINDING_RELEVANT = "Đang tìm phần nội dung liên quan..."
+STATUS_THINKING_ANSWER = "Đang suy nghĩ câu trả lời..."
+STATUS_TOOL_RUNNING = "Đang kiểm tra phép tính..."
+STATUS_TOOL_RETRY = "Đang thử lại phép tính..."
+STATUS_FINALIZING_ANSWER = "Đang hoàn thiện câu trả lời..."
+
 
 def format_timestamp(seconds):
     td = timedelta(seconds=int(seconds))
@@ -53,6 +60,10 @@ def _chapter_field(chapter, field: str, default=None):
     if isinstance(chapter, dict):
         return chapter.get(field, default)
     return getattr(chapter, field, default)
+
+
+def _status_event(message: str) -> str:
+    return json.dumps({"status": message}, ensure_ascii=False) + "\n"
 
 
 # ---------------------------------------------------------------------------
@@ -296,7 +307,7 @@ def should_continue(state: AgentState):
 
 
 def give_up_node(state: AgentState):
-    return {"messages": [AIMessage(content="That Boss so hard, I can't beat it")]}
+    return {"messages": [AIMessage(content="Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy.")]}
 
 
 graph_builder = StateGraph(AgentState)
@@ -368,6 +379,8 @@ def get_context_and_stream_langgraph(
     course service.
     """
     try:
+        yield _status_event(STATUS_READING_CONTEXT)
+
         # Fetch all DB data upfront (asyncio.run is safe in FastAPI threadpool)
         lecture, chapters, past_qas = asyncio.run(_fetch_lecture_context(lecture_id))
         persisted_lecture_id: str | None = lecture_id if lecture else None
@@ -444,6 +457,8 @@ def get_context_and_stream_langgraph(
             return
 
         # COMPLEX path — fetch transcript window
+        yield _status_event(STATUS_FINDING_RELEVANT)
+
         start_window = max(0, current_timestamp - 300)
         end_window = current_timestamp + 300
         if transcript_line_dicts is None:
@@ -537,24 +552,26 @@ Answer the student's question using ONLY the provided lecture context (transcrip
         sandbox_output = ""
         attempt_count = 0
         in_tool_call = False
+        has_streamed_answer = False
 
         inputs = {"messages": [sys_msg] + history_messages + [human_msg]}
+
+        yield _status_event(STATUS_THINKING_ANSWER)
 
         for chunk, metadata in compiled_graph.stream(inputs, stream_mode="messages"):
             if hasattr(chunk, "tool_calls") and chunk.tool_calls:
                 if not in_tool_call:
                     in_tool_call = True
-                    status = "👾 Math Boss appeared... Fighting....\n" if attempt_count == 0 else "⚔️ Fighting again....\n"
-                    yield json.dumps({"status": status}) + "\n"
+                    status = STATUS_TOOL_RUNNING if attempt_count == 0 else STATUS_TOOL_RETRY
+                    yield _status_event(status)
                     attempt_count += 1
 
             if isinstance(chunk, ToolMessage):
                 in_tool_call = False
                 tool_content = str(chunk.content)
                 sandbox_output += tool_content[:2000]
-                success = "ExitCode:0" in tool_content
-                status = "🏆 Winning! Generating final answer...\n" if success else "❌ Beated... Trying again...\n"
-                yield json.dumps({"status": status}) + "\n"
+                if "ExitCode:0" in tool_content:
+                    yield _status_event(STATUS_FINALIZING_ANSWER)
 
             if isinstance(chunk, BaseMessageChunk) and not getattr(chunk, "tool_calls", None):
                 raw = chunk.content
@@ -568,12 +585,18 @@ Answer the student's question using ONLY the provided lecture context (transcrip
                 else:
                     text_chunk = ""
                 if text_chunk:
+                    if not has_streamed_answer and not sandbox_output:
+                        yield _status_event(STATUS_FINALIZING_ANSWER)
+                    has_streamed_answer = True
                     full_answer += text_chunk
                     yield json.dumps({"a": text_chunk}) + "\n"
 
-            if isinstance(chunk, AIMessage) and chunk.content == "That Boss so hard, I can't beat it":
+            if isinstance(chunk, AIMessage) and chunk.content == "Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy.":
+                if not has_streamed_answer:
+                    yield _status_event(STATUS_FINALIZING_ANSWER)
+                    yield json.dumps({"a": chunk.content}, ensure_ascii=False) + "\n"
+                    has_streamed_answer = True
                 full_answer += chunk.content
-                yield json.dumps({"status": f"💀 {chunk.content}\n"}) + "\n"
 
         thoughts = f"[COMPLEX] [SANDBOX]\n{sandbox_output}" if sandbox_output else "[COMPLEX]"
         _log_qa(lecture_id, current_timestamp, user_question, full_answer, thoughts)
