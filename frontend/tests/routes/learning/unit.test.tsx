@@ -37,6 +37,7 @@ const quizApiMock = vi.hoisted(() => ({
 
 const navigationMock = vi.hoisted(() => ({
   pathname: "/",
+  searchParams: new URLSearchParams(),
   router: {
     push: vi.fn(),
     replace: vi.fn(),
@@ -97,6 +98,7 @@ vi.mock("next/navigation", async () => {
   return {
     ...actual,
     usePathname: () => navigationMock.pathname,
+    useSearchParams: () => navigationMock.searchParams,
     useRouter: () => navigationMock.router,
   };
 });
@@ -276,6 +278,7 @@ describe("learning unit page (US3)", () => {
       ),
     );
     navigationMock.pathname = "/";
+    navigationMock.searchParams = new URLSearchParams();
   });
 
   it("renders route loading state while the server component is resolving", () => {
@@ -601,6 +604,8 @@ describe("learning unit page (US3)", () => {
   });
 
   it("renders desktop top nav in the order logo, search, then navigation links", async () => {
+    navigationMock.pathname = "/dashboard";
+
     render(<TopNav />);
 
     const brand = screen.getByRole("link", { name: "AI Learning Hub" });
@@ -627,5 +632,53 @@ describe("learning unit page (US3)", () => {
 
     expect(authStoreMock.logout).toHaveBeenCalledTimes(1);
     expect(navigationMock.router.push).toHaveBeenCalledWith("/");
+  });
+
+  it("shows the search input on allowlisted dashboard route", async () => {
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    expect(screen.getByLabelText("Tìm kiếm khóa học")).toBeInTheDocument();
+  });
+
+  it("shows the search input on allowlisted tutor route", async () => {
+    navigationMock.pathname = "/tutor";
+
+    render(<TopNav />);
+
+    expect(screen.getByLabelText("Tìm kiếm khóa học")).toBeInTheDocument();
+  });
+
+  it("hides the search input on non-allowlisted routes", async () => {
+    navigationMock.pathname = "/history";
+
+    render(<TopNav />);
+
+    expect(screen.queryByLabelText("Tìm kiếm khóa học")).not.toBeInTheDocument();
+  });
+
+  it("hydrates the search input from the current q param", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cs231n");
+
+    render(<TopNav />);
+
+    expect(screen.getByLabelText("Tìm kiếm khóa học")).toHaveValue("cs231n");
+  });
+
+  it("updates the URL query with router.replace after typing in the search input", async () => {
+    vi.useFakeTimers();
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    fireEvent.change(input, { target: { value: "transformer" } });
+
+    vi.advanceTimersByTime(250);
+
+    expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard?q=transformer");
+    vi.useRealTimers();
   });
 });
