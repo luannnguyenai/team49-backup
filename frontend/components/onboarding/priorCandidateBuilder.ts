@@ -13,6 +13,7 @@ export interface PriorCandidateTopic {
   suggestedLevel?: PriorTopicLevel | null;
   visibility: PriorTopicVisibility;
   summary?: string | null;
+  foundationEligible?: boolean;
   units: LearningUnitSelectionItem[];
 }
 
@@ -33,6 +34,7 @@ interface CuratedTopicCopy {
   pattern: RegExp;
   label: string;
   summary: string;
+  foundationEligible?: boolean;
 }
 
 const GOAL_COURSE_IDS: Record<PlannerGoalId, string[]> = {
@@ -59,12 +61,14 @@ const CURATED_TOPIC_COPY: CuratedTopicCopy[] = [
     label: "Supervised, self-supervised, and weakly supervised learning",
     summary:
       "Learn how labels, pseudo-labels, supervision strength, and weak supervision shape common neural network training setups.",
+    foundationEligible: true,
   },
   {
     pattern: /full cycle of a deep learning project/i,
     label: "Full cycle of a deep learning project",
     summary:
       "Learn how to move from data splits and metrics to bias-variance diagnosis, error analysis, and model iteration.",
+    foundationEligible: true,
   },
   {
     pattern: /adversarial robustness and generative models/i,
@@ -101,18 +105,21 @@ const CURATED_TOPIC_COPY: CuratedTopicCopy[] = [
     label: "Image classification with simple linear models",
     summary:
       "Learn how k-NN, linear classifiers, SVM, and softmax build the foundation for image classification.",
+    foundationEligible: true,
   },
   {
     pattern: /regularization and optimization/i,
     label: "Regularization and training optimization",
     summary:
       "Learn how regularization, optimization choices, and validation behavior affect neural network training.",
+    foundationEligible: true,
   },
   {
     pattern: /neural networks and backpropagation|backpropagation,\s*neural network/i,
     label: "Neural networks and backpropagation",
     summary:
       "Learn how fully connected neural networks compute predictions and use backpropagation to update weights.",
+    foundationEligible: true,
   },
   {
     pattern: /image classification with cnns/i,
@@ -173,6 +180,7 @@ const CURATED_TOPIC_COPY: CuratedTopicCopy[] = [
     label: "Word vectors and language modeling",
     summary:
       "Learn how words become vectors and how language models use context to predict and represent text.",
+    foundationEligible: true,
   },
   {
     pattern: /dependency parsing/i,
@@ -242,12 +250,20 @@ function stripLecturePrefix(title: string): string {
     .trim();
 }
 
-function curatedCopyForSectionTitle(title: string): { label: string; summary: string } | null {
+function curatedCopyForSectionTitle(
+  title: string,
+): { label: string; summary: string; foundationEligible: boolean } | null {
   const normalizedTitle = stripLecturePrefix(title);
   const copy = CURATED_TOPIC_COPY.find(
     (item) => item.pattern.test(title) || item.pattern.test(normalizedTitle),
   );
-  return copy ? { label: copy.label, summary: copy.summary } : null;
+  return copy
+    ? {
+        label: copy.label,
+        summary: copy.summary,
+        foundationEligible: copy.foundationEligible === true,
+      }
+    : null;
 }
 
 export function displayLabelForSectionTitle(title: string): string {
@@ -322,6 +338,7 @@ function toCandidateTopic(goalId: PlannerGoalId, section: CourseSectionDetail): 
     displayLabel: curatedCopy?.label ?? displayLabelForSectionTitle(section.title),
     visibility,
     summary: curatedCopy?.summary ?? null,
+    foundationEligible: curatedCopy?.foundationEligible ?? false,
     units: [...section.learning_units].sort(
       (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0),
     ),
@@ -361,6 +378,27 @@ function textMatchesTopic(text: string, topic: PriorCandidateTopic): boolean {
     .some((token) => haystack.includes(token));
 }
 
+function inferAiExperienceMonths(text: string): number {
+  const normalized = text.toLowerCase();
+  let maxMonths = 0;
+
+  for (const match of normalized.matchAll(/(\d+(?:[.,]\d+)?)\s*(months?|tháng|mo)\b/g)) {
+    const value = Number.parseFloat(match[1].replace(",", "."));
+    if (Number.isFinite(value)) {
+      maxMonths = Math.max(maxMonths, value);
+    }
+  }
+
+  for (const match of normalized.matchAll(/(\d+(?:[.,]\d+)?)\s*(years?|năm|yr)\b/g)) {
+    const value = Number.parseFloat(match[1].replace(",", "."));
+    if (Number.isFinite(value)) {
+      maxMonths = Math.max(maxMonths, value * 12);
+    }
+  }
+
+  return maxMonths;
+}
+
 export function buildPriorShortlistFallback({
   topics,
   priorKnowledgeText,
@@ -373,8 +411,21 @@ export function buildPriorShortlistFallback({
   limit?: number;
 }): PriorCandidateTopic[] {
   const combinedText = `${priorKnowledgeText} ${codingExperienceText}`.trim();
+  const aiExperienceMonths = inferAiExperienceMonths(combinedText);
   const matched = combinedText
-    ? topics.filter((topic) => textMatchesTopic(combinedText, topic))
+    ? topics
+        .map((topic) => {
+          if (textMatchesTopic(combinedText, topic)) {
+            return { ...topic, suggestedLevel: "confident" as const };
+          }
+
+          if (aiExperienceMonths >= 3 && topic.foundationEligible === true) {
+            return { ...topic, suggestedLevel: "reviewed" as const };
+          }
+
+          return null;
+        })
+        .filter((topic): topic is PriorCandidateTopic => topic !== null)
     : [];
 
   return matched.slice(0, limit);
@@ -407,17 +458,22 @@ export function mergePriorAnalysisIntoCandidates(
   topics: PriorCandidateTopic[],
   metadata: PriorAnalysisTopicMetadata[],
   shortlistedTopicIds: string[] = [],
+  fallbackTopics: PriorCandidateTopic[] = [],
 ): PriorCandidateTopic[] {
   const metadataById = new Map(metadata.map((item) => [item.id, item]));
   const shortlistedSet = new Set(shortlistedTopicIds);
+  const fallbackLevelById = new Map(
+    fallbackTopics.map((topic) => [topic.id, topic.suggestedLevel ?? "confident" as const]),
+  );
 
   return topics.map((topic) => {
     const item = metadataById.get(topic.id);
+    const fallbackLevel = fallbackLevelById.get(topic.id);
     if (!item) {
-      return shortlistedSet.has(topic.id)
+      return shortlistedSet.has(topic.id) || fallbackLevel
         ? {
             ...topic,
-            suggestedLevel: "confident",
+            suggestedLevel: fallbackLevel ?? "confident",
           }
         : topic;
     }
@@ -425,7 +481,8 @@ export function mergePriorAnalysisIntoCandidates(
     return {
       ...topic,
       aiDisplayLabel: item.label ?? topic.aiDisplayLabel ?? null,
-      suggestedLevel: item.level ?? (shortlistedSet.has(topic.id) ? "confident" : null),
+      suggestedLevel:
+        item.level ?? fallbackLevel ?? (shortlistedSet.has(topic.id) ? "confident" : null),
       summary: item.summary?.trim() ? item.summary : topic.summary ?? null,
     };
   });
