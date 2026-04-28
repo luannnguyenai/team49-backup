@@ -53,7 +53,7 @@ describe("RoadmapPlanner", () => {
     expect(screen.queryByText("Unit hidden")).not.toBeInTheDocument();
   });
 
-  it("counts skipped units as done without rendering skipped or locked future cards", () => {
+  it("counts skipped units as done and labels them inside expanded lectures", () => {
     render(
       <RoadmapPlanner
         items={[
@@ -78,8 +78,9 @@ describe("RoadmapPlanner", () => {
     fireEvent.click(screen.getByRole("button", { name: /Expand Deep Learning/ }));
 
     expect(screen.getByText("Core Unit")).toBeInTheDocument();
-    expect(screen.queryByText("Already Mastered")).not.toBeInTheDocument();
-    expect(screen.queryByText("User Skipped")).not.toBeInTheDocument();
+    expect(screen.getByText("Already Mastered")).toBeInTheDocument();
+    expect(screen.getByText("User Skipped")).toBeInTheDocument();
+    expect(screen.getAllByText("Skip")).toHaveLength(2);
     expect(screen.queryByText("Reference Only")).not.toBeInTheDocument();
     expect(screen.queryByText("Hidden Logistics")).not.toBeInTheDocument();
     expect(screen.queryByText("Locked Phase B")).not.toBeInTheDocument();

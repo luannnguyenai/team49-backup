@@ -23,7 +23,6 @@ import {
   isDoneForPlannerProgress,
   isIncludedInMainPath,
   isOptionalIntroItem,
-  isVisibleInMainPath,
 } from "../lib/status";
 import { describePlannerReason } from "../planner-reasons";
 import { computeRecommendedNext, sortByOrder } from "../presenters";
@@ -276,6 +275,7 @@ function UnitCard({
   onSelectItem?: (id: string) => void;
   key?: React.Key;
 }) {
+  const isSkipped = item.action === "skip" || item.status === "skipped";
   const insight =
     item.learning_unit_id === currentProgress?.learning_unit_id
       ? derivePlayerInsight(currentProgress)
@@ -293,7 +293,7 @@ function UnitCard({
           ? "border-blue-600 shadow-[3px_3px_0px_#3b82f6]"
           : "border-slate-200 hover:border-slate-800 hover:shadow-[3px_3px_0px_#1e293b]",
         item.status === "completed" && "opacity-75",
-        item.status === "skipped" && "opacity-55",
+        isSkipped && "opacity-70",
       )}
     >
       <div className="flex w-full items-start gap-3">
@@ -335,9 +335,20 @@ function UnitCard({
                 Upcoming
               </span>
             ) : null}
+            {isSkipped ? (
+              <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-700">
+                Skip
+              </span>
+            ) : null}
           </div>
         </div>
-        <div className="mt-0.5 shrink-0">{statusIcon(item.status)}</div>
+        <div className="mt-0.5 shrink-0">
+          {isSkipped ? (
+            <ArrowRight className="h-5 w-5 shrink-0 text-slate-400" />
+          ) : (
+            statusIcon(item.status)
+          )}
+        </div>
       </div>
 
       {insight ? (
@@ -464,9 +475,7 @@ export default function RoadmapPlanner({
                 {course.lectures.map((lecture, index) => {
                   const isExpanded = expandedLectureKeys.has(lecture.key);
                   const completedLectureUnits = countCompleted(lecture.items);
-                  const visibleLectureItems = lecture.items.filter(
-                    isVisibleInMainPath,
-                  );
+                  const expandedLectureItems = lecture.items;
                   const optionalIntro = isOptionalIntroLecture(lecture);
                   const isCompleted =
                     lecture.items.length > 0 &&
@@ -533,7 +542,6 @@ export default function RoadmapPlanner({
                               ? "translate-y-[2px] shadow-[2px_2px_0px_#1e293b]"
                               : "shadow-[4px_4px_0px_#1e293b] hover:translate-y-[1px] hover:bg-slate-50 hover:shadow-[3px_3px_0px_#1e293b]",
                             hasRecommended &&
-                            !isExpanded &&
                             "bg-amber-50 border-amber-200",
                             optionalIntro &&
                             !hasRecommended &&
@@ -568,7 +576,7 @@ export default function RoadmapPlanner({
                         </button>
 
                         <AnimatePresence>
-                          {isExpanded && visibleLectureItems.length > 0 && (
+                          {isExpanded && expandedLectureItems.length > 0 && (
                             <motion.div
                               initial={{ opacity: 0, height: 0, marginTop: 0 }}
                               animate={{
@@ -581,7 +589,7 @@ export default function RoadmapPlanner({
                               className="overflow-hidden relative"
                             >
                               <div className="grid grid-cols-1 gap-3 pb-2 pl-0 lg:grid-cols-2 lg:pl-2">
-                                {visibleLectureItems.map((item) => (
+                                {expandedLectureItems.map((item) => (
                                   <UnitCard
                                     key={item.id}
                                     item={item}
