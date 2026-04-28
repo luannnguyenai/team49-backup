@@ -412,21 +412,20 @@ export function buildPriorShortlistFallback({
 }): PriorCandidateTopic[] {
   const combinedText = `${priorKnowledgeText} ${codingExperienceText}`.trim();
   const aiExperienceMonths = inferAiExperienceMonths(combinedText);
-  const matched = combinedText
-    ? topics
-        .map((topic) => {
-          if (textMatchesTopic(combinedText, topic)) {
-            return { ...topic, suggestedLevel: "confident" as const };
-          }
+  const matched: PriorCandidateTopic[] = [];
 
-          if (aiExperienceMonths >= 3 && topic.foundationEligible === true) {
-            return { ...topic, suggestedLevel: "reviewed" as const };
-          }
+  if (combinedText) {
+    for (const topic of topics) {
+      if (textMatchesTopic(combinedText, topic)) {
+        matched.push({ ...topic, suggestedLevel: "confident" });
+        continue;
+      }
 
-          return null;
-        })
-        .filter((topic): topic is PriorCandidateTopic => topic !== null)
-    : [];
+      if (aiExperienceMonths >= 3 && topic.foundationEligible === true) {
+        matched.push({ ...topic, suggestedLevel: "reviewed" });
+      }
+    }
+  }
 
   return matched.slice(0, limit);
 }

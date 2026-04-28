@@ -11,13 +11,15 @@ function defaultTargetDeadline(): string {
 }
 
 export const onboardingSchema = z.object({
-  known_topic_slugs: z.array(z.string()),
+  goal_ids: z.array(z.string()).default([]),
 
-  desired_section_ids: z.array(z.string()),
+  known_unit_ids: z.array(z.string()).default([]),
 
-  selected_course_ids: z
-    .array(z.string())
-    .min(1, "Chọn ít nhất 1 khóa học để tiếp tục"),
+  known_topic_slugs: z.array(z.string()).default([]),
+
+  desired_section_ids: z.array(z.string()).default([]),
+
+  selected_course_ids: z.array(z.string()).default([]),
 
   available_hours_per_week: z
     .number({ invalid_type_error: "Phải là số" })

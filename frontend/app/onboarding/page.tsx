@@ -1,8 +1,16 @@
 "use client";
 // app/onboarding/page.tsx
-// Multi-step onboarding flow (5 steps) for new users.
-// Step 1: Goal selection · Step 2: Known topics (filtered) · Step 3: Schedule · Step 4: Learning method · Step 5: Placement assessment
-// On submit: PUT /api/users/me/onboarding → redirect to /assessment
+// Multi-step onboarding wizard.
+//
+// Internal step indices:
+//   0  Goal selection
+//   1  Experience level
+//   2  Prior profile input       (experienced flow only)
+//   3  AI topic confirmation     (experienced flow only)
+//   4  Assessment depth          (experienced flow only)
+//
+// Beginner flow:    0 → 1 → submit
+// Experienced flow: 0 → 1 → 2 → 3 → 4 → submit
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -18,13 +26,13 @@ import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFilt
 import StepAssessmentDepth from "@/components/onboarding/StepAssessmentDepth";
 import { buildPostOnboardingHref } from "@/components/onboarding/onboardingNavigation";
 
-import { bootstrapDataApi, canonicalSectionApi } from "@/lib/api";
+import { canonicalSectionApi } from "@/lib/api";
 import {
-  buildBootstrapTopicsFromCanonicalSections,
-  buildBootstrapTopicGroups,
-  estimateSelectedCourseHours,
-  normalizeBootstrapCourses,
-} from "@/lib/bootstrap-onboarding";
+  analyzePriorProfile,
+  saveGoals,
+  saveKnownTopics,
+  saveExperienceLevel,
+} from "@/lib/onboarding-api";
 import {
   buildCanonicalAssessmentContext,
   writePendingCanonicalAssessment,
@@ -32,45 +40,28 @@ import {
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
-import type {
-  BootstrapCourseOption,
-  BootstrapTopicOption,
-  CourseSectionDetail,
-} from "@/types";
+import { useOnboardingStore, type ExperienceLevel } from "@/stores/onboardingStore";
+import type { CourseSectionDetail } from "@/types";
+import {
+  buildPriorCandidateTopics,
+  buildPriorShortlistFallback,
+  mergePriorAnalysisIntoCandidates,
+  selectSuggestedKnownUnitIds,
+  type PlannerGoalId,
+  type PriorCandidateTopic,
+} from "@/components/onboarding/priorCandidateBuilder";
 
 // ---------------------------------------------------------------------------
 // Step metadata — two flows share internal indices 0-4
 // ---------------------------------------------------------------------------
 
-const STEPS = [
-  {
-    title: "Mục tiêu học tập",
-    subtitle: "Bạn muốn học gì?",
-  },
-  {
-    title: "Kiến thức hiện tại",
-    subtitle: "Tick những units bạn đã nắm",
-  },
-  {
-    title: "Bạn muốn học gì?",
-    subtitle: "Chọn khóa học bạn quan tâm",
-  },
-  {
-    title: "Thời gian của bạn",
-    subtitle: "Lên lịch học phù hợp",
-  },
-  {
-    title: "Phương pháp học",
-    subtitle: "Cách bạn học tốt nhất",
-  },
-  {
-    title: "Đánh giá kiến thức",
-    subtitle: "Kiểm tra những gì bạn đã biết",
-  },
-  {
-    title: "Kết quả đánh giá",
-    subtitle: "Xác nhận lộ trình của bạn",
-  },
+// Experienced: 5 steps visible
+const STEPS_EXPERIENCED = [
+  { title: "Mục tiêu học tập",   subtitle: "Bạn muốn học gì?" },
+  { title: "Kinh nghiệm",        subtitle: "Bạn đã từng học AI/ML chưa?" },
+  { title: "Nền tảng hiện tại",  subtitle: "Nhập thông tin để AI phân tích" },
+  { title: "Xác nhận kiến thức", subtitle: "Chọn cụm cần placement kiểm chứng" },
+  { title: "Mức kiểm tra",       subtitle: "Chọn độ sâu bài placement" },
 ] as const;
 
 // Beginner: 2 visible steps (internal indices 0, 1)
@@ -85,17 +76,6 @@ const BEGINNER_DISPLAY_IDX: Record<number, number> = {
   1: 1,
   // 2, 3 and 4 are skipped for beginners
 };
-
-// Steps that use the page-level nav buttons (index 4 = TimeSchedule)
-const STEPS_WITH_PAGE_NAV = new Set([4]);
-
-// Form fields validated before advancing from each internal step
-const STEP_VALIDATION_FIELDS: (keyof OnboardingFormData)[][] = [
-  [],                                                // Step 0: optional
-  ["selected_course_ids"],                           // Step 1: required
-  ["available_hours_per_week", "target_deadline"],   // Step 2: required
-  ["preferred_method"],                              // Step 3: required
-];
 
 function goalFromStore(goalIds: string[]): PlannerGoalId {
   return goalIds.includes("nlp") ? "nlp" : "computer_vision";
@@ -115,17 +95,7 @@ function OnboardingPageInner() {
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [animKey, setAnimKey] = useState(0);
 
-  // UUID for the placement assessment session — generated once when Step 5 is entered
-  const [placementSessionId, setPlacementSessionId] = useState<string | null>(null);
-  const enteredStep5 = useRef(false);
-
-  // Results from placement assessment — used by Step 6 (ResultGate)
-  const [placementResults, setPlacementResults] = useState<TopicDecision[]>([]);
-
-  // Content data loaded from the API
-  const [canonicalSections, setCanonicalSections] = useState<CourseSectionDetail[]>([]);
-  const [bootstrapCourses, setBootstrapCourses] = useState<BootstrapCourseOption[]>([]);
-  const [bootstrapTopics, setBootstrapTopics] = useState<BootstrapTopicOption[]>([]);
+  const [sections, setSections] = useState<CourseSectionDetail[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [priorKnowledgeText, setPriorKnowledgeText] = useState("");
   const [codingExperienceText, setCodingExperienceText] = useState("");
@@ -134,45 +104,32 @@ function OnboardingPageInner() {
   const [priorAnalysisModel, setPriorAnalysisModel] = useState<string | null>(null);
   const [analyzingPrior, setAnalyzingPrior] = useState(false);
 
-  // ── React Hook Form ──────────────────────────────────────────────────────
-  const {
-    register,
-    handleSubmit,
-    watch,
-    trigger,
-    control,
-    formState: { errors },
-  } = useForm<OnboardingFormData>({
-    resolver: zodResolver(onboardingSchema),
-    defaultValues: {
-      known_topic_slugs: [],
-      desired_section_ids: [],
-      selected_course_ids: [],
-      available_hours_per_week: 5,
-      target_deadline: "",
-      preferred_method: undefined,
-    },
-  });
+  // ── React Hook Form ───────────────────────────────────────────────────────
+  const { handleSubmit } =
+    useForm<OnboardingFormData>({
+      resolver: zodResolver(onboardingSchema),
+      defaultValues: {
+        goal_ids: [],
+        known_unit_ids: [],
+        desired_section_ids: [],
+        selected_course_ids: [],
+        available_hours_per_week: 5,
+        target_deadline: undefined,
+        preferred_method: "video",
+      },
+    });
 
   // ── Load sections on mount ────────────────────────────────────────────────
   useEffect(() => {
     async function loadData() {
       try {
-        const [courses, list] = await Promise.all([
-          bootstrapDataApi.courses(),
-          canonicalSectionApi.list(),
-        ]);
+        const list = await canonicalSectionApi.list();
         const details = await Promise.all(
           list.map((s) => canonicalSectionApi.detail(s.id))
         );
-        const normalizedCourses = normalizeBootstrapCourses(courses);
-        setBootstrapCourses(normalizedCourses);
-        setBootstrapTopics(
-          buildBootstrapTopicsFromCanonicalSections(details, normalizedCourses),
-        );
-        setCanonicalSections(details);
+        setSections(details);
       } catch {
-        // Keep bootstrap/canonical lists empty; user can still complete the form
+        // keep sections empty; user can still complete the form
       } finally {
         setLoadingData(false);
       }
@@ -180,32 +137,7 @@ function OnboardingPageInner() {
     loadData();
   }, []);
 
-  // Generate placement session UUID once when entering step 5
-  useEffect(() => {
-    if (step === 5 && !enteredStep5.current) {
-      enteredStep5.current = true;
-      setPlacementSessionId(crypto.randomUUID());
-    }
-  }, [step]);
-
-  // Derive the selected sections objects (needed for schedule estimate)
-  const selectedCourseIds = watch("selected_course_ids");
-  const selectedCourses = bootstrapCourses.filter((course) =>
-    selectedCourseIds.includes(course.canonical_course_id)
-  );
-  const topicGroups = buildBootstrapTopicGroups(bootstrapTopics, bootstrapCourses);
-  const topicCountsByCourseId = bootstrapTopics.reduce<Record<string, number>>((acc, topic) => {
-    if (topic.canonical_course_id) {
-      acc[topic.canonical_course_id] = (acc[topic.canonical_course_id] ?? 0) + 1;
-    }
-    return acc;
-  }, {});
-  const totalSelectedCourseHours = estimateSelectedCourseHours(
-    bootstrapTopics,
-    selectedCourseIds,
-  );
-
-  // ── Core submit (shared by placement complete/skip and direct submit) ────
+  // ── Submit ────────────────────────────────────────────────────────────────
   const submitOnboarding = useCallback(
     async (data: OnboardingFormData) => {
       clearError();
@@ -216,17 +148,12 @@ function OnboardingPageInner() {
           knownUnitIds: knownUnitIds,
           desiredSectionIds: data.desired_section_ids,
         });
-        const selectedCourseIds = Array.from(
-          new Set(
-            selectedSections.map((section) => section.canonical_course_id ?? section.course_id)
-          )
-        );
-        // Merge goal_ids and known_unit_ids from store (Steps 1 & 2 write to store, not form)
+        canonicalContext.assessmentDepth = assessmentDepth;
         await onboard({
           ...data,
           goal_ids: goalIds,
           known_unit_ids: knownUnitIds,
-          selected_course_ids: selectedCourseIds,
+          selected_course_ids: [],
         });
         writePendingCanonicalAssessment(canonicalContext);
 
@@ -240,13 +167,8 @@ function OnboardingPageInner() {
         /* error shown from store */
       }
     },
-    [clearError, searchParams, sections, selectedSections, goalIds, knownUnitIds, onboard, router]
+    [assessmentDepth, clearError, searchParams, sections, goalIds, knownUnitIds, onboard, router]
   );
-
-  // ── Submit handler (used by Steps 2–4 form submit button) ────────────────
-  const onSubmit = async (data: OnboardingFormData) => {
-    await submitOnboarding(data);
-  };
 
   // ── Navigation ────────────────────────────────────────────────────────────
   const navigate = useCallback(
@@ -259,75 +181,58 @@ function OnboardingPageInner() {
     [step, clearError]
   );
 
-  const goNext = useCallback(async () => {
-    const fields = STEP_VALIDATION_FIELDS[step];
-    if (fields.length > 0) {
-      const valid = await trigger(fields);
-      if (!valid) return;
-    }
-    navigate(step + 1);
-  }, [step, trigger, navigate]);
+  const runPriorAnalysis = useCallback(async () => {
+    const selectedGoal = goalFromStore(goalIds);
+    const candidateTopics = buildPriorCandidateTopics({
+      goalId: selectedGoal,
+      sections,
+    }).confirmEligible;
+    const fallbackTopics = buildPriorShortlistFallback({
+      topics: candidateTopics,
+      priorKnowledgeText,
+      codingExperienceText,
+    });
 
-  const goBack = useCallback(() => {
-    clearError();
-    setDirection("backward");
-    setAnimKey((k) => k + 1);
-    setStep((s) => s - 1);
-  }, [clearError]);
-
-  // ── Submit ────────────────────────────────────────────────────────────────
-  const onSubmit = async (data: OnboardingFormData) => {
-    clearError();
+    setAnalyzingPrior(true);
     try {
-      const next = searchParams.get("next");
-      const canonicalContext = buildCanonicalAssessmentContext({
-        sections: canonicalSections,
-        knownUnitIds: [],
-        desiredSectionIds: [],
-        selectedCourseIds: data.selected_course_ids,
+      const response = await analyzePriorProfile({
+        goal_id: selectedGoal,
+        prior_knowledge_text: priorKnowledgeText,
+        coding_experience_text: codingExperienceText,
+        candidates: candidateTopics.map((topic) => ({
+          id: topic.id,
+          display_label: topic.displayLabel,
+          raw_title: topic.rawTitle,
+          unit_titles: [],
+        })),
       });
-      await onboard({
-        known_unit_ids: [],
-        desired_section_ids: [],
-        selected_course_ids: data.selected_course_ids,
-        available_hours_per_week: data.available_hours_per_week,
-        target_deadline: data.target_deadline,
-        preferred_method: data.preferred_method,
-      });
-      writePendingCanonicalAssessment(canonicalContext);
+      const fallbackIds = fallbackTopics.map((topic) => topic.id);
+      const shortlistedIds = response.fallback
+        ? [...new Set([...(response.shortlisted_topic_ids ?? []), ...fallbackIds])]
+        : response.shortlisted_topic_ids ?? [];
+      const analyzedTopics = mergePriorAnalysisIntoCandidates(
+        candidateTopics,
+        response.topic_summaries ?? [],
+        shortlistedIds,
+        response.fallback ? fallbackTopics : [],
+      );
 
-      if (canonicalContext.canonicalUnitIds.length > 0) {
-        const assessmentTarget = next
-          ? `/assessment?next=${encodeURIComponent(next)}`
-          : "/assessment";
-        router.push(assessmentTarget);
-      } else {
-        // No units selected → nothing to assess → go straight to dashboard
-        router.push(next ?? "/dashboard");
-      }
+      setPriorTopics(analyzedTopics.length > 0 ? analyzedTopics : fallbackTopics);
+      useOnboardingStore.getState().setKnownUnitIds(selectSuggestedKnownUnitIds(analyzedTopics));
+      setPriorAnalysisFallback(response.fallback);
+      setPriorAnalysisModel(`${response.provider}/${response.model_used}`);
     } catch {
-      /* error message is shown from the store */
+      const fallbackIds = fallbackTopics.map((topic) => topic.id);
+      const analyzedTopics = mergePriorAnalysisIntoCandidates(candidateTopics, [], fallbackIds, fallbackTopics);
+      setPriorTopics(analyzedTopics.length > 0 ? analyzedTopics : fallbackTopics);
+      useOnboardingStore.getState().setKnownUnitIds(selectSuggestedKnownUnitIds(analyzedTopics));
+      setPriorAnalysisFallback(true);
+      setPriorAnalysisModel(null);
+    } finally {
+      setAnalyzingPrior(false);
     }
-  };
-
-  // ── Placement callbacks (Step 5) ─────────────────────────────────────────
-  const handlePlacementComplete = useCallback(
-    (decisions: TopicDecision[]) => {
-      // Store results and transition to Step 6 (ResultGate)
-      setPlacementResults(decisions);
-      navigate(6);
-    },
-    [navigate]
-  );
-
-  const handlePlacementSkip = useCallback(() => {
-    handleSubmit(submitOnboarding)();
-  }, [handleSubmit, submitOnboarding]);
-
-  // ── ResultGate confirm (Step 6) ──────────────────────────────────────────
-  const handleResultGateConfirm = useCallback(() => {
-    handleSubmit(submitOnboarding)();
-  }, [handleSubmit, submitOnboarding]);
+    navigate(3);
+  }, [codingExperienceText, goalIds, navigate, priorKnowledgeText, sections]);
 
   // ── Derived display values ────────────────────────────────────────────────
   const isBeginner = experienceLevel === "beginner";
@@ -455,61 +360,66 @@ function OnboardingPageInner() {
               >
                 {/* Step 0 — Goal selection */}
                 {step === 0 && (
-                  <Controller
-                    control={control}
-                    name="known_topic_slugs"
-                    render={({ field }) => (
-                      <StepKnownUnits
-                        topicGroups={topicGroups}
-                        selectedSlugs={field.value}
-                        onToggle={(slug) =>
-                          field.onChange(
-                            field.value.includes(slug)
-                              ? field.value.filter((x) => x !== slug)
-                              : [...field.value, slug]
-                          )
-                        }
-                      />
-                    )}
+                  <StepGoalSelection
+                    onNext={() => {
+                      saveGoals(goalIds).catch(() => {});
+                      navigate(1);
+                    }}
                   />
                 )}
 
-                {/* Step 2 — Schedule */}
+                {/* Step 1 — Experience level */}
+                {step === 1 && (
+                  <StepExperienceLevel
+                    onBack={() => navigate(0)}
+                    onNext={(level: ExperienceLevel) => {
+                      saveExperienceLevel(level).catch(() => {});
+                      if (level === "beginner") {
+                        const store = useOnboardingStore.getState();
+                        store.setKnownUnitIds([]);
+                        store.setSkipPlacementAssessment(true);
+                        handleSubmit(submitOnboarding)();
+                      } else {
+                        navigate(2);
+                      }
+                    }}
+                  />
+                )}
+
+                {/* Step 2 — Manual prior profile input (experienced flow only) */}
                 {step === 2 && (
-                  <Controller
-                    control={control}
-                    name="selected_course_ids"
-                    render={({ field }) => (
-                      <StepDesiredSections
-                        courses={bootstrapCourses}
-                        topicCountsByCourseId={topicCountsByCourseId}
-                        selectedIds={field.value}
-                        onToggle={(id) =>
-                          field.onChange(
-                            field.value.includes(id)
-                              ? field.value.filter((x) => x !== id)
-                              : [...field.value, id]
-                          )
-                        }
-                        error={errors.selected_course_ids?.message}
-                      />
-                    )}
+                  <StepPriorKnowledgeInput
+                    goalId={goalFromStore(goalIds)}
+                    priorKnowledgeText={priorKnowledgeText}
+                    codingExperienceText={codingExperienceText}
+                    isAnalyzing={analyzingPrior}
+                    onPriorKnowledgeChange={setPriorKnowledgeText}
+                    onCodingExperienceChange={setCodingExperienceText}
+                    onBack={() => navigate(1)}
+                    onNext={runPriorAnalysis}
+                  />
+                )}
+
+                {/* Step 3 — AI topic confirmation (experienced flow only) */}
+                {step === 3 && (
+                  <StepKnownTopicsFiltered
+                    topics={priorTopics}
+                    analysisFallback={priorAnalysisFallback}
+                    modelLabel={priorAnalysisModel}
+                    onNext={() => {
+                      saveKnownTopics(knownUnitIds).catch(() => {});
+                      navigate(4);
+                    }}
+                    onBack={() => navigate(2)}
+                    onSkipAll={() => {
+                      saveKnownTopics([]).catch(() => {});
+                      navigate(4);
+                    }}
                   />
                 )}
 
                 {/* Step 4 — Assessment depth (experienced flow only) */}
                 {step === 4 && (
-                  <StepTimeSchedule
-                    register={register}
-                    errors={errors}
-                    watch={watch}
-                    selectedCourseCount={selectedCourses.length}
-                    totalHours={totalSelectedCourseHours}
-                  />
-                )}
-
-                {/* Step 5 — Assessment depth (experienced flow only) */}
-                {step === 5 && (
                   <StepAssessmentDepth
                     onBack={() => navigate(3)}
                     onNext={() => {
@@ -520,57 +430,6 @@ function OnboardingPageInner() {
                 )}
               </div>
 
-              {/* ── Navigation buttons (only for Steps 2 and 3) ── */}
-              {showPageNav && (
-                <div className={cn("mt-7 flex gap-3", isFirstStep ? "justify-end" : "justify-between")}>
-                  {!isFirstStep && (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={goBack}
-                      leftIcon={<ChevronLeft className="h-4 w-4" />}
-                    >
-                      Quay lại
-                    </Button>
-                  )}
-                  <Button
-                    type="button"
-                    onClick={goNext}
-                    rightIcon={<ChevronRight className="h-4 w-4" />}
-                  >
-                    Tiếp tục
-                  </Button>
-                </div>
-              )}
-
-              {/* ── Step 4 (Learning method) nav: Back + Submit to trigger placement ── */}
-              {isLastFormStep && (
-                <div className="mt-7 flex gap-3 justify-between">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={goBack}
-                    leftIcon={<ChevronLeft className="h-4 w-4" />}
-                  >
-                    Quay lại
-                  </Button>
-                  <Button
-                    type="button"
-                    disabled={isLoading}
-                    onClick={async () => {
-                      const fields = STEP_VALIDATION_FIELDS[step];
-                      if (fields.length > 0) {
-                        const valid = await trigger(fields);
-                        if (!valid) return;
-                      }
-                      handleSubmit(submitOnboarding)();
-                    }}
-                    rightIcon={<Sparkles className="h-4 w-4" />}
-                  >
-                    {isLoading ? "Đang xử lý..." : "Hoàn tất"}
-                  </Button>
-                </div>
-              )}
             </form>
           )}
         </div>
