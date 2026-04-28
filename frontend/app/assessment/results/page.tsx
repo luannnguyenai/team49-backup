@@ -14,6 +14,7 @@ import {
 
 import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { buildAssessmentNextHref } from "@/components/onboarding/onboardingNavigation";
 import { assessmentApi } from "@/lib/api";
 import {
   buildAssessmentResultViewModel,
@@ -252,9 +253,9 @@ function AssessmentResultsInner() {
   }
 
   // ── Go to dashboard ───────────────────────────────────────────────────────
-  const goToDashboard = () => {
+  const goToNextStep = () => {
     setNavigating(true);
-    router.push(next ?? "/dashboard");
+    router.push(buildAssessmentNextHref(next));
   };
 
   // ── Loading skeleton ──────────────────────────────────────────────────────
@@ -503,7 +504,7 @@ function AssessmentResultsInner() {
             </p>
           </div>
           <Button
-            onClick={goToDashboard}
+            onClick={goToNextStep}
             loading={navigating}
             size="lg"
           >
