@@ -122,8 +122,11 @@ export default function TimelineBoard() {
 
             {settingsOpen ? (
               <div
-                className="absolute right-0 bottom-full z-50 mb-2 w-72 rounded-2xl border bg-white p-4 text-left shadow-xl"
-                style={{ borderColor: "var(--border)" }}
+                className="absolute right-0 top-0 z-50 w-72 rounded-2xl border bg-white p-4 text-left shadow-xl"
+                style={{
+                  borderColor: "var(--border)",
+                  transform: "translateY(calc(-100% - 0.5rem))",
+                }}
               >
                 <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
                   Weekly time budget
