@@ -74,6 +74,7 @@ describe("RoadmapPlanner", () => {
     );
 
     expect(screen.getByText(/2 \/ 3 units/)).toBeInTheDocument();
+    expect(screen.getByText("2 skipped")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Expand Deep Learning/ }));
 
