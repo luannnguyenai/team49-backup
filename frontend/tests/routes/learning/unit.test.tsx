@@ -619,4 +619,13 @@ describe("learning unit page (US3)", () => {
       search.compareDocumentPosition(tutorLink) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
+
+  it("returns to the landing page after logout from top nav", async () => {
+    render(<TopNav />);
+
+    fireEvent.click(screen.getByRole("button", { name: /đăng xuất/i }));
+
+    expect(authStoreMock.logout).toHaveBeenCalledTimes(1);
+    expect(navigationMock.router.push).toHaveBeenCalledWith("/");
+  });
 });
