@@ -62,5 +62,5 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
             GeneratePathRequest(selected_course_ids=["CS230", "CS231n"]),
         )
 
-    content.get_linked_learning_units.assert_awaited_once_with(["cs230", "cs231n"])
+    content.get_linked_learning_units.assert_awaited_once_with(["CS230", "CS231n"])
     assert response.total_units == 1

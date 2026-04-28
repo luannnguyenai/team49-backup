@@ -273,7 +273,7 @@ async def _generate_canonical_learning_path(
     selected_course_ids = list(goal.selected_course_ids) if goal and goal.selected_course_ids else []
     if not selected_course_ids:
         selected_course_ids = [
-            str(course_id).strip().lower()
+            str(course_id).strip()
             for course_id in request.selected_course_ids
             if str(course_id).strip()
         ]

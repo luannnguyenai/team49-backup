@@ -24,6 +24,7 @@ class CanonicalContentRepository:
         if not selected_course_ids:
             return []
         selected = [str(course_id) for course_id in selected_course_ids]
+        selected_lower = [course_id.lower() for course_id in selected]
         uuid_ids = []
         for course_id in selected:
             try:
@@ -31,7 +32,7 @@ class CanonicalContentRepository:
             except ValueError:
                 pass
 
-        filters = [Course.canonical_course_id.in_(selected)]
+        filters = [func.lower(Course.canonical_course_id).in_(selected_lower)]
         if uuid_ids:
             filters.append(Course.id.in_(uuid_ids))
 

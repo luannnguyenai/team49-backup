@@ -65,7 +65,7 @@ function toBoolean(value: unknown): boolean | null {
 }
 
 function toCanonicalCourseIds(courseIds: string[]): string[] {
-  return courseIds.map((courseId) => courseId.trim().toLowerCase()).filter(Boolean);
+  return courseIds.map((courseId) => courseId.trim()).filter(Boolean);
 }
 
 function toPlayerProgressSnapshot(
