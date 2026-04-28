@@ -682,6 +682,61 @@ describe("learning unit page (US3)", () => {
     vi.useRealTimers();
   });
 
+  it("flushes the pending query immediately when Enter is pressed", async () => {
+    vi.useFakeTimers();
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    fireEvent.change(input, { target: { value: "deep learning & vision" } });
+
+    expect(navigationMock.router.replace).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(navigationMock.router.replace).toHaveBeenCalledWith(
+      "/dashboard?q=deep+learning+%26+vision",
+    );
+
+    vi.runOnlyPendingTimers();
+    expect(navigationMock.router.replace).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
+  it("carries q across allowlisted nav routes and drops it for other routes", async () => {
+    navigationMock.pathname = "/dashboard";
+    navigationMock.searchParams = new URLSearchParams("q=cnn");
+
+    render(<TopNav />);
+
+    expect(screen.getByRole("link", { name: "AI Tutor" })).toHaveAttribute(
+      "href",
+      "/tutor?q=cnn",
+    );
+    expect(screen.getByRole("link", { name: "Lịch sử" })).toHaveAttribute("href", "/history");
+  });
+
+  it("cancels a pending debounce when the route changes", async () => {
+    vi.useFakeTimers();
+    navigationMock.pathname = "/dashboard";
+
+    const { rerender } = render(<TopNav />);
+
+    fireEvent.change(screen.getByLabelText("Tìm kiếm khóa học"), {
+      target: { value: "transformer" },
+    });
+
+    navigationMock.pathname = "/history";
+    navigationMock.searchParams = new URLSearchParams();
+    rerender(<TopNav />);
+
+    vi.advanceTimersByTime(250);
+
+    expect(navigationMock.router.replace).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
   it("hides the clear button when the search input is empty", async () => {
     navigationMock.pathname = "/dashboard";
 
