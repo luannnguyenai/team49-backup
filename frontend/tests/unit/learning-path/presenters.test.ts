@@ -44,12 +44,13 @@ describe("learning path presenters", () => {
     expect(flow.edges.some((edge) => edge.source === "unit-b" && edge.target === "unit-c")).toBe(true);
   });
 
-  it("groups timeline by week with null fallback and excludes skipped actions", () => {
+  it("groups timeline by week with null fallback and excludes skipped or optional items", () => {
     const timeline = groupByWeek([
       item({ id: "a", order_index: 0, week_number: null, estimated_hours: 1.5 }),
       item({ id: "b", order_index: 1, week_number: 2, estimated_hours: 2 }),
       item({ id: "c", order_index: 2, week_number: 2, action: "skip" }),
       item({ id: "d", order_index: 3, week_number: 2, segment_policy: "hidden" }),
+      item({ id: "e", order_index: 4, week_number: 2, section_title: "Lecture 1: Introduction" }),
     ]);
 
     expect(timeline.total_weeks).toBe(2);

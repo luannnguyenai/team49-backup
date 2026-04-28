@@ -20,7 +20,7 @@ describe("learning path status helpers", () => {
     expect(getStatusIconName("skipped")).toBe("skip");
   });
 
-  it("hides skip actions from timeline", () => {
+  it("hides skip actions and optional intros from timeline", () => {
     const base: PathItemResponse = {
       id: "1",
       learning_unit_id: "1",
@@ -35,6 +35,12 @@ describe("learning path status helpers", () => {
     };
     expect(isVisibleInTimeline(base)).toBe(true);
     expect(isVisibleInTimeline({ ...base, action: "skip" })).toBe(false);
+    expect(
+      isVisibleInTimeline({
+        ...base,
+        section_title: "Lecture 1: Introduction to Deep Learning",
+      }),
+    ).toBe(false);
   });
 
   it("keeps only actionable learning items in the main path", () => {

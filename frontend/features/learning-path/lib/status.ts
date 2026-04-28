@@ -30,7 +30,7 @@ export function getStatusClassName(status: PathStatus, isRecommended = false): s
 }
 
 export function isVisibleInTimeline(item: PathItemResponse): boolean {
-  return isVisibleInMainPath(item);
+  return isVisibleInMainPath(item) && !isOptionalIntroItem(item);
 }
 
 export function isIncludedInMainPath(item: PathItemResponse): boolean {
