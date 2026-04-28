@@ -492,8 +492,8 @@ echo "✓ Complete flow tested"
 ```bash
 # Check if database has placement items for a unit
 sqlite3 app.db << EOF
-SELECT COUNT(*) as placement_items 
-FROM canonical_items 
+SELECT COUNT(*) as placement_items
+FROM canonical_items
 WHERE canonical_unit_id = 'unit_id' AND phase = 'placement';
 EOF
 ```
@@ -502,9 +502,9 @@ EOF
 ```bash
 # Check session in database
 sqlite3 app.db << EOF
-SELECT id, user_id, total_questions, correct_count, completed_at 
-FROM sessions 
-WHERE user_id = 'user_id' 
+SELECT id, user_id, total_questions, correct_count, completed_at
+FROM sessions
+WHERE user_id = 'user_id'
 ORDER BY created_at DESC LIMIT 5;
 EOF
 ```
@@ -513,8 +513,8 @@ EOF
 ```bash
 # Check placement assessment results
 sqlite3 app.db << EOF
-SELECT user_id, topic_unit_id, score_pct, decision, user_choice 
-FROM placement_assessment_results 
+SELECT user_id, topic_unit_id, score_pct, decision, user_choice
+FROM placement_assessment_results
 WHERE user_id = 'user_id';
 EOF
 ```

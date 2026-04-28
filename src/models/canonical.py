@@ -11,6 +11,7 @@ idempotent without an extra mapping layer.
 
 from datetime import datetime
 import uuid
+from typing import Optional
 
 from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSON, UUID

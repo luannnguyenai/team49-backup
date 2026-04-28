@@ -1,7 +1,7 @@
 # Onboarding & Assessment Flow - Test Status Report
 
-**Date:** 2026-04-27  
-**Status:** ✅ READY FOR TESTING  
+**Date:** 2026-04-27
+**Status:** ✅ READY FOR TESTING
 **Coverage:** Complete onboarding flow (7 steps) + 8 integration tests
 
 ---
@@ -184,12 +184,12 @@ async def check():
     settings = Settings()
     engine = create_async_engine(settings.database_url)
     async_session = sessionmaker(engine, class_=AsyncSession)
-    
+
     async with async_session() as db:
         # Count learning units
         result = await db.execute(select(func.count(LearningUnit.id)))
         units_total = result.scalar()
-        
+
         # Count units with canonical_unit_id
         result = await db.execute(
             select(func.count(LearningUnit.id)).where(
@@ -197,7 +197,7 @@ async def check():
             )
         )
         units_canonical = result.scalar()
-        
+
         # Count placement items
         result = await db.execute(
             select(func.count(QuestionBankItem.item_id)).where(
@@ -205,10 +205,10 @@ async def check():
             )
         )
         placement_items = result.scalar()
-        
+
         print(f"Learning Units: {units_total} (with canonical: {units_canonical})")
         print(f"Placement Items: {placement_items}")
-        
+
         if units_canonical == 0:
             print("⚠️  WARNING: No units with canonical_unit_id - placement tests will skip")
         if placement_items == 0:
@@ -244,7 +244,7 @@ EOF
 ## Common Test Issues
 
 ### Issue: Tests Skip with "No placement items"
-**Cause:** Database doesn't have placement items  
+**Cause:** Database doesn't have placement items
 **Fix:** Seed test data or check canonical_items table
 ```bash
 python3 -c "
@@ -254,22 +254,22 @@ from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 ```
 
 ### Issue: "No learning unit with canonical_unit_id"
-**Cause:** Units exist but lack canonical_unit_id mapping  
+**Cause:** Units exist but lack canonical_unit_id mapping
 **Fix:** Add canonical_unit_id to learning_units
 ```sql
-UPDATE learning_units SET canonical_unit_id = 'cs224n_nlp_intro' 
+UPDATE learning_units SET canonical_unit_id = 'cs224n_nlp_intro'
 WHERE title LIKE '%NLP%' AND canonical_unit_id IS NULL LIMIT 1;
 ```
 
 ### Issue: Database connection fails
-**Cause:** DB not running or config incorrect  
+**Cause:** DB not running or config incorrect
 **Fix:** Check .env file and DATABASE_URL
 ```bash
 python3 -c "from src.config import Settings; print(Settings().database_url)"
 ```
 
 ### Issue: Import errors in pytest
-**Cause:** PYTHONPATH not set  
+**Cause:** PYTHONPATH not set
 **Fix:** Run from project root with PYTHONPATH
 ```bash
 cd /Users/binluan/A20-App-049
@@ -361,6 +361,6 @@ PYTHONPATH=. python3 -m pytest tests/integration/test_onboarding_flow_e2e.py -v
 
 ---
 
-**Report Generated:** 2026-04-27  
-**Created By:** Claude  
+**Report Generated:** 2026-04-27
+**Created By:** Claude
 **Status:** ✅ READY FOR TESTING
