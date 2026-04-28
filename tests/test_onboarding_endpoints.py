@@ -30,6 +30,7 @@ from src.services.onboarding_service import (
     _all_course_ids,
     _COURSE_TO_GOAL,
     _parse_prior_analysis_response,
+    _run_prior_analysis_with_retry,
     save_user_goals,
     save_known_topics,
 )
@@ -217,6 +218,40 @@ class TestPriorAnalysisParsing(unittest.TestCase):
 
         self.assertEqual(ids, ["cnn"])
         self.assertEqual(summaries, {})
+
+
+class TestPriorAnalysisRetry(unittest.IsolatedAsyncioTestCase):
+    async def test_retries_until_model_returns_parseable_json(self):
+        calls = 0
+
+        async def flaky_call():
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                return "not json"
+            return json.dumps({"topics": [{"id": "cnn", "level": "confident"}]})
+
+        ids, summaries = await _run_prior_analysis_with_retry(
+            flaky_call,
+            {"cnn"},
+            sleep_fn=AsyncMock(),
+        )
+
+        self.assertEqual(calls, 2)
+        self.assertEqual(ids, ["cnn"])
+        self.assertEqual(summaries, {"cnn": {"level": "confident"}})
+
+    async def test_raises_after_retry_budget_is_exhausted(self):
+        async def broken_call():
+            return "not json"
+
+        with self.assertRaises(json.JSONDecodeError):
+            await _run_prior_analysis_with_retry(
+                broken_call,
+                {"cnn"},
+                max_attempts=2,
+                sleep_fn=AsyncMock(),
+            )
 
 # ---------------------------------------------------------------------------
 # Service async tests (mocked DB)

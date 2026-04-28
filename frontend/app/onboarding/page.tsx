@@ -217,10 +217,14 @@ function OnboardingPageInner() {
           unit_titles: [],
         })),
       });
+      const fallbackIds = fallbackTopics.map((topic) => topic.id);
+      const shortlistedIds = response.fallback
+        ? [...new Set([...(response.shortlisted_topic_ids ?? []), ...fallbackIds])]
+        : response.shortlisted_topic_ids ?? [];
       const analyzedTopics = mergePriorAnalysisIntoCandidates(
         candidateTopics,
         response.topic_summaries ?? [],
-        response.shortlisted_topic_ids ?? [],
+        shortlistedIds,
       );
 
       setPriorTopics(analyzedTopics.length > 0 ? analyzedTopics : fallbackTopics);
