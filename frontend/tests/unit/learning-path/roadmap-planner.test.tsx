@@ -40,7 +40,8 @@ describe("RoadmapPlanner", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /Deep Learning 1 bài học/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Deep Learning/ }));
+
     expect(screen.getByText("Neural Networks")).toBeInTheDocument();
     expect(screen.queryByText("Unit hidden")).not.toBeInTheDocument();
   });
@@ -55,6 +56,7 @@ describe("RoadmapPlanner", () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole("button", { name: /Deep Learning/ }));
     fireEvent.click(screen.getByRole("button", { name: /CNN Basics/ }));
 
     expect(onSelectItem).toHaveBeenCalledWith("a");
@@ -75,6 +77,8 @@ describe("RoadmapPlanner", () => {
         }}
       />,
     );
+
+    fireEvent.click(screen.getByRole("button", { name: /Deep Learning/ }));
 
     expect(screen.getByText("End quiz đã mở")).toBeInTheDocument();
   });
