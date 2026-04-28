@@ -34,4 +34,14 @@ describe("auth middleware public route handling", () => {
       "http://localhost:3000/assessment?next=%2Fdashboard",
     );
   });
+
+  it("redirects authenticated users away from the public landing page", () => {
+    const request = new NextRequest("http://localhost:3000/");
+    request.cookies.set("al_access_token", "token");
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost:3000/tutor");
+  });
 });

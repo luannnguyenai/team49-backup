@@ -158,7 +158,7 @@ export default function TutorPage() {
                   Khám phá danh mục để chọn khoá phù hợp và bắt đầu học cùng AI Tutor.
                 </p>
               </div>
-              <Link href="/" className="btn-primary inline-flex items-center gap-2">
+              <Link href="/tutor" className="btn-primary inline-flex items-center gap-2">
                 <Compass size={16} />
                 Khám phá khoá học
               </Link>
@@ -169,7 +169,7 @@ export default function TutorPage() {
             <div className="pt-2 text-center text-sm" style={{ color: "var(--text-muted)" }}>
               Còn {others.length} khoá khác trong danh mục.{" "}
               <Link
-                href="/"
+                href="/tutor"
                 className="font-semibold underline"
                 style={{ color: "var(--color-primary-600)" }}
               >
