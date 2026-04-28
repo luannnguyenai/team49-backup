@@ -1,20 +1,17 @@
 $baseBranch = "main"
-$sourceBranch = "ed-fix-merge-1"
+$sourceBranch = "ed-fix-3"
 $remote = "origin"
 
-$commits = @(
-
-)
-
-# Tránh file script bị Git add nhầm
-git reset create-prs-per-commit.ps1 2>$null
-if (Test-Path ".git/info/exclude") {
-  if (-not (Select-String -Path ".git/info/exclude" -Pattern "^create-prs-per-commit\.ps1$" -Quiet)) {
-    Add-Content ".git/info/exclude" "create-prs-per-commit.ps1"
-  }
-}
-
 git fetch $remote
+$sourceRef = "$remote/$sourceBranch"
+
+# Lấy short commit ID theo thứ tự cũ nhất -> mới nhất từ git log --oneline.
+$commits = @(git log --reverse --format="%h" "$baseBranch..$sourceRef")
+
+if ($commits.Count -eq 0) {
+  Write-Host "No commits found between $baseBranch and $sourceRef." -ForegroundColor Yellow
+  exit 0
+}
 
 foreach ($commit in $commits) {
   Write-Host "`n=============================="
