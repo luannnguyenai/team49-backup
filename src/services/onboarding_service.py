@@ -10,6 +10,7 @@ import json
 import logging
 import asyncio
 import urllib.request
+from collections.abc import Awaitable, Callable
 from collections import defaultdict
 from uuid import UUID
 
@@ -43,6 +44,8 @@ _MINUTES_PER_HOUR = 60.0
 # Fallback when estimated_minutes is None
 _DEFAULT_HOURS = 1.0
 _PRIOR_ANALYSIS_LIMIT = 8
+_PRIOR_ANALYSIS_MAX_ATTEMPTS = 3
+_PRIOR_ANALYSIS_RETRY_BASE_DELAY_SECONDS = 0.6
 
 
 _PRIOR_ANALYSIS_SYSTEM = """\
@@ -195,6 +198,39 @@ def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> tuple[list[
     return result[:_PRIOR_ANALYSIS_LIMIT], {}
 
 
+async def _run_prior_analysis_with_retry(
+    call_model: Callable[[], Awaitable[str]],
+    valid_ids: set[str],
+    *,
+    max_attempts: int = _PRIOR_ANALYSIS_MAX_ATTEMPTS,
+    sleep_fn: Callable[[float], Awaitable[object]] = asyncio.sleep,
+) -> tuple[list[str], dict[str, dict[str, str]]]:
+    """Call and parse the prior-analysis model with a small retry budget."""
+    last_error: Exception | None = None
+    attempts = max(1, max_attempts)
+
+    for attempt in range(attempts):
+        try:
+            raw_response = await call_model()
+            return _parse_prior_analysis_response(raw_response, valid_ids)
+        except Exception as exc:
+            last_error = exc
+            if attempt >= attempts - 1:
+                break
+            delay = _PRIOR_ANALYSIS_RETRY_BASE_DELAY_SECONDS * (2**attempt)
+            logger.info(
+                "prior analysis LLM attempt %s/%s failed; retrying in %.1fs: %s",
+                attempt + 1,
+                attempts,
+                delay,
+                exc,
+            )
+            await sleep_fn(delay)
+
+    assert last_error is not None
+    raise last_error
+
+
 async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResponse:
     """Use the configured reasoning model to shortlist prior-knowledge topics.
 
@@ -234,11 +270,12 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
     try:
         enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
         if settings.model_provider.lower() == "openai":
-            raw_response = await asyncio.to_thread(
-                _invoke_openai_responses,
-                _PRIOR_ANALYSIS_SYSTEM,
-                user_text,
-            )
+            async def call_model() -> str:
+                return await asyncio.to_thread(
+                    _invoke_openai_responses,
+                    _PRIOR_ANALYSIS_SYSTEM,
+                    user_text,
+                )
         else:
             llm = init_chat_model(
                 **build_chat_model_kwargs(
@@ -247,14 +284,18 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
                     max_tokens=700,
                 )
             )
-            response = llm.invoke(
-                [
-                    SystemMessage(content=_PRIOR_ANALYSIS_SYSTEM),
-                    HumanMessage(content=user_text),
-                ]
-            )
-            raw_response = str(response.content)
-        shortlisted, summary_map = _parse_prior_analysis_response(raw_response, valid_ids)
+
+            async def call_model() -> str:
+                response = await asyncio.to_thread(
+                    llm.invoke,
+                    [
+                        SystemMessage(content=_PRIOR_ANALYSIS_SYSTEM),
+                        HumanMessage(content=user_text),
+                    ],
+                )
+                return str(response.content)
+
+        shortlisted, summary_map = await _run_prior_analysis_with_retry(call_model, valid_ids)
         fallback = False
     except Exception as exc:
         logger.warning("prior analysis LLM failed; using fallback: %s", exc)
