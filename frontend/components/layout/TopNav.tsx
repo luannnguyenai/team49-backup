@@ -2,9 +2,9 @@
 // components/layout/TopNav.tsx
 // Horizontal top navigation bar — replaces the left Sidebar + TopBar combo.
 
-import { useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Moon, Sun, Bell, LogOut, Search, Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -12,13 +12,125 @@ import { useAuthStore } from "@/stores/authStore";
 import BrandLogo from "@/components/layout/BrandLogo";
 import { NAV_ITEMS, type NavItem } from "@/components/layout/navItems";
 
+const SEARCH_ROUTE_ALLOWLIST = new Set(["/dashboard", "/tutor"]);
+const SEARCH_QUERY_KEY = "q";
+const SEARCH_DEBOUNCE_MS = 250;
+
+function isSearchEnabledForPath(pathname: string) {
+  return SEARCH_ROUTE_ALLOWLIST.has(pathname);
+}
+
+function buildHrefWithOptionalQuery(
+  href: string,
+  currentQuery: string,
+  shouldCarryQuery: boolean,
+) {
+  if (!shouldCarryQuery || !currentQuery) {
+    return href;
+  }
+
+  const params = new URLSearchParams();
+  params.set(SEARCH_QUERY_KEY, currentQuery);
+  return `${href}?${params.toString()}`;
+}
+
+function TopNavSearch({ pathname }: { pathname: string }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get(SEARCH_QUERY_KEY) ?? "";
+  const [draftQuery, setDraftQuery] = useState(initialQuery);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setDraftQuery(initialQuery);
+  }, [initialQuery]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+  }, [pathname]);
+
+  if (!isSearchEnabledForPath(pathname)) {
+    return null;
+  }
+
+  const commitQuery = (nextQuery: string) => {
+    const trimmedQuery = nextQuery.trim();
+    const params = new URLSearchParams(searchParams.toString());
+    if (trimmedQuery) {
+      params.set(SEARCH_QUERY_KEY, trimmedQuery);
+    } else {
+      params.delete(SEARCH_QUERY_KEY);
+    }
+
+    const suffix = params.toString();
+    router.replace(suffix ? `${pathname}?${suffix}` : pathname);
+  };
+
+  const scheduleCommit = (nextQuery: string) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      commitQuery(nextQuery);
+      debounceRef.current = null;
+    }, SEARCH_DEBOUNCE_MS);
+  };
+
+  return (
+    <div className="hidden flex-1 sm:block">
+      <label
+        className="mx-auto flex max-w-md items-center gap-2 rounded-full border px-3 py-2"
+        style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}
+      >
+        <Search className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
+        <input
+          aria-label="Tìm kiếm khóa học"
+          placeholder="Tìm theo tên khóa học, mô tả..."
+          value={draftQuery}
+          onChange={(event) => {
+            const nextValue = event.target.value;
+            setDraftQuery(nextValue);
+            scheduleCommit(nextValue);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+                debounceRef.current = null;
+              }
+              commitQuery(draftQuery);
+            }
+          }}
+          className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
+          style={{ color: "var(--text-primary)" }}
+        />
+      </label>
+    </div>
+  );
+}
+
 export default function TopNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, logout } = useAuthStore();
   const { resolvedTheme, setTheme } = useTheme();
   const isAuthenticated = user !== null;
+  const currentSearchQuery = searchParams.get(SEARCH_QUERY_KEY) ?? "";
+  const currentPathSupportsSearch = isSearchEnabledForPath(pathname);
 
   const handleLogout = () => {
     logout();
@@ -44,6 +156,18 @@ export default function TopNav() {
   const visibleNavItems = isAuthenticated
     ? NAV_ITEMS.filter((navItem) => navItem.label !== "Courses")
     : NAV_ITEMS;
+  const navItemsWithResolvedHref = useMemo(
+    () =>
+      visibleNavItems.map((navItem) => ({
+        ...navItem,
+        resolvedHref: buildHrefWithOptionalQuery(
+          navItem.href,
+          currentSearchQuery,
+          currentPathSupportsSearch && isSearchEnabledForPath(navItem.href),
+        ),
+      })),
+    [visibleNavItems, currentSearchQuery, currentPathSupportsSearch],
+  );
 
   return (
     <>
@@ -57,34 +181,19 @@ export default function TopNav() {
             <BrandLogo compact />
           </div>
 
-          {/* Search — center, flex-1 */}
-          <div className="hidden flex-1 sm:block">
-            <label
-              className="mx-auto flex max-w-md items-center gap-2 rounded-full border px-3 py-2"
-              style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}
-            >
-              <Search className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
-              <input
-                aria-label="Tìm kiếm khóa học"
-                placeholder="Tìm kiếm khóa học..."
-                readOnly
-                tabIndex={-1}
-                value=""
-                className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
-                style={{ color: "var(--text-primary)" }}
-              />
-            </label>
-          </div>
+          <Suspense fallback={<div className="hidden flex-1 sm:block" />}>
+            <TopNavSearch pathname={pathname} />
+          </Suspense>
 
           {/* Desktop nav links */}
           <nav className="ml-auto hidden items-center gap-1 md:flex">
-            {visibleNavItems.map((navItem) => {
-              const { href, label, icon: Icon } = navItem;
+            {navItemsWithResolvedHref.map((navItem) => {
+              const { href, label, icon: Icon, resolvedHref } = navItem;
               const active = isNavItemActive(navItem);
               return (
                 <Link
                   key={href}
-                  href={href}
+                  href={resolvedHref}
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -175,13 +284,13 @@ export default function TopNav() {
             className="md:hidden border-t px-4 py-3 space-y-1"
             style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
           >
-            {visibleNavItems.map((navItem) => {
-              const { href, label, icon: Icon } = navItem;
+            {navItemsWithResolvedHref.map((navItem) => {
+              const { href, label, icon: Icon, resolvedHref } = navItem;
               const active = isNavItemActive(navItem);
               return (
                 <Link
                   key={href}
-                  href={href}
+                  href={resolvedHref}
                   onClick={() => setMobileOpen(false)}
                   aria-current={active ? "page" : undefined}
                   className={cn(
