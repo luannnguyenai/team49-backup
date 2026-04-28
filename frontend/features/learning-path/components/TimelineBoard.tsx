@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, Settings2 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDurationFromHours } from "../lib/duration";
 import { buildCurrentWeekPlan, computeRecommendedNext } from "../presenters";
@@ -15,15 +15,11 @@ function courseTitleParts(title: string): { code: string | null; title: string }
 export default function TimelineBoard() {
   const items = useLearningPathStore((s) => s.items);
   const profile = useLearningPathStore((s) => s.profile);
-  const setProfile = useLearningPathStore((s) => s.setProfile);
   const selectItem = useLearningPathStore((s) => s.selectItem);
-  const weeklyHours = profile?.weeklyHours ?? 5;
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [draftWeeklyHours, setDraftWeeklyHours] = useState(weeklyHours);
 
   const weekPlan = useMemo(
-    () => buildCurrentWeekPlan(items, weeklyHours),
-    [items, weeklyHours],
+    () => buildCurrentWeekPlan(items, profile?.weeklyHours ?? null),
+    [items, profile?.weeklyHours],
   );
   const recommendedId = useMemo(() => computeRecommendedNext(items), [items]);
   const firstLectureKey = weekPlan.courses[0]?.lectures[0]?.key ?? null;
@@ -34,21 +30,6 @@ export default function TimelineBoard() {
   useEffect(() => {
     setExpandedLectures(new Set(firstLectureKey ? [firstLectureKey] : []));
   }, [firstLectureKey]);
-
-  useEffect(() => {
-    setDraftWeeklyHours(weeklyHours);
-  }, [weeklyHours]);
-
-  const applyWeeklyHours = () => {
-    if (!profile) return;
-    const nextWeeklyHours = Math.min(40, Math.max(1, Math.round(draftWeeklyHours)));
-    setProfile({
-      ...profile,
-      weeklyHours: nextWeeklyHours,
-      pacingHash: `weekly:${nextWeeklyHours}`,
-    });
-    setSettingsOpen(false);
-  };
 
   const toggleLecture = (lectureKey: string) => {
     setExpandedLectures((current) => {
@@ -100,85 +81,14 @@ export default function TimelineBoard() {
               Đã ẩn phần skip, đã hoàn thành và intro optional.
             </p>
           </div>
-          <div className="relative text-sm sm:text-right" style={{ color: "var(--text-secondary)" }}>
-            <button
-              type="button"
-              onClick={() => setSettingsOpen((open) => !open)}
-              className="group rounded-2xl px-3 py-2 text-left transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/30 sm:text-right"
-              aria-expanded={settingsOpen}
-              aria-label="Weekly time settings"
-            >
-              <span className="inline-flex items-center gap-2">
-                <span>
-                  <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                    {formatDurationFromHours(weekPlan.total_hours) ?? "0 phút"}
-                  </span>{" "}
-                  / {formatDurationFromHours(weeklyHours) ?? "5 giờ"}
-                </span>
-                <Settings2 className="h-4 w-4 text-slate-400 transition group-hover:text-primary-600" />
-              </span>
-              <span className="mt-0.5 block">{weekPlan.learning_units.length} bài trong tuần này</span>
-            </button>
-
-            {settingsOpen ? (
-              <div
-                className="absolute right-0 top-full z-20 mt-2 w-72 rounded-2xl border bg-white p-4 text-left shadow-xl"
-                style={{ borderColor: "var(--border)" }}
-              >
-                <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-                  Weekly time budget
-                </p>
-                <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                  Timeline sẽ tự gom các lecture tiếp theo theo số giờ này.
-                </p>
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <input
-                    type="range"
-                    min={1}
-                    max={40}
-                    value={draftWeeklyHours}
-                    onChange={(event) => setDraftWeeklyHours(Number(event.target.value))}
-                    className="w-full accent-primary-600"
-                    aria-label="Weekly hours"
-                  />
-                  <span className="w-16 rounded-lg bg-blue-50 px-2 py-1 text-center text-sm font-bold text-primary-600">
-                    {Math.round(draftWeeklyHours)}h
-                  </span>
-                </div>
-                <input
-                  type="number"
-                  min={1}
-                  max={40}
-                  value={draftWeeklyHours}
-                  onChange={(event) => setDraftWeeklyHours(Number(event.target.value))}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") applyWeeklyHours();
-                  }}
-                  className="mt-3 w-full rounded-xl border px-3 py-2 text-sm font-medium outline-none focus:ring-2 focus:ring-primary-500/30"
-                  style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
-                  aria-label="Weekly hours input"
-                />
-                <div className="mt-4 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDraftWeeklyHours(weeklyHours);
-                      setSettingsOpen(false);
-                    }}
-                    className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={applyWeeklyHours}
-                    className="rounded-lg bg-primary-600 px-3 py-2 text-sm font-semibold text-white hover:bg-primary-700"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-            ) : null}
+          <div className="text-sm sm:text-right" style={{ color: "var(--text-secondary)" }}>
+            <p>
+              <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
+                {formatDurationFromHours(weekPlan.total_hours) ?? "0 phút"}
+              </span>{" "}
+              / {formatDurationFromHours(profile?.weeklyHours ?? 5) ?? "5 giờ"}
+            </p>
+            <p>{weekPlan.learning_units.length} bài trong tuần này</p>
           </div>
         </div>
 
