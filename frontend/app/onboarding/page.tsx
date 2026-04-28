@@ -24,6 +24,7 @@ import StepExperienceLevel from "@/components/onboarding/StepExperienceLevel";
 import StepPriorKnowledgeInput from "@/components/onboarding/StepPriorKnowledgeInput";
 import StepKnownTopicsFiltered from "@/components/onboarding/StepKnownTopicsFiltered";
 import StepAssessmentDepth from "@/components/onboarding/StepAssessmentDepth";
+import { buildPostOnboardingHref } from "@/components/onboarding/onboardingNavigation";
 
 import { canonicalSectionApi } from "@/lib/api";
 import {
@@ -167,13 +168,12 @@ function OnboardingPageInner() {
         }
         writePendingCanonicalAssessment(canonicalContext);
 
-        if (canonicalContext.canonicalUnitIds.length > 0) {
-          router.push(
-            next ? `/assessment?next=${encodeURIComponent(next)}` : "/assessment"
-          );
-        } else {
-          router.push(next ?? "/dashboard");
-        }
+        router.push(
+          buildPostOnboardingHref({
+            hasAssessmentUnits: canonicalContext.canonicalUnitIds.length > 0,
+            requestedNext: next,
+          }),
+        );
       } catch {
         /* error shown from store */
       }
