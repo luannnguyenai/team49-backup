@@ -1,5 +1,7 @@
 import { api } from "@/lib/api";
 import type {
+  GeneratePathRequest,
+  GeneratePathResponse,
   LearningPathResponse,
   PathStatus,
   TimelineResponse,
@@ -9,6 +11,9 @@ import type {
 export const learningPathApi = {
   getLearningPath: () =>
     api.get<LearningPathResponse>("/api/learning-path").then((r) => r.data),
+
+  generatePath: (body: GeneratePathRequest) =>
+    api.post<GeneratePathResponse>("/api/learning-path/generate", body).then((r) => r.data),
 
   getTimeline: () =>
     api.get<TimelineResponse>("/api/learning-path/timeline").then((r) => r.data),

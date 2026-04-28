@@ -1,6 +1,11 @@
-import type { Edge, Node } from "reactflow";
 import type { PathItemResponse, TimelineResponse, WeekEntry } from "@/types";
-import { isVisibleInTimeline } from "./lib/status";
+import {
+  isDoneForPlannerProgress,
+  isIncludedInMainPath,
+  isOptionalIntroItem,
+  isVisibleInMainPath,
+  isVisibleInTimeline,
+} from "./lib/status";
 
 export interface SectionSummary {
   key: string;
@@ -23,10 +28,47 @@ export interface SubtopicNodeData {
 
 export type LearningPathNodeData = TopicNodeData | SubtopicNodeData;
 
+export interface FlowNode<TData = LearningPathNodeData> {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: TData;
+}
+
+export interface FlowEdge {
+  id: string;
+  source: string;
+  target: string;
+  type?: string;
+  animated?: boolean;
+}
+
 export interface FlowModel {
-  nodes: Node<LearningPathNodeData>[];
-  edges: Edge[];
+  nodes: FlowNode[];
+  edges: FlowEdge[];
   sectionSummaries: SectionSummary[];
+}
+
+export interface TimelineLectureGroup {
+  key: string;
+  title: string;
+  learning_units: PathItemResponse[];
+  total_hours: number;
+}
+
+export interface TimelineCourseGroup {
+  key: string;
+  course_id: string | null;
+  course_title: string;
+  lectures: TimelineLectureGroup[];
+  total_hours: number;
+}
+
+export interface CurrentWeekPlan {
+  week: number;
+  learning_units: PathItemResponse[];
+  total_hours: number;
+  courses: TimelineCourseGroup[];
 }
 
 function slugify(value: string): string {
@@ -42,13 +84,56 @@ export function sortByOrder(items: PathItemResponse[]): PathItemResponse[] {
   return [...items].sort((a, b) => a.order_index - b.order_index);
 }
 
+function extractLectureNumber(title: string | null | undefined): number | null {
+  const match = title?.match(/\blecture\s+(\d+)\b/i);
+  if (!match) return null;
+  return Number.parseInt(match[1], 10);
+}
+
+function courseKey(item: PathItemResponse): string {
+  return item.course_id || item.course_title || "";
+}
+
+export function sortByPlannerDisplayOrder(
+  items: PathItemResponse[],
+): PathItemResponse[] {
+  const firstCourseOrder = new Map<string, number>();
+  for (const item of sortByOrder(items)) {
+    const key = courseKey(item);
+    if (!firstCourseOrder.has(key)) {
+      firstCourseOrder.set(key, item.order_index);
+    }
+  }
+
+  return [...items].sort((a, b) => {
+    const courseDiff =
+      (firstCourseOrder.get(courseKey(a)) ?? Number.MAX_SAFE_INTEGER) -
+      (firstCourseOrder.get(courseKey(b)) ?? Number.MAX_SAFE_INTEGER);
+    if (courseDiff !== 0) return courseDiff;
+
+    const aLecture = extractLectureNumber(a.section_title);
+    const bLecture = extractLectureNumber(b.section_title);
+    if (aLecture != null && bLecture != null && aLecture !== bLecture) {
+      return aLecture - bLecture;
+    }
+    if (aLecture != null && bLecture == null) return -1;
+    if (aLecture == null && bLecture != null) return 1;
+
+    return a.order_index - b.order_index;
+  });
+}
+
 export function computeRecommendedNext(items: PathItemResponse[]): string | null {
-  return sortByOrder(items).find((item) => item.status === "pending" && item.action !== "skip")?.id ?? null;
+  return sortByPlannerDisplayOrder(items).find((item) =>
+    item.status === "pending" &&
+    isVisibleInMainPath(item) &&
+    !isOptionalIntroItem(item)
+  )?.id ?? null;
 }
 
 export function groupByWeek(items: PathItemResponse[]): TimelineResponse {
   const grouped = new Map<number, PathItemResponse[]>();
-  for (const item of sortByOrder(items)) {
+  for (const item of sortByPlannerDisplayOrder(items)) {
     if (!isVisibleInTimeline(item)) continue;
     const week = item.week_number ?? 1;
     grouped.set(week, [...(grouped.get(week) ?? []), item]);
@@ -67,29 +152,108 @@ export function groupByWeek(items: PathItemResponse[]): TimelineResponse {
   return { total_weeks: entries.length, items: entries };
 }
 
+export function normalizeTimelineOrder(timeline: TimelineResponse): TimelineResponse {
+  return {
+    ...timeline,
+    items: timeline.items
+      .map((week) => ({
+        ...week,
+        learning_units: sortByPlannerDisplayOrder(week.learning_units).filter(isVisibleInTimeline),
+      }))
+      .sort((a, b) => a.week - b.week),
+  };
+}
+
+function roundHours(hours: number): number {
+  return Number(hours.toFixed(4));
+}
+
+export function buildCurrentWeekPlan(
+  items: PathItemResponse[],
+  weeklyHours: number | null | undefined,
+): CurrentWeekPlan {
+  const budget = weeklyHours && weeklyHours > 0 ? weeklyHours : 5;
+  const candidates = sortByPlannerDisplayOrder(items).filter(
+    (item) => isVisibleInTimeline(item) && !isDoneForPlannerProgress(item),
+  );
+  const learningUnits: PathItemResponse[] = [];
+  let totalHours = 0;
+
+  for (const item of candidates) {
+    learningUnits.push(item);
+    totalHours += item.estimated_hours ?? 0;
+    if (totalHours >= budget) break;
+  }
+
+  const courses: TimelineCourseGroup[] = [];
+  const courseByKey = new Map<string, TimelineCourseGroup>();
+
+  for (const item of learningUnits) {
+    const key = courseKey(item) || "course";
+    let course = courseByKey.get(key);
+    if (!course) {
+      course = {
+        key,
+        course_id: item.course_id ?? null,
+        course_title: item.course_title || "Learning Path",
+        lectures: [],
+        total_hours: 0,
+      };
+      courseByKey.set(key, course);
+      courses.push(course);
+    }
+
+    const title = item.section_title || "Khác";
+    const lectureKey = `${key}:${slugify(title)}`;
+    let lecture = course.lectures.find((candidate) => candidate.key === lectureKey);
+    if (!lecture) {
+      lecture = {
+        key: lectureKey,
+        title,
+        learning_units: [],
+        total_hours: 0,
+      };
+      course.lectures.push(lecture);
+    }
+
+    lecture.learning_units.push(item);
+    lecture.total_hours = roundHours(lecture.total_hours + (item.estimated_hours ?? 0));
+    course.total_hours = roundHours(course.total_hours + (item.estimated_hours ?? 0));
+  }
+
+  return {
+    week: 1,
+    learning_units: learningUnits,
+    total_hours: roundHours(totalHours),
+    courses,
+  };
+}
+
 export function pathToFlow(items: PathItemResponse[]): FlowModel {
-  const ordered = sortByOrder(items);
+  const ordered = sortByOrder(items).filter(isIncludedInMainPath);
   const recommendedId = computeRecommendedNext(ordered);
   const sections: SectionSummary[] = [];
-  const sectionByTitle = new Map<string, SectionSummary>();
+  const sectionByKey = new Map<string, SectionSummary>();
 
   for (const item of ordered) {
     const title = item.section_title || "Khác";
-    let section = sectionByTitle.get(title);
+    const courseKey = item.course_id || `course-${slugify(item.course_title || "course")}`;
+    const sectionKey = `${courseKey}:${slugify(title)}`;
+    let section = sectionByKey.get(sectionKey);
     if (!section) {
       section = {
-        key: `section-${item.order_index}-${slugify(title)}`,
+        key: sectionKey,
         title,
         items: [],
       };
-      sectionByTitle.set(title, section);
+      sectionByKey.set(sectionKey, section);
       sections.push(section);
     }
     section.items.push(item);
   }
 
-  const nodes: Node<LearningPathNodeData>[] = [];
-  const edges: Edge[] = [];
+  const nodes: FlowNode[] = [];
+  const edges: FlowEdge[] = [];
 
   for (const section of sections) {
     const topicId = `topic-${section.key}`;

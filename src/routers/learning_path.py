@@ -46,6 +46,46 @@ learning_path_router = APIRouter(
 )
 
 
+def _path_item_response(
+    lp,
+    learning_unit_title: str,
+    section_title: str | None,
+    course_title: str | None,
+) -> PathItemResponse:
+    course_slug = getattr(lp, "course_slug", None)
+    unit_slug = getattr(lp, "unit_slug", None)
+    return PathItemResponse(
+        id=lp.id,
+        learning_unit_id=lp.learning_unit_id,
+        learning_unit_title=learning_unit_title,
+        section_title=section_title,
+        course_id=getattr(lp, "course_id", None),
+        course_title=course_title,
+        course_slug=course_slug,
+        unit_slug=unit_slug,
+        learn_href=f"/courses/{course_slug}/learn/{unit_slug}"
+        if course_slug and unit_slug
+        else None,
+        action=lp.action,
+        estimated_hours=lp.estimated_hours,
+        order_index=lp.order_index,
+        week_number=lp.week_number,
+        status=lp.status,
+        canonical_unit_id=lp.canonical_unit_id,
+        reason_codes=list(getattr(lp, "reason_codes", []) or []),
+        prerequisite_gap_kp_ids=list(getattr(lp, "prerequisite_gap_kp_ids", []) or []),
+        segment_policy=getattr(lp, "segment_policy", None),
+        content_type=getattr(lp, "content_type", None),
+        salience_score=getattr(lp, "salience_score", None),
+        has_quiz_items=getattr(lp, "has_quiz_items", None),
+        is_worth_learning=getattr(lp, "is_worth_learning", None),
+        override_critical_kp=bool(getattr(lp, "override_critical_kp", False)),
+        phase_tag=getattr(lp, "phase_tag", None),
+        is_locked=bool(getattr(lp, "is_locked", False)),
+        rationale_log=getattr(lp, "rationale_log", None),
+    )
+
+
 # ---------------------------------------------------------------------------
 # POST /api/learning-path/generate
 # ---------------------------------------------------------------------------
@@ -87,22 +127,8 @@ async def api_get_learning_path(
     rows = await get_learning_path(db, user.id)
 
     items: list[PathItemResponse] = [
-        PathItemResponse(
-            id=lp.id,
-            learning_unit_id=lp.learning_unit_id,
-            learning_unit_title=learning_unit_title,
-            section_title=section_title,
-            action=lp.action,
-            estimated_hours=lp.estimated_hours,
-            order_index=lp.order_index,
-            week_number=lp.week_number,
-            status=lp.status,
-            canonical_unit_id=lp.canonical_unit_id,
-            phase_tag=getattr(lp, "phase_tag", None),
-            is_locked=getattr(lp, "is_locked", False),
-            rationale_log=getattr(lp, "rationale_log", None),
-        )
-        for lp, learning_unit_title, section_title in rows
+        _path_item_response(lp, learning_unit_title, section_title, course_title)
+        for lp, learning_unit_title, section_title, course_title in rows
     ]
 
     from src.models.learning import PathStatus
@@ -139,22 +165,8 @@ async def api_get_timeline(
     for week_num in sorted(grouped.keys()):
         rows = grouped[week_num]
         week_items: list[PathItemResponse] = [
-            PathItemResponse(
-                id=lp.id,
-                learning_unit_id=lp.learning_unit_id,
-                learning_unit_title=learning_unit_title,
-                section_title=section_title,
-                action=lp.action,
-                estimated_hours=lp.estimated_hours,
-                order_index=lp.order_index,
-                week_number=lp.week_number,
-                status=lp.status,
-                canonical_unit_id=lp.canonical_unit_id,
-                phase_tag=getattr(lp, "phase_tag", None),
-                is_locked=getattr(lp, "is_locked", False),
-                rationale_log=getattr(lp, "rationale_log", None),
-            )
-            for lp, learning_unit_title, section_title in rows
+            _path_item_response(lp, learning_unit_title, section_title, course_title)
+            for lp, learning_unit_title, section_title, course_title in rows
         ]
         total_hours = round(sum(i.estimated_hours or 0.0 for i in week_items), 4)
         week_entries.append(

@@ -591,6 +591,8 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   );
   const quizProgressRef = useRef<InlineQuizProgress>({});
   const lastWatchSyncRef = useRef(0);
+  const handledCheckpointHashRef = useRef<string | null>(null);
+  const handledUnitSeekRef = useRef<string | null>(null);
 
   useEffect(() => {
     quizProgressRef.current = inlineQuizProgress;
@@ -894,6 +896,34 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
     [resumeInlineQuiz],
   );
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleCheckpointHash = () => {
+      const hash = window.location.hash;
+      const checkpoint =
+        hash === "#midpoint-quiz"
+          ? "midpoint"
+          : hash === "#end-quiz"
+            ? "end"
+            : null;
+      if (!checkpoint) return;
+      if (handledCheckpointHashRef.current === hash) return;
+
+      const status = checkpointStatus.find((entry) => entry.checkpoint === checkpoint);
+      if (!status || status.completed || (!status.active && !status.available)) return;
+
+      handledCheckpointHashRef.current = hash;
+      void startCheckpointQuiz(checkpoint);
+    };
+
+    handleCheckpointHash();
+    window.addEventListener("hashchange", handleCheckpointHash);
+    return () => {
+      window.removeEventListener("hashchange", handleCheckpointHash);
+    };
+  }, [checkpointStatus, startCheckpointQuiz]);
+
   const submitInlineQuizAnswer = useCallback(async () => {
     if (!quizSession || !activeQuizQuestion || quizSession.selectedAnswer === null) return;
     try {
@@ -994,11 +1024,54 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
     }
   }, [quizSession, syncInlineQuizProgress]);
 
+  const syncVideoDuration = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const nextDuration = video.duration;
+    if (Number.isFinite(nextDuration) && nextDuration > 0) {
+      setDuration(nextDuration);
+    }
+  }, []);
+
   const handleSeek = useCallback((seconds: number) => {
     if (!videoRef.current) return;
     videoRef.current.currentTime = seconds;
     setCurrentTime(seconds);
   }, []);
+
+  const targetUnitStartSeconds =
+    typeof unit.start_seconds === "number" &&
+    Number.isFinite(unit.start_seconds) &&
+    unit.start_seconds > 0
+      ? unit.start_seconds
+      : null;
+
+  useEffect(() => {
+    if (targetUnitStartSeconds == null) return;
+
+    const seekKey = `${unit.id}:${targetUnitStartSeconds}`;
+    if (handledUnitSeekRef.current === seekKey) return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    const seekToTargetUnit = () => {
+      video.currentTime = targetUnitStartSeconds;
+      setCurrentTime(targetUnitStartSeconds);
+      handledUnitSeekRef.current = seekKey;
+      syncVideoDuration();
+    };
+
+    if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      seekToTargetUnit();
+      return;
+    }
+
+    video.addEventListener("loadedmetadata", seekToTargetUnit, { once: true });
+    return () => {
+      video.removeEventListener("loadedmetadata", seekToTargetUnit);
+    };
+  }, [syncVideoDuration, targetUnitStartSeconds, unit.id]);
 
   const chapterMarkers = useMemo<VideoProgressRailMarker[]>(() => {
     if (!duration) return [];
@@ -1187,12 +1260,15 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                     className="aspect-video w-full object-contain"
                     crossOrigin="anonymous"
                     src={content.video_url}
+                    onLoadedMetadata={syncVideoDuration}
+                    onCanPlay={syncVideoDuration}
                     onTimeUpdate={() => {
-                      if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
+                      if (videoRef.current) {
+                        setCurrentTime(videoRef.current.currentTime);
+                        if (!duration) syncVideoDuration();
+                      }
                     }}
-                    onDurationChange={() => {
-                      if (videoRef.current) setDuration(videoRef.current.duration || 0);
-                    }}
+                    onDurationChange={syncVideoDuration}
                     onEnded={() => {
                       const video = videoRef.current;
                       if (!video) return;

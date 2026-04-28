@@ -2,7 +2,9 @@
 
 import {
   type ComponentPropsWithoutRef,
+  type CSSProperties,
   type ElementType,
+  type Ref,
   useEffect,
   useRef,
   useState,
@@ -94,19 +96,27 @@ export default function ScrollReveal<T extends ElementType = "div">({
     return () => observer.disconnect();
   }, [reducedMotion]);
 
+  const componentProps = {
+    ...props,
+    ref: ref as Ref<HTMLElement>,
+    className: cn(
+      "landing-reveal",
+      isVisible ? "landing-reveal-visible" : "landing-reveal-hidden",
+      direction === "down" ? "landing-reveal-from-bottom" : "landing-reveal-from-top",
+      className,
+    ),
+    style: {
+      transitionDelay: `${delayMs}ms`,
+    } satisfies CSSProperties,
+  } as ComponentPropsWithoutRef<T> & {
+    ref: Ref<HTMLElement>;
+    className: string;
+    style: CSSProperties;
+  };
+
   return (
     <Component
-      ref={ref}
-      className={cn(
-        "landing-reveal",
-        isVisible ? "landing-reveal-visible" : "landing-reveal-hidden",
-        direction === "down" ? "landing-reveal-from-bottom" : "landing-reveal-from-top",
-        className,
-      )}
-      style={{
-        transitionDelay: `${delayMs}ms`,
-      }}
-      {...props}
+      {...componentProps}
     >
       {children}
     </Component>

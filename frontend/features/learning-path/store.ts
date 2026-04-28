@@ -1,8 +1,17 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { learningSessionApi } from "@/lib/api";
 import { learningPathApi } from "./api";
+import { isDoneForPlannerProgress, isIncludedInMainPath } from "./lib/status";
 import type { LearningPathResponse, PathItemResponse, PathStatus, TimelineResponse } from "@/types";
+import type { PlayerProgressSnapshot } from "./player-insights";
+import type { LearningProfile } from "./profile";
 
 interface LearningPathState {
+  profile: LearningProfile | null;
+  generatedTopologyHash: string | null;
+  previousProfile: LearningProfile | null;
+  currentProgress: PlayerProgressSnapshot | null;
   items: PathItemResponse[];
   summary: Omit<LearningPathResponse, "items"> | null;
   timeline: TimelineResponse | null;
@@ -11,6 +20,8 @@ interface LearningPathState {
   selectedItemId: string | null;
   selectedSectionKey: string | null;
   updatingStatusById: Record<string, boolean>;
+  setProfile: (profile: LearningProfile | null) => void;
+  setCurrentProgress: (snapshot: PlayerProgressSnapshot | null) => void;
   loadPath: () => Promise<void>;
   selectItem: (id: string) => void;
   selectSection: (sectionKey: string) => void;
@@ -24,74 +35,172 @@ function toErrorMessage(error: unknown): string {
 }
 
 function recomputeSummary(items: PathItemResponse[]): Omit<LearningPathResponse, "items"> {
+  const mainPathItems = items.filter(isIncludedInMainPath);
   return {
-    total_units: items.length,
-    completed_units: items.filter((item) => item.status === "completed").length,
-    in_progress_units: items.filter((item) => item.status === "in_progress").length,
+    total_units: mainPathItems.length,
+    completed_units: mainPathItems.filter(isDoneForPlannerProgress).length,
+    in_progress_units: mainPathItems.filter((item) => item.status === "in_progress").length,
   };
 }
 
-export const useLearningPathStore = create<LearningPathState>((set, get) => ({
-  items: [],
-  summary: null,
-  timeline: null,
-  loading: false,
-  error: null,
-  selectedItemId: null,
-  selectedSectionKey: null,
-  updatingStatusById: {},
+function emptyLearningPath(): LearningPathResponse {
+  return {
+    total_units: 0,
+    completed_units: 0,
+    in_progress_units: 0,
+    items: [],
+  };
+}
 
-  loadPath: async () => {
-    set({ loading: true, error: null });
-    try {
-      const [path, timeline] = await Promise.all([
-        learningPathApi.getLearningPath(),
-        learningPathApi.getTimeline().catch(() => null),
-      ]);
-      set({
-        items: path.items,
-        summary: {
-          total_units: path.total_units,
-          completed_units: path.completed_units,
-          in_progress_units: path.in_progress_units,
-        },
-        timeline,
-        loading: false,
-        error: null,
-      });
-    } catch (error) {
-      set({ loading: false, error: toErrorMessage(error) });
-    }
-  },
+function getHttpStatus(error: unknown): number | null {
+  if (!error || typeof error !== "object" || !("response" in error)) return null;
+  const response = (error as { response?: { status?: unknown } }).response;
+  return typeof response?.status === "number" ? response.status : null;
+}
 
-  selectItem: (id) => set({ selectedItemId: id, selectedSectionKey: null }),
-  selectSection: (sectionKey) => set({ selectedSectionKey: sectionKey, selectedItemId: null }),
-  closeDrawer: () => set({ selectedItemId: null, selectedSectionKey: null }),
+function toNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
 
-  updateStatus: async (pathId, status) => {
-    const previousItems = get().items;
-    const nextItems = previousItems.map((item) =>
-      item.id === pathId ? { ...item, status } : item,
-    );
-    set((state) => ({
-      items: nextItems,
-      summary: recomputeSummary(nextItems),
-      updatingStatusById: { ...state.updatingStatusById, [pathId]: true },
+function toBoolean(value: unknown): boolean | null {
+  return typeof value === "boolean" ? value : null;
+}
+
+function toCanonicalCourseIds(courseIds: string[]): string[] {
+  return courseIds.map((courseId) => courseId.trim()).filter(Boolean);
+}
+
+function toPlayerProgressSnapshot(
+  learningUnitId: string | null | undefined,
+  progress: Record<string, unknown> | null | undefined,
+): PlayerProgressSnapshot | null {
+  if (!learningUnitId || !progress) return null;
+  return {
+    learning_unit_id: learningUnitId,
+    video_progress_s: toNumber(progress.video_progress_s),
+    watch_percent: toNumber(progress.watch_percent),
+    video_finished: toBoolean(progress.video_finished),
+    inline_quiz: (progress.inline_quiz as PlayerProgressSnapshot["inline_quiz"]) ?? null,
+    review_due_count: toNumber(progress.review_due_count),
+    mastery_stale: toBoolean(progress.mastery_stale),
+    has_end_quiz: toBoolean(progress.has_end_quiz),
+  };
+}
+
+export const useLearningPathStore = create<LearningPathState>()(
+  persist(
+    (set, get) => ({
+      profile: null,
+      generatedTopologyHash: null,
+      previousProfile: null,
+      currentProgress: null,
+      items: [],
+      summary: null,
+      timeline: null,
+      loading: false,
       error: null,
-    }));
+      selectedItemId: null,
+      selectedSectionKey: null,
+      updatingStatusById: {},
 
-    try {
-      await learningPathApi.updatePathStatus(pathId, status);
-      set((state) => ({
-        updatingStatusById: { ...state.updatingStatusById, [pathId]: false },
-      }));
-    } catch (error) {
-      set((state) => ({
-        items: previousItems,
-        summary: recomputeSummary(previousItems),
-        updatingStatusById: { ...state.updatingStatusById, [pathId]: false },
-        error: toErrorMessage(error),
-      }));
-    }
-  },
-}));
+      setProfile: (profile) =>
+        set((state) => ({
+          profile,
+          previousProfile: state.profile,
+          generatedTopologyHash: profile ? state.generatedTopologyHash : null,
+        })),
+
+      setCurrentProgress: (snapshot) => set({ currentProgress: snapshot }),
+
+      loadPath: async () => {
+        set({ loading: true, error: null });
+        try {
+          const profile = get().profile;
+          let path: LearningPathResponse;
+          try {
+            path = await learningPathApi.getLearningPath();
+          } catch (error) {
+            if (!profile || getHttpStatus(error) !== 404) throw error;
+            path = emptyLearningPath();
+          }
+          const generatedTopologyHash = get().generatedTopologyHash;
+
+          const shouldGenerate =
+            profile &&
+            (path.items.length === 0 ||
+              (generatedTopologyHash !== null && generatedTopologyHash !== profile.topologyHash));
+
+          if (profile && shouldGenerate) {
+            const generated = await learningPathApi.generatePath({
+              desired_section_ids: [],
+              selected_course_ids: toCanonicalCourseIds(profile.selectedCourseIds),
+            });
+            path = {
+              total_units: generated.total_units,
+              completed_units: 0,
+              in_progress_units: 0,
+              items: generated.items,
+            };
+          }
+
+          const [timeline, resume] = await Promise.all([
+            learningPathApi.getTimeline().catch(() => null),
+            learningSessionApi.resume().catch(() => null),
+          ]);
+          set({
+            items: path.items,
+            summary: recomputeSummary(path.items),
+            timeline,
+            currentProgress: toPlayerProgressSnapshot(
+              resume?.current_unit_id,
+              resume?.current_progress,
+            ),
+            generatedTopologyHash: get().profile?.topologyHash ?? null,
+            loading: false,
+            error: null,
+          });
+        } catch (error) {
+          set({ loading: false, error: toErrorMessage(error) });
+        }
+      },
+
+      selectItem: (id) => set({ selectedItemId: id, selectedSectionKey: null }),
+      selectSection: (sectionKey) => set({ selectedSectionKey: sectionKey, selectedItemId: null }),
+      closeDrawer: () => set({ selectedItemId: null, selectedSectionKey: null }),
+
+      updateStatus: async (pathId, status) => {
+        const previousItems = get().items;
+        const nextItems = previousItems.map((item) =>
+          item.id === pathId ? { ...item, status } : item,
+        );
+        set((state) => ({
+          items: nextItems,
+          summary: recomputeSummary(nextItems),
+          updatingStatusById: { ...state.updatingStatusById, [pathId]: true },
+          error: null,
+        }));
+
+        try {
+          await learningPathApi.updatePathStatus(pathId, status);
+          set((state) => ({
+            updatingStatusById: { ...state.updatingStatusById, [pathId]: false },
+          }));
+        } catch (error) {
+          set((state) => ({
+            items: previousItems,
+            summary: recomputeSummary(previousItems),
+            updatingStatusById: { ...state.updatingStatusById, [pathId]: false },
+            error: toErrorMessage(error),
+          }));
+        }
+      },
+    }),
+    {
+      name: "learn:path-profile",
+      partialize: (state) => ({
+        profile: state.profile,
+        generatedTopologyHash: state.generatedTopologyHash,
+      }),
+    },
+  ),
+);

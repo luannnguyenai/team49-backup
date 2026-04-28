@@ -73,10 +73,12 @@ function UnitCard({ item }: { item: PathItem }) {
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center gap-2">
           {item.is_locked && (
-            <Lock
-              className="h-4 w-4 shrink-0 text-slate-400"
-              title="Hoàn thành Phase A trước"
-            />
+            <span title="Hoàn thành Phase A trước">
+              <Lock
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0 text-slate-400"
+              />
+            </span>
           )}
           <span
             className="truncate text-sm font-semibold"

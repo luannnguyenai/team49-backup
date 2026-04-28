@@ -121,8 +121,8 @@ class Course(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     hero_badge: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     primary_subject: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    canonical_course_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
-    course_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    canonical_course_id: Mapped[Optional[str]] = mapped_column(String(80), nullable=True, index=True)
+    course_config: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     overview: Mapped[Optional["CourseOverview"]] = relationship(
         "CourseOverview",
@@ -273,17 +273,17 @@ class LearningUnit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default=LearningUnitStatus.metadata_partial.value,
     )
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    content_source_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    content_body: Mapped[str | None] = mapped_column(Text, nullable=True)
-    estimated_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    canonical_unit_id: Mapped[str | None] = mapped_column(String(220), nullable=True, index=True)
+    content_source_type: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    content_body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    estimated_minutes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    canonical_unit_id: Mapped[Optional[str]] = mapped_column(String(220), nullable=True, index=True)
     has_quiz_items: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
         default=False,
         server_default="false",
     )
-    salience_decision: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    salience_decision: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
     entry_mode: Mapped[LearningUnitEntryMode] = mapped_column(
         Enum(LearningUnitEntryMode, name="learning_unit_entry_mode_enum"),
         nullable=False,

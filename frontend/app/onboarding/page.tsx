@@ -39,6 +39,8 @@ import {
 } from "@/lib/canonical-assessment-session";
 import { onboardingSchema, type OnboardingFormData } from "@/lib/onboarding-schema";
 import { cn } from "@/lib/utils";
+import { onboardingToLearningProfile } from "@/features/learning-path/profile";
+import { useLearningPathStore } from "@/features/learning-path/store";
 import { useAuthStore } from "@/stores/authStore";
 import { useOnboardingStore, type ExperienceLevel } from "@/stores/onboardingStore";
 import type { CourseSectionDetail } from "@/types";
@@ -155,6 +157,15 @@ function OnboardingPageInner() {
           known_unit_ids: knownUnitIds,
           selected_course_ids: [],
         });
+        if (goalIds[0]) {
+          useLearningPathStore.getState().setProfile(
+            onboardingToLearningProfile({
+              selected_path_key: goalIds[0],
+              available_hours_per_week: data.available_hours_per_week,
+              preferred_method: data.preferred_method,
+            }),
+          );
+        }
         writePendingCanonicalAssessment(canonicalContext);
 
         router.push(

@@ -39,17 +39,25 @@ def test_path_item_response_allows_canonical_unit_without_legacy_topic_fields():
         week_number=None,
         status=PathStatus.pending,
         canonical_unit_id="local::lecture01::seg1",
+        reason_codes=["critical_kp", "quiz_available"],
+        segment_policy="core",
+        content_type="concept",
+        has_quiz_items=True,
+        override_critical_kp=True,
     )
 
     assert item.learning_unit_title == "Unit 1"
     assert item.section_title == "Section 1"
     assert item.canonical_unit_id == "local::lecture01::seg1"
+    assert item.reason_codes == ["critical_kp", "quiz_available"]
+    assert item.segment_policy == "core"
 
 
 @pytest.mark.asyncio
 async def test_get_learning_path_reads_latest_canonical_plan(monkeypatch):
     user_id = uuid4()
     unit_id = uuid4()
+    course_id = uuid4()
 
     class FakePlannerAuditRepository:
         def __init__(self, db):
@@ -66,6 +74,11 @@ async def test_get_learning_path_reads_latest_canonical_plan(monkeypatch):
                         "action": "deep_practice",
                         "estimated_hours": 0.5,
                         "order_index": 2,
+                        "reason_codes": ["critical_kp"],
+                        "segment_policy": "core",
+                        "content_type": "concept",
+                        "has_quiz_items": True,
+                        "override_critical_kp": True,
                     }
                 ]
             )
@@ -80,9 +93,13 @@ async def test_get_learning_path_reads_latest_canonical_plan(monkeypatch):
                 unit_id: SimpleNamespace(
                     id=unit_id,
                     title="Convolution Basics",
+                    course_id=course_id,
                     section_id=uuid4(),
                 )
             }
+
+        async def get_courses_by_ids(self, course_ids):
+            return {course_id: SimpleNamespace(id=course_id, title="CS231n")}
 
         async def get_sections_by_ids(self, section_ids):
             return {section_ids[0]: SimpleNamespace(id=section_ids[0], title="CNN Section")}
@@ -96,14 +113,19 @@ async def test_get_learning_path_reads_latest_canonical_plan(monkeypatch):
 
     rows = await recommendation_engine.get_learning_path("db-session", user_id)
 
-    lp, learning_unit_title, section_title = rows[0]
+    lp, learning_unit_title, section_title, course_title = rows[0]
     assert lp.id == unit_id
     assert lp.learning_unit_id == unit_id
     assert lp.canonical_unit_id == "cs231n::u1"
     assert lp.action == PathAction.deep_practice
     assert lp.status == PathStatus.completed
+    assert lp.reason_codes == ["critical_kp"]
+    assert lp.segment_policy == "core"
+    assert lp.has_quiz_items is True
+    assert lp.override_critical_kp is True
     assert learning_unit_title == "Convolution Basics"
     assert section_title == "CNN Section"
+    assert course_title == "CS231n"
 
 
 @pytest.mark.asyncio
@@ -122,15 +144,29 @@ async def test_get_learning_path_timeline_groups_canonical_non_skip_items(monkey
                 ),
                 "Unit 1",
                 "canonical_unit",
+                "CS231n",
             ),
             (
                 SimpleNamespace(
                     action=PathAction.skip,
                     week_number=None,
                     order_index=1,
+                    segment_policy=None,
                 ),
                 "Unit 2",
                 "canonical_unit",
+                "CS231n",
+            ),
+            (
+                SimpleNamespace(
+                    action=PathAction.deep_practice,
+                    week_number=None,
+                    order_index=2,
+                    segment_policy="hidden",
+                ),
+                "Hidden logistics",
+                "canonical_unit",
+                "CS231n",
             ),
         ]
 
@@ -180,6 +216,9 @@ async def test_update_path_status_writes_progress_and_waive(monkeypatch):
                     canonical_unit_id="cs231n::u1",
                 )
             }
+
+        async def get_courses_by_ids(self, course_ids):
+            return {course_id: SimpleNamespace(id=course_id, title="CS231n")}
 
     class FakeLearningProgressRepository:
         upsert_payload = None
@@ -274,6 +313,9 @@ async def test_update_path_status_rejects_skip_without_mastery_or_skip_quiz(monk
                     canonical_unit_id="cs231n::u1",
                 )
             }
+
+        async def get_courses_by_ids(self, course_ids):
+            return {course_id: SimpleNamespace(id=course_id, title="CS231n")}
 
     class FakeLearningProgressRepository:
         touched = False

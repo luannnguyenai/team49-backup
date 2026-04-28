@@ -314,6 +314,7 @@ export interface LearningUnitSummary {
   title: string;
   lecture_title?: string | null;
   lecture_order?: number | null;
+  start_seconds?: number | null;
   unit_type: string;
   status: CourseStatus;
   entry_mode: "text" | "video" | "hybrid";
@@ -459,18 +460,47 @@ export interface PathItemResponse {
   learning_unit_id: string;
   learning_unit_title: string;
   section_title: string | null;
+  course_id?: string | null;
+  course_title?: string | null;
+  course_slug?: string | null;
+  unit_slug?: string | null;
+  learn_href?: string | null;
   action: PathAction;
   estimated_hours: number | null;
   order_index: number;
   week_number: number | null;
   status: PathStatus;
   canonical_unit_id: string | null;
+  reason_codes?: string[];
+  prerequisite_gap_kp_ids?: string[];
+  segment_policy?: "core" | "reference" | "hidden";
+  content_type?: string | null;
+  salience_score?: number | string | null;
+  has_quiz_items?: boolean;
+  is_worth_learning?: boolean | null;
+  override_critical_kp?: boolean;
+  phase_tag?: string | null;
+  is_locked?: boolean;
 }
 
 export interface LearningPathResponse {
   total_units: number;
   completed_units: number;
   in_progress_units: number;
+  items: PathItemResponse[];
+}
+
+export interface GeneratePathRequest {
+  desired_section_ids?: string[];
+  selected_course_ids?: string[];
+}
+
+export interface GeneratePathResponse {
+  generated_at: string;
+  total_units: number;
+  total_hours: number;
+  required_hours_per_week: number | null;
+  warnings: string[];
   items: PathItemResponse[];
 }
 

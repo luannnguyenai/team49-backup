@@ -118,6 +118,7 @@ const LECTURE_1_UNIT: LearningUnitResponse = {
     title: "Lecture 1: Introduction",
     lecture_title: "Lecture 1: Introduction",
     lecture_order: 1,
+    start_seconds: null,
     unit_type: "lecture",
     status: "ready",
     entry_mode: "video",
@@ -147,6 +148,7 @@ const DISABLED_TUTOR_UNIT: LearningUnitResponse = {
     title: "Lecture 99: Placeholder",
     lecture_title: "Lecture 99: Placeholder",
     lecture_order: 99,
+    start_seconds: null,
     unit_type: "lecture",
     status: "ready",
     entry_mode: "video",
@@ -201,6 +203,7 @@ const LECTURE_2_UNIT: LearningUnitResponse = {
     title: "Lecture 2: Image Classification with Linear Classifiers",
     lecture_title: "Lecture 2: Image Classification with Linear Classifiers",
     lecture_order: 2,
+    start_seconds: null,
     unit_type: "lecture",
     status: "ready",
     entry_mode: "video",
@@ -490,6 +493,71 @@ describe("learning unit page (US3)", () => {
     await waitFor(() => {
       expect(screen.getAllByTestId("chapter-marker")).toHaveLength(2);
       expect(screen.getAllByTestId("checkpoint-marker")).toHaveLength(2);
+    });
+  });
+
+  it("syncs video duration from loaded metadata so chapter markers remain visible", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+
+    fireEvent(video!, new Event("loadedmetadata"));
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("chapter-marker")).toHaveLength(2);
+      expect(screen.getAllByText(/00:00 \/ 10:00/).length).toBeGreaterThan(0);
+    });
+  });
+
+  it("seeks to the selected canonical unit timestamp after video metadata loads", async () => {
+    const targetUnit = {
+      ...LECTURE_1_UNIT,
+      unit: {
+        ...LECTURE_1_UNIT.unit,
+        start_seconds: 300,
+      },
+    };
+
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={targetUnit}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+
+    fireEvent(video!, new Event("loadedmetadata"));
+
+    await waitFor(() => {
+      expect(video!.currentTime).toBe(300);
+      expect(screen.getAllByText(/05:00 \/ 10:00/).length).toBeGreaterThan(0);
     });
   });
 

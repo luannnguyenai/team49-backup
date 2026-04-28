@@ -41,8 +41,8 @@ export default function ViewToggle({ view, onChange }: { view: LearnView; onChan
   return (
     <div className="flex rounded-xl p-1" style={{ backgroundColor: "var(--bg-page)" }}>
       {([
-        ["graph", "Đồ thị"],
-        ["timeline", "Tuần"],
+        ["graph", "Plan"],
+        ["timeline", "Weekly"],
       ] as const).map(([key, label]) => (
         <button
           key={key}

@@ -51,6 +51,240 @@ from src.services.skip_policy_service import can_skip_unit
 # ---------------------------------------------------------------------------
 
 
+def _unit_active(unit: object | None) -> bool:
+    active_value = getattr(unit, "active", True)
+    return True if active_value is None else bool(active_value)
+
+
+def _section_flags(unit: object | None) -> set[str]:
+    flags = getattr(unit, "section_flags", None)
+    if not isinstance(flags, list):
+        return set()
+    return {str(flag).strip().lower() for flag in flags if str(flag).strip()}
+
+
+def _segment_policy(unit: object | None) -> str:
+    if not _unit_active(unit):
+        return "hidden"
+    flags = _section_flags(unit)
+    content_type = str(getattr(unit, "content_type", "") or "").strip().lower()
+    if flags.intersection({"logistics", "admin", "administrative"}) or content_type in {
+        "logistics",
+        "admin",
+        "administrative",
+    }:
+        return "hidden"
+    if "reference" in flags or content_type == "reference":
+        return "reference"
+    if getattr(unit, "is_worth_learning", None) is False:
+        return "reference"
+    return "core"
+
+
+def _high_salience(unit: object | None) -> bool:
+    raw = getattr(unit, "salience_score", None)
+    if raw is None:
+        return False
+    if isinstance(raw, (int, float)):
+        return float(raw) >= 0.75
+    value = str(raw).strip().lower()
+    if value in {"critical", "high"}:
+        return True
+    try:
+        return float(value) >= 0.75
+    except ValueError:
+        return False
+
+
+def _planner_reason_codes(
+    *,
+    action: PathAction,
+    canonical_unit: object | None,
+    has_quiz_items: bool,
+    segment_policy: str,
+) -> list[str]:
+    reason_codes: list[str] = []
+    content_type = str(getattr(canonical_unit, "content_type", "") or "").strip().lower()
+
+    if getattr(canonical_unit, "override_critical_kp", False):
+        reason_codes.append("critical_kp")
+    if _high_salience(canonical_unit):
+        reason_codes.append("high_salience")
+    if has_quiz_items:
+        reason_codes.append("quiz_available")
+    if content_type in {"prerequisite", "foundation"}:
+        reason_codes.append("required_prerequisite")
+    if action == PathAction.skip:
+        reason_codes.append("skip_by_mastery")
+    if action == PathAction.quick_review:
+        reason_codes.append("quick_review")
+    if segment_policy == "hidden":
+        reason_codes.append("hidden_logistics")
+    if segment_policy == "reference":
+        reason_codes.append("reference_only")
+
+    return reason_codes
+
+
+def _serialize_plan_item(
+    item: PathItemResponse,
+    *,
+    kp_ids: list[str],
+    mastery_lcb: float,
+) -> dict[str, object]:
+    return {
+        "learning_unit_id": str(item.learning_unit_id),
+        "canonical_unit_id": item.canonical_unit_id,
+        "course_id": str(item.course_id) if item.course_id is not None else None,
+        "course_title": item.course_title,
+        "course_slug": item.course_slug,
+        "unit_slug": item.unit_slug,
+        "learn_href": item.learn_href,
+        "action": item.action.value,
+        "estimated_hours": item.estimated_hours or 0.0,
+        "order_index": item.order_index,
+        "kp_ids": kp_ids,
+        "mastery_lcb": mastery_lcb,
+        "reason_codes": item.reason_codes,
+        "prerequisite_gap_kp_ids": item.prerequisite_gap_kp_ids,
+        "segment_policy": item.segment_policy,
+        "content_type": item.content_type,
+        "salience_score": item.salience_score,
+        "has_quiz_items": item.has_quiz_items,
+        "is_worth_learning": item.is_worth_learning,
+        "override_critical_kp": item.override_critical_kp,
+        "phase_tag": item.phase_tag,
+        "is_locked": item.is_locked,
+        "rationale_log": item.rationale_log,
+    }
+
+
+def _derive_salience_from_kp_rows(unit_kp_rows: list[object]) -> str | None:
+    weights: list[float] = []
+    for row in unit_kp_rows:
+        planner_role = str(getattr(row, "planner_role", "") or "").strip().lower()
+        coverage_level = str(getattr(row, "coverage_level", "") or "").strip().lower()
+        if planner_role not in {"", "main", "prereq", "prerequisite"}:
+            continue
+        if coverage_level == "mention":
+            continue
+        weight = getattr(row, "coverage_weight", None)
+        if isinstance(weight, (int, float)):
+            weights.append(float(weight))
+
+    if not weights:
+        return None
+    return f"{max(weights):g}"
+
+
+def _has_critical_gateway_kp(
+    unit_kp_rows: list[object],
+    kp_by_id: dict[str, object],
+) -> bool:
+    for row in unit_kp_rows:
+        planner_role = str(getattr(row, "planner_role", "") or "").strip().lower()
+        if planner_role not in {"", "main", "prereq", "prerequisite"}:
+            continue
+        kp = kp_by_id.get(str(getattr(row, "kp_id", "") or ""))
+        if kp is None:
+            continue
+        importance = str(getattr(kp, "importance_level", "") or "").strip().lower()
+        structural_role = str(getattr(kp, "structural_role", "") or "").strip().lower()
+        if importance == "critical" and structural_role == "gateway":
+            return True
+    return False
+
+
+def classify_schema_v2_unit_priority(
+    unit: object,
+    *,
+    unit_kp_rows: list[object],
+    kp_by_id: dict[str, object],
+    quiz_item_count: int,
+    action: PathAction,
+) -> SimpleNamespace:
+    """Classify a canonical unit using denormalized fields first, graph fallback second."""
+
+    segment_policy = _segment_policy(unit)
+    derived_salience = _derive_salience_from_kp_rows(unit_kp_rows)
+    salience_score = getattr(unit, "salience_score", None) or derived_salience
+    has_quiz_items = bool(getattr(unit, "has_quiz_items", False) or quiz_item_count > 0)
+    override_critical = bool(getattr(unit, "override_critical_kp", False)) or _has_critical_gateway_kp(
+        unit_kp_rows,
+        kp_by_id,
+    )
+
+    canonical_unit = SimpleNamespace(
+        content_type=getattr(unit, "content_type", None),
+        salience_score=salience_score,
+        has_quiz_items=has_quiz_items,
+        is_worth_learning=getattr(unit, "is_worth_learning", None),
+        override_critical_kp=override_critical,
+        active=getattr(unit, "active", True),
+        section_flags=getattr(unit, "section_flags", []),
+    )
+    reason_codes = _planner_reason_codes(
+        action=action,
+        canonical_unit=canonical_unit,
+        has_quiz_items=has_quiz_items,
+        segment_policy=segment_policy,
+    )
+
+    return SimpleNamespace(
+        segment_policy=segment_policy,
+        reason_codes=reason_codes,
+        has_quiz_items=has_quiz_items,
+        salience_score=str(salience_score) if salience_score is not None else None,
+        override_critical_kp=override_critical,
+    )
+
+
+def find_prerequisite_gaps(
+    *,
+    target_kp_ids: list[str],
+    prerequisite_edges: list[object],
+    mastered_kp_ids: set[str],
+    max_depth: int = 2,
+) -> list[str]:
+    """Walk prerequisite edges backwards and return unmastered KP gaps up to `max_depth`."""
+
+    parents_by_target: dict[str, list[str]] = {}
+    for edge in prerequisite_edges:
+        if getattr(edge, "active", True) is False:
+            continue
+        source = str(getattr(edge, "source_kp_id", "") or "")
+        target = str(getattr(edge, "target_kp_id", "") or "")
+        if source and target:
+            parents_by_target.setdefault(target, []).append(source)
+
+    gaps: list[str] = []
+    seen = set(target_kp_ids)
+    frontier = [(kp_id, 0) for kp_id in target_kp_ids]
+    while frontier:
+        current, depth = frontier.pop(0)
+        if depth >= max_depth:
+            continue
+        for parent in parents_by_target.get(current, []):
+            if parent in seen:
+                continue
+            seen.add(parent)
+            if parent not in mastered_kp_ids:
+                gaps.append(parent)
+                frontier.append((parent, depth + 1))
+
+    return gaps
+
+
+def is_mastery_evidence_backed(mastery: object | None) -> bool:
+    if mastery is None:
+        return False
+    updated_by = str(getattr(mastery, "updated_by", "") or "").strip().lower()
+    observed = int(getattr(mastery, "n_items_observed", 0) or 0)
+    if observed <= 0:
+        return False
+    return updated_by not in {"self_report", "self-report", "manual_prior"}
+
+
 async def generate_learning_path(
     db: AsyncSession,
     user: User,
@@ -69,13 +303,23 @@ async def _generate_canonical_learning_path(
     audit_repo = PlannerAuditRepository(db)
     goal_repo = GoalPreferenceRepository(db)
     goal = await goal_repo.get_by_user_id(user.id)
-    if goal is None or not goal.selected_course_ids:
-        raise ValidationError("Canonical planner requires goal_preferences.selected_course_ids.")
+    selected_course_ids = list(goal.selected_course_ids) if goal and goal.selected_course_ids else []
+    if not selected_course_ids:
+        selected_course_ids = [
+            str(course_id).strip()
+            for course_id in request.selected_course_ids
+            if str(course_id).strip()
+        ]
+    if not selected_course_ids:
+        raise ValidationError(
+            "Canonical planner requires selected_course_ids or goal_preferences.selected_course_ids."
+        )
 
-    units = await content_repo.get_linked_learning_units(goal.selected_course_ids)
+    units = await content_repo.get_linked_learning_units(selected_course_ids)
     if not units:
         raise NotFoundError("No linked canonical learning units found for selected courses.")
 
+    course_by_id = await content_repo.get_courses_by_ids([unit.course_id for unit in units])
     section_by_id = await content_repo.get_sections_by_ids([unit.section_id for unit in units])
     status_by_unit = await _get_canonical_path_status_map(
         db,
@@ -84,7 +328,13 @@ async def _generate_canonical_learning_path(
     )
     canonical_unit_ids = [unit.canonical_unit_id for unit in units if unit.canonical_unit_id]
     unit_kp_rows = await content_repo.get_unit_kp_rows(canonical_unit_ids)
+    canonical_unit_by_id = await content_repo.get_canonical_units_by_ids(canonical_unit_ids)
+    quiz_counts_by_unit_id = await content_repo.get_quiz_item_counts_by_unit_ids(canonical_unit_ids)
     kp_ids = sorted({row.kp_id for row in unit_kp_rows})
+    kp_by_id = await content_repo.get_concepts_by_ids(kp_ids)
+    unit_kp_rows_by_unit_id: dict[str, list[object]] = {}
+    for row in unit_kp_rows:
+        unit_kp_rows_by_unit_id.setdefault(row.unit_id, []).append(row)
 
     mastery_repo = LearnerMasteryKPRepository(db)
     mastery_by_kp = await mastery_repo.bulk_get_for_user(user.id, kp_ids)
@@ -98,24 +348,49 @@ async def _generate_canonical_learning_path(
         row.topic_unit_id: float(row.score_pct) for row in placement_results
     }
     has_placement = len(placement_by_unit) > 0
-    placement_skipped = goal.placement_status == "skipped"
+    placement_skipped = getattr(goal, "placement_status", None) == "skipped"
 
     generated_at = datetime.now(UTC)
     items: list[PathItemResponse] = []
-    recommended_path_json = []
     course_id_by_unit: dict[uuid.UUID, uuid.UUID] = {}
+    plan_metadata_by_unit: dict[uuid.UUID, dict[str, object]] = {}
 
     for order_index, unit in enumerate(units):
-        unit_kps = [row.kp_id for row in unit_kp_rows if row.unit_id == unit.canonical_unit_id]
+        canonical_unit = (
+            canonical_unit_by_id.get(unit.canonical_unit_id)
+            if unit.canonical_unit_id
+            else None
+        )
+        current_unit_kp_rows = unit_kp_rows_by_unit_id.get(unit.canonical_unit_id or "", [])
+        unit_kps = [row.kp_id for row in current_unit_kp_rows]
         mastery_values = [
             estimate_mastery_lcb_on_read(mastery_by_kp[kp_id], now=generated_at)
             for kp_id in unit_kps
             if kp_id in mastery_by_kp
         ]
         mastery_lcb = min(mastery_values) if mastery_values else 0.0
-        action_value = classify_unit_action(mastery_lcb)
+        decision = placement_by_unit.get(unit.id) if has_placement and not placement_skipped else None
+        if decision == "skip":
+            action_value = PathAction.skip.value
+        elif decision == "review":
+            action_value = PathAction.quick_review.value
+        else:
+            action_value = classify_unit_action(mastery_lcb)
         action = PathAction(action_value)
-        estimated_hours = 0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
+        priority = classify_schema_v2_unit_priority(
+            canonical_unit or SimpleNamespace(active=True),
+            unit_kp_rows=current_unit_kp_rows,
+            kp_by_id=kp_by_id,
+            quiz_item_count=quiz_counts_by_unit_id.get(unit.canonical_unit_id or "", 0),
+            action=action,
+        )
+        segment_policy = priority.segment_policy
+        has_quiz_items = priority.has_quiz_items
+        reason_codes = priority.reason_codes
+        if segment_policy == "hidden":
+            estimated_hours = 0.0
+        else:
+            estimated_hours = 0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
 
         # Determine Phase A/B tag and rationale
         if placement_skipped:
@@ -127,9 +402,9 @@ async def _generate_canonical_learning_path(
             is_locked = False
             rationale_log = None
         else:
-            decision = placement_by_unit.get(unit.id)
             if decision is None:
-                # Not assessed — include in Phase A as prereq
+                # Not assessed means "not verified yet", not "skip".
+                # Keep it in Phase A so the learner can still learn or verify it.
                 phase_tag = "phase_a"
                 is_locked = False
                 rationale_log = "placement_prereq_unassessed"
@@ -148,6 +423,10 @@ async def _generate_canonical_learning_path(
                 else:
                     rationale_log = f"placement_relearn_score={round(score_pct)}"
 
+        course = course_by_id.get(unit.course_id)
+        course_slug = getattr(course, "slug", None)
+        unit_slug = getattr(unit, "slug", None)
+
         item = PathItemResponse(
             id=unit.id,
             learning_unit_id=unit.id,
@@ -155,32 +434,37 @@ async def _generate_canonical_learning_path(
             section_title=(
                 section_by_id[unit.section_id].title if unit.section_id in section_by_id else None
             ),
+            course_id=unit.course_id,
+            course_title=(course.title if course is not None else None),
+            course_slug=course_slug,
+            unit_slug=unit_slug,
+            learn_href=f"/courses/{course_slug}/learn/{unit_slug}"
+            if course_slug and unit_slug
+            else None,
             action=action,
             estimated_hours=estimated_hours if estimated_hours > 0 else None,
             order_index=order_index,
             week_number=None,
             status=status_by_unit.get(unit.id, PathStatus.pending),
             canonical_unit_id=unit.canonical_unit_id,
+            reason_codes=reason_codes,
+            prerequisite_gap_kp_ids=[],
+            segment_policy=segment_policy,
+            content_type=getattr(canonical_unit, "content_type", None),
+            salience_score=priority.salience_score,
+            has_quiz_items=has_quiz_items,
+            is_worth_learning=getattr(canonical_unit, "is_worth_learning", None),
+            override_critical_kp=bool(priority.override_critical_kp),
             phase_tag=phase_tag,
             is_locked=is_locked,
             rationale_log=rationale_log,
         )
         items.append(item)
         course_id_by_unit[unit.id] = unit.course_id
-        recommended_path_json.append(
-            {
-                "learning_unit_id": str(unit.id),
-                "canonical_unit_id": unit.canonical_unit_id,
-                "action": action.value,
-                "estimated_hours": estimated_hours,
-                "order_index": order_index,
-                "kp_ids": unit_kps,
-                "mastery_lcb": mastery_lcb,
-                "phase_tag": phase_tag,
-                "is_locked": is_locked,
-                "rationale_log": rationale_log,
-            }
-        )
+        plan_metadata_by_unit[unit.id] = {
+            "kp_ids": unit_kps,
+            "mastery_lcb": mastery_lcb,
+        }
 
     # Sort: Phase A interleaved round-robin by course, then Phase B
     if has_placement and not placement_skipped:
@@ -208,13 +492,21 @@ async def _generate_canonical_learning_path(
             item.order_index = new_order
 
     total_hours = sum(item.estimated_hours or 0.0 for item in items)
+    recommended_path_json = [
+        _serialize_plan_item(
+            item,
+            kp_ids=list(plan_metadata_by_unit.get(item.learning_unit_id, {}).get("kp_ids", [])),
+            mastery_lcb=float(plan_metadata_by_unit.get(item.learning_unit_id, {}).get("mastery_lcb", 0.0)),
+        )
+        for item in items
+    ]
     plan = await audit_repo.create_plan(
         user_id=user.id,
         trigger="generate_canonical_learning_path",
         recommended_path_json=recommended_path_json,
         goal_snapshot_json={
-            "selected_course_ids": goal.selected_course_ids,
-            "derived_from_course_set_hash": goal.derived_from_course_set_hash,
+            "selected_course_ids": selected_course_ids,
+            "derived_from_course_set_hash": getattr(goal, "derived_from_course_set_hash", None),
         },
         weights_used_json={"planner": "canonical_unit_bootstrap"},
     )
@@ -266,7 +558,7 @@ async def _generate_canonical_learning_path(
 async def get_learning_path(
     db: AsyncSession,
     user_id: uuid.UUID,
-) -> list[tuple[SimpleNamespace, str, str]]:
+) -> list[tuple[SimpleNamespace, str, str, str | None]]:
     """Return the latest canonical planner path rows for the user."""
     return await _get_canonical_learning_path_rows(db, user_id)
 
@@ -279,13 +571,15 @@ async def get_learning_path(
 async def get_learning_path_timeline(
     db: AsyncSession,
     user_id: uuid.UUID,
-) -> dict[int, list[tuple[SimpleNamespace, str, str]]]:
+) -> dict[int, list[tuple[SimpleNamespace, str, str, str | None]]]:
     """Return canonical planner rows grouped by week number."""
     rows = await _get_canonical_learning_path_rows(db, user_id)
     grouped: dict[int, list] = {}
     for row in rows:
         lp = row[0]
         if lp.action == PathAction.skip:
+            continue
+        if getattr(lp, "segment_policy", None) == "hidden":
             continue
         week = lp.week_number or 1
         grouped.setdefault(week, []).append(row)
@@ -347,7 +641,7 @@ async def _phase_b_unlocked(
 async def _get_canonical_learning_path_rows(
     db: AsyncSession,
     user_id: uuid.UUID,
-) -> list[tuple[SimpleNamespace, str, str]]:
+) -> list[tuple[SimpleNamespace, str, str, str | None]]:
     audit_repo = PlannerAuditRepository(db)
     plan = await audit_repo.get_latest_plan_for_user(
         user_id,
@@ -368,6 +662,7 @@ async def _get_canonical_learning_path_rows(
 
     content_repo = CanonicalContentRepository(db)
     unit_by_id = await content_repo.get_learning_units_by_ids(learning_unit_ids)
+    course_by_id = await content_repo.get_courses_by_ids([unit.course_id for unit in unit_by_id.values()])
     section_by_id = await content_repo.get_sections_by_ids(
         [unit.section_id for unit in unit_by_id.values()]
     )
@@ -376,7 +671,7 @@ async def _get_canonical_learning_path_rows(
         user_id=user_id,
         learning_unit_ids=learning_unit_ids,
     )
-    rows: list[tuple[SimpleNamespace, str, str]] = []
+    rows: list[tuple[SimpleNamespace, str, str, str | None]] = []
     for fallback_order, item in enumerate(plan.recommended_path_json):
         if not isinstance(item, dict):
             continue
@@ -399,16 +694,43 @@ async def _get_canonical_learning_path_rows(
             week_number=item.get("week_number"),
             status=status_by_unit.get(unit_id, PathStatus.pending),
             learning_unit_id=unit_id,
+            course_id=unit.course_id if unit is not None else item.get("course_id"),
             canonical_unit_id=item.get("canonical_unit_id"),
+            reason_codes=list(item.get("reason_codes") or []),
+            prerequisite_gap_kp_ids=list(item.get("prerequisite_gap_kp_ids") or []),
+            segment_policy=item.get("segment_policy"),
+            content_type=item.get("content_type"),
+            salience_score=item.get("salience_score"),
+            has_quiz_items=item.get("has_quiz_items"),
+            is_worth_learning=item.get("is_worth_learning"),
+            override_critical_kp=bool(item.get("override_critical_kp", False)),
             phase_tag=item.get("phase_tag"),
             is_locked=bool(item.get("is_locked", False)),
             rationale_log=item.get("rationale_log"),
+            unit_slug=(
+                getattr(unit, "slug", None)
+                if unit is not None
+                else item.get("unit_slug")
+            ),
         )
         section_title = None
+        course_title = item.get("course_title")
+        course_slug = item.get("course_slug")
         if unit is not None:
             section = section_by_id.get(unit.section_id)
             section_title = section.title if section is not None else None
-        rows.append((row, unit.title if unit is not None else str(unit_id), section_title or "canonical_unit"))
+            course = course_by_id.get(unit.course_id)
+            course_title = course.title if course is not None else course_title
+            course_slug = getattr(course, "slug", None) if course is not None else course_slug
+        row.course_slug = course_slug
+        rows.append(
+            (
+                row,
+                unit.title if unit is not None else str(unit_id),
+                section_title or "canonical_unit",
+                course_title,
+            )
+        )
 
     # Fix 3: Dynamic gate — recompute is_locked for Phase B based on current Phase A mastery
     phase_a_unit_ids = [

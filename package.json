@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "motion": "^12.38.0",
     "reactflow": "^11.11.4"
   }
 }

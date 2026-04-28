@@ -30,5 +30,34 @@ export function getStatusClassName(status: PathStatus, isRecommended = false): s
 }
 
 export function isVisibleInTimeline(item: PathItemResponse): boolean {
-  return item.action !== "skip";
+  return isVisibleInMainPath(item) && !isOptionalIntroItem(item);
+}
+
+export function isIncludedInMainPath(item: PathItemResponse): boolean {
+  if (item.segment_policy === "hidden") return false;
+  if (item.segment_policy === "reference") return false;
+  return true;
+}
+
+export function isVisibleInMainPath(item: PathItemResponse): boolean {
+  if (!isIncludedInMainPath(item)) return false;
+  if (item.action === "skip") return false;
+  if (item.status === "skipped") return false;
+  return true;
+}
+
+export function isDoneForPlannerProgress(item: PathItemResponse): boolean {
+  return (
+    item.status === "completed" ||
+    item.status === "skipped" ||
+    item.action === "skip"
+  );
+}
+
+export function isOptionalIntroItem(item: PathItemResponse): boolean {
+  return Boolean(
+    item.section_title?.match(
+      /(^|\b)(lecture|lec\.?)\s*1\s*[:-]\s*(intro|introduction)\b|^intro\b|^introduction\b/i,
+    ),
+  );
 }

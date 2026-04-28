@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { learningUnitApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { LearningUnitContentById, PathStatus } from "@/types";
+import { formatDurationFromHours } from "../lib/duration";
 import { getStatusLabel } from "../lib/status";
 import { pathToFlow, sortByOrder } from "../presenters";
 import { useLearningPathStore } from "../store";
@@ -20,6 +21,10 @@ function summarizeMarkdown(markdown: string | null | undefined): string | null {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 420);
+}
+
+function learningPlayerHref(item: { learn_href?: string | null; learning_unit_id: string }): string {
+  return item.learn_href || `/learn/${item.learning_unit_id}`;
 }
 
 export default function LearningUnitDrawer() {
@@ -122,7 +127,9 @@ export default function LearningUnitDrawer() {
               </div>
               <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
                 <p style={{ color: "var(--text-muted)" }}>Tuần / thời lượng</p>
-                <p className="font-medium" style={{ color: "var(--text-primary)" }}>Tuần {selectedItem.week_number ?? 1} · {selectedItem.estimated_hours ?? 0}h</p>
+                <p className="font-medium" style={{ color: "var(--text-primary)" }}>
+                  Tuần {selectedItem.week_number ?? 1} · {formatDurationFromHours(selectedItem.estimated_hours) ?? "0 phút"}
+                </p>
               </div>
             </div>
 
@@ -184,7 +191,7 @@ export default function LearningUnitDrawer() {
             </div>
 
             <Link
-              href={`/learn/${selectedItem.learning_unit_id}`}
+              href={learningPlayerHref(selectedItem)}
               className="flex w-full items-center justify-center rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
             >
               Bắt đầu học
