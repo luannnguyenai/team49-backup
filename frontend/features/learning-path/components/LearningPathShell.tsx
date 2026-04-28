@@ -57,6 +57,7 @@ export default function LearningPathShell() {
   const loading = useLearningPathStore((s) => s.loading);
   const error = useLearningPathStore((s) => s.error);
   const loadPath = useLearningPathStore((s) => s.loadPath);
+  const setProfile = useLearningPathStore((s) => s.setProfile);
 
   useEffect(() => {
     if (profile) {
@@ -82,7 +83,13 @@ export default function LearningPathShell() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 animate-fade-in">
-      <PlannerHeader profile={profile} summary={summary} view={view} onViewChange={setView} />
+      <PlannerHeader
+        profile={profile}
+        summary={summary}
+        view={view}
+        onViewChange={setView}
+        onProfileChange={setProfile}
+      />
       <ProfileChangeBanner
         previousProfile={previousProfile}
         currentProfile={profile}
