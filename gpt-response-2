@@ -1,0 +1,601 @@
+[problem]
+Review notebook fine-tune Qwen2.5-VL for Kaggle T4, benchmark correctness, and epoch/eval strategy.
+
+[cause]
+The current notebook has improved VLM/T4 setup, but it is not yet a final benchmark-ready training notebook. It still has ordering/data/eval issues that can make Run All fail or make the result unverifiable.
+
+[fix]
+Apply the must-fix items below before final Kaggle training.
+
+---
+
+# Summary
+
+Notebook reviewed:
+
+`fine-tune-chatbot/finetune_qwen_unsloth.ipynb`
+
+Current verdict:
+
+```text
+Smoke-test train: GO only after fixing SYSTEM_PROMPT order.
+Final benchmarked train: NO-GO until verified MCQ benchmark is added.
+```
+
+---
+
+# What Claude has already improved
+
+## 1. Kept VLM path
+
+The notebook still uses:
+
+```python
+from unsloth import FastVisionModel
+model_name="unsloth/Qwen2.5-VL-3B-Instruct"
+```
+
+This is correct if self-host migration must preserve current product behavior, because the app pipeline sends video-frame images to the model.
+
+## 2. Added public Vietnamese training data
+
+New section:
+
+```text
+## 1b. Public Training Dataset (Tier 1)
+```
+
+Dataset:
+
+```python
+5CD-AI/Vietnamese-alpaca-gpt4-newformat
+PUBLIC_LIMIT = 300
+```
+
+Intent:
+
+```text
+Add small Vietnamese instruction-following exposure.
+Use public samples for train only.
+Do not contaminate domain val/test.
+```
+
+## 3. Split domain train separately from public train
+
+Current logic:
+
+```python
+domain_train = lecture-split train
+val = lecture-split val
+test = lecture-split test
+train = domain_train + public_train_samples
+```
+
+This direction is good.
+
+## 4. Switched eval/save to step-based
+
+Current config:
+
+```python
+eval_strategy="steps"
+eval_steps=50
+save_strategy="steps"
+save_steps=50
+load_best_model_at_end=True
+```
+
+This is better than eval once per epoch because the dataset is small.
+
+## 5. Added Tier 0 benchmark
+
+New section:
+
+```text
+Tier 0 Benchmark Eval: MMLU + GSM8K
+```
+
+This is useful as a general-capability regression guard.
+
+## 6. Added VLM text-only generation workaround
+
+The notebook now renders chat template first:
+
+```python
+text = tokenizer.apply_chat_template(..., tokenize=False)
+model_inputs = tokenizer.tokenizer(text, return_tensors="pt", add_special_tokens=False)
+```
+
+This is reasonable for text-only eval with a VLM processor.
+
+---
+
+# Must-fix issues
+
+## 1. Blocker: public dataset cell uses SYSTEM_PROMPT before it is defined
+
+[problem]
+The public data cell constructs messages using:
+
+```python
+{"role": "system", "content": SYSTEM_PROMPT}
+```
+
+but `SYSTEM_PROMPT` is defined in a later cell.
+
+[cause]
+Run All from a fresh kernel can fail with:
+
+```text
+NameError: name 'SYSTEM_PROMPT' is not defined
+```
+
+[fix]
+Move `SYSTEM_PROMPT` definition above the public dataset cell.
+
+Preferred structure:
+
+```text
+1. Environment
+2. Paths/load data
+3. Define SYSTEM_PROMPT
+4. Load public training data
+5. Convert domain data
+```
+
+---
+
+## 2. Blocker: unit_summary is still not included
+
+[problem]
+`unit_to_sample()` still uses:
+
+```python
+title = unit.get("title", "")
+```
+
+[cause]
+The real `units.jsonl` data uses `unit_name`, not `title`.
+
+Observed local sample:
+
+```text
+title: None
+unit_name: present
+summary: present
+lecture_id: present
+```
+
+So this condition fails:
+
+```python
+if not title or not summary or len(summary) < 50:
+    return None
+```
+
+Result:
+
+```text
+unit_summary: 0
+```
+
+[fix]
+Change `unit_to_sample()`:
+
+```python
+def unit_to_sample(unit):
+    title = (
+        unit.get("title")
+        or unit.get("unit_name")
+        or unit.get("description")
+        or ""
+    )
+    summary = unit.get("summary", "") or unit.get("description", "")
+    course = unit.get("course_id", "")
+    lecture = unit.get("lecture_id", "")
+
+    if not title or not summary or len(summary) < 50:
+        return None
+
+    return {
+        "lecture_id": lecture,
+        "item_id": unit.get("unit_id", unit.get("id", "")),
+        "variant": "unit_summary",
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"[{course}] Summarize the key concepts in '{title}'"},
+            {"role": "assistant", "content": summary},
+        ],
+    }
+```
+
+Expected after fix:
+
+```text
+MCQ variants: 3828
+unit_summary: up to 376
+public_vi: 300
+total samples: ~4500 before split/public train mix
+```
+
+---
+
+## 3. Current benchmark is not enough for verified correctness
+
+[problem]
+Notebook currently has:
+
+```text
+1. test_data[:5] qualitative generation
+2. MMLU/GSM8K public benchmark
+```
+
+[cause]
+This does not prove the model is correct on the project's verified course dataset.
+
+MMLU/GSM8K only check general-capability regression. They do not measure CS224n/CS231n/CS230 course-specific correctness.
+
+[fix]
+Add Tier 1 verified domain MCQ benchmark.
+
+Requirements:
+
+```text
+- Use question_bank.jsonl
+- Use held-out lectures only
+- Use verified/pass items only if metadata exists
+- Prompt model to return A/B/C/D only
+- Compute accuracy overall and per course
+- Save predictions and summary to Kaggle output
+```
+
+Recommended benchmark cell:
+
+```python
+import re
+from collections import Counter, defaultdict
+
+def normalize_status(x):
+    return str(x or "").strip().lower()
+
+def is_verified_item(item):
+    status = normalize_status(item.get("review_status"))
+    gate = item.get("qa_gate_passed")
+
+    status_ok = (
+        not status
+        or status in {"verified", "approved", "pass", "passed", "accepted", "ok"}
+    )
+    gate_ok = gate is not False
+    return status_ok and gate_ok
+
+def extract_letter(text):
+    text = (text or "").strip().upper()
+    m = re.search(r"\b([ABCD])\b", text)
+    return m.group(1) if m else "X"
+
+verified_items = [m for m in mcqs if is_verified_item(m)]
+bench_items = [
+    m for m in verified_items
+    if m.get("lecture_id") in test_lectures
+]
+
+print(f"Verified items: {len(verified_items)}")
+print(f"Benchmark held-out items: {len(bench_items)}")
+print("Review status distribution:", Counter(normalize_status(m.get("review_status")) for m in mcqs))
+print("QA gate distribution:", Counter(m.get("qa_gate_passed") for m in mcqs))
+
+predictions = []
+correct = 0
+by_course = defaultdict(lambda: [0, 0])
+
+for item in bench_items:
+    choices = "\n".join(
+        f"{chr(65+i)}. {choice}"
+        for i, choice in enumerate(item["choices"])
+    )
+    prompt = (
+        f"[{item['course_id']}]\n"
+        f"Question: {item['question']}\n\n"
+        f"Choices:\n{choices}\n\n"
+        "Return only the correct letter: A, B, C, or D."
+    )
+
+    resp = generate([{"role": "user", "content": prompt}], max_new_tokens=8)
+    pred = extract_letter(resp)
+    gold = chr(65 + int(item["answer_index"]))
+    ok = pred == gold
+
+    correct += int(ok)
+    by_course[item["course_id"]][0] += int(ok)
+    by_course[item["course_id"]][1] += 1
+
+    predictions.append({
+        "item_id": item.get("item_id"),
+        "course_id": item.get("course_id"),
+        "lecture_id": item.get("lecture_id"),
+        "question": item.get("question"),
+        "gold": gold,
+        "pred": pred,
+        "raw_response": resp,
+        "correct": ok,
+    })
+
+overall_acc = correct / max(1, len(bench_items))
+print(f"Domain verified MCQ accuracy: {correct}/{len(bench_items)} = {overall_acc:.1%}")
+
+for course, (c, n) in sorted(by_course.items()):
+    print(f"{course}: {c}/{n} = {c/max(1,n):.1%}")
+
+eval_dir = OUT_ROOT / "eval"
+eval_dir.mkdir(parents=True, exist_ok=True)
+
+with open(eval_dir / "domain_verified_predictions.jsonl", "w", encoding="utf-8") as f:
+    for row in predictions:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+with open(eval_dir / "domain_verified_summary.json", "w", encoding="utf-8") as f:
+    json.dump({
+        "benchmark_items": len(bench_items),
+        "correct": correct,
+        "accuracy": overall_acc,
+        "by_course": {
+            course: {"correct": c, "total": n, "accuracy": c / max(1, n)}
+            for course, (c, n) in by_course.items()
+        },
+    }, f, ensure_ascii=False, indent=2)
+```
+
+---
+
+## 4. Missing base-model comparison
+
+[problem]
+The notebook only benchmarks after fine-tuning.
+
+[cause]
+Without base-model results, there is no way to know whether fine-tuning improved or degraded correctness.
+
+[fix]
+For final benchmark, run the same domain verified MCQ benchmark:
+
+```text
+1. Before training on base model
+2. After training on fine-tuned adapter
+3. Compare delta
+```
+
+Minimum output:
+
+```json
+{
+  "base_accuracy": 0.0,
+  "finetuned_accuracy": 0.0,
+  "delta": 0.0
+}
+```
+
+If runtime is tight, base benchmark can use a smaller fixed subset:
+
+```python
+BASE_BENCH_N = min(100, len(bench_items))
+```
+
+---
+
+## 5. Save adapter should happen before long eval
+
+[problem]
+Notebook currently trains, then plots/evals, then saves adapter.
+
+[cause]
+If post-training eval OOMs or fails, the final adapter may not be saved in the simple output location, even though checkpoints exist.
+
+[fix]
+Move:
+
+```python
+model.save_pretrained(str(CKPT_DIR))
+tokenizer.save_pretrained(str(CKPT_DIR))
+```
+
+immediately after:
+
+```python
+trainer.train()
+```
+
+Then run plots and benchmark.
+
+---
+
+# Epoch recommendation
+
+Current config:
+
+```python
+num_train_epochs=2
+per_device_train_batch_size=2
+gradient_accumulation_steps=8
+learning_rate=2e-4
+eval_steps=50
+save_steps=50
+```
+
+Estimated after fixes:
+
+```text
+Train samples: ~4100-4500 depending split/public mix
+Effective batch: 16
+Steps per epoch: ~255-280
+2 epochs: ~510-560 optimizer steps
+Eval every 50 steps: ~10-11 eval points
+```
+
+Recommendation:
+
+```text
+Baseline final train: 2 epochs
+Smoke test only: 1 epoch
+Try 3 epochs only if verified MCQ accuracy improves and eval_loss keeps improving
+```
+
+Preferred safe config:
+
+```python
+num_train_epochs=2
+learning_rate=1e-4  # safer
+```
+
+Faster but more overfit-prone config:
+
+```python
+num_train_epochs=2
+learning_rate=2e-4
+```
+
+Given this dataset is small and synthetic-heavy, start with:
+
+```python
+num_train_epochs=2
+learning_rate=1e-4
+eval_steps=50
+save_steps=50
+```
+
+If using `2e-4`, rely on verified benchmark to catch degradation.
+
+---
+
+# Eval recommendation
+
+Use 3-tier eval:
+
+## Tier 0: general regression
+
+Keep:
+
+```text
+MMLU 100-200
+GSM8K 50-100
+```
+
+Purpose:
+
+```text
+Detect broad degradation.
+Not the main project benchmark.
+```
+
+## Tier 1: verified domain MCQ benchmark
+
+Primary metric:
+
+```text
+Held-out lecture MCQ accuracy
+```
+
+Report:
+
+```text
+overall accuracy
+per-course accuracy
+per-difficulty accuracy if available
+per-question_intent accuracy if available
+```
+
+## Tier 2: qualitative tutor samples
+
+Save 20 generated examples:
+
+```text
+question
+reference answer
+generated answer
+course
+lecture
+variant
+```
+
+Manual rubric:
+
+```text
+correctness
+groundedness
+clarity
+hallucination
+same-language behavior
+```
+
+---
+
+# Split recommendation
+
+Current split:
+
+```python
+n_val = max(1, int(n * 0.05))
+n_test = max(1, int(n * 0.05))
+```
+
+With around 41 lectures:
+
+```text
+val = 2 lectures
+test = 2 lectures
+```
+
+This is leakage-safe but noisy.
+
+Recommended for benchmark reliability:
+
+```python
+n_val = max(3, int(n * 0.10))
+n_test = max(3, int(n * 0.10))
+```
+
+With 41 lectures:
+
+```text
+val = 4 lectures
+test = 4 lectures
+```
+
+Use 10/10 if final benchmark quality matters more than squeezing maximum training samples.
+
+---
+
+# Go/No-Go
+
+## Current state
+
+```text
+NO-GO for final benchmarked training.
+```
+
+Reasons:
+
+```text
+1. SYSTEM_PROMPT is used before definition.
+2. unit_summary still not included because title field mismatch.
+3. No verified domain MCQ accuracy metric.
+4. No base-vs-finetuned comparison.
+5. Save happens after eval instead of immediately after training.
+```
+
+## Minimum changes before Kaggle final run
+
+```text
+1. Move SYSTEM_PROMPT above public dataset cell.
+2. Fix unit_to_sample() title fallback to unit_name.
+3. Add verified held-out MCQ benchmark.
+4. Save adapter immediately after training.
+5. Keep MMLU/GSM8K as regression guard only.
+```
+
+After these fixes:
+
+```text
+GO for Kaggle T4 baseline.
+Recommended: 2 epochs, eval/save every 50 steps, effective batch 16.
+```
