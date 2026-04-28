@@ -1,152 +1,48 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 
 import HomePage from "@/app/page";
 import CourseOverviewInteractive from "@/components/course/CourseOverviewInteractive";
-import TopNav from "@/components/layout/TopNav";
 import type { CourseOverviewResponse } from "@/types";
 
-const navigationMock = vi.hoisted(() => ({
-  pathname: "/",
-  router: {
-    push: vi.fn(),
-    replace: vi.fn(),
-    refresh: vi.fn(),
-    prefetch: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-  },
-}));
-
-const courseApiMock = vi.hoisted(() => ({
-  catalog: vi.fn(),
-  overview: vi.fn(),
-  start: vi.fn(),
-  learningUnit: vi.fn(),
-}));
-
-const authStoreMock = vi.hoisted(() => ({
-  user: null as { id: string; full_name: string; is_onboarded: boolean } | null,
-  logout: vi.fn(),
-}));
-
-vi.mock("@/lib/api", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/api")>("@/lib/api");
-  return {
-    ...actual,
-    courseApi: courseApiMock,
-  };
-});
-
-vi.mock("@/stores/authStore", async () => {
-  return {
-    useAuthStore: (selector?: (state: unknown) => unknown) => {
-      const state = { user: authStoreMock.user, logout: authStoreMock.logout };
-      return selector ? selector(state) : state;
-    },
-  };
-});
-
-vi.mock("next/navigation", async () => {
-  const actual = await vi.importActual<typeof import("next/navigation")>("next/navigation");
-  return {
-    ...actual,
-    usePathname: () => navigationMock.pathname,
-    useRouter: () => navigationMock.router,
-  };
-});
-
-describe("course catalog routes", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    authStoreMock.user = null;
-    navigationMock.pathname = "/";
-  });
-
-  it("renders both demo courses on the public catalog home", async () => {
-    courseApiMock.catalog.mockResolvedValue({
-      items: [
-        {
-          id: "course_cs231n",
-          slug: "cs231n",
-          title: "CS231n: Deep Learning for Computer Vision",
-          short_description: "Deep learning foundations for computer vision.",
-          status: "ready",
-          cover_image_url: "/courses/cs231n/cover.jpg",
-          hero_badge: "Available now",
-          is_recommended: false,
-        },
-        {
-          id: "course_cs224n",
-          slug: "cs224n",
-          title: "CS224n: Natural Language Processing with Deep Learning",
-          short_description: "Modern NLP systems and language modeling.",
-          status: "ready",
-          cover_image_url: "/courses/cs224n/cover.jpg",
-          hero_badge: "Available now",
-          is_recommended: false,
-        },
-      ],
-    });
-
+describe("landing page route", () => {
+  it("renders a public landing page focused on guided AI learning", () => {
     render(<HomePage />);
 
-    await waitFor(() => {
-      expect(screen.getByText("CS231n: Deep Learning for Computer Vision")).toBeInTheDocument();
-    });
-    expect(screen.getByText("AI Learning Hub")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Courses" })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Tìm kiếm khóa học...")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Đăng nhập" })).toHaveAttribute("href", "/login");
-    expect(screen.queryByRole("link", { name: "?" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Đăng xuất" })).not.toBeInTheDocument();
     expect(
-      screen.getByText("CS224n: Natural Language Processing with Deep Learning"),
+      screen.getByRole("heading", {
+        name: "Học AI, ML, CV và NLP theo một lộ trình rõ ràng hơn",
+      }),
     ).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "Xem khóa học" })).toHaveLength(2);
+    expect(
+      screen.getByText("Một nền tảng học tập giúp bạn định hướng, học có hệ thống và tiếp tục tiến lên khi gặp phần khó."),
+    ).toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole("link", { name: "Đăng ký ngay" })
+        .every((link) => link.getAttribute("href") === "/register"),
+    ).toBe(true);
+    expect(
+      screen
+        .getAllByRole("link", { name: "Đăng nhập" })
+        .every((link) => link.getAttribute("href") === "/login"),
+    ).toBe(true);
+    expect(screen.getByRole("link", { name: "Sản phẩm" })).toHaveAttribute("href", "#product");
+    expect(screen.getByRole("link", { name: "Lộ trình học" })).toHaveAttribute("href", "#roadmap");
+    expect(screen.getByRole("link", { name: "AI Tutor" })).toHaveAttribute("href", "#tutor");
+    expect(screen.getByRole("link", { name: "Liên hệ" })).toHaveAttribute("href", "#contact");
+    expect(
+      screen.getByRole("heading", { name: "Cá nhân hóa lộ trình học" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "AI chatbot hỗ trợ ngay trong lúc học" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Đội ngũ phát triển")).toBeInTheDocument();
   });
+});
 
-  it("renders readiness and progress copy on catalog cards", async () => {
-    courseApiMock.catalog.mockResolvedValue({
-      items: [
-        {
-          id: "course_cs231n",
-          slug: "cs231n",
-          title: "CS231n: Deep Learning for Computer Vision",
-          short_description: "Deep learning foundations for computer vision.",
-          status: "ready",
-          cover_image_url: "/courses/cs231n/cover.jpg",
-          hero_badge: "Available now",
-          is_recommended: false,
-          progress_percent: 0,
-        },
-        {
-          id: "course_cs224n",
-          slug: "cs224n",
-          title: "CS224n: Natural Language Processing with Deep Learning",
-          short_description: "Modern NLP systems and language modeling.",
-          status: "ready",
-          cover_image_url: "/courses/cs224n/cover.jpg",
-          hero_badge: "Available now",
-          is_recommended: false,
-          progress_percent: 35,
-        },
-      ],
-    });
-
-    render(<HomePage />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Sẵn sàng học")).toBeInTheDocument();
-    });
-
-    expect(screen.getByText("Sẵn sàng để bắt đầu ngay bây giờ")).toBeInTheDocument();
-    expect(screen.getByText("Tiến độ: 0%")).toBeInTheDocument();
-    expect(screen.getByText("Tiếp tục bài học")).toBeInTheDocument();
-    expect(screen.getByText("Tiến độ: 35%")).toBeInTheDocument();
-  });
-
-  it("shows a startable overview for CS231n", async () => {
+describe("course overview routes", () => {
+  it("shows a startable overview for CS231n", () => {
     const data: CourseOverviewResponse = {
       course: {
         id: "course_cs231n",
@@ -176,21 +72,16 @@ describe("course catalog routes", () => {
       },
     };
 
-    navigationMock.pathname = "/courses/cs231n";
     render(
-      <>
-        <TopNav />
-        <CourseOverviewInteractive courseSlug="cs231n" data={data} />
-      </>,
+      <CourseOverviewInteractive courseSlug="cs231n" data={data} />,
     );
 
     expect(screen.getByText("Build deep intuition for modern vision systems")).toBeInTheDocument();
     expect(screen.getByText("Những gì bạn sẽ học")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Courses" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("button", { name: "Start learning" })).toBeEnabled();
   });
 
-  it("shows a startable overview for CS224n", async () => {
+  it("shows a startable overview for CS224n", () => {
     const data: CourseOverviewResponse = {
       course: {
         id: "course_cs224n",
@@ -220,12 +111,8 @@ describe("course catalog routes", () => {
       },
     };
 
-    navigationMock.pathname = "/courses/cs224n";
     render(
-      <>
-        <TopNav />
-        <CourseOverviewInteractive courseSlug="cs224n" data={data} />
-      </>,
+      <CourseOverviewInteractive courseSlug="cs224n" data={data} />,
     );
 
     expect(
