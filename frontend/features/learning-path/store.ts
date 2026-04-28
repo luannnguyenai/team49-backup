@@ -41,6 +41,21 @@ function recomputeSummary(items: PathItemResponse[]): Omit<LearningPathResponse,
   };
 }
 
+function emptyLearningPath(): LearningPathResponse {
+  return {
+    total_units: 0,
+    completed_units: 0,
+    in_progress_units: 0,
+    items: [],
+  };
+}
+
+function getHttpStatus(error: unknown): number | null {
+  if (!error || typeof error !== "object" || !("response" in error)) return null;
+  const response = (error as { response?: { status?: unknown } }).response;
+  return typeof response?.status === "number" ? response.status : null;
+}
+
 function toNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
@@ -99,7 +114,13 @@ export const useLearningPathStore = create<LearningPathState>()(
         set({ loading: true, error: null });
         try {
           const profile = get().profile;
-          let path = await learningPathApi.getLearningPath();
+          let path: LearningPathResponse;
+          try {
+            path = await learningPathApi.getLearningPath();
+          } catch (error) {
+            if (!profile || getHttpStatus(error) !== 404) throw error;
+            path = emptyLearningPath();
+          }
           const generatedTopologyHash = get().generatedTopologyHash;
 
           const shouldGenerate =

@@ -118,6 +118,41 @@ describe("learning path store", () => {
     });
   });
 
+  it("treats a missing backend path as empty when a concrete profile exists", async () => {
+    const profile = createLearningProfileForPath("computer_vision", {
+      weeklyHours: null,
+      source: "manual",
+    });
+    const generatedItem = pathItem({
+      id: "generated-after-404",
+      learning_unit_title: "CNN foundations",
+    });
+
+    useLearningPathStore.getState().setProfile(profile);
+    vi.mocked(learningPathApi.getLearningPath).mockRejectedValue({
+      response: { status: 404 },
+    });
+    vi.mocked(learningPathApi.generatePath).mockResolvedValue({
+      generated_at: "2026-04-28T00:00:00Z",
+      total_units: 1,
+      total_hours: 1,
+      required_hours_per_week: null,
+      warnings: [],
+      items: [generatedItem],
+    });
+
+    await useLearningPathStore.getState().loadPath();
+
+    expect(learningPathApi.generatePath).toHaveBeenCalledWith({
+      desired_section_ids: [],
+      selected_course_ids: ["cs230", "cs231n"],
+    });
+    expect(useLearningPathStore.getState()).toMatchObject({
+      items: [generatedItem],
+      error: null,
+    });
+  });
+
   it("regenerates when the persisted path hash does not match the current profile", async () => {
     const oldProfile = createLearningProfileForPath("computer_vision", {
       weeklyHours: null,
