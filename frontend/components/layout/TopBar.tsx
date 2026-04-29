@@ -77,7 +77,7 @@ export default function TopBar({ title, onMenuClick }: Props) {
         <div
           className={cn(
             "flex h-8 w-8 items-center justify-center rounded-full",
-            "bg-primary-100 dark:bg-primary-900/30 text-primary-600",
+            "bg-surface-accent-soft text-primary-700 dark:text-primary-300",
             "text-sm font-semibold cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all"
           )}
           aria-label="Hồ sơ"
