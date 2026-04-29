@@ -66,4 +66,26 @@ describe("course catalog cache", () => {
       includeUnavailable: false,
     });
   });
+
+  it("restarts a stale in-flight request instead of waiting forever", async () => {
+    vi.useFakeTimers();
+    const stalePromise = new Promise<never>(() => {});
+    const freshResponse = { items: [{ id: "fresh-course" }] };
+    courseApiMock.catalog
+      .mockReturnValueOnce(stalePromise)
+      .mockResolvedValueOnce(freshResponse);
+
+    const { getCachedAllCourseCatalog, resetCachedAllCourseCatalog } = await import(
+      "@/lib/course-catalog-cache"
+    );
+    resetCachedAllCourseCatalog();
+
+    void getCachedAllCourseCatalog(true);
+    vi.advanceTimersByTime(10_001);
+    const result = await getCachedAllCourseCatalog(true);
+
+    expect(result).toBe(freshResponse);
+    expect(courseApiMock.catalog).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
 });

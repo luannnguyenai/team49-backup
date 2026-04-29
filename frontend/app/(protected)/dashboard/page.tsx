@@ -207,7 +207,7 @@ export default function DashboardPage() {
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-            Tất cả khóa học
+            Khám phá khóa học
           </h2>
           <button
             className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm"

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.course import Course, CourseRecommendation
@@ -32,8 +32,35 @@ class CourseRecommendationRepository(BaseRepository[CourseRecommendation]):
         if not course_ids:
             return set()
 
+        uuid_candidates: list[UUID] = []
+        canonical_candidates: list[str] = []
+        for course_id in course_ids:
+            if isinstance(course_id, UUID):
+                uuid_candidates.append(course_id)
+                continue
+
+            normalized = str(course_id).strip()
+            if not normalized:
+                continue
+
+            try:
+                uuid_candidates.append(UUID(normalized))
+                continue
+            except ValueError:
+                canonical_candidates.append(normalized.lower())
+
+        filters = []
+        if uuid_candidates:
+            filters.append(Course.id.in_(uuid_candidates))
+        if canonical_candidates:
+            filters.append(func.lower(Course.canonical_course_id).in_(canonical_candidates))
+            filters.append(func.lower(Course.slug).in_(canonical_candidates))
+
+        if not filters:
+            return set()
+
         result = await self.session.execute(
-            select(Course.slug).where(Course.id.in_(course_ids))
+            select(Course.slug).where(or_(*filters))
         )
         return {row[0] for row in result.all()}
 

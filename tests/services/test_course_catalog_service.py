@@ -96,7 +96,7 @@ async def test_list_course_catalog_all_annotates_recommended_flags_from_shared_r
 @pytest.mark.asyncio
 async def test_get_recommended_course_slugs_falls_back_from_goal_preference_course_ids(monkeypatch):
     user_id = uuid4()
-    goal_course_id = str(uuid4())
+    goal_course_id = "cs231n"
 
     class FakeSessionContext:
         async def __aenter__(self):

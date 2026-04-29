@@ -98,6 +98,8 @@ describe("dashboard search", () => {
 
     render(<DashboardPage />);
 
+    expect(await screen.findByText("Khám phá khóa học")).toBeInTheDocument();
+
     const allButtons = await screen.findAllByRole("button", { name: "Tất cả" });
     fireEvent.click(allButtons[1]);
 
