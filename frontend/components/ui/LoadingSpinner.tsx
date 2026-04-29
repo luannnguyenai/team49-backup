@@ -17,7 +17,7 @@ export default function LoadingSpinner({ size = "md", className }: Props) {
       fill="none"
       viewBox="0 0 24 24"
       role="status"
-      aria-label="Đang tải"
+      aria-label="Loading"
     >
       <circle
         className="opacity-25"

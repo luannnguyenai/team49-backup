@@ -57,7 +57,7 @@ describe("Sidebar logout routing", () => {
 
     render(<Sidebar mobileOpen={false} onMobileClose={vi.fn()} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Đăng xuất" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
 
     expect(authStoreMock.logout).toHaveBeenCalledTimes(1);
     expect(navigationMock.router.push).not.toHaveBeenCalled();

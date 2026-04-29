@@ -14,8 +14,8 @@ import Button from "@/components/ui/Button";
 import { useAuthStore } from "@/stores/authStore";
 
 const schema = z.object({
-  email: z.string().email("Email không hợp lệ"),
-  password: z.string().min(8, "Mật khẩu phải ít nhất 8 ký tự"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -60,14 +60,14 @@ export default function LoginForm() {
         label="Email"
         type="email"
         autoComplete="email"
-        placeholder="ban@example.com"
+        placeholder="you@example.com"
         leftElement={<Mail className="h-4 w-4" />}
         error={errors.email?.message}
         {...register("email")}
       />
 
       <Input
-        label="Mật khẩu"
+        label="Password"
         type={showPassword ? "text" : "password"}
         autoComplete="current-password"
         placeholder="••••••••"
@@ -77,7 +77,7 @@ export default function LoginForm() {
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             className="hover:text-slate-600 dark:hover:text-slate-300"
-            aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -92,18 +92,18 @@ export default function LoginForm() {
 
       <div className="flex justify-end">
         <Link href={forgotPasswordHref} className="link text-sm">
-          Quên mật khẩu?
+          Forgot password?
         </Link>
       </div>
 
       <Button type="submit" loading={isLoading} className="w-full">
-        Đăng nhập
+        Sign in
       </Button>
 
       <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
-        Chưa có tài khoản?{" "}
+        Don't have an account?{" "}
         <Link href={registerHref} className="link">
-          Đăng ký ngay
+          Sign up now
         </Link>
       </p>
     </form>

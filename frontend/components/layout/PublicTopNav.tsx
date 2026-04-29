@@ -4,10 +4,10 @@ import { ArrowRight } from "lucide-react";
 import BrandLogo from "@/components/layout/BrandLogo";
 
 const NAV_ITEMS = [
-  { href: "#product", label: "Sản phẩm" },
-  { href: "#roadmap", label: "Lộ trình học" },
+  { href: "#product", label: "Product" },
+  { href: "#roadmap", label: "Learning Path" },
   { href: "#tutor", label: "AI Tutor" },
-  { href: "#contact", label: "Liên hệ" },
+  { href: "#contact", label: "Contact" },
 ] as const;
 
 export default function PublicTopNav() {
@@ -33,13 +33,13 @@ export default function PublicTopNav() {
             href="/login"
             className="inline-flex items-center rounded-full border border-border-subtle px-4 py-2 text-sm font-semibold text-text-body transition-colors hover:border-slate-300 hover:bg-surface-page dark:border-slate-700 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-900"
           >
-            Đăng nhập
+            Sign in
           </Link>
           <Link
             href="/register"
             className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
           >
-            Đăng ký
+            Sign up
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

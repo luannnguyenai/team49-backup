@@ -17,18 +17,18 @@ const schema = z
   .object({
     full_name: z
       .string()
-      .min(2, "Họ tên phải ít nhất 2 ký tự")
-      .max(255, "Họ tên quá dài"),
-    email: z.string().email("Email không hợp lệ"),
+      .min(2, "Full name must be at least 2 characters")
+      .max(255, "Full name is too long"),
+    email: z.string().email("Invalid email address"),
     password: z
       .string()
-      .min(8, "Mật khẩu phải ít nhất 8 ký tự")
-      .regex(/\d/, "Mật khẩu phải chứa ít nhất 1 chữ số")
-      .regex(/[a-zA-Z]/, "Mật khẩu phải chứa ít nhất 1 chữ cái"),
+      .min(8, "Password must be at least 8 characters")
+      .regex(/\d/, "Password must contain at least 1 number")
+      .regex(/[a-zA-Z]/, "Password must contain at least 1 letter"),
     confirm_password: z.string(),
   })
   .refine((d) => d.password === d.confirm_password, {
-    message: "Mật khẩu xác nhận không khớp",
+    message: "Password confirmation does not match",
     path: ["confirm_password"],
   });
 
@@ -60,7 +60,7 @@ export default function RegisterForm() {
     return score;
   })();
 
-  const strengthLabel = ["", "Yếu", "Trung bình", "Tốt", "Mạnh"][passwordStrength];
+  const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"][passwordStrength];
   const strengthColor = ["", "bg-red-400", "bg-yellow-400", "bg-blue-400", "bg-green-400"][passwordStrength];
 
   const onSubmit = async (data: FormData) => {
@@ -90,10 +90,10 @@ export default function RegisterForm() {
       )}
 
       <Input
-        label="Họ và tên"
+        label="Full name"
         type="text"
         autoComplete="name"
-        placeholder="Nguyễn Văn A"
+        placeholder="Jane Doe"
         leftElement={<User className="h-4 w-4" />}
         error={errors.full_name?.message}
         {...register("full_name")}
@@ -103,7 +103,7 @@ export default function RegisterForm() {
         label="Email"
         type="email"
         autoComplete="email"
-        placeholder="ban@example.com"
+        placeholder="you@example.com"
         leftElement={<Mail className="h-4 w-4" />}
         error={errors.email?.message}
         {...register("email")}
@@ -111,7 +111,7 @@ export default function RegisterForm() {
 
       <div>
         <Input
-          label="Mật khẩu"
+          label="Password"
           type={showPassword ? "text" : "password"}
           autoComplete="new-password"
           placeholder="••••••••"
@@ -121,7 +121,7 @@ export default function RegisterForm() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="hover:text-slate-600 dark:hover:text-slate-300"
-              aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -143,14 +143,14 @@ export default function RegisterForm() {
               ))}
             </div>
             <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-              Độ mạnh: <span className="font-medium">{strengthLabel}</span>
+              Strength: <span className="font-medium">{strengthLabel}</span>
             </p>
           </div>
         )}
       </div>
 
       <Input
-        label="Xác nhận mật khẩu"
+        label="Confirm password"
         type={showConfirm ? "text" : "password"}
         autoComplete="new-password"
         placeholder="••••••••"
@@ -160,7 +160,7 @@ export default function RegisterForm() {
             type="button"
             onClick={() => setShowConfirm((v) => !v)}
             className="hover:text-slate-600 dark:hover:text-slate-300"
-            aria-label={showConfirm ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+            aria-label={showConfirm ? "Hide password" : "Show password"}
           >
             {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -170,13 +170,13 @@ export default function RegisterForm() {
       />
 
       <Button type="submit" loading={isLoading} className="w-full mt-2">
-        Tạo tài khoản
+        Create account
       </Button>
 
       <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
-        Đã có tài khoản?{" "}
+        Already have an account?{" "}
         <Link href={loginHref} className="link">
-          Đăng nhập
+          Sign in
         </Link>
       </p>
     </form>
