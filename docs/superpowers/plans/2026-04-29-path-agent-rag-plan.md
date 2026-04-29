@@ -657,6 +657,12 @@ type AgentChatRequest = {
 };
 ```
 
+Trace mode rules:
+
+- Normal users may request only `none` or `summary`.
+- `full` trace is restricted to reviewer/dev/admin roles because it can expose candidate courses, applied filters, scope decisions, and user-specific retrieval context.
+- Backend must downgrade unauthorized `full` requests to `summary` or reject them with a safe error.
+
 Response:
 
 ```ts
@@ -690,6 +696,8 @@ type AgentChatResponse = {
         label: string;
         canonical_unit_ids: string[];
         default_phase: "placement" | "mini_quiz" | "skip_verification" | "bridge_check" | "final_quiz" | "review";
+        eligible: boolean;
+        disabledReason?: "no_eligible_questions" | "unsupported_phase" | "out_of_scope" | "requires_login";
       }
     | {
         type: "request_replan_dry_run";
@@ -719,7 +727,7 @@ Fallback/refusal rules:
 - If no grounded unit/path/planner source exists, return `confidence="no_source"` and do not invent citations.
 - If the user asks outside selected/enrolled/available courses, either ask for explicit global search permission or return an out-of-scope fallback.
 - If the user asks for a state mutation, return an action button; do not mutate through chat text alone.
-- Trace exposure is controlled by `traceMode`; normal users can receive summary trace, reviewers/dev mode can receive full trace.
+- Trace exposure is controlled by `traceMode`; normal users can receive summary trace only, while full trace is restricted to reviewer/dev/admin roles.
 
 ### 8.2 `GET /api/agent/context`
 
@@ -1220,7 +1228,7 @@ Reviewers should validate:
 - Does each actionable search result include runtime navigation fields such as `learn_href`, `course_slug`, `unit_slug`, or `learning_unit_id`?
 - Are cross-path prerequisite/gap questions handled by graph services instead of BM25-only search?
 - Does query normalization cover common domain aliases such as `ViT`, `CNN`, `convnet`, `RF`, and `word vectors`?
-- Does replan require validated evidence ownership, phase, affected KPs, mastery deltas, and dry-run impact before mutation?
+- Does the backend derive and validate evidence ownership, phase, affected KPs, mastery deltas, and dry-run impact before any replan mutation?
 - Are hidden/admin/logistics units handled correctly for assessment and search?
 
 ## 15. Open Questions
@@ -1242,7 +1250,7 @@ context
 -> unit search or path requirements
 -> runtime navigation resolution
 -> unit context / optional transcript
--> answer or backend-mediated action
+-> AgentChatOrchestrator returns cited answer or backend-mediated action
 ```
 
 Do not add embeddings yet. Add retrieval trace logging early so reviewers can inspect why the Agent selected each unit. Use assessment/player evidence as the only source of mastery changes. Keep the existing Lecture AI Tutor lecture-scoped and introduce a separate Path Agent for path/course-level questions.
