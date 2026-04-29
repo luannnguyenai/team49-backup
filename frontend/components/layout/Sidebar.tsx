@@ -26,8 +26,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/");
   };
 
