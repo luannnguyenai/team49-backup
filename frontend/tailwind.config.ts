@@ -11,17 +11,37 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          50: "#eff6ff",
-          100: "#dbeafe",
-          200: "#bfdbfe",
-          300: "#93c5fd",
-          400: "#60a5fa",
-          500: "#3b82f6",
-          600: "#2563EB",   // ← brand primary
-          700: "#1d4ed8",
-          800: "#1e40af",
-          900: "#1e3a8a",
-          950: "#172554",
+          50:  "#ecfeff",
+          100: "#cffafe",
+          200: "#a5f3fc",
+          300: "#67e8f9",
+          400: "#22d3ee",
+          500: "#06b6d4",
+          600: "#0891b2",   // ← brand primary (cyan-led)
+          700: "#0e7490",
+          800: "#155e75",
+          900: "#164e63",
+          950: "#083344",
+        },
+        brand: {
+          indigo: "#4f46e5",
+          cyan:   "#06b6d4",
+          teal:   "#2dd4bf",
+          ink:    "#020617",
+        },
+        surface: {
+          page:           "var(--surface-page)",
+          card:           "var(--surface-card)",
+          elevated:       "var(--surface-elevated)",
+          "accent-soft":  "var(--surface-accent-soft)",
+        },
+        text: {
+          strong: "var(--text-strong)",
+          body:   "var(--text-body)",
+          muted:  "var(--text-muted-2)",
+        },
+        border: {
+          subtle: "var(--border-subtle)",
         },
       },
       fontFamily: {
@@ -41,6 +61,7 @@ const config: Config = {
       boxShadow: {
         card: "0 18px 55px rgba(15,23,42,0.08)",
         "card-hover": "0 24px 70px rgba(15,23,42,0.12)",
+        "brand-soft": "0 20px 60px -30px rgba(8,145,178,0.32)",
       },
       letterSpacing: {
         "widest-xs": "0.16em",
