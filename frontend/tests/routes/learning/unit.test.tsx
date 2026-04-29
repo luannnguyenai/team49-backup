@@ -5,6 +5,12 @@ import LearningUnitLoading from "@/app/(protected)/courses/[courseSlug]/learn/[u
 import LearningUnitShell from "@/components/learn/LearningUnitShell";
 import LearningPageScreen from "@/components/learn/LearningPageScreen";
 import TopNav from "@/components/layout/TopNav";
+import {
+  COMING_SOON_ITEM,
+  CS224N_ITEM,
+  CS231N_ITEM,
+  CS231N_RECOMMENDED,
+} from "@/tests/fixtures/coursePlatform";
 import type { LearningUnitResponse } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -17,6 +23,7 @@ const apiMock = vi.hoisted(() => ({
 }));
 
 const courseApiMock = vi.hoisted(() => ({
+  catalog: vi.fn(),
   listUnits: vi.fn(),
   lectureToc: vi.fn(),
 }));
@@ -64,6 +71,7 @@ vi.mock("@/lib/api", async () => {
     api: apiMock,
     courseApi: {
       ...actual.courseApi,
+      catalog: courseApiMock.catalog,
       listUnits: courseApiMock.listUnits,
       lectureToc: courseApiMock.lectureToc,
     },
@@ -245,6 +253,17 @@ describe("learning unit page (US3)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     apiMock.get.mockResolvedValue({ data: [] });
+    courseApiMock.catalog.mockResolvedValue({
+      items: [
+        CS231N_RECOMMENDED,
+        CS224N_ITEM,
+        {
+          ...COMING_SOON_ITEM,
+          title: "Upcoming AI Operations",
+          short_description: "Production readiness for AI systems.",
+        },
+      ],
+    });
     courseApiMock.listUnits.mockResolvedValue([]);
     courseApiMock.lectureToc.mockImplementation((courseSlug: string, lectureOrder: number) => {
       if (courseSlug === "cs231n" && lectureOrder === 1) {
@@ -702,107 +721,46 @@ describe("learning unit page (US3)", () => {
     expect(navigationMock.router.push).toHaveBeenCalledWith("/");
   });
 
-  it("shows the search input on allowlisted dashboard route", async () => {
-    navigationMock.pathname = "/dashboard";
-
-    render(<TopNav />);
-
-    expect(screen.getByLabelText("Tìm kiếm khóa học")).toBeInTheDocument();
-  });
-
-  it("shows the search input on allowlisted tutor route", async () => {
-    navigationMock.pathname = "/tutor";
-
-    render(<TopNav />);
-
-    expect(screen.getByLabelText("Tìm kiếm khóa học")).toBeInTheDocument();
-  });
-
-  it("hides the search input on non-allowlisted routes", async () => {
+  it("shows the search input on non-course routes as a global nav control", async () => {
     navigationMock.pathname = "/history";
 
     render(<TopNav />);
 
-    expect(screen.queryByLabelText("Tìm kiếm khóa học")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Tìm kiếm khóa học")).toBeInTheDocument();
   });
 
-  it("hydrates the search input from the current q param", async () => {
-    navigationMock.pathname = "/dashboard";
-    navigationMock.searchParams = new URLSearchParams("q=cs231n");
-
-    render(<TopNav />);
-
-    expect(screen.getByLabelText("Tìm kiếm khóa học")).toHaveValue("cs231n");
-  });
-
-  it("updates the URL query with router.replace after typing in the search input", async () => {
-    vi.useFakeTimers();
+  it("loads the course catalog when the dropdown search is activated", async () => {
     navigationMock.pathname = "/dashboard";
 
     render(<TopNav />);
 
-    const input = screen.getByLabelText("Tìm kiếm khóa học");
-    fireEvent.change(input, { target: { value: "transformer" } });
+    fireEvent.focus(screen.getByLabelText("Tìm kiếm khóa học"));
 
-    vi.advanceTimersByTime(250);
-
-    expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard?q=transformer");
-    vi.useRealTimers();
-  });
-
-  it("flushes the pending query immediately when Enter is pressed", async () => {
-    vi.useFakeTimers();
-    navigationMock.pathname = "/dashboard";
-
-    render(<TopNav />);
-
-    const input = screen.getByLabelText("Tìm kiếm khóa học");
-    fireEvent.change(input, { target: { value: "deep learning & vision" } });
-
-    expect(navigationMock.router.replace).not.toHaveBeenCalled();
-
-    fireEvent.keyDown(input, { key: "Enter" });
-
-    expect(navigationMock.router.replace).toHaveBeenCalledWith(
-      "/dashboard?q=deep+learning+%26+vision",
-    );
-
-    vi.runOnlyPendingTimers();
-    expect(navigationMock.router.replace).toHaveBeenCalledTimes(1);
-    vi.useRealTimers();
-  });
-
-  it("carries q across allowlisted nav routes and drops it for other routes", async () => {
-    navigationMock.pathname = "/dashboard";
-    navigationMock.searchParams = new URLSearchParams("q=cnn");
-
-    render(<TopNav />);
-
-    expect(screen.getByRole("link", { name: "AI Tutor" })).toHaveAttribute(
-      "href",
-      "/tutor?q=cnn",
-    );
-    expect(screen.getByRole("link", { name: "Lịch sử" })).toHaveAttribute("href", "/history");
-  });
-
-  it("cancels a pending debounce when the route changes", async () => {
-    vi.useFakeTimers();
-    navigationMock.pathname = "/dashboard";
-
-    const { rerender } = render(<TopNav />);
-
-    fireEvent.change(screen.getByLabelText("Tìm kiếm khóa học"), {
-      target: { value: "transformer" },
+    await waitFor(() => {
+      expect(courseApiMock.catalog).toHaveBeenCalledWith({
+        view: "all",
+        includeUnavailable: true,
+      });
     });
+  });
 
-    navigationMock.pathname = "/history";
-    navigationMock.searchParams = new URLSearchParams();
-    rerender(<TopNav />);
+  it("shows matching courses in a dropdown beneath the search input", async () => {
+    navigationMock.pathname = "/learn";
 
-    vi.advanceTimersByTime(250);
+    render(<TopNav />);
 
-    expect(navigationMock.router.replace).not.toHaveBeenCalled();
-    vi.useRealTimers();
+    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "vision" } });
+
+    expect(
+      await screen.findByRole("button", { name: /cs231n: deep learning for computer vision/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: /cs224n: natural language processing with deep learning/i,
+      }),
+    ).not.toBeInTheDocument();
   });
 
   it("hides the clear button when the search input is empty", async () => {
@@ -817,39 +775,58 @@ describe("learning unit page (US3)", () => {
 
   it("shows the clear button when the search input has a value", async () => {
     navigationMock.pathname = "/dashboard";
-    navigationMock.searchParams = new URLSearchParams("q=cs231n");
 
     render(<TopNav />);
+
+    fireEvent.change(screen.getByLabelText("Tìm kiếm khóa học"), {
+      target: { value: "cs231n" },
+    });
+
+    await waitFor(() => {
+      expect(courseApiMock.catalog).toHaveBeenCalled();
+    });
 
     expect(
       screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
     ).toBeInTheDocument();
   });
 
-  it("clears the search input and removes q from the URL when clear button is pressed", async () => {
+  it("clears the search input and closes the dropdown when clear button is pressed", async () => {
     navigationMock.pathname = "/dashboard";
-    navigationMock.searchParams = new URLSearchParams("q=cs231n");
 
     render(<TopNav />);
+
+    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "cs231n" } });
+
+    await screen.findByRole("button", { name: /cs231n: deep learning for computer vision/i });
 
     fireEvent.click(
       screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
     );
 
-    expect(screen.getByLabelText("Tìm kiếm khóa học")).toHaveValue("");
-    expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard");
+    expect(input).toHaveValue("");
+    expect(
+      screen.queryByRole("button", { name: /cs231n: deep learning for computer vision/i }),
+    ).not.toBeInTheDocument();
   });
 
-  it("preserves other query params when clearing the search query", async () => {
-    navigationMock.pathname = "/dashboard";
-    navigationMock.searchParams = new URLSearchParams("q=cs231n&tab=ready");
+  it("routes to the selected course when a dropdown result is clicked", async () => {
+    navigationMock.pathname = "/profile";
 
     render(<TopNav />);
 
+    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "language" } });
+
     fireEvent.click(
-      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+      await screen.findByRole("button", {
+        name: /cs224n: natural language processing with deep learning/i,
+      }),
     );
 
-    expect(navigationMock.router.replace).toHaveBeenCalledWith("/dashboard?tab=ready");
+    expect(navigationMock.router.push).toHaveBeenCalledWith("/courses/cs224n");
   });
 });
