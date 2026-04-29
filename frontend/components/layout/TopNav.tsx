@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import BrandLogo from "@/components/layout/BrandLogo";
 import { NAV_ITEMS, type NavItem } from "@/components/layout/navItems";
-import { courseApi } from "@/lib/api";
+import { getCachedAllCourseCatalog } from "@/lib/course-catalog-cache";
 import { normalizeCourseSearchQuery } from "@/lib/course-search";
 import type { CourseCatalogItem } from "@/types";
 
@@ -80,8 +80,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
     }
 
     setIsLoadingCourses(true);
-    courseApi
-      .catalog({ view: "all", includeUnavailable: true })
+    getCachedAllCourseCatalog(true)
       .then((response) => {
         if (mountedRef.current) {
           setCatalogCourses(response.items);
