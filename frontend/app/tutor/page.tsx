@@ -27,7 +27,7 @@ function TutorPageFallback() {
     <div className="flex min-h-[40vh] items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+        <p className="text-sm text-text-muted">
           Đang tải danh sách khoá học...
         </p>
       </div>
@@ -95,14 +95,14 @@ function TutorPageContent() {
   return (
     <div className="space-y-8 animate-fade-in">
       <header className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-600 dark:bg-primary-900/30">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300">
           <GraduationCap className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <h1 className="text-2xl font-bold text-text-strong">
             Khoá học đang tham gia
           </h1>
-          <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+          <p className="mt-1 text-sm text-text-body">
             Tiếp tục lộ trình học và khám phá các khoá được gợi ý cho bạn.
           </p>
         </div>
@@ -112,7 +112,7 @@ function TutorPageContent() {
         <div className="flex min-h-[40vh] items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            <p className="text-sm text-text-muted">
               Đang tải danh sách khoá học...
             </p>
           </div>
@@ -124,18 +124,15 @@ function TutorPageContent() {
       ) : (
         <div className="space-y-6">
           {activeCourse && activeUnitSlug && (
-            <section
-              className="flex flex-col gap-4 rounded-2xl border p-5 md:flex-row md:items-center md:justify-between"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
-            >
+            <section className="flex flex-col gap-4 rounded-2xl border border-border-subtle bg-surface-card p-5 md:flex-row md:items-center md:justify-between">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
                   Tiếp tục học
                 </p>
-                <h2 className="mt-1 truncate text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                <h2 className="mt-1 truncate text-lg font-bold text-text-strong">
                   {activeCourse.title}
                 </h2>
-                <p className="mt-1 line-clamp-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+                <p className="mt-1 line-clamp-2 text-sm text-text-body">
                   {activeCourse.short_description}
                 </p>
               </div>
@@ -152,10 +149,10 @@ function TutorPageContent() {
           {filteredJoinedCourses.length > 0 && (
             <section className="space-y-3">
               <div>
-                <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                <h2 className="text-lg font-semibold text-text-strong">
                   Khoá của bạn
                 </h2>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                <p className="text-sm text-text-body">
                   Các khoá bạn đã tham gia qua lịch sử học tập.
                 </p>
               </div>
@@ -166,10 +163,10 @@ function TutorPageContent() {
           {filteredRecommendedCourses.length > 0 && (
             <section className="space-y-3">
               <div>
-                <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                <h2 className="text-lg font-semibold text-text-strong">
                   Gợi ý cho bạn
                 </h2>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                <p className="text-sm text-text-body">
                   Khoá phù hợp với lộ trình cá nhân hoá.
                 </p>
               </div>
@@ -178,27 +175,21 @@ function TutorPageContent() {
           )}
 
           {hasActiveSearch && !hasSearchResults && (
-            <div
-              className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed p-8 text-center"
-              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-            >
+            <div className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed border-border-subtle p-8 text-center text-text-muted">
               Không tìm thấy khóa học phù hợp với từ khóa &quot;{rawQuery}&quot;.
             </div>
           )}
 
           {hasNothingToShow && (
-            <section
-              className="flex flex-col items-center gap-4 rounded-2xl border border-dashed p-10 text-center"
-              style={{ borderColor: "var(--border)" }}
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900/30">
+            <section className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border-subtle p-10 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300">
                 <Compass className="h-5 w-5" />
               </div>
               <div className="space-y-1">
-                <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
+                <p className="text-base font-semibold text-text-strong">
                   Chưa có khoá nào đang tham gia
                 </p>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                <p className="text-sm text-text-body">
                   Khám phá danh mục để chọn khoá phù hợp và bắt đầu học cùng AI Tutor.
                 </p>
               </div>
@@ -210,12 +201,11 @@ function TutorPageContent() {
           )}
 
           {filteredOthers.length > 0 && (
-            <div className="pt-2 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+            <div className="pt-2 text-center text-sm text-text-muted">
               Còn {filteredOthers.length} khoá khác trong danh mục.{" "}
               <Link
                 href="/tutor"
-                className="font-semibold underline"
-                style={{ color: "var(--color-primary-600)" }}
+                className="font-semibold text-primary-600 underline"
               >
                 Xem tất cả
               </Link>
