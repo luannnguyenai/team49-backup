@@ -163,6 +163,7 @@ export default function DashboardPage() {
   const totalHours = summary ? Math.round((summary.total_study_seconds ?? 0) / 3600) : 0;
   const avgScore = summary?.avg_score != null ? Math.round(summary.avg_score) : 0;
   const firstName = user?.full_name.split(" ")[0] ?? "bạn";
+  const noRecommendations = activeTab === "for-you" && filteredByTab.length === 0;
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 animate-fade-in">
@@ -260,7 +261,9 @@ export default function DashboardPage() {
             className="flex h-40 items-center justify-center rounded-xl border"
             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
-            Không có khóa học nào trong mục này.
+            {noRecommendations
+              ? "Chưa có gợi ý cá nhân hóa nào cho bạn."
+              : "Không có khóa học nào trong mục này."}
           </div>
         ) : (
           <>
