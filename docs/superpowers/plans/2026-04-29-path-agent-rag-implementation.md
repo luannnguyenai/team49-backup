@@ -40,6 +40,7 @@ Create:
 - `tests/services/test_agent_query_normalizer.py`
 - `tests/services/test_agent_search_service.py`
 - `tests/services/test_agent_requirement_service.py`
+- `tests/services/test_agent_unit_context_service.py`
 - `tests/services/test_agent_chat_service.py`
 - `tests/contract/test_agent_routes.py`
 
@@ -307,6 +308,32 @@ class AgentFallback(BaseModel):
     message: str
 
 
+class StartAssessmentActionRequest(BaseModel):
+    canonical_unit_ids: list[str] = Field(alias="canonicalUnitIds", min_length=1)
+    phase: AssessmentPhase
+    reason: str
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class RequestReplanActionRequest(BaseModel):
+    assessment_session_id: str | None = Field(default=None, alias="assessmentSessionId")
+    source_canonical_unit_ids: list[str] = Field(default_factory=list, alias="sourceCanonicalUnitIds")
+    reason: str
+    dry_run: bool = Field(default=True, alias="dryRun")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentActionResponse(BaseModel):
+    accepted: bool
+    rejected_reason: str | None = Field(default=None, alias="rejectedReason")
+    dry_run: bool = Field(default=True, alias="dryRun")
+    impact: dict | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class AgentChatResponse(BaseModel):
     conversation_id: str
     message_id: str
@@ -351,6 +378,29 @@ class UnitSearchResult(BaseModel):
 
 class UnitSearchResponse(BaseModel):
     results: list[UnitSearchResult]
+    trace: RetrievalTrace
+
+
+class TranscriptSnippet(BaseModel):
+    start_sec: int
+    end_sec: int
+    text: str
+    source: Literal["transcript", "summary", "key_point"]
+
+
+class UnitContextResponse(BaseModel):
+    canonical_unit_id: str
+    course_id: str
+    lecture_id: str | None = None
+    lecture_title: str | None = None
+    unit_name: str
+    summary: str | None = None
+    key_points: list[dict | str] = Field(default_factory=list)
+    kp_ids: list[str] = Field(default_factory=list)
+    learn_href: str | None = None
+    start_sec: int | None = None
+    end_sec: int | None = None
+    snippets: list[TranscriptSnippet] = Field(default_factory=list)
     trace: RetrievalTrace
 
 
@@ -569,6 +619,24 @@ async def test_get_unit_kp_concepts_skips_empty_ids():
 
     assert await repo.get_unit_kp_concepts([]) == []
     assert session.execute.await_count == 0
+
+
+@pytest.mark.asyncio
+async def test_get_agent_unit_context_skips_empty_id():
+    session = AsyncMock()
+    repo = CanonicalContentRepository(session)
+
+    assert await repo.get_agent_unit_context("") is None
+    assert session.execute.await_count == 0
+
+
+@pytest.mark.asyncio
+async def test_get_transcript_snippets_for_unit_skips_empty_id():
+    session = AsyncMock()
+    repo = CanonicalContentRepository(session)
+
+    assert await repo.get_transcript_snippets_for_unit("", max_snippets=3) == []
+    assert session.execute.await_count == 0
 ```
 
 - [ ] **Step 2: Run tests and verify failure**
@@ -589,7 +657,7 @@ Add imports:
 
 ```python
 from dataclasses import dataclass
-from sqlalchemy import String, cast, desc, literal, text
+from sqlalchemy import String, and_, cast, not_
 ```
 
 Add dataclasses after imports:
@@ -610,6 +678,21 @@ class RuntimeNavigationRow:
     course_slug: str | None
     unit_slug: str | None
     learn_href: str | None
+
+
+@dataclass(slots=True)
+class AgentUnitContextRow:
+    unit: CanonicalUnit
+    kp_rows: list[tuple[UnitKPMap, ConceptKP]]
+    navigation: RuntimeNavigationRow | None
+
+
+@dataclass(slots=True)
+class AgentTranscriptSnippetRow:
+    start_sec: int
+    end_sec: int
+    text: str
+    source: str
 ```
 
 Add methods inside `CanonicalContentRepository`:
@@ -626,6 +709,17 @@ Add methods inside `CanonicalContentRepository`:
             return []
 
         selected_lower = [course_id.lower() for course_id in course_ids]
+        hidden_filter = and_(
+            not_(CanonicalUnit.section_flags.contains(["logistics"])),
+            not_(CanonicalUnit.section_flags.contains(["admin"])),
+            not_(CanonicalUnit.section_flags.contains(["administrative"])),
+            not_(CanonicalUnit.section_flags.contains(["reference"])),
+            or_(
+                CanonicalUnit.content_type.is_(None),
+                CanonicalUnit.content_type.not_in(("logistics", "admin", "administrative", "reference")),
+            ),
+            CanonicalUnit.is_worth_learning.is_not(False),
+        )
         like_terms = [term for term in clean_query.lower().split() if len(term) >= 2][:8]
         like_filter = None
         for term in like_terms:
@@ -673,6 +767,7 @@ Add methods inside `CanonicalContentRepository`:
             .where(
                 func.lower(CanonicalUnit.course_id).in_(selected_lower),
                 CanonicalUnit.active.is_(True),
+                hidden_filter,
                 like_filter,
             )
             .order_by(CanonicalUnit.course_id, CanonicalUnit.lecture_order, CanonicalUnit.ordering_index)
@@ -684,6 +779,10 @@ Add methods inside `CanonicalContentRepository`:
             score = 1.0
             if clean_query.lower() in (unit.unit_name or "").lower():
                 score += 2.0
+            if getattr(unit, "content_type", None) in {"core_theory", "prerequisite", "foundation"}:
+                score += 0.5
+            if getattr(unit, "salience_score", None) in {"critical", "high"}:
+                score += 0.5
             if int(count or 0) > 0:
                 score += 0.25
             rows.append(AgentUnitSearchRow(unit=unit, quiz_count=int(count or 0), score=score))
@@ -727,6 +826,42 @@ Add methods inside `CanonicalContentRepository`:
             .where(UnitKPMap.unit_id.in_(canonical_unit_ids))
         )
         return list(result.all())
+
+    async def get_agent_unit_context(self, canonical_unit_id: str) -> AgentUnitContextRow | None:
+        if not canonical_unit_id:
+            return None
+        unit = await self.session.get(CanonicalUnit, canonical_unit_id)
+        if unit is None:
+            return None
+        kp_rows = await self.get_unit_kp_concepts([canonical_unit_id])
+        navigation = (await self.get_runtime_navigation_for_canonical_units([canonical_unit_id])).get(
+            canonical_unit_id
+        )
+        return AgentUnitContextRow(unit=unit, kp_rows=kp_rows, navigation=navigation)
+
+    async def get_transcript_snippets_for_unit(
+        self,
+        canonical_unit_id: str,
+        max_snippets: int = 3,
+    ) -> list[AgentTranscriptSnippetRow]:
+        if not canonical_unit_id:
+            return []
+        unit = await self.session.get(CanonicalUnit, canonical_unit_id)
+        if unit is None:
+            return []
+        clip = unit.video_clip_ref or {}
+        content_ref = unit.content_ref or {}
+        start_sec = int(clip.get("start_sec") or content_ref.get("start_sec") or 0)
+        end_sec = int(clip.get("end_sec") or content_ref.get("end_sec") or start_sec)
+        text_value = unit.summary or unit.description or unit.unit_name
+        return [
+            AgentTranscriptSnippetRow(
+                start_sec=start_sec,
+                end_sec=end_sec,
+                text=text_value,
+                source="summary",
+            )
+        ][:max_snippets]
 ```
 
 - [ ] **Step 4: Run repository tests**
@@ -938,7 +1073,10 @@ async def test_search_intersects_requested_courses_with_allowed_courses():
     )
 
     assert captured["course_ids"] == ["CS231n"]
-    assert response.trace.applied_filters == ["course_scope:CS231n"]
+    assert response.trace.applied_filters == [
+        "course_scope:CS231n",
+        "content_policy:exclude_hidden_reference_logistics",
+    ]
 
 
 @pytest.mark.asyncio
@@ -979,6 +1117,24 @@ async def test_search_returns_navigation_and_quiz_metadata():
     assert response.results[0].has_quiz_items is True
     assert response.results[0].learn_href == "/courses/cs231n/learn/lecture-05-seg6"
     assert response.results[0].navigation_resolution == "product_learning_unit"
+
+
+@pytest.mark.asyncio
+async def test_search_trace_records_content_policy_filter():
+    repo = SimpleNamespace()
+
+    async def search_agent_units(query, course_ids, limit):
+        return []
+
+    async def get_runtime_navigation_for_canonical_units(ids):
+        return {}
+
+    repo.search_agent_units = search_agent_units
+    repo.get_runtime_navigation_for_canonical_units = get_runtime_navigation_for_canonical_units
+
+    response = await UnitSearchService(repo).search(UnitSearchRequest(query="course intro"), ["CS230"])
+
+    assert "content_policy:exclude_hidden_reference_logistics" in response.trace.applied_filters
 ```
 
 - [ ] **Step 2: Run tests and verify failure**
@@ -1089,9 +1245,10 @@ class UnitSearchService:
                 query_expansions=normalized.expansions,
                 resolved_scope=request.scope or "current_path",
                 candidate_courses=scoped_course_ids,
-                applied_filters=[f"course_scope:{','.join(scoped_course_ids)}"]
-                if scoped_course_ids
-                else [],
+                applied_filters=(
+                    [f"course_scope:{','.join(scoped_course_ids)}"] if scoped_course_ids else []
+                )
+                + ["content_policy:exclude_hidden_reference_logistics"],
                 ranking_version="unit_search_v1",
                 runtime_navigation_resolution=nav_trace,
                 selected_unit_ids=canonical_ids,
@@ -1215,6 +1372,43 @@ async def test_requirement_service_maps_prerequisite_kp_back_to_source_unit():
 
     assert response.required_units[0].canonical_unit_id == "source-unit"
     assert response.required_units[0].required_kp_ids == ["kp-source"]
+
+
+@pytest.mark.asyncio
+async def test_requirement_service_ignores_reference_and_mention_only_targets():
+    target_unit = SimpleNamespace(canonical_unit_id="target-unit", content_type="reference")
+    target_kp = SimpleNamespace(
+        unit_id="target-unit",
+        kp_id="kp-target",
+        planner_role="support",
+        coverage_level="mention",
+    )
+    repo = SimpleNamespace()
+
+    async def get_linked_learning_units(course_ids):
+        return [target_unit]
+
+    async def get_unit_kp_rows(ids):
+        return [target_kp]
+
+    async def get_prerequisite_edges_for_kps(ids):
+        raise AssertionError("mention-only reference targets must not query prerequisite edges")
+
+    async def get_runtime_navigation_for_canonical_units(ids):
+        return {}
+
+    repo.get_linked_learning_units = get_linked_learning_units
+    repo.get_unit_kp_rows = get_unit_kp_rows
+    repo.get_prerequisite_edges_for_kps = get_prerequisite_edges_for_kps
+    repo.get_runtime_navigation_for_canonical_units = get_runtime_navigation_for_canonical_units
+
+    response = await PathRequirementService(repo).get_requirements(
+        PathRequirementsRequest(targetPathKey="nlp", targetCourseIds=["CS224n"], sourceCourseIds=["CS230"]),
+        allowed_course_ids=["CS224n", "CS230"],
+    )
+
+    assert response.required_units == []
+    assert "target_content_policy:core_only" in response.trace.applied_filters
 ```
 
 - [ ] **Step 2: Run tests and verify failure**
@@ -1251,6 +1445,22 @@ class PathRequirementService:
     def __init__(self, content_repo):
         self.content_repo = content_repo
 
+    def _eligible_unit(self, unit) -> bool:
+        flags = set(getattr(unit, "section_flags", None) or [])
+        content_type = str(getattr(unit, "content_type", "") or "").lower()
+        if flags.intersection({"logistics", "admin", "administrative", "reference"}):
+            return False
+        if content_type in {"logistics", "admin", "administrative", "reference"}:
+            return False
+        return getattr(unit, "is_worth_learning", True) is not False
+
+    def _target_kp_row(self, row) -> bool:
+        planner_role = str(getattr(row, "planner_role", "") or "").lower()
+        coverage_level = str(getattr(row, "coverage_level", "") or "").lower()
+        if coverage_level == "mention":
+            return False
+        return planner_role in {"main", "prereq", ""}
+
     async def get_requirements(
         self,
         request: PathRequirementsRequest,
@@ -1267,7 +1477,11 @@ class PathRequirementService:
             allowed_lower[c.lower()] for c in requested_sources if c.lower() in allowed_lower
         ]
 
-        target_units = await self.content_repo.get_linked_learning_units(target_courses)
+        target_units = [
+            unit
+            for unit in await self.content_repo.get_linked_learning_units(target_courses)
+            if self._eligible_unit(unit)
+        ]
         target_canonical_ids = [
             str(unit.canonical_unit_id)
             for unit in target_units
@@ -1278,20 +1492,31 @@ class PathRequirementService:
             {
                 row.kp_id
                 for row in target_kp_rows
-                if (getattr(row, "planner_role", None) in {"main", "prereq", None})
+                if self._target_kp_row(row)
             }
         )
 
-        edges = await self.content_repo.get_prerequisite_edges_for_kps(target_kp_ids)
-        prereq_kp_ids = sorted(
-            {
+        all_edges = []
+        prereq_kp_ids: set[str] = set()
+        frontier = target_kp_ids
+        for _ in range(request.prerequisite_depth):
+            if not frontier:
+                break
+            edges = await self.content_repo.get_prerequisite_edges_for_kps(frontier)
+            all_edges.extend(edges)
+            next_frontier = {
                 edge.source_kp_id
                 for edge in edges
-                if edge.target_kp_id in target_kp_ids
+                if edge.target_kp_id in frontier and edge.source_kp_id not in prereq_kp_ids
             }
-        )
+            prereq_kp_ids.update(next_frontier)
+            frontier = sorted(next_frontier)
 
-        source_units = await self.content_repo.get_linked_learning_units(source_courses)
+        source_units = [
+            unit
+            for unit in await self.content_repo.get_linked_learning_units(source_courses)
+            if self._eligible_unit(unit)
+        ]
         source_canonical_ids = [
             str(unit.canonical_unit_id)
             for unit in source_units
@@ -1300,8 +1525,12 @@ class PathRequirementService:
         source_kp_rows = await self.content_repo.get_unit_kp_rows(source_canonical_ids)
         unit_to_kps: dict[str, set[str]] = {}
         for row in source_kp_rows:
-            if row.kp_id in prereq_kp_ids and getattr(row, "planner_role", None) in {"main", "prereq", None}:
+            if row.kp_id in prereq_kp_ids and self._target_kp_row(row):
                 unit_to_kps.setdefault(row.unit_id, set()).add(row.kp_id)
+
+        mastery_by_kp = {}
+        if request.include_mastery and hasattr(self.content_repo, "get_mastery_lcb_by_kp_ids"):
+            mastery_by_kp = await self.content_repo.get_mastery_lcb_by_kp_ids(sorted(prereq_kp_ids))
 
         navigation = await RuntimeNavigationResolver(self.content_repo).resolve(list(unit_to_kps))
         units_by_canonical = {str(unit.canonical_unit_id): unit for unit in source_units}
@@ -1317,6 +1546,19 @@ class PathRequirementService:
                 )
             )
             unit = units_by_canonical.get(canonical_id)
+            mastery_values = [
+                mastery_by_kp[kp_id]
+                for kp_id in unit_to_kps[canonical_id]
+                if kp_id in mastery_by_kp
+            ]
+            min_mastery = min(mastery_values) if mastery_values else None
+            status = (
+                "already_mastered"
+                if min_mastery is not None and min_mastery >= 0.8
+                else "needs_review"
+                if min_mastery is not None and min_mastery >= 0.5
+                else "unassessed"
+            )
             required_units.append(
                 PathRequirementUnit(
                     canonical_unit_id=canonical_id,
@@ -1328,8 +1570,9 @@ class PathRequirementService:
                     unit_name=getattr(unit, "title", canonical_id),
                     required_kp_ids=sorted(unit_to_kps[canonical_id]),
                     prerequisite_for=target_kp_ids,
-                    status="unassessed",
-                    reasons=["prerequisite_kp_match"],
+                    mastery_lcb=min_mastery,
+                    status=status,
+                    reasons=["required_prerequisite", "prerequisite_kp_match"],
                 )
             )
 
@@ -1341,8 +1584,12 @@ class PathRequirementService:
                 selected_path=request.target_path_key,
                 selected_course_ids=target_courses,
                 prerequisite_depth=request.prerequisite_depth,
-                graph_edges_considered=len(edges),
-                applied_filters=[f"target_course_scope:{','.join(target_courses)}"],
+                graph_edges_considered=len(all_edges),
+                applied_filters=[
+                    f"target_course_scope:{','.join(target_courses)}",
+                    "target_content_policy:core_only",
+                    "kp_policy:main_prereq_not_mention",
+                ],
                 ranking_version="path_requirements_v1",
                 runtime_navigation_resolution=nav_trace,
             ),
@@ -1368,7 +1615,177 @@ git commit -m "feat: add path requirement service"
 
 ---
 
-### Task 7: Agent Chat Orchestrator
+### Task 7: Unit Context Service
+
+**Files:**
+- Create: `src/services/agent_unit_context_service.py`
+- Test: `tests/services/test_agent_unit_context_service.py`
+
+- [ ] **Step 1: Write failing tests**
+
+Create `tests/services/test_agent_unit_context_service.py`:
+
+```python
+from types import SimpleNamespace
+
+import pytest
+
+from src.services.agent_unit_context_service import AgentUnitContextService
+
+
+@pytest.mark.asyncio
+async def test_unit_context_returns_kps_navigation_and_snippets():
+    unit = SimpleNamespace(
+        unit_id="unit-a",
+        course_id="CS231n",
+        lecture_id="lecture-05",
+        lecture_title="Lecture 5",
+        unit_name="Receptive fields",
+        summary="How convolution kernels see local image regions.",
+        key_points=["local receptive field"],
+        video_clip_ref={"start_sec": 3200, "end_sec": 3340},
+    )
+    kp = SimpleNamespace(kp_id="kp-rf", name="Receptive field")
+    context_row = SimpleNamespace(
+        unit=unit,
+        kp_rows=[(SimpleNamespace(kp_id="kp-rf"), kp)],
+        navigation=SimpleNamespace(learn_href="/courses/cs231n/learn/lecture-05-seg6"),
+    )
+    repo = SimpleNamespace()
+
+    async def get_agent_unit_context(canonical_unit_id):
+        return context_row
+
+    async def get_transcript_snippets_for_unit(canonical_unit_id, max_snippets=3):
+        return [
+            SimpleNamespace(
+                start_sec=3200,
+                end_sec=3340,
+                text="Convolutional layers use local receptive fields.",
+                source="summary",
+            )
+        ]
+
+    repo.get_agent_unit_context = get_agent_unit_context
+    repo.get_transcript_snippets_for_unit = get_transcript_snippets_for_unit
+
+    response = await AgentUnitContextService(repo).get_context("unit-a")
+
+    assert response.canonical_unit_id == "unit-a"
+    assert response.kp_ids == ["kp-rf"]
+    assert response.learn_href == "/courses/cs231n/learn/lecture-05-seg6"
+    assert response.snippets[0].start_sec == 3200
+
+
+@pytest.mark.asyncio
+async def test_unit_context_raises_for_missing_unit():
+    repo = SimpleNamespace()
+
+    async def get_agent_unit_context(canonical_unit_id):
+        return None
+
+    repo.get_agent_unit_context = get_agent_unit_context
+    repo.get_transcript_snippets_for_unit = get_agent_unit_context
+
+    with pytest.raises(ValueError, match="canonical_unit_not_found"):
+        await AgentUnitContextService(repo).get_context("missing-unit")
+```
+
+- [ ] **Step 2: Run tests and verify failure**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_unit_context_service.py -q
+```
+
+Expected: FAIL with `ModuleNotFoundError`.
+
+- [ ] **Step 3: Implement service**
+
+Create `src/services/agent_unit_context_service.py`:
+
+```python
+from __future__ import annotations
+
+from uuid import uuid4
+
+from src.schemas.agent import RetrievalTrace, TranscriptSnippet, UnitContextResponse
+
+
+class AgentUnitContextService:
+    def __init__(self, content_repo):
+        self.content_repo = content_repo
+
+    async def get_context(
+        self,
+        canonical_unit_id: str,
+        max_snippets: int = 3,
+    ) -> UnitContextResponse:
+        context = await self.content_repo.get_agent_unit_context(canonical_unit_id)
+        if context is None:
+            raise ValueError("canonical_unit_not_found")
+
+        unit = context.unit
+        snippets = await self.content_repo.get_transcript_snippets_for_unit(
+            canonical_unit_id,
+            max_snippets=max_snippets,
+        )
+        kp_ids = [kp.kp_id for _, kp in context.kp_rows]
+        key_points = list(unit.key_points or [])
+        navigation = context.navigation
+
+        return UnitContextResponse(
+            canonical_unit_id=unit.unit_id,
+            course_id=unit.course_id,
+            lecture_id=unit.lecture_id,
+            lecture_title=unit.lecture_title,
+            unit_name=unit.unit_name,
+            summary=unit.summary,
+            key_points=key_points,
+            kp_ids=kp_ids,
+            learn_href=getattr(navigation, "learn_href", None),
+            start_sec=(unit.video_clip_ref or {}).get("start_sec"),
+            end_sec=(unit.video_clip_ref or {}).get("end_sec"),
+            snippets=[
+                TranscriptSnippet(
+                    start_sec=snippet.start_sec,
+                    end_sec=snippet.end_sec,
+                    text=snippet.text,
+                    source=snippet.source,
+                )
+                for snippet in snippets
+            ],
+            trace=RetrievalTrace(
+                trace_id=str(uuid4()),
+                normalized_query=canonical_unit_id,
+                resolved_scope="current_path",
+                ranking_version="unit_context_v1",
+                selected_unit_ids=[canonical_unit_id],
+            ),
+        )
+```
+
+- [ ] **Step 4: Run tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_unit_context_service.py -q
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/services/agent_unit_context_service.py tests/services/test_agent_unit_context_service.py
+git commit -m "feat: add agent unit context service"
+```
+
+---
+
+### Task 8: Agent Chat Orchestrator
 
 **Files:**
 - Create: `src/services/agent_chat_service.py`
@@ -1393,7 +1810,22 @@ async def test_chat_uses_path_requirements_for_required_parts_question():
     requirement_service = SimpleNamespace()
 
     async def get_requirements(request, allowed_course_ids):
-        return SimpleNamespace(required_units=[], trace=SimpleNamespace(trace_id="trace-req"))
+        return SimpleNamespace(
+            required_units=[
+                SimpleNamespace(
+                    canonical_unit_id="unit-a",
+                    course_id="CS230",
+                    unit_name="Backpropagation",
+                    learn_href="/courses/cs230/learn/lecture-02-seg4",
+                    required_kp_ids=["kp-backprop"],
+                )
+            ],
+            trace=SimpleNamespace(
+                trace_id="trace-req",
+                selected_course_ids=["CS224n"],
+                runtime_navigation_resolution=[],
+            ),
+        )
 
     requirement_service.get_requirements = get_requirements
     service = AgentChatService(search_service, requirement_service)
@@ -1404,8 +1836,10 @@ async def test_chat_uses_path_requirements_for_required_parts_question():
         is_reviewer=False,
     )
 
-    assert response.answer.confidence in {"grounded", "partial", "no_source"}
-    assert response.message_id
+    assert response.answer.confidence == "grounded"
+    assert response.citations[0].canonical_unit_id == "unit-a"
+    assert response.actions[0].type == "open_unit"
+    assert response.trace is not None
 
 
 @pytest.mark.asyncio
@@ -1486,6 +1920,26 @@ class AgentChatService:
             answer = "I checked the path requirement graph for NLP prerequisites."
             if not requirements.required_units:
                 answer = "I could not find required prerequisite units in the current scoped path."
+            citations = [
+                {
+                    "canonical_unit_id": unit.canonical_unit_id,
+                    "course_id": unit.course_id,
+                    "unit_name": unit.unit_name,
+                    "learn_href": unit.learn_href,
+                    "source": "planner",
+                }
+                for unit in requirements.required_units[:5]
+            ]
+            actions = [
+                {
+                    "type": "open_unit",
+                    "label": f"Open {unit.unit_name}",
+                    "learn_href": unit.learn_href,
+                    "canonical_unit_id": unit.canonical_unit_id,
+                }
+                for unit in requirements.required_units[:3]
+                if unit.learn_href
+            ]
             return AgentChatResponse(
                 conversation_id=request.conversation_id or str(uuid4()),
                 message_id=str(uuid4()),
@@ -1493,9 +1947,27 @@ class AgentChatService:
                     markdown=answer,
                     confidence="grounded" if requirements.required_units else "no_source",
                 ),
-                citations=[],
-                actions=[],
-                trace=None,
+                citations=citations,
+                actions=actions,
+                trace=RetrievalTrace(
+                    trace_id=requirements.trace.trace_id,
+                    intent="ask_what_next",
+                    raw_query=request.message,
+                    normalized_query=request.message,
+                    resolved_scope="current_path",
+                    selected_path="nlp",
+                    candidate_courses=getattr(requirements.trace, "selected_course_ids", []),
+                    applied_filters=getattr(requirements.trace, "applied_filters", []),
+                    ranking_version="path_requirements_v1",
+                    runtime_navigation_resolution=getattr(
+                        requirements.trace,
+                        "runtime_navigation_resolution",
+                        [],
+                    ),
+                    selected_unit_ids=[
+                        unit.canonical_unit_id for unit in requirements.required_units[:5]
+                    ],
+                ),
             )
 
         search = await self.search_service.search(
@@ -1575,7 +2047,7 @@ git commit -m "feat: add path agent chat orchestrator"
 
 ---
 
-### Task 8: Agent Router And App Wiring
+### Task 9: Agent Router And App Wiring
 
 **Files:**
 - Create: `src/routers/agent.py`
@@ -1587,15 +2059,34 @@ git commit -m "feat: add path agent chat orchestrator"
 Create `tests/contract/test_agent_routes.py`:
 
 ```python
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
+from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
 from src.api.app import app
+from src.database import get_async_db
+from src.dependencies.auth import get_current_user
 
 
 pytestmark = pytest.mark.anyio
+
+
+async def override_db():
+    yield object()
+
+
+@pytest.fixture(autouse=True)
+def agent_route_overrides():
+    user = SimpleNamespace(id=uuid4(), is_onboarded=True)
+    app.dependency_overrides[get_current_user] = lambda: user
+    app.dependency_overrides[get_async_db] = override_db
+    try:
+        yield user
+    finally:
+        app.dependency_overrides.clear()
 
 
 async def test_agent_chat_endpoint_returns_structured_response():
@@ -1609,13 +2100,15 @@ async def test_agent_chat_endpoint_returns_structured_response():
         "trace": None,
     }
 
-    with patch("src.routers.agent.agent_chat", new=AsyncMock(return_value=expected), create=True):
+    with (
+        patch("src.routers.agent.AgentChatService.chat", new=AsyncMock(return_value=expected)),
+        patch("src.routers.agent._allowed_course_ids_for_user", new=AsyncMock(return_value=["CS230", "CS231n"])),
+    ):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
             response = await client.post("/api/agent/chat", json={"message": "Where is CNN taught?"})
 
-    assert response.status_code in {200, 401}
-    if response.status_code == 200:
-        assert response.json()["answer"]["confidence"] == "grounded"
+    assert response.status_code == 200
+    assert response.json()["answer"]["confidence"] == "grounded"
 
 
 async def test_agent_search_rejects_include_hidden_contract():
@@ -1625,7 +2118,41 @@ async def test_agent_search_rejects_include_hidden_contract():
             json={"query": "logistics", "includeHidden": True},
         )
 
-    assert response.status_code in {401, 422}
+    assert response.status_code == 422
+
+
+async def test_agent_unit_context_endpoint_returns_context():
+    expected = {
+        "canonical_unit_id": "unit-a",
+        "course_id": "CS231n",
+        "lecture_id": "lecture-05",
+        "lecture_title": "Lecture 5",
+        "unit_name": "Receptive fields",
+        "summary": "Convolution receptive fields.",
+        "key_points": ["local receptive field"],
+        "kp_ids": ["kp-rf"],
+        "learn_href": "/courses/cs231n/learn/lecture-05-seg6",
+        "start_sec": 3200,
+        "end_sec": 3340,
+        "snippets": [],
+        "trace": {
+            "trace_id": "trace-context",
+            "normalized_query": "unit-a",
+            "resolved_scope": "current_path",
+            "ranking_version": "unit_context_v1",
+        },
+    }
+    with patch(
+        "src.routers.agent.AgentUnitContextService.get_context",
+        new=AsyncMock(return_value=expected),
+    ):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            response = await client.get("/api/agent/unit-context/unit-a")
+
+    assert response.status_code == 200
+    assert response.json()["canonical_unit_id"] == "unit-a"
+
+
 ```
 
 - [ ] **Step 2: Run route tests and verify failure**
@@ -1651,29 +2178,31 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
 from src.models.user import User
+from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.schemas.agent import (
     AgentChatRequest,
     AgentChatResponse,
     PathRequirementsRequest,
     PathRequirementsResponse,
+    UnitContextResponse,
     UnitSearchRequest,
     UnitSearchResponse,
 )
 from src.services.agent_chat_service import AgentChatService
 from src.services.agent_requirement_service import PathRequirementService
 from src.services.agent_search_service import UnitSearchService
+from src.services.agent_unit_context_service import AgentUnitContextService
 
 
 agent_router = APIRouter(prefix="/api/agent", tags=["Path Agent"])
 
 
-def _allowed_course_ids_for_user(user: User) -> list[str]:
-    profile = getattr(user, "goal_preferences", None) or {}
-    selected = profile.get("selected_course_ids") if isinstance(profile, dict) else None
-    if selected:
-        return [str(course_id) for course_id in selected]
-    return ["CS230", "CS231n", "CS224n"]
+async def _allowed_course_ids_for_user(user: User, db: AsyncSession) -> list[str]:
+    goal = await GoalPreferenceRepository(db).get_by_user_id(user.id)
+    if goal and goal.selected_course_ids:
+        return [str(course_id) for course_id in goal.selected_course_ids]
+    return []
 
 
 @agent_router.post("/chat", response_model=AgentChatResponse)
@@ -1688,7 +2217,7 @@ async def agent_chat(
     service = AgentChatService(search, requirements)
     return await service.chat(
         body,
-        allowed_course_ids=_allowed_course_ids_for_user(user),
+        allowed_course_ids=await _allowed_course_ids_for_user(user, db),
         is_reviewer=False,
     )
 
@@ -1701,7 +2230,7 @@ async def agent_search_units(
 ) -> UnitSearchResponse:
     return await UnitSearchService(CanonicalContentRepository(db)).search(
         body,
-        allowed_course_ids=_allowed_course_ids_for_user(user),
+        allowed_course_ids=await _allowed_course_ids_for_user(user, db),
     )
 
 
@@ -1713,8 +2242,43 @@ async def agent_path_requirements(
 ) -> PathRequirementsResponse:
     return await PathRequirementService(CanonicalContentRepository(db)).get_requirements(
         body,
-        allowed_course_ids=_allowed_course_ids_for_user(user),
+        allowed_course_ids=await _allowed_course_ids_for_user(user, db),
     )
+
+
+@agent_router.get("/unit-context/{canonical_unit_id}", response_model=UnitContextResponse)
+async def agent_unit_context(
+    canonical_unit_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> UnitContextResponse:
+    return await AgentUnitContextService(CanonicalContentRepository(db)).get_context(canonical_unit_id)
+
+
+@agent_router.get(
+    "/transcript-snippets/{canonical_unit_id}",
+    response_model=list[dict],
+)
+async def agent_transcript_snippets(
+    canonical_unit_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> list[dict]:
+    snippets = await CanonicalContentRepository(db).get_transcript_snippets_for_unit(
+        canonical_unit_id,
+        max_snippets=5,
+    )
+    return [
+        {
+            "start_sec": snippet.start_sec,
+            "end_sec": snippet.end_sec,
+            "text": snippet.text,
+            "source": snippet.source,
+        }
+        for snippet in snippets
+    ]
+
+
 ```
 
 Modify `src/api/app.py` imports:
@@ -1744,7 +2308,7 @@ Expected: PASS.
 Run:
 
 ```bash
-pytest tests/test_agent_schema_contract.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_chat_service.py tests/contract/test_agent_routes.py -q
+pytest tests/test_agent_schema_contract.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
 ```
 
 Expected: PASS.
@@ -1758,11 +2322,12 @@ git commit -m "feat: expose path agent api routes"
 
 ---
 
-### Task 9: Replan And Assessment Action Stubs
+### Task 10: Replan And Assessment Action Endpoints
 
 **Files:**
 - Modify: `src/schemas/agent.py`
 - Create: `src/services/agent_action_service.py`
+- Modify: `src/routers/agent.py`
 - Test: `tests/services/test_agent_action_service.py`
 
 - [ ] **Step 1: Write failing tests**
@@ -1844,26 +2409,92 @@ async def validate_replan_request(request, user_id: str) -> ReplanValidationResu
     return ReplanValidationResult(accepted=True)
 ```
 
-- [ ] **Step 4: Run tests**
+- [ ] **Step 4: Wire action endpoints**
+
+Modify `src/routers/agent.py` imports:
+
+```python
+from src.schemas.agent import (
+    AgentActionResponse,
+    RequestReplanActionRequest,
+    StartAssessmentActionRequest,
+)
+from src.services.agent_action_service import validate_replan_request
+```
+
+Add endpoints:
+
+```python
+@agent_router.post("/actions/start-assessment", response_model=AgentActionResponse)
+async def agent_start_assessment(
+    body: StartAssessmentActionRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AgentActionResponse:
+    return AgentActionResponse(
+        accepted=True,
+        dryRun=False,
+        impact={
+            "phase": body.phase,
+            "canonical_unit_ids": body.canonical_unit_ids,
+        },
+    )
+
+
+@agent_router.post("/actions/request-replan", response_model=AgentActionResponse)
+async def agent_request_replan(
+    body: RequestReplanActionRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AgentActionResponse:
+    validation = await validate_replan_request(body, user_id=str(user.id))
+    return AgentActionResponse(
+        accepted=validation.accepted,
+        rejectedReason=validation.rejected_reason,
+        dryRun=body.dry_run,
+        impact={"mode": "dry_run_only"} if validation.accepted and body.dry_run else None,
+    )
+```
+
+Append to `tests/contract/test_agent_routes.py`:
+
+```python
+async def test_agent_action_endpoints_exist():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        response = await client.post(
+            "/api/agent/actions/request-replan",
+            json={
+                "assessmentSessionId": "session-a",
+                "sourceCanonicalUnitIds": ["unit-a"],
+                "reason": "assessment_completed",
+                "dryRun": True,
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["accepted"] is True
+```
+
+- [ ] **Step 5: Run tests**
 
 Run:
 
 ```bash
-pytest tests/services/test_agent_action_service.py -q
+pytest tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
 ```
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/services/agent_action_service.py tests/services/test_agent_action_service.py
+git add src/schemas/agent.py src/services/agent_action_service.py src/routers/agent.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py
 git commit -m "feat: add agent action validation stubs"
 ```
 
 ---
 
-### Task 10: Documentation And Final Verification
+### Task 11: Documentation And Final Verification
 
 **Files:**
 - Modify: `docs/superpowers/plans/2026-04-29-path-agent-rag-plan.md`
@@ -1884,7 +2515,7 @@ Implementation tasks are tracked in `docs/superpowers/plans/2026-04-29-path-agen
 Run:
 
 ```bash
-pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
+pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
 ```
 
 Expected: PASS.
@@ -1922,17 +2553,18 @@ git commit -m "docs: link path agent implementation plan"
 
 Spec coverage:
 
-- Chat/orchestration endpoint: Task 7 and Task 8.
-- Trace exposure and full-trace restriction: Task 1 and Task 7.
+- Chat/orchestration endpoint: Task 8 and Task 9.
+- Trace exposure and full-trace restriction: Task 1 and Task 8.
 - Unit-centered search with query normalization: Task 2, Task 3, Task 5.
 - Runtime navigation data: Task 3, Task 4, Task 5.
-- Path requirements/prerequisite graph: Task 6.
-- Assessment/replan action guardrails: Task 1, Task 7, Task 9.
-- Public API contracts: Task 8.
-- Verification and docs handoff: Task 10.
+- Unit context and transcript snippets: Task 1, Task 3, Task 7, Task 9.
+- Path requirements/prerequisite graph with content/KP policy and mastery overlay: Task 6.
+- Assessment/replan action guardrails: Task 1, Task 8, Task 10.
+- Public API contracts: Task 9.
+- Verification and docs handoff: Task 11.
 
 Known V1 limits:
 
-- Search implementation starts with deterministic LIKE-style matching for tests and can be upgraded to PostgreSQL `tsvector`/BM25 ranking without changing API shape.
+- Search implementation starts with deterministic LIKE-style matching plus content-policy filters and can be upgraded to PostgreSQL `tsvector`/BM25 ranking without changing API shape.
 - Chat response is template-based in V1; LLM wording can be added behind `AgentChatService` once tool traces are stable.
-- Replan mutation is intentionally not implemented; Task 9 adds validation stubs only.
+- Replan mutation is intentionally not implemented; Task 10 exposes backend-mediated validation and dry-run action contracts only.
