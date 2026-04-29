@@ -9,7 +9,7 @@ describe("CourseCatalog presentational hygiene", () => {
     render(<CourseCatalog items={[]} />);
 
     expect(
-      screen.getByText("Chưa có khóa học nào trong mục này."),
+      screen.getByText("There are no courses in this section yet."),
     ).toBeInTheDocument();
   });
 
@@ -17,15 +17,15 @@ describe("CourseCatalog presentational hygiene", () => {
     render(
       <CourseCatalog
         items={[]}
-        emptyMessage="Không tìm thấy khóa học phù hợp với từ khóa của bạn."
+        emptyMessage="No courses matched your keyword."
       />,
     );
 
     expect(
-      screen.getByText("Không tìm thấy khóa học phù hợp với từ khóa của bạn."),
+      screen.getByText("No courses matched your keyword."),
     ).toBeInTheDocument();
     expect(
-      screen.queryByText("Chưa có khóa học nào trong mục này."),
+      screen.queryByText("There are no courses in this section yet."),
     ).not.toBeInTheDocument();
   });
 
