@@ -3,6 +3,21 @@ $sourceBranch = "ed-fix-5"
 $remote = "origin"
 $progressFile = ".pr-cherry-pick-progress.json"
 
+# Paste list từ git cherry -v vào đây
+$commitLines = @"
++ bfde608f37c07da635ead91a8356ee2b9ebc2536 Update page.tsx
++ 790882ee03b7f7660bc163b67fbf112be03b0a6c Update page.tsx
++ 50e9ebdb5d3aa10f9ecbc5f7f0a87c3dd9310e46 Update setup.ts
++ f779d3db9c74fc80b63e2fdcd04f298387c929b1 phase 5.2
++ c355d1645141a635491458cb0ad1ec7701f2fbbf fix bug drop down push nav bar
+- 981a1e9301dbf89f5445de96ac8e3ef6ed0775f2 Update create-prs-per-commit.ps1
++ f5262da110a4f4e36e781d7c1d1b8de342619872 fix phase 9 eval
++ 4749c968b646f6a110125eeded91549b3d35b5c9 fix log out not redirect to landing page
++ 00505e1c2546228601fe82b4d55fb92c83124cbc fix phase 9,2
++ 3ec04ae132be902661c18c22b0497a819df0f86e fix seach 5
++ 4616a015c9f8e4b7f37f36a865fa93addf920de8 Update unit.test.tsx
+"@
+
 function Save-Progress {
   param(
     [string]$LastMergedCommit,
@@ -37,15 +52,24 @@ Abort-InProgressGitOps
 git fetch $remote
 
 $baseRef = "$remote/$baseBranch"
-$sourceRef = "$remote/$sourceBranch"
 
-# Lấy toàn bộ commit từ base -> source, cũ nhất -> mới nhất
-$commits = @(git log --reverse --format="%h" "$baseRef..$sourceRef")
+# Chỉ lấy commit có dấu +
+$commits = @(
+  $commitLines -split "`n" |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { $_ -match '^\+\s+[0-9a-f]{7,40}\s+' } |
+    ForEach-Object {
+      ($_ -split '\s+')[1]
+    }
+)
 
 if ($commits.Count -eq 0) {
-  Write-Host "No commits found between $baseRef and $sourceRef." -ForegroundColor Yellow
+  Write-Host "No unmerged commits found in provided list." -ForegroundColor Yellow
   exit 0
 }
+
+Write-Host "Commits to process:" -ForegroundColor Cyan
+$commits | ForEach-Object { Write-Host "  $_" }
 
 $progress = Load-Progress
 $startIndex = 0
@@ -67,12 +91,6 @@ if ($progress -ne $null -and $progress.sourceBranch -eq $sourceBranch -and $prog
   }
 }
 
-if ($startIndex -ge $commits.Count) {
-  Write-Host "All commits already processed." -ForegroundColor Green
-  Remove-Item $progressFile -ErrorAction SilentlyContinue
-  exit 0
-}
-
 for ($i = $startIndex; $i -lt $commits.Count; $i++) {
   $commit = $commits[$i]
 
@@ -83,16 +101,10 @@ for ($i = $startIndex; $i -lt $commits.Count; $i++) {
   Save-Progress -LastMergedCommit $null -FailedCommit $commit
 
   git checkout $baseBranch
-  if ($LASTEXITCODE -ne 0) {
-    Write-Host "Cannot checkout $baseBranch. Stopping." -ForegroundColor Red
-    exit 1
-  }
+  if ($LASTEXITCODE -ne 0) { exit 1 }
 
   git pull $remote $baseBranch
-  if ($LASTEXITCODE -ne 0) {
-    Write-Host "Cannot pull latest $baseBranch. Stopping." -ForegroundColor Red
-    exit 1
-  }
+  if ($LASTEXITCODE -ne 0) { exit 1 }
 
   $subject = git log -1 --pretty=%s $commit
 
@@ -104,11 +116,12 @@ for ($i = $startIndex; $i -lt $commits.Count; $i++) {
     $safeName = "commit"
   }
 
-  $branchName = "pr/$commit-$safeName"
+  $shortCommit = $commit.Substring(0, 8)
+  $branchName = "pr/$shortCommit-$safeName"
 
   git checkout -B $branchName $baseRef
   if ($LASTEXITCODE -ne 0) {
-    Write-Host "Cannot create branch $branchName. Stopping." -ForegroundColor Red
+    Write-Host "Cannot create branch $branchName. Rerun will resume from $commit." -ForegroundColor Red
     exit 1
   }
 
@@ -122,7 +135,7 @@ for ($i = $startIndex; $i -lt $commits.Count; $i++) {
     git cherry-pick --continue
 
     if ($LASTEXITCODE -ne 0) {
-      Write-Host "Cannot auto-resolve commit $commit. Progress saved. Rerun will resume from this commit." -ForegroundColor Red
+      Write-Host "Cannot auto-resolve commit $commit. Rerun will resume from this commit." -ForegroundColor Red
       Save-Progress -LastMergedCommit $null -FailedCommit $commit
       exit 1
     }
@@ -130,8 +143,7 @@ for ($i = $startIndex; $i -lt $commits.Count; $i++) {
 
   git push -u $remote $branchName --force
   if ($LASTEXITCODE -ne 0) {
-    Write-Host "Push failed for $branchName. Progress saved. Rerun will resume from this commit." -ForegroundColor Red
-    Save-Progress -LastMergedCommit $null -FailedCommit $commit
+    Write-Host "Push failed for $branchName. Rerun will resume from $commit." -ForegroundColor Red
     exit 1
   }
 
@@ -148,7 +160,7 @@ for ($i = $startIndex; $i -lt $commits.Count; $i++) {
   gh pr merge $branchName --merge --delete-branch
 
   if ($LASTEXITCODE -ne 0) {
-    Write-Host "Merge failed for $branchName. Progress saved. Rerun will resume from this commit." -ForegroundColor Red
+    Write-Host "Merge failed for $branchName. Rerun will resume from $commit." -ForegroundColor Red
     Save-Progress -LastMergedCommit $null -FailedCommit $commit
     exit 1
   }
@@ -156,7 +168,6 @@ for ($i = $startIndex; $i -lt $commits.Count; $i++) {
   Write-Host "Merged $commit successfully." -ForegroundColor Green
 
   Save-Progress -LastMergedCommit $commit -FailedCommit $null
-
   git fetch $remote
 }
 
@@ -165,4 +176,4 @@ git pull $remote $baseBranch
 
 Remove-Item $progressFile -ErrorAction SilentlyContinue
 
-Write-Host "`nAll commits processed and merged." -ForegroundColor Green
+Write-Host "`nAll provided unmerged commits processed and merged." -ForegroundColor Green
