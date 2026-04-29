@@ -715,12 +715,28 @@ describe("learning unit page (US3)", () => {
   });
 
   it("returns to the landing page after logout from top nav", async () => {
+    let resolveLogout!: () => void;
+    authStoreMock.logout.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveLogout = resolve;
+        }),
+    );
+
+    navigationMock.pathname = "/dashboard";
+
     render(<TopNav />);
 
     fireEvent.click(screen.getByRole("button", { name: /đăng xuất/i }));
 
     expect(authStoreMock.logout).toHaveBeenCalledTimes(1);
-    expect(navigationMock.router.push).toHaveBeenCalledWith("/");
+    expect(navigationMock.router.push).not.toHaveBeenCalled();
+
+    resolveLogout();
+
+    await waitFor(() => {
+      expect(navigationMock.router.push).toHaveBeenCalledWith("/");
+    });
   });
 
   it("shows the search input on non-course routes as a global nav control", async () => {
@@ -833,4 +849,5 @@ describe("learning unit page (US3)", () => {
 
     expect(navigationMock.router.push).toHaveBeenCalledWith("/courses/cs224n");
   });
+
 });

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import Sidebar from "@/components/layout/Sidebar";
@@ -46,12 +46,26 @@ describe("Sidebar logout routing", () => {
     navigationMock.pathname = "/dashboard";
   });
 
-  it("returns the user to the landing page after logout", () => {
+  it("returns the user to the landing page after logout", async () => {
+    let resolveLogout!: () => void;
+    authStoreMock.logout.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveLogout = resolve;
+        }),
+    );
+
     render(<Sidebar mobileOpen={false} onMobileClose={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Đăng xuất" }));
 
     expect(authStoreMock.logout).toHaveBeenCalledTimes(1);
-    expect(navigationMock.router.push).toHaveBeenCalledWith("/");
+    expect(navigationMock.router.push).not.toHaveBeenCalled();
+
+    resolveLogout();
+
+    await waitFor(() => {
+      expect(navigationMock.router.push).toHaveBeenCalledWith("/");
+    });
   });
 });

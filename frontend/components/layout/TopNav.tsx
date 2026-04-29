@@ -250,8 +250,8 @@ function TopNavContent() {
   const { resolvedTheme, setTheme } = useTheme();
   const isAuthenticated = user !== null;
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/");
   };
 
