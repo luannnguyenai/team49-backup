@@ -44,8 +44,10 @@ vi.mock("next/navigation", async () => {
 });
 
 describe("tutor page search", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    const { resetCachedAllCourseCatalog } = await import("@/lib/course-catalog-cache");
+    resetCachedAllCourseCatalog();
     navigationMock.searchParams = new URLSearchParams();
     window.sessionStorage.clear();
     window.sessionStorage.setItem(
