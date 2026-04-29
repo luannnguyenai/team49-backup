@@ -1,30 +1,39 @@
-# Product-Wide Visual Rebrand Implementation Plan
+# Phase 1 Product Color System Rebrand Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the current mixed visual language with one unified product-wide color system derived from the landing page, while isolating all changes to design tokens, styling classes, and presentational components only.
+**Goal:** Unify the landing page and app UI under one shared color system derived from the landing palette, while isolating all work to tokens, utilities, and presentational styling only.
 
-**Architecture:** This rebrand is token-first. The implementation starts by defining a new semantic color layer in `frontend/app/globals.css` and updating the Tailwind bridge in `frontend/tailwind.config.ts`, then migrates shared UI primitives and shell components before touching page-level hard-coded colors. No API contracts, state logic, routing, business logic, or backend behavior may change.
+**Architecture:** This is a token-first, color-only rebrand. The implementation defines a semantic color layer in `frontend/app/globals.css`, exposes those semantics through Tailwind utilities in `frontend/tailwind.config.ts`, migrates shared primitives and shells to those utilities, and then repaints page-level hard-coded color usage. No API contracts, handlers, routing, state, or business logic may change.
 
-**Tech Stack:** Next.js 14 App Router, React 18, TypeScript 5, Tailwind CSS, CSS custom properties, `next-themes`
+**Tech Stack:** Next.js 14 App Router, React 18, TypeScript 5, Tailwind CSS, CSS custom properties, `next-themes`, Vitest, Testing Library
 
 ---
+
+## Scope
+
+- This plan covers **color system rebranding only**.
+- It does **not** cover typography, spacing, copywriting, information architecture, or behavior redesign.
+- This is **Phase 1**, not a full end-to-end redesign.
 
 ## Constraints
 
 - Only the design language may change.
-- Do not modify backend code, API contracts, data flow, state management, routing semantics, or business logic.
-- Do not change button handlers, form submission logic, auth logic, or fetch behavior.
+- Do not modify backend code, API contracts, fetch behavior, form submission logic, auth behavior, routing semantics, or state management.
+- Do not change button handlers, link destinations, search behavior, or presenter logic.
 - Keep success, warning, and error semantics distinct from the new brand palette.
-- Light mode is the primary target. Dark mode should remain stable and readable, but deep dark-mode redesign is out of scope for this pass.
+- Light mode is the primary target.
+- Dark mode may receive token plumbing required for safety, but no deep visual redesign is in scope.
 
 ## Target Design Language
 
 - **Base neutrals:** `slate-50`, `white`, `slate-100`, `slate-950`, `slate-700`, `slate-500`
-- **Primary brand axis:** `indigo -> cyan`
-- **Accent axis:** `cyan`
-- **Gradient tail / supportive accent:** `teal`
-- **Visual principle:** Most UI remains neutral; saturated color appears only in CTA, accents, highlights, and hero surfaces.
+- **Primary action color:** cyan-led brand primary
+- **Accent color:** cyan
+- **Depth/supportive color:** indigo
+- **Gradient tail:** teal
+- **Usage rule:** Most UI remains neutral; saturated color is reserved for primary actions, accents, highlights, and selected hero surfaces.
+- **Primary button rule:** standard `.btn-primary` is flat brand color; gradients are reserved for explicit hero treatments only.
 
 ## File Structure
 
@@ -59,74 +68,64 @@
 - Modify: `frontend/app/(protected)/history/page.tsx`
 - Modify: `frontend/app/tutor/page.tsx`
 
-**Optional follow-up sweep if color debt remains**
-- Inspect and modify only if needed: `frontend/app/assessment/page.tsx`
-- Inspect and modify only if needed: `frontend/app/module-test/[sectionId]/results/page.tsx`
-- Inspect and modify only if needed: `frontend/components/learn/LearningUnitShell.tsx`
-- Inspect and modify only if needed: `frontend/components/learn/InContextTutor.tsx`
-
 **Verification**
-- Create: `frontend/tests/unit/ui/theme-tokens.test.ts`
+- Create: `frontend/tests/unit/ui/button-theme.test.tsx`
 - Create: `frontend/tests/unit/layout/topnav-theme.test.tsx`
 - Create: `frontend/tests/unit/course/course-status-badge-theme.test.tsx`
 
 ## Non-Goals
 
-- No redesign of information architecture
+- No typography scale redesign
+- No spacing system redesign
 - No copy rewrite
-- No component behavior changes
-- No accessibility refactor beyond preserving or improving color contrast and focus visibility
-- No attempt to make dark mode visually match landing page one-to-one
+- No information architecture changes
+- No business-logic cleanup
+- No dark-mode restyling beyond safety and regression control
 
-### Task 1: Define Semantic Brand Tokens
+## Implementation Rules
+
+- Preserve the full `primary-50 ... primary-950` ramp in Tailwind. Re-tint it if needed, but do not remove steps because the existing codebase already depends on them.
+- Register semantic Tailwind colors for text and surfaces so page adoption uses classes like `bg-surface-page`, `bg-surface-card`, `text-text-strong`, `text-text-body`, `text-text-muted`, `bg-brand-accent-soft`, `text-brand-accent`.
+- Do not add new `style={{ color: "var(--...)" }}` usage unless there is no practical class-based option.
+- Do not hard-code `bg-cyan-*`, `text-cyan-*`, or similar brand literals in adoption tasks when semantic utilities can express the same intent.
+- Do not apply gradients to every standard primary button.
+
+### Task 1: Define Semantic Brand Tokens and Tailwind Utilities
 
 **Files:**
 - Modify: `frontend/app/globals.css`
 - Modify: `frontend/tailwind.config.ts`
-- Test: `frontend/tests/unit/ui/theme-tokens.test.ts`
+- Test: `frontend/tests/unit/ui/button-theme.test.tsx`
 
-- [ ] **Step 1: Write the failing token presence test**
+- [ ] **Step 1: Write the failing render-based token-consumption test**
 
-```ts
+```tsx
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
+import Button from "@/components/ui/Button";
 
-describe("theme token contract", () => {
-  it("defines the product-wide light-mode brand tokens", () => {
-    const css = fs.readFileSync(
-      path.join(process.cwd(), "app/globals.css"),
-      "utf8",
-    );
+describe("Button theme contract", () => {
+  it("keeps the primary button on the semantic button class", () => {
+    render(<Button>Continue</Button>);
 
-    expect(css).toContain("--surface-page:");
-    expect(css).toContain("--surface-card:");
-    expect(css).toContain("--surface-elevated:");
-    expect(css).toContain("--text-strong:");
-    expect(css).toContain("--text-body:");
-    expect(css).toContain("--text-muted:");
-    expect(css).toContain("--brand-primary:");
-    expect(css).toContain("--brand-primary-hover:");
-    expect(css).toContain("--brand-accent:");
-    expect(css).toContain("--brand-accent-soft:");
-    expect(css).toContain("--ring-brand:");
-    expect(css).toContain("--shadow-brand-soft:");
+    const button = screen.getByRole("button", { name: "Continue" });
+    expect(button.className).toContain("btn-primary");
   });
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run test to verify the baseline**
 
-Run: `npm test -- --run frontend/tests/unit/ui/theme-tokens.test.ts`
+Run: `npm test -- --run frontend/tests/unit/ui/button-theme.test.tsx`
 
-Expected: FAIL because the new semantic token names do not exist yet.
+Expected: PASS baseline. This is a guard that later token and utility changes must continue to flow through the shared button primitive.
 
-- [ ] **Step 3: Add the semantic token layer and Tailwind bridge**
+- [ ] **Step 3: Add the semantic token layer and semantic Tailwind bridge**
 
 ```css
 :root {
   --surface-page: #f8fafc;
-  --surface-card: rgba(255, 255, 255, 0.92);
+  --surface-card: #ffffff;
   --surface-elevated: #ffffff;
   --surface-accent-soft: #ecfeff;
   --text-strong: #020617;
@@ -164,15 +163,37 @@ Expected: FAIL because the new semantic token names do not exist yet.
 ```ts
 colors: {
   primary: {
-    500: "#0891b2",
+    50: "#ecfeff",
+    100: "#cffafe",
+    200: "#a5f3fc",
+    300: "#67e8f9",
+    400: "#22d3ee",
+    500: "#06b6d4",
     600: "#0891b2",
     700: "#0e7490",
+    800: "#155e75",
+    900: "#164e63",
+    950: "#083344",
   },
   brand: {
     indigo: "#4f46e5",
     cyan: "#06b6d4",
     teal: "#2dd4bf",
     ink: "#020617",
+  },
+  surface: {
+    page: "var(--surface-page)",
+    card: "var(--surface-card)",
+    elevated: "var(--surface-elevated)",
+    "accent-soft": "var(--surface-accent-soft)",
+  },
+  text: {
+    strong: "var(--text-strong)",
+    body: "var(--text-body)",
+    muted: "var(--text-muted)",
+  },
+  border: {
+    subtle: "var(--border-subtle)",
   },
 },
 boxShadow: {
@@ -181,17 +202,17 @@ boxShadow: {
 },
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 4: Re-run the button contract test**
 
-Run: `npm test -- --run frontend/tests/unit/ui/theme-tokens.test.ts`
+Run: `npm test -- --run frontend/tests/unit/ui/button-theme.test.tsx`
 
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add frontend/app/globals.css frontend/tailwind.config.ts frontend/tests/unit/ui/theme-tokens.test.ts
-git commit -m "design: add semantic brand token layer"
+git add frontend/app/globals.css frontend/tailwind.config.ts frontend/tests/unit/ui/button-theme.test.tsx
+git commit -m "design: add semantic brand tokens and tailwind utilities"
 ```
 
 ### Task 2: Re-theme Shared Primitives Without Changing Behavior
@@ -201,93 +222,80 @@ git commit -m "design: add semantic brand token layer"
 - Modify: `frontend/components/ui/Button.tsx`
 - Modify: `frontend/components/ui/Input.tsx`
 - Modify: `frontend/components/ui/LoadingSpinner.tsx`
-- Test: `frontend/tests/unit/ui/theme-tokens.test.ts`
+- Test: `frontend/tests/unit/ui/button-theme.test.tsx`
 
-- [ ] **Step 1: Write the failing primitive-style assertions**
+- [ ] **Step 1: Write the failing class-contract test for button variants**
 
-```ts
+```tsx
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
+import Button from "@/components/ui/Button";
 
-describe("primitive brand usage", () => {
-  it("maps button and input utility classes to semantic brand tokens", () => {
-    const css = fs.readFileSync(
-      path.join(process.cwd(), "app/globals.css"),
-      "utf8",
+describe("Button variant contract", () => {
+  it("keeps primary and secondary variants mapped to shared utility classes", () => {
+    render(
+      <>
+        <Button>Primary</Button>
+        <Button variant="secondary">Secondary</Button>
+      </>,
     );
 
-    expect(css).toContain(".btn-primary");
-    expect(css).toContain("var(--brand-primary)");
-    expect(css).toContain("var(--brand-primary-hover)");
-    expect(css).toContain("var(--ring-brand)");
-    expect(css).toContain(".input-base:focus");
+    expect(screen.getByRole("button", { name: "Primary" }).className).toContain("btn-primary");
+    expect(screen.getByRole("button", { name: "Secondary" }).className).toContain("btn-secondary");
   });
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run test to verify the baseline**
 
-Run: `npm test -- --run frontend/tests/unit/ui/theme-tokens.test.ts`
+Run: `npm test -- --run frontend/tests/unit/ui/button-theme.test.tsx`
 
-Expected: FAIL because the utilities still point to the old `primary-*` and neutral focus styling.
+Expected: PASS baseline
 
-- [ ] **Step 3: Update primitive styling only**
+- [ ] **Step 3: Update primitive styling to semantic utilities and flat primary buttons**
 
 ```css
 .card {
-  @apply rounded-xl border p-6;
-  background-color: var(--surface-card);
+  @apply rounded-xl border p-6 bg-surface-card shadow-card;
   border-color: var(--border-subtle);
-  box-shadow: var(--shadow-brand-soft);
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
-  background: linear-gradient(135deg, var(--brand-primary-strong), var(--brand-primary));
-}
-
-.btn-primary:hover {
-  filter: brightness(0.96);
-}
-
-.btn-primary:focus-visible {
-  box-shadow: 0 0 0 3px var(--ring-brand);
+  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+  border-color: transparent;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
-  background-color: rgba(255, 255, 255, 0.78);
+  @apply inline-flex items-center justify-center gap-2 rounded-lg border bg-surface-card px-4 py-2.5 text-sm font-semibold text-text-body transition-all duration-150 hover:bg-surface-page active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
   border-color: var(--border-subtle);
-  color: var(--text-body);
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-text-body transition-all duration-150 hover:bg-surface-page active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2;
+}
+
+.input-base {
+  @apply w-full rounded-lg border bg-surface-card px-3.5 py-2.5 text-sm text-text-strong outline-none transition-all duration-150;
+  border-color: var(--border-subtle);
 }
 
 .input-base:focus {
-  border-color: var(--brand-accent);
+  @apply border-primary-500;
   box-shadow: 0 0 0 3px var(--ring-brand);
 }
 ```
 
-```tsx
-const variantClass: Record<Variant, string> = {
-  primary: "btn-primary",
-  secondary: "btn-secondary",
-  ghost: "btn-ghost",
-  danger: "inline-flex items-center justify-center gap-2 rounded-lg bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-red-600 active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500",
-};
-```
+- [ ] **Step 4: Re-run the button variant contract test**
 
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `npm test -- --run frontend/tests/unit/ui/theme-tokens.test.ts`
+Run: `npm test -- --run frontend/tests/unit/ui/button-theme.test.tsx`
 
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add frontend/app/globals.css frontend/components/ui/Button.tsx frontend/components/ui/Input.tsx frontend/components/ui/LoadingSpinner.tsx frontend/tests/unit/ui/theme-tokens.test.ts
-git commit -m "design: re-theme shared ui primitives"
+git add frontend/app/globals.css frontend/components/ui/Button.tsx frontend/components/ui/Input.tsx frontend/components/ui/LoadingSpinner.tsx frontend/tests/unit/ui/button-theme.test.tsx
+git commit -m "design: re-theme shared ui primitives with semantic utilities"
 ```
 
 ### Task 3: Align Public and Protected Navigation to the New Brand
@@ -300,30 +308,30 @@ git commit -m "design: re-theme shared ui primitives"
 - Modify: `frontend/components/layout/TopBar.tsx`
 - Test: `frontend/tests/unit/layout/topnav-theme.test.tsx`
 
-- [ ] **Step 1: Write the failing nav-theme test**
+- [ ] **Step 1: Write the nav-shell contract test**
 
 ```tsx
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import PublicTopNav from "@/components/layout/PublicTopNav";
 
-describe("PublicTopNav theme", () => {
-  it("renders the brand CTA and translucent shell classes", () => {
+describe("PublicTopNav theme contract", () => {
+  it("keeps a translucent shell and a strong primary CTA", () => {
     render(<PublicTopNav />);
 
-    expect(screen.getByRole("link", { name: /đăng ký/i }).className).toMatch(/bg-slate-950|bg-\[|rounded-full/);
-    expect(screen.getByRole("banner").className).toMatch(/backdrop-blur|border-white\/60/);
+    expect(screen.getByRole("banner").className).toMatch(/backdrop-blur/);
+    expect(screen.getByRole("link", { name: /đăng ký/i }).className).toMatch(/bg-slate-950|btn-primary/);
   });
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run test to verify the baseline**
 
 Run: `npm test -- --run frontend/tests/unit/layout/topnav-theme.test.tsx`
 
-Expected: FAIL because `banner` role/classes are not asserted in a stable branded way yet.
+Expected: PASS baseline
 
-- [ ] **Step 3: Normalize nav shell and active states to brand tokens**
+- [ ] **Step 3: Normalize nav shell and active states using semantic classes, not raw cyan literals**
 
 ```tsx
 <header className="sticky top-0 z-40 border-b border-white/60 bg-white/75 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/85">
@@ -333,16 +341,16 @@ Expected: FAIL because `banner` role/classes are not asserted in a stable brande
 className={cn(
   "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
   active
-    ? "bg-cyan-50 text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-200"
-    : "hover:bg-white/70 dark:hover:bg-slate-800",
+    ? "bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
+    : "text-text-body hover:bg-surface-page dark:hover:bg-slate-800",
 )}
 ```
 
 ```tsx
-className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-50 text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-200"
+className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **Step 4: Re-run the nav-shell contract test**
 
 Run: `npm test -- --run frontend/tests/unit/layout/topnav-theme.test.tsx`
 
@@ -352,16 +360,16 @@ Expected: PASS
 
 ```bash
 git add frontend/components/layout/PublicTopNav.tsx frontend/components/layout/TopNav.tsx frontend/components/layout/BrandLogo.tsx frontend/components/layout/Sidebar.tsx frontend/components/layout/TopBar.tsx frontend/tests/unit/layout/topnav-theme.test.tsx
-git commit -m "design: align navigation shells with brand palette"
+git commit -m "design: align navigation shells with semantic brand utilities"
 ```
 
-### Task 4: Preserve Semantic Status Colors While Reframing Their Presentation
+### Task 4: Preserve Semantic Status Colors While Refreshing Badge Presentation
 
 **Files:**
 - Modify: `frontend/components/course/CourseStatusBadge.tsx`
 - Test: `frontend/tests/unit/course/course-status-badge-theme.test.tsx`
 
-- [ ] **Step 1: Write the failing badge contract test**
+- [ ] **Step 1: Write the badge contract test**
 
 ```tsx
 import { render, screen } from "@testing-library/react";
@@ -369,40 +377,24 @@ import { describe, expect, it } from "vitest";
 import CourseStatusBadge from "@/components/course/CourseStatusBadge";
 
 describe("CourseStatusBadge", () => {
-  it("keeps semantic status colors while using the updated badge shape", () => {
+  it("keeps semantic status colors and the pill badge shape", () => {
     render(<CourseStatusBadge status="ready" />);
 
     const badge = screen.getByText("Ready");
-    expect(badge.className).toMatch(/rounded-full/);
-    expect(badge.className).toMatch(/border-emerald-200/);
+    expect(badge.className).toContain("rounded-full");
+    expect(badge.className).toContain("border-emerald-200");
+    expect(badge.className).toContain("bg-emerald-50");
   });
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Run test to verify the baseline**
 
 Run: `npm test -- --run frontend/tests/unit/course/course-status-badge-theme.test.tsx`
 
-Expected: FAIL if the new badge shape, spacing, or emphasis has not been stabilized yet.
+Expected: PASS baseline
 
-- [ ] **Step 3: Update badge presentation but keep semantic meaning**
-
-```tsx
-const STATUS_COPY: Record<CourseStatus, { label: string; className: string }> = {
-  ready: {
-    label: "Ready",
-    className: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  },
-  coming_soon: {
-    label: "Coming soon",
-    className: "border-amber-200 bg-amber-50 text-amber-700",
-  },
-  metadata_partial: {
-    label: "Metadata partial",
-    className: "border-cyan-200 bg-cyan-50 text-cyan-700",
-  },
-};
-```
+- [ ] **Step 3: Refresh badge shape and polish without altering semantic colors**
 
 ```tsx
 className={cn(
@@ -411,7 +403,9 @@ className={cn(
 )}
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+Implementation note: keep `ready`, `coming_soon`, and `metadata_partial` mapped to semantic green/amber/cyan families. Do not fold them into the brand primary.
+
+- [ ] **Step 4: Re-run the badge contract test**
 
 Run: `npm test -- --run frontend/tests/unit/course/course-status-badge-theme.test.tsx`
 
@@ -421,7 +415,7 @@ Expected: PASS
 
 ```bash
 git add frontend/components/course/CourseStatusBadge.tsx frontend/tests/unit/course/course-status-badge-theme.test.tsx
-git commit -m "design: refresh course status badge presentation"
+git commit -m "design: refresh status badge presentation without changing semantics"
 ```
 
 ### Task 5: Converge Landing and App Shell on the Same Token Vocabulary
@@ -429,131 +423,85 @@ git commit -m "design: refresh course status badge presentation"
 **Files:**
 - Modify: `frontend/components/landing/LandingPage.tsx`
 - Modify: `frontend/app/globals.css`
-- Test: `frontend/tests/unit/ui/theme-tokens.test.ts`
 
-- [ ] **Step 1: Write the failing landing token usage test**
+- [ ] **Step 1: Inspect repeated neutral and shell classes on the landing page**
 
-```ts
-import { describe, expect, it } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
-
-describe("landing/app token convergence", () => {
-  it("keeps the landing gradient palette while referencing the shared brand vocabulary", () => {
-    const source = fs.readFileSync(
-      path.join(process.cwd(), "components/landing/LandingPage.tsx"),
-      "utf8",
-    );
-
-    expect(source).toContain("from-indigo-600");
-    expect(source).toContain("via-cyan-500");
-    expect(source).toContain("to-teal-400");
-  });
-});
+```txt
+Look for repeated uses of:
+- bg-slate-50 / bg-white / text-slate-950 / text-slate-600
+- border-slate-200 / dark:border-slate-800
+- card-like shells that should share the app token vocabulary
 ```
 
-- [ ] **Step 2: Run test to verify it fails only if convergence work removes the approved palette**
-
-Run: `npm test -- --run frontend/tests/unit/ui/theme-tokens.test.ts`
-
-Expected: PASS before edits or FAIL if the landing palette has drifted away from the approved brand axis.
-
-- [ ] **Step 3: Replace repeated one-off neutrals with shared surfaces where safe**
+- [ ] **Step 2: Replace repeated neutral shells with shared semantic utilities where safe**
 
 ```tsx
-<div className="bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-white">
-```
-
-```css
-.card {
-  background-color: var(--surface-card);
-}
+className="bg-surface-page text-text-strong dark:bg-slate-950 dark:text-white"
 ```
 
 ```tsx
-className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+className="rounded-[28px] border border-border-subtle bg-surface-card p-6 shadow-card dark:border-slate-800 dark:bg-slate-900"
 ```
 
-Implementation note: keep hero gradients, glows, and accent moments from the landing page; only converge repeated neutral and shell styling with the new token layer.
+Implementation note: keep hero gradients, glows, and accent moments from the landing page. This task converges the repeated neutral shell language only.
 
-- [ ] **Step 4: Run test to verify approved palette remains intact**
+- [ ] **Step 3: Verify by inspection that the approved landing gradient axis is still intact**
 
-Run: `npm test -- --run frontend/tests/unit/ui/theme-tokens.test.ts`
+```txt
+Must remain present in the hero surfaces:
+- from-indigo-600
+- via-cyan-500
+- to-teal-400
+```
 
-Expected: PASS
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add frontend/components/landing/LandingPage.tsx frontend/app/globals.css frontend/tests/unit/ui/theme-tokens.test.ts
-git commit -m "design: converge landing and app shell styling"
+git add frontend/components/landing/LandingPage.tsx frontend/app/globals.css
+git commit -m "design: converge landing neutrals with shared color system"
 ```
 
-### Task 6: Repaint Dashboard With Tokens Only
+### Task 6: Repaint Dashboard With Tokens and Utilities Only
 
 **Files:**
 - Modify: `frontend/app/(protected)/dashboard/page.tsx`
-- Modify: `frontend/features/dashboard/presenters.ts`
 - Test: `frontend/tests/unit/dashboard/presenters.test.ts`
 
-- [ ] **Step 1: Write the failing dashboard-style assertion**
-
-```ts
-import { buildDashboardCourseCardModel } from "@/features/dashboard/presenters";
-import { describe, expect, it } from "vitest";
-
-describe("dashboard presenter contract", () => {
-  it("keeps CTA routing semantics unchanged during the visual rebrand", () => {
-    const model = buildDashboardCourseCardModel({
-      id: "1",
-      slug: "intro-ai",
-      title: "Intro AI",
-      short_description: "desc",
-      status: "ready",
-      is_recommended: false,
-    } as never);
-
-    expect(model.href).toBe("/courses/intro-ai/start");
-    expect(model.ctaLabel).toBe("Bắt đầu học");
-  });
-});
-```
-
-- [ ] **Step 2: Run test to verify the behavior baseline**
+- [ ] **Step 1: Run the existing dashboard presenter test as a behavior guard**
 
 Run: `npm test -- --run frontend/tests/unit/dashboard/presenters.test.ts`
 
-Expected: PASS and serves as a guard that styling changes must not alter dashboard routing semantics.
+Expected: PASS baseline
 
-- [ ] **Step 3: Replace hard-coded page colors with the new design language**
+- [ ] **Step 2: Replace hard-coded page colors with semantic utility classes**
 
 ```tsx
-<div className="card flex flex-col overflow-hidden transition-shadow group hover:shadow-brand-soft" style={{ backgroundColor: "var(--surface-card)", padding: 0 }}>
+<div className="card flex flex-col overflow-hidden p-0 transition-shadow group hover:shadow-brand-soft">
 ```
 
 ```tsx
-<div className={`relative flex h-36 items-center justify-center bg-gradient-to-br from-indigo-600 via-cyan-500 to-teal-400`}>
+<div className="relative flex h-36 items-center justify-center bg-gradient-to-br from-indigo-600 via-cyan-500 to-teal-400">
 ```
 
 ```tsx
-style={{ color: "var(--text-strong)" }}
-style={{ color: "var(--text-body)" }}
-style={{ backgroundColor: "var(--surface-page)" }}
+className="text-text-strong"
+className="text-text-body"
+className="bg-surface-page"
 ```
 
-Implementation note: do not change `historyApi.list`, `filterDashboardCourses`, tab logic, or CTA href generation.
+Implementation note: do not change `historyApi.list`, `filterDashboardCourses`, active tab logic, or CTA href generation. Do not add new inline `style={{ color: ... }}` where Tailwind utilities can express the same intent.
 
-- [ ] **Step 4: Run test to verify semantics remain unchanged**
+- [ ] **Step 3: Re-run the dashboard presenter test**
 
 Run: `npm test -- --run frontend/tests/unit/dashboard/presenters.test.ts`
 
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add frontend/app/(protected)/dashboard/page.tsx frontend/features/dashboard/presenters.ts frontend/tests/unit/dashboard/presenters.test.ts
-git commit -m "design: repaint dashboard with shared brand tokens"
+git add frontend/app/(protected)/dashboard/page.tsx frontend/tests/unit/dashboard/presenters.test.ts
+git commit -m "design: repaint dashboard with semantic color utilities"
 ```
 
 ### Task 7: Repaint Tutor, Profile, and History Without Touching Logic
@@ -562,70 +510,45 @@ git commit -m "design: repaint dashboard with shared brand tokens"
 - Modify: `frontend/app/tutor/page.tsx`
 - Modify: `frontend/app/(protected)/profile/page.tsx`
 - Modify: `frontend/app/(protected)/history/page.tsx`
-- Test: `frontend/tests/unit/tutor/in-context-tutor.test.tsx`
 
-- [ ] **Step 1: Write a routing/behavior guard for tutor page dependencies**
-
-```ts
-import { describe, expect, it } from "vitest";
-import { buildUserCourseCollections } from "@/features/course-membership/presenters";
-
-describe("tutor page behavior guard", () => {
-  it("keeps joined and recommended course separation unchanged", () => {
-    const result = buildUserCourseCollections(
-      [
-        { slug: "a", is_recommended: true },
-        { slug: "b", is_recommended: true },
-      ] as never,
-      [{ course_slug: "a" }] as never,
-      null,
-    );
-
-    expect(result.joinedCourses.map((item) => item.slug)).toEqual(["a"]);
-    expect(result.recommendedCourses.map((item) => item.slug)).toEqual(["b"]);
-  });
-});
-```
-
-- [ ] **Step 2: Run behavior guards before visual edits**
+- [ ] **Step 1: Run existing tutor behavior tests before repaint**
 
 Run: `npm test -- --run frontend/tests/unit/tutor/in-context-tutor.test.tsx`
 
-Expected: PASS baseline. If a dedicated presenter test is added during implementation, run it here as well.
+Expected: PASS baseline
 
-- [ ] **Step 3: Replace page-local hard-coded blues/violets with brand tokens and approved gradients**
+- [ ] **Step 2: Replace page-local hard-coded brand colors with semantic utilities**
 
 ```tsx
-className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-200"
+className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
 ```
 
 ```tsx
-style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-card)" }}
-style={{ color: "var(--text-strong)" }}
-style={{ color: "var(--text-body)" }}
-style={{ color: "var(--text-muted)" }}
+className="rounded-full bg-surface-accent-soft px-2 py-0.5 text-xs font-semibold text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
 ```
 
 ```tsx
-className="rounded-full bg-cyan-50 px-2 py-0.5 text-xs font-semibold text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-200"
+className="border-border-subtle bg-surface-card text-text-strong"
+className="text-text-body"
+className="text-text-muted"
 ```
 
-Implementation note: do not edit `sessionStorage` usage, history fetches, profile calculations, sorting, filtering, pagination, or expansion behavior.
+Implementation note: do not edit `sessionStorage` usage, history fetches, profile calculations, sorting, filtering, pagination, or expansion behavior. Do not bypass the token layer with raw `bg-cyan-*` or inline CSS variables if semantic classes are available.
 
-- [ ] **Step 4: Run behavior guards after the repaint**
+- [ ] **Step 3: Re-run existing tutor behavior tests**
 
 Run: `npm test -- --run frontend/tests/unit/tutor/in-context-tutor.test.tsx`
 
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add frontend/app/tutor/page.tsx frontend/app/(protected)/profile/page.tsx frontend/app/(protected)/history/page.tsx frontend/tests/unit/tutor/in-context-tutor.test.tsx
-git commit -m "design: repaint tutor profile and history pages"
+git commit -m "design: repaint tutor profile and history with semantic utilities"
 ```
 
-### Task 8: Final Brand QA and Regression Verification
+### Task 8: Final QA for Light Mode, Dark Mode Safety, and Contrast
 
 **Files:**
 - Modify: `redesign.md`
@@ -633,14 +556,26 @@ git commit -m "design: repaint tutor profile and history pages"
 - [ ] **Step 1: Run targeted verification commands**
 
 Run: `npm run type-check`
+
 Expected: PASS
 
-Run: `npm test -- --run frontend/tests/unit/ui/theme-tokens.test.ts frontend/tests/unit/layout/topnav-theme.test.tsx frontend/tests/unit/course/course-status-badge-theme.test.tsx frontend/tests/unit/dashboard/presenters.test.ts frontend/tests/unit/tutor/in-context-tutor.test.tsx`
+Run: `npm test -- --run frontend/tests/unit/ui/button-theme.test.tsx frontend/tests/unit/layout/topnav-theme.test.tsx frontend/tests/unit/course/course-status-badge-theme.test.tsx frontend/tests/unit/dashboard/presenters.test.ts frontend/tests/unit/tutor/in-context-tutor.test.tsx`
+
 Expected: PASS
 
-- [ ] **Step 2: Do a manual visual sweep in light mode**
+- [ ] **Step 2: Run accessibility and quality checks**
 
-Check these exact surfaces:
+Run: `npm run build`
+
+Expected: PASS
+
+Run: `npx lighthouse http://localhost:3000 --only-categories=accessibility --preset=desktop`
+
+Expected: accessibility report completes with no new contrast regression caused by the rebrand
+
+- [ ] **Step 3: Do a manual visual sweep in light mode**
+
+Check:
 
 ```txt
 1. Landing hero CTA, chips, glow cards
@@ -654,7 +589,7 @@ Check these exact surfaces:
 Expected:
 
 ```txt
-- CTA hierarchy is clearer than before
+- Standard primary buttons are flat brand color, not gradient
 - Accent cyan appears as signal, not body text
 - Most backgrounds remain neutral
 - No page still looks like the old blue-first app
@@ -662,29 +597,55 @@ Expected:
 - Focus rings remain visible on inputs and buttons
 ```
 
-- [ ] **Step 3: Record any remaining color debt**
+- [ ] **Step 4: Do a dark-mode safety sweep**
+
+Check:
 
 ```txt
-If any component still uses stale hard-coded blue/violet classes, append a short follow-up list here before opening implementation review.
+1. Protected TopNav
+2. Primary and secondary buttons
+3. Card/background separation
+4. Input focus ring visibility
+5. Badge readability
 ```
 
-- [ ] **Step 4: Commit**
+Expected:
+
+```txt
+- No unreadable text
+- No broken contrast on active states
+- No accidental landing-style glow overuse
+```
+
+- [ ] **Step 5: Record remaining color debt**
+
+```txt
+If any component still uses stale hard-coded blue/violet classes, append a short follow-up list here before implementation review.
+```
+
+- [ ] **Step 6: Commit**
 
 ```bash
 git add redesign.md
-git commit -m "docs: finalize product-wide visual rebrand plan"
+git commit -m "docs: finalize phase 1 color-system rebrand plan"
 ```
 
 ## Self-Review
 
-- Spec coverage:
-  - Product-wide palette unification: covered by Tasks 1, 5
-  - Isolation from backend/API/logic: enforced in Constraints and Tasks 6-7
-  - Landing-derived visual language: covered by Tasks 1, 3, 5
-  - Light-mode-first rollout: reflected in token definitions and QA
-- Placeholder scan: no `TODO`, `TBD`, or “implement later” placeholders remain.
-- Type consistency: existing file paths, component names, and presenter names match the codebase inspected during planning.
+- Accepted Claude review points incorporated:
+  - Keep full `primary-50 ... 950` ramp
+  - Expose semantic Tailwind utilities for text and surfaces
+  - Avoid decorative string-match pseudo-tests as the main verification layer
+  - Use flat standard primary buttons; reserve gradients for hero treatments
+  - Do not bypass the token layer with raw `bg-cyan-*` adoption classes
+  - Avoid adding more inline CSS variable style blocks where utilities suffice
+  - Make the scope explicit as a **Phase 1 color-system rebrand**
+  - Add dark-mode safety QA and accessibility checks
+- Intentionally not expanded in this phase:
+  - Typography redesign
+  - Spacing redesign
+  - Copy/UX rewrite
 
 ## Review Gate
 
-This plan is saved to `redesign.md` per user preference and is intended for Claude review before any implementation starts.
+This revised plan is saved to `redesign.md` per user preference and is intended for Claude review before any implementation starts.
