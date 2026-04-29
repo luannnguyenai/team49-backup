@@ -5,17 +5,23 @@ $progressFile = ".pr-cherry-pick-progress.json"
 
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ bfde608f37c07da635ead91a8356ee2b9ebc2536 Update page.tsx
-+ 790882ee03b7f7660bc163b67fbf112be03b0a6c Update page.tsx
-+ 50e9ebdb5d3aa10f9ecbc5f7f0a87c3dd9310e46 Update setup.ts
-+ f779d3db9c74fc80b63e2fdcd04f298387c929b1 phase 5.2
-+ c355d1645141a635491458cb0ad1ec7701f2fbbf fix bug drop down push nav bar
-- 981a1e9301dbf89f5445de96ac8e3ef6ed0775f2 Update create-prs-per-commit.ps1
-+ f5262da110a4f4e36e781d7c1d1b8de342619872 fix phase 9 eval
-+ 4749c968b646f6a110125eeded91549b3d35b5c9 fix log out not redirect to landing page
-+ 00505e1c2546228601fe82b4d55fb92c83124cbc fix phase 9,2
-+ 3ec04ae132be902661c18c22b0497a819df0f86e fix seach 5
-+ 4616a015c9f8e4b7f37f36a865fa93addf920de8 Update unit.test.tsx
++ bdf48db07ea755d8a1e2f3debfa2c1f1dc3d5096 Delete search_box.md
++ 53d595f6f05fa73c3d2596b6aac09b39ceefc188 Create redesign.md
++ ba220c65926a0652abff8a898cef86bea8085772 Update redesign.md
++ 41e38c4dcd68eb8dcafc63faa9f3d5fc29ae1701 Create button-theme.test.tsx
++ 46f42dea9957ce02f7fc0aca1318754a0849c087 design: add semantic brand tokens and tailwind utilities
++ 835cf1f664323ffaeb13523c0c0539fc4330fc70 design: re-theme shared ui primitives with semantic utilities
++ f9c68857f853fdb29db95adc9a90dccba286ee65 design: align navigation shells with semantic brand utilities
++ 0c80531b318588c721c7cac0e43006d126e33e93 design: refresh status badge presentation without changing semantics
++ 6642d50e840024976cf599028c92b771defd0f88 design: converge landing neutrals with shared color system
++ 372c91e562647b73f686f7c60bbbf7022fa45e29 design: repaint dashboard with semantic color utilities
++ 670f726e948eeb9d2c47bb29f215f18df0ba8558 design: repaint tutor profile and history with semantic utilities
++ 72fbdc1e37406bebf94b782eb9463d9a7577af5f docs: finalize phase 1 color-system rebrand plan
++ 2ff59fed36b25445e1a939cb1e7e01f6dc8a96ca fix button learning transfer
++ fc6caef762cb3cfa03b06707b3bfa0eb4a6c4cf5 Update LearningUnitDrawer.tsx
++ 01c803fecf7af32a2e2686638299f4eaf6af1db3 fix width sync
++ 683ed70b4815bbdb3037c823b8930d7bbd9078c6 Update tailwind.config.ts
++ 1b28a03e311191d4958b1106d87c7a6b63d78875 Update PIPELINE.md
 "@
 
 function Save-Progress {
