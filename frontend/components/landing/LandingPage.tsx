@@ -71,13 +71,13 @@ function BulletList({ items }: { items: readonly string[] }) {
 
 export default function LandingPage() {
   return (
-    <div className="bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-white">
+    <div className="bg-surface-page text-text-strong dark:bg-slate-950 dark:text-white">
       <PublicTopNav />
 
       <main className="landing-scroll-shell md:snap-y md:snap-proximity">
         <section
           id="product"
-          className="landing-panel relative overflow-hidden border-b border-slate-200/70 dark:border-slate-800 md:snap-start"
+          className="landing-panel relative overflow-hidden border-b border-border-subtle dark:border-slate-800 md:snap-start"
         >
           <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_45%,#ecfeff_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.24),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.2),_transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_48%,#082f49_100%)]" />
           <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl gap-14 px-4 py-16 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-center lg:py-20">
@@ -191,7 +191,7 @@ export default function LandingPage() {
 
         <section
           id="roadmap"
-          className="landing-panel relative border-b border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-950 md:snap-start"
+          className="landing-panel relative border-b border-border-subtle bg-surface-card dark:border-slate-800 dark:bg-slate-950 md:snap-start"
         >
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
             <ScrollReveal className="space-y-6">
@@ -211,7 +211,7 @@ export default function LandingPage() {
             <div className="grid gap-4 md:grid-cols-3">
               <ScrollReveal
                 as="article"
-                className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-[28px] border border-border-subtle bg-surface-card p-5 shadow-card dark:border-slate-800 dark:bg-slate-900"
               >
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">01</p>
                 <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Mục tiêu</h3>
@@ -233,7 +233,7 @@ export default function LandingPage() {
               <ScrollReveal
                 as="article"
                 delayMs={160}
-                className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-[28px] border border-border-subtle bg-surface-card p-5 shadow-card dark:border-slate-800 dark:bg-slate-900"
               >
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">03</p>
                 <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Tiến trình rõ ràng</h3>
@@ -325,7 +325,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-panel border-b border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-950 md:snap-start">
+        <section className="landing-panel border-b border-border-subtle bg-surface-card dark:border-slate-800 dark:bg-slate-950 md:snap-start">
           <div className="mx-auto max-w-7xl px-4 py-20 md:px-6">
             <ScrollReveal className="space-y-6">
               <div className="space-y-4 text-center">
@@ -345,7 +345,7 @@ export default function LandingPage() {
                     as="article"
                     key={course.slug}
                     delayMs={index * 50}
-                    className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                    className="rounded-[28px] border border-border-subtle bg-surface-card p-6 shadow-card dark:border-slate-800 dark:bg-slate-900"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -371,7 +371,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-panel border-b border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-950 md:snap-start">
+        <section className="landing-panel border-b border-border-subtle bg-surface-card dark:border-slate-800 dark:bg-slate-950 md:snap-start">
           <ScrollReveal className="mx-auto max-w-5xl px-4 py-20 text-center md:px-6">
             <SectionLabel>Bắt đầu học có định hướng</SectionLabel>
             <h2 className="mt-6 text-3xl font-semibold leading-tight text-slate-950 dark:text-white md:text-4xl">
