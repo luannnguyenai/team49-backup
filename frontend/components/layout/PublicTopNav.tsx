@@ -21,7 +21,7 @@ export default function PublicTopNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-950 dark:text-slate-200 dark:hover:text-white"
+              className="text-sm font-medium text-text-body transition-colors hover:text-text-strong dark:text-slate-200 dark:hover:text-white"
             >
               {item.label}
             </Link>
@@ -31,7 +31,7 @@ export default function PublicTopNav() {
         <div className="ml-auto flex items-center gap-2 md:ml-6">
           <Link
             href="/login"
-            className="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-900"
+            className="inline-flex items-center rounded-full border border-border-subtle px-4 py-2 text-sm font-semibold text-text-body transition-colors hover:border-slate-300 hover:bg-surface-page dark:border-slate-700 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-900"
           >
             Đăng nhập
           </Link>

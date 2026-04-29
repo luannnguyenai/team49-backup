@@ -130,7 +130,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
           )}
         >
           {/* Avatar */}
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 text-sm font-semibold">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300 text-sm font-semibold">
             {user?.full_name?.[0]?.toUpperCase() ?? "?"}
           </div>
           {!collapsed && (

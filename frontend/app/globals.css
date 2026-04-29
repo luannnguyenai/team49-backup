@@ -157,7 +157,7 @@
     color: var(--text-primary);
   }
   .sidebar-item.active {
-    @apply bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400;
+    @apply bg-surface-accent-soft text-primary-700 dark:text-primary-300;
   }
 }
 
