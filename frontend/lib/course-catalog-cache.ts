@@ -1,5 +1,6 @@
-import { courseApi } from "@/lib/api";
-import type { CourseCatalogResponse } from "@/types";
+import { bootstrapDataApi, courseApi } from "@/lib/api";
+import { mergeMockCourses } from "@/lib/mock-course-catalog";
+import type { BootstrapCourse, CourseCatalogItem, CourseCatalogResponse } from "@/types";
 
 type CacheKey = "all:true" | "all:false";
 
@@ -10,6 +11,7 @@ type CacheEntry = {
 };
 
 const REQUEST_STALE_MS = 10_000;
+const API_TIMEOUT_MS = 3_000;
 
 const catalogCache = new Map<CacheKey, CacheEntry>();
 
@@ -32,6 +34,44 @@ function getOrCreateEntry(key: CacheKey): CacheEntry {
   return created;
 }
 
+function toCatalogItem(course: BootstrapCourse): CourseCatalogItem {
+  return {
+    id: course.id,
+    slug: course.slug,
+    title: course.title,
+    short_description: course.short_description,
+    status: course.status === "ready" ? "ready" : "coming_soon",
+    cover_image_url: course.cover_image_url,
+    hero_badge: course.hero_badge,
+    is_recommended: false,
+    progress_percent: null,
+  };
+}
+
+async function loadBootstrapCatalog(): Promise<CourseCatalogResponse> {
+  const bootstrapCourses = await bootstrapDataApi.courses();
+  return mergeMockCourses({
+    items: bootstrapCourses.map(toCatalogItem),
+  });
+}
+
+async function loadCatalogResponse(includeUnavailable: boolean): Promise<CourseCatalogResponse> {
+  const timeoutPromise = new Promise<CourseCatalogResponse>((resolve) => {
+    setTimeout(async () => {
+      resolve(await loadBootstrapCatalog());
+    }, API_TIMEOUT_MS);
+  });
+
+  try {
+    return await Promise.race([
+      courseApi.catalog({ view: "all", includeUnavailable }),
+      timeoutPromise,
+    ]);
+  } catch {
+    return loadBootstrapCatalog();
+  }
+}
+
 export function getCachedAllCourseCatalog(includeUnavailable: boolean): Promise<CourseCatalogResponse> {
   const key = getCacheKey(includeUnavailable);
   const entry = getOrCreateEntry(key);
@@ -50,7 +90,7 @@ export function getCachedAllCourseCatalog(includeUnavailable: boolean): Promise<
     return entry.promise;
   }
 
-  const request = courseApi.catalog({ view: "all", includeUnavailable });
+  const request = loadCatalogResponse(includeUnavailable);
   entry.promise = request;
   entry.startedAt = now;
 

@@ -94,6 +94,10 @@ function TopNavSearch({ pathname }: { pathname: string }) {
       });
   };
 
+  useEffect(() => {
+    ensureCatalogLoaded();
+  }, []);
+
   const hasDraftQuery = draftQuery.length > 0;
 
   return (

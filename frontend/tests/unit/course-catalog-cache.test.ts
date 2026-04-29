@@ -4,6 +4,10 @@ const courseApiMock = vi.hoisted(() => ({
   catalog: vi.fn(),
 }));
 
+const bootstrapDataApiMock = vi.hoisted(() => ({
+  courses: vi.fn(),
+}));
+
 vi.mock("@/lib/api", async () => {
   const actual = await vi.importActual<typeof import("@/lib/api")>("@/lib/api");
   return {
@@ -12,12 +16,30 @@ vi.mock("@/lib/api", async () => {
       ...actual.courseApi,
       catalog: courseApiMock.catalog,
     },
+    bootstrapDataApi: {
+      ...actual.bootstrapDataApi,
+      courses: bootstrapDataApiMock.courses,
+    },
   };
 });
 
 describe("course catalog cache", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    bootstrapDataApiMock.courses.mockResolvedValue([
+      {
+        id: "course_cs231n",
+        slug: "cs231n",
+        title: "CS231n: Deep Learning for Computer Vision",
+        short_description: "Deep learning foundations for computer vision.",
+        status: "ready",
+        visibility: "public",
+        cover_image_url: "/courses/cs231n/cover.jpg",
+        hero_badge: "Available now",
+        primary_subject: "computer_vision",
+        sort_order: 2,
+      },
+    ]);
   });
 
   it("reuses the same in-flight request for repeated includeUnavailable=true calls", async () => {
@@ -87,5 +109,19 @@ describe("course catalog cache", () => {
     expect(result).toBe(freshResponse);
     expect(courseApiMock.catalog).toHaveBeenCalledTimes(2);
     vi.useRealTimers();
+  });
+
+  it("falls back to bootstrap catalog when the API request rejects", async () => {
+    courseApiMock.catalog.mockRejectedValue(new Error("network down"));
+
+    const { getCachedAllCourseCatalog, resetCachedAllCourseCatalog } = await import(
+      "@/lib/course-catalog-cache"
+    );
+    resetCachedAllCourseCatalog();
+
+    const result = await getCachedAllCourseCatalog(true);
+
+    expect(result.items[0]?.slug).toBe("cs231n");
+    expect(bootstrapDataApiMock.courses).toHaveBeenCalledTimes(1);
   });
 });
