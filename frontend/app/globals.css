@@ -86,21 +86,19 @@
 /* ── Reusable component classes ─────────────────────────────────────────────── */
 @layer components {
   .card {
-    @apply rounded-xl border p-6 shadow-sm;
-    background-color: var(--bg-card);
-    border-color: var(--border);
+    @apply rounded-xl border p-6 bg-surface-card shadow-card;
+    border-color: var(--border-subtle);
   }
 
   .input-base {
-    @apply w-full rounded-lg border px-3.5 py-2.5 text-sm outline-none
-           transition-all duration-150;
-    background-color: var(--bg-card);
-    border-color: var(--border);
-    color: var(--text-primary);
+    @apply w-full rounded-lg border bg-surface-card px-3.5 py-2.5 text-sm
+           text-text-strong outline-none transition-all duration-150;
+    border-color: var(--border-subtle);
   }
-  .input-base::placeholder { color: var(--text-muted); }
+  .input-base::placeholder { color: var(--text-muted-2); }
   .input-base:focus {
-    @apply border-primary-600 ring-2 ring-primary-600/20;
+    @apply border-primary-500;
+    box-shadow: 0 0 0 3px var(--ring-brand);
   }
   .input-base.error {
     @apply border-red-500 ring-2 ring-red-500/20;
@@ -113,27 +111,26 @@
            active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
            focus-visible:outline-none focus-visible:ring-2
            focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+    border-color: transparent;
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 rounded-lg
-           border px-4 py-2.5 text-sm font-semibold
-           transition-all duration-150 hover:bg-slate-50 dark:hover:bg-slate-800
+           border bg-surface-card px-4 py-2.5 text-sm font-semibold text-text-body
+           transition-all duration-150 hover:bg-surface-page
            active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
            focus-visible:outline-none focus-visible:ring-2
            focus-visible:ring-primary-600 focus-visible:ring-offset-2;
-    border-color: var(--border);
-    color: var(--text-primary);
+    border-color: var(--border-subtle);
   }
 
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2
-           text-sm font-medium transition-all duration-150
-           hover:bg-slate-100 dark:hover:bg-slate-800
+           text-sm font-medium text-text-body transition-all duration-150
+           hover:bg-surface-page
            active:scale-[0.98] disabled:opacity-50
            focus-visible:outline-none focus-visible:ring-2
            focus-visible:ring-primary-600;
-    color: var(--text-secondary);
   }
 
   .link {
