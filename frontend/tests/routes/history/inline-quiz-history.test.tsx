@@ -112,7 +112,7 @@ describe("history page inline quiz rows", () => {
       expect(historyApiMock.detail).toHaveBeenCalledWith("session-inline-1");
     });
 
-    expect(await screen.findByText("Chi tiết từng câu (1 câu)")).toBeInTheDocument();
+    expect(await screen.findByText("Question details (1 questions)")).toBeInTheDocument();
     expect(screen.getByText("Which choice is correct?")).toBeInTheDocument();
   });
 
@@ -182,7 +182,7 @@ describe("history page inline quiz rows", () => {
       expect(historyApiMock.detail).toHaveBeenCalledWith("session-inline-1");
     });
 
-    expect(await screen.findByText("Review mở từ liên kết")).toBeInTheDocument();
+    expect(await screen.findByText("Review opened from link")).toBeInTheDocument();
     expect(screen.getByText("Mid-video quiz")).toBeInTheDocument();
     expect(screen.getByText("Why is B correct?")).toBeInTheDocument();
   });
