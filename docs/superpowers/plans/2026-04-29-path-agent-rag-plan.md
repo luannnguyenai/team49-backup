@@ -65,25 +65,34 @@ The unit is the correct join point because it connects all major runtime systems
 | Assessment | `question_bank.unit_id` maps questions to units. |
 | Mastery | `unit_kp_map` maps units to KPs; KP mastery is user state. |
 | RAG answer | Unit has summary, key points, transcript path, and evidence timestamps. |
+| Runtime navigation | Unit must be joined to product `learning_units` and `courses` to produce `learn_href`. |
 
 The Agent should not search "documents" in the abstract. It should search units first, then expand to transcript snippets or video evidence only when needed.
+
+Important distinction:
+
+- `units.unit_id` is the canonical retrieval key.
+- The UI/player usually needs product runtime navigation fields: `learning_units.id`, `learning_units.slug`, `courses.slug`, `course_slug`, `unit_slug`, or a prebuilt `learn_href`.
+- Every search result that can become a user action must include both canonical identity and runtime navigation identity. A result with only `canonical_unit_id` is not actionable enough.
 
 ## 4. User Question Simulation
 
 These are expected user questions and the retrieval/action behavior the system should support.
 
+The product direction is English-first, so acceptance examples and test cases should use English queries. Vietnamese can still be supported later through query translation, but it should not drive V1 retrieval acceptance.
+
 | User question | Expected scope | Retrieval target | Action |
 | --- | --- | --- | --- |
-| "Bài nào dạy receptive field?" | current path or current course | Units whose title/KP/key_points mention receptive field | Return lecture/unit + open player action |
-| "CNN khác Vision Transformer thế nào?" | current path/course | Top CNN units + ViT units | Answer with cited units; optionally suggest comparison quiz |
-| "Tôi nên học gì tiếp?" | current path | Learning path rows + mastery/progress | Return next unit/lecture and reason |
-| "Tôi biết CNN rồi, skip được không?" | current path | CNN units + quiz availability + mastery | Start assessment instead of trusting self-report |
-| "Phần nào của DL bắt buộc cho NLP?" | selected NLP path | Prerequisite graph + unit KP map across CS230/CS224n | Return required DL units and gap reason |
-| "Tôi yếu ở đâu?" | current user | learner mastery + placement results + recent interactions | Summarize weak KPs/units and suggest assessment/review |
-| "Mở đoạn nói về stride trong CNN" | current path/course | Unit search -> transcript timestamp | Navigate player to unit/timestamp |
-| "Cho tôi quiz nhanh về backprop" | current path/course | Units/KPs for backprop + question bank | Start assessment/quiz |
-| "Tại sao planner bắt tôi học unit này?" | selected unit | path item reason_codes + prerequisite gaps + mastery | Explain planner rationale |
-| "Tôi quay lại sau 1 tháng thì nên ôn gì?" | current user | stale mastery + review service + progress | Suggest review units |
+| "Where is receptive field taught?" | current path or current course | Units whose title/KP/key_points mention receptive field | Return lecture/unit + open player action |
+| "How are CNNs different from Vision Transformers?" | current path/course | Top CNN units + ViT units | Answer with cited units; optionally suggest comparison quiz |
+| "What should I learn next?" | current path | Learning path rows + mastery/progress | Return next unit/lecture and reason |
+| "I already know CNNs. Can I skip them?" | current path | CNN units + quiz availability + mastery | Start assessment instead of trusting self-report |
+| "Which DL parts are required for NLP?" | selected NLP path | Path requirement service over KP/prerequisite graph | Return required DL units and gap reason |
+| "Where am I weak?" | current user | learner mastery + placement results + recent interactions | Summarize weak KPs/units and suggest assessment/review |
+| "Open the stride section in the CNN lecture." | current path/course | Unit search -> runtime navigation -> timestamp | Navigate player to unit/timestamp |
+| "Give me a quick quiz on backprop." | current path/course | Units/KPs for backprop + question bank | Start assessment/quiz |
+| "Why does the planner want me to learn this unit?" | selected unit | path item reason_codes + prerequisite gaps + mastery | Explain planner rationale |
+| "I came back after a month. What should I review?" | current user | stale mastery + review service + progress | Suggest review units |
 
 ## 5. Retrieval Architecture
 
@@ -133,12 +142,39 @@ type AgentIntent =
 
 Examples:
 
-- "receptive field nằm ở đâu" -> `find_content`
-- "giải thích receptive field" -> `explain_concept`
-- "test tôi CNN" -> `assess_knowledge`
-- "sao tôi phải học bài này" -> `explain_planner_decision`
+- "Where is receptive field taught?" -> `find_content`
+- "Explain receptive field." -> `explain_concept`
+- "Test me on CNNs." -> `assess_knowledge`
+- "Why do I need to learn this unit?" -> `explain_planner_decision`
 
-### 5.3 UnitSearchService
+### 5.3 QueryNormalizer
+
+Search quality should not rely on raw user wording. Before UnitSearchService runs, normalize common domain aliases and abbreviations.
+
+Examples:
+
+| Raw phrase | Normalized terms |
+| --- | --- |
+| `ViT` | `vision transformer`, `transformer`, `image transformer` |
+| `CNN` | `convnet`, `convolutional neural network`, `convolution` |
+| `RF` in a CV query | `receptive field` |
+| `word vectors` | `embeddings`, `word embeddings`, `dense vectors` |
+| `RAG` | `retrieval augmented generation`, `retrieval`, `augmentation` |
+| `backprop` | `backpropagation`, `gradient`, `chain rule` |
+
+The normalizer must be traceable. Every expanded query should return the expansion in retrieval trace:
+
+```json
+{
+  "raw_query": "Where is RF covered?",
+  "normalized_query": "where is receptive field covered",
+  "expansions": [
+    {"from": "RF", "to": ["receptive field"], "reason": "cv_domain_alias"}
+  ]
+}
+```
+
+### 5.4 UnitSearchService
 
 V1 should use database full-text/BM25-style search over a unit-centered search document.
 
@@ -162,6 +198,10 @@ is_worth_learning
 section_flags
 transcript_path
 video_clip_ref
+learning_unit_id
+course_slug
+unit_slug
+learn_href
 ```
 
 Initial implementation options:
@@ -198,7 +238,83 @@ Recommended V1 boost rules:
 | `section_flags` includes intro/logistics/career | Negative for assessment |
 | `salience_score=high` or critical KP | Positive |
 
-### 5.4 UnitContextService
+### 5.5 PathRequirementService
+
+Cross-path prerequisite and gap questions should not be answered by BM25 alone.
+
+Questions such as "Which DL parts are required for NLP?" require graph/planner reasoning:
+
+```text
+selected path -> target course/KPs -> prerequisite_edges -> unit_kp_map -> user mastery -> required units/gaps
+```
+
+Inputs:
+
+```ts
+type PathRequirementRequest = {
+  targetPathKey: "computer_vision" | "nlp";
+  targetCourseIds: string[];
+  sourceCourseIds?: string[];
+  includeMastery?: boolean;
+};
+```
+
+Output:
+
+```ts
+type PathRequirementResponse = {
+  requiredUnits: Array<{
+    canonical_unit_id: string;
+    learning_unit_id?: string;
+    course_id: string;
+    course_slug?: string;
+    unit_slug?: string;
+    learn_href?: string;
+    unit_name: string;
+    required_kp_ids: string[];
+    prerequisite_for: string[];
+    mastery_lcb?: number;
+    status: "required" | "already_mastered" | "needs_review" | "unassessed";
+    reasons: string[];
+  }>;
+  trace: {
+    target_path: string;
+    prerequisite_depth: number;
+    graph_edges_considered: number;
+    ranking_version: string;
+  };
+};
+```
+
+This service should be used for path requirement, prerequisite gap, and "why do I need this DL unit for NLP/CV?" questions. UnitSearchService can still help explain a specific concept after the requirement service selects the relevant units.
+
+### 5.6 RuntimeNavigationResolver
+
+Search output must be actionable. RuntimeNavigationResolver joins canonical units to product navigation data.
+
+Required output fields for any "open player" action:
+
+```ts
+type RuntimeNavigationTarget = {
+  canonical_unit_id: string;
+  learning_unit_id: string | null;
+  course_id: string;
+  course_slug: string | null;
+  unit_slug: string | null;
+  learn_href: string | null;
+  lecture_id: string | null;
+  start_sec?: number;
+  end_sec?: number;
+};
+```
+
+Resolution strategy:
+
+1. Prefer existing learning path item fields if the unit is already in the current path: `learning_unit_id`, `course_slug`, `unit_slug`, `learn_href`.
+2. Otherwise join canonical `units.unit_id` to product `learning_units.canonical_unit_id`, then join `courses`.
+3. If no runtime row exists, return `learn_href=null` and mark the result as non-actionable; the Agent can still answer from canonical context but should not show an "Open player" button.
+
+### 5.7 UnitContextService
 
 After UnitSearchService returns top candidates, UnitContextService expands only those units.
 
@@ -230,7 +346,7 @@ type UnitContext = {
 };
 ```
 
-### 5.5 TranscriptSnippetService
+### 5.8 TranscriptSnippetService
 
 Transcript should be searched only after top units are selected.
 
@@ -269,7 +385,7 @@ The following examples are from the local canonical DB and show why unit-centere
 Query:
 
 ```text
-"receptive field trong CNN"
+"receptive field in CNNs"
 ```
 
 Candidate unit:
@@ -328,7 +444,7 @@ The strongest timestamp evidence is around 3220s. I can open the player at that 
 Query:
 
 ```text
-"CNN là gì và tại sao quan trọng"
+"what are CNNs and why do they matter"
 ```
 
 Candidate:
@@ -363,7 +479,7 @@ Expected Agent behavior:
 Query:
 
 ```text
-"word vector và embedding trong NLP"
+"word vectors and embeddings in NLP"
 ```
 
 Candidate:
@@ -399,7 +515,7 @@ Expected Agent behavior:
 User:
 
 ```text
-"Đoạn nào nói về receptive field?"
+"Where is receptive field covered?"
 ```
 
 Trace:
@@ -410,11 +526,20 @@ Trace:
   "scope": "current_path",
   "selected_path": "computer_vision",
   "candidate_courses": ["CS230", "CS231n"],
+  "query_normalization": {
+    "raw_query": "Where is receptive field covered?",
+    "normalized_query": "where is receptive field covered",
+    "expansions": []
+  },
   "query_terms": ["receptive", "field"],
   "top_units": [
     {
       "unit_id": "local::lecture_5_image_classification_with_cnns::seg6",
+      "learning_unit_id": "runtime-learning-unit-id-if-available",
       "course_id": "CS231n",
+      "course_slug": "cs231n",
+      "unit_slug": "lecture-05-seg6",
+      "learn_href": "/courses/cs231n/learn/lecture-05-seg6#t=3220",
       "lecture_title": "Lecture 5: Image Classification with CNNs",
       "unit_name": "Receptive fields, stride, and convolution formulas",
       "reasons": ["unit_title_match", "key_point_match", "quiz_available", "current_path_match"]
@@ -436,7 +561,7 @@ Trace:
 User:
 
 ```text
-"Tôi biết CNN rồi, kiểm tra nhanh giúp tôi để skip phần đã biết."
+"I already know CNNs. Test me quickly so I can skip what I know."
 ```
 
 Trace:
@@ -469,7 +594,7 @@ Trace:
 User:
 
 ```text
-"Sao planner bắt tôi học unit này?"
+"Why does the planner want me to learn this unit?"
 ```
 
 Trace:
@@ -528,10 +653,16 @@ Response:
 ```ts
 type UnitSearchResponse = {
   results: Array<{
-    unit_id: string;
+    canonical_unit_id: string;
+    learning_unit_id: string | null;
     course_id: string;
+    course_slug: string | null;
     lecture_id: string | null;
     lecture_title: string | null;
+    unit_slug: string | null;
+    learn_href: string | null;
+    start_sec?: number;
+    end_sec?: number;
     unit_name: string;
     summary: string | null;
     score: number;
@@ -539,11 +670,16 @@ type UnitSearchResponse = {
     has_quiz_items: boolean;
     content_type: string | null;
     salience_score: string | null;
+    actionable: boolean;
   }>;
   trace: {
+    trace_id: string;
     resolved_scope: string;
+    normalized_query: string;
+    query_expansions: Array<{ from: string; to: string[]; reason: string }>;
     applied_filters: string[];
     ranking_version: string;
+    runtime_navigation_resolution: "path_item" | "product_learning_unit" | "missing";
   };
 };
 ```
@@ -562,15 +698,57 @@ Starts assessment for selected canonical unit IDs and returns the existing asses
 
 ### 8.6 `POST /api/agent/actions/request-replan`
 
-Does not directly mutate planner state in V1 unless backend already has evidence. It should accept evidence IDs:
+Does not directly mutate planner state until backend validates evidence ownership and impact. It should accept explicit evidence, current plan identity, affected KPs, and support dry-run first:
 
 ```ts
 type ReplanRequest = {
-  reason: string;
-  assessmentSessionId?: string;
-  sourceUnitIds?: string[];
+  currentPlanId: string;
+  plannerSessionId: string;
+  reason: "assessment_completed" | "mastery_stale" | "user_goal_changed" | "manual_review";
+  dryRun: boolean;
+  evidence: {
+    assessmentSessionId?: string;
+    completedSessionOwnedByUser: boolean;
+    phase?: "placement" | "mini_quiz" | "skip_verification" | "bridge_check" | "final_quiz" | "review";
+    sourceCanonicalUnitIds: string[];
+    affectedKpIds: string[];
+    masteryDeltas: Array<{
+      kp_id: string;
+      before_lcb?: number;
+      after_lcb?: number;
+      before_mean?: number;
+      after_mean?: number;
+    }>;
+  };
 };
 ```
+
+Response:
+
+```ts
+type ReplanResponse = {
+  dryRun: boolean;
+  accepted: boolean;
+  rejectedReason?: string;
+  impact: {
+    unitsAdded: number;
+    unitsRemoved: number;
+    unitsChangedAction: number;
+    estimatedHoursBefore: number;
+    estimatedHoursAfter: number;
+  };
+  warnings: string[];
+  nextPlanId?: string;
+};
+```
+
+Validation rules:
+
+- `assessmentSessionId` must belong to the current user.
+- `phase` must be an evidence-producing phase.
+- `affectedKpIds` must be linked to the source units or assessment items.
+- `currentPlanId`/`plannerSessionId` must match the active path state.
+- If `dryRun=true`, no planner mutation occurs; return impact only.
 
 ## 9. Data Model Additions
 
@@ -580,6 +758,36 @@ Recommended materialized view:
 
 ```sql
 CREATE MATERIALIZED VIEW unit_search_documents AS
+WITH quiz_counts AS (
+  SELECT
+    qb.unit_id,
+    COUNT(DISTINCT qb.item_id) FILTER (
+      WHERE COALESCE(qb.qa_gate_passed, true) = true
+    ) AS quiz_count,
+    COUNT(DISTINCT qb.item_id) FILTER (
+      WHERE COALESCE(qb.qa_gate_passed, true) = true
+        AND COALESCE(ipm.phase, '') IN (
+          'placement',
+          'mini_quiz',
+          'skip_verification',
+          'bridge_check',
+          'final_quiz',
+          'review'
+        )
+    ) AS usable_quiz_count
+  FROM question_bank qb
+  LEFT JOIN item_phase_map ipm ON ipm.item_id = qb.item_id
+  GROUP BY qb.unit_id
+),
+kp_text AS (
+  SELECT
+    m.unit_id,
+    string_agg(DISTINCT k.name, ' ') AS kp_names,
+    string_agg(DISTINCT COALESCE(k.description, ''), ' ') AS kp_descriptions
+  FROM unit_kp_map m
+  JOIN concepts_kp k ON k.kp_id = m.kp_id
+  GROUP BY m.unit_id
+)
 SELECT
   u.unit_id,
   u.course_id,
@@ -588,15 +796,18 @@ SELECT
   u.unit_name,
   u.summary,
   u.key_points,
+  u.section_flags,
   u.content_type,
   u.salience_score,
   u.duration_min,
   u.transcript_path,
   u.video_clip_ref,
-  u.has_quiz_items,
+  COALESCE(q.usable_quiz_count, 0) > 0 AS has_quiz_items,
+  COALESCE(q.quiz_count, 0) AS quiz_count,
+  COALESCE(q.usable_quiz_count, 0) AS usable_quiz_count,
   u.is_worth_learning,
-  string_agg(DISTINCT k.name, ' ') AS kp_names,
-  string_agg(DISTINCT coalesce(k.description, ''), ' ') AS kp_descriptions,
+  kt.kp_names,
+  kt.kp_descriptions,
   to_tsvector(
     'english',
     concat_ws(
@@ -606,15 +817,15 @@ SELECT
       u.unit_name,
       u.summary,
       u.key_points::text,
-      string_agg(DISTINCT k.name, ' '),
-      string_agg(DISTINCT coalesce(k.description, ''), ' ')
+      u.section_flags::text,
+      kt.kp_names,
+      kt.kp_descriptions
     )
   ) AS search_vector
 FROM units u
-LEFT JOIN unit_kp_map m ON m.unit_id = u.unit_id
-LEFT JOIN concepts_kp k ON k.kp_id = m.kp_id
+LEFT JOIN kp_text kt ON kt.unit_id = u.unit_id
+LEFT JOIN quiz_counts q ON q.unit_id = u.unit_id
 WHERE coalesce(u.active, true) = true
-GROUP BY u.unit_id;
 ```
 
 Notes:
@@ -622,10 +833,39 @@ Notes:
 - Use a normal SQL view first if materialized refresh is premature.
 - Add trigram index later for fuzzy title search.
 - Keep vector embedding columns unused in V1.
+- `units.has_quiz_items` can be used as a cached hint, but the retrieval view should derive quiz availability from `question_bank` + `item_phase_map` + `qa_gate_passed` so stale backfills do not mislead assessment intent.
+- Add runtime navigation fields either in this view or in `RuntimeNavigationResolver`; do not return only canonical IDs to the frontend.
 
-### 9.2 Retrieval Trace Table
+### 9.2 Retrieval Trace
 
-Add a lightweight audit table later:
+Retrieval trace is not optional. It is the main debugging surface for Agent/RAG behavior and should exist from Phase 1 as structured response metadata. Persistence can be behind a feature flag, but every search response must include a trace object.
+
+Minimum per-response trace:
+
+```ts
+type RetrievalTrace = {
+  trace_id: string;
+  user_id: string;
+  message_id?: string;
+  intent: AgentIntent;
+  raw_query: string;
+  normalized_query: string;
+  query_expansions: Array<{ from: string; to: string[]; reason: string }>;
+  scope: string;
+  selected_path?: string;
+  candidate_courses: string[];
+  applied_filters: string[];
+  ranking_version: string;
+  runtime_navigation_resolution: Array<{
+    canonical_unit_id: string;
+    source: "path_item" | "product_learning_unit" | "missing";
+    learn_href: string | null;
+  }>;
+  selected_unit_ids: string[];
+};
+```
+
+Optional persistence table:
 
 ```text
 agent_retrieval_trace
@@ -638,11 +878,13 @@ agent_retrieval_trace
 - query
 - selected_unit_ids
 - applied_filters
+- query_expansions
+- runtime_navigation_resolution
 - ranking_version
 - created_at
 ```
 
-This helps reviewers debug whether Agent behavior is deterministic and grounded.
+This lets reviewers debug whether Agent behavior is deterministic, grounded, and actionable.
 
 ## 10. Agent Guardrails
 
@@ -702,22 +944,31 @@ Do not embed full transcripts first. Transcript chunks should remain a second-st
 
 - Create `unit_search_documents` view/service.
 - Implement `UnitSearchService`.
+- Implement `QueryNormalizer` with explicit synonym/domain alias expansion.
+- Implement `RuntimeNavigationResolver` so every actionable search result can produce `learn_href`.
+- Return structured retrieval trace in every search response from day one.
+- Add optional trace persistence behind a feature flag.
 - Add unit tests for scoped search:
   - CV path query returns CS231n CNN units.
   - NLP path query returns CS224n word vector units.
   - Administrative/logistics units are downranked for assessment.
   - `has_quiz_items` boosts assessment intent.
+  - Synonym queries such as `ViT`, `convnet`, `RF`, and `word vectors` expand and rank expected units.
+  - Search results include runtime navigation fields or are marked non-actionable.
 
 ### Phase 2: Agent Context And Tools
 
 - Implement `AgentContextResolver`.
+- Implement `PathRequirementService` for prerequisite/gap questions that should not use BM25 alone.
 - Implement service-level tools:
   - `search_units`
+  - `get_path_requirements`
   - `get_unit_context`
   - `get_transcript_snippets`
   - `start_assessment`
   - `request_replan`
-- Add retrieval trace output for every tool call.
+- Validate replan dry-run inputs: plan/session ownership, assessment ownership, phase, affected KPs, and mastery deltas.
+- Add retrieval/action trace output for every tool call.
 
 ### Phase 3: Chat UI
 
@@ -753,22 +1004,30 @@ final_score = bm25_score + semantic_score + structured_boosts
 
 - Search query `"receptive field"` returns `local::lecture_5_image_classification_with_cnns::seg6`.
 - Search query `"word vector embedding"` returns CS224n word vector unit on NLP path.
+- Search query `"RF in CNNs"` expands `RF` to `receptive field` and returns the same CS231n unit with trace.
+- Search query `"ViT"` expands to `vision transformer` and does not rely on exact title text only.
 - Assessment intent excludes administrative units unless explicitly requested.
 - Course/path scope changes ranking.
 - Query with no result returns a safe fallback and does not hallucinate.
+- Search results include runtime navigation data or `actionable=false`.
+- Path requirement query for NLP returns required CS230/DL units via prerequisite/KP graph, not BM25-only.
 
 ### 13.2 Integration Tests
 
 - `/api/agent/search-units` returns trace with scope, filters, ranking version.
 - `/api/agent/unit-context/{unit_id}` includes KP links and quiz count.
+- `/api/agent/search-units` returns `learn_href` for units joined to product runtime data.
+- `/api/agent/path-requirements` returns prerequisite/gap trace and required units for selected path.
 - Assessment handoff starts session only for eligible units.
-- Replan request rejects missing evidence.
+- Replan dry-run returns impact without mutation.
+- Replan mutation rejects missing/foreign/incomplete evidence.
 
 ### 13.3 UX Tests
 
 - User can ask "where is X taught?" and open the player at the unit.
 - User can ask "test me on X" and land in assessment.
 - User can ask "why this unit?" and see planner reasons.
+- User can ask "which DL parts are required for NLP?" and receive graph-based requirements, not generic search results.
 - Lecture Tutor and Path Agent do not conflict in scope.
 
 ## 14. Reviewer Checklist
@@ -781,7 +1040,11 @@ Reviewers should validate:
 - Are Agent actions safely mediated by backend tools?
 - Are transcript/video evidence only loaded after candidate units are selected?
 - Is the Path Agent clearly separated from Lecture AI Tutor?
-- Are retrieval traces sufficient for debugging bad answers?
+- Are retrieval traces available from Phase 1 and sufficient for debugging bad answers?
+- Does each actionable search result include runtime navigation fields such as `learn_href`, `course_slug`, `unit_slug`, or `learning_unit_id`?
+- Are cross-path prerequisite/gap questions handled by graph services instead of BM25-only search?
+- Does query normalization cover common domain aliases such as `ViT`, `CNN`, `convnet`, `RF`, and `word vectors`?
+- Does replan require validated evidence ownership, phase, affected KPs, mastery deltas, and dry-run impact before mutation?
 - Are hidden/admin/logistics units handled correctly for assessment and search?
 
 ## 15. Open Questions
@@ -801,4 +1064,3 @@ context -> intent -> unit search -> unit context -> optional transcript -> answe
 ```
 
 Do not add embeddings yet. Add retrieval trace logging early so reviewers can inspect why the Agent selected each unit. Use assessment/player evidence as the only source of mastery changes. Keep the existing Lecture AI Tutor lecture-scoped and introduce a separate Path Agent for path/course-level questions.
-
