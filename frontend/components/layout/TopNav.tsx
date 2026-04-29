@@ -84,7 +84,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
       .catch(() => {
         if (mountedRef.current) {
           setCatalogCourses([]);
-          setHasLoadedCourses(true);
+          setHasLoadedCourses(false);
         }
       })
       .finally(() => {
@@ -93,10 +93,6 @@ function TopNavSearch({ pathname }: { pathname: string }) {
         }
       });
   };
-
-  useEffect(() => {
-    ensureCatalogLoaded();
-  }, []);
 
   const hasDraftQuery = draftQuery.length > 0;
 
