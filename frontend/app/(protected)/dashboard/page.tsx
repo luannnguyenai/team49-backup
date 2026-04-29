@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { BookOpen, TrendingUp, Clock, Play, ChevronDown } from "lucide-react";
+import { BookOpen, TrendingUp, Clock, Play } from "lucide-react";
 
 import CourseStatusBadge from "@/components/course/CourseStatusBadge";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -176,11 +176,8 @@ export default function DashboardPage() {
       )}
 
       <div>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4">
           <h2 className="text-lg font-bold text-text-strong">Khám phá khóa học</h2>
-          <button className="flex items-center gap-1.5 rounded-lg border border-border-subtle bg-surface-card px-3 py-1.5 text-sm text-text-body">
-            Tất cả <ChevronDown className="h-4 w-4" />
-          </button>
         </div>
 
         <div className="mb-6 flex gap-1 rounded-xl bg-surface-page p-1 w-fit">
