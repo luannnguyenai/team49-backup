@@ -337,6 +337,7 @@ class AgentAction(BaseModel):
         "unsupported_phase",
         "out_of_scope",
         "requires_login",
+        "not_implemented",
     ] | None = Field(default=None, alias="disabledReason")
     current_plan_id: str | None = Field(default=None, alias="currentPlanId")
     planner_session_id: str | None = Field(default=None, alias="plannerSessionId")
@@ -381,7 +382,7 @@ class AgentActionResponse(BaseModel):
 
 class AgentAssessmentWorkflowRequest(BaseModel):
     workflow_id: str | None = Field(default=None, alias="workflowId")
-    event: Literal["start", "resume", "assessment_completed"] = "start"
+    event: Literal["start", "resume"] = "start"
     message: str | None = None
     candidate_canonical_unit_ids: list[str] = Field(
         default_factory=list, alias="candidateCanonicalUnitIds"
@@ -2502,6 +2503,7 @@ def test_workflow_resume_reduce_reissues_smaller_proposal():
 
     response = service.resume(
         workflow_id=started.workflow_id,
+        user_id="user-1",
         decision={"action": "reduce", "questionBudget": 15},
     )
 
@@ -2509,7 +2511,7 @@ def test_workflow_resume_reduce_reissues_smaller_proposal():
     assert response.interrupt["questionBudget"] == 15
 
 
-def test_workflow_resume_approve_returns_start_assessment_action():
+def test_workflow_resume_approve_returns_disabled_start_assessment_action_until_wired():
     service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
     started = service.start(
         user_id="user-1",
@@ -2520,16 +2522,70 @@ def test_workflow_resume_approve_returns_start_assessment_action():
 
     response = service.resume(
         workflow_id=started.workflow_id,
+        user_id="user-1",
         decision={"action": "approve"},
     )
 
     assert response.status == "assessment_ready"
     assert response.actions[0].type == "start_assessment"
     assert response.actions[0].canonical_unit_ids == ["unit-a"]
-    assert response.actions[0].eligible is True
+    assert response.actions[0].eligible is False
+    assert response.actions[0].disabled_reason == "not_implemented"
+
+
+def test_workflow_resume_rejects_wrong_user():
+    service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a"],
+        question_budget=10,
+        phase="skip_verification",
+    )
+
+    try:
+        service.resume(
+            workflow_id=started.workflow_id,
+            user_id="user-2",
+            decision={"action": "approve"},
+        )
+    except PermissionError as exc:
+        assert str(exc) == "workflow_out_of_scope"
+    else:
+        raise AssertionError("resume must enforce workflow ownership")
+
+
+def test_workflow_resume_rejects_unknown_workflow():
+    service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
+
+    try:
+        service.resume(
+            workflow_id="missing-workflow",
+            user_id="user-1",
+            decision={"action": "approve"},
+        )
+    except ValueError as exc:
+        assert str(exc) == "workflow_not_found"
+    else:
+        raise AssertionError("resume must reject unknown workflow ids")
 ```
 
-- [ ] **Step 2: Run tests and verify failure**
+- [ ] **Step 2: Verify LangGraph dependency is installed**
+
+Run:
+
+```bash
+python -c "from langgraph.graph import StateGraph; from langgraph.types import Command, interrupt; print('langgraph ok')"
+```
+
+Expected: prints `langgraph ok`. If this fails with `ModuleNotFoundError`, sync project dependencies before continuing:
+
+```bash
+uv sync
+```
+
+Then rerun the import check.
+
+- [ ] **Step 3: Run tests and verify failure**
 
 Run:
 
@@ -2539,7 +2595,7 @@ pytest tests/services/test_agent_assessment_workflow.py -q
 
 Expected: FAIL with `ModuleNotFoundError`.
 
-- [ ] **Step 3: Implement LangGraph workflow service**
+- [ ] **Step 4: Implement LangGraph workflow service**
 
 Create `src/services/agent_assessment_workflow.py`:
 
@@ -2639,7 +2695,8 @@ class AgentAssessmentWorkflowService:
                         label="Start assessment",
                         canonical_unit_ids=state["candidate_canonical_unit_ids"],
                         default_phase=state["phase"],
-                        eligible=True,
+                        eligible=False,
+                        disabled_reason="not_implemented",
                     )
                 ],
                 trace={"orchestrator": "langgraph", "node": "assessment_ready"},
@@ -2672,14 +2729,30 @@ class AgentAssessmentWorkflowService:
         result = self.graph.invoke(state, config=self._config(workflow_id))
         return self._response_from_result(workflow_id, result, fallback_state=state)
 
-    def resume(self, workflow_id: str, decision: dict) -> AgentAssessmentWorkflowResponse:
+    def _state_for_workflow(self, workflow_id: str) -> AssessmentWorkflowState:
+        state_snapshot = self.graph.get_state(self._config(workflow_id))
+        state = dict(state_snapshot.values or {})
+        if not state:
+            raise ValueError("workflow_not_found")
+        return state
+
+    def resume(
+        self,
+        workflow_id: str,
+        *,
+        user_id: str,
+        decision: dict,
+    ) -> AgentAssessmentWorkflowResponse:
+        state = self._state_for_workflow(workflow_id)
+        if state.get("user_id") != user_id:
+            raise PermissionError("workflow_out_of_scope")
         result = self.graph.invoke(Command(resume=decision), config=self._config(workflow_id))
         state_snapshot = self.graph.get_state(self._config(workflow_id))
         state = dict(state_snapshot.values or {})
         return self._response_from_result(workflow_id, result, fallback_state=state)
 ```
 
-- [ ] **Step 4: Run tests**
+- [ ] **Step 5: Run tests**
 
 Run:
 
@@ -2689,7 +2762,7 @@ pytest tests/services/test_agent_assessment_workflow.py -q
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add src/services/agent_assessment_workflow.py tests/services/test_agent_assessment_workflow.py
@@ -3142,12 +3215,39 @@ Add module-level workflow service and endpoints:
 assessment_workflow_service = AgentAssessmentWorkflowService()
 
 
+async def _validate_workflow_candidates_in_scope(
+    canonical_unit_ids: list[str],
+    *,
+    allowed_course_ids: list[str],
+    db: AsyncSession,
+) -> None:
+    if not canonical_unit_ids:
+        raise HTTPException(status_code=422, detail="candidateCanonicalUnitIds_required")
+    service = AgentUnitContextService(CanonicalContentRepository(db))
+    for canonical_unit_id in canonical_unit_ids:
+        try:
+            await service.get_context(
+                canonical_unit_id,
+                allowed_course_ids=allowed_course_ids,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+
 @agent_router.post("/assessment-workflows", response_model=AgentAssessmentWorkflowResponse)
 async def agent_start_assessment_workflow(
     body: AgentAssessmentWorkflowRequest,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AgentAssessmentWorkflowResponse:
+    context = await _agent_context_for_user(user, db)
+    await _validate_workflow_candidates_in_scope(
+        body.candidate_canonical_unit_ids,
+        allowed_course_ids=context.allowed_course_ids,
+        db=db,
+    )
     return assessment_workflow_service.start(
         user_id=str(user.id),
         candidate_canonical_unit_ids=body.candidate_canonical_unit_ids,
@@ -3166,10 +3266,16 @@ async def agent_resume_assessment_workflow(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AgentAssessmentWorkflowResponse:
-    return assessment_workflow_service.resume(
-        workflow_id=workflow_id,
-        decision=body.decision or {},
-    )
+    try:
+        return assessment_workflow_service.resume(
+            workflow_id=workflow_id,
+            user_id=str(user.id),
+            decision=body.decision or {},
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
 ```
 
 Add action endpoints:
@@ -3224,6 +3330,12 @@ async def test_assessment_workflow_endpoint_returns_proposal_interrupt():
     with patch(
         "src.routers.agent.assessment_workflow_service.start",
         return_value=expected,
+    ), patch(
+        "src.routers.agent.AgentUnitContextService.get_context",
+        new=AsyncMock(return_value=SimpleNamespace(canonical_unit_id="unit-a")),
+    ), patch(
+        "src.routers.agent._agent_context_for_user",
+        new=AsyncMock(return_value=SimpleNamespace(allowed_course_ids=["CS231n"])),
     ):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
             response = await client.post(
@@ -3239,6 +3351,120 @@ async def test_assessment_workflow_endpoint_returns_proposal_interrupt():
     assert response.status_code == 200
     assert response.json()["status"] == "waiting_user_approval"
     assert response.json()["interrupt"]["type"] == "assessment_proposal"
+
+
+async def test_assessment_workflow_start_rejects_out_of_scope_candidates():
+    with patch(
+        "src.routers.agent.AgentUnitContextService.get_context",
+        new=AsyncMock(side_effect=PermissionError("canonical_unit_out_of_scope")),
+    ), patch(
+        "src.routers.agent._agent_context_for_user",
+        new=AsyncMock(return_value=SimpleNamespace(allowed_course_ids=["CS231n"])),
+    ):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            response = await client.post(
+                "/api/agent/assessment-workflows",
+                json={
+                    "event": "start",
+                    "candidateCanonicalUnitIds": ["unit-outside-scope"],
+                    "questionBudget": 15,
+                    "phase": "skip_verification",
+                },
+            )
+
+    assert response.status_code == 403
+
+
+async def test_assessment_workflow_resume_maps_reduce_response():
+    expected = {
+        "workflowId": "workflow-1",
+        "status": "waiting_user_approval",
+        "interrupt": {
+            "type": "assessment_proposal",
+            "questionBudget": 15,
+            "canonicalUnitIds": ["unit-a"],
+        },
+        "actions": [],
+        "trace": {"orchestrator": "langgraph"},
+    }
+
+    with patch(
+        "src.routers.agent.assessment_workflow_service.resume",
+        return_value=expected,
+    ):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            response = await client.post(
+                "/api/agent/assessment-workflows/workflow-1/resume",
+                json={
+                    "event": "resume",
+                    "decision": {"action": "reduce", "questionBudget": 15},
+                },
+            )
+
+    assert response.status_code == 200
+    assert response.json()["interrupt"]["questionBudget"] == 15
+
+
+async def test_assessment_workflow_resume_maps_approve_response():
+    expected = {
+        "workflowId": "workflow-1",
+        "status": "assessment_ready",
+        "interrupt": None,
+        "actions": [
+            {
+                "type": "start_assessment",
+                "label": "Start assessment",
+                "canonical_unit_ids": ["unit-a"],
+                "default_phase": "skip_verification",
+                "eligible": False,
+                "disabledReason": "not_implemented",
+            }
+        ],
+        "trace": {"orchestrator": "langgraph"},
+    }
+
+    with patch(
+        "src.routers.agent.assessment_workflow_service.resume",
+        return_value=expected,
+    ):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            response = await client.post(
+                "/api/agent/assessment-workflows/workflow-1/resume",
+                json={"event": "resume", "decision": {"action": "approve"}},
+            )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "assessment_ready"
+    assert response.json()["actions"][0]["eligible"] is False
+    assert response.json()["actions"][0]["disabledReason"] == "not_implemented"
+
+
+async def test_assessment_workflow_resume_maps_ownership_error_to_403():
+    with patch(
+        "src.routers.agent.assessment_workflow_service.resume",
+        side_effect=PermissionError("workflow_out_of_scope"),
+    ):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            response = await client.post(
+                "/api/agent/assessment-workflows/workflow-1/resume",
+                json={"event": "resume", "decision": {"action": "approve"}},
+            )
+
+    assert response.status_code == 403
+
+
+async def test_assessment_workflow_resume_maps_unknown_workflow_to_404():
+    with patch(
+        "src.routers.agent.assessment_workflow_service.resume",
+        side_effect=ValueError("workflow_not_found"),
+    ):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            response = await client.post(
+                "/api/agent/assessment-workflows/missing-workflow/resume",
+                json={"event": "resume", "decision": {"action": "approve"}},
+            )
+
+    assert response.status_code == 404
 
 
 async def test_replan_action_is_disabled_until_db_validation_is_wired():
@@ -3369,5 +3595,7 @@ Known V1 limits:
 - Search implementation starts with deterministic LIKE-style matching plus content-policy filters and can be upgraded to PostgreSQL `tsvector`/BM25 ranking without changing API shape.
 - Chat response is template-based in V1; LLM wording can be added behind `AgentChatService` once tool traces are stable.
 - LangGraph is used only for assessment workflow proposal/approval state; general RAG/chat stays custom and deterministic.
+- Workflow start validates candidate canonical unit IDs against the authenticated user's allowed course scope before creating graph state.
+- Workflow resume validates stored workflow ownership against the authenticated user before accepting a resume decision.
 - LangGraph checkpointer is process-local in the V1 task to keep implementation small. Swap to a DB-backed checkpointer or `planner_session_state` persistence before horizontal scaling.
 - Replan mutation is intentionally not implemented; Task 12 exposes backend-mediated validation and dry-run action contracts only.
