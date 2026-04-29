@@ -12,7 +12,8 @@ import {
   filterDashboardCourses,
   type DashboardCourseTab,
 } from "@/features/dashboard/presenters";
-import { courseApi, historyApi } from "@/lib/api";
+import { historyApi } from "@/lib/api";
+import { getCachedAllCourseCatalog } from "@/lib/course-catalog-cache";
 import {
   filterCoursesByQuery,
   normalizeCourseSearchQuery,
@@ -149,7 +150,7 @@ export default function DashboardPage() {
   const hasActiveSearch = normalizedQuery.length >= 2;
 
   useEffect(() => {
-    Promise.all([courseApi.catalog({ includeUnavailable: true }), historyApi.list({ page_size: 1 })])
+    Promise.all([getCachedAllCourseCatalog(true), historyApi.list({ page_size: 1 })])
       .then(([catalog, hist]) => {
         setCourses(catalog.items);
         setSummary(hist.summary);
