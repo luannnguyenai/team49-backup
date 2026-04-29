@@ -12,6 +12,7 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   AlertCircle,
+  Award,
   BookOpen,
   Brain,
   CheckCircle2,
@@ -21,6 +22,7 @@ import {
   ChevronUp,
   Clock,
   Filter,
+  History as HistoryIcon,
   Lightbulb,
   RotateCcw,
   TrendingUp,
@@ -622,7 +624,7 @@ export default function HistoryPage() {
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="mx-auto max-w-7xl space-y-6 animate-fade-in">
       {/* Page header */}
       <div>
         <h2 className="text-2xl font-bold text-text-strong">
@@ -635,55 +637,66 @@ export default function HistoryPage() {
 
       {/* ── Stats summary ──────────────────────────────────────────────── */}
       {summary && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total sessions */}
-          <div className="card py-3 px-4">
-            <p className="text-xs font-medium text-text-muted">
-              Tổng phiên học
-            </p>
-            <p className="mt-1 text-2xl font-bold text-text-strong">
+          <div className="card flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
+              <HistoryIcon className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-body">Tổng phiên học</p>
+              <p className="text-xs text-text-muted">
+                {summary.completed_sessions} hoàn thành
+              </p>
+            </div>
+            <p className="shrink-0 text-2xl font-bold text-text-strong">
               {summary.total_sessions}
-            </p>
-            <p className="text-xs text-text-muted">
-              {summary.completed_sessions} hoàn thành
             </p>
           </div>
 
           {/* Avg score */}
-          <div className="card py-3 px-4">
-            <p className="text-xs font-medium text-text-muted">
-              Điểm trung bình
-            </p>
+          <div className="card flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
+              <Award className="h-6 w-6 text-amber-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-body">Điểm trung bình</p>
+              <p className="text-xs text-text-muted">Các phiên hoàn thành</p>
+            </div>
             <p
-              className="mt-1 text-2xl font-bold"
+              className="shrink-0 text-2xl font-bold"
               style={{ color: summary.avg_score !== null ? scoreColor(summary.avg_score) : "var(--text-muted)" }}
             >
               {summary.avg_score !== null ? `${summary.avg_score.toFixed(1)}%` : "—"}
             </p>
-            <p className="text-xs text-text-muted">
-              Các phiên hoàn thành
-            </p>
           </div>
 
           {/* Study time */}
-          <div className="card py-3 px-4">
-            <p className="text-xs font-medium text-text-muted">
-              Tổng thời gian
-            </p>
-            <p className="mt-1 text-2xl font-bold text-text-strong">
+          <div className="card flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
+              <Clock className="h-6 w-6 text-violet-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-body">Tổng thời gian</p>
+              <p className="text-xs text-text-muted">Thời gian học tích lũy</p>
+            </div>
+            <p className="shrink-0 text-2xl font-bold text-text-strong">
               {fmtStudyTime(summary.total_study_seconds)}
-            </p>
-            <p className="text-xs text-text-muted">
-              Thời gian học tích lũy
             </p>
           </div>
 
           {/* Score trend sparkline */}
-          <div className="card py-3 px-4">
-            <p className="mb-1 flex items-center gap-1 text-xs font-medium text-text-muted">
-              <TrendingUp size={11} /> Xu hướng điểm
-            </p>
-            <SparkLine data={summary.score_trend} width={140} height={40} />
+          <div className="card flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
+              <TrendingUp className="h-6 w-6 text-emerald-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-body">Xu hướng điểm</p>
+              <p className="text-xs text-text-muted">Theo phiên gần đây</p>
+            </div>
+            <div className="shrink-0">
+              <SparkLine data={summary.score_trend} width={120} height={36} />
+            </div>
           </div>
         </div>
       )}

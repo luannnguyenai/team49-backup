@@ -93,7 +93,7 @@ function TutorPageContent() {
   const hasNothingToShow = joinedCourses.length === 0 && recommendedCourses.length === 0;
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="mx-auto max-w-7xl space-y-8 animate-fade-in">
       <header className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300">
           <GraduationCap className="h-5 w-5" />
