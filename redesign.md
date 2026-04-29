@@ -620,7 +620,34 @@ Expected:
 - [ ] **Step 5: Record remaining color debt**
 
 ```txt
-If any component still uses stale hard-coded blue/violet classes, append a short follow-up list here before implementation review.
+Remaining stale hard-coded blue/violet usages (deferred to Phase 2 — decorative
+semantic accents, not brand-critical):
+
+- frontend/app/(protected)/dashboard/page.tsx
+  L158-159: StatCard "Khóa học" icon — text-blue-600 / bg-blue-100 dark:bg-blue-900/30
+  L170-171: StatCard "Tổng thời gian học" icon — text-violet-600 / bg-violet-100 dark:bg-violet-900/30
+- frontend/app/(protected)/profile/page.tsx
+  L236, L248: achievement badge accent borders use blue-200 / violet-200 (decorative; semantic per achievement type)
+- frontend/app/assessment/results/page.tsx
+  L41: bg-blue-600 (decorative result CTA — could migrate to btn-primary)
+
+Notes:
+- Catalog/Stat card icons remain on a multi-hue decorative palette intentionally
+  (blue/emerald/violet) — these are not brand-critical and migrating them risks
+  losing the visual differentiation between stat categories.
+- Hero gradients (from-indigo-600 via-cyan-500 to-teal-400) preserved by design.
+- Pre-existing test failures unrelated to rebrand:
+  tests/routes/learning/legacy-tutor-redirect.test.tsx (2)
+  tests/routes/course/personalized-catalog.test.tsx (6)
+  Confirmed failing on baseline 53d595f before any color work.
+- Pre-existing `npm run build` prerender errors also reproduce on baseline 53d595f.
+
+Phase 1 contract tests added by this work — all passing:
+  tests/unit/ui/button-theme.test.tsx (2)
+  tests/unit/layout/topnav-theme.test.tsx (1)
+  tests/unit/course/course-status-badge-theme.test.tsx (1)
+  tests/unit/dashboard/presenters.test.ts (4 — pre-existing guard)
+  tests/unit/tutor/in-context-tutor.test.tsx (8 — pre-existing guard)
 ```
 
 - [ ] **Step 6: Commit**
