@@ -250,8 +250,10 @@ const TOC_SUMMARY_2 = {
 // ---------------------------------------------------------------------------
 
 describe("learning unit page (US3)", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    const { resetCachedAllCourseCatalog } = await import("@/lib/course-catalog-cache");
+    resetCachedAllCourseCatalog();
     apiMock.get.mockResolvedValue({ data: [] });
     courseApiMock.catalog.mockResolvedValue({
       items: [
