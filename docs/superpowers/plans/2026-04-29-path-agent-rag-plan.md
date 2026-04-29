@@ -25,9 +25,11 @@ Recommended V1 retrieval architecture:
 User message
 -> AgentContextResolver
 -> IntentRouter
--> UnitSearchService using BM25/full-text + structured boosts
+-> QueryNormalizer
+-> UnitSearchService or PathRequirementService
+-> RuntimeNavigationResolver
 -> UnitContextService expands top units with KP/transcript/timestamps
--> Agent response + optional action: open player, start assessment, request replan
+-> AgentChatOrchestrator returns cited answer, action buttons, and trace metadata
 ```
 
 Embedding can be added later as a hybrid fallback over unit-level search documents, not as the first retrieval layer.
@@ -178,7 +180,7 @@ The normalizer must be traceable. Every expanded query should return the expansi
 
 V1 should use database full-text/BM25-style search over a unit-centered search document.
 
-Search document fields:
+Search index fields:
 
 ```text
 unit_id
@@ -198,6 +200,11 @@ is_worth_learning
 section_flags
 transcript_path
 video_clip_ref
+```
+
+Navigation enrichment fields are not part of the core text index unless the implementation chooses to denormalize them. They must be attached by `RuntimeNavigationResolver` before returning actionable results:
+
+```text
 learning_unit_id
 course_slug
 unit_slug
@@ -248,12 +255,23 @@ Questions such as "Which DL parts are required for NLP?" require graph/planner r
 selected path -> target course/KPs -> prerequisite_edges -> unit_kp_map -> user mastery -> required units/gaps
 ```
 
+Target KP selection must be deterministic:
+
+1. Resolve `targetCourseIds` from `targetPathKey` and authenticated user scope when omitted.
+2. Select target units from those courses where `active=true`, `is_worth_learning IS NOT false`, and `content_type` is not administrative/logistics/reference-only.
+3. Keep target unit-KP rows where `unit_kp_map.planner_role IN ('main', 'prereq')`.
+4. Prefer coverage levels `dominant` and `substantial`; include `partial` only when the KP has `importance_level IN ('critical', 'high')` or `structural_role='gateway'`.
+5. Exclude KPs linked only through intro/career/logistics units.
+6. Use `prerequisite_edges` to expand prerequisites up to `prerequisiteDepth` hops.
+7. Map prerequisite KPs back to source units with `unit_kp_map`, preferring `planner_role IN ('main', 'prereq')`, higher `coverage_weight`, higher salience, and quiz availability.
+8. Overlay user mastery from `learner_mastery_kp` when `includeMastery=true` to label units as `already_mastered`, `needs_review`, `required`, or `unassessed`.
+
 Inputs:
 
 ```ts
 type PathRequirementRequest = {
   targetPathKey: "computer_vision" | "nlp";
-  targetCourseIds: string[];
+  targetCourseIds?: string[];
   sourceCourseIds?: string[];
   includeMastery?: boolean;
 };
@@ -617,7 +635,93 @@ Trace:
 
 These endpoints can be implemented as internal services first and exposed as HTTP only if needed by the frontend.
 
-### 8.1 `GET /api/agent/context`
+### 8.1 `POST /api/agent/chat`
+
+Main orchestration endpoint. This is the public contract the UI should call for normal Agent conversation. Tool endpoints below can remain internal service methods or debugging endpoints.
+
+Request:
+
+```ts
+type AgentChatRequest = {
+  message: string;
+  conversationId?: string;
+  routeContext?: {
+    route: string;
+    courseSlug?: string;
+    unitSlug?: string;
+    canonicalUnitId?: string;
+    playerTimestampSec?: number;
+  };
+  responseMode?: "non_streaming" | "streaming";
+  traceMode?: "none" | "summary" | "full";
+};
+```
+
+Response:
+
+```ts
+type AgentChatResponse = {
+  conversationId: string;
+  messageId: string;
+  answer: {
+    markdown: string;
+    confidence: "grounded" | "partial" | "no_source";
+  };
+  citations: Array<{
+    canonical_unit_id: string;
+    course_id: string;
+    lecture_id: string | null;
+    lecture_title: string | null;
+    unit_name: string;
+    learn_href: string | null;
+    timestamp_s?: number;
+    quote?: string;
+    source: "summary" | "key_point" | "transcript" | "planner" | "mastery";
+  }>;
+  actions: Array<
+    | {
+        type: "open_unit";
+        label: string;
+        learn_href: string;
+        canonical_unit_id: string;
+      }
+    | {
+        type: "start_assessment";
+        label: string;
+        canonical_unit_ids: string[];
+        default_phase: "placement" | "mini_quiz" | "skip_verification" | "bridge_check" | "final_quiz" | "review";
+      }
+    | {
+        type: "request_replan_dry_run";
+        label: string;
+        currentPlanId: string;
+        plannerSessionId: string;
+        assessmentSessionId?: string;
+        sourceCanonicalUnitIds: string[];
+      }
+  >;
+  fallback?: {
+    reason: "no_retrieval_result" | "out_of_scope" | "unsafe_action" | "tool_error";
+    message: string;
+  };
+  trace?: RetrievalTrace;
+};
+```
+
+Streaming:
+
+- V1 can ship non-streaming only.
+- If streaming is added, stream answer tokens separately from final structured payload.
+- Final event must still include `citations`, `actions`, and `trace` so UI behavior is deterministic.
+
+Fallback/refusal rules:
+
+- If no grounded unit/path/planner source exists, return `confidence="no_source"` and do not invent citations.
+- If the user asks outside selected/enrolled/available courses, either ask for explicit global search permission or return an out-of-scope fallback.
+- If the user asks for a state mutation, return an action button; do not mutate through chat text alone.
+- Trace exposure is controlled by `traceMode`; normal users can receive summary trace, reviewers/dev mode can receive full trace.
+
+### 8.2 `GET /api/agent/context`
 
 Returns current learning context.
 
@@ -633,7 +737,7 @@ type AgentContextResponse = AgentLearningContext & {
 };
 ```
 
-### 8.2 `POST /api/agent/search-units`
+### 8.3 `POST /api/agent/search-units`
 
 Request:
 
@@ -643,10 +747,16 @@ type UnitSearchRequest = {
   scope?: "current_unit" | "current_lecture" | "current_course" | "current_path" | "global_catalog";
   courseIds?: string[];
   limit?: number;
-  includeHidden?: boolean;
   intent?: AgentIntent;
 };
 ```
+
+Authorization/scope rules:
+
+- Public client requests cannot pass `includeHidden`.
+- Hidden/admin/logistics content can only surface when backend intent detection identifies an explicit logistics/admin query, or when an internal/dev-mode role requests it.
+- `courseIds` must be intersected with the user's selected path, enrolled courses, or available course catalog.
+- `scope="global_catalog"` must be explicit and should still respect course availability; it must not leak private/hidden course content.
 
 Response:
 
@@ -689,7 +799,7 @@ type UnitSearchResponse = {
 };
 ```
 
-### 8.3 `POST /api/agent/path-requirements`
+### 8.4 `POST /api/agent/path-requirements`
 
 Graph-based requirement/gap endpoint for questions that should not use BM25-only retrieval.
 
@@ -730,21 +840,22 @@ Rules:
 
 - Requires authenticated user context.
 - Defaults `targetCourseIds` from the user's selected path when omitted.
+- Intersects requested `targetCourseIds` and `sourceCourseIds` with selected/enrolled/available courses unless an authorized admin/dev scope is used.
 - Uses prerequisite/KP graph, `unit_kp_map`, and optional `learner_mastery_kp`.
 - Returns runtime navigation data for each required unit when available.
 - Must not mutate planner or mastery state.
 
-### 8.4 `GET /api/agent/unit-context/{canonical_unit_id}`
+### 8.5 `GET /api/agent/unit-context/{canonical_unit_id}`
 
 Returns unit context, KP links, quiz count, and timestamp evidence.
 
 The path parameter is canonical `units.unit_id`. If the frontend only has a runtime `learning_units.id`, it must first resolve it through `RuntimeNavigationResolver` or call a separate resolver endpoint. Do not overload this endpoint with ambiguous ID semantics.
 
-### 8.5 `POST /api/agent/transcript-snippets`
+### 8.6 `POST /api/agent/transcript-snippets`
 
 Narrow transcript retrieval for already-selected units.
 
-### 8.6 `POST /api/agent/actions/start-assessment`
+### 8.7 `POST /api/agent/actions/start-assessment`
 
 Starts assessment for selected canonical unit IDs and returns the existing assessment session payload.
 
@@ -760,7 +871,7 @@ Default phase by intent:
 
 The caller may pass a phase, but the backend should validate it against intent and eligible question phases.
 
-### 8.7 `POST /api/agent/actions/request-replan`
+### 8.8 `POST /api/agent/actions/request-replan`
 
 Does not directly mutate planner state until backend validates evidence ownership and impact. The client must not send authoritative derived evidence such as ownership flags or mastery deltas. It should send only references and intent; the backend derives ownership, phase, affected KPs, and mastery deltas from trusted repositories.
 
@@ -1032,7 +1143,7 @@ Do not embed full transcripts first. Transcript chunks should remain a second-st
   - `get_transcript_snippets`
   - `start_assessment`
   - `request_replan`
-- Validate replan dry-run inputs: plan/session ownership, assessment ownership, phase, affected KPs, and mastery deltas.
+- Validate replan dry-run references: plan/session ownership, assessment ownership, and source units; backend derives phase, affected KPs, and mastery deltas from trusted data.
 - Add retrieval/action trace output for every tool call.
 
 ### Phase 3: Chat UI
