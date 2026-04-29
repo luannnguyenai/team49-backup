@@ -3,7 +3,7 @@
 // app/tutor/page.tsx
 // "Khoá học đang tham gia" — hub page listing enrolled + recommended courses
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Compass, GraduationCap, PlayCircle } from "lucide-react";
@@ -14,6 +14,27 @@ import { filterCoursesByQuery, normalizeCourseSearchQuery } from "@/lib/course-s
 import type { CourseCatalogItem, HistoryItem } from "@/types";
 
 export default function TutorPage() {
+  return (
+    <Suspense fallback={<TutorPageFallback />}>
+      <TutorPageContent />
+    </Suspense>
+  );
+}
+
+function TutorPageFallback() {
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Đang tải danh sách khoá học...
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function TutorPageContent() {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<CourseCatalogItem[]>([]);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);

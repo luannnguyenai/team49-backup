@@ -144,6 +144,30 @@ function TopNavSearch({ pathname }: { pathname: string }) {
 }
 
 export default function TopNav() {
+  return (
+    <Suspense fallback={<TopNavFallback />}>
+      <TopNavContent />
+    </Suspense>
+  );
+}
+
+function TopNavFallback() {
+  return (
+    <header
+      className="sticky top-0 z-30 border-b"
+      style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}
+    >
+      <div className="flex h-16 items-center gap-4 px-4 md:px-6">
+        <div className="shrink-0">
+          <BrandLogo compact />
+        </div>
+        <div className="hidden flex-1 sm:block" />
+      </div>
+    </header>
+  );
+}
+
+function TopNavContent() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
