@@ -2,17 +2,24 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a V1 Path Agent backend that accepts chat messages, resolves user/path context, retrieves canonical units through unit-centered search or graph-based path requirements, returns cited answers/actions, and exposes traceable tool contracts.
+**Goal:** Build a V1 Path Agent backend that accepts chat messages, resolves user/path context, retrieves canonical units through unit-centered search or graph-based path requirements, returns cited answers/actions, and uses LangGraph only for the long-running assessment/replan approval workflow.
 
-**Architecture:** Add a separate `/api/agent` router and focused backend services: schemas, context resolver, query normalizer, unit search, runtime navigation resolver, path requirement service, unit context service, and chat orchestrator. Keep the implementation deterministic and tool-mediated; do not update mastery/planner state from LLM text. Use non-streaming chat in V1 and return structured citations/actions/traces.
+**Architecture:** Add a separate `/api/agent` router and focused backend services: schemas, context resolver, query normalizer, unit search, runtime navigation resolver, path requirement service, unit context service, chat orchestrator, and LangGraph-backed assessment workflow service. Keep retrieval, requirement matching, assessment eligibility, and replan validation deterministic and tool-mediated; do not update mastery/planner state from LLM text. Use non-streaming chat in V1 and return structured citations/actions/traces.
 
-**Tech Stack:** FastAPI, SQLAlchemy AsyncSession, Pydantic v2, PostgreSQL full-text-compatible query construction, pytest/pytest-asyncio, httpx ASGI contract tests.
+**Tech Stack:** FastAPI, SQLAlchemy AsyncSession, Pydantic v2, LangGraph `StateGraph`/`interrupt`/`Command`, PostgreSQL full-text-compatible query construction, pytest/pytest-asyncio, httpx ASGI contract tests.
 
 ---
 
 ## Scope And Constraints
 
-This plan implements backend contracts and deterministic orchestration only. It does not implement frontend chat UI, streaming, vector embeddings, or LLM answer generation. The chat orchestrator can return template-based grounded answers in V1 while preserving the final response shape for future LLM integration.
+This plan implements backend contracts, deterministic retrieval, and a narrow LangGraph workflow for assessment proposal/approval/reduction. It does not implement frontend chat UI, streaming, vector embeddings, or free-form LLM answer generation. The chat orchestrator can return template-based grounded answers in V1 while preserving the final response shape for future LLM integration.
+
+LangGraph scope:
+
+- Use LangGraph only for long-running conversational workflow state: self-report → assessment proposal → user approval/reduction → assessment handoff → replan explanation.
+- Do not use LangChain/LangGraph as the retrieval layer.
+- Do not let an LLM decide mastery, skip, quiz eligibility, or replan mutation.
+- V1 uses a backend-owned LangGraph checkpointer for assessment proposal/resume. Before multi-worker production, replace the process-local checkpointer with a DB-backed checkpointer or persist graph state snapshots into `planner_session_state.state_json`.
 
 Important rules:
 
@@ -37,12 +44,14 @@ Create:
 - `src/services/agent_requirement_service.py` — graph-based path prerequisite/gap service.
 - `src/services/agent_unit_context_service.py` — canonical unit context/KP/quiz/timestamp expansion.
 - `src/services/agent_chat_service.py` — orchestration endpoint logic: intent, tool calls, citations, actions, fallback, trace.
+- `src/services/agent_assessment_workflow.py` — LangGraph workflow for assessment proposal, user approval/reduction, and assessment handoff state.
 - `tests/services/test_agent_query_normalizer.py`
 - `tests/services/test_agent_context_service.py`
 - `tests/services/test_agent_search_service.py`
 - `tests/services/test_agent_requirement_service.py`
 - `tests/services/test_agent_unit_context_service.py`
 - `tests/services/test_agent_chat_service.py`
+- `tests/services/test_agent_assessment_workflow.py`
 - `tests/contract/test_agent_routes.py`
 
 Modify:
@@ -76,6 +85,8 @@ from src.schemas.agent import (
     AgentChatRequest,
     AgentChatResponse,
     AgentAction,
+    AgentAssessmentWorkflowRequest,
+    AgentAssessmentWorkflowResponse,
     AgentCitation,
     UnitSearchRequest,
     UnitSearchResponse,
@@ -158,6 +169,33 @@ def test_unit_search_response_trace_uses_per_result_navigation_resolution():
     )
 
     assert response.trace.runtime_navigation_resolution[0].source == "product_learning_unit"
+
+
+def test_assessment_workflow_response_exposes_interrupt_payload():
+    response = AgentAssessmentWorkflowResponse(
+        workflow_id="workflow-1",
+        status="waiting_user_approval",
+        interrupt={
+            "type": "assessment_proposal",
+            "questionBudget": 30,
+            "canonicalUnitIds": ["unit-a"],
+        },
+        actions=[],
+    )
+
+    assert response.status == "waiting_user_approval"
+    assert response.interrupt["type"] == "assessment_proposal"
+
+
+def test_assessment_workflow_request_supports_resume_decision():
+    request = AgentAssessmentWorkflowRequest(
+        workflowId="workflow-1",
+        event="resume",
+        decision={"action": "reduce", "questionBudget": 15},
+    )
+
+    assert request.workflow_id == "workflow-1"
+    assert request.decision["questionBudget"] == 15
 ```
 
 - [ ] **Step 2: Run schema tests and verify failure**
@@ -281,9 +319,15 @@ class AgentCitation(BaseModel):
 
 
 class AgentAction(BaseModel):
-    type: Literal["open_unit", "start_assessment", "request_replan_dry_run"]
+    type: Literal[
+        "open_unit",
+        "start_assessment",
+        "request_replan_dry_run",
+        "continue_assessment_workflow",
+    ]
     label: str
     learn_href: str | None = None
+    workflow_id: str | None = Field(default=None, alias="workflowId")
     canonical_unit_id: str | None = None
     canonical_unit_ids: list[str] = Field(default_factory=list)
     default_phase: AssessmentPhase | None = None
@@ -331,6 +375,38 @@ class AgentActionResponse(BaseModel):
     rejected_reason: str | None = Field(default=None, alias="rejectedReason")
     dry_run: bool = Field(default=True, alias="dryRun")
     impact: dict | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentAssessmentWorkflowRequest(BaseModel):
+    workflow_id: str | None = Field(default=None, alias="workflowId")
+    event: Literal["start", "resume", "assessment_completed"] = "start"
+    message: str | None = None
+    candidate_canonical_unit_ids: list[str] = Field(
+        default_factory=list, alias="candidateCanonicalUnitIds"
+    )
+    question_budget: int = Field(default=30, ge=1, le=50, alias="questionBudget")
+    phase: AssessmentPhase = "skip_verification"
+    decision: dict | None = None
+    assessment_session_id: str | None = Field(default=None, alias="assessmentSessionId")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentAssessmentWorkflowResponse(BaseModel):
+    workflow_id: str = Field(alias="workflowId")
+    status: Literal[
+        "collecting_self_report",
+        "waiting_user_approval",
+        "assessment_ready",
+        "waiting_assessment_result",
+        "completed",
+        "rejected",
+    ]
+    interrupt: dict | None = None
+    actions: list[AgentAction] = Field(default_factory=list)
+    trace: dict = Field(default_factory=dict)
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -1858,8 +1934,8 @@ pytest tests/services/test_agent_requirement_service.py -q
 
 Expected: PASS.
 
-Note: action route tests are intentionally not part of Task 10. They append to
-`tests/contract/test_agent_routes.py` in Task 11 after action schemas and
+Note: action route tests are intentionally not part of Task 11. They append to
+`tests/contract/test_agent_routes.py` in Task 12 after action schemas and
 `agent_action_service.py` exist.
 
 - [ ] **Step 5: Commit**
@@ -2379,7 +2455,250 @@ git commit -m "feat: add path agent chat orchestrator"
 
 ---
 
-### Task 10: Agent Router And App Wiring
+### Task 10: LangGraph Assessment Workflow
+
+**Files:**
+- Create: `src/services/agent_assessment_workflow.py`
+- Test: `tests/services/test_agent_assessment_workflow.py`
+
+This workflow is intentionally narrow. It coordinates the conversational
+assessment/replan handoff, but it does not score mastery, create quiz sessions,
+or mutate planner state. Those remain backend services/actions outside the graph.
+
+- [ ] **Step 1: Write failing tests**
+
+Create `tests/services/test_agent_assessment_workflow.py`:
+
+```python
+from langgraph.checkpoint.memory import InMemorySaver
+
+from src.services.agent_assessment_workflow import AgentAssessmentWorkflowService
+
+
+def test_workflow_starts_with_assessment_proposal_interrupt():
+    service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
+
+    response = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a", "unit-b"],
+        question_budget=30,
+        phase="skip_verification",
+    )
+
+    assert response.status == "waiting_user_approval"
+    assert response.interrupt["type"] == "assessment_proposal"
+    assert response.interrupt["questionBudget"] == 30
+    assert response.interrupt["canonicalUnitIds"] == ["unit-a", "unit-b"]
+
+
+def test_workflow_resume_reduce_reissues_smaller_proposal():
+    service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a", "unit-b"],
+        question_budget=30,
+        phase="skip_verification",
+    )
+
+    response = service.resume(
+        workflow_id=started.workflow_id,
+        decision={"action": "reduce", "questionBudget": 15},
+    )
+
+    assert response.status == "waiting_user_approval"
+    assert response.interrupt["questionBudget"] == 15
+
+
+def test_workflow_resume_approve_returns_start_assessment_action():
+    service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a"],
+        question_budget=10,
+        phase="skip_verification",
+    )
+
+    response = service.resume(
+        workflow_id=started.workflow_id,
+        decision={"action": "approve"},
+    )
+
+    assert response.status == "assessment_ready"
+    assert response.actions[0].type == "start_assessment"
+    assert response.actions[0].canonical_unit_ids == ["unit-a"]
+    assert response.actions[0].eligible is True
+```
+
+- [ ] **Step 2: Run tests and verify failure**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_assessment_workflow.py -q
+```
+
+Expected: FAIL with `ModuleNotFoundError`.
+
+- [ ] **Step 3: Implement LangGraph workflow service**
+
+Create `src/services/agent_assessment_workflow.py`:
+
+```python
+from __future__ import annotations
+
+from typing import Literal, TypedDict
+from uuid import uuid4
+
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command, interrupt
+
+from src.schemas.agent import AgentAction, AgentAssessmentWorkflowResponse, AssessmentPhase
+
+
+class AssessmentWorkflowState(TypedDict, total=False):
+    workflow_id: str
+    user_id: str
+    candidate_canonical_unit_ids: list[str]
+    question_budget: int
+    phase: AssessmentPhase
+    status: str
+
+
+class AgentAssessmentWorkflowService:
+    def __init__(self, checkpointer=None):
+        self.checkpointer = checkpointer or InMemorySaver()
+        self.graph = self._build_graph()
+
+    def _build_graph(self):
+        builder = StateGraph(AssessmentWorkflowState)
+        builder.add_node("proposal", self._proposal_node)
+        builder.add_node("assessment_ready", self._assessment_ready_node)
+        builder.add_node("rejected", self._rejected_node)
+        builder.add_edge(START, "proposal")
+        builder.add_edge("assessment_ready", END)
+        builder.add_edge("rejected", END)
+        return builder.compile(checkpointer=self.checkpointer)
+
+    def _proposal_node(
+        self,
+        state: AssessmentWorkflowState,
+    ) -> Command[Literal["proposal", "assessment_ready", "rejected"]]:
+        decision = interrupt(
+            {
+                "type": "assessment_proposal",
+                "canonicalUnitIds": state["candidate_canonical_unit_ids"],
+                "questionBudget": state["question_budget"],
+                "phase": state["phase"],
+                "message": "Approve or reduce the assessment before starting.",
+            }
+        )
+        action = str(decision.get("action", "")).lower()
+        if action == "reduce":
+            next_budget = int(decision.get("questionBudget") or state["question_budget"])
+            next_budget = max(1, min(next_budget, state["question_budget"]))
+            return Command(update={"question_budget": next_budget}, goto="proposal")
+        if action == "approve":
+            return Command(update={"status": "assessment_ready"}, goto="assessment_ready")
+        return Command(update={"status": "rejected"}, goto="rejected")
+
+    def _assessment_ready_node(self, state: AssessmentWorkflowState) -> AssessmentWorkflowState:
+        return {"status": "assessment_ready"}
+
+    def _rejected_node(self, state: AssessmentWorkflowState) -> AssessmentWorkflowState:
+        return {"status": "rejected"}
+
+    def _config(self, workflow_id: str) -> dict:
+        return {"configurable": {"thread_id": workflow_id}}
+
+    def _response_from_result(
+        self,
+        workflow_id: str,
+        result: dict,
+        *,
+        fallback_state: AssessmentWorkflowState | None = None,
+    ) -> AgentAssessmentWorkflowResponse:
+        interrupts = result.get("__interrupt__") or []
+        if interrupts:
+            return AgentAssessmentWorkflowResponse(
+                workflowId=workflow_id,
+                status="waiting_user_approval",
+                interrupt=interrupts[0].value,
+                actions=[],
+                trace={"orchestrator": "langgraph", "node": "proposal"},
+            )
+
+        state = fallback_state or result
+        if state.get("status") == "assessment_ready":
+            return AgentAssessmentWorkflowResponse(
+                workflowId=workflow_id,
+                status="assessment_ready",
+                actions=[
+                    AgentAction(
+                        type="start_assessment",
+                        label="Start assessment",
+                        canonical_unit_ids=state["candidate_canonical_unit_ids"],
+                        default_phase=state["phase"],
+                        eligible=True,
+                    )
+                ],
+                trace={"orchestrator": "langgraph", "node": "assessment_ready"},
+            )
+
+        return AgentAssessmentWorkflowResponse(
+            workflowId=workflow_id,
+            status="rejected",
+            actions=[],
+            trace={"orchestrator": "langgraph", "node": "rejected"},
+        )
+
+    def start(
+        self,
+        *,
+        user_id: str,
+        candidate_canonical_unit_ids: list[str],
+        question_budget: int,
+        phase: AssessmentPhase,
+    ) -> AgentAssessmentWorkflowResponse:
+        workflow_id = str(uuid4())
+        state: AssessmentWorkflowState = {
+            "workflow_id": workflow_id,
+            "user_id": user_id,
+            "candidate_canonical_unit_ids": candidate_canonical_unit_ids,
+            "question_budget": question_budget,
+            "phase": phase,
+            "status": "waiting_user_approval",
+        }
+        result = self.graph.invoke(state, config=self._config(workflow_id))
+        return self._response_from_result(workflow_id, result, fallback_state=state)
+
+    def resume(self, workflow_id: str, decision: dict) -> AgentAssessmentWorkflowResponse:
+        result = self.graph.invoke(Command(resume=decision), config=self._config(workflow_id))
+        state_snapshot = self.graph.get_state(self._config(workflow_id))
+        state = dict(state_snapshot.values or {})
+        return self._response_from_result(workflow_id, result, fallback_state=state)
+```
+
+- [ ] **Step 4: Run tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_assessment_workflow.py -q
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/services/agent_assessment_workflow.py tests/services/test_agent_assessment_workflow.py
+git commit -m "feat: add langgraph assessment workflow"
+```
+
+---
+
+### Task 11: Agent Router And App Wiring
 
 **Files:**
 - Create: `src/routers/agent.py`
@@ -2697,13 +3016,14 @@ git commit -m "feat: expose path agent api routes"
 
 ---
 
-### Task 11: Replan And Assessment Action Endpoints
+### Task 12: Replan And Assessment Action Endpoints
 
 **Files:**
 - Modify: `src/schemas/agent.py`
 - Create: `src/services/agent_action_service.py`
 - Modify: `src/routers/agent.py`
 - Test: `tests/services/test_agent_action_service.py`
+- Test: `tests/contract/test_agent_routes.py`
 
 - [ ] **Step 1: Write failing tests**
 
@@ -2807,13 +3127,52 @@ Modify `src/routers/agent.py` imports:
 ```python
 from src.schemas.agent import (
     AgentActionResponse,
+    AgentAssessmentWorkflowRequest,
+    AgentAssessmentWorkflowResponse,
     RequestReplanActionRequest,
     StartAssessmentActionRequest,
 )
+from src.services.agent_assessment_workflow import AgentAssessmentWorkflowService
 from src.services.agent_action_service import start_assessment_not_implemented, validate_replan_request
 ```
 
-Add endpoints:
+Add module-level workflow service and endpoints:
+
+```python
+assessment_workflow_service = AgentAssessmentWorkflowService()
+
+
+@agent_router.post("/assessment-workflows", response_model=AgentAssessmentWorkflowResponse)
+async def agent_start_assessment_workflow(
+    body: AgentAssessmentWorkflowRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AgentAssessmentWorkflowResponse:
+    return assessment_workflow_service.start(
+        user_id=str(user.id),
+        candidate_canonical_unit_ids=body.candidate_canonical_unit_ids,
+        question_budget=body.question_budget,
+        phase=body.phase,
+    )
+
+
+@agent_router.post(
+    "/assessment-workflows/{workflow_id}/resume",
+    response_model=AgentAssessmentWorkflowResponse,
+)
+async def agent_resume_assessment_workflow(
+    workflow_id: str,
+    body: AgentAssessmentWorkflowRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AgentAssessmentWorkflowResponse:
+    return assessment_workflow_service.resume(
+        workflow_id=workflow_id,
+        decision=body.decision or {},
+    )
+```
+
+Add action endpoints:
 
 ```python
 @agent_router.post("/actions/start-assessment", response_model=AgentActionResponse)
@@ -2849,6 +3208,39 @@ async def agent_request_replan(
 Append to `tests/contract/test_agent_routes.py`:
 
 ```python
+async def test_assessment_workflow_endpoint_returns_proposal_interrupt():
+    expected = {
+        "workflowId": "workflow-1",
+        "status": "waiting_user_approval",
+        "interrupt": {
+            "type": "assessment_proposal",
+            "questionBudget": 15,
+            "canonicalUnitIds": ["unit-a"],
+        },
+        "actions": [],
+        "trace": {"orchestrator": "langgraph"},
+    }
+
+    with patch(
+        "src.routers.agent.assessment_workflow_service.start",
+        return_value=expected,
+    ):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            response = await client.post(
+                "/api/agent/assessment-workflows",
+                json={
+                    "event": "start",
+                    "candidateCanonicalUnitIds": ["unit-a"],
+                    "questionBudget": 15,
+                    "phase": "skip_verification",
+                },
+            )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "waiting_user_approval"
+    assert response.json()["interrupt"]["type"] == "assessment_proposal"
+
+
 async def test_replan_action_is_disabled_until_db_validation_is_wired():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
         response = await client.post(
@@ -2901,7 +3293,7 @@ git commit -m "feat: add agent action validation stubs"
 
 ---
 
-### Task 12: Documentation And Final Verification
+### Task 13: Documentation And Final Verification
 
 **Files:**
 - Modify: `docs/superpowers/plans/2026-04-29-path-agent-rag-plan.md`
@@ -2922,7 +3314,7 @@ Implementation tasks are tracked in `docs/superpowers/plans/2026-04-29-path-agen
 Run:
 
 ```bash
-pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
+pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_assessment_workflow.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
 ```
 
 Expected: PASS.
@@ -2960,19 +3352,22 @@ git commit -m "docs: link path agent implementation plan"
 
 Spec coverage:
 
-- Chat/orchestration endpoint: Task 9 and Task 10.
+- Chat/orchestration endpoint: Task 9 and Task 11.
 - Trace exposure and full-trace restriction: Task 1 and Task 9.
-- User/path scope context: Task 3 and Task 10.
+- User/path scope context: Task 3 and Task 11.
 - Unit-centered search with query normalization: Task 2, Task 4, Task 6.
 - Runtime navigation data: Task 4, Task 5, Task 6.
-- Unit context and transcript snippets: Task 1, Task 4, Task 8, Task 10.
+- Unit context and transcript snippets: Task 1, Task 4, Task 8, Task 11.
 - Path requirements/prerequisite graph with content/KP policy and mastery overlay: Task 7.
-- Assessment/replan action guardrails: Task 1, Task 9, Task 11.
-- Public API contracts: Task 10.
-- Verification and docs handoff: Task 12.
+- Assessment/replan workflow orchestration: Task 1 and Task 10.
+- Assessment/replan action guardrails: Task 1, Task 9, Task 10, Task 12.
+- Public API contracts: Task 11 and Task 12.
+- Verification and docs handoff: Task 13.
 
 Known V1 limits:
 
 - Search implementation starts with deterministic LIKE-style matching plus content-policy filters and can be upgraded to PostgreSQL `tsvector`/BM25 ranking without changing API shape.
 - Chat response is template-based in V1; LLM wording can be added behind `AgentChatService` once tool traces are stable.
-- Replan mutation is intentionally not implemented; Task 11 exposes backend-mediated validation and dry-run action contracts only.
+- LangGraph is used only for assessment workflow proposal/approval state; general RAG/chat stays custom and deterministic.
+- LangGraph checkpointer is process-local in the V1 task to keep implementation small. Swap to a DB-backed checkpointer or `planner_session_state` persistence before horizontal scaling.
+- Replan mutation is intentionally not implemented; Task 12 exposes backend-mediated validation and dry-run action contracts only.
