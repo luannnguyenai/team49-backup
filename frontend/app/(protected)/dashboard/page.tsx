@@ -25,10 +25,10 @@ const HERO_GRADIENT =
   "from-indigo-600 via-cyan-500 to-teal-400";
 
 const TABS: { key: DashboardCourseTab; label: string }[] = [
-  { key: "for-you", label: "Dành cho bạn" },
-  { key: "all", label: "Tất cả" },
-  { key: "ready", label: "Sẵn sàng" },
-  { key: "coming_soon", label: "Sắp ra mắt" },
+  { key: "for-you", label: "For you" },
+  { key: "all", label: "All" },
+  { key: "ready", label: "Ready" },
+  { key: "coming_soon", label: "Coming soon" },
 ];
 
 function StatCard({
@@ -82,7 +82,7 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
         <div className="flex items-center gap-4 text-xs text-text-muted">
           <span className="flex items-center gap-1">
             <Play className="h-3 w-3" />
-            {course.status === "ready" ? "Sẵn sàng học" : "Đang hoàn thiện"}
+            {course.status === "ready" ? "Ready to learn" : "In progress"}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
@@ -94,7 +94,7 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-page">
             <div className="h-full w-0 rounded-full bg-primary-600" />
           </div>
-          <p className="mt-1 text-xs text-text-muted">Tiến độ: 0%</p>
+          <p className="mt-1 text-xs text-text-muted">Progress: 0%</p>
         </div>
 
         <Link
@@ -134,17 +134,17 @@ export default function DashboardPage() {
   const filtered = filterCoursesByQuery(filteredByTab, rawQuery);
   const totalHours = summary ? Math.round((summary.total_study_seconds ?? 0) / 3600) : 0;
   const avgScore = summary?.avg_score != null ? Math.round(summary.avg_score) : 0;
-  const firstName = user?.full_name.split(" ")[0] ?? "bạn";
+  const firstName = user?.full_name.split(" ")[0] ?? "there";
   const noRecommendations = activeTab === "for-you" && filteredByTab.length === 0;
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-text-strong">
-          Chào mừng trở lại, {firstName}! 👋
+          Welcome back, {firstName}! 👋
         </h1>
         <p className="mt-1 text-sm text-text-body">
-          Tiếp tục hành trình học của bạn hôm nay.
+          Continue your learning journey today.
         </p>
       </div>
 
@@ -158,26 +158,26 @@ export default function DashboardPage() {
             icon={<BookOpen className="h-6 w-6 text-blue-600" />}
             iconBg="bg-blue-100 dark:bg-blue-900/30"
             value={String(courses.length)}
-            label="Khóa học trong catalog"
+            label="Courses in catalog"
           />
           <StatCard
             icon={<TrendingUp className="h-6 w-6 text-emerald-600" />}
             iconBg="bg-emerald-100 dark:bg-emerald-900/30"
             value={`${avgScore}%`}
-            label="Tiến độ trung bình"
+            label="Average progress"
           />
           <StatCard
             icon={<Clock className="h-6 w-6 text-violet-600" />}
             iconBg="bg-violet-100 dark:bg-violet-900/30"
             value={`${totalHours}h`}
-            label="Tổng thời gian học"
+            label="Total study time"
           />
         </div>
       )}
 
       <div>
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-text-strong">Khám phá khóa học</h2>
+          <h2 className="text-lg font-bold text-text-strong">Explore courses</h2>
         </div>
 
         <div className="mb-6 flex gap-1 rounded-xl bg-surface-page p-1 w-fit">
@@ -203,23 +203,23 @@ export default function DashboardPage() {
         ) : hasActiveSearch && filtered.length === 0 ? (
           <>
             <p className="sr-only" aria-live="polite">
-              0 kết quả cho từ khóa {rawQuery}
+              0 results for keyword {rawQuery}
             </p>
             <div className="flex h-40 items-center justify-center rounded-xl border border-border-subtle text-center text-text-muted">
-              Không tìm thấy khóa học phù hợp với từ khóa &quot;{rawQuery}&quot;.
+              No courses matched the keyword &quot;{rawQuery}&quot;.
             </div>
           </>
         ) : filtered.length === 0 ? (
           <div className="flex h-40 items-center justify-center rounded-xl border border-border-subtle text-text-muted">
             {noRecommendations
-              ? "Chưa có gợi ý cá nhân hóa nào cho bạn."
-              : "Không có khóa học nào trong mục này."}
+              ? "There are no personalized recommendations for you yet."
+              : "There are no courses in this section."}
           </div>
         ) : (
           <>
             <p className="sr-only" aria-live="polite">
-              {filtered.length} kết quả
-              {hasActiveSearch ? ` cho từ khóa ${rawQuery}` : ""}
+              {filtered.length} results
+              {hasActiveSearch ? ` for keyword ${rawQuery}` : ""}
             </p>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((course) => (
