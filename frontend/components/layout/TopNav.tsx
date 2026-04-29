@@ -4,102 +4,107 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Moon, Sun, Bell, LogOut, Search, Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import BrandLogo from "@/components/layout/BrandLogo";
 import { NAV_ITEMS, type NavItem } from "@/components/layout/navItems";
+import { courseApi } from "@/lib/api";
+import { normalizeCourseSearchQuery } from "@/lib/course-search";
+import type { CourseCatalogItem } from "@/types";
 
-const SEARCH_ROUTE_ALLOWLIST = new Set(["/dashboard", "/tutor"]);
-const SEARCH_QUERY_KEY = "q";
-const SEARCH_DEBOUNCE_MS = 250;
+const MIN_SEARCH_QUERY_LENGTH = 2;
+const MAX_DROPDOWN_RESULTS = 6;
 
-function isSearchEnabledForPath(pathname: string) {
-  return SEARCH_ROUTE_ALLOWLIST.has(pathname);
-}
-
-function buildHrefWithOptionalQuery(
-  href: string,
-  currentQuery: string,
-  shouldCarryQuery: boolean,
-) {
-  if (!shouldCarryQuery || !currentQuery) {
-    return href;
-  }
-
-  const params = new URLSearchParams();
-  params.set(SEARCH_QUERY_KEY, currentQuery);
-  return `${href}?${params.toString()}`;
+function getCourseHref(courseSlug: string) {
+  return `/courses/${courseSlug}`;
 }
 
 function TopNavSearch({ pathname }: { pathname: string }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const initialQuery = searchParams.get(SEARCH_QUERY_KEY) ?? "";
-  const [draftQuery, setDraftQuery] = useState(initialQuery);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setDraftQuery(initialQuery);
-  }, [initialQuery]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mountedRef = useRef(true);
+  const [draftQuery, setDraftQuery] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [catalogCourses, setCatalogCourses] = useState<CourseCatalogItem[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
+  const [hasLoadedCourses, setHasLoadedCourses] = useState(false);
 
   useEffect(() => {
     return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
+      mountedRef.current = false;
     };
   }, []);
 
   useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
+    setDraftQuery("");
+    setIsDropdownOpen(false);
   }, [pathname]);
 
-  if (!isSearchEnabledForPath(pathname)) {
-    return null;
-  }
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
 
-  const commitQuery = (nextQuery: string) => {
-    const trimmedQuery = nextQuery.trim();
-    const params = new URLSearchParams(searchParams.toString());
-    if (trimmedQuery) {
-      params.set(SEARCH_QUERY_KEY, trimmedQuery);
-    } else {
-      params.delete(SEARCH_QUERY_KEY);
-    }
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, []);
 
-    const suffix = params.toString();
-    router.replace(suffix ? `${pathname}?${suffix}` : pathname);
-  };
-
-  const scheduleCommit = (nextQuery: string) => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = setTimeout(() => {
-      commitQuery(nextQuery);
-      debounceRef.current = null;
-    }, SEARCH_DEBOUNCE_MS);
-  };
+  const normalizedQuery = normalizeCourseSearchQuery(draftQuery);
+  const hasSearchTerm = normalizedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
+  const matchingCourses = hasSearchTerm
+    ? catalogCourses
+        .filter((course) =>
+          normalizeCourseSearchQuery(
+            [course.title, course.short_description, course.hero_badge ?? ""].join(" "),
+          ).includes(normalizedQuery),
+        )
+        .slice(0, MAX_DROPDOWN_RESULTS)
+    : [];
+  const showDropdown = isDropdownOpen && hasSearchTerm;
 
   const clearQuery = () => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
     setDraftQuery("");
-    commitQuery("");
+    setIsDropdownOpen(false);
+  };
+
+  const ensureCatalogLoaded = () => {
+    if (hasLoadedCourses || isLoadingCourses) {
+      return;
+    }
+
+    setIsLoadingCourses(true);
+    courseApi
+      .catalog({ view: "all", includeUnavailable: true })
+      .then((response) => {
+        if (mountedRef.current) {
+          setCatalogCourses(response.items);
+          setHasLoadedCourses(true);
+        }
+      })
+      .catch(() => {
+        if (mountedRef.current) {
+          setCatalogCourses([]);
+          setHasLoadedCourses(true);
+        }
+      })
+      .finally(() => {
+        if (mountedRef.current) {
+          setIsLoadingCourses(false);
+        }
+      });
   };
 
   const hasDraftQuery = draftQuery.length > 0;
 
   return (
-    <div className="hidden flex-1 sm:block">
+    <div ref={containerRef} className="min-w-0 flex-1">
       <label
         className="mx-auto flex max-w-md items-center gap-2 rounded-full border px-3 py-2"
         style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}
@@ -109,19 +114,19 @@ function TopNavSearch({ pathname }: { pathname: string }) {
           aria-label="Tìm kiếm khóa học"
           placeholder="Tìm theo tên khóa học, mô tả..."
           value={draftQuery}
+          onFocus={() => {
+            setIsDropdownOpen(true);
+            ensureCatalogLoaded();
+          }}
           onChange={(event) => {
-            const nextValue = event.target.value;
-            setDraftQuery(nextValue);
-            scheduleCommit(nextValue);
+            setDraftQuery(event.target.value);
+            setIsDropdownOpen(true);
+            ensureCatalogLoaded();
           }}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
+            if (event.key === "Escape") {
               event.preventDefault();
-              if (debounceRef.current) {
-                clearTimeout(debounceRef.current);
-                debounceRef.current = null;
-              }
-              commitQuery(draftQuery);
+              setIsDropdownOpen(false);
             }
           }}
           className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
@@ -139,6 +144,76 @@ function TopNavSearch({ pathname }: { pathname: string }) {
           </button>
         )}
       </label>
+      {showDropdown && (
+        <div
+          className="mx-auto mt-2 max-w-md overflow-hidden rounded-2xl border shadow-lg"
+          style={{
+            backgroundColor: "var(--bg-card)",
+            borderColor: "var(--border)",
+            boxShadow: "0 18px 50px rgba(15, 23, 42, 0.16)",
+          }}
+        >
+          {isLoadingCourses ? (
+            <div className="px-4 py-3 text-sm" style={{ color: "var(--text-muted)" }}>
+              Đang tải khóa học...
+            </div>
+          ) : matchingCourses.length === 0 ? (
+            <div className="px-4 py-3 text-sm" style={{ color: "var(--text-muted)" }}>
+              Không tìm thấy khóa học phù hợp.
+            </div>
+          ) : (
+            <ul className="py-2">
+              {matchingCourses.map((course) => (
+                <li key={course.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      setDraftQuery("");
+                      router.push(getCourseHref(course.slug));
+                    }}
+                    className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    <span className="min-w-0">
+                      <span
+                        className="block truncate text-sm font-semibold"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {course.title}
+                      </span>
+                      <span
+                        className="mt-1 block truncate text-xs"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        {course.short_description}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      {course.is_recommended && (
+                        <span
+                          className="mb-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium"
+                          style={{
+                            backgroundColor: "rgba(59, 130, 246, 0.12)",
+                            color: "rgb(37, 99, 235)",
+                          }}
+                        >
+                          Dành cho bạn
+                        </span>
+                      )}
+                      <span
+                        className="block text-[11px] uppercase tracking-[0.08em]"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {course.status === "coming_soon" ? "Sắp ra mắt" : "Sẵn sàng"}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -161,7 +236,7 @@ function TopNavFallback() {
         <div className="shrink-0">
           <BrandLogo compact />
         </div>
-        <div className="hidden flex-1 sm:block" />
+        <div className="min-w-0 flex-1" />
       </div>
     </header>
   );
@@ -171,12 +246,9 @@ function TopNavContent() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, logout } = useAuthStore();
   const { resolvedTheme, setTheme } = useTheme();
   const isAuthenticated = user !== null;
-  const currentSearchQuery = searchParams.get(SEARCH_QUERY_KEY) ?? "";
-  const currentPathSupportsSearch = isSearchEnabledForPath(pathname);
 
   const handleLogout = () => {
     logout();
@@ -206,13 +278,9 @@ function TopNavContent() {
     () =>
       visibleNavItems.map((navItem) => ({
         ...navItem,
-        resolvedHref: buildHrefWithOptionalQuery(
-          navItem.href,
-          currentSearchQuery,
-          currentPathSupportsSearch && isSearchEnabledForPath(navItem.href),
-        ),
+        resolvedHref: navItem.href,
       })),
-    [visibleNavItems, currentSearchQuery, currentPathSupportsSearch],
+    [visibleNavItems],
   );
 
   return (
@@ -227,7 +295,7 @@ function TopNavContent() {
             <BrandLogo compact />
           </div>
 
-          <Suspense fallback={<div className="hidden flex-1 sm:block" />}>
+          <Suspense fallback={<div className="min-w-0 flex-1" />}>
             <TopNavSearch pathname={pathname} />
           </Suspense>
 
