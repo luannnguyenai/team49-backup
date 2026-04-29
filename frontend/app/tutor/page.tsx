@@ -7,9 +7,10 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Compass, GraduationCap, PlayCircle } from "lucide-react";
-import { courseApi, historyApi } from "@/lib/api";
+import { historyApi } from "@/lib/api";
 import CourseCatalog from "@/components/course/CourseCatalog";
 import { buildUserCourseCollections } from "@/features/course-membership/presenters";
+import { getCachedAllCourseCatalog } from "@/lib/course-catalog-cache";
 import { filterCoursesByQuery, normalizeCourseSearchQuery } from "@/lib/course-search";
 import type { CourseCatalogItem, HistoryItem } from "@/types";
 
@@ -59,7 +60,7 @@ function TutorPageContent() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      courseApi.catalog({ view: "all", includeUnavailable: false }),
+      getCachedAllCourseCatalog(false),
       historyApi.list({ page_size: 100 }),
     ])
       .then(([catalog, history]) => {
