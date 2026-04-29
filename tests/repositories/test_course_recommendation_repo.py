@@ -56,3 +56,18 @@ async def test_get_slugs_by_course_ids_maps_uuid_ids_to_course_slugs():
     output = await repo.get_slugs_by_course_ids(["uuid-1", "uuid-2"])
 
     assert output == {"cs231n", "cs224n"}
+
+
+@pytest.mark.asyncio
+async def test_get_slugs_by_course_ids_maps_canonical_course_ids_to_slugs():
+    from src.repositories.course_recommendation_repo import CourseRecommendationRepository
+
+    session = AsyncMock()
+    result = Mock()
+    result.all.return_value = [("cs231n",), ("cs224n",)]
+    session.execute.return_value = result
+
+    repo = CourseRecommendationRepository(session)
+    output = await repo.get_slugs_by_course_ids(["CS231N", "cs224n"])
+
+    assert output == {"cs231n", "cs224n"}
