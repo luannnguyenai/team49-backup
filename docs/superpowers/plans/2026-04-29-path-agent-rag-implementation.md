@@ -1538,6 +1538,57 @@ async def test_requirement_service_maps_prerequisite_kp_back_to_source_unit():
 
 
 @pytest.mark.asyncio
+async def test_requirement_service_accepts_concept_lookup_dict_from_repo():
+    target_runtime_unit = SimpleNamespace(canonical_unit_id="target-unit")
+    target_unit = SimpleNamespace(unit_id="target-unit", unit_name="NLP target")
+    source_unit = SimpleNamespace(unit_id="source-unit", unit_name="Embeddings")
+    target_kp = SimpleNamespace(unit_id="target-unit", kp_id="kp-target", planner_role="main")
+    source_kp = SimpleNamespace(unit_id="source-unit", kp_id="kp-source", planner_role="main")
+    edge = SimpleNamespace(source_kp_id="kp-source", target_kp_id="kp-target")
+    repo = SimpleNamespace()
+
+    async def get_linked_learning_units(course_ids):
+        return [target_runtime_unit] if course_ids == ["CS224n"] else [SimpleNamespace(canonical_unit_id="source-unit")]
+
+    async def get_canonical_units_by_ids(ids):
+        if ids == ["target-unit"]:
+            return {"target-unit": target_unit}
+        return {"source-unit": source_unit}
+
+    async def get_unit_kp_rows(ids):
+        return [target_kp] if ids == ["target-unit"] else [source_kp]
+
+    async def get_prerequisite_edges_for_kps(ids):
+        return [edge]
+
+    async def get_runtime_navigation_for_canonical_units(ids):
+        return {}
+
+    async def get_concepts_by_ids(ids):
+        return {
+            "kp-target": SimpleNamespace(
+                kp_id="kp-target",
+                importance_level="critical",
+                structural_role="gateway",
+            )
+        }
+
+    repo.get_linked_learning_units = get_linked_learning_units
+    repo.get_canonical_units_by_ids = get_canonical_units_by_ids
+    repo.get_unit_kp_rows = get_unit_kp_rows
+    repo.get_prerequisite_edges_for_kps = get_prerequisite_edges_for_kps
+    repo.get_runtime_navigation_for_canonical_units = get_runtime_navigation_for_canonical_units
+    repo.get_concepts_by_ids = get_concepts_by_ids
+
+    response = await PathRequirementService(repo).get_requirements(
+        PathRequirementsRequest(targetPathKey="nlp", targetCourseIds=["CS224n"], sourceCourseIds=["CS230"]),
+        allowed_course_ids=["CS224n", "CS230"],
+    )
+
+    assert response.required_units[0].canonical_unit_id == "source-unit"
+
+
+@pytest.mark.asyncio
 async def test_requirement_service_ignores_reference_and_mention_only_targets():
     target_runtime_unit = SimpleNamespace(canonical_unit_id="target-unit")
     target_unit = SimpleNamespace(unit_id="target-unit", content_type="reference")
@@ -1806,6 +1857,10 @@ pytest tests/services/test_agent_requirement_service.py -q
 ```
 
 Expected: PASS.
+
+Note: action route tests are intentionally not part of Task 10. They append to
+`tests/contract/test_agent_routes.py` in Task 11 after action schemas and
+`agent_action_service.py` exist.
 
 - [ ] **Step 5: Commit**
 
@@ -2737,6 +2792,7 @@ def start_assessment_not_implemented() -> ReplanValidationResult:
 
 
 async def validate_replan_request(request, user_id: str) -> ReplanValidationResult:
+    """V1 stub: no DB-backed evidence validation or mutation is wired yet."""
     assessment_session_id = getattr(request, "assessment_session_id", None)
     source_unit_ids = getattr(request, "source_canonical_unit_ids", [])
     if not assessment_session_id and not source_unit_ids:
