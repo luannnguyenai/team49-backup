@@ -25,7 +25,7 @@ export default function CourseStatusBadge({ status }: { status: CourseStatus }) 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-widest-xs",
+        "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-widest-xs shadow-sm",
         copy.className,
       )}
     >
