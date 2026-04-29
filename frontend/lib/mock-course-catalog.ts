@@ -13,7 +13,7 @@ export const MOCK_COURSES: CourseCatalogItem[] = [
     slug: "rag-production-systems",
     title: "RAG Production Systems",
     short_description:
-      "Thiết kế pipeline retrieval, indexing, chunking và guardrail để đưa RAG vào sản phẩm thật.",
+      "Design retrieval, indexing, chunking, and guardrail pipelines to bring RAG into real products.",
     status: "coming_soon",
     cover_image_url: null,
     hero_kicker: "LLM systems",
@@ -26,7 +26,7 @@ export const MOCK_COURSES: CourseCatalogItem[] = [
     slug: "agent-evaluation-playbook",
     title: "Agent Evaluation Playbook",
     short_description:
-      "Xây bộ tiêu chí đánh giá agent, kiểm thử theo task, và theo dõi regression khi prompt hoặc tool thay đổi.",
+      "Build agent evaluation criteria, test by task, and track regressions when prompts or tools change.",
     status: "coming_soon",
     cover_image_url: null,
     hero_kicker: "Evaluation",
@@ -39,7 +39,7 @@ export const MOCK_COURSES: CourseCatalogItem[] = [
     slug: "mlops-foundations",
     title: "MLOps Foundations",
     short_description:
-      "Từ experiment tracking, model packaging đến deployment và monitoring cho mô hình học máy.",
+      "From experiment tracking and model packaging to deployment and monitoring for machine learning systems.",
     status: "coming_soon",
     cover_image_url: null,
     hero_kicker: "Operations",
@@ -52,7 +52,7 @@ export const MOCK_COURSES: CourseCatalogItem[] = [
     slug: "multimodal-ai-studio",
     title: "Multimodal AI Studio",
     short_description:
-      "Kết hợp text, image và audio để xây trải nghiệm AI đa phương thức có thể demo và mở rộng.",
+      "Combine text, image, and audio to build multimodal AI experiences that can be demoed and scaled.",
     status: "coming_soon",
     cover_image_url: null,
     hero_kicker: "Multimodal",
@@ -65,7 +65,7 @@ export const MOCK_COURSES: CourseCatalogItem[] = [
     slug: "ai-product-strategy",
     title: "AI Product Strategy",
     short_description:
-      "Biến use case AI thành roadmap sản phẩm, chọn chỉ số thành công và tránh xây demo không ra giá trị.",
+      "Turn AI use cases into a product roadmap, choose success metrics, and avoid demos that create no value.",
     status: "coming_soon",
     cover_image_url: null,
     hero_kicker: "Product",
@@ -85,27 +85,27 @@ function buildMockOverview(course: CourseCatalogItem): CourseOverviewResponse {
   return {
     course,
     overview: {
-      headline: `${course.title} sẽ mở sớm`,
+      headline: `${course.title} is coming soon`,
       subheadline:
-        "Khóa học đang ở trạng thái coming soon. Bạn có thể xem định hướng nội dung trước khi phần học chính thức mở.",
+        "This course is currently marked as coming soon. You can preview its direction before the learning content officially opens.",
       summary_markdown: [
-        `**${course.title}** được thêm vào catalog để người học thấy trước các hướng học tiếp theo.`,
+        `**${course.title}** has been added to the catalog so learners can preview upcoming learning directions.`,
         course.short_description,
-        "Khi khóa học mở chính thức, trang này sẽ được thay bằng overview và lộ trình học đầy đủ.",
+        "When the course officially launches, this page will be replaced with the full overview and learning path.",
       ].join("\n\n"),
       learning_outcomes: [
-        "Hiểu phạm vi và mục tiêu chính của khóa học trước khi bắt đầu.",
-        "Biết chủ đề nào sẽ được mở trong đợt phát hành tiếp theo.",
-        "Giữ được tính liên tục của catalog khi số lượng khóa học tăng lên.",
+        "Understand the scope and main goals of the course before starting.",
+        "See which topics will open in the next release wave.",
+        "Keep the catalog experience continuous as the number of courses grows.",
       ],
       target_audience:
-        "Người học muốn theo dõi các khóa học sắp mở để lên kế hoạch học tập.",
+        "Learners who want to track upcoming courses and plan their study path.",
       prerequisites_summary:
-        "Chưa yêu cầu. Metadata chi tiết sẽ được cập nhật khi khóa học mở.",
+        "None yet. Detailed metadata will be added when the course opens.",
       estimated_duration_text: "Coming soon",
       structure_snapshot: {
         summary:
-          "Trang overview tạm thời cho course sắp ra mắt. Nội dung học và unit chi tiết sẽ được bổ sung sau.",
+          "A temporary overview page for an upcoming course. Detailed learning content and units will be added later.",
       },
       cta_label: "Coming soon",
     },

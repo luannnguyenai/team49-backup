@@ -33,7 +33,7 @@ describe("mock course catalog", () => {
     const decision = getMockCourseStartDecision("agent-evaluation-playbook");
 
     expect(overview?.course.status).toBe("coming_soon");
-    expect(overview?.overview.headline).toContain("sẽ mở sớm");
+    expect(overview?.overview.headline).toContain("is coming soon");
     expect(decision?.reason).toBe("course_unavailable");
   });
 });
