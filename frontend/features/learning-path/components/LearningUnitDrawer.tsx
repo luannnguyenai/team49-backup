@@ -71,7 +71,6 @@ export default function LearningUnitDrawer() {
       return;
     }
     let active = true;
-    setContent(null);
     setContentError(null);
     learningUnitApi
       .contentById(selectedItem.learning_unit_id)
@@ -154,7 +153,7 @@ export default function LearningUnitDrawer() {
               </div>
             </div>
 
-            <div>
+            <div className="min-h-[7rem]">
               <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Mô tả</p>
               {contentError ? (
                 <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-200">{contentError}</p>
@@ -167,8 +166,8 @@ export default function LearningUnitDrawer() {
               )}
             </div>
 
-            <div className="flex gap-2">
-              {previous && (
+            <div className="flex items-center justify-between gap-2">
+              {previous ? (
                 <button
                   type="button"
                   className="rounded-lg border px-3 py-2 text-sm"
@@ -177,8 +176,10 @@ export default function LearningUnitDrawer() {
                 >
                   Bài trước
                 </button>
+              ) : (
+                <span aria-hidden="true" />
               )}
-              {next && (
+              {next ? (
                 <button
                   type="button"
                   className="rounded-lg border px-3 py-2 text-sm"
@@ -187,6 +188,8 @@ export default function LearningUnitDrawer() {
                 >
                   Bài tiếp
                 </button>
+              ) : (
+                <span aria-hidden="true" />
               )}
             </div>
 
