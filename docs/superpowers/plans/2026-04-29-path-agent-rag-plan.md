@@ -671,6 +671,7 @@ type UnitSearchResponse = {
     content_type: string | null;
     salience_score: string | null;
     actionable: boolean;
+    navigation_resolution: "path_item" | "product_learning_unit" | "missing";
   }>;
   trace: {
     trace_id: string;
@@ -679,26 +680,89 @@ type UnitSearchResponse = {
     query_expansions: Array<{ from: string; to: string[]; reason: string }>;
     applied_filters: string[];
     ranking_version: string;
-    runtime_navigation_resolution: "path_item" | "product_learning_unit" | "missing";
+    runtime_navigation_resolution: Array<{
+      canonical_unit_id: string;
+      source: "path_item" | "product_learning_unit" | "missing";
+      learn_href: string | null;
+    }>;
   };
 };
 ```
 
-### 8.3 `GET /api/agent/unit-context/{unit_id}`
+### 8.3 `POST /api/agent/path-requirements`
+
+Graph-based requirement/gap endpoint for questions that should not use BM25-only retrieval.
+
+Request:
+
+```ts
+type PathRequirementsRequest = {
+  targetPathKey: "computer_vision" | "nlp";
+  targetCourseIds?: string[];
+  sourceCourseIds?: string[];
+  includeMastery?: boolean;
+  prerequisiteDepth?: 1 | 2;
+};
+```
+
+Response:
+
+```ts
+type PathRequirementsResponse = PathRequirementResponse & {
+  auth: {
+    userScoped: true;
+  };
+  trace: PathRequirementResponse["trace"] & {
+    trace_id: string;
+    selected_path: string;
+    selected_course_ids: string[];
+    applied_filters: string[];
+    runtime_navigation_resolution: Array<{
+      canonical_unit_id: string;
+      source: "path_item" | "product_learning_unit" | "missing";
+      learn_href: string | null;
+    }>;
+  };
+};
+```
+
+Rules:
+
+- Requires authenticated user context.
+- Defaults `targetCourseIds` from the user's selected path when omitted.
+- Uses prerequisite/KP graph, `unit_kp_map`, and optional `learner_mastery_kp`.
+- Returns runtime navigation data for each required unit when available.
+- Must not mutate planner or mastery state.
+
+### 8.4 `GET /api/agent/unit-context/{canonical_unit_id}`
 
 Returns unit context, KP links, quiz count, and timestamp evidence.
 
-### 8.4 `POST /api/agent/transcript-snippets`
+The path parameter is canonical `units.unit_id`. If the frontend only has a runtime `learning_units.id`, it must first resolve it through `RuntimeNavigationResolver` or call a separate resolver endpoint. Do not overload this endpoint with ambiguous ID semantics.
+
+### 8.5 `POST /api/agent/transcript-snippets`
 
 Narrow transcript retrieval for already-selected units.
 
-### 8.5 `POST /api/agent/actions/start-assessment`
+### 8.6 `POST /api/agent/actions/start-assessment`
 
 Starts assessment for selected canonical unit IDs and returns the existing assessment session payload.
 
-### 8.6 `POST /api/agent/actions/request-replan`
+Default phase by intent:
 
-Does not directly mutate planner state until backend validates evidence ownership and impact. It should accept explicit evidence, current plan identity, affected KPs, and support dry-run first:
+| Intent | Default phase |
+| --- | --- |
+| Self-report skip verification | `skip_verification` |
+| Review stale or weak mastery | `review` |
+| Onboarding-style initial gap check | `placement` |
+| Bridge prerequisite check | `bridge_check` |
+| End-of-unit verification | `final_quiz` |
+
+The caller may pass a phase, but the backend should validate it against intent and eligible question phases.
+
+### 8.7 `POST /api/agent/actions/request-replan`
+
+Does not directly mutate planner state until backend validates evidence ownership and impact. The client must not send authoritative derived evidence such as ownership flags or mastery deltas. It should send only references and intent; the backend derives ownership, phase, affected KPs, and mastery deltas from trusted repositories.
 
 ```ts
 type ReplanRequest = {
@@ -706,20 +770,8 @@ type ReplanRequest = {
   plannerSessionId: string;
   reason: "assessment_completed" | "mastery_stale" | "user_goal_changed" | "manual_review";
   dryRun: boolean;
-  evidence: {
-    assessmentSessionId?: string;
-    completedSessionOwnedByUser: boolean;
-    phase?: "placement" | "mini_quiz" | "skip_verification" | "bridge_check" | "final_quiz" | "review";
-    sourceCanonicalUnitIds: string[];
-    affectedKpIds: string[];
-    masteryDeltas: Array<{
-      kp_id: string;
-      before_lcb?: number;
-      after_lcb?: number;
-      before_mean?: number;
-      after_mean?: number;
-    }>;
-  };
+  assessmentSessionId?: string;
+  sourceCanonicalUnitIds: string[];
 };
 ```
 
@@ -739,14 +791,27 @@ type ReplanResponse = {
   };
   warnings: string[];
   nextPlanId?: string;
+  derivedEvidence: {
+    assessmentSessionId?: string;
+    phase?: "placement" | "mini_quiz" | "skip_verification" | "bridge_check" | "final_quiz" | "review";
+    affectedKpIds: string[];
+    masteryDeltas: Array<{
+      kp_id: string;
+      before_lcb?: number;
+      after_lcb?: number;
+      before_mean?: number;
+      after_mean?: number;
+    }>;
+  };
 };
 ```
 
 Validation rules:
 
-- `assessmentSessionId` must belong to the current user.
-- `phase` must be an evidence-producing phase.
-- `affectedKpIds` must be linked to the source units or assessment items.
+- `assessmentSessionId`, when present, must belong to the current user and be completed.
+- Backend derives `phase` from the stored session/items; clients cannot assert it.
+- Backend derives `affectedKpIds` and `masteryDeltas` from `interaction_log`, assessment results, and `learner_mastery_kp`.
+- Derived affected KPs must be linked to the source units or assessment items.
 - `currentPlanId`/`plannerSessionId` must match the active path state.
 - If `dryRun=true`, no planner mutation occurs; return impact only.
 
@@ -1015,7 +1080,7 @@ final_score = bm25_score + semantic_score + structured_boosts
 ### 13.2 Integration Tests
 
 - `/api/agent/search-units` returns trace with scope, filters, ranking version.
-- `/api/agent/unit-context/{unit_id}` includes KP links and quiz count.
+- `/api/agent/unit-context/{canonical_unit_id}` includes KP links and quiz count.
 - `/api/agent/search-units` returns `learn_href` for units joined to product runtime data.
 - `/api/agent/path-requirements` returns prerequisite/gap trace and required units for selected path.
 - Assessment handoff starts session only for eligible units.
@@ -1060,7 +1125,13 @@ Reviewers should validate:
 Implement V1 as deterministic hierarchical retrieval:
 
 ```text
-context -> intent -> unit search -> unit context -> optional transcript -> answer/action
+context
+-> intent
+-> query normalization
+-> unit search or path requirements
+-> runtime navigation resolution
+-> unit context / optional transcript
+-> answer or backend-mediated action
 ```
 
 Do not add embeddings yet. Add retrieval trace logging early so reviewers can inspect why the Agent selected each unit. Use assessment/player evidence as the only source of mastery changes. Keep the existing Lecture AI Tutor lecture-scoped and introduce a separate Path Agent for path/course-level questions.
