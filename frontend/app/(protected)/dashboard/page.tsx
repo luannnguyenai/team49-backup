@@ -21,14 +21,8 @@ import {
 import { useAuthStore } from "@/stores/authStore";
 import type { CourseCatalogItem, HistorySummary } from "@/types";
 
-const GRADIENTS = [
-  "from-blue-500 to-indigo-600",
-  "from-violet-500 to-purple-600",
-  "from-emerald-500 to-teal-600",
-  "from-orange-500 to-red-500",
-  "from-pink-500 to-rose-600",
-  "from-cyan-500 to-blue-500",
-];
+const HERO_GRADIENT =
+  "from-indigo-600 via-cyan-500 to-teal-400";
 
 const TABS: { key: DashboardCourseTab; label: string }[] = [
   { key: "for-you", label: "Dành cho bạn" },
@@ -49,36 +43,25 @@ function StatCard({
   label: string;
 }) {
   return (
-    <div
-      className="card flex items-center gap-4"
-      style={{ backgroundColor: "var(--bg-card)" }}
-    >
+    <div className="card flex items-center gap-4">
       <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
         {icon}
       </div>
       <div>
-        <p className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-          {value}
-        </p>
-        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          {label}
-        </p>
+        <p className="text-2xl font-bold text-text-strong">{value}</p>
+        <p className="text-sm text-text-body">{label}</p>
       </div>
     </div>
   );
 }
 
-function CourseCard({ course, idx }: { course: CourseCatalogItem; idx: number }) {
-  const gradient = GRADIENTS[idx % GRADIENTS.length];
+function CourseCard({ course }: { course: CourseCatalogItem }) {
   const model = buildDashboardCourseCardModel(course);
 
   return (
-    <div
-      className="card flex flex-col overflow-hidden transition-shadow group hover:shadow-md"
-      style={{ backgroundColor: "var(--bg-card)", padding: 0 }}
-    >
+    <div className="card flex flex-col overflow-hidden p-0 transition-shadow group hover:shadow-brand-soft">
       <div
-        className={`relative flex h-36 items-center justify-center bg-gradient-to-br ${gradient}`}
+        className={`relative flex h-36 items-center justify-center bg-gradient-to-br ${HERO_GRADIENT}`}
       >
         <BookOpen className="h-12 w-12 text-white opacity-30" />
         <div className="absolute right-3 top-3">
@@ -88,21 +71,15 @@ function CourseCard({ course, idx }: { course: CourseCatalogItem; idx: number })
 
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
-          <h3
-            className="line-clamp-2 font-semibold leading-snug"
-            style={{ color: "var(--text-primary)" }}
-          >
+          <h3 className="line-clamp-2 font-semibold leading-snug text-text-strong">
             {course.title}
           </h3>
-          <p
-            className="mt-1 line-clamp-2 text-sm"
-            style={{ color: "var(--text-secondary)" }}
-          >
+          <p className="mt-1 line-clamp-2 text-sm text-text-body">
             {course.short_description}
           </p>
         </div>
 
-        <div className="flex items-center gap-4 text-xs" style={{ color: "var(--text-muted)" }}>
+        <div className="flex items-center gap-4 text-xs text-text-muted">
           <span className="flex items-center gap-1">
             <Play className="h-3 w-3" />
             {course.status === "ready" ? "Sẵn sàng học" : "Đang hoàn thiện"}
@@ -114,21 +91,15 @@ function CourseCard({ course, idx }: { course: CourseCatalogItem; idx: number })
         </div>
 
         <div>
-          <div
-            className="h-1.5 w-full overflow-hidden rounded-full"
-            style={{ backgroundColor: "var(--bg-page)" }}
-          >
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-page">
             <div className="h-full w-0 rounded-full bg-primary-600" />
           </div>
-          <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-            Tiến độ: 0%
-          </p>
+          <p className="mt-1 text-xs text-text-muted">Tiến độ: 0%</p>
         </div>
 
         <Link
           href={model.href}
-          className="mt-auto flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "var(--primary-600, #2563eb)", color: "white" }}
+          className="btn-primary mt-auto"
         >
           <Play className="h-3.5 w-3.5" />
           {model.ctaLabel}
@@ -169,10 +140,10 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+        <h1 className="text-2xl font-bold text-text-strong">
           Chào mừng trở lại, {firstName}! 👋
         </h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+        <p className="mt-1 text-sm text-text-body">
           Tiếp tục hành trình học của bạn hôm nay.
         </p>
       </div>
@@ -206,35 +177,22 @@ export default function DashboardPage() {
 
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-            Khám phá khóa học
-          </h2>
-          <button
-            className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm"
-            style={{
-              borderColor: "var(--border)",
-              color: "var(--text-secondary)",
-              backgroundColor: "var(--bg-card)",
-            }}
-          >
+          <h2 className="text-lg font-bold text-text-strong">Khám phá khóa học</h2>
+          <button className="flex items-center gap-1.5 rounded-lg border border-border-subtle bg-surface-card px-3 py-1.5 text-sm text-text-body">
             Tất cả <ChevronDown className="h-4 w-4" />
           </button>
         </div>
 
-        <div
-          className="mb-6 flex gap-1 rounded-xl p-1 w-fit"
-          style={{ backgroundColor: "var(--bg-page)" }}
-        >
+        <div className="mb-6 flex gap-1 rounded-xl bg-surface-page p-1 w-fit">
           {TABS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
               className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
                 activeTab === key
-                  ? "bg-white text-primary-600 shadow-sm dark:bg-slate-800"
-                  : "hover:bg-white/60 dark:hover:bg-slate-800/60"
+                  ? "bg-surface-card text-primary-700 shadow-sm dark:text-primary-300"
+                  : "text-text-body hover:bg-surface-card/60"
               }`}
-              style={activeTab !== key ? { color: "var(--text-secondary)" } : {}}
             >
               {label}
             </button>
@@ -250,18 +208,12 @@ export default function DashboardPage() {
             <p className="sr-only" aria-live="polite">
               0 kết quả cho từ khóa {rawQuery}
             </p>
-            <div
-              className="flex h-40 items-center justify-center rounded-xl border text-center"
-              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-            >
+            <div className="flex h-40 items-center justify-center rounded-xl border border-border-subtle text-center text-text-muted">
               Không tìm thấy khóa học phù hợp với từ khóa &quot;{rawQuery}&quot;.
             </div>
           </>
         ) : filtered.length === 0 ? (
-          <div
-            className="flex h-40 items-center justify-center rounded-xl border"
-            style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-          >
+          <div className="flex h-40 items-center justify-center rounded-xl border border-border-subtle text-text-muted">
             {noRecommendations
               ? "Chưa có gợi ý cá nhân hóa nào cho bạn."
               : "Không có khóa học nào trong mục này."}
@@ -273,8 +225,8 @@ export default function DashboardPage() {
               {hasActiveSearch ? ` cho từ khóa ${rawQuery}` : ""}
             </p>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((course, idx) => (
-                <CourseCard key={course.id} course={course} idx={idx} />
+              {filtered.map((course) => (
+                <CourseCard key={course.id} course={course} />
               ))}
             </div>
           </>
