@@ -123,4 +123,18 @@ describe("dashboard search", () => {
       await screen.findByText(/không tìm thấy khóa học phù hợp với từ khóa/i),
     ).toBeInTheDocument();
   });
+
+  it("shows a recommendation-specific empty state on the default for-you tab", async () => {
+    courseApiMock.catalog.mockResolvedValue({
+      items: [CS231N_ITEM, CS224N_ITEM],
+    });
+
+    render(<DashboardPage />);
+
+    expect(
+      await screen.findByText(/chưa có gợi ý cá nhân hóa nào cho bạn/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(CS231N_ITEM.title)).not.toBeInTheDocument();
+    expect(screen.queryByText(CS224N_ITEM.title)).not.toBeInTheDocument();
+  });
 });

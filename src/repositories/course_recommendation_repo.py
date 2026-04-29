@@ -28,6 +28,15 @@ class CourseRecommendationRepository(BaseRepository[CourseRecommendation]):
         )
         return {row[0] for row in result.all()}
 
+    async def get_slugs_by_course_ids(self, course_ids: list[str | UUID]) -> set[str]:
+        if not course_ids:
+            return set()
+
+        result = await self.session.execute(
+            select(Course.slug).where(Course.id.in_(course_ids))
+        )
+        return {row[0] for row in result.all()}
+
     async def delete_for_user(self, user_id: UUID) -> None:
         await self.session.execute(
             delete(CourseRecommendation).where(CourseRecommendation.user_id == user_id)
