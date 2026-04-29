@@ -133,19 +133,16 @@ interface StatRowProps {
 
 function StatRow({ icon, iconBg, label, value }: StatRowProps) {
   return (
-    <div
-      className="flex items-center justify-between rounded-lg px-3 py-2.5"
-      style={{ backgroundColor: "var(--bg-page)" }}
-    >
+    <div className="flex items-center justify-between rounded-lg bg-surface-page px-3 py-2.5">
       <div className="flex items-center gap-2.5">
         <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconBg}`}>
           {icon}
         </div>
-        <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+        <span className="text-sm font-medium text-text-strong">
           {label}
         </span>
       </div>
-      <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+      <span className="text-sm font-bold text-text-strong">
         {value}
       </span>
     </div>
@@ -204,7 +201,7 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in xl:max-w-7xl">
       <div>
-        <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+        <h2 className="text-2xl font-bold text-text-strong">
           Hồ sơ của bạn
         </h2>
       </div>
@@ -219,15 +216,15 @@ export default function ProfilePage() {
           <div className="space-y-4">
             <div className="card space-y-4">
               {/* Avatar + name */}
-              <div className="flex flex-col items-center text-center gap-3 pb-4 border-b" style={{ borderColor: "var(--border)" }}>
+              <div className="flex flex-col items-center text-center gap-3 pb-4 border-b border-border-subtle">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white text-2xl font-bold shadow-lg">
                   {initials}
                 </div>
                 <div>
-                  <p className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                  <p className="text-lg font-bold text-text-strong">
                     {user.full_name}
                   </p>
-                  <span className="mt-1 inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-2.5 py-0.5 text-xs font-semibold">
+                  <span className="mt-1 inline-flex items-center rounded-full bg-surface-accent-soft px-2.5 py-0.5 text-xs font-semibold text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300">
                     {membershipLabel}
                   </span>
                 </div>
@@ -264,7 +261,7 @@ export default function ProfilePage() {
 
             {/* Achievements */}
             <div className="card space-y-3">
-              <h3 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+              <h3 className="text-sm font-bold text-text-strong">
                 Thành tích
               </h3>
               {achievements.length > 0 ? (
@@ -275,17 +272,17 @@ export default function ProfilePage() {
                   >
                     <span className="text-2xl">{a.icon}</span>
                     <div>
-                      <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                      <p className="text-sm font-semibold text-text-strong">
                         {a.title}
                       </p>
-                      <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                      <p className="text-xs text-text-body">
                         {a.desc}
                       </p>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                <p className="text-sm text-text-muted">
                   Hoàn thành assessment hoặc các phiên học đầu tiên để mở khóa thành tích.
                 </p>
               )}
@@ -293,21 +290,21 @@ export default function ProfilePage() {
 
             {/* Account info */}
             <div className="card space-y-2">
-              <h3 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+              <h3 className="text-sm font-bold text-text-strong">
                 Tài khoản
               </h3>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                <span style={{ color: "var(--text-muted)" }}>Email: </span>{user.email}
+              <p className="text-sm text-text-body">
+                <span className="text-text-muted">Email: </span>{user.email}
               </p>
               {user.preferred_method && (
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  <span style={{ color: "var(--text-muted)" }}>Học bằng: </span>
+                <p className="text-sm text-text-body">
+                  <span className="text-text-muted">Học bằng: </span>
                   {user.preferred_method === "video" ? "🎥 Video" : "📖 Đọc tài liệu"}
                 </p>
               )}
               {user.available_hours_per_week && (
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  <span style={{ color: "var(--text-muted)" }}>Giờ học / tuần: </span>
+                <p className="text-sm text-text-body">
+                  <span className="text-text-muted">Giờ học / tuần: </span>
                   {user.available_hours_per_week}h
                 </p>
               )}
@@ -317,10 +314,10 @@ export default function ProfilePage() {
           {/* ── RIGHT: Skills radar chart ── */}
           <div className="card space-y-6 xl:px-8">
             <div>
-              <h3 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
+              <h3 className="text-base font-bold text-text-strong">
                 Kỹ năng AI của bạn
               </h3>
-              <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-sm mt-0.5 text-text-body">
                 Biểu đồ radar hiển thị trình độ của bạn trong các lĩnh vực AI khác nhau
               </p>
             </div>
@@ -331,7 +328,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-muted)" }}>
+            <div className="flex items-center gap-2 text-xs text-text-muted">
               <div className="h-3 w-3 rounded-sm" style={{ backgroundColor: "rgba(37,99,235,0.3)", border: "2px solid #2563eb" }} />
               Trình độ hiện tại
             </div>
@@ -341,7 +338,7 @@ export default function ProfilePage() {
               {skills.map((skill) => (
                 <div key={skill.label}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                    <span className="text-sm font-medium text-text-strong">
                       {skill.label}
                     </span>
                     <span
@@ -351,10 +348,7 @@ export default function ProfilePage() {
                       {skill.value}%
                     </span>
                   </div>
-                  <div
-                    className="h-2 w-full rounded-full overflow-hidden"
-                    style={{ backgroundColor: "var(--bg-page)" }}
-                  >
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-surface-page">
                     <div
                       className="h-full rounded-full transition-all duration-700"
                       style={{
@@ -367,7 +361,7 @@ export default function ProfilePage() {
               ))}
             </div>
 
-            <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xs text-center text-text-muted">
               {hasSkillEvidence
                 ? "Kỹ năng này được tính từ kết quả assessment và các bài luyện tập đã lưu."
                 : "Hoàn thành assessment để cập nhật kỹ năng của bạn."}
