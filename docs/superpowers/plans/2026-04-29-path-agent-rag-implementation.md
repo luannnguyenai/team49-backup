@@ -744,6 +744,15 @@ async def test_get_unit_kp_concepts_skips_empty_ids():
 
 
 @pytest.mark.asyncio
+async def test_get_canonical_units_by_ids_skips_empty_ids():
+    session = AsyncMock()
+    repo = CanonicalContentRepository(session)
+
+    assert await repo.get_canonical_units_by_ids([]) == {}
+    assert session.execute.await_count == 0
+
+
+@pytest.mark.asyncio
 async def test_get_agent_unit_context_skips_empty_id():
     session = AsyncMock()
     repo = CanonicalContentRepository(session)
@@ -953,6 +962,14 @@ Add methods inside `CanonicalContentRepository`:
             .where(UnitKPMap.unit_id.in_(canonical_unit_ids))
         )
         return list(result.all())
+
+    async def get_canonical_units_by_ids(self, canonical_unit_ids: list[str]) -> dict[str, CanonicalUnit]:
+        if not canonical_unit_ids:
+            return {}
+        result = await self.session.execute(
+            select(CanonicalUnit).where(CanonicalUnit.unit_id.in_(canonical_unit_ids))
+        )
+        return {str(unit.unit_id): unit for unit in result.scalars().all()}
 
     async def get_agent_unit_context(self, canonical_unit_id: str) -> AgentUnitContextRow | None:
         if not canonical_unit_id:
@@ -1428,6 +1445,9 @@ async def test_requirement_service_filters_target_courses_to_allowed_scope():
     async def get_linked_learning_units(course_ids):
         return []
 
+    async def get_canonical_units_by_ids(ids):
+        return {}
+
     async def get_unit_kp_rows(ids):
         return []
 
@@ -1441,6 +1461,7 @@ async def test_requirement_service_filters_target_courses_to_allowed_scope():
         return []
 
     repo.get_linked_learning_units = get_linked_learning_units
+    repo.get_canonical_units_by_ids = get_canonical_units_by_ids
     repo.get_unit_kp_rows = get_unit_kp_rows
     repo.get_prerequisite_edges_for_kps = get_prerequisite_edges_for_kps
     repo.get_runtime_navigation_for_canonical_units = get_runtime_navigation_for_canonical_units
@@ -1462,10 +1483,11 @@ async def test_requirement_service_filters_target_courses_to_allowed_scope():
 
 @pytest.mark.asyncio
 async def test_requirement_service_maps_prerequisite_kp_back_to_source_unit():
-    target_unit = SimpleNamespace(canonical_unit_id="target-unit")
+    target_runtime_unit = SimpleNamespace(canonical_unit_id="target-unit")
+    target_unit = SimpleNamespace(unit_id="target-unit", unit_name="NLP target")
     source_unit = SimpleNamespace(
-        canonical_unit_id="source-unit",
-        title="Backpropagation",
+        unit_id="source-unit",
+        unit_name="Backpropagation",
     )
     target_kp = SimpleNamespace(unit_id="target-unit", kp_id="kp-target", planner_role="main")
     source_kp = SimpleNamespace(
@@ -1479,7 +1501,12 @@ async def test_requirement_service_maps_prerequisite_kp_back_to_source_unit():
     repo = SimpleNamespace()
 
     async def get_linked_learning_units(course_ids):
-        return [target_unit] if course_ids == ["CS224n"] else [source_unit]
+        return [target_runtime_unit] if course_ids == ["CS224n"] else [SimpleNamespace(canonical_unit_id="source-unit")]
+
+    async def get_canonical_units_by_ids(ids):
+        if ids == ["target-unit"]:
+            return {"target-unit": target_unit}
+        return {"source-unit": source_unit}
 
     async def get_unit_kp_rows(ids):
         return [target_kp] if ids == ["target-unit"] else [source_kp]
@@ -1494,6 +1521,7 @@ async def test_requirement_service_maps_prerequisite_kp_back_to_source_unit():
         return [SimpleNamespace(kp_id="kp-target", importance_level="high", structural_role="gateway")]
 
     repo.get_linked_learning_units = get_linked_learning_units
+    repo.get_canonical_units_by_ids = get_canonical_units_by_ids
     repo.get_unit_kp_rows = get_unit_kp_rows
     repo.get_prerequisite_edges_for_kps = get_prerequisite_edges_for_kps
     repo.get_runtime_navigation_for_canonical_units = get_runtime_navigation_for_canonical_units
@@ -1511,7 +1539,8 @@ async def test_requirement_service_maps_prerequisite_kp_back_to_source_unit():
 
 @pytest.mark.asyncio
 async def test_requirement_service_ignores_reference_and_mention_only_targets():
-    target_unit = SimpleNamespace(canonical_unit_id="target-unit", content_type="reference")
+    target_runtime_unit = SimpleNamespace(canonical_unit_id="target-unit")
+    target_unit = SimpleNamespace(unit_id="target-unit", content_type="reference")
     target_kp = SimpleNamespace(
         unit_id="target-unit",
         kp_id="kp-target",
@@ -1521,7 +1550,10 @@ async def test_requirement_service_ignores_reference_and_mention_only_targets():
     repo = SimpleNamespace()
 
     async def get_linked_learning_units(course_ids):
-        return [target_unit]
+        return [target_runtime_unit]
+
+    async def get_canonical_units_by_ids(ids):
+        return {"target-unit": target_unit}
 
     async def get_unit_kp_rows(ids):
         return [target_kp]
@@ -1536,6 +1568,7 @@ async def test_requirement_service_ignores_reference_and_mention_only_targets():
         return [SimpleNamespace(kp_id="kp-target", importance_level="low", structural_role="support")]
 
     repo.get_linked_learning_units = get_linked_learning_units
+    repo.get_canonical_units_by_ids = get_canonical_units_by_ids
     repo.get_unit_kp_rows = get_unit_kp_rows
     repo.get_prerequisite_edges_for_kps = get_prerequisite_edges_for_kps
     repo.get_runtime_navigation_for_canonical_units = get_runtime_navigation_for_canonical_units
@@ -1585,6 +1618,8 @@ class PathRequirementService:
         self.content_repo = content_repo
 
     def _eligible_unit(self, unit) -> bool:
+        if unit is None:
+            return False
         flags = set(getattr(unit, "section_flags", None) or [])
         content_type = str(getattr(unit, "content_type", "") or "").lower()
         if flags.intersection({"logistics", "admin", "administrative", "reference"}):
@@ -1625,21 +1660,29 @@ class PathRequirementService:
             allowed_lower[c.lower()] for c in requested_sources if c.lower() in allowed_lower
         ]
 
+        target_learning_units = await self.content_repo.get_linked_learning_units(target_courses)
+        target_candidate_ids = [
+            str(unit.canonical_unit_id)
+            for unit in target_learning_units
+            if getattr(unit, "canonical_unit_id", None)
+        ]
+        target_canonical_units = await self.content_repo.get_canonical_units_by_ids(target_candidate_ids)
         target_units = [
-            unit
-            for unit in await self.content_repo.get_linked_learning_units(target_courses)
-            if self._eligible_unit(unit)
+            unit for unit in target_canonical_units.values() if self._eligible_unit(unit)
         ]
         target_canonical_ids = [
-            str(unit.canonical_unit_id)
+            str(unit.unit_id)
             for unit in target_units
-            if getattr(unit, "canonical_unit_id", None)
+            if getattr(unit, "unit_id", None)
         ]
         target_kp_rows = await self.content_repo.get_unit_kp_rows(target_canonical_ids)
         target_concepts = await self.content_repo.get_concepts_by_ids(
             sorted({row.kp_id for row in target_kp_rows})
         )
-        target_concept_by_id = {concept.kp_id: concept for concept in target_concepts}
+        target_concept_values = (
+            target_concepts.values() if isinstance(target_concepts, dict) else target_concepts
+        )
+        target_concept_by_id = {concept.kp_id: concept for concept in target_concept_values}
         target_kp_ids = sorted(
             {
                 row.kp_id
@@ -1665,15 +1708,20 @@ class PathRequirementService:
             prereq_kp_ids.update(next_frontier)
             frontier = sorted(next_frontier)
 
+        source_learning_units = await self.content_repo.get_linked_learning_units(source_courses)
+        source_candidate_ids = [
+            str(unit.canonical_unit_id)
+            for unit in source_learning_units
+            if getattr(unit, "canonical_unit_id", None)
+        ]
+        source_canonical_units = await self.content_repo.get_canonical_units_by_ids(source_candidate_ids)
         source_units = [
-            unit
-            for unit in await self.content_repo.get_linked_learning_units(source_courses)
-            if self._eligible_unit(unit)
+            unit for unit in source_canonical_units.values() if self._eligible_unit(unit)
         ]
         source_canonical_ids = [
-            str(unit.canonical_unit_id)
+            str(unit.unit_id)
             for unit in source_units
-            if getattr(unit, "canonical_unit_id", None)
+            if getattr(unit, "unit_id", None)
         ]
         source_kp_rows = await self.content_repo.get_unit_kp_rows(source_canonical_ids)
         unit_to_kps: dict[str, set[str]] = {}
@@ -1686,7 +1734,7 @@ class PathRequirementService:
             mastery_by_kp = await self.content_repo.get_mastery_lcb_by_kp_ids(sorted(prereq_kp_ids))
 
         navigation = await RuntimeNavigationResolver(self.content_repo).resolve(list(unit_to_kps))
-        units_by_canonical = {str(unit.canonical_unit_id): unit for unit in source_units}
+        units_by_canonical = {str(unit.unit_id): unit for unit in source_units}
         required_units: list[PathRequirementUnit] = []
         nav_trace: list[RuntimeNavigationTrace] = []
         for canonical_id in sorted(unit_to_kps):
@@ -1720,7 +1768,7 @@ class PathRequirementService:
                     course_slug=nav.course_slug,
                     unit_slug=nav.unit_slug,
                     learn_href=nav.learn_href,
-                    unit_name=getattr(unit, "title", canonical_id),
+                    unit_name=getattr(unit, "unit_name", canonical_id),
                     required_kp_ids=sorted(unit_to_kps[canonical_id]),
                     prerequisite_for=target_kp_ids,
                     mastery_lcb=min_mastery,
@@ -2183,7 +2231,7 @@ class AgentChatService:
             ]
             trace = RetrievalTrace(
                 trace_id=requirements.trace.trace_id,
-                intent="ask_what_next",
+                intent="general_course_question",
                 raw_query=request.message,
                 normalized_query=request.message,
                 resolved_scope="current_path",
@@ -2388,6 +2436,34 @@ async def test_agent_unit_context_endpoint_returns_context():
     assert response.json()["canonical_unit_id"] == "unit-a"
 
 
+async def test_agent_unit_context_scope_error_maps_to_403():
+    with patch(
+        "src.routers.agent.AgentUnitContextService.get_context",
+        new=AsyncMock(side_effect=PermissionError("canonical_unit_out_of_scope")),
+    ), patch(
+        "src.routers.agent._agent_context_for_user",
+        new=AsyncMock(return_value=SimpleNamespace(allowed_course_ids=["CS231n"])),
+    ):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            response = await client.get("/api/agent/unit-context/unit-outside-scope")
+
+    assert response.status_code == 403
+
+
+async def test_agent_transcript_missing_unit_maps_to_404():
+    with patch(
+        "src.routers.agent.AgentUnitContextService.get_transcript_snippets",
+        new=AsyncMock(side_effect=ValueError("canonical_unit_not_found")),
+    ), patch(
+        "src.routers.agent._agent_context_for_user",
+        new=AsyncMock(return_value=SimpleNamespace(allowed_course_ids=["CS231n"])),
+    ):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+            response = await client.get("/api/agent/transcript-snippets/missing-unit")
+
+    assert response.status_code == 404
+
+
 ```
 
 - [ ] **Step 2: Run route tests and verify failure**
@@ -2407,7 +2483,7 @@ Create `src/routers/agent.py`:
 ```python
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_db
@@ -2423,6 +2499,7 @@ from src.schemas.agent import (
     UnitContextResponse,
     UnitSearchRequest,
     UnitSearchResponse,
+    TranscriptSnippet,
 )
 from src.services.agent_context_service import AgentContext, AgentContextService
 from src.services.agent_chat_service import AgentChatService
@@ -2489,36 +2566,37 @@ async def agent_unit_context(
     db: AsyncSession = Depends(get_async_db),
 ) -> UnitContextResponse:
     context = await _agent_context_for_user(user, db)
-    return await AgentUnitContextService(CanonicalContentRepository(db)).get_context(
-        canonical_unit_id,
-        allowed_course_ids=context.allowed_course_ids,
-    )
+    try:
+        return await AgentUnitContextService(CanonicalContentRepository(db)).get_context(
+            canonical_unit_id,
+            allowed_course_ids=context.allowed_course_ids,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
 
 
 @agent_router.get(
     "/transcript-snippets/{canonical_unit_id}",
-    response_model=list[dict],
+    response_model=list[TranscriptSnippet],
 )
 async def agent_transcript_snippets(
     canonical_unit_id: str,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
-) -> list[dict]:
+) -> list[TranscriptSnippet]:
     context = await _agent_context_for_user(user, db)
-    snippets = await AgentUnitContextService(CanonicalContentRepository(db)).get_transcript_snippets(
-        canonical_unit_id,
-        allowed_course_ids=context.allowed_course_ids,
-        max_snippets=5,
-    )
-    return [
-        {
-            "start_sec": snippet.start_sec,
-            "end_sec": snippet.end_sec,
-            "text": snippet.text,
-            "source": snippet.source,
-        }
-        for snippet in snippets
-    ]
+    try:
+        return await AgentUnitContextService(CanonicalContentRepository(db)).get_transcript_snippets(
+            canonical_unit_id,
+            allowed_course_ids=context.allowed_course_ids,
+            max_snippets=5,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
 
 
 ```
@@ -2663,7 +2741,7 @@ async def validate_replan_request(request, user_id: str) -> ReplanValidationResu
     source_unit_ids = getattr(request, "source_canonical_unit_ids", [])
     if not assessment_session_id and not source_unit_ids:
         return ReplanValidationResult(accepted=False, rejected_reason="missing_evidence")
-    return ReplanValidationResult(accepted=True)
+    return ReplanValidationResult(accepted=False, rejected_reason="not_implemented")
 ```
 
 - [ ] **Step 4: Wire action endpoints**
@@ -2715,7 +2793,7 @@ async def agent_request_replan(
 Append to `tests/contract/test_agent_routes.py`:
 
 ```python
-async def test_agent_action_endpoints_exist():
+async def test_replan_action_is_disabled_until_db_validation_is_wired():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
         response = await client.post(
             "/api/agent/actions/request-replan",
@@ -2728,7 +2806,8 @@ async def test_agent_action_endpoints_exist():
         )
 
     assert response.status_code == 200
-    assert response.json()["accepted"] is True
+    assert response.json()["accepted"] is False
+    assert response.json()["rejectedReason"] == "not_implemented"
 
 
 async def test_start_assessment_action_is_disabled_until_wired():
