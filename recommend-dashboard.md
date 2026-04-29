@@ -92,17 +92,53 @@ Global search should use the course catalog as a search source and remain indepe
 
 ## Phase Plan
 
+## Current Status
+
+Implementation status as of 2026-04-29:
+
+- Phase 1: Completed
+- Phase 2: Completed
+- Phase 3: Completed
+- Phase 4: Completed
+- Phase 5: Completed
+- Phase 6: Completed
+- Phase 7: Completed
+
+Primary implementation files:
+
+- backend recommendation resolution:
+  - `src/services/course_catalog_service.py`
+  - `src/repositories/course_recommendation_repo.py`
+- dashboard recommendation behavior:
+  - `frontend/features/dashboard/presenters.ts`
+  - `frontend/app/(protected)/dashboard/page.tsx`
+- global search dropdown:
+  - `frontend/components/layout/TopNav.tsx`
+- shared catalog cache:
+  - `frontend/lib/course-catalog-cache.ts`
+- verification tests:
+  - `tests/services/test_course_catalog_service.py`
+  - `tests/repositories/test_course_recommendation_repo.py`
+  - `frontend/tests/unit/dashboard/presenters.test.ts`
+  - `frontend/tests/routes/dashboard/page.test.tsx`
+  - `frontend/tests/routes/tutor/page.test.tsx`
+  - `frontend/tests/routes/learning/unit.test.tsx`
+  - `frontend/tests/unit/course-catalog-cache.test.ts`
+
 ### Phase 1: Lock Semantics
 
 Objective:
 - Freeze the meaning of planner path, recommended courses, and global search before changing code.
 
+Status:
+- Completed
+
 Checklist:
-- `/learn` continues to mean current personalized path
-- dashboard `Dành cho bạn` means recommended courses only
-- global nav search means quick course lookup only
-- recommendation must not silently fall back to full catalog
-- search dropdown must not change planner or recommendation state
+- [x] `/learn` continues to mean current personalized path
+- [x] dashboard `Dành cho bạn` means recommended courses only
+- [x] global nav search means quick course lookup only
+- [x] recommendation must not silently fall back to full catalog
+- [x] search dropdown must not change planner or recommendation state
 
 Success criteria:
 - clear behavior matrix exists for:
@@ -115,6 +151,9 @@ Success criteria:
 Objective:
 - Make catalog recommendation annotation consistent with planner scope when explicit recommendation rows are absent.
 
+Status:
+- Completed
+
 Implementation direction:
 - update `src/services/course_catalog_service.py`
 - resolve recommended course slugs with precedence:
@@ -124,13 +163,13 @@ Implementation direction:
 - keep precedence logic in one shared resolver so both catalog branches use the same result
 
 Checklist:
-- `view="recommended"` returns only recommended courses
-- `view="all"` returns the full catalog with correct `is_recommended` flags
-- explicit recommendation rows override fallback goal scope
-- fallback course UUIDs are mapped to slugs before comparison with catalog rows
-- the same precedence rule is used by both `view="recommended"` and `view="all"`
-- remove/update old comments that instruct the frontend to fall back from empty recommended results to all courses
-- no planner-generation rewrite
+- [x] `view="recommended"` returns only recommended courses
+- [x] `view="all"` returns the full catalog with correct `is_recommended` flags
+- [x] explicit recommendation rows override fallback goal scope
+- [x] fallback course UUIDs are mapped to slugs before comparison with catalog rows
+- [x] the same precedence rule is used by both `view="recommended"` and `view="all"`
+- [x] remove/update old comments that instruct the frontend to fall back from empty recommended results to all courses
+- [x] no planner-generation rewrite
 
 Success criteria:
 - backend can produce a coherent recommended subset even without explicit `course_recommendations`
@@ -140,16 +179,19 @@ Success criteria:
 Objective:
 - Make dashboard recommendation behavior honest and consistent.
 
+Status:
+- Completed
+
 Implementation direction:
 - update dashboard presenter/page logic
 - remove current fallback from recommended tab to all courses
 
 Checklist:
-- `Dành cho bạn` only renders recommended courses
-- if recommended set is empty, show an explicit empty state
-- `Tất cả`, `Sẵn sàng`, `Sắp ra mắt` keep current behavior
-- no hidden fallback to all catalog inside “for-you”
-- update existing tests that currently encode the old fallback behavior
+- [x] `Dành cho bạn` only renders recommended courses
+- [x] if recommended set is empty, show an explicit empty state
+- [x] `Tất cả`, `Sẵn sàng`, `Sắp ra mắt` keep current behavior
+- [x] no hidden fallback to all catalog inside “for-you”
+- [x] update existing tests that currently encode the old fallback behavior
 
 Success criteria:
 - dashboard no longer misrepresents the full catalog as personalized recommendations
@@ -159,24 +201,27 @@ Success criteria:
 Objective:
 - Expose the course search input consistently across all top navigation shells.
 
+Status:
+- Completed
+
 Implementation direction:
 - render search input on every `TopNav`
 - show a dropdown directly under the input while typing
 - keep dropdown state independent from existing route-level `?q=` filtering used by `/dashboard` and `/tutor`
 
 Checklist:
-- search bar visible on every page using `TopNav`
-- dropdown appears directly under the search field
-- dropdown uses local component state, not shared `?q=` URL mutation during typing
-- dropdown supports:
+- [x] search bar visible on every page using `TopNav`
+- [x] dropdown appears directly under the search field
+- [x] dropdown uses local component state, not shared `?q=` URL mutation during typing
+- [x] dropdown supports:
   - loading state
   - matched results
   - empty state
-- click outside closes dropdown
-- selecting a result navigates to the target course page
-- search interaction does not auto-redirect while the user types
-- guest users can use the dropdown against the general catalog
-- recommended badges in the dropdown are only shown when recommendation annotation exists
+- [x] click outside closes dropdown
+- [x] selecting a result navigates to the target course page
+- [x] search interaction does not auto-redirect while the user types
+- [x] guest users can use the dropdown against the general catalog
+- [x] recommended badges in the dropdown are only shown when recommendation annotation exists
 
 Success criteria:
 - users can type from any page and immediately see matching course results without leaving the page first
@@ -186,6 +231,9 @@ Success criteria:
 Objective:
 - Reuse course catalog data safely without creating a broad new search subsystem.
 
+Status:
+- Completed
+
 Implementation direction:
 - prefer existing `courseApi.catalog({ includeUnavailable: true })`
 - filter client-side for dropdown results
@@ -193,12 +241,12 @@ Implementation direction:
 - avoid repeated duplicate fetches by reusing a shared client-side cache/store for catalog data
 
 Checklist:
-- only course fields needed by dropdown are used
-- query matches title and short description using existing search helpers where possible
-- dropdown limits result count
-- optional recommended badge can be shown from `is_recommended`
-- planner store is not touched
-- dashboard and dropdown should not each force their own redundant uncached catalog fetch on every mount if shared cache can be reused safely
+- [x] only course fields needed by dropdown are used
+- [x] query matches title and short description using existing search helpers where possible
+- [x] dropdown limits result count
+- [x] optional recommended badge can be shown from `is_recommended`
+- [x] planner store is not touched
+- [x] dashboard and dropdown should not each force their own redundant uncached catalog fetch on every mount if shared cache can be reused safely
 
 Success criteria:
 - dropdown search remains fast, local, and isolated
@@ -208,14 +256,17 @@ Success criteria:
 Objective:
 - Ensure unrelated product areas are not altered.
 
+Status:
+- Completed
+
 Checklist:
-- `/learn` still renders planner path as before
-- assessment results CTA flow remains unchanged
-- auth gating remains unchanged
-- tutor and course pages only change insofar as they inherit the updated `TopNav`
-- no unrelated navigation regressions
-- verify `course_catalog_service` changes are not imported into planner rendering chains
-- verify dropdown local state does not mutate `/dashboard` or `/tutor` page filter state
+- [x] `/learn` still renders planner path as before
+- [x] assessment results CTA flow remains unchanged
+- [x] auth gating remains unchanged
+- [x] tutor and course pages only change insofar as they inherit the updated `TopNav`
+- [x] no unrelated navigation regressions
+- [x] verify `course_catalog_service` changes are not imported into planner rendering chains
+- [x] verify dropdown local state does not mutate `/dashboard` or `/tutor` page filter state
 
 Success criteria:
 - all changes remain inside recommendation/search/dashboard boundaries
@@ -225,16 +276,44 @@ Success criteria:
 Objective:
 - Prove the change set works locally and in Docker.
 
+Status:
+- Completed
+
 Checklist:
-- targeted backend tests for recommendation resolution
-- targeted frontend tests for dashboard and top-nav dropdown
-- frontend type-check
-- frontend production build
-- Docker frontend dev build
-- Docker frontend prod build
+- [x] targeted backend tests for recommendation resolution
+- [x] targeted frontend tests for dashboard and top-nav dropdown
+- [x] frontend type-check
+- [x] frontend production build
+- [x] Docker frontend dev build
+- [x] Docker frontend prod build
 
 Success criteria:
 - behavior is consistent in both local and Docker execution paths
+
+## Verification Log
+
+Verified during implementation:
+
+- `python -m pytest tests/services/test_course_catalog_service.py tests/repositories/test_course_recommendation_repo.py -q`
+- `npm test -- --run tests/unit/dashboard/presenters.test.ts`
+- `npm test -- --run tests/routes/dashboard/page.test.tsx`
+- `npm test -- --run tests/routes/tutor/page.test.tsx`
+- `npm test -- --run tests/routes/learning/unit.test.tsx`
+- `npm test -- --run tests/unit/course-catalog-cache.test.ts tests/routes/dashboard/page.test.tsx tests/routes/tutor/page.test.tsx tests/routes/learning/unit.test.tsx`
+- `npm --prefix frontend run type-check`
+- `npm --prefix frontend run build`
+- `docker compose build frontend`
+- `docker compose -f docker-compose.yml -f docker-compose.prod.yml build frontend`
+
+## Remaining Follow-Ups
+
+No blocking items remain for this plan.
+
+Possible follow-up work outside this change:
+
+- add keyboard navigation for dropdown search results
+- add a “see all results” action if product wants a richer discovery flow
+- decide whether dashboard/tutor page-level `?q=` filters should stay as-is or be redesigned later
 
 ## Expected UX After Change
 

@@ -758,6 +758,8 @@ describe("learning unit page (US3)", () => {
     expect(
       await screen.findByRole("button", { name: /cs231n: deep learning for computer vision/i }),
     ).toBeInTheDocument();
+    expect(screen.getByTestId("topnav-search-dropdown")).toHaveClass("absolute");
+    expect(screen.getByText(/deep learning foundations for computer vision/i)).toBeInTheDocument();
     expect(
       screen.queryByRole("button", {
         name: /cs224n: natural language processing with deep learning/i,

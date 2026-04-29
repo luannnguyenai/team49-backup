@@ -12,7 +12,7 @@ import { useAuthStore } from "@/stores/authStore";
 import BrandLogo from "@/components/layout/BrandLogo";
 import { NAV_ITEMS, type NavItem } from "@/components/layout/navItems";
 import { getCachedAllCourseCatalog } from "@/lib/course-catalog-cache";
-import { normalizeCourseSearchQuery } from "@/lib/course-search";
+import { filterCoursesByQuery, normalizeCourseSearchQuery } from "@/lib/course-search";
 import type { CourseCatalogItem } from "@/types";
 
 const MIN_SEARCH_QUERY_LENGTH = 2;
@@ -59,13 +59,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
   const normalizedQuery = normalizeCourseSearchQuery(draftQuery);
   const hasSearchTerm = normalizedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
   const matchingCourses = hasSearchTerm
-    ? catalogCourses
-        .filter((course) =>
-          normalizeCourseSearchQuery(
-            [course.title, course.short_description, course.hero_badge ?? ""].join(" "),
-          ).includes(normalizedQuery),
-        )
-        .slice(0, MAX_DROPDOWN_RESULTS)
+    ? filterCoursesByQuery(catalogCourses, draftQuery).slice(0, MAX_DROPDOWN_RESULTS)
     : [];
   const showDropdown = isDropdownOpen && hasSearchTerm;
 
@@ -104,48 +98,50 @@ function TopNavSearch({ pathname }: { pathname: string }) {
 
   return (
     <div ref={containerRef} className="min-w-0 flex-1">
-      <label
-        className="mx-auto flex max-w-md items-center gap-2 rounded-full border px-3 py-2"
-        style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}
-      >
-        <Search className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
-        <input
-          aria-label="Tìm kiếm khóa học"
-          placeholder="Tìm theo tên khóa học, mô tả..."
-          value={draftQuery}
-          onFocus={() => {
-            setIsDropdownOpen(true);
-            ensureCatalogLoaded();
-          }}
-          onChange={(event) => {
-            setDraftQuery(event.target.value);
-            setIsDropdownOpen(true);
-            ensureCatalogLoaded();
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.preventDefault();
-              setIsDropdownOpen(false);
-            }
-          }}
-          className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
-          style={{ color: "var(--text-primary)" }}
-        />
-        {hasDraftQuery && (
-          <button
-            type="button"
-            aria-label="Xóa từ khóa tìm kiếm"
-            onClick={clearQuery}
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
-            style={{ color: "var(--text-muted)" }}
-          >
-            <X className="h-3 w-3" />
-          </button>
-        )}
-      </label>
+      <div className="relative mx-auto max-w-md">
+        <label
+          className="flex items-center gap-2 rounded-full border px-3 py-2"
+          style={{ backgroundColor: "var(--bg-page)", borderColor: "var(--border)" }}
+        >
+          <Search className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
+          <input
+            aria-label="Tìm kiếm khóa học"
+            placeholder="Tìm theo tên khóa học, mô tả..."
+            value={draftQuery}
+            onFocus={() => {
+              setIsDropdownOpen(true);
+              ensureCatalogLoaded();
+            }}
+            onChange={(event) => {
+              setDraftQuery(event.target.value);
+              setIsDropdownOpen(true);
+              ensureCatalogLoaded();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.preventDefault();
+                setIsDropdownOpen(false);
+              }
+            }}
+            className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
+            style={{ color: "var(--text-primary)" }}
+          />
+          {hasDraftQuery && (
+            <button
+              type="button"
+              aria-label="Xóa từ khóa tìm kiếm"
+              onClick={clearQuery}
+              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+              style={{ color: "var(--text-muted)" }}
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </label>
       {showDropdown && (
         <div
-          className="mx-auto mt-2 max-w-md overflow-hidden rounded-2xl border shadow-lg"
+          data-testid="topnav-search-dropdown"
+          className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border shadow-lg"
           style={{
             backgroundColor: "var(--bg-card)",
             borderColor: "var(--border)",
@@ -181,7 +177,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
                         {course.title}
                       </span>
                       <span
-                        className="mt-1 block truncate text-xs"
+                        className="mt-1 block text-xs leading-5"
                         style={{ color: "var(--text-secondary)" }}
                       >
                         {course.short_description}
@@ -213,6 +209,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }
