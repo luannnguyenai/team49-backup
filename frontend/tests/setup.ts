@@ -1,9 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
+import { resetCachedAllCourseCatalog } from "@/lib/course-catalog-cache";
 
 afterEach(() => {
   cleanup();
+  resetCachedAllCourseCatalog();
 });
 
 vi.mock("next/navigation", () => ({
