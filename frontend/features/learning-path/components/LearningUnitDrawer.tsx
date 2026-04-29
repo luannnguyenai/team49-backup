@@ -4,14 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { learningUnitApi } from "@/lib/api";
-import { cn } from "@/lib/utils";
-import type { LearningUnitContentById, PathStatus } from "@/types";
+import type { LearningUnitContentById } from "@/types";
 import { formatDurationFromHours } from "../lib/duration";
 import { getStatusLabel } from "../lib/status";
 import { pathToFlow, sortByOrder } from "../presenters";
 import { useLearningPathStore } from "../store";
-
-const STATUSES: PathStatus[] = ["pending", "in_progress", "completed", "skipped"];
 
 function summarizeMarkdown(markdown: string | null | undefined): string | null {
   if (!markdown) return null;
@@ -33,8 +30,6 @@ export default function LearningUnitDrawer() {
   const selectedSectionKey = useLearningPathStore((s) => s.selectedSectionKey);
   const closeDrawer = useLearningPathStore((s) => s.closeDrawer);
   const selectItem = useLearningPathStore((s) => s.selectItem);
-  const updateStatus = useLearningPathStore((s) => s.updateStatus);
-  const updatingStatusById = useLearningPathStore((s) => s.updatingStatusById);
 
   const [content, setContent] = useState<LearningUnitContentById | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
@@ -134,23 +129,12 @@ export default function LearningUnitDrawer() {
 
             <div>
               <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Trạng thái</p>
-              <div className="flex flex-wrap gap-2">
-                {STATUSES.map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    disabled={updatingStatusById[selectedItem.id]}
-                    onClick={() => updateStatus(selectedItem.id, status)}
-                    className={cn(
-                      "rounded-full border px-3 py-1.5 text-sm font-medium disabled:opacity-60",
-                      selectedItem.status === status ? "border-primary-600 bg-primary-600 text-white" : "hover:bg-slate-50 dark:hover:bg-slate-900",
-                    )}
-                    style={selectedItem.status !== status ? { borderColor: "var(--border)", color: "var(--text-secondary)" } : undefined}
-                  >
-                    {getStatusLabel(status)}
-                  </button>
-                ))}
-              </div>
+              <span
+                className="inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium"
+                style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+              >
+                {getStatusLabel(selectedItem.status)}
+              </span>
             </div>
 
             <div className="min-h-[7rem]">
