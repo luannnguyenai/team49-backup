@@ -23,6 +23,7 @@ from src.schemas.course import (
     StartLearningDecisionResponse,
 )
 from src.repositories.course_recommendation_repo import CourseRecommendationRepository
+from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.services.course_bootstrap_service import (
     get_bootstrap_course,
     get_bootstrap_overview,
@@ -103,10 +104,8 @@ async def list_course_catalog(
                 if row["slug"] in recommended_slugs
             ]
             return CourseCatalogResponse(items=items)
-        else:
-            # No recommendations yet — return empty list
-            # (frontend should fall back to all-courses tab)
-            return CourseCatalogResponse(items=[])
+
+        return CourseCatalogResponse(items=[])
 
     # Default: all courses
     items = []
@@ -190,8 +189,18 @@ async def _get_recommended_course_slugs(user_id: uuid.UUID) -> set[str]:
         from src.database import async_session_factory
 
         async with async_session_factory() as db:
-            repo = CourseRecommendationRepository(db)
-            return await repo.get_recommended_slugs_for_user(user_id)
+            recommendation_repo = CourseRecommendationRepository(db)
+            recommended_slugs = await recommendation_repo.get_recommended_slugs_for_user(user_id)
+            if recommended_slugs:
+                return recommended_slugs
+
+            goal_repo = GoalPreferenceRepository(db)
+            goal = await goal_repo.get_by_user_id(user_id)
+            selected_course_ids = list(goal.selected_course_ids or []) if goal is not None else []
+            if not selected_course_ids:
+                return set()
+
+            return await recommendation_repo.get_slugs_by_course_ids(selected_course_ids)
     except Exception:
         return set()
 

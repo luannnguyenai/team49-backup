@@ -13,8 +13,7 @@ export function filterDashboardCourses(
   activeTab: DashboardCourseTab,
 ): CourseCatalogItem[] {
   if (activeTab === "for-you") {
-    const recommended = courses.filter((course) => course.is_recommended);
-    return recommended.length > 0 ? recommended : courses;
+    return courses.filter((course) => course.is_recommended);
   }
 
   if (activeTab === "all") {

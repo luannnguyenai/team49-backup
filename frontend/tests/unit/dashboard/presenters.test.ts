@@ -32,9 +32,9 @@ describe("dashboard presenters", () => {
     expect(filterDashboardCourses(courses, "for-you")).toEqual([CS231N_RECOMMENDED]);
   });
 
-  it("falls back to all courses when there are no recommendations", () => {
+  it("returns an empty list when there are no recommendations", () => {
     const courses = [CS231N_ITEM, CS224N_ITEM];
 
-    expect(filterDashboardCourses(courses, "for-you")).toEqual(courses);
+    expect(filterDashboardCourses(courses, "for-you")).toEqual([]);
   });
 });
