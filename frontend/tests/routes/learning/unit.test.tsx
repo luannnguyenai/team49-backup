@@ -762,6 +762,34 @@ describe("learning unit page (US3)", () => {
     });
   });
 
+  it("retries loading the catalog when the first search request fails", async () => {
+    navigationMock.pathname = "/dashboard";
+    courseApiMock.catalog
+      .mockRejectedValueOnce(new Error("temporary failure"))
+      .mockResolvedValueOnce({
+        items: [CS231N_RECOMMENDED, CS224N_ITEM],
+      });
+
+    render(<TopNav />);
+
+    const input = screen.getByLabelText("Tìm kiếm khóa học");
+
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "cs" } });
+
+    await screen.findByText("Không tìm thấy khóa học phù hợp.");
+    expect(courseApiMock.catalog).toHaveBeenCalledTimes(1);
+
+    fireEvent.change(input, { target: { value: "cs2" } });
+
+    expect(
+      await screen.findByRole("button", {
+        name: /cs231n: deep learning for computer vision/i,
+      }),
+    ).toBeInTheDocument();
+    expect(courseApiMock.catalog).toHaveBeenCalledTimes(2);
+  });
+
   it("shows matching courses in a dropdown beneath the search input", async () => {
     navigationMock.pathname = "/learn";
 
