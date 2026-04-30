@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import LearningPathShell from "@/features/learning-path/components/LearningPathShell";
 
-export const metadata: Metadata = { title: "Lộ trình học" };
+export const metadata: Metadata = { title: "Learning Path" };
 
 export default function LearnPage() {
   return (
