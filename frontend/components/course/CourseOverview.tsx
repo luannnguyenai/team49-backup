@@ -24,7 +24,7 @@ export default function CourseOverview({
           <div className="space-y-6 p-6 md:p-8">
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-xs font-semibold uppercase tracking-widest-md text-primary-700 dark:text-primary-300">
-                Tổng quan khóa học
+                Course overview
               </p>
               <CourseStatusBadge status={data.course.status} />
             </div>
@@ -49,7 +49,7 @@ export default function CourseOverview({
                 {model.courseTitle}
               </span>
               <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">
-                {data.overview.estimated_duration_text ?? "Thời lượng sẽ được cập nhật"}
+                {data.overview.estimated_duration_text ?? "Duration will be updated"}
               </span>
               {data.course.hero_badge && (
                 <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">
@@ -63,7 +63,7 @@ export default function CourseOverview({
             <div className="space-y-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest-sm text-slate-500 dark:text-slate-300">
-                  Những gì bạn sẽ học
+                  What you will learn
                 </p>
                 <p className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
                   {model.courseTitle}
@@ -72,12 +72,12 @@ export default function CourseOverview({
 
               <div className="space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-200">
                 <p>
-                  <span className="font-semibold text-slate-950 dark:text-white">Đối tượng:</span>{" "}
-                  {data.overview.target_audience ?? "Dành cho tất cả học viên"}
+                  <span className="font-semibold text-slate-950 dark:text-white">Audience:</span>{" "}
+                  {data.overview.target_audience ?? "Open to all learners"}
                 </p>
                 <p>
-                  <span className="font-semibold text-slate-950 dark:text-white">Yêu cầu trước:</span>{" "}
-                  {data.overview.prerequisites_summary ?? "Chưa có yêu cầu"}
+                  <span className="font-semibold text-slate-950 dark:text-white">Prerequisites:</span>{" "}
+                  {data.overview.prerequisites_summary ?? "No prerequisites yet"}
                 </p>
               </div>
 
@@ -103,7 +103,7 @@ export default function CourseOverview({
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
         <article className="card rounded-card p-7">
           <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700 dark:text-primary-300">
-            Kết quả học tập
+            Learning outcomes
           </p>
           <ul className="mt-5 space-y-4">
             {data.overview.learning_outcomes.map((outcome) => (
@@ -120,12 +120,12 @@ export default function CourseOverview({
 
         <article className="card rounded-card p-7">
           <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700 dark:text-primary-300">
-            Cấu trúc khóa học
+            Course structure
           </p>
           <p className="mt-5 text-sm leading-7" style={{ color: "var(--text-secondary)" }}>
             {typeof data.overview.structure_snapshot?.summary === "string"
               ? data.overview.structure_snapshot.summary
-              : "Chi tiết cấu trúc khóa học sẽ được cập nhật sớm."}
+              : "Detailed course structure will be added soon."}
           </p>
         </article>
       </section>
