@@ -27,10 +27,6 @@ def default_phase_for_intent(intent: str, reason: str | None = None) -> str:
     return "placement"
 
 
-def start_assessment_not_implemented() -> ActionValidationResult:
-    return ActionValidationResult(accepted=False, rejected_reason="not_implemented")
-
-
 def _assessment_depth_for_budget(question_budget: int | None) -> str:
     if question_budget is None:
         return "standard"
