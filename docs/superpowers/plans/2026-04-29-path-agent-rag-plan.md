@@ -661,6 +661,14 @@ type AgentChatRequest = {
 };
 ```
 
+Conversation/session rules:
+
+- `conversationId` scopes chat memory to one user-created session.
+- Starting a new chat creates a new conversation and must not load summaries or messages from older chat sessions.
+- New sessions may still use the current authenticated user profile, selected path, route context, and the latest five current-lecture Lecture AI Tutor Q&A turns when the route context is a player/lecture.
+- Older turns inside the same conversation can be summarized to avoid context growth, but cross-session summaries must not be injected into a new chat.
+- Chat memory is context only. It can remember self-reported knowledge and preferences, but it cannot update mastery or justify skip/replan without assessment/player/mastery evidence.
+
 Trace mode rules:
 
 - Normal users may request only `none` or `summary`.
@@ -711,6 +719,29 @@ type AgentChatResponse = {
         default_phase: "placement" | "mini_quiz" | "skip_verification" | "bridge_check" | "final_quiz" | "review";
         eligible: boolean;
         disabledReason?: "no_eligible_questions" | "unsupported_phase" | "out_of_scope" | "requires_login" | "not_implemented";
+        proposal?: {
+          title: string;
+          purpose: string;
+          estimatedQuestions: number;
+          estimatedTimeMinutes: number;
+          scope: Array<{
+            label: string;
+            unitCount: number;
+            reason: string;
+          }>;
+          difficultyMix: {
+            easy: number;
+            medium: number;
+            hard: number;
+            application: number;
+          };
+          reductionOptions: Array<{
+            id: string;
+            label: string;
+            effect: string;
+            estimatedQuestionsAfterReduction: number;
+          }>;
+        };
       }
     | {
         type: "request_replan_dry_run";
@@ -1105,6 +1136,7 @@ This lets reviewers debug whether Agent behavior is deterministic, grounded, and
 - Agent answers should cite units/lectures; if no source is found, say so.
 - When the user asks about advanced content, check prerequisite graph and progress before linking directly. If prerequisites are missing or far ahead in the path, suggest the prerequisite order first.
 - Path Agent may read only the latest five Lecture AI Tutor Q&A turns for the current lecture/player context. These turns are context hints, not authoritative mastery evidence.
+- Agent chat session summaries are session-scoped. They may summarize older turns in the same conversation after enough exchanges, but a new chat starts with no previous chat-session memory.
 
 ### 10.3 Action Rules
 
@@ -1113,6 +1145,8 @@ This lets reviewers debug whether Agent behavior is deterministic, grounded, and
 - No direct DB mutation by LLM.
 - Replan should be a backend-controlled action with evidence IDs.
 - Assessment/replan actions should be rendered as explicit action cards/buttons under the chat response, e.g. "If you are ready for assessment: [Start assessment]".
+- Assessment skip/replan handoff should be proposal-driven, not a fixed quick/balanced/thorough picker. The Agent proposes exact question count, scope, difficulty mix, and rationale; the user can negotiate reductions such as core-only, no application questions, or minimum-evidence before approving.
+- If the user asks to reduce an assessment, the Agent should revise the proposal and clearly state the trade-off: fewer questions means weaker evidence for skipping borderline units.
 - `start_assessment` actions must expose eligibility and a disabled reason when there are not enough valid quiz items or the endpoint is not wired.
 
 ## 11. Embedding Decision

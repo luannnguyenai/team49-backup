@@ -4152,8 +4152,13 @@ Tests should assert:
 
 - The global authenticated nav label is `AI Assistant`, not `AI Tutor`.
 - `/agent` renders a normal chatbot-like page with an input and message transcript.
+- `/agent` renders a left chat-history sidebar on desktop with `New chat`, search/filter, active session highlight, and sessions grouped by `Today`, `Previous 7 days`, and `Older`.
+- Chat-history items show title, preview, and updated time only. Do not render category labels such as `Assessment`, `Path`, `Course`, or `General`.
+- Starting a new chat creates a new conversation UI state and does not hydrate messages or memory summary from previous chat sessions.
 - Agent responses render citations/direct links to `learn_href`.
 - Agent responses render action cards/buttons, including `continue_assessment_workflow` and disabled `start_assessment` states.
+- Assessment workflow cards render a proposal/negotiation state with exact question count, scope, difficulty mix, rationale, reduction options, and approval action. They must not render fixed onboarding-style `Quick` / `Balanced` / `Thorough` modes.
+- The right context panel renders session-scoped assistant memory status: recent message window, last summary update, and read-only memory summary. New chats show empty memory.
 - Legacy `/tutor` redirects or aliases to `/agent` according to the migration decision.
 - The Lecture AI Tutor panel inside `/courses/:course/learn/:unit` still says `AI Tutor` and remains lecture-scoped.
 
@@ -4165,6 +4170,21 @@ Implement a focused chat shell:
 - Render `answer.markdown`.
 - Render `citations` as direct course/lecture/unit links.
 - Render `actions` as buttons/cards below the assistant message.
+- Render chat history from session data:
+  - `New chat` creates a new empty conversation.
+  - Existing sessions remain available in the sidebar.
+  - No session category badges in V1 because one conversation can mix path, assessment, and course questions.
+- Render session memory as same-session context only:
+  - Keep latest 8-12 messages as short-term context.
+  - Show summary status (`empty`, `fresh`, `stale`, `updating`) for older turns in the current session.
+  - Do not use previous chat-session memory in a new chat.
+  - Use latest five current-lecture AI Tutor Q&A turns only when route context points to the current player/lecture.
+- Render assessment proposal cards:
+  - show exact `estimatedQuestions` and estimated time,
+  - show unit/KP scope and difficulty mix,
+  - show why this many questions are needed,
+  - offer reduction actions such as `core only`, `remove application questions`, and `minimum evidence`,
+  - show `Start assessment` only after proposal approval.
 - For outside-current-path answers, render the warning text from the response without switching path.
 - Do not expose full trace to normal users.
 
@@ -4246,7 +4266,7 @@ Spec coverage:
 - Path requirements/prerequisite graph with content/KP policy and real `learner_mastery_kp` mastery overlay: Task 4 and Task 7.
 - Assessment/replan workflow orchestration: Task 1 and Task 10.
 - Assessment/replan action guardrails: Task 1, Task 9, Task 10, Task 12.
-- Frontend `/agent` AI Assistant route and action cards: Task 12.5.
+- Frontend `/agent` AI Assistant route, session history, session-scoped memory UI, and proposal/negotiation action cards: Task 12.5.
 - Public API contracts: Task 11 and Task 12.
 - Verification and docs handoff: Task 13.
 
