@@ -3,7 +3,7 @@ import pytest
 from src.schemas.agent import RequestReplanActionRequest
 from src.services.agent_action_service import (
     default_phase_for_intent,
-    start_assessment_not_implemented,
+    start_agent_assessment,
     validate_replan_request,
 )
 
@@ -14,11 +14,38 @@ def test_default_phase_for_intent_matches_assessment_use_case():
     assert default_phase_for_intent("general_course_question") == "placement"
 
 
-def test_start_assessment_action_is_explicitly_disabled_until_real_service_is_wired():
-    result = start_assessment_not_implemented()
+@pytest.mark.asyncio
+async def test_start_assessment_action_calls_assessment_service(monkeypatch):
+    captured = {}
 
-    assert result.accepted is False
-    assert result.rejected_reason == "not_implemented"
+    async def fake_start_assessment(*args, **kwargs):
+        captured["args"] = args
+        captured.update(kwargs)
+
+        class Response:
+            total_questions = 12
+
+        return Response()
+
+    monkeypatch.setattr("src.services.agent_action_service.start_assessment", fake_start_assessment)
+
+    request = type(
+        "Request",
+        (),
+        {
+            "canonical_unit_ids": ["unit-a"],
+            "phase": "skip_verification",
+            "question_budget": 40,
+        },
+    )()
+
+    result = await start_agent_assessment(None, user_id="user-1", request=request)
+
+    assert result.total_questions == 12
+    assert captured["canonical_unit_ids"] == ["unit-a"]
+    assert captured["phase"] == "skip_verification"
+    assert captured["assessment_depth"] == "deep"
+    assert captured["question_budget"] == 40
 
 
 @pytest.mark.asyncio

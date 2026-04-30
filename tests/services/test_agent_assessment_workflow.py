@@ -17,7 +17,7 @@ def test_assessment_workflow_starts_with_negotiable_proposal():
     assert response.interrupt["reductionOptions"][0]["id"] == "minimum-evidence"
 
 
-def test_assessment_workflow_reduce_then_approve_keeps_start_disabled_until_real_assessment_is_wired():
+def test_assessment_workflow_reduce_then_approve_enables_start_action():
     service = AgentAssessmentWorkflowService()
     started = service.start(
         user_id="user-1",
@@ -41,8 +41,9 @@ def test_assessment_workflow_reduce_then_approve_keeps_start_disabled_until_real
         decision={"action": "approve"},
     )
     assert approved.status == "assessment_ready"
-    assert approved.actions[0].eligible is False
-    assert approved.actions[0].disabled_reason == "not_implemented"
+    assert approved.actions[0].eligible is True
+    assert approved.actions[0].disabled_reason is None
+    assert approved.actions[0].question_budget == 29
 
 
 def test_assessment_workflow_rejects_bad_decision_without_500():

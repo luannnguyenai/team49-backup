@@ -164,6 +164,7 @@ class AgentAction(BaseModel):
     canonical_unit_id: str | None = None
     canonical_unit_ids: list[str] = Field(default_factory=list)
     default_phase: AssessmentPhase | None = None
+    question_budget: int | None = Field(default=None, ge=1, le=70, alias="questionBudget")
     eligible: bool | None = None
     disabled_reason: Literal[
         "no_eligible_questions",
@@ -317,6 +318,7 @@ class StartAssessmentActionRequest(BaseModel):
     canonical_unit_ids: list[str] = Field(alias="canonicalUnitIds", min_length=1)
     phase: AssessmentPhase
     reason: str
+    question_budget: int | None = Field(default=None, ge=1, le=70, alias="questionBudget")
 
     model_config = ConfigDict(populate_by_name=True)
 

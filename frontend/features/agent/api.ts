@@ -42,6 +42,8 @@ export interface AgentAction {
   canonicalUnitIds?: string[];
   default_phase?: string | null;
   defaultPhase?: string | null;
+  question_budget?: number | null;
+  questionBudget?: number | null;
   eligible?: boolean | null;
   disabled_reason?: string | null;
   disabledReason?: string | null;
@@ -147,6 +149,15 @@ export interface AgentAssessmentWorkflowResponse {
   actions: AgentAction[];
 }
 
+export interface AgentActionResponse {
+  accepted: boolean;
+  rejected_reason?: string | null;
+  rejectedReason?: string | null;
+  dry_run?: boolean;
+  dryRun?: boolean;
+  impact?: Record<string, unknown> | null;
+}
+
 export const agentApi = {
   listConversations: () =>
     api.get<AgentConversationSummary[]>("/api/agent/conversations").then((r) => r.data),
@@ -193,6 +204,16 @@ export const agentApi = {
         decision,
       })
       .then((r) => r.data),
+
+  startAssessmentAction: (payload: {
+    canonicalUnitIds: string[];
+    phase: string;
+    reason: string;
+    questionBudget?: number | null;
+  }) =>
+    api
+      .post<AgentActionResponse>("/api/agent/actions/start-assessment", payload)
+      .then((r) => r.data),
 };
 
 export function getConversationId(value: AgentConversationSummary | AgentChatResponse | AgentConversationMemory) {
@@ -237,6 +258,10 @@ export function getActionCanonicalIds(value: AgentAction) {
 
 export function getActionDisabledReason(value: AgentAction) {
   return value.disabledReason ?? value.disabled_reason ?? null;
+}
+
+export function getActionQuestionBudget(value: AgentAction) {
+  return value.questionBudget ?? value.question_budget ?? null;
 }
 
 export function getWorkflowId(value: AgentAssessmentWorkflowResponse | AgentAction) {

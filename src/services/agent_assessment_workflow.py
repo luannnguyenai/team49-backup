@@ -133,8 +133,8 @@ class AgentAssessmentWorkflowService:
                 label="Start assessment",
                 canonical_unit_ids=next_state["candidate_canonical_unit_ids"],
                 default_phase=next_state["phase"],
-                eligible=False,
-                disabledReason="not_implemented",
+                questionBudget=int(next_state["question_budget"]),
+                eligible=True,
             )
         ]
         next_state.pop("decision", None)

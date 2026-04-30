@@ -98,6 +98,34 @@ def _assessment_depth_policy(depth: str) -> AssessmentDepthPolicy:
     )
 
 
+def _assessment_budget_policy(depth: str, question_budget: int | None) -> AssessmentDepthPolicy:
+    policy = _assessment_depth_policy(depth)
+    if question_budget is None:
+        return policy
+
+    budget = max(1, min(int(question_budget), 70))
+    if budget <= 15:
+        return AssessmentDepthPolicy(
+            max_questions=budget,
+            questions_per_unit=policy.questions_per_unit,
+            allowed_difficulties={"easy", "medium"},
+            allow_application=False,
+        )
+    if budget > 30:
+        return AssessmentDepthPolicy(
+            max_questions=budget,
+            questions_per_unit=max(policy.questions_per_unit, 5),
+            allowed_difficulties={"easy", "medium", "hard"},
+            allow_application=True,
+        )
+    return AssessmentDepthPolicy(
+        max_questions=budget,
+        questions_per_unit=max(policy.questions_per_unit, 3),
+        allowed_difficulties={"easy", "medium", "hard"},
+        allow_application=False,
+    )
+
+
 def _filter_unit_pools_for_depth(
     unit_pools: UnitPools,
     policy: AssessmentDepthPolicy,
@@ -167,6 +195,7 @@ async def start_assessment(
     canonical_unit_ids: list[str] | None = None,
     phase: str = "placement",
     assessment_depth: str = "standard",
+    question_budget: int | None = None,
 ) -> AssessmentStartResponse:
     selected_unit_ids = await _resolve_canonical_unit_ids(
         db,
@@ -187,7 +216,7 @@ async def start_assessment(
             "assessment_start: unit=%s candidates=%d", unit_id, len(pairs)
         )
 
-    policy = _assessment_depth_policy(assessment_depth)
+    policy = _assessment_budget_policy(assessment_depth, question_budget)
     filtered_unit_pools = _filter_unit_pools_for_depth(unit_pools, policy)
     strategy = pick_strategy(filtered_unit_pools)
     items = strategy.select(

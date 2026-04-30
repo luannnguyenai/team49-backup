@@ -29,9 +29,10 @@ from src.schemas.agent import (
     UnitSearchResponse,
 )
 from src.services.agent_action_service import (
-    start_assessment_not_implemented,
+    start_agent_assessment,
     validate_replan_request,
 )
+from src.exceptions import ValidationError
 from src.services.agent_assessment_workflow import AgentAssessmentWorkflowService
 from src.services.agent_chat_service import AgentChatService
 from src.services.agent_context_service import AgentContextResolver
@@ -279,14 +280,29 @@ async def agent_resume_assessment_workflow(
 async def agent_start_assessment(
     body: StartAssessmentActionRequest,
     user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
 ) -> AgentActionResponse:
-    _ = (body, user)
-    result = start_assessment_not_implemented()
+    try:
+        assessment = await start_agent_assessment(db, user_id=user.id, request=body)
+    except ValidationError as exc:
+        return AgentActionResponse(
+            accepted=False,
+            rejectedReason=str(exc),
+            dryRun=False,
+            impact=None,
+        )
     return AgentActionResponse(
-        accepted=result.accepted,
-        rejectedReason=result.rejected_reason,
-        dryRun=True,
-        impact=None,
+        accepted=True,
+        rejectedReason=None,
+        dryRun=False,
+        impact={
+            "sessionId": str(assessment.session_id),
+            "totalQuestions": assessment.total_questions,
+            "questions": [question.model_dump(mode="json") for question in assessment.questions],
+            "canonicalUnitIds": body.canonical_unit_ids,
+            "phase": body.phase,
+            "href": "/assessment",
+        },
     )
 
 

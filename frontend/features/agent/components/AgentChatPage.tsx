@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   ArrowRight,
@@ -36,6 +37,7 @@ import {
   agentApi,
   getActionCanonicalIds,
   getActionDisabledReason,
+  getActionQuestionBudget,
   getCitationCanonicalId,
   getCitationCourseId,
   getCitationHref,
@@ -61,6 +63,8 @@ import {
   type AgentWarning,
   type AssessmentProposal,
 } from "@/features/agent/api";
+import { writeStartedCanonicalAssessment } from "@/lib/canonical-assessment-session";
+import type { QuestionForAssessment } from "@/types";
 
 type UiMessage = {
   id: string;
@@ -333,9 +337,53 @@ function AssessmentProposalCard({
 }
 
 function ActionButton({ action }: { action: AgentAction }) {
+  const router = useRouter();
+  const [isStarting, setIsStarting] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
   const href = getCitationHref(action);
   const disabledReason = getActionDisabledReason(action);
   const disabled = action.eligible === false || Boolean(disabledReason);
+
+  const startAssessment = async () => {
+    if (disabled || action.type !== "start_assessment") return;
+    const canonicalUnitIds = getActionCanonicalIds(action);
+    if (canonicalUnitIds.length === 0) return;
+    setIsStarting(true);
+    setStartError(null);
+    try {
+      const response = await agentApi.startAssessmentAction({
+        canonicalUnitIds,
+        phase: action.defaultPhase ?? action.default_phase ?? "skip_verification",
+        reason: "agent_assessment_workflow_approved",
+        questionBudget: getActionQuestionBudget(action),
+      });
+      if (!response.accepted || !response.impact) {
+        throw new Error(response.rejectedReason ?? response.rejected_reason ?? "Assessment could not be started.");
+      }
+      const impact = response.impact as {
+        sessionId?: string;
+        totalQuestions?: number;
+        questions?: unknown[];
+        canonicalUnitIds?: string[];
+        href?: string;
+      };
+      if (!impact.sessionId || !Array.isArray(impact.questions)) {
+        throw new Error("Assessment response did not include a usable session.");
+      }
+      writeStartedCanonicalAssessment({
+        sessionId: impact.sessionId,
+        questions: impact.questions as QuestionForAssessment[],
+        canonicalUnitIds: impact.canonicalUnitIds ?? canonicalUnitIds,
+        unitNameMap: {},
+      });
+      router.push(impact.href ?? "/assessment");
+    } catch (err) {
+      setStartError(err instanceof Error ? err.message : "Assessment could not be started.");
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
   const content = (
     <span
       className={cn(
@@ -348,10 +396,19 @@ function ActionButton({ action }: { action: AgentAction }) {
       <span>
         <span className="block">{action.label}</span>
         {disabledReason ? <span className="mt-0.5 block text-xs font-medium">Disabled: {disabledReason}</span> : null}
+        {startError ? <span className="mt-0.5 block text-xs font-medium text-red-600">{startError}</span> : null}
       </span>
-      <ChevronRight className="h-4 w-4 shrink-0" />
+      {isStarting ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
     </span>
   );
+
+  if (action.type === "start_assessment") {
+    return (
+      <button type="button" disabled={disabled || isStarting} onClick={startAssessment} className="w-full">
+        {content}
+      </button>
+    );
+  }
 
   if (!href || disabled) return <button type="button">{content}</button>;
   return <Link href={href}>{content}</Link>;
