@@ -98,10 +98,9 @@ describe("dashboard search", () => {
 
     render(<DashboardPage />);
 
-    expect(await screen.findByText("Khám phá khóa học")).toBeInTheDocument();
+    expect(await screen.findByText("Explore courses")).toBeInTheDocument();
 
-    const allButtons = await screen.findAllByRole("button", { name: "Tất cả" });
-    fireEvent.click(allButtons[1]);
+    fireEvent.click(await screen.findByRole("button", { name: "All" }));
 
     expect(await screen.findByText(CS224N_ITEM.title)).toBeInTheDocument();
     expect(screen.queryByText(CS231N_ITEM.title)).not.toBeInTheDocument();
@@ -112,7 +111,7 @@ describe("dashboard search", () => {
 
     render(<DashboardPage />);
 
-    fireEvent.click(await screen.findByRole("button", { name: "Sắp ra mắt" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Coming soon" }));
 
     expect(await screen.findByText("Upcoming AI Operations")).toBeInTheDocument();
     expect(screen.queryByText(CS231N_ITEM.title)).not.toBeInTheDocument();
@@ -124,7 +123,7 @@ describe("dashboard search", () => {
     render(<DashboardPage />);
 
     expect(
-      await screen.findByText(/không tìm thấy khóa học phù hợp với từ khóa/i),
+      await screen.findByText(/no courses matched the keyword/i),
     ).toBeInTheDocument();
   });
 
@@ -136,7 +135,7 @@ describe("dashboard search", () => {
     render(<DashboardPage />);
 
     expect(
-      await screen.findByText(/chưa có gợi ý cá nhân hóa nào cho bạn/i),
+      await screen.findByText(/there are no personalized recommendations for you yet/i),
     ).toBeInTheDocument();
     expect(screen.queryByText(CS231N_ITEM.title)).not.toBeInTheDocument();
     expect(screen.queryByText(CS224N_ITEM.title)).not.toBeInTheDocument();
