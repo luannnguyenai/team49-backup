@@ -14,7 +14,7 @@ export default function PublicTopNav() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/60 bg-white/75 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/85">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 md:px-6">
-        <BrandLogo subtitle="Guided AI skill development" />
+        <BrandLogo subtitle="Structured AI learning" />
 
         <nav className="ml-auto hidden items-center gap-6 md:flex">
           {NAV_ITEMS.map((item) => (
