@@ -18,6 +18,7 @@ import {
   filterCoursesByQuery,
   normalizeCourseSearchQuery,
 } from "@/lib/course-search";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAuthStore } from "@/stores/authStore";
 import type { CourseCatalogItem, HistorySummary } from "@/types";
 
@@ -110,6 +111,7 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
 }
 
 export default function DashboardPage() {
+  usePageTitle("AI Learning Hub - Dashboard");
   const user = useAuthStore((s) => s.user);
   const searchParams = useSearchParams();
   const [courses, setCourses] = useState<CourseCatalogItem[]>([]);
