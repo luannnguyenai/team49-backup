@@ -1041,8 +1041,8 @@ export default function AgentChatPage() {
   );
 
   return (
-    <div className="flex h-[calc(100dvh-4rem)] overflow-hidden bg-slate-50">
-      <div className={cn("hidden shrink-0 border-r border-slate-200 bg-white transition-all lg:block", leftMinimized ? "w-[72px]" : "w-[292px]")}>
+    <div className="flex h-full min-h-0 overflow-hidden bg-slate-50">
+      <div className={cn("hidden shrink-0 border-r border-slate-200 bg-white transition-all lg:block", leftMinimized ? "w-20" : "w-72")}>
         <SessionSidebar
           sessions={sessions}
           activeId={activeSessionId}
@@ -1139,7 +1139,7 @@ export default function AgentChatPage() {
         <Composer onSend={sendMessage} disabled={isThinking} />
       </section>
 
-      <div className={cn("hidden shrink-0 border-l border-slate-200 bg-white transition-all lg:block", rightMinimized ? "w-[72px]" : "w-[320px]")}>
+      <div className={cn("hidden shrink-0 border-l border-slate-200 bg-white transition-all lg:block", rightMinimized ? "w-20" : "w-80")}>
         <ContextPanel memory={memory} isMinimized={rightMinimized} onOpenMemory={() => setMemoryOpen(true)} />
       </div>
 
