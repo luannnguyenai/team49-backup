@@ -42,6 +42,6 @@ describe("auth middleware public route handling", () => {
     const response = middleware(request);
 
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("http://localhost:3000/tutor");
+    expect(response.headers.get("location")).toBe("http://localhost:3000/agent");
   });
 });
