@@ -1,7 +1,7 @@
 "use client";
 
 // app/tutor/page.tsx
-// "Khoá học đang tham gia" — hub page listing enrolled + recommended courses
+// "Current courses" — hub page listing enrolled + recommended courses
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
@@ -28,7 +28,7 @@ function TutorPageFallback() {
       <div className="flex flex-col items-center gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
         <p className="text-sm text-text-muted">
-          Đang tải danh sách khoá học...
+          Loading course list...
         </p>
       </div>
     </div>
@@ -67,7 +67,7 @@ function TutorPageContent() {
         setItems(catalog.items);
         setHistoryItems(history.items);
       })
-      .catch(() => setError("Không thể tải danh sách khoá học. Vui lòng thử lại."))
+      .catch(() => setError("Unable to load the course list. Please try again."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -100,10 +100,10 @@ function TutorPageContent() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-text-strong">
-            Khoá học đang tham gia
+            Current courses
           </h1>
           <p className="mt-1 text-sm text-text-body">
-            Tiếp tục lộ trình học và khám phá các khoá được gợi ý cho bạn.
+            Continue your learning path and explore courses recommended for you.
           </p>
         </div>
       </header>
@@ -113,7 +113,7 @@ function TutorPageContent() {
           <div className="flex flex-col items-center gap-3">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
             <p className="text-sm text-text-muted">
-              Đang tải danh sách khoá học...
+              Loading course list...
             </p>
           </div>
         </div>
@@ -127,7 +127,7 @@ function TutorPageContent() {
             <section className="flex flex-col gap-4 rounded-2xl border border-border-subtle bg-surface-card p-5 md:flex-row md:items-center md:justify-between">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-                  Tiếp tục học
+                  Continue learning
                 </p>
                 <h2 className="mt-1 truncate text-lg font-bold text-text-strong">
                   {activeCourse.title}
@@ -141,7 +141,7 @@ function TutorPageContent() {
                 className="btn-primary flex shrink-0 items-center gap-2"
               >
                 <PlayCircle size={16} />
-                Tiếp tục
+                Resume
               </Link>
             </section>
           )}
@@ -150,10 +150,10 @@ function TutorPageContent() {
             <section className="space-y-3">
               <div>
                 <h2 className="text-lg font-semibold text-text-strong">
-                  Khoá của bạn
+                  Your courses
                 </h2>
                 <p className="text-sm text-text-body">
-                  Các khoá bạn đã tham gia qua lịch sử học tập.
+                  Courses you have joined through your learning history.
                 </p>
               </div>
               <CourseCatalog items={filteredJoinedCourses} />
@@ -164,10 +164,10 @@ function TutorPageContent() {
             <section className="space-y-3">
               <div>
                 <h2 className="text-lg font-semibold text-text-strong">
-                  Gợi ý cho bạn
+                  Recommended for you
                 </h2>
                 <p className="text-sm text-text-body">
-                  Khoá phù hợp với lộ trình cá nhân hoá.
+                  Courses that match your personalized learning path.
                 </p>
               </div>
               <CourseCatalog items={filteredRecommendedCourses} />
@@ -176,7 +176,7 @@ function TutorPageContent() {
 
           {hasActiveSearch && !hasSearchResults && (
             <div className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed border-border-subtle p-8 text-center text-text-muted">
-              Không tìm thấy khóa học phù hợp với từ khóa &quot;{rawQuery}&quot;.
+              No courses matched the keyword &quot;{rawQuery}&quot;.
             </div>
           )}
 
@@ -187,27 +187,27 @@ function TutorPageContent() {
               </div>
               <div className="space-y-1">
                 <p className="text-base font-semibold text-text-strong">
-                  Chưa có khoá nào đang tham gia
+                  No active courses yet
                 </p>
                 <p className="text-sm text-text-body">
-                  Khám phá danh mục để chọn khoá phù hợp và bắt đầu học cùng AI Tutor.
+                  Explore the catalog to choose the right course and start learning with AI Tutor.
                 </p>
               </div>
               <Link href="/tutor" className="btn-primary inline-flex items-center gap-2">
                 <Compass size={16} />
-                Khám phá khoá học
+                Explore courses
               </Link>
             </section>
           )}
 
           {filteredOthers.length > 0 && (
             <div className="pt-2 text-center text-sm text-text-muted">
-              Còn {filteredOthers.length} khoá khác trong danh mục.{" "}
+              There are {filteredOthers.length} more courses in the catalog.{" "}
               <Link
                 href="/tutor"
                 className="font-semibold text-primary-600 underline"
               >
-                Xem tất cả
+                View all
               </Link>
             </div>
           )}

@@ -119,7 +119,7 @@ describe("tutor page search", () => {
 
     render(<TutorPage />);
 
-    expect(await screen.findByText("Tiếp tục học")).toBeInTheDocument();
+    expect(await screen.findByText("Continue learning")).toBeInTheDocument();
     expect(screen.getByText(CS231N_ITEM.title)).toBeInTheDocument();
     expect(await screen.findByText(CS224N_ITEM.title)).toBeInTheDocument();
     expect(screen.getByText("AI Language Operations")).toBeInTheDocument();
@@ -131,10 +131,10 @@ describe("tutor page search", () => {
 
     render(<TutorPage />);
 
-    expect(await screen.findByText("Tiếp tục học")).toBeInTheDocument();
+    expect(await screen.findByText("Continue learning")).toBeInTheDocument();
     expect(screen.getByText(CS231N_ITEM.title)).toBeInTheDocument();
     expect(
-      await screen.findByText(/không tìm thấy khóa học phù hợp với từ khóa/i),
+      await screen.findByText(/no courses matched the keyword/i),
     ).toBeInTheDocument();
     expect(screen.queryByText(CS224N_ITEM.title)).not.toBeInTheDocument();
     expect(screen.queryByText("AI Language Operations")).not.toBeInTheDocument();
