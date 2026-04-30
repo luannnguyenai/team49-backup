@@ -317,6 +317,7 @@ class AgentChatRequest(BaseModel):
     message: str = Field(min_length=1)
     conversation_id: str | None = Field(default=None, alias="conversationId")
     route_context: RouteContext | None = Field(default=None, alias="routeContext")
+    intent: AgentIntent | None = None
     response_mode: Literal["non_streaming", "streaming"] = Field(
         default="non_streaming", alias="responseMode"
     )
@@ -870,6 +871,15 @@ async def test_get_agent_unit_context_skips_empty_id():
 
 
 @pytest.mark.asyncio
+async def test_get_mastery_lcb_by_kp_ids_skips_empty_ids():
+    session = AsyncMock()
+    repo = CanonicalContentRepository(session)
+
+    assert await repo.get_mastery_lcb_by_kp_ids(user_id="user-1", kp_ids=[]) == {}
+    assert session.execute.await_count == 0
+
+
+@pytest.mark.asyncio
 async def test_get_transcript_snippets_for_unit_skips_empty_id():
     session = AsyncMock()
     repo = CanonicalContentRepository(session)
@@ -897,6 +907,8 @@ Add imports:
 ```python
 from dataclasses import dataclass
 from sqlalchemy import String, and_, cast, not_
+from src.models.learning import LearnerMasteryKP
+from src.services.canonical_mastery_service import estimate_mastery_lcb_on_read
 ```
 
 Add dataclasses after imports:
@@ -1002,6 +1014,7 @@ Add methods inside `CanonicalContentRepository`:
             .subquery()
         )
 
+        candidate_limit = max(limit * 4, limit)
         result = await self.session.execute(
             select(
                 CanonicalUnit,
@@ -1014,8 +1027,10 @@ Add methods inside `CanonicalContentRepository`:
                 hidden_filter,
                 like_filter,
             )
+            # Candidate-window ordering is deterministic only; final response ranking
+            # is by computed relevance score below.
             .order_by(CanonicalUnit.course_id, CanonicalUnit.lecture_order, CanonicalUnit.ordering_index)
-            .limit(limit)
+            .limit(candidate_limit)
         )
 
         rows: list[AgentUnitSearchRow] = []
@@ -1030,7 +1045,15 @@ Add methods inside `CanonicalContentRepository`:
             if int(count or 0) > 0:
                 score += 0.25
             rows.append(AgentUnitSearchRow(unit=unit, quiz_count=int(count or 0), score=score))
-        return rows
+        rows.sort(
+            key=lambda row: (
+                -row.score,
+                row.unit.course_id,
+                row.unit.lecture_order,
+                row.unit.ordering_index,
+            )
+        )
+        return rows[:limit]
 
     async def get_runtime_navigation_for_canonical_units(
         self,
@@ -1078,6 +1101,26 @@ Add methods inside `CanonicalContentRepository`:
             select(CanonicalUnit).where(CanonicalUnit.unit_id.in_(canonical_unit_ids))
         )
         return {str(unit.unit_id): unit for unit in result.scalars().all()}
+
+    async def get_mastery_lcb_by_kp_ids(
+        self,
+        *,
+        user_id: str,
+        kp_ids: list[str],
+    ) -> dict[str, float]:
+        if not kp_ids:
+            return {}
+        result = await self.session.execute(
+            select(LearnerMasteryKP)
+            .where(
+                LearnerMasteryKP.user_id == user_id,
+                LearnerMasteryKP.kp_id.in_(kp_ids),
+            )
+        )
+        return {
+            row.kp_id: estimate_mastery_lcb_on_read(row)
+            for row in result.scalars().all()
+        }
 
     async def get_agent_unit_context(self, canonical_unit_id: str) -> AgentUnitContextRow | None:
         if not canonical_unit_id:
@@ -1387,6 +1430,57 @@ async def test_search_trace_records_content_policy_filter():
     response = await UnitSearchService(repo).search(UnitSearchRequest(query="course intro"), ["CS230"])
 
     assert "content_policy:exclude_hidden_reference_logistics" in response.trace.applied_filters
+
+
+@pytest.mark.asyncio
+async def test_search_orders_results_by_score_before_response():
+    low_unit = SimpleNamespace(
+        unit_id="unit-low",
+        course_id="CS231n",
+        lecture_id="lecture-01",
+        lecture_title="Lecture 1",
+        unit_name="Low score",
+        summary="",
+        content_type="core_theory",
+        salience_score="low",
+    )
+    high_unit = SimpleNamespace(
+        unit_id="unit-high",
+        course_id="CS231n",
+        lecture_id="lecture-05",
+        lecture_title="Lecture 5",
+        unit_name="High score",
+        summary="",
+        content_type="core_theory",
+        salience_score="critical",
+    )
+    repo = SimpleNamespace()
+
+    async def search_agent_units(query, course_ids, limit):
+        return [
+            SimpleNamespace(unit=low_unit, quiz_count=0, score=1.0),
+            SimpleNamespace(unit=high_unit, quiz_count=2, score=5.0),
+        ]
+
+    async def get_runtime_navigation_for_canonical_units(ids):
+        return {
+            unit_id: SimpleNamespace(
+                learning_unit_id=None,
+                course_id="course-a",
+                course_slug="cs231n",
+                unit_slug=unit_id,
+                learn_href=f"/courses/cs231n/learn/{unit_id}",
+                source="product_learning_unit",
+            )
+            for unit_id in ids
+        }
+
+    repo.search_agent_units = search_agent_units
+    repo.get_runtime_navigation_for_canonical_units = get_runtime_navigation_for_canonical_units
+
+    response = await UnitSearchService(repo).search(UnitSearchRequest(query="cnn"), ["CS231n"])
+
+    assert [result.canonical_unit_id for result in response.results] == ["unit-high", "unit-low"]
 ```
 
 - [ ] **Step 2: Run tests and verify failure**
@@ -1445,6 +1539,7 @@ class UnitSearchService:
             scoped_course_ids,
             request.limit,
         )
+        rows = sorted(rows, key=lambda row: row.score, reverse=True)
         canonical_ids = [row.unit.unit_id for row in rows]
         navigation = await RuntimeNavigationResolver(self.content_repo).resolve(canonical_ids)
 
@@ -1646,6 +1741,59 @@ async def test_requirement_service_maps_prerequisite_kp_back_to_source_unit():
 
 
 @pytest.mark.asyncio
+async def test_requirement_service_applies_mastery_overlay_from_repo():
+    target_runtime_unit = SimpleNamespace(canonical_unit_id="target-unit")
+    target_unit = SimpleNamespace(unit_id="target-unit", unit_name="NLP target")
+    source_unit = SimpleNamespace(unit_id="source-unit", unit_name="Backpropagation")
+    target_kp = SimpleNamespace(unit_id="target-unit", kp_id="kp-target", planner_role="main")
+    source_kp = SimpleNamespace(unit_id="source-unit", kp_id="kp-source", planner_role="main")
+    edge = SimpleNamespace(source_kp_id="kp-source", target_kp_id="kp-target")
+    repo = SimpleNamespace()
+
+    async def get_linked_learning_units(course_ids):
+        return [target_runtime_unit] if course_ids == ["CS224n"] else [SimpleNamespace(canonical_unit_id="source-unit")]
+
+    async def get_canonical_units_by_ids(ids):
+        if ids == ["target-unit"]:
+            return {"target-unit": target_unit}
+        return {"source-unit": source_unit}
+
+    async def get_unit_kp_rows(ids):
+        return [target_kp] if ids == ["target-unit"] else [source_kp]
+
+    async def get_prerequisite_edges_for_kps(ids):
+        return [edge]
+
+    async def get_runtime_navigation_for_canonical_units(ids):
+        return {}
+
+    async def get_concepts_by_ids(ids):
+        return [SimpleNamespace(kp_id="kp-target", importance_level="high", structural_role="gateway")]
+
+    async def get_mastery_lcb_by_kp_ids(*, user_id, kp_ids):
+        assert user_id == "user-1"
+        assert kp_ids == ["kp-source"]
+        return {"kp-source": 0.86}
+
+    repo.get_linked_learning_units = get_linked_learning_units
+    repo.get_canonical_units_by_ids = get_canonical_units_by_ids
+    repo.get_unit_kp_rows = get_unit_kp_rows
+    repo.get_prerequisite_edges_for_kps = get_prerequisite_edges_for_kps
+    repo.get_runtime_navigation_for_canonical_units = get_runtime_navigation_for_canonical_units
+    repo.get_concepts_by_ids = get_concepts_by_ids
+    repo.get_mastery_lcb_by_kp_ids = get_mastery_lcb_by_kp_ids
+
+    response = await PathRequirementService(repo).get_requirements(
+        PathRequirementsRequest(targetPathKey="nlp", targetCourseIds=["CS224n"], sourceCourseIds=["CS230"]),
+        allowed_course_ids=["CS224n", "CS230"],
+        user_id="user-1",
+    )
+
+    assert response.required_units[0].mastery_lcb == 0.86
+    assert response.required_units[0].status == "already_mastered"
+
+
+@pytest.mark.asyncio
 async def test_requirement_service_accepts_concept_lookup_dict_from_repo():
     target_runtime_unit = SimpleNamespace(canonical_unit_id="target-unit")
     target_unit = SimpleNamespace(unit_id="target-unit", unit_name="NLP target")
@@ -1807,6 +1955,7 @@ class PathRequirementService:
         self,
         request: PathRequirementsRequest,
         allowed_course_ids: list[str],
+        user_id: str | None = None,
     ) -> PathRequirementsResponse:
         allowed_lower = {course_id.lower(): course_id for course_id in allowed_course_ids}
         default_targets = GOAL_COURSE_MAP.get(request.target_path_key, [])
@@ -1889,8 +2038,11 @@ class PathRequirementService:
                 unit_to_kps.setdefault(row.unit_id, set()).add(row.kp_id)
 
         mastery_by_kp = {}
-        if request.include_mastery and hasattr(self.content_repo, "get_mastery_lcb_by_kp_ids"):
-            mastery_by_kp = await self.content_repo.get_mastery_lcb_by_kp_ids(sorted(prereq_kp_ids))
+        if request.include_mastery and user_id:
+            mastery_by_kp = await self.content_repo.get_mastery_lcb_by_kp_ids(
+                user_id=user_id,
+                kp_ids=sorted(prereq_kp_ids),
+            )
 
         navigation = await RuntimeNavigationResolver(self.content_repo).resolve(list(unit_to_kps))
         units_by_canonical = {str(unit.unit_id): unit for unit in source_units}
@@ -2320,7 +2472,14 @@ from types import SimpleNamespace
 import pytest
 
 from src.schemas.agent import AgentChatRequest, RetrievalTrace, UnitSearchResponse
-from src.services.agent_chat_service import AgentChatService
+from src.services.agent_chat_service import AgentChatService, classify_agent_intent
+
+
+def test_classify_agent_intent_uses_intent_table_not_single_phrase_match():
+    assert classify_agent_intent("Can you verify my CNN knowledge?") == "assess_knowledge"
+    assert classify_agent_intent("What should I learn before transformers?") == "ask_what_next"
+    assert classify_agent_intent("Where is receptive field covered?") == "find_content"
+    assert classify_agent_intent("Which DL prerequisites do I need for NLP?") == "explain_planner_decision"
 
 
 @pytest.mark.asyncio
@@ -2328,7 +2487,8 @@ async def test_chat_uses_path_requirements_for_required_parts_question():
     search_service = SimpleNamespace()
     requirement_service = SimpleNamespace()
 
-    async def get_requirements(request, allowed_course_ids):
+    async def get_requirements(request, allowed_course_ids, user_id=None):
+        assert user_id == "user-1"
         return SimpleNamespace(
             required_units=[
                 SimpleNamespace(
@@ -2352,6 +2512,7 @@ async def test_chat_uses_path_requirements_for_required_parts_question():
     response = await service.chat(
         AgentChatRequest(message="Which DL parts are required for NLP?"),
         allowed_course_ids=["CS230", "CS224n"],
+        user_id="user-1",
         is_reviewer=False,
     )
 
@@ -2366,7 +2527,7 @@ async def test_chat_hides_requirement_trace_when_requested():
     search_service = SimpleNamespace()
     requirement_service = SimpleNamespace()
 
-    async def get_requirements(request, allowed_course_ids):
+    async def get_requirements(request, allowed_course_ids, user_id=None):
         return SimpleNamespace(required_units=[], trace=SimpleNamespace(trace_id="trace-req"))
 
     requirement_service.get_requirements = get_requirements
@@ -2482,6 +2643,7 @@ from uuid import uuid4
 from src.schemas.agent import (
     AgentAction,
     AgentAnswer,
+    AgentIntent,
     AgentChatRequest,
     AgentChatResponse,
     AgentFallback,
@@ -2489,6 +2651,65 @@ from src.schemas.agent import (
     RetrievalTrace,
     UnitSearchRequest,
 )
+
+
+INTENT_RULES: list[tuple[AgentIntent, tuple[str, ...]]] = [
+    (
+        "assess_knowledge",
+        (
+            "test me",
+            "quiz me",
+            "verify",
+            "assessment",
+            "can i skip",
+            "skip",
+            "already know",
+            "i know",
+        ),
+    ),
+    (
+        "explain_planner_decision",
+        (
+            "required for",
+            "prerequisite",
+            "prerequisites",
+            "which dl parts",
+            "need for nlp",
+            "need before",
+        ),
+    ),
+    (
+        "ask_what_next",
+        (
+            "what should i learn",
+            "what next",
+            "learn next",
+            "study next",
+            "before",
+        ),
+    ),
+    (
+        "find_content",
+        (
+            "where is",
+            "where can i review",
+            "covered",
+            "find",
+            "open",
+            "review",
+        ),
+    ),
+]
+
+
+def classify_agent_intent(message: str, explicit_intent: AgentIntent | None = None) -> AgentIntent:
+    if explicit_intent:
+        return explicit_intent
+    normalized = message.lower()
+    for intent, phrases in INTENT_RULES:
+        if any(phrase in normalized for phrase in phrases):
+            return intent
+    return "general_course_question"
 
 
 class AgentChatService:
@@ -2522,10 +2743,11 @@ class AgentChatService:
         request: AgentChatRequest,
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None = None,
+        user_id: str | None = None,
         is_reviewer: bool = False,
     ) -> AgentChatResponse:
-        message_lower = request.message.lower()
-        if "skip" in message_lower or "test me" in message_lower:
+        intent = classify_agent_intent(request.message, request.intent)
+        if intent == "assess_knowledge":
             return AgentChatResponse(
                 conversation_id=request.conversation_id or str(uuid4()),
                 message_id=str(uuid4()),
@@ -2549,10 +2771,11 @@ class AgentChatService:
                 ],
             )
 
-        if "required for nlp" in message_lower or "dl parts" in message_lower:
+        if intent == "explain_planner_decision":
             requirements = await self.requirement_service.get_requirements(
                 PathRequirementsRequest(targetPathKey="nlp"),
                 allowed_course_ids=allowed_course_ids,
+                user_id=user_id,
             )
             answer = "I checked the path requirement graph for NLP prerequisites."
             if not requirements.required_units:
@@ -2579,7 +2802,7 @@ class AgentChatService:
             ]
             trace = RetrievalTrace(
                 trace_id=requirements.trace.trace_id,
-                intent="general_course_question",
+                intent=intent,
                 raw_query=request.message,
                 normalized_query=request.message,
                 resolved_scope="current_path",
@@ -2609,7 +2832,7 @@ class AgentChatService:
             )
 
         search = await self.search_service.search(
-            UnitSearchRequest(query=request.message, scope="current_path"),
+            UnitSearchRequest(query=request.message, scope="current_path", intent=intent),
             allowed_course_ids=allowed_course_ids,
         )
         citations = []
@@ -3239,6 +3462,8 @@ async def agent_chat(
     return await service.chat(
         body,
         allowed_course_ids=context.allowed_course_ids,
+        current_path_course_ids=context.allowed_course_ids,
+        user_id=str(user.id),
         is_reviewer=False,
     )
 
@@ -3266,6 +3491,7 @@ async def agent_path_requirements(
     return await PathRequirementService(CanonicalContentRepository(db)).get_requirements(
         body,
         allowed_course_ids=context.allowed_course_ids,
+        user_id=str(user.id),
     )
 
 
@@ -3924,14 +4150,14 @@ git commit -m "docs: link path agent implementation plan"
 
 Spec coverage:
 
-- Chat/orchestration endpoint: Task 9 and Task 11.
+- Chat/orchestration endpoint with explicit `AgentIntent` override and deterministic intent routing table: Task 9 and Task 11.
 - Trace exposure and full-trace restriction: Task 1 and Task 9.
 - User/path scope context: Task 3 and Task 11.
-- Unit-centered search with query normalization: Task 2, Task 4, Task 6.
+- Unit-centered search with query normalization and score-first result ranking: Task 2, Task 4, Task 6.
 - Runtime navigation data: Task 4, Task 5, Task 6.
 - Unit context and transcript snippets: Task 1, Task 4, Task 8, Task 11.
 - Last-five current-lecture Tutor memory context: Task 8.5 and Task 9.
-- Path requirements/prerequisite graph with content/KP policy and mastery overlay: Task 7.
+- Path requirements/prerequisite graph with content/KP policy and real `learner_mastery_kp` mastery overlay: Task 4 and Task 7.
 - Assessment/replan workflow orchestration: Task 1 and Task 10.
 - Assessment/replan action guardrails: Task 1, Task 9, Task 10, Task 12.
 - Frontend `/agent` AI Assistant route and action cards: Task 12.5.
@@ -3940,7 +4166,7 @@ Spec coverage:
 
 Known V1 limits:
 
-- Search implementation starts with deterministic LIKE-style matching plus content-policy filters and can be upgraded to PostgreSQL `tsvector`/BM25 ranking without changing API shape.
+- Search implementation starts with deterministic LIKE-style matching, content-policy filters, and score-ranked results; it can be upgraded to PostgreSQL `tsvector`/BM25 ranking without changing API shape.
 - Chat response is template-based in V1; LLM wording can be added behind `AgentChatService` once tool traces are stable.
 - LangGraph is used only for assessment workflow proposal/approval state; general RAG/chat stays custom and deterministic.
 - Workflow start validates candidate canonical unit IDs against the authenticated user's allowed course scope before creating graph state.
