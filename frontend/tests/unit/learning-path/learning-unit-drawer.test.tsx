@@ -56,7 +56,7 @@ describe("LearningUnitDrawer", () => {
 
     render(<LearningUnitDrawer />);
 
-    expect(screen.getByRole("link", { name: "Bắt đầu học" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Start learning" })).toHaveAttribute(
       "href",
       "/courses/cs230/learn/lecture-02-seg3",
     );
@@ -67,7 +67,7 @@ describe("LearningUnitDrawer", () => {
 
     render(<LearningUnitDrawer />);
 
-    expect(screen.getByRole("link", { name: "Bắt đầu học" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Start learning" })).toHaveAttribute(
       "href",
       "/learn/legacy-unit-id",
     );
