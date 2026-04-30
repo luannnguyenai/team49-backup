@@ -51,7 +51,7 @@ const TYPE_LABELS: Record<SessionType, string> = {
   assessment: "Assessment",
   quiz: "Quiz",
   module_test: "Module Test",
-  practice: "Luyện tập",
+  practice: "Practice",
 };
 
 const TYPE_COLORS: Record<SessionType, string> = {
@@ -67,10 +67,10 @@ const CHECKPOINT_LABELS: Record<string, string> = {
 };
 
 const BLOOM_VI: Record<string, string> = {
-  remember: "Nhớ",
-  understand: "Hiểu",
-  apply: "Áp dụng",
-  analyze: "Phân tích",
+  remember: "Remember",
+  understand: "Understand",
+  apply: "Apply",
+  analyze: "Analyze",
 };
 
 const BLOOM_BAR_COLOR: Record<string, string> = {
@@ -88,15 +88,15 @@ type SortDir = "asc" | "desc";
 // ---------------------------------------------------------------------------
 
 function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("vi-VN", {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
     day: "2-digit",
-    month: "2-digit",
     year: "numeric",
   });
 }
 
 function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("vi-VN", {
+  return new Date(iso).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -145,7 +145,7 @@ function SparkLine({
   if (data.length < 2) {
     return (
       <span className="text-xs text-text-muted">
-        Chưa đủ dữ liệu
+        Not enough data
       </span>
     );
   }
@@ -239,7 +239,7 @@ function ExpandedDetail({
       .then(setDetail)
       .catch((err) => {
         const d = err?.response?.data?.detail;
-        setError(typeof d === "string" ? d : "Không thể tải chi tiết.");
+        setError(typeof d === "string" ? d : "Unable to load details.");
       })
       .finally(() => setLoading(false));
   }, [sessionId]);
@@ -254,7 +254,8 @@ function ExpandedDetail({
 
   if (error || !detail) {
     return (
-      <p className="py-4 text-center text-sm text-red-500">{error || "Không có dữ liệu."}</p>
+      <p className="py-4 text-center text-sm text-red-500">{error || "No data available."}</p>
+      
     );
   }
 
@@ -281,7 +282,7 @@ function ExpandedDetail({
         {/* Weak KCs */}
         <div className="rounded-xl border border-border-subtle bg-surface-page p-3">
           <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted">
-            <BookOpen size={12} /> Kiến thức yếu
+            <BookOpen size={12} /> Weak knowledge
           </p>
           {detail.weak_kcs.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
@@ -295,14 +296,14 @@ function ExpandedDetail({
               ))}
             </div>
           ) : (
-            <p className="text-xs text-text-muted">Không có</p>
+            <p className="text-xs text-text-muted">None</p>
           )}
         </div>
 
         {/* Misconceptions */}
         <div className="rounded-xl border border-border-subtle bg-surface-page p-3">
           <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted">
-            <Lightbulb size={12} /> Hiểu nhầm
+            <Lightbulb size={12} /> Misconceptions
           </p>
           {detail.misconceptions.length > 0 ? (
             <ul className="space-y-1">
@@ -314,7 +315,7 @@ function ExpandedDetail({
               ))}
             </ul>
           ) : (
-            <p className="text-xs text-text-muted">Không phát hiện</p>
+            <p className="text-xs text-text-muted">Not detected</p>
           )}
         </div>
       </div>
@@ -322,7 +323,7 @@ function ExpandedDetail({
       {/* Per-question list */}
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-          Chi tiết từng câu ({detail.questions.length} câu)
+          Question details ({detail.questions.length} questions)
         </p>
         <div className="space-y-1.5">
           {detail.questions.map((q, i) => (
@@ -345,14 +346,14 @@ function LinkedReviewPanel({ sessionId }: { sessionId: string }) {
     <div className="rounded-2xl border border-border-subtle bg-surface-elevated p-4">
       <div className="flex flex-wrap items-center gap-2">
         <p className="text-sm font-semibold text-text-strong">
-          Review mở từ liên kết
+          Review opened from link
         </p>
         <span className="rounded-full bg-surface-page px-2 py-0.5 text-xs text-text-body dark:bg-slate-800 dark:text-slate-300">
           Session {sessionId}
         </span>
       </div>
       <p className="mt-1 text-xs text-text-muted">
-        Phiên này không nằm trong trang lịch sử hiện tại, nên nội dung review được tải trực tiếp.
+        This session is not on the current history page, so the review content was loaded directly.
       </p>
       <ExpandedDetail sessionId={sessionId} />
     </div>
@@ -564,7 +565,7 @@ export default function HistoryPage() {
       });
       setData(result);
     } catch {
-      setError("Không thể tải lịch sử. Vui lòng thử lại.");
+      setError("Unable to load history. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -628,10 +629,10 @@ export default function HistoryPage() {
       {/* Page header */}
       <div>
         <h2 className="text-2xl font-bold text-text-strong">
-          Lịch sử học tập
+          Learning history
         </h2>
         <p className="mt-1 text-sm text-text-body">
-          Xem lại tất cả phiên học, kết quả và phân tích chi tiết.
+          Review all learning sessions, results, and detailed analysis.
         </p>
       </div>
 
@@ -644,9 +645,9 @@ export default function HistoryPage() {
               <HistoryIcon className="h-6 w-6 text-blue-600" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-text-body">Tổng phiên học</p>
+              <p className="text-sm font-medium text-text-body">Total sessions</p>
               <p className="text-xs text-text-muted">
-                {summary.completed_sessions} hoàn thành
+                {summary.completed_sessions} completed
               </p>
             </div>
             <p className="shrink-0 text-2xl font-bold text-text-strong">
@@ -660,8 +661,8 @@ export default function HistoryPage() {
               <Award className="h-6 w-6 text-amber-600" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-text-body">Điểm trung bình</p>
-              <p className="text-xs text-text-muted">Các phiên hoàn thành</p>
+              <p className="text-sm font-medium text-text-body">Average score</p>
+              <p className="text-xs text-text-muted">Completed sessions</p>
             </div>
             <p
               className="shrink-0 text-2xl font-bold"
@@ -677,8 +678,8 @@ export default function HistoryPage() {
               <Clock className="h-6 w-6 text-violet-600" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-text-body">Tổng thời gian</p>
-              <p className="text-xs text-text-muted">Thời gian học tích lũy</p>
+              <p className="text-sm font-medium text-text-body">Total time</p>
+              <p className="text-xs text-text-muted">Accumulated study time</p>
             </div>
             <p className="shrink-0 text-2xl font-bold text-text-strong">
               {fmtStudyTime(summary.total_study_seconds)}
@@ -691,8 +692,8 @@ export default function HistoryPage() {
               <TrendingUp className="h-6 w-6 text-emerald-600" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-text-body">Xu hướng điểm</p>
-              <p className="text-xs text-text-muted">Theo phiên gần đây</p>
+              <p className="text-sm font-medium text-text-body">Score trend</p>
+              <p className="text-xs text-text-muted">Across recent sessions</p>
             </div>
             <div className="shrink-0">
               <SparkLine data={summary.score_trend} width={120} height={36} />
@@ -711,7 +712,7 @@ export default function HistoryPage() {
           onChange={(e) => setTypeFilter(e.target.value as SessionType | "")}
           className="rounded-lg border border-border-subtle bg-transparent px-2.5 py-1.5 text-sm text-text-strong"
         >
-          <option value="">Tất cả loại</option>
+          <option value="">All types</option>
           <option value="assessment">Assessment</option>
           <option value="quiz">Quiz</option>
           <option value="module_test">Module Test</option>
@@ -723,7 +724,7 @@ export default function HistoryPage() {
           onChange={(e) => setModuleFilter(e.target.value)}
           className="rounded-lg border border-border-subtle bg-transparent px-2.5 py-1.5 text-sm text-text-strong"
         >
-          <option value="">Tất cả module</option>
+          <option value="">All modules</option>
           {sections.map((section) => (
             <option key={section.id} value={section.id}>
               {section.title}
@@ -739,9 +740,9 @@ export default function HistoryPage() {
           }
           className="rounded-lg border border-border-subtle bg-transparent px-2.5 py-1.5 text-sm text-text-strong"
         >
-          <option value="">Toàn bộ thời gian</option>
-          <option value="7">7 ngày qua</option>
-          <option value="30">30 ngày qua</option>
+          <option value="">All time</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
         </select>
 
         {/* Reset */}
@@ -755,14 +756,14 @@ export default function HistoryPage() {
             className="flex items-center gap-1 text-xs text-text-muted"
           >
             <RotateCcw size={11} />
-            Xóa bộ lọc
+            Clear filters
           </button>
         )}
 
         {/* Record count */}
         {data && (
           <span className="ml-auto text-xs text-text-muted">
-            {data.total} kết quả
+            {data.total} results
           </span>
         )}
       </div>
@@ -783,13 +784,13 @@ export default function HistoryPage() {
           <table className="w-full">
             <thead className="bg-surface-page">
               <tr>
-                <Th label="Thời gian" sortKey="started_at" current={sortKey} dir={sortDir} onSort={handleSort} className="pl-5" />
-                <Th label="Loại" sortKey="session_type" current={sortKey} dir={sortDir} onSort={handleSort} />
+                <Th label="Time" sortKey="started_at" current={sortKey} dir={sortDir} onSort={handleSort} className="pl-5" />
+                <Th label="Type" sortKey="session_type" current={sortKey} dir={sortDir} onSort={handleSort} />
                 <Th label="Topic / Module" sortKey="subject" current={sortKey} dir={sortDir} onSort={handleSort} />
-                <Th label="Điểm" sortKey="score_percent" current={sortKey} dir={sortDir} onSort={handleSort} />
-                <Th label="Thời lượng" sortKey="duration_seconds" current={sortKey} dir={sortDir} onSort={handleSort} />
+                <Th label="Score" sortKey="score_percent" current={sortKey} dir={sortDir} onSort={handleSort} />
+                <Th label="Duration" sortKey="duration_seconds" current={sortKey} dir={sortDir} onSort={handleSort} />
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                  Chi tiết
+                  Details
                 </th>
               </tr>
             </thead>
@@ -809,7 +810,7 @@ export default function HistoryPage() {
               ) : sortedItems.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-16 text-center text-sm text-text-muted">
-                    Chưa có phiên học nào phù hợp với bộ lọc.
+                    No learning sessions match the current filters.
                   </td>
                 </tr>
               ) : (
@@ -875,7 +876,7 @@ export default function HistoryPage() {
                             </div>
                           ) : (
                             <span className="text-sm text-text-muted">
-                              {item.completed_at ? "—" : "Đang học"}
+                              {item.completed_at ? "—" : "In progress"}
                             </span>
                           )}
                         </td>
@@ -905,9 +906,9 @@ export default function HistoryPage() {
                               ].join(" ")}
                             >
                               {isExpanded ? (
-                                <><ChevronUp size={12} /> Thu gọn</>
+                                <><ChevronUp size={12} /> Collapse</>
                               ) : (
-                                <><ChevronDown size={12} /> Chi tiết</>
+                                <><ChevronDown size={12} /> Details</>
                               )}
                             </button>
                           ) : (
@@ -936,7 +937,7 @@ export default function HistoryPage() {
         {data && totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-border-subtle bg-surface-elevated px-5 py-3">
             <p className="text-xs text-text-muted">
-              Trang {page} / {totalPages} — {data.total} kết quả
+              Page {page} / {totalPages} — {data.total} results
             </p>
 
             <div className="flex items-center gap-1">
