@@ -206,7 +206,7 @@ function TutorPageContent() {
             <div className="pt-2 text-center text-sm text-text-muted">
               There are {filteredOthers.length} more courses in the catalog.{" "}
               <Link
-                href="/tutor"
+                href="/dashboard"
                 className="font-semibold text-primary-600 underline"
               >
                 View all
