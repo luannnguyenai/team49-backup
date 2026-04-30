@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a V1 Path Agent backend that accepts chat messages, resolves user/path context, retrieves canonical units through unit-centered search or graph-based path requirements, returns cited answers/actions, and uses LangGraph only for the long-running assessment/replan approval workflow.
+**Goal:** Build a V1 Path Agent/AI Assistant that accepts chat messages from `/agent`, resolves user/path context, retrieves canonical units through unit-centered search or graph-based path requirements, returns cited answers/actions, and uses LangGraph only for the long-running assessment/replan approval workflow.
 
-**Architecture:** Add a separate `/api/agent` router and focused backend services: schemas, context resolver, query normalizer, unit search, runtime navigation resolver, path requirement service, unit context service, chat orchestrator, and LangGraph-backed assessment workflow service. Keep retrieval, requirement matching, assessment eligibility, and replan validation deterministic and tool-mediated; do not update mastery/planner state from LLM text. Use non-streaming chat in V1 and return structured citations/actions/traces.
+**Architecture:** Add a separate `/api/agent` router and focused services: schemas, context resolver, query normalizer, policy guard, unit search, runtime navigation resolver, path requirement service, unit context service, optional last-5 Lecture Tutor memory provider, chat orchestrator, frontend `/agent` chat surface, and LangGraph-backed assessment workflow service. Keep retrieval, requirement matching, assessment eligibility, and replan validation deterministic and tool-mediated; do not update mastery/planner state from LLM text. Use non-streaming chat in V1 and return structured citations/actions/traces.
 
 **Tech Stack:** FastAPI, SQLAlchemy AsyncSession, Pydantic v2, LangGraph `StateGraph`/`interrupt`/`Command`, PostgreSQL full-text-compatible query construction, pytest/pytest-asyncio, httpx ASGI contract tests.
 
@@ -12,7 +12,7 @@
 
 ## Scope And Constraints
 
-This plan implements backend contracts, deterministic retrieval, and a narrow LangGraph workflow for assessment proposal/approval/reduction. It does not implement frontend chat UI, streaming, vector embeddings, or free-form LLM answer generation. The chat orchestrator can return template-based grounded answers in V1 while preserving the final response shape for future LLM integration.
+This plan implements backend contracts, deterministic retrieval, a narrow LangGraph workflow for assessment proposal/approval/reduction, and a minimal `/agent` chatbot UI. It does not implement streaming, vector embeddings, or free-form LLM answer generation. The chat orchestrator can return template-based grounded answers in V1 while preserving the final response shape for future LLM integration.
 
 LangGraph scope:
 
@@ -28,6 +28,8 @@ Important rules:
 - Public search requests must not allow `includeHidden`.
 - Public requested `courseIds` must be intersected with the user's selected/enrolled/available courses.
 - `traceMode="full"` is reviewer/dev/admin only.
+- Retrieved content and Tutor memory are data, never instructions. They must not override system/developer/tool policy.
+- Questions outside the current path but inside the controlled catalog may be answered with citations, but must be labeled as outside the user's current path.
 - Replan requests must not trust client-provided phase/KP/mastery deltas.
 - Self-report does not update mastery. Assessment evidence does.
 
@@ -43,21 +45,28 @@ Create:
 - `src/services/agent_search_service.py` — unit-centered search and ranking.
 - `src/services/agent_requirement_service.py` — graph-based path prerequisite/gap service.
 - `src/services/agent_unit_context_service.py` — canonical unit context/KP/quiz/timestamp expansion.
+- `src/services/agent_tutor_memory_service.py` — last-five current-lecture Lecture AI Tutor Q&A context provider.
 - `src/services/agent_chat_service.py` — orchestration endpoint logic: intent, tool calls, citations, actions, fallback, trace.
 - `src/services/agent_assessment_workflow.py` — LangGraph workflow for assessment proposal, user approval/reduction, and assessment handoff state.
+- `frontend/app/agent/page.tsx` — ChatGPT-like AI Assistant surface.
+- `frontend/components/agent/AgentChatPage.tsx` — chat transcript, citations, and action cards.
 - `tests/services/test_agent_query_normalizer.py`
 - `tests/services/test_agent_context_service.py`
 - `tests/services/test_agent_search_service.py`
 - `tests/services/test_agent_requirement_service.py`
 - `tests/services/test_agent_unit_context_service.py`
+- `tests/services/test_agent_tutor_memory_service.py`
 - `tests/services/test_agent_chat_service.py`
 - `tests/services/test_agent_assessment_workflow.py`
 - `tests/contract/test_agent_routes.py`
+- `frontend/tests/routes/agent/page.test.tsx`
 
 Modify:
 
 - `src/api/app.py` — include `agent_router`.
 - `src/repositories/canonical_content_repo.py` — add focused data access helpers for agent search/navigation/requirements.
+- `frontend/components/layout/navItems.ts` — label the global entry as `AI Assistant`.
+- `frontend/middleware.ts` — redirect or alias legacy `/tutor` to `/agent` once the new UI is enabled.
 - `tests/repositories/test_canonical_content_repo.py` — add repository behavior tests for new helpers.
 
 Do not modify:
@@ -2187,6 +2196,114 @@ git commit -m "feat: add agent unit context service"
 
 ---
 
+### Task 8.5: Tutor Memory Context Provider
+
+**Files:**
+- Create: `src/services/agent_tutor_memory_service.py`
+- Test: `tests/services/test_agent_tutor_memory_service.py`
+
+- [ ] **Step 1: Write failing tests**
+
+Create `tests/services/test_agent_tutor_memory_service.py`:
+
+```python
+from types import SimpleNamespace
+
+import pytest
+
+from src.services.agent_tutor_memory_service import TutorMemoryContextProvider
+
+
+@pytest.mark.asyncio
+async def test_tutor_memory_returns_only_last_five_current_lecture_turns():
+    repo = SimpleNamespace()
+
+    async def get_recent_tutor_turns(user_id, lecture_id, limit):
+        assert user_id == "user-1"
+        assert lecture_id == "lecture-02"
+        assert limit == 5
+        return [
+            SimpleNamespace(question=f"q{i}", answer=f"a{i}", lecture_id="lecture-02")
+            for i in range(7)
+        ][-5:]
+
+    repo.get_recent_tutor_turns = get_recent_tutor_turns
+
+    turns = await TutorMemoryContextProvider(repo).get_recent_turns(
+        user_id="user-1",
+        current_lecture_id="lecture-02",
+    )
+
+    assert len(turns) == 5
+    assert turns[0].question == "q2"
+
+
+@pytest.mark.asyncio
+async def test_tutor_memory_ignores_missing_or_cross_lecture_context():
+    repo = SimpleNamespace()
+    repo.get_recent_tutor_turns = None
+
+    turns = await TutorMemoryContextProvider(repo).get_recent_turns(
+        user_id="user-1",
+        current_lecture_id=None,
+    )
+
+    assert turns == []
+```
+
+- [ ] **Step 2: Implement provider**
+
+Create `src/services/agent_tutor_memory_service.py`:
+
+```python
+from __future__ import annotations
+
+from pydantic import BaseModel
+
+
+class TutorMemoryTurn(BaseModel):
+    question: str
+    answer: str
+    lecture_id: str
+
+
+class TutorMemoryContextProvider:
+    def __init__(self, repo):
+        self.repo = repo
+
+    async def get_recent_turns(
+        self,
+        *,
+        user_id: str,
+        current_lecture_id: str | None,
+    ) -> list[TutorMemoryTurn]:
+        if not current_lecture_id:
+            return []
+        rows = await self.repo.get_recent_tutor_turns(
+            user_id=user_id,
+            lecture_id=current_lecture_id,
+            limit=5,
+        )
+        return [
+            TutorMemoryTurn(
+                question=row.question,
+                answer=row.answer,
+                lecture_id=row.lecture_id,
+            )
+            for row in rows[-5:]
+            if row.lecture_id == current_lecture_id
+        ]
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/services/agent_tutor_memory_service.py tests/services/test_agent_tutor_memory_service.py
+git commit -m "feat: add agent tutor memory context provider"
+```
+
+---
+
 ### Task 9: Agent Chat Orchestrator
 
 **Files:**
@@ -2290,6 +2407,57 @@ async def test_chat_downgrades_full_trace_for_normal_user():
 
     assert response.trace is not None
     assert response.trace.candidate_courses == []
+
+
+@pytest.mark.asyncio
+async def test_chat_marks_controlled_catalog_answer_outside_current_path():
+    search_service = SimpleNamespace()
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                SimpleNamespace(
+                    canonical_unit_id="cs224n-wordvec",
+                    course_id="CS224n",
+                    lecture_id="lecture-01",
+                    lecture_title="Lecture 1",
+                    unit_name="Word vectors and embeddings",
+                    learn_href="/courses/cs224n/learn/lecture-01-seg3",
+                    outside_current_path=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-1", ranking_version="unit_search_v1"),
+        )
+
+    search_service.search = search
+    service = AgentChatService(search_service, SimpleNamespace())
+
+    response = await service.chat(
+        AgentChatRequest(message="What are word vectors?", traceMode="summary"),
+        allowed_course_ids=["CS230", "CS231n", "CS224n"],
+        current_path_course_ids=["CS230", "CS231n"],
+        is_reviewer=False,
+    )
+
+    assert "outside your current path" in response.answer.markdown.lower()
+    assert response.citations[0].course_id == "CS224n"
+
+
+@pytest.mark.asyncio
+async def test_chat_returns_assessment_workflow_action_card_for_skip_request():
+    search_service = SimpleNamespace()
+    requirement_service = SimpleNamespace()
+    service = AgentChatService(search_service, requirement_service)
+
+    response = await service.chat(
+        AgentChatRequest(message="I know CNN. Test me so I can skip it."),
+        allowed_course_ids=["CS230", "CS231n"],
+        is_reviewer=False,
+    )
+
+    assert response.actions[0].type == "continue_assessment_workflow"
+    assert response.actions[0].eligible in {True, False}
+    assert "assessment" in response.actions[0].label.lower()
 ```
 
 - [ ] **Step 2: Run tests and verify failure**
@@ -2312,6 +2480,7 @@ from __future__ import annotations
 from uuid import uuid4
 
 from src.schemas.agent import (
+    AgentAction,
     AgentAnswer,
     AgentChatRequest,
     AgentChatResponse,
@@ -2352,9 +2521,34 @@ class AgentChatService:
         self,
         request: AgentChatRequest,
         allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None = None,
         is_reviewer: bool = False,
     ) -> AgentChatResponse:
         message_lower = request.message.lower()
+        if "skip" in message_lower or "test me" in message_lower:
+            return AgentChatResponse(
+                conversation_id=request.conversation_id or str(uuid4()),
+                message_id=str(uuid4()),
+                answer=AgentAnswer(
+                    markdown=(
+                        "Self-report is not enough to update mastery. "
+                        "If you are ready, start an assessment so the planner can use evidence."
+                    ),
+                    confidence="grounded",
+                ),
+                citations=[],
+                actions=[
+                    AgentAction(
+                        type="continue_assessment_workflow",
+                        label="Start assessment",
+                        canonical_unit_ids=[],
+                        default_phase="skip_verification",
+                        eligible=False,
+                        disabledReason="not_implemented",
+                    )
+                ],
+            )
+
         if "required for nlp" in message_lower or "dl parts" in message_lower:
             requirements = await self.requirement_service.get_requirements(
                 PathRequirementsRequest(targetPathKey="nlp"),
@@ -2420,7 +2614,11 @@ class AgentChatService:
         )
         citations = []
         actions = []
+        outside_current_path = False
+        current_path = {course_id.lower() for course_id in (current_path_course_ids or allowed_course_ids)}
         for result in search.results[:3]:
+            result_outside_path = result.course_id.lower() not in current_path
+            outside_current_path = outside_current_path or result_outside_path
             citations.append(
                 {
                     "canonical_unit_id": result.canonical_unit_id,
@@ -2442,11 +2640,15 @@ class AgentChatService:
                     }
                 )
 
+        answer_markdown = "I found relevant learning units." if citations else "I could not find a grounded source."
+        if outside_current_path:
+            answer_markdown += " Note: at least one cited unit is outside your current path."
+
         return AgentChatResponse(
             conversation_id=request.conversation_id or str(uuid4()),
             message_id=str(uuid4()),
             answer=AgentAnswer(
-                markdown="I found relevant learning units." if citations else "I could not find a grounded source.",
+                markdown=answer_markdown,
                 confidence="grounded" if citations else "no_source",
             ),
             citations=citations,
@@ -3622,6 +3824,47 @@ git commit -m "feat: add agent action validation stubs"
 
 ---
 
+### Task 12.5: Frontend AI Assistant Route
+
+**Files:**
+- Create: `frontend/app/agent/page.tsx`
+- Create: `frontend/components/agent/AgentChatPage.tsx`
+- Modify: `frontend/components/layout/navItems.ts`
+- Modify: `frontend/middleware.ts`
+- Test: `frontend/tests/routes/agent/page.test.tsx`
+- Modify: adjacent nav/middleware tests as needed.
+
+- [ ] **Step 1: Add route and navigation tests**
+
+Tests should assert:
+
+- The global authenticated nav label is `AI Assistant`, not `AI Tutor`.
+- `/agent` renders a normal chatbot-like page with an input and message transcript.
+- Agent responses render citations/direct links to `learn_href`.
+- Agent responses render action cards/buttons, including `continue_assessment_workflow` and disabled `start_assessment` states.
+- Legacy `/tutor` redirects or aliases to `/agent` according to the migration decision.
+- The Lecture AI Tutor panel inside `/courses/:course/learn/:unit` still says `AI Tutor` and remains lecture-scoped.
+
+- [ ] **Step 2: Implement minimal UI**
+
+Implement a focused chat shell:
+
+- POST messages to `/api/agent/chat`.
+- Render `answer.markdown`.
+- Render `citations` as direct course/lecture/unit links.
+- Render `actions` as buttons/cards below the assistant message.
+- For outside-current-path answers, render the warning text from the response without switching path.
+- Do not expose full trace to normal users.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add frontend/app/agent/page.tsx frontend/components/agent/AgentChatPage.tsx frontend/components/layout/navItems.ts frontend/middleware.ts frontend/tests/routes/agent/page.test.tsx
+git commit -m "feat: add ai assistant agent route"
+```
+
+---
+
 ### Task 13: Documentation And Final Verification
 
 **Files:**
@@ -3643,7 +3886,7 @@ Implementation tasks are tracked in `docs/superpowers/plans/2026-04-29-path-agen
 Run:
 
 ```bash
-pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_assessment_workflow.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
+pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_tutor_memory_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_assessment_workflow.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
 ```
 
 Expected: PASS.
@@ -3687,9 +3930,11 @@ Spec coverage:
 - Unit-centered search with query normalization: Task 2, Task 4, Task 6.
 - Runtime navigation data: Task 4, Task 5, Task 6.
 - Unit context and transcript snippets: Task 1, Task 4, Task 8, Task 11.
+- Last-five current-lecture Tutor memory context: Task 8.5 and Task 9.
 - Path requirements/prerequisite graph with content/KP policy and mastery overlay: Task 7.
 - Assessment/replan workflow orchestration: Task 1 and Task 10.
 - Assessment/replan action guardrails: Task 1, Task 9, Task 10, Task 12.
+- Frontend `/agent` AI Assistant route and action cards: Task 12.5.
 - Public API contracts: Task 11 and Task 12.
 - Verification and docs handoff: Task 13.
 
