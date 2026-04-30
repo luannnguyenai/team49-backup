@@ -21,13 +21,13 @@ describe("StepPriorKnowledgeInput", () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText("Kiến thức bạn đã học"), {
-      target: { value: "Tôi đã học CNN và ResNet." },
+    fireEvent.change(screen.getByLabelText("Knowledge you have studied"), {
+      target: { value: "I have studied CNN and ResNet." },
     });
     fireEvent.click(screen.getByRole("button", { name: "Intermediate coding skill" }));
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(onPriorKnowledgeChange).toHaveBeenCalledWith("Tôi đã học CNN và ResNet.");
+    expect(onPriorKnowledgeChange).toHaveBeenCalledWith("I have studied CNN and ResNet.");
     expect(onCodingExperienceChange).toHaveBeenCalledWith(
       "Intermediate: comfortable with Python and basic PyTorch training/debugging, but not advanced production ML tooling.",
     );
