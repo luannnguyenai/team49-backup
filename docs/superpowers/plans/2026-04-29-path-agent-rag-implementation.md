@@ -54,6 +54,7 @@ Create:
 - `src/services/agent_assessment_workflow.py` — LangGraph workflow for assessment proposal, user approval/reduction, and assessment handoff state.
 - `frontend/app/agent/page.tsx` — ChatGPT-like AI Assistant surface.
 - `frontend/components/agent/AgentChatPage.tsx` — chat transcript, citations, and action cards.
+- `frontend/lib/agent/agentAdapters.ts` — defensive API-to-UI mappers for chat responses, conversation replay, actions, citations, and memory.
 - `tests/services/test_agent_query_normalizer.py`
 - `tests/services/test_agent_context_service.py`
 - `tests/services/test_agent_search_service.py`
@@ -66,6 +67,7 @@ Create:
 - `tests/services/test_agent_assessment_workflow.py`
 - `tests/contract/test_agent_routes.py`
 - `frontend/tests/routes/agent/page.test.tsx`
+- `frontend/tests/lib/agent/agentAdapters.test.ts`
 
 Modify:
 
@@ -152,6 +154,20 @@ def test_chat_response_supports_citations_and_disabled_assessment_action():
 
     assert response.actions[0].eligible is False
     assert response.actions[0].disabled_reason == "no_eligible_questions"
+
+
+def test_agent_actions_support_prerequisite_path_and_target_choice():
+    prereq = AgentAction(
+        type="review_prerequisite_path",
+        label="Review prerequisite order",
+        canonical_unit_ids=["cs230-l01-u05", "cs230-l03-u02"],
+        eligible=True,
+    )
+    target = AgentAction(type="choose_target_path", label="Computer Vision", eligible=True)
+
+    assert prereq.type == "review_prerequisite_path"
+    assert prereq.canonical_unit_ids == ["cs230-l01-u05", "cs230-l03-u02"]
+    assert target.type == "choose_target_path"
 
 
 def test_conversation_replay_accepts_datetime_and_raw_response_json():
@@ -432,10 +448,12 @@ class AssessmentProposal(BaseModel):
 class AgentAction(BaseModel):
     type: Literal[
         "open_unit",
+        "review_prerequisite_path",
         "start_assessment_workflow",
         "start_assessment",
         "request_replan_dry_run",
         "continue_assessment_workflow",
+        "choose_target_path",
     ]
     label: str
     learn_href: str | None = None
@@ -5051,9 +5069,11 @@ git commit -m "feat: add agent action validation stubs"
 **Files:**
 - Create: `frontend/app/agent/page.tsx`
 - Create: `frontend/components/agent/AgentChatPage.tsx`
+- Create: `frontend/lib/agent/agentAdapters.ts`
 - Modify: `frontend/components/layout/navItems.ts`
 - Modify: `frontend/middleware.ts`
 - Test: `frontend/tests/routes/agent/page.test.tsx`
+- Test: `frontend/tests/lib/agent/agentAdapters.test.ts`
 - Modify: adjacent nav/middleware tests as needed.
 
 - [ ] **Step 1: Add route and navigation tests**
@@ -5071,6 +5091,13 @@ Tests should assert:
 - The right context panel renders session-scoped assistant memory status: recent message window, last summary update, and read-only memory summary. New chats show empty memory.
 - Legacy `/tutor` redirects or aliases to `/agent` according to the migration decision.
 - The Lecture AI Tutor panel inside `/courses/:course/learn/:unit` still says `AI Tutor` and remains lecture-scoped.
+- Adapter tests should assert:
+  - `AgentChatResponse.answer.markdown` maps to the visible assistant message body.
+  - Backend `learn_href` maps to the UI link field used by citation/action components.
+  - Conversation replay keeps raw `citations` and `actions` JSON renderable even when historical keys are camelCase or incomplete.
+  - `AgentConversationMemory.lastUpdatedAt = null` renders an empty/no-memory state instead of throwing.
+  - Assessment cards use the proposal attached to the action, not module-level mock data.
+  - Session summaries do not expose or require a category field.
 
 - [ ] **Step 2: Implement minimal UI**
 
@@ -5081,9 +5108,10 @@ Implement a focused chat shell:
 - Create a new session with `POST /api/agent/conversations`.
 - Load selected conversation messages from `GET /api/agent/conversations/{conversationId}`.
 - Load selected conversation memory from `GET /api/agent/conversations/{conversationId}/memory`.
-- Render `answer.markdown`.
-- Render `citations` as direct course/lecture/unit links.
-- Render `actions` as buttons/cards below the assistant message.
+- Add `frontend/lib/agent/agentAdapters.ts` as the only place that converts backend contracts into UI view models.
+- Render `answer.markdown` as the assistant message content.
+- Render `citations` as direct course/lecture/unit links using backend `learn_href`; the adapter may expose camelCase `learnHref`/`href` to UI components, but the API contract stays `learn_href`.
+- Render `actions` as buttons/cards below the assistant message. Supported V1 action types are `open_unit`, `review_prerequisite_path`, `choose_target_path`, `start_assessment_workflow`, `continue_assessment_workflow`, `start_assessment`, and `request_replan_dry_run`.
 - Render chat history from session data:
   - `New chat` creates a new empty conversation.
   - Existing sessions remain available in the sidebar.
@@ -5091,11 +5119,12 @@ Implement a focused chat shell:
 - Render session memory as same-session context only:
   - Keep latest 8-12 messages as short-term context.
   - Show summary status (`empty`, `fresh`, `stale`, `updating`) for older turns in the current session.
+  - If `lastUpdatedAt` is null or `summaryStatus` is `empty`, render `No memory yet` / empty summary state; never non-null assert memory timestamps.
   - Do not use previous chat-session memory in a new chat.
   - Use latest five current-lecture AI Tutor Q&A turns only when route context points to the current player/lecture.
 - Render assessment proposal cards:
   - `start_assessment_workflow` calls `POST /api/agent/assessment-workflows` with candidate canonical unit IDs,
-  - `continue_assessment_workflow` renders the returned workflow proposal/interruption,
+  - `continue_assessment_workflow` renders the returned workflow proposal/interruption from `action.proposal`; do not use hardcoded/global mock proposal data,
   - show exact `estimatedQuestions` and estimated time,
   - show unit/KP scope and difficulty mix,
   - show why this many questions are needed,
@@ -5103,11 +5132,15 @@ Implement a focused chat shell:
   - show `Start assessment` only after proposal approval.
 - For outside-current-path answers, render the warning text from the response without switching path.
 - Do not expose full trace to normal users.
+- Keep mock data in a separate local mock file or test fixture only; production components should render from API/adapted props.
+- Do not include `key?: React.Key` in component prop types.
+- Avoid raw `h-screen` if the route is mounted under the existing app shell/header; use a layout-aware height so the page does not double-scroll under the global navigation.
+- The right context panel may be default-collapsed on desktop for V1. If expanded, keep the first version limited to Memory, Current Path, Current Context, and Recommended; do not make it a second full planner surface.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add frontend/app/agent/page.tsx frontend/components/agent/AgentChatPage.tsx frontend/components/layout/navItems.ts frontend/middleware.ts frontend/tests/routes/agent/page.test.tsx
+git add frontend/app/agent/page.tsx frontend/components/agent/AgentChatPage.tsx frontend/lib/agent/agentAdapters.ts frontend/components/layout/navItems.ts frontend/middleware.ts frontend/tests/routes/agent/page.test.tsx frontend/tests/lib/agent/agentAdapters.test.ts
 git commit -m "feat: add ai assistant agent route"
 ```
 
@@ -5149,7 +5182,17 @@ pytest tests/repositories/test_canonical_content_repo.py tests/services/test_rec
 
 Expected: PASS.
 
-- [ ] **Step 4: Optional frontend type-check**
+- [ ] **Step 4: Run frontend route/adapter tests**
+
+Run:
+
+```bash
+npm test -- frontend/tests/routes/agent/page.test.tsx frontend/tests/lib/agent/agentAdapters.test.ts
+```
+
+Expected: PASS. If the repository uses a different frontend test command, use the existing frontend test runner and keep these two test files in the focused suite.
+
+- [ ] **Step 5: Optional frontend type-check**
 
 Run:
 
@@ -5159,7 +5202,7 @@ npm run type-check
 
 Expected: PASS or only documented unrelated existing failures. If unrelated failures occur, record exact file/error in the final response and do not modify unrelated files.
 
-- [ ] **Step 5: Commit final docs**
+- [ ] **Step 6: Commit final docs**
 
 ```bash
 git add docs/superpowers/plans/2026-04-29-path-agent-rag-plan.md docs/superpowers/plans/2026-04-29-path-agent-rag-implementation.md
@@ -5184,6 +5227,7 @@ Spec coverage:
 - Assessment/replan workflow orchestration: Task 1 and Task 10.
 - Assessment/replan action guardrails: Task 1, Task 9, Task 10, Task 12.
 - Frontend `/agent` AI Assistant route, session history, session-scoped memory UI, and proposal/negotiation action cards: Task 12.5.
+- Frontend API adapter boundary for snake_case live contracts, raw replay JSON, null memory state, and action proposal rendering: Task 12.5.
 - Public API contracts: Task 11 and Task 12.
 - Verification and docs handoff: Task 13.
 

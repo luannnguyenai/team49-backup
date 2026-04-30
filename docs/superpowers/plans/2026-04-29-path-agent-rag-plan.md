@@ -704,6 +704,17 @@ type AgentChatResponse = {
         canonical_unit_id: string;
       }
     | {
+        type: "review_prerequisite_path";
+        label: string;
+        canonical_unit_ids: string[];
+        eligible: boolean;
+      }
+    | {
+        type: "choose_target_path";
+        label: "Computer Vision" | "NLP";
+        eligible: boolean;
+      }
+    | {
         type: "start_assessment_workflow";
         label: string;
         canonical_unit_ids: string[];
@@ -773,6 +784,15 @@ Streaming:
 - V1 can ship non-streaming only.
 - If streaming is added, stream answer tokens separately from final structured payload.
 - Final event must still include `citations`, `actions`, and `trace` so UI behavior is deterministic.
+
+Frontend adapter rules:
+
+- The backend API contract remains canonical/snake_case: `answer.markdown`, `citations[].learn_href`, `actions[].canonical_unit_ids`, and `actions[].default_phase`.
+- The `/agent` UI may use camelCase view models internally, but conversion must be isolated in `frontend/lib/agent/agentAdapters.ts`.
+- Conversation replay messages return `citations` and `actions` as raw JSON snapshots. The UI must normalize them defensively instead of assuming every historical replay object matches the latest live schema.
+- Session history does not include category labels in V1. A single conversation can mix path, assessment, course, and general planning questions, so badges like `Assessment`, `Path`, `Course`, or `General` should not be rendered.
+- Assessment proposal cards must render from `action.proposal` or the workflow interrupt payload. Do not use module-level mock proposal data in production components.
+- Empty memory is valid. If `lastUpdatedAt` is null or `summaryStatus="empty"`, render a no-memory state instead of assuming a timestamp exists.
 
 Fallback/refusal rules:
 
