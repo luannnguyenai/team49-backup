@@ -147,4 +147,12 @@ describe("tutor page search", () => {
     expect(screen.queryByText(CS224N_ITEM.title)).not.toBeInTheDocument();
     expect(screen.queryByText("AI Language Operations")).not.toBeInTheDocument();
   });
+
+  it("routes the catalog view-all link to the dashboard", async () => {
+    render(<TutorPage />);
+
+    const viewAllLink = await screen.findByRole("link", { name: "View all" });
+
+    expect(viewAllLink).toHaveAttribute("href", "/dashboard");
+  });
 });
