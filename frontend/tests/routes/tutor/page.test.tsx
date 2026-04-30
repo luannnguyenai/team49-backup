@@ -151,7 +151,9 @@ describe("tutor page search", () => {
   it("routes the catalog view-all link to the dashboard", async () => {
     render(<TutorPage />);
 
-    const viewAllLink = await screen.findByRole("link", { name: "View all" });
+    expect(await screen.findByText(/looking for something else\?/i)).toBeInTheDocument();
+
+    const viewAllLink = await screen.findByRole("link", { name: "Explore courses" });
 
     expect(viewAllLink).toHaveAttribute("href", "/dashboard");
   });
