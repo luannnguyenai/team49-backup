@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -883,6 +884,23 @@ describe("learning unit page (US3)", () => {
     fireEvent.keyDown(input, { key: "Enter" });
 
     expect(navigationMock.router.push).toHaveBeenCalledWith("/courses/cs224n");
+  });
+
+  it("exits the loading state in React strict mode after catalog preloading resolves", async () => {
+    navigationMock.pathname = "/dashboard";
+
+    render(
+      <StrictMode>
+        <TopNav />
+      </StrictMode>,
+    );
+
+    const input = screen.getByLabelText("Search courses");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "deep learning" } });
+
+    expect(await screen.findByText("CS231n: Deep Learning for Computer Vision")).toBeInTheDocument();
+    expect(screen.queryByText("Loading courses...")).not.toBeInTheDocument();
   });
 
 });
