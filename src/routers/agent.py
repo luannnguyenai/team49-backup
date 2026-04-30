@@ -310,11 +310,12 @@ async def agent_start_assessment(
 async def agent_request_replan(
     body: RequestReplanActionRequest,
     user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
 ) -> AgentActionResponse:
-    validation = await validate_replan_request(body, user_id=str(user.id))
+    validation = await validate_replan_request(db, body, user)
     return AgentActionResponse(
         accepted=validation.accepted,
         rejectedReason=validation.rejected_reason,
         dryRun=body.dry_run,
-        impact={"mode": "dry_run_only"} if validation.accepted and body.dry_run else None,
+        impact=validation.impact,
     )
