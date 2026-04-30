@@ -91,7 +91,7 @@ describe("InContextTutor", () => {
     });
     fireEvent.click(screen.getAllByRole("button")[1]);
 
-    expect(screen.getByText("Đang suy nghĩ...")).toBeInTheDocument();
+    expect(screen.getByText("Thinking...")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText("Lecture not found")).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe("InContextTutor", () => {
     });
     fireEvent.click(screen.getAllByRole("button")[1]);
 
-    expect(screen.getByText("Đang suy nghĩ...")).toBeInTheDocument();
+    expect(screen.getByText("Thinking...")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText("First streamed answer.")).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe("InContextTutor", () => {
   it("parses NDJSON responses even when JSON objects are split across network chunks", async () => {
     fetchMock.mockResolvedValue(
       buildChunkedNdjsonResponse(200, [
-        '{"status":"Đang suy nghĩ',
+        '{"status":"Thinking',
         '..."}\n{"a":"Measure brain ',
         'activity means "}\n{"a":"recording neural signals."}\n{"qa_id":42}\n',
       ]),
@@ -162,8 +162,8 @@ describe("InContextTutor", () => {
   it("shows backend status text separately before streamed answer content arrives", async () => {
     fetchMock.mockResolvedValue(
       buildDelayedNdjsonResponse(200, [
-        { chunk: '{"status":"Đang đọc ngữ cảnh bài giảng..."}\n' },
-        { chunk: '{"status":"Đang tìm phần nội dung liên quan..."}\n', delayMs: 20 },
+        { chunk: '{"status":"Reading lecture context..."}\n' },
+        { chunk: '{"status":"Finding the most relevant section..."}\n', delayMs: 20 },
         { chunk: '{"a":"Answer starts here."}\n{"qa_id":12}\n', delayMs: 150 },
       ]),
     );
@@ -183,16 +183,16 @@ describe("InContextTutor", () => {
     });
     fireEvent.click(screen.getAllByRole("button")[1]);
 
-    expect(await screen.findByText("Đang đọc ngữ cảnh bài giảng...")).toBeInTheDocument();
+    expect(await screen.findByText("Reading lecture context...")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText("Đang tìm phần nội dung liên quan...")).toBeInTheDocument();
+      expect(screen.getByText("Finding the most relevant section...")).toBeInTheDocument();
     });
 
     await waitFor(() => {
       expect(screen.getByText("Answer starts here.")).toBeInTheDocument();
     });
-    expect(screen.queryByText("Đang đọc ngữ cảnh bài giảng...")).not.toBeInTheDocument();
-    expect(screen.queryByText("Đang tìm phần nội dung liên quan...")).not.toBeInTheDocument();
+    expect(screen.queryByText("Reading lecture context...")).not.toBeInTheDocument();
+    expect(screen.queryByText("Finding the most relevant section...")).not.toBeInTheDocument();
   });
 
   it("includes context_binding_id in tutor requests when provided", async () => {
@@ -229,7 +229,7 @@ describe("InContextTutor", () => {
   it("disables input while streaming and restores focus when the reply completes", async () => {
     fetchMock.mockResolvedValue(
       buildDelayedNdjsonResponse(200, [
-        { chunk: '{"status":"Đang suy nghĩ..."}\n' },
+        { chunk: '{"status":"Thinking..."}\n' },
         { chunk: '{"a":"Done."}\n{"qa_id":14}\n', delayMs: 120 },
       ]),
     );
@@ -266,10 +266,10 @@ describe("InContextTutor", () => {
   it("shows a step list when the backend emits multiple tutor stages", async () => {
     fetchMock.mockResolvedValue(
       buildDelayedNdjsonResponse(200, [
-        { chunk: '{"status":"Đang đọc ngữ cảnh bài giảng..."}\n' },
-        { chunk: '{"status":"Đang tìm phần nội dung liên quan..."}\n', delayMs: 20 },
-        { chunk: '{"status":"Đang suy nghĩ câu trả lời..."}\n', delayMs: 20 },
-        { chunk: '{"a":"Mình đã tổng hợp xong."}\n{"qa_id":18}\n', delayMs: 100 },
+        { chunk: '{"status":"Reading lecture context..."}\n' },
+        { chunk: '{"status":"Finding the most relevant section..."}\n', delayMs: 20 },
+        { chunk: '{"status":"Composing the answer..."}\n', delayMs: 20 },
+        { chunk: '{"a":"I have finished summarizing it."}\n{"qa_id":18}\n', delayMs: 100 },
       ]),
     );
 
@@ -284,28 +284,28 @@ describe("InContextTutor", () => {
     );
 
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
-      target: { value: "Tóm tắt giúp mình" },
+      target: { value: "Please summarize it" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
-    expect(await screen.findByText("Đang đọc ngữ cảnh bài giảng...")).toBeInTheDocument();
+    expect(await screen.findByText("Reading lecture context...")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText("Đang tìm phần nội dung liên quan...")).toBeInTheDocument();
-      expect(screen.getByText("Đang suy nghĩ câu trả lời...")).toBeInTheDocument();
+      expect(screen.getByText("Finding the most relevant section...")).toBeInTheDocument();
+      expect(screen.getByText("Composing the answer...")).toBeInTheDocument();
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Mình đã tổng hợp xong.")).toBeInTheDocument();
+      expect(screen.getByText("I have finished summarizing it.")).toBeInTheDocument();
     });
   });
 
   it("shows a tool-specific step only when the backend actually uses a tool", async () => {
     fetchMock.mockResolvedValue(
       buildDelayedNdjsonResponse(200, [
-        { chunk: '{"status":"Đang suy nghĩ câu trả lời..."}\n' },
-        { chunk: '{"status":"Đang kiểm tra phép tính..."}\n', delayMs: 20 },
-        { chunk: '{"status":"Đang hoàn thiện câu trả lời..."}\n', delayMs: 20 },
-        { chunk: '{"a":"Kết quả đã được kiểm tra."}\n{"qa_id":22}\n', delayMs: 100 },
+        { chunk: '{"status":"Composing the answer..."}\n' },
+        { chunk: '{"status":"Checking the calculation..."}\n', delayMs: 20 },
+        { chunk: '{"status":"Finalizing the answer..."}\n', delayMs: 20 },
+        { chunk: '{"a":"The result has been checked."}\n{"qa_id":22}\n', delayMs: 100 },
       ]),
     );
 
@@ -320,17 +320,17 @@ describe("InContextTutor", () => {
     );
 
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
-      target: { value: "Tính giúp mình giá trị này" },
+      target: { value: "Calculate this value for me" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
-    expect(await screen.findByText("Đang kiểm tra phép tính...")).toBeInTheDocument();
+    expect(await screen.findByText("Checking the calculation...")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText("Đang hoàn thiện câu trả lời...")).toBeInTheDocument();
+      expect(screen.getByText("Finalizing the answer...")).toBeInTheDocument();
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Kết quả đã được kiểm tra.")).toBeInTheDocument();
+      expect(screen.getByText("The result has been checked.")).toBeInTheDocument();
     });
   });
 });
