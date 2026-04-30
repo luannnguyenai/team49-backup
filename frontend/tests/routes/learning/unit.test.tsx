@@ -612,6 +612,46 @@ describe("learning unit page (US3)", () => {
     expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
   });
 
+  it("pauses the video as soon as the mid-video quiz prompt appears", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    const pauseSpy = vi.fn();
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => false,
+    });
+    Object.defineProperty(video, "pause", {
+      configurable: true,
+      writable: true,
+      value: pauseSpy,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
+    expect(pauseSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("shows the end-of-video quiz overlay when playback finishes", async () => {
     const { container } = render(
       <LearningPageScreen
@@ -651,6 +691,58 @@ describe("learning unit page (US3)", () => {
 
     expect(await screen.findAllByText("End-of-video quiz")).toHaveLength(2);
     expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
+  });
+
+  it("pauses the video as soon as the end-of-video quiz prompt appears", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    const pauseSpy = vi.fn();
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => false,
+    });
+    Object.defineProperty(video, "pause", {
+      configurable: true,
+      writable: true,
+      value: pauseSpy,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    const dismissButton = await screen.findByRole("button", { name: "Dismiss for now" });
+    fireEvent.click(dismissButton);
+
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+
+    fireEvent(video!, new Event("ended"));
+
+    expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
+    expect(await screen.findAllByText("End-of-video quiz")).toHaveLength(2);
+    expect(pauseSpy).toHaveBeenCalledTimes(2);
   });
 
   it("does not show AI Tutor toggle when tutor is disabled", async () => {
