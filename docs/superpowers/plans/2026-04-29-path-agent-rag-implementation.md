@@ -110,6 +110,7 @@ from src.schemas.agent import (
     AgentCitation,
     AgentConversationMessage,
     AgentConversationSummary,
+    AgentWarning,
     UnitSearchRequest,
     UnitSearchResponse,
 )
@@ -154,6 +155,24 @@ def test_chat_response_supports_citations_and_disabled_assessment_action():
 
     assert response.actions[0].eligible is False
     assert response.actions[0].disabled_reason == "no_eligible_questions"
+
+
+def test_chat_response_supports_warning_contract():
+    response = AgentChatResponse(
+        conversation_id="conv-1",
+        message_id="msg-1",
+        answer={
+            "markdown": "This is outside your current Computer Vision path.",
+            "confidence": "grounded",
+        },
+        warning=AgentWarning(
+            type="outside_current_path",
+            message="This content is outside your current path, but it is available in the controlled catalog.",
+        ),
+    )
+
+    assert response.warning is not None
+    assert response.warning.type == "outside_current_path"
 
 
 def test_agent_actions_support_prerequisite_path_and_target_choice():
@@ -485,6 +504,11 @@ class AgentFallback(BaseModel):
     message: str
 
 
+class AgentWarning(BaseModel):
+    type: Literal["outside_current_path", "needs_assessment", "ambiguous_target"]
+    message: str
+
+
 class StartAssessmentActionRequest(BaseModel):
     canonical_unit_ids: list[str] = Field(alias="canonicalUnitIds", min_length=1)
     phase: AssessmentPhase
@@ -556,6 +580,7 @@ class AgentChatResponse(BaseModel):
     answer: AgentAnswer
     citations: list[AgentCitation] = Field(default_factory=list)
     actions: list[AgentAction] = Field(default_factory=list)
+    warning: AgentWarning | None = None
     fallback: AgentFallback | None = None
     trace: RetrievalTrace | None = None
 
@@ -5094,10 +5119,14 @@ Tests should assert:
 - Adapter tests should assert:
   - `AgentChatResponse.answer.markdown` maps to the visible assistant message body.
   - Backend `learn_href` maps to the UI link field used by citation/action components.
+  - Backend `warning` maps to the assistant message warning block; the UI should not infer warning copy from unrelated fields.
   - Conversation replay keeps raw `citations` and `actions` JSON renderable even when historical keys are camelCase or incomplete.
   - `AgentConversationMemory.lastUpdatedAt = null` renders an empty/no-memory state instead of throwing.
   - Assessment cards use the proposal attached to the action, not module-level mock data.
+  - Proposal view models derive `id` from `workflowId`/message id and `canReduce` from `reductionOptions.length > 0`; these are UI conveniences, not backend fields.
+  - Citation view models default missing `courseSlug`, `summary`, `startSec`, `endSec`, and `outsideCurrentPath` safely from backend fields (`course_id`, `quote`, `timestamp_s`, warning/scope context) without requiring those fields in `AgentCitation`.
   - Session summaries do not expose or require a category field.
+  - Icon-only controls, sidebars, and memory/proposal modal have accessible labels and keyboard behavior.
 
 - [ ] **Step 2: Implement minimal UI**
 
@@ -5111,6 +5140,7 @@ Implement a focused chat shell:
 - Add `frontend/lib/agent/agentAdapters.ts` as the only place that converts backend contracts into UI view models.
 - Render `answer.markdown` as the assistant message content.
 - Render `citations` as direct course/lecture/unit links using backend `learn_href`; the adapter may expose camelCase `learnHref`/`href` to UI components, but the API contract stays `learn_href`.
+- Render `warning` directly from `AgentChatResponse.warning` for outside-current-path, needs-assessment, and ambiguous-target messages.
 - Render `actions` as buttons/cards below the assistant message. Supported V1 action types are `open_unit`, `review_prerequisite_path`, `choose_target_path`, `start_assessment_workflow`, `continue_assessment_workflow`, `start_assessment`, and `request_replan_dry_run`.
 - Render chat history from session data:
   - `New chat` creates a new empty conversation.
@@ -5133,9 +5163,16 @@ Implement a focused chat shell:
 - For outside-current-path answers, render the warning text from the response without switching path.
 - Do not expose full trace to normal users.
 - Keep mock data in a separate local mock file or test fixture only; production components should render from API/adapted props.
+- Treat any pasted/mock UI as a visual reference only. Production `AgentChatPage` must receive API/adapted data through props/state and must not keep module-level response mocks such as `ASSESSMENT_PROPOSAL` in the render path.
 - Do not include `key?: React.Key` in component prop types.
 - Avoid raw `h-screen` if the route is mounted under the existing app shell/header; use a layout-aware height so the page does not double-scroll under the global navigation.
 - The right context panel may be default-collapsed on desktop for V1. If expanded, keep the first version limited to Memory, Current Path, Current Context, and Recommended; do not make it a second full planner surface.
+- Accessibility requirements:
+  - Icon-only buttons must have `aria-label`.
+  - Mobile drawers and memory/proposal modals must expose `role="dialog"` and `aria-modal="true"`.
+  - Modal/drawer open should move focus into the panel and Escape should close it.
+  - Closing a modal/drawer should return focus to the trigger.
+  - Action cards must be real buttons or links with visible focus states.
 
 - [ ] **Step 3: Commit**
 
@@ -5227,7 +5264,8 @@ Spec coverage:
 - Assessment/replan workflow orchestration: Task 1 and Task 10.
 - Assessment/replan action guardrails: Task 1, Task 9, Task 10, Task 12.
 - Frontend `/agent` AI Assistant route, session history, session-scoped memory UI, and proposal/negotiation action cards: Task 12.5.
-- Frontend API adapter boundary for snake_case live contracts, raw replay JSON, null memory state, and action proposal rendering: Task 12.5.
+- Frontend API adapter boundary for snake_case live contracts, explicit warning contract, raw replay JSON, null memory state, derived citation/proposal view-model fields, and action proposal rendering: Task 12.5.
+- Frontend accessibility acceptance for icon-only controls, drawers, modals, focus handling, and keyboard-visible action cards: Task 12.5.
 - Public API contracts: Task 11 and Task 12.
 - Verification and docs handoff: Task 13.
 

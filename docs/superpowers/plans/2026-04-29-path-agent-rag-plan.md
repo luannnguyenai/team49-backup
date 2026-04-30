@@ -771,6 +771,10 @@ type AgentChatResponse = {
         sourceCanonicalUnitIds: string[];
       }
   >;
+  warning?: {
+    type: "outside_current_path" | "needs_assessment" | "ambiguous_target";
+    message: string;
+  };
   fallback?: {
     reason: "no_retrieval_result" | "out_of_scope" | "unsafe_action" | "tool_error";
     message: string;
@@ -790,9 +794,13 @@ Frontend adapter rules:
 - The backend API contract remains canonical/snake_case: `answer.markdown`, `citations[].learn_href`, `actions[].canonical_unit_ids`, and `actions[].default_phase`.
 - The `/agent` UI may use camelCase view models internally, but conversion must be isolated in `frontend/lib/agent/agentAdapters.ts`.
 - Conversation replay messages return `citations` and `actions` as raw JSON snapshots. The UI must normalize them defensively instead of assuming every historical replay object matches the latest live schema.
+- Warnings are explicit response fields. The UI should render `warning.message` directly for outside-current-path, needs-assessment, and ambiguous-target states instead of inferring warning copy from fallback/citations/actions.
+- Rich UI citation fields such as `courseSlug`, `summary`, `startSec`, `endSec`, and `outsideCurrentPath` are view-model fields. Derive/default them from `course_id`, `quote`, `timestamp_s`, and response warning/scope context unless the backend schema is deliberately extended later.
+- UI assessment proposal fields such as `id` and `canReduce` are view-model fields. Derive `id` from `workflowId`/message id and `canReduce` from `reductionOptions.length > 0`.
 - Session history does not include category labels in V1. A single conversation can mix path, assessment, course, and general planning questions, so badges like `Assessment`, `Path`, `Course`, or `General` should not be rendered.
 - Assessment proposal cards must render from `action.proposal` or the workflow interrupt payload. Do not use module-level mock proposal data in production components.
 - Empty memory is valid. If `lastUpdatedAt` is null or `summaryStatus="empty"`, render a no-memory state instead of assuming a timestamp exists.
+- Accessibility is part of the UI contract: icon-only controls need accessible labels, drawers/modals need dialog semantics and Escape/focus handling, and action cards need visible keyboard focus states.
 
 Fallback/refusal rules:
 
