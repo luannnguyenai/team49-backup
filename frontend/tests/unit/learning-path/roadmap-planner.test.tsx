@@ -180,7 +180,7 @@ describe("RoadmapPlanner", () => {
   it("renders a path-required state for missing concrete path data", () => {
     render(<PathRequiredState />);
 
-    expect(screen.getByText("Chọn lộ trình trước khi học")).toBeInTheDocument();
+    expect(screen.getByText("Choose a path before you start learning")).toBeInTheDocument();
   });
 
   it("lets the user pick exactly one temporary path while onboarding is unavailable", () => {
