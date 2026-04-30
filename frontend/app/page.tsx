@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import LandingPage from "@/components/landing/LandingPage";
 
 export const metadata: Metadata = {
-  title: "Lộ trình học AI có định hướng",
+  title: "Guided AI Learning Path",
   description:
-    "Nền tảng học AI/ML/CV/NLP giúp bạn học có lộ trình, có hỗ trợ, và tiến bộ rõ ràng hơn.",
+    "An AI/ML/CV/NLP learning platform that gives you structure, support, and clearer progress.",
 };
 
 export default function RootPage() {
