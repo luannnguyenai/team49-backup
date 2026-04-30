@@ -850,4 +850,22 @@ describe("learning unit page (US3)", () => {
     expect(navigationMock.router.push).toHaveBeenCalledWith("/courses/cs224n");
   });
 
+  it("routes to the first matching course when Enter is pressed in the search input", async () => {
+    navigationMock.pathname = "/profile";
+
+    render(<TopNav />);
+
+    const input = screen.getByLabelText("Search courses");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "language" } });
+
+    await screen.findByRole("button", {
+      name: /cs224n: natural language processing with deep learning/i,
+    });
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(navigationMock.router.push).toHaveBeenCalledWith("/courses/cs224n");
+  });
+
 });
