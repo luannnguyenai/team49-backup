@@ -66,11 +66,11 @@ export default function StepPriorKnowledgeInput({
     <div className="space-y-5">
       <div>
         <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-          Nền tảng hiện tại của bạn
+          Your current foundation
         </p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-          Nhập thủ công vài dòng. Khi bấm tiếp tục, AI sẽ suy nghĩ và lọc ra một shortlist
-          ngắn để bạn xác nhận ở bước sau.
+          Enter a few lines manually. When you continue, AI will reason over it and create
+          a short shortlist for you to confirm in the next step.
         </p>
       </div>
 
@@ -80,14 +80,14 @@ export default function StepPriorKnowledgeInput({
           className="text-sm font-semibold"
           style={{ color: "var(--text-primary)" }}
         >
-          Kiến thức bạn đã học
+          Knowledge you have studied
         </label>
         <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-          Ví dụ: {GOAL_PRIOR_HINTS[goalId].join(", ")}. Có thể ghi cả thời gian đã học AI.
+          Example: {GOAL_PRIOR_HINTS[goalId].join(", ")}. You can also mention how long you have studied AI.
         </p>
         <textarea
           id="prior-knowledge"
-          aria-label="Kiến thức bạn đã học"
+          aria-label="Knowledge you have studied"
           value={priorKnowledgeText}
           onChange={(event) => onPriorKnowledgeChange(event.target.value)}
           className="mt-3 min-h-24 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-primary-500"
@@ -96,16 +96,16 @@ export default function StepPriorKnowledgeInput({
             backgroundColor: "var(--bg-card)",
             color: "var(--text-primary)",
           }}
-          placeholder="Tôi đã học CNN, ResNet, transformer khoảng 3 tháng..."
+          placeholder="I have studied CNN, ResNet, and transformers for about 3 months..."
         />
       </div>
 
       <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)" }}>
         <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-          Kỹ năng coding ML
+          ML coding skill
         </p>
         <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-          Gợi ý: {CODING_HINTS.join(", ")}.
+          Hints: {CODING_HINTS.join(", ")}.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
           {CODING_LEVELS.map((level) => {
@@ -148,7 +148,7 @@ export default function StepPriorKnowledgeInput({
             backgroundColor: "var(--bg-card)",
           }}
         >
-          Quay lại
+          Back
         </button>
         <button
           type="button"
@@ -157,7 +157,7 @@ export default function StepPriorKnowledgeInput({
           className="ml-auto inline-flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-75"
         >
           {isAnalyzing && <Loader2 className="h-4 w-4 animate-spin" />}
-          {isAnalyzing ? "AI thinking..." : "Tiếp tục"}
+          {isAnalyzing ? "AI thinking..." : "Continue"}
         </button>
       </div>
     </div>
