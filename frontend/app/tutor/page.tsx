@@ -12,6 +12,7 @@ import CourseCatalog from "@/components/course/CourseCatalog";
 import { buildUserCourseCollections } from "@/features/course-membership/presenters";
 import { getCachedAllCourseCatalog } from "@/lib/course-catalog-cache";
 import { filterCoursesByQuery, normalizeCourseSearchQuery } from "@/lib/course-search";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import type { CourseCatalogItem, HistoryItem } from "@/types";
 
 export default function TutorPage() {
@@ -36,6 +37,7 @@ function TutorPageFallback() {
 }
 
 function TutorPageContent() {
+  usePageTitle("AI Learning Hub - AI Tutor");
   const searchParams = useSearchParams();
   const [items, setItems] = useState<CourseCatalogItem[]>([]);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
