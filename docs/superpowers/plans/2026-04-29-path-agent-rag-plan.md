@@ -1110,7 +1110,7 @@ Recommended tables:
 
 - `agent_conversations`: `conversation_id`, `user_id`, `title`, `preview`, `created_at`, `updated_at`, `message_count`.
 - `agent_conversation_messages`: `message_id`, `conversation_id`, `user_id`, `role`, `markdown`, `citations_json`, `actions_json`, `created_at`.
-- `agent_conversation_memory`: `conversation_id`, `user_id`, `summary_status`, `recent_message_window`, `summary_json`, `last_updated_at`.
+- `agent_conversation_memories`: `conversation_id`, `user_id`, `summary_status`, `recent_message_window`, `summary_json`, `last_updated_at`.
 
 Rules:
 
@@ -1118,6 +1118,7 @@ Rules:
 - Conversation rows are user-scoped.
 - Memory summary is scoped to the same `conversation_id`.
 - New conversations start without prior message history or prior memory summary.
+- Implement with an `AgentConversationRepository`; do not fake persistence with frontend-only local state.
 
 ### 9.1 Search Document View
 

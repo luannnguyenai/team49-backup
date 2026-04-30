@@ -47,6 +47,8 @@ Create:
 - `src/services/agent_unit_context_service.py` — canonical unit context/KP/quiz/timestamp expansion.
 - `src/services/agent_tutor_memory_service.py` — last-five current-lecture Lecture AI Tutor Q&A context provider.
 - `src/services/agent_conversation_service.py` — authenticated conversation history and same-session memory summary provider.
+- `src/models/agent_conversation.py` — persisted agent conversations, messages, and memory summaries.
+- `src/repositories/agent_conversation_repo.py` — user-scoped persistence helpers for conversation sidebar/history/memory.
 - `src/services/agent_chat_service.py` — orchestration endpoint logic: intent, tool calls, citations, actions, fallback, trace.
 - `src/services/agent_assessment_workflow.py` — LangGraph workflow for assessment proposal, user approval/reduction, and assessment handoff state.
 - `frontend/app/agent/page.tsx` — ChatGPT-like AI Assistant surface.
@@ -58,6 +60,7 @@ Create:
 - `tests/services/test_agent_unit_context_service.py`
 - `tests/services/test_agent_tutor_memory_service.py`
 - `tests/services/test_agent_conversation_service.py`
+- `tests/repositories/test_agent_conversation_repo.py`
 - `tests/services/test_agent_chat_service.py`
 - `tests/services/test_agent_assessment_workflow.py`
 - `tests/contract/test_agent_routes.py`
@@ -2548,7 +2551,11 @@ git commit -m "feat: add agent tutor memory context provider"
 ### Task 8.75: Agent Conversation Sessions And Memory
 
 **Files:**
+- Create: `src/models/agent_conversation.py`
+- Create: migration in the existing migration system for `agent_conversations`, `agent_conversation_messages`, and `agent_conversation_memories`
+- Create: `src/repositories/agent_conversation_repo.py`
 - Create: `src/services/agent_conversation_service.py`
+- Test: `tests/repositories/test_agent_conversation_repo.py`
 - Test: `tests/services/test_agent_conversation_service.py`
 - Modify: `src/schemas/agent.py`
 - Modify: `src/routers/agent.py`
@@ -2559,7 +2566,259 @@ does not feed old sessions into new chats. The source of truth is backend
 persistence through repository helpers; frontend local state is only an
 optimistic/rendering cache.
 
-- [ ] **Step 1: Write failing tests**
+- [ ] **Step 1: Add persistence model and migration**
+
+Create `src/models/agent_conversation.py`:
+
+```python
+from __future__ import annotations
+
+from uuid import uuid4
+
+from sqlalchemy import DateTime, ForeignKey, Integer, JSON, String, Text, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.models.base import Base
+
+
+class AgentConversation(Base):
+    __tablename__ = "agent_conversations"
+
+    conversation_id: Mapped[str] = mapped_column(
+        String,
+        primary_key=True,
+        default=lambda: str(uuid4()),
+    )
+    user_id: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    title: Mapped[str] = mapped_column(String, nullable=False, default="New chat")
+    preview: Mapped[str] = mapped_column(String, nullable=False, default="")
+    message_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[object] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[object] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    messages: Mapped[list["AgentConversationMessage"]] = relationship(
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+    )
+    memory: Mapped["AgentConversationMemory | None"] = relationship(
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+
+
+class AgentConversationMessage(Base):
+    __tablename__ = "agent_conversation_messages"
+
+    message_id: Mapped[str] = mapped_column(
+        String,
+        primary_key=True,
+        default=lambda: str(uuid4()),
+    )
+    conversation_id: Mapped[str] = mapped_column(
+        ForeignKey("agent_conversations.conversation_id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    user_id: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    role: Mapped[str] = mapped_column(String, nullable=False)
+    markdown: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    citations_json: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    actions_json: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    created_at: Mapped[object] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    conversation: Mapped[AgentConversation] = relationship(back_populates="messages")
+
+
+class AgentConversationMemory(Base):
+    __tablename__ = "agent_conversation_memories"
+
+    conversation_id: Mapped[str] = mapped_column(
+        ForeignKey("agent_conversations.conversation_id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    user_id: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    summary_status: Mapped[str] = mapped_column(String, nullable=False, default="empty")
+    recent_message_window: Mapped[int] = mapped_column(Integer, nullable=False, default=10)
+    summary_json: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    last_updated_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    conversation: Mapped[AgentConversation] = relationship(back_populates="memory")
+```
+
+Create the migration using the repository's existing migration convention.
+Required DB behavior:
+
+- `agent_conversations.user_id` and `updated_at` are indexed for the sidebar.
+- `agent_conversation_messages.conversation_id`, `user_id`, and `created_at` are indexed for replay.
+- `agent_conversation_memories.conversation_id` is the primary key.
+- All foreign keys cascade delete from `agent_conversations`.
+
+- [ ] **Step 2: Write repository tests**
+
+Create `tests/repositories/test_agent_conversation_repo.py`:
+
+```python
+import pytest
+
+from src.models.agent_conversation import (
+    AgentConversation,
+    AgentConversationMemory,
+    AgentConversationMessage,
+)
+from src.repositories.agent_conversation_repo import AgentConversationRepository
+
+
+@pytest.mark.asyncio
+async def test_repo_lists_only_user_conversations(db_session):
+    repo = AgentConversationRepository(db_session)
+    db_session.add_all(
+        [
+            AgentConversation(conversation_id="conv-user", user_id="user-1", title="CNN review"),
+            AgentConversation(conversation_id="conv-other", user_id="user-2", title="Other"),
+        ]
+    )
+    await db_session.commit()
+
+    rows = await repo.list_agent_conversations("user-1")
+
+    assert [row.conversation_id for row in rows] == ["conv-user"]
+
+
+@pytest.mark.asyncio
+async def test_repo_rejects_wrong_user_message_access(db_session):
+    repo = AgentConversationRepository(db_session)
+    db_session.add(AgentConversation(conversation_id="conv-1", user_id="user-1", title="Owned"))
+    await db_session.commit()
+
+    with pytest.raises(ValueError, match="conversation_not_found"):
+        await repo.get_agent_conversation_messages("user-2", "conv-1")
+
+
+@pytest.mark.asyncio
+async def test_repo_returns_messages_and_memory_for_owner(db_session):
+    repo = AgentConversationRepository(db_session)
+    db_session.add(AgentConversation(conversation_id="conv-1", user_id="user-1", title="Owned"))
+    db_session.add(
+        AgentConversationMessage(
+            message_id="msg-1",
+            conversation_id="conv-1",
+            user_id="user-1",
+            role="assistant",
+            markdown="Review CNN basics here.",
+            citations_json=[{"canonicalUnitId": "unit-cnn"}],
+            actions_json=[{"type": "open_unit", "label": "Open"}],
+        )
+    )
+    db_session.add(
+        AgentConversationMemory(
+            conversation_id="conv-1",
+            user_id="user-1",
+            summary_status="fresh",
+            summary_json={"selfReportedKnowledge": ["CNN"]},
+        )
+    )
+    await db_session.commit()
+
+    messages = await repo.get_agent_conversation_messages("user-1", "conv-1")
+    memory = await repo.get_agent_conversation_memory("user-1", "conv-1")
+
+    assert messages[0].message_id == "msg-1"
+    assert memory.summary_json["selfReportedKnowledge"] == ["CNN"]
+```
+
+- [ ] **Step 3: Implement repository**
+
+Create `src/repositories/agent_conversation_repo.py`:
+
+```python
+from __future__ import annotations
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.models.agent_conversation import (
+    AgentConversation,
+    AgentConversationMemory,
+    AgentConversationMessage,
+)
+
+
+class AgentConversationRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def _get_owned_conversation(self, user_id: str, conversation_id: str) -> AgentConversation:
+        conversation = await self.session.scalar(
+            select(AgentConversation).where(
+                AgentConversation.conversation_id == conversation_id,
+                AgentConversation.user_id == user_id,
+            )
+        )
+        if conversation is None:
+            raise ValueError("conversation_not_found")
+        return conversation
+
+    async def list_agent_conversations(self, user_id: str) -> list[AgentConversation]:
+        result = await self.session.scalars(
+            select(AgentConversation)
+            .where(AgentConversation.user_id == user_id)
+            .order_by(AgentConversation.updated_at.desc())
+            .limit(50)
+        )
+        return list(result)
+
+    async def create_agent_conversation(self, user_id: str) -> AgentConversation:
+        conversation = AgentConversation(user_id=user_id, title="New chat", preview="", message_count=0)
+        self.session.add(conversation)
+        await self.session.flush()
+        await self.session.refresh(conversation)
+        return conversation
+
+    async def get_agent_conversation_messages(
+        self,
+        user_id: str,
+        conversation_id: str,
+    ) -> list[AgentConversationMessage]:
+        await self._get_owned_conversation(user_id, conversation_id)
+        result = await self.session.scalars(
+            select(AgentConversationMessage)
+            .where(
+                AgentConversationMessage.conversation_id == conversation_id,
+                AgentConversationMessage.user_id == user_id,
+            )
+            .order_by(AgentConversationMessage.created_at.asc())
+        )
+        return list(result)
+
+    async def get_agent_conversation_memory(
+        self,
+        user_id: str,
+        conversation_id: str,
+    ) -> AgentConversationMemory | None:
+        await self._get_owned_conversation(user_id, conversation_id)
+        return await self.session.scalar(
+            select(AgentConversationMemory).where(
+                AgentConversationMemory.conversation_id == conversation_id,
+                AgentConversationMemory.user_id == user_id,
+            )
+        )
+```
+
+- [ ] **Step 4: Write service tests**
 
 Create `tests/services/test_agent_conversation_service.py`:
 
@@ -2636,7 +2895,7 @@ async def test_memory_is_loaded_only_for_same_conversation():
             summary_status="fresh",
             recent_message_window=10,
             last_updated_at="2026-04-30T09:05:00Z",
-            summary={"selfReportedKnowledge": ["CNN basics"]},
+            summary_json={"selfReportedKnowledge": ["CNN basics"]},
         )
 
     repo.get_agent_conversation_memory = get_memory
@@ -2647,16 +2906,50 @@ async def test_memory_is_loaded_only_for_same_conversation():
     )
 
     assert memory.summary["selfReportedKnowledge"] == ["CNN basics"]
+
+
+@pytest.mark.asyncio
+async def test_messages_are_replayed_with_citations_and_actions():
+    repo = SimpleNamespace()
+
+    async def get_messages(user_id, conversation_id):
+        assert user_id == "user-1"
+        assert conversation_id == "conv-1"
+        return [
+            SimpleNamespace(
+                message_id="msg-1",
+                role="assistant",
+                markdown="Review CNN basics.",
+                created_at="2026-04-30T09:06:00Z",
+                citations_json=[{"canonicalUnitId": "unit-cnn", "title": "CNN basics"}],
+                actions_json=[{"type": "open_unit", "label": "Open unit"}],
+            )
+        ]
+
+    repo.get_agent_conversation_messages = get_messages
+
+    messages = await AgentConversationService(repo).get_messages(
+        user_id="user-1",
+        conversation_id="conv-1",
+    )
+
+    assert messages[0].message_id == "msg-1"
+    assert messages[0].citations[0]["canonicalUnitId"] == "unit-cnn"
+    assert messages[0].actions[0].type == "open_unit"
 ```
 
-- [ ] **Step 2: Implement service contract**
+- [ ] **Step 5: Implement service contract**
 
 Create `src/services/agent_conversation_service.py`:
 
 ```python
 from __future__ import annotations
 
-from src.schemas.agent import AgentConversationMemory, AgentConversationSummary
+from src.schemas.agent import (
+    AgentConversationMemory,
+    AgentConversationMessage,
+    AgentConversationSummary,
+)
 
 
 class AgentConversationService:
@@ -2701,33 +2994,169 @@ class AgentConversationService:
             summaryStatus=row.summary_status,
             recentMessageWindow=row.recent_message_window,
             lastUpdatedAt=row.last_updated_at,
-            summary=row.summary or {},
+            summary=row.summary_json or {},
         )
+
+    async def get_messages(self, *, user_id: str, conversation_id: str) -> list[AgentConversationMessage]:
+        rows = await self.repo.get_agent_conversation_messages(user_id, conversation_id)
+        return [
+            AgentConversationMessage(
+                messageId=row.message_id,
+                role=row.role,
+                markdown=row.markdown,
+                createdAt=row.created_at,
+                citations=row.citations_json or [],
+                actions=row.actions_json or [],
+            )
+            for row in rows
+        ]
 ```
 
-- [ ] **Step 3: Add router contracts**
+- [ ] **Step 6: Add route contract tests**
+
+Append to `tests/contract/test_agent_routes.py`:
+
+```python
+from types import SimpleNamespace
+
+import pytest
+
+from src.api.app import app
+from src.dependencies.auth import get_current_user
+
+
+@pytest.fixture
+def agent_auth_user():
+    async def override_user():
+        return SimpleNamespace(id="user-1")
+
+    app.dependency_overrides[get_current_user] = override_user
+    yield
+    app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_agent_conversations_list_is_authenticated_and_user_scoped(db_client, agent_auth_user):
+    response = await db_client.get("/api/agent/conversations")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert isinstance(body, list)
+    assert all("category" not in item for item in body)
+
+
+@pytest.mark.asyncio
+async def test_agent_conversations_create_returns_empty_new_session(db_client, agent_auth_user):
+    response = await db_client.post("/api/agent/conversations")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["title"] == "New chat"
+    assert body["messageCount"] == 0
+
+
+@pytest.mark.asyncio
+async def test_agent_conversation_messages_404_for_missing_or_wrong_user(db_client, agent_auth_user):
+    created = await db_client.post("/api/agent/conversations")
+    conversation_id = created.json()["conversationId"]
+
+    async def override_other_user():
+        return SimpleNamespace(id="user-2")
+
+    app.dependency_overrides[get_current_user] = override_other_user
+    response = await db_client.get(f"/api/agent/conversations/{conversation_id}")
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_agent_conversation_memory_returns_empty_for_new_session(db_client, agent_auth_user):
+    created = await db_client.post("/api/agent/conversations")
+    conversation_id = created.json()["conversationId"]
+    response = await db_client.get(f"/api/agent/conversations/{conversation_id}/memory")
+
+    assert response.status_code == 200
+    assert response.json()["summaryStatus"] == "empty"
+```
+
+- [ ] **Step 7: Add router contracts**
 
 Add endpoints to `src/routers/agent.py`:
 
 ```python
+from fastapi import Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.database import get_async_db
+from src.dependencies.auth import get_current_user
+from src.models.user import User
+from src.repositories.agent_conversation_repo import AgentConversationRepository
+from src.schemas.agent import (
+    AgentConversationMemory,
+    AgentConversationMessage,
+    AgentConversationSummary,
+)
+from src.services.agent_conversation_service import AgentConversationService
+
+
+def _agent_conversation_service(db: AsyncSession) -> AgentConversationService:
+    return AgentConversationService(AgentConversationRepository(db))
+
+
+def _conversation_not_found(exc: ValueError) -> HTTPException:
+    if str(exc) == "conversation_not_found":
+        return HTTPException(status_code=404, detail="conversation_not_found")
+    return HTTPException(status_code=400, detail=str(exc))
+
+
 @agent_router.get("/conversations", response_model=list[AgentConversationSummary])
-async def agent_list_conversations(...):
-    ...
+async def agent_list_conversations(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+):
+    service = _agent_conversation_service(db)
+    return await service.list_conversations(user_id=str(current_user.id))
 
 
 @agent_router.post("/conversations", response_model=AgentConversationSummary)
-async def agent_create_conversation(...):
-    ...
+async def agent_create_conversation(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+):
+    service = _agent_conversation_service(db)
+    return await service.create_conversation(user_id=str(current_user.id))
 
 
 @agent_router.get("/conversations/{conversation_id}", response_model=list[AgentConversationMessage])
-async def agent_get_conversation_messages(...):
-    ...
+async def agent_get_conversation_messages(
+    conversation_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+):
+    service = _agent_conversation_service(db)
+    try:
+        return await service.get_messages(
+            user_id=str(current_user.id),
+            conversation_id=conversation_id,
+        )
+    except ValueError as exc:
+        raise _conversation_not_found(exc)
 
 
 @agent_router.get("/conversations/{conversation_id}/memory", response_model=AgentConversationMemory)
-async def agent_get_conversation_memory(...):
-    ...
+async def agent_get_conversation_memory(
+    conversation_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+):
+    service = _agent_conversation_service(db)
+    try:
+        return await service.get_memory(
+            user_id=str(current_user.id),
+            conversation_id=conversation_id,
+        )
+    except ValueError as exc:
+        raise _conversation_not_found(exc)
 ```
 
 Rules:
@@ -2738,10 +3167,10 @@ Rules:
 - Conversation messages persist structured citations/actions for replay.
 - Do not implement persistent history as frontend-only `localStorage`; that would break multi-device sessions and reviewer API tests.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add src/schemas/agent.py src/services/agent_conversation_service.py src/routers/agent.py tests/services/test_agent_conversation_service.py tests/contract/test_agent_routes.py
+git add src/models/agent_conversation.py src/repositories/agent_conversation_repo.py src/schemas/agent.py src/services/agent_conversation_service.py src/routers/agent.py tests/repositories/test_agent_conversation_repo.py tests/services/test_agent_conversation_service.py tests/contract/test_agent_routes.py
 git commit -m "feat: add agent conversation session contracts"
 ```
 
@@ -2781,6 +3210,9 @@ def test_extract_requirement_target_path_from_message():
     assert extract_requirement_target_path("Which DL prerequisites do I need for NLP?") == "nlp"
     assert extract_requirement_target_path("Which DL parts are required for computer vision?") == "computer_vision"
     assert extract_requirement_target_path("What should I learn before Vision Transformers?") == "computer_vision"
+    assert extract_requirement_target_path("What should I learn before ViT?") == "computer_vision"
+    assert extract_requirement_target_path("Which prerequisites do I need for CV?") == "computer_vision"
+    assert extract_requirement_target_path("Does activity recognition require DL?") is None
     assert extract_requirement_target_path("Which prerequisites do I still need?") is None
 
 
@@ -2995,6 +3427,7 @@ Create `src/services/agent_chat_service.py`:
 ```python
 from __future__ import annotations
 
+import re
 from uuid import uuid4
 
 from src.schemas.agent import (
@@ -3069,11 +3502,25 @@ def classify_agent_intent(message: str, explicit_intent: AgentIntent | None = No
     return "general_course_question"
 
 
+def _has_any_phrase(normalized: str, phrases: tuple[str, ...]) -> bool:
+    return any(phrase in normalized for phrase in phrases)
+
+
+def _has_any_token(normalized: str, tokens: tuple[str, ...]) -> bool:
+    return any(re.search(rf"\b{re.escape(token)}\b", normalized) for token in tokens)
+
+
 def extract_requirement_target_path(message: str, route_context=None) -> str | None:
     normalized = message.lower()
-    if any(term in normalized for term in ("vision transformer", "vit", "computer vision", "cs231n", "cnn", "image")):
+    if _has_any_phrase(
+        normalized,
+        ("vision transformer", "computer vision", "cs231n", "cnn", "image"),
+    ) or _has_any_token(normalized, ("vit", "cv")):
         return "computer_vision"
-    if any(term in normalized for term in ("nlp", "natural language", "cs224n", "word vector", "transformer")):
+    if _has_any_phrase(
+        normalized,
+        ("natural language", "cs224n", "word vector", "transformer"),
+    ) or _has_any_token(normalized, ("nlp",)):
         return "nlp"
     if route_context and getattr(route_context, "course_slug", None):
         course_slug = str(route_context.course_slug).lower()
