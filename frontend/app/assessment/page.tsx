@@ -40,10 +40,10 @@ type Phase = "loading" | "active" | "submitting" | "error";
 const OPTIONS: SelectedAnswer[] = ["A", "B", "C", "D"];
 
 const BLOOM_BADGE: Record<string, { label: string; color: string }> = {
-  remember: { label: "Nhớ", color: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300" },
-  understand: { label: "Hiểu", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" },
-  apply: { label: "Áp dụng", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" },
-  analyze: { label: "Phân tích", color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300" },
+  remember: { label: "Remember", color: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300" },
+  understand: { label: "Understand", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" },
+  apply: { label: "Apply", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" },
+  analyze: { label: "Analyze", color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300" },
 };
 
 // ---------------------------------------------------------------------------
@@ -102,7 +102,7 @@ function AssessmentPageInner() {
         const { canonicalUnitIds, unitNameMap, assessmentDepth } = readPendingCanonicalAssessment();
         if (canonicalUnitIds.length === 0) {
           if (!cancelled) {
-            setErrorMsg("Không tìm thấy learning units cho assessment. Hãy quay lại onboarding.");
+            setErrorMsg("No learning units were found for this assessment. Please return to onboarding.");
             setPhase("error");
           }
           return;
@@ -127,8 +127,8 @@ function AssessmentPageInner() {
             typeof detail === "string"
               ? detail
               : Array.isArray(detail)
-              ? (detail as { msg?: string }[])[0]?.msg ?? "Dữ liệu không hợp lệ."
-              : "Không thể bắt đầu assessment. Vui lòng thử lại.";
+              ? (detail as { msg?: string }[])[0]?.msg ?? "Invalid data."
+              : "Unable to start the assessment. Please try again.";
           setErrorMsg(msg);
           setPhase("error");
         }
@@ -219,7 +219,7 @@ function AssessmentPageInner() {
       );
 
     if (answerList.length === 0) {
-      setErrorMsg("Bạn chưa trả lời câu nào. Vui lòng trả lời ít nhất 1 câu.");
+      setErrorMsg("You have not answered any questions yet. Please answer at least one.");
       setPhase("active");
       return;
     }
@@ -237,7 +237,7 @@ function AssessmentPageInner() {
       const detail = (e as { response?: { data?: { detail?: string } } })
         ?.response?.data?.detail;
       setErrorMsg(
-        typeof detail === "string" ? detail : "Nộp bài thất bại. Vui lòng thử lại."
+        typeof detail === "string" ? detail : "Submission failed. Please try again."
       );
       setPhase("active");
     }
@@ -285,7 +285,7 @@ function AssessmentPageInner() {
         <div className="flex flex-col items-center gap-4">
           <LoadingSpinner size="lg" />
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Đang chuẩn bị câu hỏi…
+            Preparing your questions...
           </p>
         </div>
       </div>
@@ -298,10 +298,10 @@ function AssessmentPageInner() {
         <div className="card max-w-md w-full text-center space-y-4">
           <p className="text-4xl">😕</p>
           <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-            {errorMsg ?? "Đã xảy ra lỗi"}
+            {errorMsg ?? "Something went wrong"}
           </p>
           <Button onClick={() => router.push("/dashboard")} variant="secondary">
-            Về Dashboard
+            Back to Dashboard
           </Button>
         </div>
       </div>
@@ -341,7 +341,7 @@ function AssessmentPageInner() {
             <Brain className="h-3.5 w-3.5 text-white" />
           </div>
           <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-            Câu hỏi
+            Questions
           </span>
           <span
             className="ml-auto text-xs font-medium tabular-nums"
@@ -365,7 +365,7 @@ function AssessmentPageInner() {
                 <button
                   key={qKey}
                   onClick={() => jumpTo(idx)}
-                  title={`Câu ${idx + 1}${isQFlagged ? " · Đánh dấu review" : ""}`}
+                  title={`Question ${idx + 1}${isQFlagged ? " · Marked for review" : ""}`}
                   className={cn(
                     "relative flex h-9 w-full items-center justify-center rounded-lg text-xs font-bold transition-all duration-150",
                     isCur
@@ -400,19 +400,19 @@ function AssessmentPageInner() {
         >
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded bg-primary-600 shrink-0" />
-            <span>Đang làm</span>
+            <span>Current</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded bg-emerald-100 border border-emerald-300 shrink-0" />
-            <span>Đã trả lời</span>
+            <span>Answered</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded bg-amber-100 border border-amber-300 shrink-0" />
-            <span>Đã bỏ qua</span>
+            <span>Skipped</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-yellow-400 shrink-0 ml-0.5" />
-            <span>Đánh dấu review</span>
+            <span>Marked for review</span>
           </div>
         </div>
       </aside>
@@ -441,7 +441,7 @@ function AssessmentPageInner() {
                   {learningUnitName}
                 </span>
                 <span className="shrink-0 ml-2">
-                  Câu {currentIdx + 1} / {questions.length}
+                  Question {currentIdx + 1} / {questions.length}
                 </span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
@@ -501,7 +501,7 @@ function AssessmentPageInner() {
                 {/* Bookmark / flag button */}
                 <button
                   onClick={() => questionKey && toggleFlag(questionKey)}
-                  title={isFlagged ? "Bỏ đánh dấu review" : "Đánh dấu để review lại"}
+                  title={isFlagged ? "Remove review mark" : "Mark for review"}
                   className={cn(
                     "ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all duration-150",
                     isFlagged
@@ -516,7 +516,7 @@ function AssessmentPageInner() {
                     <Bookmark className="h-3.5 w-3.5" />
                   )}
                   <span className="hidden sm:inline">
-                    {isFlagged ? "Đã đánh dấu" : "Đánh dấu"}
+                    {isFlagged ? "Marked" : "Mark"}
                   </span>
                 </button>
               </div>
@@ -529,7 +529,7 @@ function AssessmentPageInner() {
             </div>
 
             {/* Options */}
-            <div className="space-y-2.5" role="radiogroup" aria-label="Lựa chọn">
+            <div className="space-y-2.5" role="radiogroup" aria-label="Answer choices">
               {OPTIONS.map((opt) => {
                 const isSelected = selectedOption === opt;
                 return (
@@ -589,12 +589,12 @@ function AssessmentPageInner() {
               onClick={skip}
               leftIcon={<SkipForward className="h-3.5 w-3.5" />}
             >
-              Bỏ qua
+              Skip
             </Button>
 
             {/* Keyboard hint */}
             <p className="hidden text-xs sm:block" style={{ color: "var(--text-muted)" }}>
-              Nhấn{" "}
+              Press{" "}
               <kbd className="rounded border px-1 py-0.5 font-mono text-xs" style={{ borderColor: "var(--border)" }}>
                 A
               </kbd>
@@ -602,11 +602,11 @@ function AssessmentPageInner() {
               <kbd className="rounded border px-1 py-0.5 font-mono text-xs" style={{ borderColor: "var(--border)" }}>
                 D
               </kbd>{" "}
-              để chọn ·{" "}
+              to choose ·{" "}
               <kbd className="rounded border px-1 py-0.5 font-mono text-xs" style={{ borderColor: "var(--border)" }}>
                 Enter
               </kbd>{" "}
-              để tiếp
+              to continue
             </p>
 
             {/* Next / Submit */}
@@ -619,7 +619,7 @@ function AssessmentPageInner() {
                 phase !== "submitting" ? <ChevronRight className="h-4 w-4" /> : undefined
               }
             >
-              {isLastQuestion ? "Nộp bài" : "Câu tiếp"}
+              {isLastQuestion ? "Submit assessment" : "Next question"}
             </Button>
           </div>
         </main>
