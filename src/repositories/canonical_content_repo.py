@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.canonical import (
@@ -77,6 +77,14 @@ class CanonicalContentRepository:
         )
         return list(result.scalars().all())
 
+    async def get_unit_kp_rows_by_kp_ids(self, kp_ids: list[str]) -> list[UnitKPMap]:
+        if not kp_ids:
+            return []
+        result = await self.session.execute(
+            select(UnitKPMap).where(UnitKPMap.kp_id.in_(kp_ids))
+        )
+        return list(result.scalars().all())
+
     async def get_canonical_units_by_ids(self, canonical_unit_ids: list[str]) -> dict[str, CanonicalUnit]:
         if not canonical_unit_ids:
             return {}
@@ -134,3 +142,79 @@ class CanonicalContentRepository:
             )
         )
         return list(result.scalars().all())
+
+    async def search_canonical_units(
+        self,
+        query_terms: list[str],
+        course_ids: list[str],
+        limit: int = 20,
+        include_reference: bool = False,
+    ) -> list[CanonicalUnit]:
+        if not query_terms or not course_ids:
+            return []
+
+        normalized_courses = [course_id.upper() for course_id in course_ids]
+        like_filters = []
+        for term in query_terms:
+            pattern = f"%{term.lower()}%"
+            like_filters.append(func.lower(CanonicalUnit.unit_name).like(pattern))
+            like_filters.append(func.lower(func.coalesce(CanonicalUnit.summary, "")).like(pattern))
+            like_filters.append(func.lower(func.coalesce(CanonicalUnit.description, "")).like(pattern))
+            like_filters.append(func.lower(func.coalesce(CanonicalUnit.lecture_title, "")).like(pattern))
+
+        content_filters = [
+            CanonicalUnit.active.is_not(False),
+            CanonicalUnit.course_id.in_(normalized_courses),
+        ]
+        if not include_reference:
+            content_filters.append(
+                or_(
+                    CanonicalUnit.section_flags.is_(None),
+                    and_(
+                        ~CanonicalUnit.section_flags.contains(["logistics"]),
+                        ~CanonicalUnit.section_flags.contains(["admin"]),
+                    ),
+                )
+            )
+
+        result = await self.session.execute(
+            select(CanonicalUnit)
+            .where(*content_filters, or_(*like_filters))
+            .order_by(CanonicalUnit.course_id, CanonicalUnit.lecture_order, CanonicalUnit.ordering_index)
+            .limit(limit)
+        )
+        return list(result.scalars().all())
+
+    async def get_learning_units_by_canonical_ids(
+        self,
+        canonical_unit_ids: list[str],
+    ) -> dict[str, tuple[LearningUnit, Course, CourseSection]]:
+        if not canonical_unit_ids:
+            return {}
+        result = await self.session.execute(
+            select(LearningUnit, Course, CourseSection)
+            .join(Course, LearningUnit.course_id == Course.id)
+            .join(CourseSection, LearningUnit.section_id == CourseSection.id)
+            .where(LearningUnit.canonical_unit_id.in_(canonical_unit_ids))
+        )
+        return {
+            unit.canonical_unit_id: (unit, course, section)
+            for unit, course, section in result.all()
+            if unit.canonical_unit_id
+        }
+
+    async def get_mastery_lcb_by_kp_ids(self, user_id, kp_ids: list[str]) -> dict[str, float]:
+        if not kp_ids:
+            return {}
+        from src.models.learning import LearnerMasteryKP
+
+        result = await self.session.execute(
+            select(LearnerMasteryKP).where(
+                LearnerMasteryKP.user_id == user_id,
+                LearnerMasteryKP.kp_id.in_(kp_ids),
+            )
+        )
+        mastery = {}
+        for row in result.scalars().all():
+            mastery[row.kp_id] = max(0.0, float(row.mastery_mean_cached) - float(row.theta_sigma) * 0.5)
+        return mastery
