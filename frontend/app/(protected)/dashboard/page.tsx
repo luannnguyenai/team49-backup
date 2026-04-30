@@ -80,23 +80,23 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
           </p>
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-text-muted">
-          <span className="flex items-center gap-1">
-            <Play className="h-3 w-3" />
-            {course.status === "ready" ? "Ready to learn" : "In progress"}
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {model.statusDetail}
-          </span>
-        </div>
-
-        <div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-page">
-            <div className="h-full w-0 rounded-full bg-primary-600" />
+        {course.status !== "ready" ? (
+          <div className="flex items-center gap-4 text-xs text-text-muted">
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {model.statusDetail}
+            </span>
           </div>
-          <p className="mt-1 text-xs text-text-muted">Progress: 0%</p>
-        </div>
+        ) : null}
+
+        {course.status === "ready" ? (
+          <div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-page">
+              <div className="h-full w-0 rounded-full bg-primary-600" />
+            </div>
+            <p className="mt-1 text-xs text-text-muted">Progress: 0%</p>
+          </div>
+        ) : null}
 
         <Link
           href={model.href}
