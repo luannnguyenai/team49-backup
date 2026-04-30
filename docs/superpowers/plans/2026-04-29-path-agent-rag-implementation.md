@@ -46,6 +46,7 @@ Create:
 - `src/services/agent_requirement_service.py` — graph-based path prerequisite/gap service.
 - `src/services/agent_unit_context_service.py` — canonical unit context/KP/quiz/timestamp expansion.
 - `src/services/agent_tutor_memory_service.py` — last-five current-lecture Lecture AI Tutor Q&A context provider.
+- `src/services/agent_conversation_service.py` — authenticated conversation history and same-session memory summary provider.
 - `src/services/agent_chat_service.py` — orchestration endpoint logic: intent, tool calls, citations, actions, fallback, trace.
 - `src/services/agent_assessment_workflow.py` — LangGraph workflow for assessment proposal, user approval/reduction, and assessment handoff state.
 - `frontend/app/agent/page.tsx` — ChatGPT-like AI Assistant surface.
@@ -56,6 +57,7 @@ Create:
 - `tests/services/test_agent_requirement_service.py`
 - `tests/services/test_agent_unit_context_service.py`
 - `tests/services/test_agent_tutor_memory_service.py`
+- `tests/services/test_agent_conversation_service.py`
 - `tests/services/test_agent_chat_service.py`
 - `tests/services/test_agent_assessment_workflow.py`
 - `tests/contract/test_agent_routes.py`
@@ -186,14 +188,30 @@ def test_assessment_workflow_response_exposes_interrupt_payload():
         status="waiting_user_approval",
         interrupt={
             "type": "assessment_proposal",
-            "questionBudget": 30,
+            "title": "CNN skip verification",
+            "purpose": "Verify whether selected CNN units can be skipped.",
+            "estimatedQuestions": 58,
+            "estimatedTimeMinutes": 45,
+            "difficultyMix": {"easy": 10, "medium": 24, "hard": 18, "application": 6},
             "canonicalUnitIds": ["unit-a"],
+            "scope": [
+                {"label": "CNN image classification", "unitCount": 7, "reason": "Core CV foundation."}
+            ],
+            "reductionOptions": [
+                {
+                    "id": "core-only",
+                    "label": "Focus only on core topics",
+                    "effect": "Removes advanced/application-heavy questions.",
+                    "estimatedQuestionsAfterReduction": 38,
+                }
+            ],
         },
         actions=[],
     )
 
     assert response.status == "waiting_user_approval"
     assert response.interrupt["type"] == "assessment_proposal"
+    assert response.interrupt["estimatedQuestions"] == 58
 
 
 def test_assessment_workflow_request_supports_resume_decision():
@@ -343,9 +361,46 @@ class AgentCitation(BaseModel):
     source: Literal["summary", "key_point", "transcript", "planner", "mastery"]
 
 
+class AssessmentProposalScopeItem(BaseModel):
+    label: str
+    unit_count: int = Field(alias="unitCount")
+    reason: str
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AssessmentDifficultyMix(BaseModel):
+    easy: int = 0
+    medium: int = 0
+    hard: int = 0
+    application: int = 0
+
+
+class AssessmentReductionOption(BaseModel):
+    id: str
+    label: str
+    effect: str
+    estimated_questions_after_reduction: int = Field(alias="estimatedQuestionsAfterReduction")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AssessmentProposal(BaseModel):
+    title: str
+    purpose: str
+    estimated_questions: int = Field(alias="estimatedQuestions", ge=1, le=70)
+    estimated_time_minutes: int = Field(alias="estimatedTimeMinutes", ge=1)
+    scope: list[AssessmentProposalScopeItem] = Field(default_factory=list)
+    difficulty_mix: AssessmentDifficultyMix = Field(alias="difficultyMix")
+    reduction_options: list[AssessmentReductionOption] = Field(default_factory=list, alias="reductionOptions")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class AgentAction(BaseModel):
     type: Literal[
         "open_unit",
+        "start_assessment_workflow",
         "start_assessment",
         "request_replan_dry_run",
         "continue_assessment_workflow",
@@ -370,6 +425,7 @@ class AgentAction(BaseModel):
     source_canonical_unit_ids: list[str] = Field(
         default_factory=list, alias="sourceCanonicalUnitIds"
     )
+    proposal: AssessmentProposal | None = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -407,7 +463,7 @@ class AgentActionResponse(BaseModel):
 
 class AssessmentWorkflowDecision(BaseModel):
     action: Literal["approve", "reduce", "reject"]
-    question_budget: int | None = Field(default=None, ge=1, le=50, alias="questionBudget")
+    question_budget: int | None = Field(default=None, ge=1, le=70, alias="questionBudget")
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -419,7 +475,7 @@ class AgentAssessmentWorkflowRequest(BaseModel):
     candidate_canonical_unit_ids: list[str] = Field(
         default_factory=list, alias="candidateCanonicalUnitIds"
     )
-    question_budget: int = Field(default=30, ge=1, le=50, alias="questionBudget")
+    question_budget: int = Field(default=30, ge=1, le=70, alias="questionBudget")
     phase: AssessmentPhase = "skip_verification"
     decision: AssessmentWorkflowDecision | None = None
     assessment_session_id: str | None = Field(default=None, alias="assessmentSessionId")
@@ -452,6 +508,37 @@ class AgentChatResponse(BaseModel):
     actions: list[AgentAction] = Field(default_factory=list)
     fallback: AgentFallback | None = None
     trace: RetrievalTrace | None = None
+
+
+class AgentConversationSummary(BaseModel):
+    conversation_id: str = Field(alias="conversationId")
+    title: str
+    preview: str
+    updated_at: str = Field(alias="updatedAt")
+    message_count: int = Field(alias="messageCount")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentConversationMemory(BaseModel):
+    conversation_id: str = Field(alias="conversationId")
+    summary_status: Literal["empty", "fresh", "stale", "updating"] = Field(alias="summaryStatus")
+    recent_message_window: int = Field(alias="recentMessageWindow")
+    last_updated_at: str | None = Field(default=None, alias="lastUpdatedAt")
+    summary: dict = Field(default_factory=dict)
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentConversationMessage(BaseModel):
+    message_id: str = Field(alias="messageId")
+    role: Literal["user", "assistant"]
+    markdown: str
+    created_at: str = Field(alias="createdAt")
+    citations: list[AgentCitation] = Field(default_factory=list)
+    actions: list[AgentAction] = Field(default_factory=list)
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class UnitSearchRequest(BaseModel):
@@ -2458,6 +2545,208 @@ git commit -m "feat: add agent tutor memory context provider"
 
 ---
 
+### Task 8.75: Agent Conversation Sessions And Memory
+
+**Files:**
+- Create: `src/services/agent_conversation_service.py`
+- Test: `tests/services/test_agent_conversation_service.py`
+- Modify: `src/schemas/agent.py`
+- Modify: `src/routers/agent.py`
+- Test: `tests/contract/test_agent_routes.py`
+
+This task backs the `/agent` chat-history sidebar and same-session memory UI. It
+does not feed old sessions into new chats. The source of truth is backend
+persistence through repository helpers; frontend local state is only an
+optimistic/rendering cache.
+
+- [ ] **Step 1: Write failing tests**
+
+Create `tests/services/test_agent_conversation_service.py`:
+
+```python
+from types import SimpleNamespace
+
+import pytest
+
+from src.services.agent_conversation_service import AgentConversationService
+
+
+@pytest.mark.asyncio
+async def test_conversation_service_lists_user_scoped_summaries_without_categories():
+    repo = SimpleNamespace()
+
+    async def list_conversations(user_id):
+        assert user_id == "user-1"
+        return [
+            SimpleNamespace(
+                conversation_id="conv-1",
+                title="CNN skip assessment",
+                preview="You asked whether CNN fundamentals can be skipped...",
+                updated_at="2026-04-30T09:04:00Z",
+                message_count=12,
+            )
+        ]
+
+    repo.list_agent_conversations = list_conversations
+
+    conversations = await AgentConversationService(repo).list_conversations(user_id="user-1")
+
+    assert conversations[0].conversation_id == "conv-1"
+    assert not hasattr(conversations[0], "category")
+
+
+@pytest.mark.asyncio
+async def test_new_conversation_starts_with_empty_memory():
+    repo = SimpleNamespace()
+
+    async def create_conversation(user_id):
+        return SimpleNamespace(
+            conversation_id="conv-new",
+            title="New chat",
+            preview="",
+            updated_at="2026-04-30T09:10:00Z",
+            message_count=0,
+        )
+
+    repo.create_agent_conversation = create_conversation
+
+    async def get_memory(user_id, conversation_id):
+        return None
+
+    repo.get_agent_conversation_memory = get_memory
+    service = AgentConversationService(repo)
+
+    conversation = await service.create_conversation(user_id="user-1")
+    memory = await service.get_memory(user_id="user-1", conversation_id=conversation.conversation_id)
+
+    assert conversation.conversation_id == "conv-new"
+    assert memory.summary_status == "empty"
+    assert memory.summary == {}
+
+
+@pytest.mark.asyncio
+async def test_memory_is_loaded_only_for_same_conversation():
+    repo = SimpleNamespace()
+
+    async def get_memory(user_id, conversation_id):
+        assert user_id == "user-1"
+        assert conversation_id == "conv-1"
+        return SimpleNamespace(
+            conversation_id="conv-1",
+            summary_status="fresh",
+            recent_message_window=10,
+            last_updated_at="2026-04-30T09:05:00Z",
+            summary={"selfReportedKnowledge": ["CNN basics"]},
+        )
+
+    repo.get_agent_conversation_memory = get_memory
+
+    memory = await AgentConversationService(repo).get_memory(
+        user_id="user-1",
+        conversation_id="conv-1",
+    )
+
+    assert memory.summary["selfReportedKnowledge"] == ["CNN basics"]
+```
+
+- [ ] **Step 2: Implement service contract**
+
+Create `src/services/agent_conversation_service.py`:
+
+```python
+from __future__ import annotations
+
+from src.schemas.agent import AgentConversationMemory, AgentConversationSummary
+
+
+class AgentConversationService:
+    def __init__(self, repo):
+        self.repo = repo
+
+    async def list_conversations(self, *, user_id: str) -> list[AgentConversationSummary]:
+        rows = await self.repo.list_agent_conversations(user_id)
+        return [
+            AgentConversationSummary(
+                conversationId=row.conversation_id,
+                title=row.title,
+                preview=row.preview,
+                updatedAt=row.updated_at,
+                messageCount=row.message_count,
+            )
+            for row in rows
+        ]
+
+    async def create_conversation(self, *, user_id: str) -> AgentConversationSummary:
+        row = await self.repo.create_agent_conversation(user_id)
+        return AgentConversationSummary(
+            conversationId=row.conversation_id,
+            title=row.title,
+            preview=row.preview,
+            updatedAt=row.updated_at,
+            messageCount=row.message_count,
+        )
+
+    async def get_memory(self, *, user_id: str, conversation_id: str) -> AgentConversationMemory:
+        row = await self.repo.get_agent_conversation_memory(user_id, conversation_id)
+        if row is None:
+            return AgentConversationMemory(
+                conversationId=conversation_id,
+                summaryStatus="empty",
+                recentMessageWindow=10,
+                lastUpdatedAt=None,
+                summary={},
+            )
+        return AgentConversationMemory(
+            conversationId=row.conversation_id,
+            summaryStatus=row.summary_status,
+            recentMessageWindow=row.recent_message_window,
+            lastUpdatedAt=row.last_updated_at,
+            summary=row.summary or {},
+        )
+```
+
+- [ ] **Step 3: Add router contracts**
+
+Add endpoints to `src/routers/agent.py`:
+
+```python
+@agent_router.get("/conversations", response_model=list[AgentConversationSummary])
+async def agent_list_conversations(...):
+    ...
+
+
+@agent_router.post("/conversations", response_model=AgentConversationSummary)
+async def agent_create_conversation(...):
+    ...
+
+
+@agent_router.get("/conversations/{conversation_id}", response_model=list[AgentConversationMessage])
+async def agent_get_conversation_messages(...):
+    ...
+
+
+@agent_router.get("/conversations/{conversation_id}/memory", response_model=AgentConversationMemory)
+async def agent_get_conversation_memory(...):
+    ...
+```
+
+Rules:
+
+- All endpoints are authenticated and user-scoped.
+- The list response has no category labels.
+- New conversations return empty memory until same-session turns are summarized.
+- Conversation messages persist structured citations/actions for replay.
+- Do not implement persistent history as frontend-only `localStorage`; that would break multi-device sessions and reviewer API tests.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/schemas/agent.py src/services/agent_conversation_service.py src/routers/agent.py tests/services/test_agent_conversation_service.py tests/contract/test_agent_routes.py
+git commit -m "feat: add agent conversation session contracts"
+```
+
+---
+
 ### Task 9: Agent Chat Orchestrator
 
 **Files:**
@@ -2491,6 +2780,7 @@ def test_classify_agent_intent_uses_intent_table_not_single_phrase_match():
 def test_extract_requirement_target_path_from_message():
     assert extract_requirement_target_path("Which DL prerequisites do I need for NLP?") == "nlp"
     assert extract_requirement_target_path("Which DL parts are required for computer vision?") == "computer_vision"
+    assert extract_requirement_target_path("What should I learn before Vision Transformers?") == "computer_vision"
     assert extract_requirement_target_path("Which prerequisites do I still need?") is None
 
 
@@ -2664,6 +2954,17 @@ async def test_chat_marks_controlled_catalog_answer_outside_current_path():
 async def test_chat_returns_assessment_workflow_action_card_for_skip_request():
     search_service = SimpleNamespace()
     requirement_service = SimpleNamespace()
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                SimpleNamespace(canonical_unit_id="cnn-unit-a"),
+                SimpleNamespace(canonical_unit_id="cnn-unit-b"),
+            ],
+            trace=RetrievalTrace(trace_id="trace-1", ranking_version="unit_search_v1"),
+        )
+
+    search_service.search = search
     service = AgentChatService(search_service, requirement_service)
 
     response = await service.chat(
@@ -2672,9 +2973,9 @@ async def test_chat_returns_assessment_workflow_action_card_for_skip_request():
         is_reviewer=False,
     )
 
-    assert response.actions[0].type == "continue_assessment_workflow"
-    assert response.actions[0].eligible in {True, False}
-    assert "assessment" in response.actions[0].label.lower()
+    assert response.actions[0].type == "start_assessment_workflow"
+    assert response.actions[0].eligible is True
+    assert response.actions[0].canonical_unit_ids == ["cnn-unit-a", "cnn-unit-b"]
 ```
 
 - [ ] **Step 2: Run tests and verify failure**
@@ -2770,10 +3071,10 @@ def classify_agent_intent(message: str, explicit_intent: AgentIntent | None = No
 
 def extract_requirement_target_path(message: str, route_context=None) -> str | None:
     normalized = message.lower()
+    if any(term in normalized for term in ("vision transformer", "vit", "computer vision", "cs231n", "cnn", "image")):
+        return "computer_vision"
     if any(term in normalized for term in ("nlp", "natural language", "cs224n", "word vector", "transformer")):
         return "nlp"
-    if any(term in normalized for term in ("computer vision", "vision", "cv", "cs231n", "cnn", "image")):
-        return "computer_vision"
     if route_context and getattr(route_context, "course_slug", None):
         course_slug = str(route_context.course_slug).lower()
         if course_slug == "cs224n":
@@ -2819,6 +3120,11 @@ class AgentChatService:
     ) -> AgentChatResponse:
         intent = classify_agent_intent(request.message, request.intent)
         if intent == "assess_knowledge":
+            search = await self.search_service.search(
+                UnitSearchRequest(query=request.message, scope="current_path", intent=intent),
+                allowed_course_ids=allowed_course_ids,
+            )
+            candidate_ids = [result.canonical_unit_id for result in search.results[:12]]
             return AgentChatResponse(
                 conversation_id=request.conversation_id or str(uuid4()),
                 message_id=str(uuid4()),
@@ -2832,14 +3138,15 @@ class AgentChatService:
                 citations=[],
                 actions=[
                     AgentAction(
-                        type="continue_assessment_workflow",
-                        label="Start assessment",
-                        canonical_unit_ids=[],
+                        type="start_assessment_workflow",
+                        label="Prepare assessment proposal",
+                        canonical_unit_ids=candidate_ids,
                         default_phase="skip_verification",
-                        eligible=False,
-                        disabledReason="not_implemented",
+                        eligible=bool(candidate_ids),
+                        disabledReason=None if candidate_ids else "no_eligible_questions",
                     )
                 ],
+                trace=self._filter_trace(search.trace, request, is_reviewer),
             )
 
         if intent == "explain_planner_decision":
@@ -3021,8 +3328,9 @@ def test_workflow_starts_with_assessment_proposal_interrupt():
 
     assert response.status == "waiting_user_approval"
     assert response.interrupt["type"] == "assessment_proposal"
-    assert response.interrupt["questionBudget"] == 30
+    assert response.interrupt["estimatedQuestions"] == 30
     assert response.interrupt["canonicalUnitIds"] == ["unit-a", "unit-b"]
+    assert response.interrupt["reductionOptions"][0]["estimatedQuestionsAfterReduction"] < 30
 
 
 def test_workflow_resume_reduce_reissues_smaller_proposal():
@@ -3041,7 +3349,7 @@ def test_workflow_resume_reduce_reissues_smaller_proposal():
     )
 
     assert response.status == "waiting_user_approval"
-    assert response.interrupt["questionBudget"] == 15
+    assert response.interrupt["estimatedQuestions"] == 15
 
 
 def test_workflow_resume_invalid_reduce_budget_rejects_cleanly():
@@ -3202,7 +3510,31 @@ class AgentAssessmentWorkflowService:
             {
                 "type": "assessment_proposal",
                 "canonicalUnitIds": state["candidate_canonical_unit_ids"],
-                "questionBudget": state["question_budget"],
+                "title": "Skip verification assessment",
+                "purpose": "Verify whether selected units can be skipped with evidence.",
+                "estimatedQuestions": state["question_budget"],
+                "estimatedTimeMinutes": max(10, int(state["question_budget"] * 1.5)),
+                "scope": [
+                    {
+                        "label": "Selected candidate units",
+                        "unitCount": len(state["candidate_canonical_unit_ids"]),
+                        "reason": "These units match the learner's self-reported prior knowledge.",
+                    }
+                ],
+                "difficultyMix": {
+                    "easy": max(1, state["question_budget"] // 5),
+                    "medium": max(1, state["question_budget"] // 2),
+                    "hard": max(0, state["question_budget"] // 4),
+                    "application": max(0, state["question_budget"] // 10),
+                },
+                "reductionOptions": [
+                    {
+                        "id": "minimum-evidence",
+                        "label": "Minimum evidence check",
+                        "effect": "Keeps only high-signal questions. Evidence is weaker for borderline skips.",
+                        "estimatedQuestionsAfterReduction": max(10, state["question_budget"] // 2),
+                    }
+                ],
                 "phase": state["phase"],
                 "message": "Approve or reduce the assessment before starting.",
             }
@@ -3903,8 +4235,12 @@ async def test_assessment_workflow_endpoint_returns_proposal_interrupt():
         "status": "waiting_user_approval",
         "interrupt": {
             "type": "assessment_proposal",
-            "questionBudget": 15,
+            "estimatedQuestions": 15,
+            "estimatedTimeMinutes": 23,
             "canonicalUnitIds": ["unit-a"],
+            "scope": [],
+            "difficultyMix": {"easy": 3, "medium": 8, "hard": 4, "application": 0},
+            "reductionOptions": [],
         },
         "actions": [],
         "trace": {"orchestrator": "langgraph"},
@@ -3987,8 +4323,12 @@ async def test_assessment_workflow_resume_maps_reduce_response():
         "status": "waiting_user_approval",
         "interrupt": {
             "type": "assessment_proposal",
-            "questionBudget": 15,
+            "estimatedQuestions": 15,
+            "estimatedTimeMinutes": 23,
             "canonicalUnitIds": ["unit-a"],
+            "scope": [],
+            "difficultyMix": {"easy": 3, "medium": 8, "hard": 4, "application": 0},
+            "reductionOptions": [],
         },
         "actions": [],
         "trace": {"orchestrator": "langgraph"},
@@ -4008,7 +4348,7 @@ async def test_assessment_workflow_resume_maps_reduce_response():
             )
 
     assert response.status_code == 200
-    assert response.json()["interrupt"]["questionBudget"] == 15
+    assert response.json()["interrupt"]["estimatedQuestions"] == 15
 
 
 async def test_assessment_workflow_resume_rejects_start_event():
@@ -4156,7 +4496,7 @@ Tests should assert:
 - Chat-history items show title, preview, and updated time only. Do not render category labels such as `Assessment`, `Path`, `Course`, or `General`.
 - Starting a new chat creates a new conversation UI state and does not hydrate messages or memory summary from previous chat sessions.
 - Agent responses render citations/direct links to `learn_href`.
-- Agent responses render action cards/buttons, including `continue_assessment_workflow` and disabled `start_assessment` states.
+- Agent responses render action cards/buttons, including `start_assessment_workflow`, `continue_assessment_workflow`, and disabled `start_assessment` states.
 - Assessment workflow cards render a proposal/negotiation state with exact question count, scope, difficulty mix, rationale, reduction options, and approval action. They must not render fixed onboarding-style `Quick` / `Balanced` / `Thorough` modes.
 - The right context panel renders session-scoped assistant memory status: recent message window, last summary update, and read-only memory summary. New chats show empty memory.
 - Legacy `/tutor` redirects or aliases to `/agent` according to the migration decision.
@@ -4167,6 +4507,10 @@ Tests should assert:
 Implement a focused chat shell:
 
 - POST messages to `/api/agent/chat`.
+- Load chat history from `GET /api/agent/conversations`.
+- Create a new session with `POST /api/agent/conversations`.
+- Load selected conversation messages from `GET /api/agent/conversations/{conversationId}`.
+- Load selected conversation memory from `GET /api/agent/conversations/{conversationId}/memory`.
 - Render `answer.markdown`.
 - Render `citations` as direct course/lecture/unit links.
 - Render `actions` as buttons/cards below the assistant message.
@@ -4180,6 +4524,8 @@ Implement a focused chat shell:
   - Do not use previous chat-session memory in a new chat.
   - Use latest five current-lecture AI Tutor Q&A turns only when route context points to the current player/lecture.
 - Render assessment proposal cards:
+  - `start_assessment_workflow` calls `POST /api/agent/assessment-workflows` with candidate canonical unit IDs,
+  - `continue_assessment_workflow` renders the returned workflow proposal/interruption,
   - show exact `estimatedQuestions` and estimated time,
   - show unit/KP scope and difficulty mix,
   - show why this many questions are needed,
@@ -4218,7 +4564,7 @@ Implementation tasks are tracked in `docs/superpowers/plans/2026-04-29-path-agen
 Run:
 
 ```bash
-pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_tutor_memory_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_assessment_workflow.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
+pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_tutor_memory_service.py tests/services/test_agent_conversation_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_assessment_workflow.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
 ```
 
 Expected: PASS.
@@ -4263,6 +4609,7 @@ Spec coverage:
 - Runtime navigation data: Task 4, Task 5, Task 6.
 - Unit context and transcript snippets: Task 1, Task 4, Task 8, Task 11.
 - Last-five current-lecture Tutor memory context: Task 8.5 and Task 9.
+- Conversation sessions and same-session memory summaries: Task 8.75 and Task 12.5.
 - Path requirements/prerequisite graph with content/KP policy and real `learner_mastery_kp` mastery overlay: Task 4 and Task 7.
 - Assessment/replan workflow orchestration: Task 1 and Task 10.
 - Assessment/replan action guardrails: Task 1, Task 9, Task 10, Task 12.
