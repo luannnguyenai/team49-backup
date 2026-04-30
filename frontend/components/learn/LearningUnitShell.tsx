@@ -396,9 +396,14 @@ function InlineQuizOverlay({
   const result = session?.result ?? null;
 
   return (
-    <div className="pointer-events-none absolute inset-4 flex items-end justify-end">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex aspect-video items-center justify-center p-4 sm:p-6">
       <div
-        className="pointer-events-auto w-full max-w-md rounded-3xl border p-4 shadow-2xl backdrop-blur"
+        aria-hidden="true"
+        className="absolute inset-0 rounded-t-3xl bg-slate-950/35 backdrop-blur-[2px]"
+        data-testid="inline-quiz-backdrop"
+      />
+      <div
+        className="pointer-events-auto relative z-10 w-full max-w-xl rounded-2xl border p-5 shadow-2xl backdrop-blur"
         style={{
           borderColor: "rgba(255,255,255,0.32)",
           background:
