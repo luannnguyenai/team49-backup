@@ -9,11 +9,11 @@ import {
 import type { PathItemResponse } from "@/types";
 
 describe("learning path status helpers", () => {
-  it("maps every status to Vietnamese labels and icon names", () => {
-    expect(getStatusLabel("pending")).toBe("Chưa học");
-    expect(getStatusLabel("in_progress")).toBe("Đang học");
-    expect(getStatusLabel("completed")).toBe("Hoàn thành");
-    expect(getStatusLabel("skipped")).toBe("Bỏ qua");
+  it("maps every status to English labels and icon names", () => {
+    expect(getStatusLabel("pending")).toBe("Not started");
+    expect(getStatusLabel("in_progress")).toBe("In progress");
+    expect(getStatusLabel("completed")).toBe("Completed");
+    expect(getStatusLabel("skipped")).toBe("Skipped");
     expect(getStatusIconName("pending")).toBe("circle");
     expect(getStatusIconName("in_progress")).toBe("play");
     expect(getStatusIconName("completed")).toBe("check");
