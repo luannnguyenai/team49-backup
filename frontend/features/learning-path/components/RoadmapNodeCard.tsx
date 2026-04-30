@@ -107,7 +107,7 @@ export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectS
       </div>
       {!isTopic && node.isRecommended ? (
         <span className="mt-2 inline-flex rounded-full bg-amber-100 px-2 py-1 text-[11px] font-semibold text-amber-800">
-          Nên học tiếp
+          Recommended next
         </span>
       ) : null}
       {!isTopic && insight ? <PlayerInsightBadge insight={insight} /> : null}
