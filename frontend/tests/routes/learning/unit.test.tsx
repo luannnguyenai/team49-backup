@@ -373,7 +373,7 @@ describe("learning unit page (US3)", () => {
     ).toHaveAttribute("href", "/courses/cs231n");
     expect(screen.getAllByText("Lecture 1: Introduction").length).toBeGreaterThan(0);
     await waitFor(() => {
-      expect(screen.getByText("Bài học")).toBeInTheDocument();
+      expect(screen.getByText("Lessons")).toBeInTheDocument();
       expect(screen.getByText("Lecture 01")).toBeInTheDocument();
       expect(screen.getByText("Lecture 02")).toBeInTheDocument();
       expect(screen.getByLabelText("Lecture 01 completed")).toBeInTheDocument();
@@ -381,7 +381,7 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByText("Key ideas at this moment")).toBeInTheDocument();
       expect(screen.getByText("Neural networks learn layered visual features.")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Ask about this lecture...")).toBeInTheDocument();
-      expect(screen.getByText("Giải thích ý chính của đoạn này dễ hiểu hơn")).toBeInTheDocument();
+      expect(screen.getByText("Explain the main idea of this section in simpler terms")).toBeInTheDocument();
       expect(screen.getByLabelText("Video progress rail")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Hide lessons panel" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Close tutor" })).toBeInTheDocument();
@@ -608,7 +608,7 @@ describe("learning unit page (US3)", () => {
     fireEvent(video!, new Event("durationchange"));
     fireEvent(video!, new Event("timeupdate"));
 
-    expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
   });
 
   it("shows the end-of-video quiz overlay when playback finishes", async () => {
@@ -637,7 +637,7 @@ describe("learning unit page (US3)", () => {
     fireEvent(video!, new Event("durationchange"));
     fireEvent(video!, new Event("timeupdate"));
 
-    const dismissButton = await screen.findByRole("button", { name: "Ẩn tạm" });
+    const dismissButton = await screen.findByRole("button", { name: "Dismiss for now" });
     fireEvent.click(dismissButton);
 
     Object.defineProperty(video, "currentTime", {
@@ -649,7 +649,7 @@ describe("learning unit page (US3)", () => {
     fireEvent(video!, new Event("ended"));
 
     expect(await screen.findAllByText("End-of-video quiz")).toHaveLength(2);
-    expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
   });
 
   it("does not show AI Tutor toggle when tutor is disabled", async () => {
@@ -698,7 +698,7 @@ describe("learning unit page (US3)", () => {
     render(<TopNav />);
 
     const brand = screen.getByRole("link", { name: "AI Learning Hub" });
-    const search = screen.getByLabelText("Tìm kiếm khóa học");
+    const search = screen.getByLabelText("Search courses");
     const tutorLink = screen.getByRole("link", { name: "AI Tutor" });
 
     const headerRow = brand.closest("header")?.firstElementChild;
@@ -727,7 +727,7 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    fireEvent.click(screen.getByRole("button", { name: /đăng xuất/i }));
+    fireEvent.click(screen.getByRole("button", { name: /sign out/i }));
 
     expect(authStoreMock.logout).toHaveBeenCalledTimes(1);
     expect(navigationMock.router.push).not.toHaveBeenCalled();
@@ -744,7 +744,7 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    expect(screen.getByLabelText("Tìm kiếm khóa học")).toBeInTheDocument();
+    expect(screen.getByLabelText("Search courses")).toBeInTheDocument();
   });
 
   it("loads the course catalog when the dropdown search is activated", async () => {
@@ -752,7 +752,7 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    fireEvent.focus(screen.getByLabelText("Tìm kiếm khóa học"));
+    fireEvent.focus(screen.getByLabelText("Search courses"));
 
     await waitFor(() => {
       expect(courseApiMock.catalog).toHaveBeenCalledWith({
@@ -767,7 +767,7 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    const input = screen.getByLabelText("Search courses");
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "vision" } });
 
@@ -789,7 +789,7 @@ describe("learning unit page (US3)", () => {
     render(<TopNav />);
 
     expect(
-      screen.queryByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+      screen.queryByRole("button", { name: "Clear search query" }),
     ).not.toBeInTheDocument();
   });
 
@@ -798,7 +798,7 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    fireEvent.change(screen.getByLabelText("Tìm kiếm khóa học"), {
+    fireEvent.change(screen.getByLabelText("Search courses"), {
       target: { value: "cs231n" },
     });
 
@@ -807,7 +807,7 @@ describe("learning unit page (US3)", () => {
     });
 
     expect(
-      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+      screen.getByRole("button", { name: "Clear search query" }),
     ).toBeInTheDocument();
   });
 
@@ -816,14 +816,14 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    const input = screen.getByLabelText("Search courses");
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "cs231n" } });
 
     await screen.findByRole("button", { name: /cs231n: deep learning for computer vision/i });
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+      screen.getByRole("button", { name: "Clear search query" }),
     );
 
     expect(input).toHaveValue("");
@@ -837,7 +837,7 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    const input = screen.getByLabelText("Search courses");
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "language" } });
 
