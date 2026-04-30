@@ -2,7 +2,6 @@
 // Centered card layout for login / register pages
 
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Brain } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -41,14 +40,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Card */}
-        <div className="card animate-fade-in">
-          <div className="mb-4 flex justify-end">
-            <Link href="/" className="link text-sm">
-              Back to Landing Page
-            </Link>
-          </div>
-          {children}
-        </div>
+        <div className="card animate-fade-in">{children}</div>
       </div>
     </div>
   );
