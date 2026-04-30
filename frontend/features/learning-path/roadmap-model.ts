@@ -120,7 +120,7 @@ function groupByCourseAndLecture(items: PathItemResponse[]): CourseGroup[] {
     }
     course.items.push(item);
 
-    const lectureTitle = item.section_title || "Khác";
+    const lectureTitle = item.section_title || "Other";
     const lectureKey = `${courseKey}:${slugify(lectureTitle)}`;
     let lecture = course.lectures.find((candidate) => candidate.key === lectureKey);
     if (!lecture) {
@@ -160,7 +160,7 @@ export function buildRoadmapModel(items: PathItemResponse[]): RoadmapModel {
       id: `course-${slugify(course.key)}`,
       kind: "course",
       title: course.title,
-      subtitle: `${course.lectures.length} lecture · ${course.items.length} bài học`,
+      subtitle: `${course.lectures.length} lectures · ${course.items.length} lessons`,
       itemId: null,
       item: null,
       sectionKey: course.key,
@@ -183,7 +183,7 @@ export function buildRoadmapModel(items: PathItemResponse[]): RoadmapModel {
         id: `topic-${slugify(lecture.key)}`,
         kind: "topic",
         title: lecture.title,
-        subtitle: `${lecture.items.length} bài học`,
+        subtitle: `${lecture.items.length} lessons`,
         itemId: null,
         item: null,
         sectionKey: lecture.key,
