@@ -49,6 +49,7 @@ Create:
 - `src/services/agent_conversation_service.py` — authenticated conversation history and same-session memory summary provider.
 - `src/models/agent_conversation.py` — persisted agent conversations, messages, and memory summaries.
 - `src/repositories/agent_conversation_repo.py` — user-scoped persistence helpers for conversation sidebar/history/memory.
+- `alembic/versions/YYYYMMDD_agent_conversations.py` — Alembic migration for conversation persistence tables.
 - `src/services/agent_chat_service.py` — orchestration endpoint logic: intent, tool calls, citations, actions, fallback, trace.
 - `src/services/agent_assessment_workflow.py` — LangGraph workflow for assessment proposal, user approval/reduction, and assessment handoff state.
 - `frontend/app/agent/page.tsx` — ChatGPT-like AI Assistant surface.
@@ -69,6 +70,7 @@ Create:
 Modify:
 
 - `src/api/app.py` — include `agent_router`.
+- `src/models/__init__.py` — import agent conversation models so Alembic metadata discovers the new tables.
 - `src/repositories/canonical_content_repo.py` — add focused data access helpers for agent search/navigation/requirements.
 - `frontend/components/layout/navItems.ts` — label the global entry as `AI Assistant`.
 - `frontend/middleware.ts` — redirect or alias legacy `/tutor` to `/agent` once the new UI is enabled.
@@ -2552,11 +2554,12 @@ git commit -m "feat: add agent tutor memory context provider"
 
 **Files:**
 - Create: `src/models/agent_conversation.py`
-- Create: migration in the existing migration system for `agent_conversations`, `agent_conversation_messages`, and `agent_conversation_memories`
+- Create: `alembic/versions/YYYYMMDD_agent_conversations.py`
 - Create: `src/repositories/agent_conversation_repo.py`
 - Create: `src/services/agent_conversation_service.py`
 - Test: `tests/repositories/test_agent_conversation_repo.py`
 - Test: `tests/services/test_agent_conversation_service.py`
+- Modify: `src/models/__init__.py`
 - Modify: `src/schemas/agent.py`
 - Modify: `src/routers/agent.py`
 - Test: `tests/contract/test_agent_routes.py`
@@ -2659,13 +2662,98 @@ class AgentConversationMemory(Base):
     conversation: Mapped[AgentConversation] = relationship(back_populates="memory")
 ```
 
-Create the migration using the repository's existing migration convention.
-Required DB behavior:
+Register the models in `src/models/__init__.py`. This repo's `alembic/env.py`
+imports `src.models`, so missing this import means tests and migrations will not
+discover the new tables:
 
-- `agent_conversations.user_id` and `updated_at` are indexed for the sidebar.
-- `agent_conversation_messages.conversation_id`, `user_id`, and `created_at` are indexed for replay.
-- `agent_conversation_memories.conversation_id` is the primary key.
-- All foreign keys cascade delete from `agent_conversations`.
+```python
+from src.models.agent_conversation import (  # noqa: F401
+    AgentConversation,
+    AgentConversationMemory,
+    AgentConversationMessage,
+)
+
+__all__ = [
+    # ...
+    "AgentConversation",
+    "AgentConversationMessage",
+    "AgentConversationMemory",
+]
+```
+
+Create `alembic/versions/YYYYMMDD_agent_conversations.py`. Use the same Alembic
+style as the existing files in `alembic/versions/`:
+
+```python
+from alembic import op
+import sqlalchemy as sa
+
+
+revision = "YYYYMMDD_agent_conversations"
+down_revision = "<current_head_revision>"
+branch_labels = None
+depends_on = None
+
+
+def upgrade() -> None:
+    op.create_table(
+        "agent_conversations",
+        sa.Column("conversation_id", sa.String(), primary_key=True),
+        sa.Column("user_id", sa.String(), nullable=False),
+        sa.Column("title", sa.String(), nullable=False, server_default="New chat"),
+        sa.Column("preview", sa.String(), nullable=False, server_default=""),
+        sa.Column("message_count", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    )
+    op.create_index("ix_agent_conversations_user_id", "agent_conversations", ["user_id"])
+    op.create_index("ix_agent_conversations_updated_at", "agent_conversations", ["updated_at"])
+
+    op.create_table(
+        "agent_conversation_messages",
+        sa.Column("message_id", sa.String(), primary_key=True),
+        sa.Column("conversation_id", sa.String(), sa.ForeignKey("agent_conversations.conversation_id", ondelete="CASCADE"), nullable=False),
+        sa.Column("user_id", sa.String(), nullable=False),
+        sa.Column("role", sa.String(), nullable=False),
+        sa.Column("markdown", sa.Text(), nullable=False, server_default=""),
+        sa.Column("citations_json", sa.JSON(), nullable=False, server_default=sa.text("'[]'::json")),
+        sa.Column("actions_json", sa.JSON(), nullable=False, server_default=sa.text("'[]'::json")),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    )
+    op.create_index("ix_agent_conversation_messages_conversation_id", "agent_conversation_messages", ["conversation_id"])
+    op.create_index("ix_agent_conversation_messages_user_id", "agent_conversation_messages", ["user_id"])
+    op.create_index("ix_agent_conversation_messages_created_at", "agent_conversation_messages", ["created_at"])
+
+    op.create_table(
+        "agent_conversation_memories",
+        sa.Column("conversation_id", sa.String(), sa.ForeignKey("agent_conversations.conversation_id", ondelete="CASCADE"), primary_key=True),
+        sa.Column("user_id", sa.String(), nullable=False),
+        sa.Column("summary_status", sa.String(), nullable=False, server_default="empty"),
+        sa.Column("recent_message_window", sa.Integer(), nullable=False, server_default="10"),
+        sa.Column("summary_json", sa.JSON(), nullable=False, server_default=sa.text("'{}'::json")),
+        sa.Column("last_updated_at", sa.DateTime(timezone=True), nullable=True),
+    )
+    op.create_index("ix_agent_conversation_memories_user_id", "agent_conversation_memories", ["user_id"])
+
+
+def downgrade() -> None:
+    op.drop_index("ix_agent_conversation_memories_user_id", table_name="agent_conversation_memories")
+    op.drop_table("agent_conversation_memories")
+    op.drop_index("ix_agent_conversation_messages_created_at", table_name="agent_conversation_messages")
+    op.drop_index("ix_agent_conversation_messages_user_id", table_name="agent_conversation_messages")
+    op.drop_index("ix_agent_conversation_messages_conversation_id", table_name="agent_conversation_messages")
+    op.drop_table("agent_conversation_messages")
+    op.drop_index("ix_agent_conversations_updated_at", table_name="agent_conversations")
+    op.drop_index("ix_agent_conversations_user_id", table_name="agent_conversations")
+    op.drop_table("agent_conversations")
+```
+
+Verification for this step:
+
+```bash
+uv run alembic upgrade head
+pytest tests/repositories/test_agent_conversation_repo.py -q
+```
 
 - [ ] **Step 2: Write repository tests**
 
@@ -3079,6 +3167,12 @@ async def test_agent_conversation_memory_returns_empty_for_new_session(db_client
     assert response.json()["summaryStatus"] == "empty"
 ```
 
+These tests use the existing `db_client` fixture from `tests/conftest.py`. That
+fixture already builds an `ASGITransport(app=app)` client and overrides
+`get_async_db` with the test transaction. If the fixture is renamed during
+implementation, keep the same behavior instead of adding an unauthenticated
+client fixture.
+
 - [ ] **Step 7: Add router contracts**
 
 Add endpoints to `src/routers/agent.py`:
@@ -3170,7 +3264,7 @@ Rules:
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/models/agent_conversation.py src/repositories/agent_conversation_repo.py src/schemas/agent.py src/services/agent_conversation_service.py src/routers/agent.py tests/repositories/test_agent_conversation_repo.py tests/services/test_agent_conversation_service.py tests/contract/test_agent_routes.py
+git add alembic/versions/YYYYMMDD_agent_conversations.py src/models/__init__.py src/models/agent_conversation.py src/repositories/agent_conversation_repo.py src/schemas/agent.py src/services/agent_conversation_service.py src/routers/agent.py tests/repositories/test_agent_conversation_repo.py tests/services/test_agent_conversation_service.py tests/contract/test_agent_routes.py
 git commit -m "feat: add agent conversation session contracts"
 ```
 
@@ -4429,7 +4523,7 @@ Expected: PASS.
 Run:
 
 ```bash
-pytest tests/test_agent_schema_contract.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_chat_service.py tests/contract/test_agent_routes.py -q
+pytest tests/test_agent_schema_contract.py tests/repositories/test_agent_conversation_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_conversation_service.py tests/services/test_agent_chat_service.py tests/contract/test_agent_routes.py -q
 ```
 
 Expected: PASS.
@@ -5011,7 +5105,7 @@ Implementation tasks are tracked in `docs/superpowers/plans/2026-04-29-path-agen
 Run:
 
 ```bash
-pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_tutor_memory_service.py tests/services/test_agent_conversation_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_assessment_workflow.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
+pytest tests/test_agent_schema_contract.py tests/repositories/test_canonical_content_repo.py tests/repositories/test_agent_conversation_repo.py tests/services/test_agent_query_normalizer.py tests/services/test_agent_context_service.py tests/services/test_agent_navigation_service.py tests/services/test_agent_search_service.py tests/services/test_agent_requirement_service.py tests/services/test_agent_unit_context_service.py tests/services/test_agent_tutor_memory_service.py tests/services/test_agent_conversation_service.py tests/services/test_agent_chat_service.py tests/services/test_agent_assessment_workflow.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
 ```
 
 Expected: PASS.
