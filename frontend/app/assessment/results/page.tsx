@@ -35,23 +35,23 @@ const MASTERY_CONFIG: Record<
   MasteryLevel,
   { label: string; color: string; bg: string }
 > = {
-  not_started: { label: "Chưa bắt đầu", color: "text-slate-500 dark:text-slate-400",      bg: "bg-slate-100 dark:bg-slate-800"        },
-  novice:      { label: "Mới bắt đầu",  color: "text-red-600 dark:text-red-400",           bg: "bg-red-50 dark:bg-red-900/20"          },
-  developing:  { label: "Đang phát triển", color: "text-orange-600 dark:text-orange-400",  bg: "bg-orange-50 dark:bg-orange-900/20"    },
-  proficient:  { label: "Thành thạo",   color: "text-blue-600 dark:text-blue-400",          bg: "bg-blue-50 dark:bg-blue-900/20"        },
-  mastered:    { label: "Chuyên sâu",   color: "text-emerald-600 dark:text-emerald-400",    bg: "bg-emerald-50 dark:bg-emerald-900/20"  },
+  not_started: { label: "Not started", color: "text-slate-500 dark:text-slate-400",      bg: "bg-slate-100 dark:bg-slate-800"        },
+  novice:      { label: "Novice",  color: "text-red-600 dark:text-red-400",           bg: "bg-red-50 dark:bg-red-900/20"          },
+  developing:  { label: "Developing", color: "text-orange-600 dark:text-orange-400",  bg: "bg-orange-50 dark:bg-orange-900/20"    },
+  proficient:  { label: "Proficient",   color: "text-blue-600 dark:text-blue-400",          bg: "bg-blue-50 dark:bg-blue-900/20"        },
+  mastered:    { label: "Mastered",   color: "text-emerald-600 dark:text-emerald-400",    bg: "bg-emerald-50 dark:bg-emerald-900/20"  },
 };
 
 const DECISION_OPTIONS: { value: string; label: string }[] = [
-  { value: "skip",    label: "Bỏ qua"  },
-  { value: "review",  label: "Ôn tập"  },
-  { value: "relearn", label: "Học lại" },
+  { value: "skip",    label: "Skip"  },
+  { value: "review",  label: "Review"  },
+  { value: "relearn", label: "Relearn" },
 ];
 
 const DECISION_LABEL: Record<string, string> = {
-  skip:    "Bỏ qua",
-  review:  "Ôn tập",
-  relearn: "Học lại",
+  skip:    "Skip",
+  review:  "Review",
+  relearn: "Relearn",
 };
 
 // ---------------------------------------------------------------------------
@@ -59,10 +59,10 @@ const DECISION_LABEL: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 function scoreMessage(pct: number): { emoji: string; text: string } {
-  if (pct >= 80) return { emoji: "🏆", text: "Xuất sắc! Bạn nắm vững kiến thức rất tốt." };
-  if (pct >= 60) return { emoji: "👍", text: "Tốt! Bạn đang trên đà phát triển." };
-  if (pct >= 40) return { emoji: "📚", text: "Cần ôn tập thêm — lộ trình sẽ giúp bạn." };
-  return { emoji: "🌱", text: "Hãy bắt đầu từ nền tảng — bạn sẽ tiến bộ nhanh thôi!" };
+  if (pct >= 80) return { emoji: "🏆", text: "Excellent work. You have a strong grasp of the material." };
+  if (pct >= 60) return { emoji: "👍", text: "Good progress. You are building momentum." };
+  if (pct >= 40) return { emoji: "📚", text: "You need more review, and the learning path will help." };
+  return { emoji: "🌱", text: "Start from the fundamentals and you can improve quickly." };
 }
 
 function Skeleton({ className }: { className?: string }) {
@@ -147,7 +147,7 @@ function DecisionRow({ item, currentDecision, onDecisionChange }: DecisionRowPro
       </span>
 
       <select
-        aria-label={`Điều chỉnh ${item.title}`}
+        aria-label={`Adjust ${item.title}`}
         value={currentDecision}
         onChange={(event) => onDecisionChange(item.id, event.target.value, currentDecision)}
         className="rounded-lg border bg-white px-3 py-2 text-xs font-medium dark:bg-slate-900"
@@ -196,7 +196,7 @@ function AssessmentResultsInner() {
   // ── Fetch results ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!sessionId) {
-      setError("Không tìm thấy session. Vui lòng làm lại assessment.");
+      setError("No session was found. Please retake the assessment.");
       setLoading(false);
       return;
     }
@@ -230,7 +230,7 @@ function AssessmentResultsInner() {
           });
       })
       .catch(() => {
-        setError("Không thể tải kết quả. Vui lòng thử lại.");
+        setError("Unable to load the results. Please try again.");
         setLoading(false);
       });
   }, [sessionId]);
@@ -244,11 +244,11 @@ function AssessmentResultsInner() {
 
     try {
       await assessmentApi.updateTopicDecision(sessionId, unitId, newDecision);
-      showToast("Đã cập nhật", "success");
+      showToast("Updated", "success");
     } catch {
       // Rollback
       setDecisions((prev) => ({ ...prev, [unitId]: oldDecision }));
-      showToast("Cập nhật thất bại", "error");
+      showToast("Update failed", "error");
     }
   }
 
@@ -281,10 +281,10 @@ function AssessmentResultsInner() {
         <div className="card max-w-md w-full text-center space-y-4">
           <AlertTriangle className="mx-auto h-10 w-10 text-red-500" />
           <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-            {error ?? "Không tìm thấy kết quả"}
+            {error ?? "Results not found"}
           </p>
           <Button onClick={() => router.push("/assessment")} variant="secondary">
-            Làm lại assessment
+            Retake assessment
           </Button>
         </div>
       </div>
@@ -317,7 +317,7 @@ function AssessmentResultsInner() {
             <Brain className="h-6 w-6 text-white" />
           </div>
           <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-            Kết quả Assessment
+            Assessment Results
           </h1>
         </div>
 
@@ -327,9 +327,9 @@ function AssessmentResultsInner() {
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
-                  Đánh giá nhanh
+                  Quick assessment
                 </p>
-                <h2 className="text-xl font-bold leading-tight">Tóm tắt kết quả</h2>
+                <h2 className="text-xl font-bold leading-tight">Results summary</h2>
                 <p className="max-w-xl text-sm leading-relaxed text-white/80">
                   {msg}
                 </p>
@@ -337,7 +337,7 @@ function AssessmentResultsInner() {
               <div className="shrink-0 rounded-3xl bg-white/15 px-5 py-4 text-center ring-1 ring-white/20">
                 <span className="text-3xl">{emoji}</span>
                 <p className="text-4xl font-extrabold">{overall.toFixed(1)}%</p>
-                <p className="mt-1 text-xs font-medium text-white/70">điểm tổng</p>
+                <p className="mt-1 text-xs font-medium text-white/70">overall score</p>
               </div>
             </div>
           </div>
@@ -345,7 +345,7 @@ function AssessmentResultsInner() {
           <div className="space-y-4 p-5 sm:p-6">
             {aiSummaryLoading && (
               <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-sm text-primary-800 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-200">
-                AI đang tóm tắt kết quả...
+                AI is summarizing your results...
               </div>
             )}
 
@@ -353,7 +353,7 @@ function AssessmentResultsInner() {
               <div className="space-y-3 rounded-2xl border border-primary-100 bg-primary-50 p-4 dark:border-primary-900/40 dark:bg-primary-900/20">
                 <div className="flex items-center gap-2 text-primary-800 dark:text-primary-200">
                   <Brain className="h-4 w-4" />
-                  <p className="text-sm font-semibold">Nhận xét AI</p>
+                  <p className="text-sm font-semibold">AI summary</p>
                 </div>
                 <p className="text-sm leading-relaxed text-primary-900 dark:text-primary-100">
                   {aiSummary.summary}
@@ -380,19 +380,19 @@ function AssessmentResultsInner() {
                 <p className="text-2xl font-bold text-red-600 dark:text-red-300">
                   {viewModel.counts.relearn}
                 </p>
-                <p className="text-xs font-medium text-red-700 dark:text-red-300">học lại</p>
+                <p className="text-xs font-medium text-red-700 dark:text-red-300">relearn</p>
               </div>
               <div className="rounded-2xl bg-amber-50 p-3 dark:bg-amber-900/20">
                 <p className="text-2xl font-bold text-amber-600 dark:text-amber-300">
                   {viewModel.counts.review}
                 </p>
-                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">ôn tập</p>
+                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">review</p>
               </div>
               <div className="rounded-2xl bg-emerald-50 p-3 dark:bg-emerald-900/20">
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-300">
                   {viewModel.counts.skip}
                 </p>
-                <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">bỏ qua</p>
+                <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">skip</p>
               </div>
             </div>
           </div>
@@ -402,10 +402,10 @@ function AssessmentResultsInner() {
         <div className="card space-y-4">
           <div>
             <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              Ưu tiên cho lộ trình
+              Learning path priorities
             </h2>
             <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-              Chỉ hiển thị tối đa 5 phần cần xử lý. Không lặp lại toàn bộ danh sách đã kiểm tra.
+              This view shows up to 5 sections that need action, without repeating the full assessment list.
             </p>
           </div>
 
@@ -422,7 +422,7 @@ function AssessmentResultsInner() {
             </div>
           ) : (
             <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
-              Không có phần nào cần học lại. Lộ trình sẽ bỏ qua các phần bạn đã nắm vững.
+              No sections need relearning. The path will skip the areas you already know well.
             </div>
           )}
         </div>
@@ -433,11 +433,10 @@ function AssessmentResultsInner() {
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
             <div>
               <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                {viewModel.counts.skip} phần sẽ được bỏ qua
+                {viewModel.counts.skip} sections will be skipped
               </h2>
               <p className="mt-1 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                Đây là phần đã đủ vững theo bài test. Trang kết quả không liệt kê lại toàn bộ để tránh rối;
-                planner sẽ tự dùng quyết định này khi tạo lộ trình.
+                These are the areas you already handled well on the assessment. The planner will use this automatically when building your path.
               </p>
             </div>
           </div>
@@ -449,11 +448,11 @@ function AssessmentResultsInner() {
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                Hiểu nhầm phát hiện ({allMisconceptions.length})
+                Misconceptions detected ({allMisconceptions.length})
               </h2>
             </div>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Những misconception này được phát hiện dựa trên đáp án sai của bạn. Lộ trình học sẽ ưu tiên giải quyết chúng.
+              These misconceptions were inferred from your incorrect answers. Your learning path will prioritize fixing them.
             </p>
             <div className="space-y-2">
               {displayedMisconceptions.map((m, i) => (
@@ -475,7 +474,7 @@ function AssessmentResultsInner() {
               ))}
               {allMisconceptions.length > displayedMisconceptions.length && (
                 <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  Và {allMisconceptions.length - displayedMisconceptions.length} misconception khác sẽ được xử lý trong lộ trình.
+                  And {allMisconceptions.length - displayedMisconceptions.length} more misconceptions will be addressed in the path.
                 </p>
               )}
             </div>
@@ -487,7 +486,7 @@ function AssessmentResultsInner() {
           <div className="card flex items-center gap-3">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              Không phát hiện misconception nào. Kiến thức của bạn khá vững!
+              No misconceptions were detected. Your understanding looks solid.
             </p>
           </div>
         )}
@@ -497,10 +496,10 @@ function AssessmentResultsInner() {
           <Trophy className="h-8 w-8 text-primary-600" />
           <div>
             <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-              Assessment hoàn thành!
+              Assessment complete
             </p>
             <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-              AI đã ghi nhận trình độ của bạn và sẵn sàng tạo lộ trình học cá nhân hóa.
+              AI has recorded your level and is ready to build your personalized learning path.
             </p>
           </div>
           <Button
@@ -508,7 +507,7 @@ function AssessmentResultsInner() {
             loading={navigating}
             size="lg"
           >
-            {navigating ? "Đang chuyển..." : "Xác nhận và bắt đầu học"}
+            {navigating ? "Redirecting..." : "Confirm and start learning"}
           </Button>
         </div>
 
