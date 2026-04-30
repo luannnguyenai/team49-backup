@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import String, and_, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.canonical import (
@@ -167,12 +167,13 @@ class CanonicalContentRepository:
             CanonicalUnit.course_id.in_(normalized_courses),
         ]
         if not include_reference:
+            section_flags_text = cast(CanonicalUnit.section_flags, String)
             content_filters.append(
                 or_(
                     CanonicalUnit.section_flags.is_(None),
                     and_(
-                        ~CanonicalUnit.section_flags.contains(["logistics"]),
-                        ~CanonicalUnit.section_flags.contains(["admin"]),
+                        ~section_flags_text.like("%logistics%"),
+                        ~section_flags_text.like("%admin%"),
                     ),
                 )
             )

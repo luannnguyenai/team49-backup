@@ -214,7 +214,7 @@ function AssessmentProposalCard({
   const minutes = getProposalMinutes(proposal);
   const mix = getProposalDifficultyMix(proposal);
   const reductions = getProposalReductionOptions(proposal);
-  const totalMix = Object.values(mix).reduce((sum, value) => sum + Number(value), 0) || 1;
+  const totalMix = (Object.values(mix).reduce((sum: number, value) => sum + Number(value), 0) as number) || 1;
 
   const runDecision = async (decision: { action: "approve" | "reduce" | "reject"; reductionId?: string; questionBudget?: number }) => {
     if (!workflowId) return;
@@ -833,31 +833,34 @@ function Composer({ onSend, disabled }: { onSend: (message: string) => void; dis
             </button>
           ))}
         </div>
-        <form onSubmit={send} className="relative">
+        <form onSubmit={send} className="relative flex items-end">
           <label htmlFor="agent-message" className="sr-only">
             Message AI Assistant
           </label>
-          <textarea
-            id="agent-message"
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                send(event);
-              }
-            }}
-            placeholder="Message AI Assistant..."
-            rows={1}
-            className="min-h-14 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 pr-14 text-[15px] leading-6 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
-          />
-          <button
-            type="submit"
-            disabled={disabled || !text.trim()}
-            className="absolute bottom-2 right-2 flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400"
-            aria-label="Send message"
-          >
-            <Send className="h-4 w-4" />
-          </button>
+          <div className="relative flex-1 flex items-center w-full">
+            <textarea
+              id="agent-message"
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  send(event);
+                }
+              }}
+              placeholder="Message AI Assistant..."
+              rows={1}
+              className="max-h-32 min-h-[48px] w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-4 pr-14 text-[15px] leading-relaxed shadow-inner outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
+            <button
+              type="submit"
+              disabled={disabled || !text.trim()}
+              className="absolute right-1.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-200/50 transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-300 disabled:shadow-none"
+              aria-label="Send message"
+            >
+              <Send className="h-[18px] w-[18px]" />
+            </button>
+          </div>
         </form>
       </div>
     </div>
@@ -886,14 +889,14 @@ export default function AgentChatPage() {
     setIsLoadingSessions(true);
     agentApi
       .listConversations()
-      .then((items) => {
+      .then((items: AgentConversationSummary[]) => {
         if (!active) return;
         setSessions(items);
         if (!activeSessionId && items.length > 0) {
           setActiveSessionId(getConversationId(items[0]));
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (active) setError(err instanceof Error ? err.message : "Could not load conversations.");
       })
       .finally(() => {
