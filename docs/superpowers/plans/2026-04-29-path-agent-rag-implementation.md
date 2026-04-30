@@ -1690,6 +1690,7 @@ async def test_requirement_service_maps_prerequisite_kp_back_to_source_unit():
     target_unit = SimpleNamespace(unit_id="target-unit", unit_name="NLP target")
     source_unit = SimpleNamespace(
         unit_id="source-unit",
+        course_id="CS230",
         unit_name="Backpropagation",
     )
     target_kp = SimpleNamespace(unit_id="target-unit", kp_id="kp-target", planner_role="main")
@@ -1737,6 +1738,7 @@ async def test_requirement_service_maps_prerequisite_kp_back_to_source_unit():
     )
 
     assert response.required_units[0].canonical_unit_id == "source-unit"
+    assert response.required_units[0].course_id == "CS230"
     assert response.required_units[0].required_kp_ids == ["kp-source"]
 
 
@@ -2075,7 +2077,7 @@ class PathRequirementService:
                 PathRequirementUnit(
                     canonical_unit_id=canonical_id,
                     learning_unit_id=nav.learning_unit_id,
-                    course_id=nav.course_id or "",
+                    course_id=getattr(unit, "course_id", ""),
                     course_slug=nav.course_slug,
                     unit_slug=nav.unit_slug,
                     learn_href=nav.learn_href,
@@ -2472,7 +2474,11 @@ from types import SimpleNamespace
 import pytest
 
 from src.schemas.agent import AgentChatRequest, RetrievalTrace, UnitSearchResponse
-from src.services.agent_chat_service import AgentChatService, classify_agent_intent
+from src.services.agent_chat_service import (
+    AgentChatService,
+    classify_agent_intent,
+    extract_requirement_target_path,
+)
 
 
 def test_classify_agent_intent_uses_intent_table_not_single_phrase_match():
@@ -2480,6 +2486,12 @@ def test_classify_agent_intent_uses_intent_table_not_single_phrase_match():
     assert classify_agent_intent("What should I learn before transformers?") == "ask_what_next"
     assert classify_agent_intent("Where is receptive field covered?") == "find_content"
     assert classify_agent_intent("Which DL prerequisites do I need for NLP?") == "explain_planner_decision"
+
+
+def test_extract_requirement_target_path_from_message():
+    assert extract_requirement_target_path("Which DL prerequisites do I need for NLP?") == "nlp"
+    assert extract_requirement_target_path("Which DL parts are required for computer vision?") == "computer_vision"
+    assert extract_requirement_target_path("Which prerequisites do I still need?") is None
 
 
 @pytest.mark.asyncio
@@ -2520,6 +2532,50 @@ async def test_chat_uses_path_requirements_for_required_parts_question():
     assert response.citations[0].canonical_unit_id == "unit-a"
     assert response.actions[0].type == "open_unit"
     assert response.trace is not None
+
+
+@pytest.mark.asyncio
+async def test_chat_uses_cv_target_for_computer_vision_requirement_question():
+    search_service = SimpleNamespace()
+    requirement_service = SimpleNamespace()
+    seen = {}
+
+    async def get_requirements(request, allowed_course_ids, user_id=None):
+        seen["target"] = request.target_path_key
+        return SimpleNamespace(required_units=[], trace=SimpleNamespace(trace_id="trace-req"))
+
+    requirement_service.get_requirements = get_requirements
+    service = AgentChatService(search_service, requirement_service)
+
+    await service.chat(
+        AgentChatRequest(message="Which DL parts are required for computer vision?"),
+        allowed_course_ids=["CS230", "CS231n"],
+        user_id="user-1",
+        is_reviewer=False,
+    )
+
+    assert seen["target"] == "computer_vision"
+
+
+@pytest.mark.asyncio
+async def test_chat_asks_for_target_when_requirement_question_is_ambiguous():
+    search_service = SimpleNamespace()
+    requirement_service = SimpleNamespace()
+
+    async def get_requirements(request, allowed_course_ids, user_id=None):
+        raise AssertionError("ambiguous target should not query path requirements")
+
+    requirement_service.get_requirements = get_requirements
+    service = AgentChatService(search_service, requirement_service)
+
+    response = await service.chat(
+        AgentChatRequest(message="Which prerequisites should I learn first?"),
+        allowed_course_ids=["CS230", "CS231n", "CS224n"],
+        is_reviewer=False,
+    )
+
+    assert response.answer.confidence == "partial"
+    assert "which target path" in response.answer.markdown.lower()
 
 
 @pytest.mark.asyncio
@@ -2712,6 +2768,21 @@ def classify_agent_intent(message: str, explicit_intent: AgentIntent | None = No
     return "general_course_question"
 
 
+def extract_requirement_target_path(message: str, route_context=None) -> str | None:
+    normalized = message.lower()
+    if any(term in normalized for term in ("nlp", "natural language", "cs224n", "word vector", "transformer")):
+        return "nlp"
+    if any(term in normalized for term in ("computer vision", "vision", "cv", "cs231n", "cnn", "image")):
+        return "computer_vision"
+    if route_context and getattr(route_context, "course_slug", None):
+        course_slug = str(route_context.course_slug).lower()
+        if course_slug == "cs224n":
+            return "nlp"
+        if course_slug == "cs231n":
+            return "computer_vision"
+    return None
+
+
 class AgentChatService:
     def __init__(self, search_service, requirement_service):
         self.search_service = search_service
@@ -2772,12 +2843,27 @@ class AgentChatService:
             )
 
         if intent == "explain_planner_decision":
+            target_path = extract_requirement_target_path(request.message, request.route_context)
+            if target_path is None:
+                return AgentChatResponse(
+                    conversation_id=request.conversation_id or str(uuid4()),
+                    message_id=str(uuid4()),
+                    answer=AgentAnswer(
+                        markdown=(
+                            "Which target path should I check prerequisites for: "
+                            "Computer Vision or NLP?"
+                        ),
+                        confidence="partial",
+                    ),
+                    citations=[],
+                    actions=[],
+                )
             requirements = await self.requirement_service.get_requirements(
-                PathRequirementsRequest(targetPathKey="nlp"),
+                PathRequirementsRequest(targetPathKey=target_path),
                 allowed_course_ids=allowed_course_ids,
                 user_id=user_id,
             )
-            answer = "I checked the path requirement graph for NLP prerequisites."
+            answer = f"I checked the path requirement graph for {target_path.replace('_', ' ')} prerequisites."
             if not requirements.required_units:
                 answer = "I could not find required prerequisite units in the current scoped path."
             citations = [
@@ -2806,7 +2892,7 @@ class AgentChatService:
                 raw_query=request.message,
                 normalized_query=request.message,
                 resolved_scope="current_path",
-                selected_path="nlp",
+                selected_path=target_path,
                 candidate_courses=getattr(requirements.trace, "selected_course_ids", []),
                 applied_filters=getattr(requirements.trace, "applied_filters", []),
                 ranking_version="path_requirements_v1",
