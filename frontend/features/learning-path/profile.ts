@@ -142,10 +142,10 @@ export function describeProfileChange(
   currentProfile: LearningProfile,
 ): string {
   if (previousProfile.pathKey === "computer_vision" && currentProfile.pathKey === "nlp") {
-    return "Bạn đang đổi lộ trình từ Computer Vision sang NLP.";
+    return "You are switching your learning path from Computer Vision to NLP.";
   }
   if (previousProfile.pathKey === "nlp" && currentProfile.pathKey === "computer_vision") {
-    return "Bạn đang đổi lộ trình từ NLP sang Computer Vision.";
+    return "You are switching your learning path from NLP to Computer Vision.";
   }
-  return `Bạn đang đổi lộ trình từ ${previousProfile.label} sang ${currentProfile.label}.`;
+  return `You are switching your learning path from ${previousProfile.label} to ${currentProfile.label}.`;
 }
