@@ -29,7 +29,7 @@ describe("landing page route", () => {
     ).toBe(true);
     expect(screen.getByRole("link", { name: "Sản phẩm" })).toHaveAttribute("href", "#product");
     expect(screen.getByRole("link", { name: "Lộ trình học" })).toHaveAttribute("href", "#roadmap");
-    expect(screen.getByRole("link", { name: "AI Tutor" })).toHaveAttribute("href", "#tutor");
+    expect(screen.getByRole("link", { name: "AI Assistant" })).toHaveAttribute("href", "#tutor");
     expect(screen.getByRole("link", { name: "Liên hệ" })).toHaveAttribute("href", "#contact");
     expect(
       screen.getByRole("heading", { name: "Cá nhân hóa lộ trình học" }),
