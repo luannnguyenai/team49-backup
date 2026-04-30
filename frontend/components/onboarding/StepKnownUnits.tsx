@@ -1,6 +1,6 @@
 "use client";
 // components/onboarding/StepKnownUnits.tsx
-// Step 1 — "Bạn đã biết gì?"
+// Step 1 — "What do you already know?"
 // Displays all learning units grouped by section as a checkbox card grid.
 
 import { Check, Clock } from "lucide-react";
@@ -31,20 +31,20 @@ export default function StepKnownUnits({
   return (
     <div className="space-y-6">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Chọn những topic bạn đã nắm — hệ thống sẽ dùng thông tin này để hiểu nền tảng hiện tại của bạn.{" "}
+        Choose the topics you already know — the system will use this information to understand your current foundation.{" "}
         <span className="font-medium" style={{ color: "var(--text-primary)" }}>
-          Bỏ qua nếu bạn mới bắt đầu.
+          Skip this if you are just starting.
         </span>
         {selectedSlugs.length > 0 && (
           <span className="ml-2 font-semibold text-primary-600">
-            ({selectedSlugs.length} topic đã chọn)
+            ({selectedSlugs.length} topics selected)
           </span>
         )}
       </p>
 
       {topicGroups.length === 0 && (
         <div className="py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-          Không có topics nào để hiển thị.
+          No topics are available to display.
         </div>
       )}
 
@@ -107,7 +107,7 @@ export default function StepKnownUnits({
                     >
                       <Clock className="h-3 w-3" />
                       {topic.estimated_hours_beginner != null
-                        ? `${Math.round(topic.estimated_hours_beginner * 60)} phút`
+                        ? `${Math.round(topic.estimated_hours_beginner * 60)} min`
                         : "—"}
                     </span>
                   </button>
