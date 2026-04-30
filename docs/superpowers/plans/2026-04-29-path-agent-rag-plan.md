@@ -801,8 +801,8 @@ type AgentConversationMessage = {
   role: "user" | "assistant";
   markdown: string;
   createdAt: string;
-  citations?: AgentChatResponse["citations"];
-  actions?: AgentChatResponse["actions"];
+  citations?: Record<string, unknown>[];
+  actions?: Record<string, unknown>[];
 };
 
 type AgentConversationMemory = {
@@ -836,6 +836,7 @@ Rules:
 - A new conversation starts with empty message history and empty session memory.
 - Memory summarization can run after enough same-session turns, but summaries from older conversations are never injected into a new chat.
 - Chat message persistence stores structured citations/actions so the UI can re-render prior assistant responses.
+- Conversation message replay keeps citations/actions as raw JSON snapshots, not as strict live `AgentCitation`/`AgentAction` models, so historical messages remain renderable after schema changes.
 
 ### 8.2 `GET /api/agent/context`
 

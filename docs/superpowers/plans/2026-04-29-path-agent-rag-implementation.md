@@ -95,6 +95,8 @@ Do not modify:
 Create `tests/test_agent_schema_contract.py`:
 
 ```python
+from datetime import datetime, timezone
+
 from pydantic import ValidationError
 
 from src.schemas.agent import (
@@ -104,6 +106,8 @@ from src.schemas.agent import (
     AgentAssessmentWorkflowRequest,
     AgentAssessmentWorkflowResponse,
     AgentCitation,
+    AgentConversationMessage,
+    AgentConversationSummary,
     UnitSearchRequest,
     UnitSearchResponse,
 )
@@ -148,6 +152,28 @@ def test_chat_response_supports_citations_and_disabled_assessment_action():
 
     assert response.actions[0].eligible is False
     assert response.actions[0].disabled_reason == "no_eligible_questions"
+
+
+def test_conversation_replay_accepts_datetime_and_raw_response_json():
+    summary = AgentConversationSummary(
+        conversationId="conv-1",
+        title="CNN review",
+        preview="Review CNN basics.",
+        updatedAt=datetime(2026, 4, 30, 9, 4, tzinfo=timezone.utc),
+        messageCount=1,
+    )
+    message = AgentConversationMessage(
+        messageId="msg-1",
+        role="assistant",
+        markdown="Review CNN basics.",
+        createdAt=datetime(2026, 4, 30, 9, 6, tzinfo=timezone.utc),
+        citations=[{"canonicalUnitId": "unit-cnn", "title": "CNN basics"}],
+        actions=[{"type": "open_unit", "label": "Open unit"}],
+    )
+
+    assert summary.updated_at.year == 2026
+    assert message.citations[0]["canonicalUnitId"] == "unit-cnn"
+    assert message.actions[0]["type"] == "open_unit"
 
 
 def test_unit_search_request_does_not_accept_include_hidden():
@@ -262,7 +288,8 @@ Create `src/schemas/agent.py`:
 ```python
 from __future__ import annotations
 
-from typing import Literal
+from datetime import datetime
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -519,7 +546,7 @@ class AgentConversationSummary(BaseModel):
     conversation_id: str = Field(alias="conversationId")
     title: str
     preview: str
-    updated_at: str = Field(alias="updatedAt")
+    updated_at: datetime = Field(alias="updatedAt")
     message_count: int = Field(alias="messageCount")
 
     model_config = ConfigDict(populate_by_name=True)
@@ -529,7 +556,7 @@ class AgentConversationMemory(BaseModel):
     conversation_id: str = Field(alias="conversationId")
     summary_status: Literal["empty", "fresh", "stale", "updating"] = Field(alias="summaryStatus")
     recent_message_window: int = Field(alias="recentMessageWindow")
-    last_updated_at: str | None = Field(default=None, alias="lastUpdatedAt")
+    last_updated_at: datetime | None = Field(default=None, alias="lastUpdatedAt")
     summary: dict = Field(default_factory=dict)
 
     model_config = ConfigDict(populate_by_name=True)
@@ -539,9 +566,9 @@ class AgentConversationMessage(BaseModel):
     message_id: str = Field(alias="messageId")
     role: Literal["user", "assistant"]
     markdown: str
-    created_at: str = Field(alias="createdAt")
-    citations: list[AgentCitation] = Field(default_factory=list)
-    actions: list[AgentAction] = Field(default_factory=list)
+    created_at: datetime = Field(alias="createdAt")
+    citations: list[dict[str, Any]] = Field(default_factory=list)
+    actions: list[dict[str, Any]] = Field(default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -2911,6 +2938,7 @@ class AgentConversationRepository:
 Create `tests/services/test_agent_conversation_service.py`:
 
 ```python
+from datetime import datetime, timezone
 from types import SimpleNamespace
 
 import pytest
@@ -2929,7 +2957,7 @@ async def test_conversation_service_lists_user_scoped_summaries_without_categori
                 conversation_id="conv-1",
                 title="CNN skip assessment",
                 preview="You asked whether CNN fundamentals can be skipped...",
-                updated_at="2026-04-30T09:04:00Z",
+                updated_at=datetime(2026, 4, 30, 9, 4, tzinfo=timezone.utc),
                 message_count=12,
             )
         ]
@@ -2951,7 +2979,7 @@ async def test_new_conversation_starts_with_empty_memory():
             conversation_id="conv-new",
             title="New chat",
             preview="",
-            updated_at="2026-04-30T09:10:00Z",
+            updated_at=datetime(2026, 4, 30, 9, 10, tzinfo=timezone.utc),
             message_count=0,
         )
 
@@ -2982,7 +3010,7 @@ async def test_memory_is_loaded_only_for_same_conversation():
             conversation_id="conv-1",
             summary_status="fresh",
             recent_message_window=10,
-            last_updated_at="2026-04-30T09:05:00Z",
+            last_updated_at=datetime(2026, 4, 30, 9, 5, tzinfo=timezone.utc),
             summary_json={"selfReportedKnowledge": ["CNN basics"]},
         )
 
@@ -3008,7 +3036,7 @@ async def test_messages_are_replayed_with_citations_and_actions():
                 message_id="msg-1",
                 role="assistant",
                 markdown="Review CNN basics.",
-                created_at="2026-04-30T09:06:00Z",
+                created_at=datetime(2026, 4, 30, 9, 6, tzinfo=timezone.utc),
                 citations_json=[{"canonicalUnitId": "unit-cnn", "title": "CNN basics"}],
                 actions_json=[{"type": "open_unit", "label": "Open unit"}],
             )
@@ -3023,7 +3051,7 @@ async def test_messages_are_replayed_with_citations_and_actions():
 
     assert messages[0].message_id == "msg-1"
     assert messages[0].citations[0]["canonicalUnitId"] == "unit-cnn"
-    assert messages[0].actions[0].type == "open_unit"
+    assert messages[0].actions[0]["type"] == "open_unit"
 ```
 
 - [ ] **Step 5: Implement service contract**
@@ -3259,6 +3287,7 @@ Rules:
 - The list response has no category labels.
 - New conversations return empty memory until same-session turns are summarized.
 - Conversation messages persist structured citations/actions for replay.
+- Conversation replay stores `citations_json`/`actions_json` as raw response JSON so old messages can render even if the live action/citation schema evolves.
 - Do not implement persistent history as frontend-only `localStorage`; that would break multi-device sessions and reviewer API tests.
 
 - [ ] **Step 8: Commit**
