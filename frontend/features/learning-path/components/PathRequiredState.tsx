@@ -26,10 +26,10 @@ export default function PathRequiredState() {
         <MapIcon className="h-7 w-7" />
       </div>
       <h2 className="mt-5 text-xl font-semibold" style={{ color: "var(--text-primary)" }}>
-        Chọn lộ trình trước khi học
+        Choose a path before you start learning
       </h2>
       <p className="mt-2 max-w-xl text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-        Planner V1 chỉ render lộ trình cụ thể. Hãy chọn một path: Computer Vision hoặc NLP.
+        Planner V1 only renders a concrete path. Choose either Computer Vision or NLP.
       </p>
       <div className="mt-6 grid w-full max-w-2xl gap-3 sm:grid-cols-2">
         <button
@@ -63,7 +63,7 @@ export default function PathRequiredState() {
         href="/onboarding?next=/learn"
         className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary-600 underline-offset-4 hover:underline"
       >
-        Đi tới onboarding đầy đủ
+        Go to full onboarding
         <ArrowRight className="h-4 w-4" />
       </Link>
     </div>
