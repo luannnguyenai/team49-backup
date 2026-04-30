@@ -37,9 +37,9 @@ function getMembershipLabel(
   totalHours: number,
   hasSkillEvidence: boolean,
 ) {
-  if (completedSessions >= 10 || totalHours >= 20) return "Học viên nâng cao";
-  if (hasSkillEvidence || completedSessions >= 3) return "Học viên đang tiến bộ";
-  return "Học viên mới";
+  if (completedSessions >= 10 || totalHours >= 20) return "Advanced learner";
+  if (hasSkillEvidence || completedSessions >= 3) return "Growing learner";
+  return "New learner";
 }
 
 function normalizeDateKey(dateStr: string) {
@@ -90,32 +90,32 @@ function buildAchievements(
 
   if (hasSkillEvidence) {
     badges.push({
-      title: "Đã mở khóa hồ sơ kỹ năng",
-      desc: "Hoàn thành assessment để ghi nhận năng lực hiện tại",
+      title: "Skill profile unlocked",
+      desc: "Completed the assessment to record your current ability",
       icon: "🧠",
       color: "border-blue-400 bg-blue-50 dark:bg-blue-900/20",
     });
   }
   if (completedSessions >= 1) {
     badges.push({
-      title: "Phiên học đầu tiên",
-      desc: "Đã hoàn thành ít nhất 1 phiên học hoặc assessment",
+      title: "First learning session",
+      desc: "Completed at least 1 learning session or assessment",
       icon: "✨",
       color: "border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20",
     });
   }
   if (completedSessions >= 5) {
     badges.push({
-      title: "Người học chăm chỉ",
-      desc: "Hoàn thành từ 5 phiên học trở lên",
+      title: "Consistent learner",
+      desc: "Completed 5 or more learning sessions",
       icon: "🏆",
       color: "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20",
     });
   }
   if (totalHours >= 10) {
     badges.push({
-      title: "Bền bỉ",
-      desc: "Tích lũy từ 10 giờ học trở lên",
+      title: "Persistent",
+      desc: "Reached 10 or more total study hours",
       icon: "⏱️",
       color: "border-violet-400 bg-violet-50 dark:bg-violet-900/20",
     });
@@ -202,7 +202,7 @@ export default function ProfilePage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in xl:max-w-7xl">
       <div>
         <h2 className="text-2xl font-bold text-text-strong">
-          Hồ sơ của bạn
+          Your profile
         </h2>
       </div>
 
@@ -235,26 +235,26 @@ export default function ProfilePage() {
                 <StatRow
                   icon={<BookOpen className="h-4 w-4 text-blue-600" />}
                   iconBg="bg-blue-100 dark:bg-blue-900/30"
-                  label="Khóa học"
+                  label="Courses"
                   value={String(joinedCourseCount)}
                 />
                 <StatRow
                   icon={<Trophy className="h-4 w-4 text-emerald-600" />}
                   iconBg="bg-emerald-100 dark:bg-emerald-900/30"
-                  label="Phiên đã hoàn thành"
+                  label="Completed sessions"
                   value={String(completedSessions)}
                 />
                 <StatRow
                   icon={<Clock className="h-4 w-4 text-violet-600" />}
                   iconBg="bg-violet-100 dark:bg-violet-900/30"
-                  label="Tổng thời gian"
+                  label="Total time"
                   value={`${totalHours}h`}
                 />
                 <StatRow
                   icon={<TrendingUp className="h-4 w-4 text-orange-500" />}
                   iconBg="bg-orange-100 dark:bg-orange-900/30"
                   label="Streak"
-                  value={`${streakDays} ngày`}
+                  value={`${streakDays} days`}
                 />
               </div>
             </div>
@@ -262,7 +262,7 @@ export default function ProfilePage() {
             {/* Achievements */}
             <div className="card space-y-3">
               <h3 className="text-sm font-bold text-text-strong">
-                Thành tích
+                Achievements
               </h3>
               {achievements.length > 0 ? (
                 achievements.map((a) => (
@@ -283,7 +283,7 @@ export default function ProfilePage() {
                 ))
               ) : (
                 <p className="text-sm text-text-muted">
-                  Hoàn thành assessment hoặc các phiên học đầu tiên để mở khóa thành tích.
+                  Complete the assessment or your first learning sessions to unlock achievements.
                 </p>
               )}
             </div>
@@ -291,20 +291,20 @@ export default function ProfilePage() {
             {/* Account info */}
             <div className="card space-y-2">
               <h3 className="text-sm font-bold text-text-strong">
-                Tài khoản
+                Account
               </h3>
               <p className="text-sm text-text-body">
                 <span className="text-text-muted">Email: </span>{user.email}
               </p>
               {user.preferred_method && (
                 <p className="text-sm text-text-body">
-                  <span className="text-text-muted">Học bằng: </span>
-                  {user.preferred_method === "video" ? "🎥 Video" : "📖 Đọc tài liệu"}
+                  <span className="text-text-muted">Learn with: </span>
+                  {user.preferred_method === "video" ? "🎥 Video" : "📖 Reading materials"}
                 </p>
               )}
               {user.available_hours_per_week && (
                 <p className="text-sm text-text-body">
-                  <span className="text-text-muted">Giờ học / tuần: </span>
+                  <span className="text-text-muted">Study hours / week: </span>
                   {user.available_hours_per_week}h
                 </p>
               )}
@@ -315,10 +315,10 @@ export default function ProfilePage() {
           <div className="card space-y-6 xl:px-8">
             <div>
               <h3 className="text-base font-bold text-text-strong">
-                Kỹ năng AI của bạn
+                Your AI skills
               </h3>
               <p className="text-sm mt-0.5 text-text-body">
-                Biểu đồ radar hiển thị trình độ của bạn trong các lĩnh vực AI khác nhau
+                The radar chart shows your proficiency across different AI areas
               </p>
             </div>
 
@@ -330,7 +330,7 @@ export default function ProfilePage() {
             {/* Legend */}
             <div className="flex items-center gap-2 text-xs text-text-muted">
               <div className="h-3 w-3 rounded-sm" style={{ backgroundColor: "rgba(37,99,235,0.3)", border: "2px solid #2563eb" }} />
-              Trình độ hiện tại
+              Current level
             </div>
 
             {/* Skill progress bars */}
@@ -363,8 +363,8 @@ export default function ProfilePage() {
 
             <p className="text-xs text-center text-text-muted">
               {hasSkillEvidence
-                ? "Kỹ năng này được tính từ kết quả assessment và các bài luyện tập đã lưu."
-                : "Hoàn thành assessment để cập nhật kỹ năng của bạn."}
+                ? "These skill levels are calculated from your assessment results and saved practice work."
+                : "Complete the assessment to update your skills."}
             </p>
           </div>
         </div>
