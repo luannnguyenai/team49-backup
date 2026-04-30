@@ -8,7 +8,7 @@ interface CourseCatalogProps {
   emptyMessage?: string;
 }
 
-const DEFAULT_EMPTY_MESSAGE = "Chưa có khóa học nào trong mục này.";
+const DEFAULT_EMPTY_MESSAGE = "There are no courses in this section yet.";
 
 function getGradientClass(slug: string) {
   const gradients = [
@@ -33,16 +33,16 @@ function getLearningProgressCopy(course: CourseCatalogItem) {
 
   if (course.progress_percent > 0) {
     return {
-      title: "Tiếp tục bài học",
+      title: "Continue lesson",
       subtitle: null,
-      progressLabel: `Tiến độ: ${course.progress_percent}%`,
+      progressLabel: `Progress: ${course.progress_percent}%`,
     };
   }
 
   return {
-    title: "Sẵn sàng học",
-    subtitle: "Sẵn sàng để bắt đầu ngay bây giờ",
-    progressLabel: "Tiến độ: 0%",
+    title: "Ready to learn",
+    subtitle: "Ready to start right now",
+    progressLabel: "Progress: 0%",
   };
 }
 
@@ -95,7 +95,7 @@ export default function CourseCatalog({
                       <CourseStatusBadge status={course.status} />
                     )}
                     <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
-                      {course.hero_badge ?? "Xem tổng quan"}
+                      {course.hero_badge ?? "View overview"}
                     </span>
                   </div>
 
@@ -114,7 +114,7 @@ export default function CourseCatalog({
                 <div className="flex flex-wrap items-center gap-2">
                   {course.is_recommended && (
                     <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">
-                      Đề xuất
+                      Recommended
                     </span>
                   )}
                 </div>
@@ -127,7 +127,7 @@ export default function CourseCatalog({
                   href={`/courses/${course.slug}`}
                   className="mt-auto inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
                 >
-                  Xem khóa học
+                  View course
                 </Link>
               </div>
             </article>
