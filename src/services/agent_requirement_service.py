@@ -53,7 +53,11 @@ class AgentPathRequirementService:
         canonical_units = await self.repo.get_canonical_units_by_ids(candidate_unit_ids)
         nav_by_id = await self.navigation_service.resolve_many(candidate_unit_ids)
         mastery_by_kp = {}
-        if request.include_mastery and user_id is not None:
+        if (
+            request.include_mastery
+            and user_id is not None
+            and hasattr(self.repo, "get_mastery_lcb_by_kp_ids")
+        ):
             mastery_by_kp = await self.repo.get_mastery_lcb_by_kp_ids(user_id, prereq_kp_ids)
 
         required_units: list[PathRequirementUnit] = []

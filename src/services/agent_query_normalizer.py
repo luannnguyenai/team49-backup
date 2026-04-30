@@ -8,8 +8,8 @@ from src.schemas.agent import QueryExpansion
 SYNONYMS: dict[str, list[str]] = {
     "vit": ["vision transformer"],
     "vision transformer": ["vit"],
-    "convnet": ["cnn", "convolutional network"],
-    "cnn": ["convnet", "convolutional network"],
+    "convnet": ["cnn", "convolutional network", "convolutional neural network"],
+    "cnn": ["convnet", "convolutional network", "convolutional neural network"],
     "rf": ["receptive field"],
     "receptive field": ["rf"],
     "word vectors": ["embeddings", "word embeddings"],
@@ -29,6 +29,7 @@ def normalize_query(query: str) -> tuple[str, list[str], list[QueryExpansion]]:
                 QueryExpansion(from_term=key, to=values, reason="domain_synonym")
             )
             for value in values:
+                expanded.add(value)
                 expanded.update(term for term in value.split() if len(term) > 1)
 
     return normalized, sorted(expanded), expansions
