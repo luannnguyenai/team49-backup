@@ -14,7 +14,7 @@ describe("StepGoalSelection", () => {
   it("renders 2 goal cards", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
-    expect(screen.getByText("Hướng bạn muốn tập trung là gì?")).toBeInTheDocument();
+    expect(screen.getByText("Which direction do you want to focus on?")).toBeInTheDocument();
     expect(screen.getByText("Computer Vision (CV)")).toBeInTheDocument();
     expect(screen.getByText("Natural Language Processing")).toBeInTheDocument();
   });
@@ -22,7 +22,7 @@ describe("StepGoalSelection", () => {
   it("Continue button is disabled when no goals are selected", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
-    const continueButton = screen.getByRole("button", { name: "Tiếp tục" });
+    const continueButton = screen.getByRole("button", { name: "Continue" });
     expect(continueButton).toBeDisabled();
   });
 
@@ -39,7 +39,7 @@ describe("StepGoalSelection", () => {
 
     fireEvent.click(screen.getByText("Computer Vision (CV)"));
 
-    const continueButton = screen.getByRole("button", { name: "Tiếp tục" });
+    const continueButton = screen.getByRole("button", { name: "Continue" });
     expect(continueButton).not.toBeDisabled();
   });
 
@@ -58,7 +58,7 @@ describe("StepGoalSelection", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
     fireEvent.click(screen.getByText("Natural Language Processing"));
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(onNextMock).toHaveBeenCalledOnce();
   });
@@ -66,7 +66,7 @@ describe("StepGoalSelection", () => {
   it("clicking Continue does not call onNext when no goal is selected", () => {
     render(<StepGoalSelection onNext={onNextMock} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Tiếp tục" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(onNextMock).not.toHaveBeenCalled();
   });
