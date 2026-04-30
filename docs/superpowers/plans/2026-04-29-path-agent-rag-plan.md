@@ -1490,3 +1490,7 @@ context
 ```
 
 Do not add embeddings yet. Add retrieval trace logging early so reviewers can inspect why the Agent selected each unit. Use assessment/player evidence as the only source of mastery changes. Keep the existing Lecture AI Tutor lecture-scoped and introduce a separate Path Agent for path/course-level questions.
+
+## 17. Implementation Plan Link
+
+Implementation tasks are tracked in `docs/superpowers/plans/2026-04-29-path-agent-rag-implementation.md`.

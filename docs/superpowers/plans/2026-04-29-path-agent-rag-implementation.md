@@ -14,6 +14,8 @@
 
 This plan implements backend contracts, deterministic retrieval, a narrow LangGraph workflow for assessment proposal/approval/reduction, and a minimal `/agent` chatbot UI. It does not implement streaming, vector embeddings, or free-form LLM answer generation. The chat orchestrator can return template-based grounded answers in V1 while preserving the final response shape for future LLM integration.
 
+Implementation status update: assessment handoff is now wired to the existing canonical assessment engine. When the user approves a LangGraph assessment proposal, `/api/agent/actions/start-assessment` creates an assessment session and returns the session/questions for the `/assessment` UI. Replan actions are backend-mediated: the backend validates a completed assessment session owned by the user, returns dry-run impact, and can call the existing recommendation engine when `dryRun=false`.
+
 LangGraph scope:
 
 - Use LangGraph only for long-running conversational workflow state: self-report → assessment proposal → user approval/reduction → assessment handoff → replan explanation.
@@ -82,7 +84,7 @@ Do not modify:
 
 - Existing Lecture AI Tutor routing/scope.
 - Existing assessment scoring/mastery update logic.
-- Existing planner generation logic except through future replan action stubs.
+- Existing planner generation logic except through the backend-mediated replan action.
 
 ---
 
@@ -3954,8 +3956,9 @@ git commit -m "feat: add path agent chat orchestrator"
 - Test: `tests/services/test_agent_assessment_workflow.py`
 
 This workflow is intentionally narrow. It coordinates the conversational
-assessment/replan handoff, but it does not score mastery, create quiz sessions,
-or mutate planner state. Those remain backend services/actions outside the graph.
+assessment/replan handoff, but it does not score mastery or mutate planner state.
+Quiz session creation and planner regeneration are performed by backend action
+endpoints after the workflow reaches an approved state.
 
 - [ ] **Step 1: Write failing tests**
 
@@ -4041,7 +4044,7 @@ def test_workflow_resume_invalid_reduce_budget_rejects_cleanly():
     assert response.actions == []
 
 
-def test_workflow_resume_approve_returns_disabled_start_assessment_action_until_wired():
+def test_workflow_resume_approve_returns_enabled_start_assessment_action():
     service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
     started = service.start(
         user_id="user-1",
@@ -4059,8 +4062,8 @@ def test_workflow_resume_approve_returns_disabled_start_assessment_action_until_
     assert response.status == "assessment_ready"
     assert response.actions[0].type == "start_assessment"
     assert response.actions[0].canonical_unit_ids == ["unit-a"]
-    assert response.actions[0].eligible is False
-    assert response.actions[0].disabled_reason == "not_implemented"
+    assert response.actions[0].eligible is True
+    assert response.actions[0].disabled_reason is None
 
 
 def test_workflow_resume_rejects_wrong_user():
@@ -4272,8 +4275,8 @@ class AgentAssessmentWorkflowService:
                         label="Start assessment",
                         canonical_unit_ids=state["candidate_canonical_unit_ids"],
                         default_phase=state["phase"],
-                        eligible=False,
-                        disabled_reason="not_implemented",
+                        questionBudget=int(state["question_budget"]),
+                        eligible=True,
                     )
                 ],
                 trace={"orchestrator": "langgraph", "node": "assessment_ready"},
@@ -4673,466 +4676,51 @@ git commit -m "feat: expose path agent api routes"
 
 **Files:**
 - Modify: `src/schemas/agent.py`
-- Create: `src/services/agent_action_service.py`
+- Modify: `src/services/agent_action_service.py`
 - Modify: `src/routers/agent.py`
 - Test: `tests/services/test_agent_action_service.py`
 - Test: `tests/contract/test_agent_routes.py`
 
-- [ ] **Step 1: Write failing tests**
+Implementation status: action endpoints are wired to real backend services.
+`start-assessment` calls the canonical assessment service and returns a created
+assessment session payload (`sessionId`, `questions`, `canonicalUnitIds`, and
+`href`). `request-replan` requires a backend-owned completed assessment session;
+the backend validates ownership/completion via `get_assessment_results`, returns
+impact for `dryRun=true`, and calls `generate_learning_path` when `dryRun=false`.
+The client never supplies authoritative phase/KP/mastery deltas.
 
-Create `tests/services/test_agent_action_service.py`:
+- [x] **Step 1: Add action service tests**
 
-```python
-from types import SimpleNamespace
+Covered cases:
 
-import pytest
+- `default_phase_for_intent()` maps assessment/review defaults.
+- `start_agent_assessment()` forwards canonical unit IDs, phase, and negotiated
+  question budget into the canonical assessment engine.
+- Replan validation rejects missing/invalid assessment sessions.
+- Replan dry-run impact is derived from owned assessment results.
 
-from src.services.agent_action_service import (
-    default_phase_for_intent,
-    start_assessment_not_implemented,
-    validate_replan_request,
-)
+- [x] **Step 2: Wire action endpoints**
 
+Routes:
 
-def test_default_phase_for_self_report_skip():
-    assert default_phase_for_intent("assess_knowledge", "self_report_skip") == "skip_verification"
+- `POST /api/agent/actions/start-assessment`
+- `POST /api/agent/actions/request-replan`
 
+Both endpoints require auth and use backend services for evidence/session
+validation. `start-assessment` returns `accepted=true` only after a session is
+created. `request-replan` returns `accepted=true` only after the assessment
+result is loaded for the current user.
 
-def test_default_phase_for_review():
-    assert default_phase_for_intent("summarize_progress", "stale_mastery") == "review"
+- [x] **Step 3: Add route contract tests**
 
+Covered cases:
 
-@pytest.mark.asyncio
-async def test_replan_validation_rejects_missing_evidence():
-    result = await validate_replan_request(
-        SimpleNamespace(assessment_session_id=None, source_canonical_unit_ids=[]),
-        user_id="user-1",
-    )
+- Assessment workflow start/resume event validation.
+- Workflow ownership enforcement.
+- `start-assessment` returns a usable session/questions payload.
+- `request-replan` returns backend-derived dry-run impact.
 
-    assert result.accepted is False
-    assert result.rejected_reason == "missing_evidence"
-
-
-def test_start_assessment_stub_is_not_accepted_until_wired():
-    result = start_assessment_not_implemented()
-
-    assert result.accepted is False
-    assert result.rejected_reason == "not_implemented"
-```
-
-- [ ] **Step 2: Run tests and verify failure**
-
-Run:
-
-```bash
-pytest tests/services/test_agent_action_service.py -q
-```
-
-Expected: FAIL with `ModuleNotFoundError`.
-
-- [ ] **Step 3: Implement action service**
-
-Create `src/services/agent_action_service.py`:
-
-```python
-from __future__ import annotations
-
-from dataclasses import dataclass
-
-
-def default_phase_for_intent(intent: str, reason: str | None = None) -> str:
-    if reason == "self_report_skip":
-        return "skip_verification"
-    if reason == "stale_mastery":
-        return "review"
-    if reason == "bridge_gap":
-        return "bridge_check"
-    if reason == "end_of_unit":
-        return "final_quiz"
-    if intent == "assess_knowledge":
-        return "placement"
-    return "review"
-
-
-@dataclass(slots=True)
-class ReplanValidationResult:
-    accepted: bool
-    rejected_reason: str | None = None
-
-
-def start_assessment_not_implemented() -> ReplanValidationResult:
-    return ReplanValidationResult(accepted=False, rejected_reason="not_implemented")
-
-
-async def validate_replan_request(request, user_id: str) -> ReplanValidationResult:
-    """V1 stub: no DB-backed evidence validation or mutation is wired yet."""
-    assessment_session_id = getattr(request, "assessment_session_id", None)
-    source_unit_ids = getattr(request, "source_canonical_unit_ids", [])
-    if not assessment_session_id and not source_unit_ids:
-        return ReplanValidationResult(accepted=False, rejected_reason="missing_evidence")
-    return ReplanValidationResult(accepted=False, rejected_reason="not_implemented")
-```
-
-- [ ] **Step 4: Wire action endpoints**
-
-Modify `src/routers/agent.py` imports:
-
-```python
-from src.schemas.agent import (
-    AgentActionResponse,
-    AgentAssessmentWorkflowRequest,
-    AgentAssessmentWorkflowResponse,
-    RequestReplanActionRequest,
-    StartAssessmentActionRequest,
-)
-from src.services.agent_assessment_workflow import AgentAssessmentWorkflowService
-from src.services.agent_action_service import start_assessment_not_implemented, validate_replan_request
-```
-
-Add module-level workflow service and endpoints:
-
-```python
-assessment_workflow_service = AgentAssessmentWorkflowService()
-
-
-async def _validate_workflow_candidates_in_scope(
-    canonical_unit_ids: list[str],
-    *,
-    allowed_course_ids: list[str],
-    db: AsyncSession,
-) -> None:
-    if not canonical_unit_ids:
-        raise HTTPException(status_code=422, detail="candidateCanonicalUnitIds_required")
-
-    repo = CanonicalContentRepository(db)
-    units_by_id = await repo.get_canonical_units_by_ids(canonical_unit_ids)
-    missing_ids = [unit_id for unit_id in canonical_unit_ids if unit_id not in units_by_id]
-    if missing_ids:
-        raise HTTPException(status_code=404, detail="canonical_unit_not_found")
-
-    allowed = {course_id.lower() for course_id in allowed_course_ids}
-    out_of_scope = [
-        unit_id
-        for unit_id, unit in units_by_id.items()
-        if str(getattr(unit, "course_id", "")).lower() not in allowed
-    ]
-    if out_of_scope:
-        raise HTTPException(status_code=403, detail="canonical_unit_out_of_scope")
-
-
-@agent_router.post("/assessment-workflows", response_model=AgentAssessmentWorkflowResponse)
-async def agent_start_assessment_workflow(
-    body: AgentAssessmentWorkflowRequest,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db),
-) -> AgentAssessmentWorkflowResponse:
-    if body.event != "start":
-        raise HTTPException(status_code=422, detail="event_must_be_start")
-    context = await _agent_context_for_user(user, db)
-    await _validate_workflow_candidates_in_scope(
-        body.candidate_canonical_unit_ids,
-        allowed_course_ids=context.allowed_course_ids,
-        db=db,
-    )
-    return assessment_workflow_service.start(
-        user_id=str(user.id),
-        candidate_canonical_unit_ids=body.candidate_canonical_unit_ids,
-        question_budget=body.question_budget,
-        phase=body.phase,
-    )
-
-
-@agent_router.post(
-    "/assessment-workflows/{workflow_id}/resume",
-    response_model=AgentAssessmentWorkflowResponse,
-)
-async def agent_resume_assessment_workflow(
-    workflow_id: str,
-    body: AgentAssessmentWorkflowRequest,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db),
-) -> AgentAssessmentWorkflowResponse:
-    if body.event != "resume":
-        raise HTTPException(status_code=422, detail="event_must_be_resume")
-    try:
-        return assessment_workflow_service.resume(
-            workflow_id=workflow_id,
-            user_id=str(user.id),
-            decision=body.decision or {},
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except PermissionError as exc:
-        raise HTTPException(status_code=403, detail=str(exc)) from exc
-```
-
-Add action endpoints:
-
-```python
-@agent_router.post("/actions/start-assessment", response_model=AgentActionResponse)
-async def agent_start_assessment(
-    body: StartAssessmentActionRequest,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db),
-) -> AgentActionResponse:
-    result = start_assessment_not_implemented()
-    return AgentActionResponse(
-        accepted=result.accepted,
-        rejectedReason=result.rejected_reason,
-        dryRun=True,
-        impact=None,
-    )
-
-
-@agent_router.post("/actions/request-replan", response_model=AgentActionResponse)
-async def agent_request_replan(
-    body: RequestReplanActionRequest,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db),
-) -> AgentActionResponse:
-    validation = await validate_replan_request(body, user_id=str(user.id))
-    return AgentActionResponse(
-        accepted=validation.accepted,
-        rejectedReason=validation.rejected_reason,
-        dryRun=body.dry_run,
-        impact={"mode": "dry_run_only"} if validation.accepted and body.dry_run else None,
-    )
-```
-
-Append to `tests/contract/test_agent_routes.py`:
-
-```python
-async def test_assessment_workflow_endpoint_returns_proposal_interrupt():
-    expected = {
-        "workflowId": "workflow-1",
-        "status": "waiting_user_approval",
-        "interrupt": {
-            "type": "assessment_proposal",
-            "estimatedQuestions": 15,
-            "estimatedTimeMinutes": 23,
-            "canonicalUnitIds": ["unit-a"],
-            "scope": [],
-            "difficultyMix": {"easy": 3, "medium": 8, "hard": 4, "application": 0},
-            "reductionOptions": [],
-        },
-        "actions": [],
-        "trace": {"orchestrator": "langgraph"},
-    }
-
-    with patch(
-        "src.routers.agent.assessment_workflow_service.start",
-        return_value=expected,
-    ), patch(
-        "src.routers.agent._validate_workflow_candidates_in_scope",
-        new=AsyncMock(return_value=None),
-    ), patch(
-        "src.routers.agent._agent_context_for_user",
-        new=AsyncMock(return_value=SimpleNamespace(allowed_course_ids=["CS231n"])),
-    ):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-            response = await client.post(
-                "/api/agent/assessment-workflows",
-                json={
-                    "event": "start",
-                    "candidateCanonicalUnitIds": ["unit-a"],
-                    "questionBudget": 15,
-                    "phase": "skip_verification",
-                },
-            )
-
-    assert response.status_code == 200
-    assert response.json()["status"] == "waiting_user_approval"
-    assert response.json()["interrupt"]["type"] == "assessment_proposal"
-
-
-async def test_assessment_workflow_start_rejects_out_of_scope_candidates():
-    with patch(
-        "src.routers.agent.CanonicalContentRepository.get_canonical_units_by_ids",
-        new=AsyncMock(
-            return_value={
-                "unit-outside-scope": SimpleNamespace(
-                    unit_id="unit-outside-scope",
-                    course_id="CS999",
-                )
-            }
-        ),
-    ), patch(
-        "src.routers.agent._agent_context_for_user",
-        new=AsyncMock(return_value=SimpleNamespace(allowed_course_ids=["CS231n"])),
-    ):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-            response = await client.post(
-                "/api/agent/assessment-workflows",
-                json={
-                    "event": "start",
-                    "candidateCanonicalUnitIds": ["unit-outside-scope"],
-                    "questionBudget": 15,
-                    "phase": "skip_verification",
-                },
-            )
-
-    assert response.status_code == 403
-
-
-async def test_assessment_workflow_start_rejects_resume_event():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-        response = await client.post(
-            "/api/agent/assessment-workflows",
-            json={
-                "event": "resume",
-                "candidateCanonicalUnitIds": ["unit-a"],
-                "questionBudget": 15,
-                "phase": "skip_verification",
-            },
-        )
-
-    assert response.status_code == 422
-    assert response.json()["detail"] == "event_must_be_start"
-
-
-async def test_assessment_workflow_resume_maps_reduce_response():
-    expected = {
-        "workflowId": "workflow-1",
-        "status": "waiting_user_approval",
-        "interrupt": {
-            "type": "assessment_proposal",
-            "estimatedQuestions": 15,
-            "estimatedTimeMinutes": 23,
-            "canonicalUnitIds": ["unit-a"],
-            "scope": [],
-            "difficultyMix": {"easy": 3, "medium": 8, "hard": 4, "application": 0},
-            "reductionOptions": [],
-        },
-        "actions": [],
-        "trace": {"orchestrator": "langgraph"},
-    }
-
-    with patch(
-        "src.routers.agent.assessment_workflow_service.resume",
-        return_value=expected,
-    ):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-            response = await client.post(
-                "/api/agent/assessment-workflows/workflow-1/resume",
-                json={
-                    "event": "resume",
-                    "decision": {"action": "reduce", "questionBudget": 15},
-                },
-            )
-
-    assert response.status_code == 200
-    assert response.json()["interrupt"]["estimatedQuestions"] == 15
-
-
-async def test_assessment_workflow_resume_rejects_start_event():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-        response = await client.post(
-            "/api/agent/assessment-workflows/workflow-1/resume",
-            json={"event": "start", "decision": {"action": "approve"}},
-        )
-
-    assert response.status_code == 422
-    assert response.json()["detail"] == "event_must_be_resume"
-
-
-async def test_assessment_workflow_resume_maps_approve_response():
-    expected = {
-        "workflowId": "workflow-1",
-        "status": "assessment_ready",
-        "interrupt": None,
-        "actions": [
-            {
-                "type": "start_assessment",
-                "label": "Start assessment",
-                "canonical_unit_ids": ["unit-a"],
-                "default_phase": "skip_verification",
-                "eligible": False,
-                "disabledReason": "not_implemented",
-            }
-        ],
-        "trace": {"orchestrator": "langgraph"},
-    }
-
-    with patch(
-        "src.routers.agent.assessment_workflow_service.resume",
-        return_value=expected,
-    ):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-            response = await client.post(
-                "/api/agent/assessment-workflows/workflow-1/resume",
-                json={"event": "resume", "decision": {"action": "approve"}},
-            )
-
-    assert response.status_code == 200
-    assert response.json()["status"] == "assessment_ready"
-    assert response.json()["actions"][0]["eligible"] is False
-    assert response.json()["actions"][0]["disabledReason"] == "not_implemented"
-
-
-async def test_assessment_workflow_resume_maps_ownership_error_to_403():
-    with patch(
-        "src.routers.agent.assessment_workflow_service.resume",
-        side_effect=PermissionError("workflow_out_of_scope"),
-    ):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-            response = await client.post(
-                "/api/agent/assessment-workflows/workflow-1/resume",
-                json={"event": "resume", "decision": {"action": "approve"}},
-            )
-
-    assert response.status_code == 403
-
-
-async def test_assessment_workflow_resume_maps_unknown_workflow_to_404():
-    with patch(
-        "src.routers.agent.assessment_workflow_service.resume",
-        side_effect=ValueError("workflow_not_found"),
-    ):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-            response = await client.post(
-                "/api/agent/assessment-workflows/missing-workflow/resume",
-                json={"event": "resume", "decision": {"action": "approve"}},
-            )
-
-    assert response.status_code == 404
-
-
-async def test_replan_action_is_disabled_until_db_validation_is_wired():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-        response = await client.post(
-            "/api/agent/actions/request-replan",
-            json={
-                "assessmentSessionId": "session-a",
-                "sourceCanonicalUnitIds": ["unit-a"],
-                "reason": "assessment_completed",
-                "dryRun": True,
-            },
-        )
-
-    assert response.status_code == 200
-    assert response.json()["accepted"] is False
-    assert response.json()["rejectedReason"] == "not_implemented"
-
-
-async def test_start_assessment_action_is_disabled_until_wired():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
-        response = await client.post(
-            "/api/agent/actions/start-assessment",
-            json={
-                "canonicalUnitIds": ["unit-a"],
-                "phase": "skip_verification",
-                "reason": "self_report_skip",
-            },
-        )
-
-    assert response.status_code == 200
-    assert response.json()["accepted"] is False
-    assert response.json()["rejectedReason"] == "not_implemented"
-```
-
-- [ ] **Step 5: Run tests**
-
-Run:
+- [x] **Step 4: Run tests**
 
 ```bash
 pytest tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py -q
@@ -5140,12 +4728,13 @@ pytest tests/services/test_agent_action_service.py tests/contract/test_agent_rou
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 5: Commit**
 
-```bash
-git add src/schemas/agent.py src/services/agent_action_service.py src/routers/agent.py tests/services/test_agent_action_service.py tests/contract/test_agent_routes.py
-git commit -m "feat: add agent action validation stubs"
-```
+Implemented in:
+
+- `218252a feat: wire agent assessments to quiz flow`
+- `41ff972 feat: validate agent replan actions`
+- `4a3cb94 chore: remove stale agent assessment stub`
 
 ---
 
@@ -5171,7 +4760,7 @@ Tests should assert:
 - Chat-history items show title, preview, and updated time only. Do not render category labels such as `Assessment`, `Path`, `Course`, or `General`.
 - Starting a new chat creates a new conversation UI state and does not hydrate messages or memory summary from previous chat sessions.
 - Agent responses render citations/direct links to `learn_href`.
-- Agent responses render action cards/buttons, including `start_assessment_workflow`, `continue_assessment_workflow`, and disabled `start_assessment` states.
+- Agent responses render action cards/buttons, including `start_assessment_workflow`, `continue_assessment_workflow`, and actionable `start_assessment` handoff states.
 - Assessment workflow cards render a proposal/negotiation state with exact question count, scope, difficulty mix, rationale, reduction options, and approval action. They must not render fixed onboarding-style `Quick` / `Balanced` / `Thorough` modes.
 - The right context panel renders session-scoped assistant memory status: recent message window, last summary update, and read-only memory summary. New chats show empty memory.
 - Legacy `/tutor` redirects or aliases to `/agent` according to the migration decision.
@@ -5343,4 +4932,4 @@ Known V1 limits:
 - Workflow start validates candidate canonical unit IDs against the authenticated user's allowed course scope before creating graph state.
 - Workflow resume validates stored workflow ownership against the authenticated user before accepting a resume decision.
 - LangGraph checkpointer is process-local in the V1 task to keep implementation small. Swap to a DB-backed checkpointer or `planner_session_state` persistence before horizontal scaling.
-- Replan mutation is intentionally not implemented; Task 12 exposes backend-mediated validation and dry-run action contracts only.
+- Replan mutation is backend-mediated. Task 12 validates completed assessment evidence owned by the user before returning dry-run impact or regenerating the path with `dryRun=false`.

@@ -115,3 +115,98 @@ async def test_assessment_workflow_resume_requires_owner_and_resume_event():
         app.dependency_overrides.clear()
 
     assert forbidden.status_code == 403
+
+
+async def test_start_assessment_action_returns_session_payload():
+    user_id = uuid4()
+
+    class Question:
+        def model_dump(self, mode="json"):
+            assert mode == "json"
+            return {
+                "item_id": "item-a",
+                "canonical_item_id": "item-a",
+                "canonical_unit_id": "unit-cnn",
+                "stem_text": "Question?",
+                "option_a": "A",
+                "option_b": "B",
+                "option_c": "C",
+                "option_d": "D",
+                "id": None,
+                "topic_id": None,
+                "bloom_level": None,
+                "difficulty_bucket": None,
+                "time_expected_seconds": None,
+            }
+
+    assessment = SimpleNamespace(
+        session_id=uuid4(),
+        total_questions=1,
+        questions=[Question()],
+    )
+
+    with patch(
+        "src.routers.agent.start_agent_assessment",
+        new=AsyncMock(return_value=assessment),
+    ):
+        client = await _client_for_user(user_id)
+        try:
+            response = await client.post(
+                "/api/agent/actions/start-assessment",
+                json={
+                    "canonicalUnitIds": ["unit-cnn"],
+                    "phase": "skip_verification",
+                    "questionBudget": 20,
+                    "reason": "agent_assessment_workflow_approved",
+                },
+            )
+        finally:
+            await client.aclose()
+            app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["accepted"] is True
+    assert payload["dryRun"] is False
+    assert payload["impact"]["sessionId"] == str(assessment.session_id)
+    assert payload["impact"]["totalQuestions"] == 1
+    assert payload["impact"]["questions"][0]["canonical_unit_id"] == "unit-cnn"
+
+
+async def test_replan_action_uses_backend_validated_impact():
+    user_id = uuid4()
+    validation = SimpleNamespace(
+        accepted=True,
+        rejected_reason=None,
+        impact={
+            "mode": "dry_run",
+            "assessmentSessionId": "11111111-1111-1111-1111-111111111111",
+            "decisionCounts": {"skip": 2, "review": 1, "relearn": 0},
+        },
+    )
+
+    with patch(
+        "src.routers.agent.validate_replan_request",
+        new=AsyncMock(return_value=validation),
+    ):
+        client = await _client_for_user(user_id)
+        try:
+            response = await client.post(
+                "/api/agent/actions/request-replan",
+                json={
+                    "assessmentSessionId": "11111111-1111-1111-1111-111111111111",
+                    "sourceCanonicalUnitIds": ["unit-cnn"],
+                    "reason": "assessment_completed",
+                    "dryRun": True,
+                },
+            )
+        finally:
+            await client.aclose()
+            app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["accepted"] is True
+    assert payload["dryRun"] is True
+    assert payload["impact"]["mode"] == "dry_run"
+    assert payload["impact"]["decisionCounts"]["skip"] == 2
