@@ -54,10 +54,10 @@ describe("auth forms preserve next redirect context", () => {
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "learner@example.com" },
     });
-    fireEvent.change(screen.getByLabelText("Mật khẩu"), {
+    fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "password1" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: "Đăng nhập" }).closest("form")!);
+    fireEvent.submit(screen.getByRole("button", { name: "Sign in" }).closest("form")!);
 
     await waitFor(() => {
       expect(loginMock).toHaveBeenCalledWith({
@@ -71,7 +71,7 @@ describe("auth forms preserve next redirect context", () => {
   it("login form preserves next on the register link", () => {
     render(<LoginForm />);
 
-    expect(screen.getByRole("link", { name: "Đăng ký ngay" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Sign up now" })).toHaveAttribute(
       "href",
       "/register?next=%2Fcourses%2Fcs231n%2Fstart",
     );
@@ -80,7 +80,7 @@ describe("auth forms preserve next redirect context", () => {
   it("login form preserves next on the forgot-password link", () => {
     render(<LoginForm />);
 
-    expect(screen.getByRole("link", { name: "Quên mật khẩu?" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Forgot password?" })).toHaveAttribute(
       "href",
       "/forgot-password?next=%2Fcourses%2Fcs231n%2Fstart",
     );
@@ -91,19 +91,19 @@ describe("auth forms preserve next redirect context", () => {
 
     render(<RegisterForm />);
 
-    fireEvent.change(screen.getByLabelText("Họ và tên"), {
+    fireEvent.change(screen.getByLabelText("Full name"), {
       target: { value: "Learner Example" },
     });
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "learner@example.com" },
     });
-    fireEvent.change(screen.getByLabelText("Mật khẩu"), {
+    fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "password1" },
     });
-    fireEvent.change(screen.getByLabelText("Xác nhận mật khẩu"), {
+    fireEvent.change(screen.getByLabelText("Confirm password"), {
       target: { value: "password1" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: "Tạo tài khoản" }).closest("form")!);
+    fireEvent.submit(screen.getByRole("button", { name: "Create account" }).closest("form")!);
 
     await waitFor(() => {
       expect(registerUserMock).toHaveBeenCalledWith({
@@ -120,7 +120,7 @@ describe("auth forms preserve next redirect context", () => {
   it("register form preserves next on the login link", () => {
     render(<RegisterForm />);
 
-    expect(screen.getByRole("link", { name: "Đăng nhập" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute(
       "href",
       "/login?next=%2Fcourses%2Fcs231n%2Fstart",
     );

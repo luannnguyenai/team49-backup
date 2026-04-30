@@ -7,7 +7,7 @@ describe("PublicTopNav theme contract", () => {
     render(<PublicTopNav />);
 
     expect(screen.getByRole("banner").className).toMatch(/backdrop-blur/);
-    expect(screen.getByRole("link", { name: /đăng ký/i }).className).toMatch(
+    expect(screen.getByRole("link", { name: /sign up/i }).className).toMatch(
       /bg-slate-950|btn-primary/,
     );
   });

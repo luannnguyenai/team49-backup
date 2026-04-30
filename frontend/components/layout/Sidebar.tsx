@@ -72,7 +72,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
             "hover:bg-slate-100 dark:hover:bg-slate-800",
             collapsed && "ml-0"
           )}
-          aria-label={collapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           style={{ color: "var(--text-muted)" }}
         >
           {collapsed ? (
@@ -147,7 +147,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
             <button
               onClick={handleLogout}
               className="rounded-md p-1.5 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
-              aria-label="Đăng xuất"
+              aria-label="Sign out"
               style={{ color: "var(--text-muted)" }}
             >
               <LogOut className="h-4 w-4" />
@@ -159,7 +159,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
             onClick={handleLogout}
             className="mt-1 flex w-full items-center justify-center rounded-lg p-2 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
             style={{ color: "var(--text-muted)" }}
-            aria-label="Đăng xuất"
+            aria-label="Sign out"
           >
             <LogOut className="h-4 w-4" />
           </button>
@@ -180,7 +180,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
         <div
           className="fixed inset-0 z-40 lg:hidden"
           onClick={onMobileClose}
-          aria-label="Đóng menu"
+          aria-label="Close menu"
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <aside

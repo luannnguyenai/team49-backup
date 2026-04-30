@@ -19,13 +19,13 @@ export interface NavItem {
 export const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tutor", label: "AI Tutor", icon: MessageSquareText },
-  { href: "/learn", label: "Học", icon: BookOpen },
+  { href: "/learn", label: "Learn", icon: BookOpen },
   {
     href: "/",
     label: "Courses",
     icon: Library,
     isActive: (pathname) => pathname === "/" || pathname.startsWith("/courses/"),
   },
-  { href: "/history", label: "Lịch sử", icon: History },
-  { href: "/profile", label: "Hồ sơ", icon: User },
+  { href: "/history", label: "History", icon: History },
+  { href: "/profile", label: "Profile", icon: User },
 ] as const satisfies readonly NavItem[];

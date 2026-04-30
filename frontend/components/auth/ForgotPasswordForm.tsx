@@ -15,16 +15,16 @@ import { getErrorMessage } from "@/lib/utils";
 
 const schema = z
   .object({
-    email: z.string().email("Email không hợp lệ"),
+    email: z.string().email("Invalid email address"),
     new_password: z
       .string()
-      .min(8, "Mật khẩu phải ít nhất 8 ký tự")
-      .regex(/\d/, "Mật khẩu phải chứa ít nhất 1 chữ số")
-      .regex(/[a-zA-Z]/, "Mật khẩu phải chứa ít nhất 1 chữ cái"),
+      .min(8, "Password must be at least 8 characters")
+      .regex(/\d/, "Password must contain at least 1 number")
+      .regex(/[a-zA-Z]/, "Password must contain at least 1 letter"),
     confirm_password: z.string(),
   })
   .refine((d) => d.new_password === d.confirm_password, {
-    message: "Mật khẩu xác nhận không khớp",
+    message: "Password confirmation does not match",
     path: ["confirm_password"],
   });
 
@@ -75,14 +75,14 @@ export default function ForgotPasswordForm() {
         label="Email"
         type="email"
         autoComplete="email"
-        placeholder="ban@example.com"
+        placeholder="you@example.com"
         leftElement={<Mail className="h-4 w-4" />}
         error={errors.email?.message}
         {...register("email")}
       />
 
       <Input
-        label="Mật khẩu mới"
+        label="New password"
         type={showPassword ? "text" : "password"}
         autoComplete="new-password"
         placeholder="••••••••"
@@ -92,7 +92,7 @@ export default function ForgotPasswordForm() {
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             className="hover:text-slate-600 dark:hover:text-slate-300"
-            aria-label={showPassword ? "Ẩn mật khẩu mới" : "Hiện mật khẩu mới"}
+            aria-label={showPassword ? "Hide new password" : "Show new password"}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -102,7 +102,7 @@ export default function ForgotPasswordForm() {
       />
 
       <Input
-        label="Xác nhận mật khẩu mới"
+        label="Confirm new password"
         type={showConfirm ? "text" : "password"}
         autoComplete="new-password"
         placeholder="••••••••"
@@ -112,7 +112,7 @@ export default function ForgotPasswordForm() {
             type="button"
             onClick={() => setShowConfirm((v) => !v)}
             className="hover:text-slate-600 dark:hover:text-slate-300"
-            aria-label={showConfirm ? "Ẩn xác nhận mật khẩu" : "Hiện xác nhận mật khẩu"}
+            aria-label={showConfirm ? "Hide password confirmation" : "Show password confirmation"}
           >
             {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -122,13 +122,13 @@ export default function ForgotPasswordForm() {
       />
 
       <Button type="submit" loading={isLoading} className="w-full">
-        Đổi mật khẩu
+        Reset password
       </Button>
 
       <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
-        Nhớ mật khẩu rồi?{" "}
+        Remembered your password?{" "}
         <Link href={loginHref} className="link">
-          Quay lại đăng nhập
+          Back to sign in
         </Link>
       </p>
     </form>
