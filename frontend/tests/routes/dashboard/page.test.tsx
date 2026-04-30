@@ -106,6 +106,14 @@ describe("dashboard search", () => {
     expect(screen.queryByText(CS231N_ITEM.title)).not.toBeInTheDocument();
   });
 
+  it("sets the browser tab title for the dashboard route", async () => {
+    render(<DashboardPage />);
+
+    await waitFor(() => {
+      expect(document.title).toBe("AI Learning Hub - Dashboard");
+    });
+  });
+
   it("applies search after the active dashboard tab filter", async () => {
     navigationMock.searchParams = new URLSearchParams("q=operations");
 
