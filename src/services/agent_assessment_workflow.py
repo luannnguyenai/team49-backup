@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from typing import Any, TypedDict
 from uuid import uuid4
 
+from langgraph.graph import END, START, StateGraph
 from pydantic import ValidationError
 
 from src.schemas.agent import (
@@ -12,15 +14,24 @@ from src.schemas.agent import (
 )
 
 
-class AgentAssessmentWorkflowService:
-    """Narrow assessment proposal workflow.
+class AssessmentWorkflowState(TypedDict, total=False):
+    workflow_id: str
+    user_id: str
+    candidate_canonical_unit_ids: list[str]
+    question_budget: int
+    phase: AssessmentPhase
+    status: str
+    decision: dict[str, Any] | AssessmentWorkflowDecision | None
+    interrupt: dict[str, Any] | None
+    actions: list[AgentAction]
 
-    The environment may not have LangGraph installed, so V1 keeps state in a
-    tiny in-process store while preserving the same start/resume contract.
-    """
+
+class AgentAssessmentWorkflowService:
+    """LangGraph-backed assessment proposal workflow with V1 in-process state."""
 
     def __init__(self):
         self._states: dict[str, dict] = {}
+        self._graph = self._build_graph()
 
     def start(
         self,
@@ -38,8 +49,9 @@ class AgentAssessmentWorkflowService:
             "phase": phase,
             "status": "waiting_user_approval",
         }
-        self._states[workflow_id] = state
-        return self._proposal_response(state)
+        next_state = self._graph.invoke(state)
+        self._states[workflow_id] = next_state
+        return self._response_from_state(next_state)
 
     def resume(
         self,
@@ -52,44 +64,85 @@ class AgentAssessmentWorkflowService:
             raise ValueError("workflow_not_found")
         if state["user_id"] != user_id:
             raise PermissionError("workflow_out_of_scope")
+        state = {**state, "decision": decision}
+        next_state = self._graph.invoke(state)
+        self._states[workflow_id] = next_state
+        return self._response_from_state(next_state)
+
+    def _build_graph(self):
+        graph = StateGraph(AssessmentWorkflowState)
+        graph.add_node("proposal", self._proposal_node)
+        graph.add_node("decision", self._decision_node)
+        graph.add_conditional_edges(
+            START,
+            lambda state: "decision" if state.get("decision") is not None else "proposal",
+            {"proposal": "proposal", "decision": "decision"},
+        )
+        graph.add_edge("proposal", END)
+        graph.add_edge("decision", END)
+        return graph.compile()
+
+    def _proposal_node(self, state: AssessmentWorkflowState) -> AssessmentWorkflowState:
+        next_state = dict(state)
+        next_state["status"] = "waiting_user_approval"
+        next_state["interrupt"] = self._build_interrupt(next_state)
+        next_state["actions"] = []
+        next_state.pop("decision", None)
+        return next_state
+
+    def _decision_node(self, state: AssessmentWorkflowState) -> AssessmentWorkflowState:
+        next_state = dict(state)
         try:
             parsed = (
                 decision
-                if isinstance(decision, AssessmentWorkflowDecision)
+                if isinstance((decision := next_state.get("decision")), AssessmentWorkflowDecision)
                 else AssessmentWorkflowDecision.model_validate(decision or {})
             )
         except ValidationError:
-            state["status"] = "rejected"
-            return self._final_response(state, actions=[])
+            next_state["status"] = "rejected"
+            next_state["interrupt"] = None
+            next_state["actions"] = []
+            next_state.pop("decision", None)
+            return next_state
 
         if parsed.action == "reject":
-            state["status"] = "rejected"
-            return self._final_response(state, actions=[])
+            next_state["status"] = "rejected"
+            next_state["interrupt"] = None
+            next_state["actions"] = []
+            next_state.pop("decision", None)
+            return next_state
         if parsed.action == "reduce":
             if parsed.reduction_id == "minimum-evidence":
-                state["question_budget"] = max(10, state["question_budget"] // 2)
+                next_state["question_budget"] = max(10, int(next_state["question_budget"]) // 2)
             elif parsed.question_budget is not None:
-                state["question_budget"] = max(1, min(parsed.question_budget, state["question_budget"]))
-            return self._proposal_response(state)
-
-        state["status"] = "assessment_ready"
-        return self._final_response(
-            state,
-            actions=[
-                AgentAction(
-                    type="start_assessment",
-                    label="Start assessment",
-                    canonical_unit_ids=state["candidate_canonical_unit_ids"],
-                    default_phase=state["phase"],
-                    eligible=False,
-                    disabledReason="not_implemented",
+                next_state["question_budget"] = max(
+                    1,
+                    min(parsed.question_budget, int(next_state["question_budget"])),
                 )
-            ],
-        )
+            next_state["status"] = "waiting_user_approval"
+            next_state["interrupt"] = self._build_interrupt(next_state)
+            next_state["actions"] = []
+            next_state.pop("decision", None)
+            return next_state
 
-    def _proposal_response(self, state: dict) -> AgentAssessmentWorkflowResponse:
+        next_state["status"] = "assessment_ready"
+        next_state["interrupt"] = None
+        next_state["actions"] = [
+            AgentAction(
+                type="start_assessment",
+                label="Start assessment",
+                canonical_unit_ids=next_state["candidate_canonical_unit_ids"],
+                default_phase=next_state["phase"],
+                eligible=False,
+                disabledReason="not_implemented",
+            )
+        ]
+        next_state.pop("decision", None)
+        return next_state
+
+    def _build_interrupt(self, state: AssessmentWorkflowState) -> dict[str, Any]:
         budget = int(state["question_budget"])
-        interrupt = {
+        return {
             "type": "assessment_proposal",
             "canonicalUnitIds": state["candidate_canonical_unit_ids"],
             "title": "Skip verification assessment",
@@ -120,19 +173,12 @@ class AgentAssessmentWorkflowService:
             "phase": state["phase"],
             "message": "Approve or reduce the assessment before starting.",
         }
-        return AgentAssessmentWorkflowResponse(
-            workflowId=state["workflow_id"],
-            status="waiting_user_approval",
-            interrupt=interrupt,
-            actions=[],
-            trace={"orchestrator": "workflow_v1"},
-        )
 
-    def _final_response(self, state: dict, actions: list[AgentAction]) -> AgentAssessmentWorkflowResponse:
+    def _response_from_state(self, state: AssessmentWorkflowState) -> AgentAssessmentWorkflowResponse:
         return AgentAssessmentWorkflowResponse(
             workflowId=state["workflow_id"],
             status=state["status"],
-            interrupt=None,
-            actions=actions,
-            trace={"orchestrator": "workflow_v1"},
+            interrupt=state.get("interrupt"),
+            actions=state.get("actions", []),
+            trace={"orchestrator": "langgraph_assessment_workflow_v1"},
         )
