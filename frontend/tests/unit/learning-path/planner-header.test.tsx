@@ -24,9 +24,9 @@ describe("PlannerHeader", () => {
     expect(screen.queryByText(/Render theo path cụ thể/)).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Computer Vision" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Đổi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Change" }));
 
-    expect(screen.getByRole("dialog", { name: "Đổi lộ trình" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Change learning path" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Natural Language Processing/ }));
 
