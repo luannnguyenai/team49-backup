@@ -610,6 +610,7 @@ describe("learning unit page (US3)", () => {
     fireEvent(video!, new Event("timeupdate"));
 
     expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
+    expect(screen.getByTestId("inline-quiz-backdrop")).toBeInTheDocument();
   });
 
   it("pauses the video as soon as the mid-video quiz prompt appears", async () => {
