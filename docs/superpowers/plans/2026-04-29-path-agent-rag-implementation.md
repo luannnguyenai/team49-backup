@@ -195,7 +195,22 @@ def test_assessment_workflow_request_supports_resume_decision():
     )
 
     assert request.workflow_id == "workflow-1"
-    assert request.decision["questionBudget"] == 15
+    assert request.decision.question_budget == 15
+
+
+def test_assessment_workflow_request_rejects_invalid_reduce_budget():
+    try:
+        AgentAssessmentWorkflowRequest.model_validate(
+            {
+                "event": "resume",
+                "workflowId": "workflow-1",
+                "decision": {"action": "reduce", "questionBudget": "abc"},
+            }
+        )
+    except ValidationError as exc:
+        assert "questionBudget" in str(exc)
+    else:
+        raise AssertionError("invalid reduce budget must fail request validation")
 ```
 
 - [ ] **Step 2: Run schema tests and verify failure**
@@ -380,6 +395,13 @@ class AgentActionResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class AssessmentWorkflowDecision(BaseModel):
+    action: Literal["approve", "reduce", "reject"]
+    question_budget: int | None = Field(default=None, ge=1, le=50, alias="questionBudget")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class AgentAssessmentWorkflowRequest(BaseModel):
     workflow_id: str | None = Field(default=None, alias="workflowId")
     event: Literal["start", "resume"] = "start"
@@ -389,7 +411,7 @@ class AgentAssessmentWorkflowRequest(BaseModel):
     )
     question_budget: int = Field(default=30, ge=1, le=50, alias="questionBudget")
     phase: AssessmentPhase = "skip_verification"
-    decision: dict | None = None
+    decision: AssessmentWorkflowDecision | None = None
     assessment_session_id: str | None = Field(default=None, alias="assessmentSessionId")
 
     model_config = ConfigDict(populate_by_name=True)
@@ -2511,6 +2533,25 @@ def test_workflow_resume_reduce_reissues_smaller_proposal():
     assert response.interrupt["questionBudget"] == 15
 
 
+def test_workflow_resume_invalid_reduce_budget_rejects_cleanly():
+    service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a"],
+        question_budget=10,
+        phase="skip_verification",
+    )
+
+    response = service.resume(
+        workflow_id=started.workflow_id,
+        user_id="user-1",
+        decision={"action": "reduce", "questionBudget": "abc"},
+    )
+
+    assert response.status == "rejected"
+    assert response.actions == []
+
+
 def test_workflow_resume_approve_returns_disabled_start_assessment_action_until_wired():
     service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
     started = service.start(
@@ -2608,8 +2649,14 @@ from uuid import uuid4
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
+from pydantic import ValidationError
 
-from src.schemas.agent import AgentAction, AgentAssessmentWorkflowResponse, AssessmentPhase
+from src.schemas.agent import (
+    AgentAction,
+    AgentAssessmentWorkflowResponse,
+    AssessmentPhase,
+    AssessmentWorkflowDecision,
+)
 
 
 class AssessmentWorkflowState(TypedDict, total=False):
@@ -2649,12 +2696,15 @@ class AgentAssessmentWorkflowService:
                 "message": "Approve or reduce the assessment before starting.",
             }
         )
-        action = str(decision.get("action", "")).lower()
-        if action == "reduce":
-            next_budget = int(decision.get("questionBudget") or state["question_budget"])
+        parsed_decision = self._parse_decision(decision)
+        if parsed_decision is None:
+            return Command(update={"status": "rejected"}, goto="rejected")
+
+        if parsed_decision.action == "reduce":
+            next_budget = parsed_decision.question_budget or state["question_budget"]
             next_budget = max(1, min(next_budget, state["question_budget"]))
             return Command(update={"question_budget": next_budget}, goto="proposal")
-        if action == "approve":
+        if parsed_decision.action == "approve":
             return Command(update={"status": "assessment_ready"}, goto="assessment_ready")
         return Command(update={"status": "rejected"}, goto="rejected")
 
@@ -2666,6 +2716,17 @@ class AgentAssessmentWorkflowService:
 
     def _config(self, workflow_id: str) -> dict:
         return {"configurable": {"thread_id": workflow_id}}
+
+    def _parse_decision(
+        self,
+        decision: dict | AssessmentWorkflowDecision,
+    ) -> AssessmentWorkflowDecision | None:
+        if isinstance(decision, AssessmentWorkflowDecision):
+            return decision
+        try:
+            return AssessmentWorkflowDecision.model_validate(decision)
+        except ValidationError:
+            return None
 
     def _response_from_result(
         self,
@@ -2741,7 +2802,7 @@ class AgentAssessmentWorkflowService:
         workflow_id: str,
         *,
         user_id: str,
-        decision: dict,
+        decision: dict | AssessmentWorkflowDecision,
     ) -> AgentAssessmentWorkflowResponse:
         state = self._state_for_workflow(workflow_id)
         if state.get("user_id") != user_id:
@@ -3223,17 +3284,21 @@ async def _validate_workflow_candidates_in_scope(
 ) -> None:
     if not canonical_unit_ids:
         raise HTTPException(status_code=422, detail="candidateCanonicalUnitIds_required")
-    service = AgentUnitContextService(CanonicalContentRepository(db))
-    for canonical_unit_id in canonical_unit_ids:
-        try:
-            await service.get_context(
-                canonical_unit_id,
-                allowed_course_ids=allowed_course_ids,
-            )
-        except ValueError as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except PermissionError as exc:
-            raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+    repo = CanonicalContentRepository(db)
+    units_by_id = await repo.get_canonical_units_by_ids(canonical_unit_ids)
+    missing_ids = [unit_id for unit_id in canonical_unit_ids if unit_id not in units_by_id]
+    if missing_ids:
+        raise HTTPException(status_code=404, detail="canonical_unit_not_found")
+
+    allowed = {course_id.lower() for course_id in allowed_course_ids}
+    out_of_scope = [
+        unit_id
+        for unit_id, unit in units_by_id.items()
+        if str(getattr(unit, "course_id", "")).lower() not in allowed
+    ]
+    if out_of_scope:
+        raise HTTPException(status_code=403, detail="canonical_unit_out_of_scope")
 
 
 @agent_router.post("/assessment-workflows", response_model=AgentAssessmentWorkflowResponse)
@@ -3242,6 +3307,8 @@ async def agent_start_assessment_workflow(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AgentAssessmentWorkflowResponse:
+    if body.event != "start":
+        raise HTTPException(status_code=422, detail="event_must_be_start")
     context = await _agent_context_for_user(user, db)
     await _validate_workflow_candidates_in_scope(
         body.candidate_canonical_unit_ids,
@@ -3266,6 +3333,8 @@ async def agent_resume_assessment_workflow(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AgentAssessmentWorkflowResponse:
+    if body.event != "resume":
+        raise HTTPException(status_code=422, detail="event_must_be_resume")
     try:
         return assessment_workflow_service.resume(
             workflow_id=workflow_id,
@@ -3331,8 +3400,8 @@ async def test_assessment_workflow_endpoint_returns_proposal_interrupt():
         "src.routers.agent.assessment_workflow_service.start",
         return_value=expected,
     ), patch(
-        "src.routers.agent.AgentUnitContextService.get_context",
-        new=AsyncMock(return_value=SimpleNamespace(canonical_unit_id="unit-a")),
+        "src.routers.agent._validate_workflow_candidates_in_scope",
+        new=AsyncMock(return_value=None),
     ), patch(
         "src.routers.agent._agent_context_for_user",
         new=AsyncMock(return_value=SimpleNamespace(allowed_course_ids=["CS231n"])),
@@ -3355,8 +3424,15 @@ async def test_assessment_workflow_endpoint_returns_proposal_interrupt():
 
 async def test_assessment_workflow_start_rejects_out_of_scope_candidates():
     with patch(
-        "src.routers.agent.AgentUnitContextService.get_context",
-        new=AsyncMock(side_effect=PermissionError("canonical_unit_out_of_scope")),
+        "src.routers.agent.CanonicalContentRepository.get_canonical_units_by_ids",
+        new=AsyncMock(
+            return_value={
+                "unit-outside-scope": SimpleNamespace(
+                    unit_id="unit-outside-scope",
+                    course_id="CS999",
+                )
+            }
+        ),
     ), patch(
         "src.routers.agent._agent_context_for_user",
         new=AsyncMock(return_value=SimpleNamespace(allowed_course_ids=["CS231n"])),
@@ -3373,6 +3449,22 @@ async def test_assessment_workflow_start_rejects_out_of_scope_candidates():
             )
 
     assert response.status_code == 403
+
+
+async def test_assessment_workflow_start_rejects_resume_event():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        response = await client.post(
+            "/api/agent/assessment-workflows",
+            json={
+                "event": "resume",
+                "candidateCanonicalUnitIds": ["unit-a"],
+                "questionBudget": 15,
+                "phase": "skip_verification",
+            },
+        )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "event_must_be_start"
 
 
 async def test_assessment_workflow_resume_maps_reduce_response():
@@ -3403,6 +3495,17 @@ async def test_assessment_workflow_resume_maps_reduce_response():
 
     assert response.status_code == 200
     assert response.json()["interrupt"]["questionBudget"] == 15
+
+
+async def test_assessment_workflow_resume_rejects_start_event():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        response = await client.post(
+            "/api/agent/assessment-workflows/workflow-1/resume",
+            json={"event": "start", "decision": {"action": "approve"}},
+        )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "event_must_be_resume"
 
 
 async def test_assessment_workflow_resume_maps_approve_response():
