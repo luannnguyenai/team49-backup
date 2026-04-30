@@ -538,6 +538,7 @@ class AgentActionResponse(BaseModel):
 class AssessmentWorkflowDecision(BaseModel):
     action: Literal["approve", "reduce", "reject"]
     question_budget: int | None = Field(default=None, ge=1, le=70, alias="questionBudget")
+    reduction_id: str | None = Field(default=None, alias="reductionId")
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -3464,6 +3465,9 @@ async def test_chat_asks_for_target_when_requirement_question_is_ambiguous():
 
     assert response.answer.confidence == "partial"
     assert "which target path" in response.answer.markdown.lower()
+    assert response.warning is not None
+    assert response.warning.type == "ambiguous_target"
+    assert [action.type for action in response.actions] == ["choose_target_path", "choose_target_path"]
 
 
 @pytest.mark.asyncio
@@ -3544,7 +3548,9 @@ async def test_chat_marks_controlled_catalog_answer_outside_current_path():
         is_reviewer=False,
     )
 
-    assert "outside your current path" in response.answer.markdown.lower()
+    assert response.warning is not None
+    assert response.warning.type == "outside_current_path"
+    assert "outside your current path" in response.warning.message.lower()
     assert response.citations[0].course_id == "CS224n"
 
 
@@ -3574,6 +3580,8 @@ async def test_chat_returns_assessment_workflow_action_card_for_skip_request():
     assert response.actions[0].type == "start_assessment_workflow"
     assert response.actions[0].eligible is True
     assert response.actions[0].canonical_unit_ids == ["cnn-unit-a", "cnn-unit-b"]
+    assert response.warning is not None
+    assert response.warning.type == "needs_assessment"
 ```
 
 - [ ] **Step 2: Run tests and verify failure**
@@ -3603,6 +3611,7 @@ from src.schemas.agent import (
     AgentChatRequest,
     AgentChatResponse,
     AgentFallback,
+    AgentWarning,
     PathRequirementsRequest,
     RetrievalTrace,
     UnitSearchRequest,
@@ -3748,6 +3757,13 @@ class AgentChatService:
                     ),
                     confidence="grounded",
                 ),
+                warning=AgentWarning(
+                    type="needs_assessment",
+                    message=(
+                        "Skipping requires assessment evidence. Self-report can start the workflow, "
+                        "but it cannot update mastery by itself."
+                    ),
+                ),
                 citations=[],
                 actions=[
                     AgentAction(
@@ -3775,8 +3791,21 @@ class AgentChatService:
                         ),
                         confidence="partial",
                     ),
+                    warning=AgentWarning(
+                        type="ambiguous_target",
+                        message=(
+                            "I need a target path before using the prerequisite graph reliably."
+                        ),
+                    ),
                     citations=[],
-                    actions=[],
+                    actions=[
+                        AgentAction(
+                            type="choose_target_path",
+                            label="Computer Vision",
+                            eligible=True,
+                        ),
+                        AgentAction(type="choose_target_path", label="NLP", eligible=True),
+                    ],
                 )
             requirements = await self.requirement_service.get_requirements(
                 PathRequirementsRequest(targetPathKey=target_path),
@@ -3870,8 +3899,16 @@ class AgentChatService:
                 )
 
         answer_markdown = "I found relevant learning units." if citations else "I could not find a grounded source."
+        warning = None
         if outside_current_path:
             answer_markdown += " Note: at least one cited unit is outside your current path."
+            warning = AgentWarning(
+                type="outside_current_path",
+                message=(
+                    "At least one cited unit is outside your current path, but it is still "
+                    "inside the controlled course catalog."
+                ),
+            )
 
         return AgentChatResponse(
             conversation_id=request.conversation_id or str(uuid4()),
@@ -3882,6 +3919,7 @@ class AgentChatService:
             ),
             citations=citations,
             actions=actions,
+            warning=warning,
             fallback=None if citations else AgentFallback(
                 reason="no_retrieval_result",
                 message="No grounded unit matched the query in your current scope.",
@@ -3963,6 +4001,25 @@ def test_workflow_resume_reduce_reissues_smaller_proposal():
 
     assert response.status == "waiting_user_approval"
     assert response.interrupt["estimatedQuestions"] == 15
+
+
+def test_workflow_resume_reduce_accepts_reduction_id():
+    service = AgentAssessmentWorkflowService(checkpointer=InMemorySaver())
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a", "unit-b"],
+        question_budget=30,
+        phase="skip_verification",
+    )
+
+    response = service.resume(
+        workflow_id=started.workflow_id,
+        user_id="user-1",
+        decision={"action": "reduce", "reductionId": "minimum-evidence"},
+    )
+
+    assert response.status == "waiting_user_approval"
+    assert response.interrupt["estimatedQuestions"] < 30
 
 
 def test_workflow_resume_invalid_reduce_budget_rejects_cleanly():
@@ -4157,7 +4214,10 @@ class AgentAssessmentWorkflowService:
             return Command(update={"status": "rejected"}, goto="rejected")
 
         if parsed_decision.action == "reduce":
-            next_budget = parsed_decision.question_budget or state["question_budget"]
+            if parsed_decision.reduction_id == "minimum-evidence":
+                next_budget = max(10, state["question_budget"] // 2)
+            else:
+                next_budget = parsed_decision.question_budget or state["question_budget"]
             next_budget = max(1, min(next_budget, state["question_budget"]))
             return Command(update={"question_budget": next_budget}, goto="proposal")
         if parsed_decision.action == "approve":
@@ -5159,7 +5219,11 @@ Implement a focused chat shell:
   - show unit/KP scope and difficulty mix,
   - show why this many questions are needed,
   - offer reduction actions such as `core only`, `remove application questions`, and `minimum evidence`,
-  - show `Start assessment` only after proposal approval.
+  - reduction buttons call `POST /api/agent/assessment-workflows/{workflowId}/resume` with `{"event":"resume","decision":{"action":"reduce","reductionId":"minimum-evidence"}}` or the option id selected by the user,
+  - approval calls the same resume endpoint with `{"event":"resume","decision":{"action":"approve"}}`,
+  - reject/cancel calls the same resume endpoint with `{"event":"resume","decision":{"action":"reject"}}` and returns to normal chat state,
+  - after every resume response, render the returned `status`, `interrupt`, and `actions` instead of mutating local UI state optimistically,
+  - show `Start assessment` only when the returned workflow status/action says assessment is ready.
 - For outside-current-path answers, render the warning text from the response without switching path.
 - Do not expose full trace to normal users.
 - Keep mock data in a separate local mock file or test fixture only; production components should render from API/adapted props.
@@ -5253,6 +5317,7 @@ git commit -m "docs: link path agent implementation plan"
 Spec coverage:
 
 - Chat/orchestration endpoint with explicit `AgentIntent` override and deterministic intent routing table: Task 9 and Task 11.
+- Chat/orchestration endpoint sets explicit warning fields for outside-current-path, needs-assessment, and ambiguous-target states: Task 9.
 - Trace exposure and full-trace restriction: Task 1 and Task 9.
 - User/path scope context: Task 3 and Task 11.
 - Unit-centered search with query normalization and score-first result ranking: Task 2, Task 4, Task 6.
@@ -5262,6 +5327,7 @@ Spec coverage:
 - Conversation sessions and same-session memory summaries: Task 8.75 and Task 12.5.
 - Path requirements/prerequisite graph with content/KP policy and real `learner_mastery_kp` mastery overlay: Task 4 and Task 7.
 - Assessment/replan workflow orchestration: Task 1 and Task 10.
+- Assessment workflow approval/reduction/reject resume calls and UI handling: Task 10 and Task 12.5.
 - Assessment/replan action guardrails: Task 1, Task 9, Task 10, Task 12.
 - Frontend `/agent` AI Assistant route, session history, session-scoped memory UI, and proposal/negotiation action cards: Task 12.5.
 - Frontend API adapter boundary for snake_case live contracts, explicit warning contract, raw replay JSON, null memory state, derived citation/proposal view-model fields, and action proposal rendering: Task 12.5.

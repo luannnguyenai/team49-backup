@@ -794,7 +794,7 @@ Frontend adapter rules:
 - The backend API contract remains canonical/snake_case: `answer.markdown`, `citations[].learn_href`, `actions[].canonical_unit_ids`, and `actions[].default_phase`.
 - The `/agent` UI may use camelCase view models internally, but conversion must be isolated in `frontend/lib/agent/agentAdapters.ts`.
 - Conversation replay messages return `citations` and `actions` as raw JSON snapshots. The UI must normalize them defensively instead of assuming every historical replay object matches the latest live schema.
-- Warnings are explicit response fields. The UI should render `warning.message` directly for outside-current-path, needs-assessment, and ambiguous-target states instead of inferring warning copy from fallback/citations/actions.
+- Warnings are explicit response fields. The orchestrator must set `warning` for outside-current-path, needs-assessment, and ambiguous-target states; the UI should render `warning.message` directly instead of inferring warning copy from fallback/citations/actions.
 - Rich UI citation fields such as `courseSlug`, `summary`, `startSec`, `endSec`, and `outsideCurrentPath` are view-model fields. Derive/default them from `course_id`, `quote`, `timestamp_s`, and response warning/scope context unless the backend schema is deliberately extended later.
 - UI assessment proposal fields such as `id` and `canReduce` are view-model fields. Derive `id` from `workflowId`/message id and `canReduce` from `reductionOptions.length > 0`.
 - Session history does not include category labels in V1. A single conversation can mix path, assessment, course, and general planning questions, so badges like `Assessment`, `Path`, `Course`, or `General` should not be rendered.
@@ -1018,7 +1018,12 @@ The caller may pass a phase, but the backend should validate it against intent a
 
 ### 8.7.5 `POST /api/agent/assessment-workflows`
 
-Starts or resumes the Agent-managed assessment proposal workflow. This is the endpoint the UI calls after receiving a `start_assessment_workflow` action from chat.
+Starts or resumes the Agent-managed assessment proposal workflow. The UI calls this after receiving a `start_assessment_workflow` action from chat.
+
+V1 HTTP shape:
+
+- Start: `POST /api/agent/assessment-workflows`
+- Resume/approve/reduce/reject: `POST /api/agent/assessment-workflows/{workflowId}/resume`
 
 Request:
 
@@ -1071,6 +1076,9 @@ Rules:
 - `event="start"` validates all candidate canonical units against the user's allowed course scope.
 - `event="resume"` validates workflow ownership before applying decisions.
 - `reduce` returns a revised proposal; it does not start assessment.
+- UI reduction buttons must call the resume endpoint with `event="resume"` and `decision.action="reduce"` plus the selected `reductionId`/budget.
+- UI approval and reject buttons must call the resume endpoint with `decision.action="approve"` or `decision.action="reject"`.
+- After every resume call, the UI must render returned `status`, `interrupt`, and `actions`; it must not locally assume the workflow advanced.
 - `approve` can return a `start_assessment` action. If the assessment service is not wired yet, the action must be disabled with `disabledReason="not_implemented"`.
 - The UI must render proposal/reduction state from `interrupt`, not invent question counts client-side.
 
