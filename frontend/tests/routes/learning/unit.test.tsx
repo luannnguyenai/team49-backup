@@ -762,6 +762,19 @@ describe("learning unit page (US3)", () => {
     });
   });
 
+  it("preloads the course catalog before the search input is focused", async () => {
+    navigationMock.pathname = "/dashboard";
+
+    render(<TopNav />);
+
+    await waitFor(() => {
+      expect(courseApiMock.catalog).toHaveBeenCalledWith({
+        view: "all",
+        includeUnavailable: true,
+      });
+    });
+  });
+
   it("shows matching courses in a dropdown beneath the search input", async () => {
     navigationMock.pathname = "/learn";
 
