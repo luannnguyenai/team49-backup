@@ -11,7 +11,7 @@ import { api } from "@/lib/api";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-const DEFAULT_TUTOR_STATUS = "Đang suy nghĩ...";
+const DEFAULT_TUTOR_STATUS = "Thinking...";
 
 interface ChatMessage {
   localId: string;
