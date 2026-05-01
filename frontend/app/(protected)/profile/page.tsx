@@ -14,6 +14,7 @@ import type {
 import RadarChart from "@/components/assessment/RadarChart";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { countJoinedCourseSlugs } from "@/features/course-membership/presenters";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { SKILL_COLORS } from "@/lib/ui/skillColors";
 
 const DEFAULT_SKILLS: UserSkillSnapshot[] = [
@@ -150,6 +151,7 @@ function StatRow({ icon, iconBg, label, value }: StatRowProps) {
 }
 
 export default function ProfilePage() {
+  usePageTitle("AI Learning Hub - Profile");
   const user = useAuthStore((s) => s.user);
   const [summary, setSummary] = useState<HistorySummary | null>(null);
   const [skills, setSkills] = useState<UserSkillSnapshot[]>(DEFAULT_SKILLS);
