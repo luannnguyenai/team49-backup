@@ -21,6 +21,7 @@ Create:
 - `src/services/agent_graph_contracts.py` - Pydantic/domain contracts for checkpoint state, routing, slots, policy, pending actions, typed tool results, and graph node names.
 - `src/services/agent_graph_router.py` - structured intent router and deterministic test router seam.
 - `src/services/agent_structured_router.py` - production structured-output LLM router with schema validation and clarify fallback.
+- `src/services/agent_router_factory.py` - production router factory that builds `StructuredAgentRouter` from app settings and never falls back to deterministic keyword routing.
 - `src/services/agent_slot_resolver.py` - deterministic canonicalization from extracted slots to canonical unit/course/planner ids.
 - `src/services/agent_search_scope_service.py` - current-path, explicit-path, and expanded-path search scope policy.
 - `src/services/agent_policy_service.py` - `PolicyDecision` validation before tool execution/action proposal.
@@ -33,10 +34,12 @@ Create:
 - `tests/repositories/test_agent_graph_repo.py`
 - `tests/services/test_agent_graph_router.py`
 - `tests/services/test_agent_structured_router.py`
+- `tests/services/test_agent_router_factory.py`
 - `tests/services/test_agent_slot_resolver.py`
 - `tests/services/test_agent_search_scope_service.py`
 - `tests/services/test_agent_policy_service.py`
 - `tests/services/test_agent_path_switch_service.py`
+- `tests/services/test_agent_graph_actions.py`
 - `tests/services/test_agent_response_composer.py`
 - `tests/services/test_agent_graph_service.py`
 - `tests/contract/test_agent_graph_routes.py`
@@ -1145,7 +1148,6 @@ git commit -m "feat: add agent graph routing primitives"
 
 **Files:**
 - Create: `src/services/agent_structured_router.py`
-- Modify: `src/services/agent_graph_service.py`
 - Test: `tests/services/test_agent_structured_router.py`
 
 - [ ] **Step 1: Write structured router tests with a fake structured-output model**
@@ -1303,16 +1305,16 @@ class StructuredAgentRouter:
         )
 ```
 
-- [ ] **Step 4: Mark deterministic router as test/bootstrap-only in graph service**
+- [ ] **Step 4: Mark deterministic router as test/bootstrap-only in the router module**
 
-In `src/services/agent_graph_service.py`, keep `DeterministicAgentRouter` only as a test default:
+In `src/services/agent_graph_router.py`, keep the deterministic router docstring explicit:
 
 ```python
-    def __init__(self, search_service, requirement_service, router=None):
-        # router=None is allowed only for tests and bootstrap integration.
-        # Production route wiring must pass StructuredAgentRouter.
-        self.router = router or DeterministicAgentRouter()
+class DeterministicAgentRouter:
+    """Test/integration seam only. Do not use as the production router."""
 ```
+
+Production route wiring is handled in the dedicated production wiring task after the graph service skeleton exists.
 
 - [ ] **Step 5: Run structured router tests**
 
@@ -1327,7 +1329,7 @@ Expected: pass.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/services/agent_structured_router.py src/services/agent_graph_service.py tests/services/test_agent_structured_router.py
+git add src/services/agent_structured_router.py src/services/agent_graph_router.py tests/services/test_agent_structured_router.py
 git commit -m "feat: add structured agent intent router"
 ```
 
@@ -1395,6 +1397,7 @@ async def test_graph_returns_grounded_find_content_from_search():
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
     )
 
     response = await service.chat(
@@ -1608,7 +1611,207 @@ git commit -m "feat: add agent LangGraph service skeleton"
 
 ---
 
-### Task 6: Search Scope Escalation
+### Task 6: Production Router Wiring And Fail-Safe
+
+This task is the production cutover from the deterministic seam to the structured-output router. The deterministic router remains importable for tests/bootstrap only. Production `/api/agent/chat` must not fall back to keyword routing when the model/provider is unavailable.
+
+**Files:**
+- Create: `src/services/agent_router_factory.py`
+- Modify: `src/services/agent_graph_service.py`
+- Modify: `src/routers/agent.py`
+- Test: `tests/services/test_agent_router_factory.py`
+- Test: `tests/contract/test_agent_graph_routes.py`
+
+- [ ] **Step 1: Write router factory tests**
+
+Create `tests/services/test_agent_router_factory.py`:
+
+```python
+import pytest
+
+from src.services.agent_graph_contracts import AgentRouterUnavailableError
+from src.services.agent_router_factory import build_production_agent_router
+from src.services.agent_structured_router import StructuredAgentRouter
+
+
+class Settings:
+    model_provider = "openai"
+    fast_model = "gpt-5-mini"
+
+
+class FakeChatModel:
+    def with_structured_output(self, schema):
+        return self
+
+
+def test_production_router_factory_builds_structured_router():
+    router = build_production_agent_router(
+        settings=Settings(),
+        init_chat_model=lambda **kwargs: FakeChatModel(),
+    )
+
+    assert isinstance(router, StructuredAgentRouter)
+
+
+def test_production_router_factory_fails_safe_without_provider():
+    class MissingSettings:
+        model_provider = ""
+        fast_model = "gpt-5-mini"
+
+    with pytest.raises(AgentRouterUnavailableError):
+        build_production_agent_router(
+            settings=MissingSettings(),
+            init_chat_model=lambda **kwargs: FakeChatModel(),
+        )
+
+
+def test_production_router_factory_does_not_return_deterministic_router_on_model_error():
+    def fail_model(**kwargs):
+        raise RuntimeError("provider unavailable")
+
+    with pytest.raises(AgentRouterUnavailableError):
+        build_production_agent_router(settings=Settings(), init_chat_model=fail_model)
+```
+
+- [ ] **Step 2: Run failing router factory tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_router_factory.py -q
+```
+
+Expected: missing `agent_router_factory` and `AgentRouterUnavailableError`.
+
+- [ ] **Step 3: Add fail-safe error contract**
+
+In `src/services/agent_graph_contracts.py`, add:
+
+```python
+from src.schemas.agent import AgentAnswer, AgentChatResponse, AgentWarning
+
+
+class AgentRouterUnavailableError(RuntimeError):
+    def to_response(self) -> AgentChatResponse:
+        return AgentChatResponse(
+            conversation_id="",
+            message_id="",
+            answer=AgentAnswer(
+                markdown="I cannot classify this request right now. Please try again shortly.",
+                confidence="fallback",
+            ),
+            warning=AgentWarning(
+                type="agent_unavailable",
+                message="The production router model is unavailable.",
+            ),
+        )
+```
+
+- [ ] **Step 4: Implement production router factory**
+
+Create `src/services/agent_router_factory.py`:
+
+```python
+from __future__ import annotations
+
+from langchain.chat_models import init_chat_model
+
+from src.config import settings
+from src.services.agent_graph_contracts import AgentRouterUnavailableError
+from src.services.agent_structured_router import StructuredAgentRouter
+from src.services.chat_model_factory import build_chat_model_kwargs
+
+
+def build_production_agent_router(
+    *,
+    settings=settings,
+    init_chat_model=init_chat_model,
+) -> StructuredAgentRouter:
+    provider = str(settings.model_provider or "").strip()
+    model = str(settings.fast_model or "").strip()
+    if not provider or not model:
+        raise AgentRouterUnavailableError("Agent router model/provider is not configured.")
+    try:
+        chat_model = init_chat_model(
+            **build_chat_model_kwargs(
+                model=model,
+                model_provider=provider,
+                temperature=0,
+            )
+        )
+    except Exception as exc:
+        raise AgentRouterUnavailableError("Agent router model/provider is unavailable.") from exc
+    return StructuredAgentRouter(model=chat_model)
+```
+
+This factory must never import or instantiate `DeterministicAgentRouter`.
+
+- [ ] **Step 5: Require explicit router injection in production graph service**
+
+In `src/services/agent_graph_service.py`, keep test ergonomics explicit:
+
+```python
+class AgentGraphService:
+    def __init__(self, search_service, requirement_service, router):
+        self.search_service = search_service
+        self.requirement_service = requirement_service
+        self.router = router
+```
+
+Update existing unit tests to pass `router=DeterministicAgentRouter()` or a fake router explicitly.
+
+- [ ] **Step 6: Wire `/api/agent/chat` to production router factory**
+
+In `src/routers/agent.py`, add:
+
+```python
+from src.services.agent_graph_contracts import AgentRouterUnavailableError
+from src.services.agent_router_factory import build_production_agent_router
+```
+
+Instantiate:
+
+```python
+router = build_production_agent_router()
+response = await AgentGraphService(search, requirements, router=router).chat(
+    request=body,
+    conversation_id=str(conversation_id),
+    thread_id=conversation.thread_id,
+    user_id=str(user.id),
+    allowed_course_ids=context.allowed_course_ids,
+)
+```
+
+Handle fail-safe without deterministic fallback:
+
+```python
+except AgentRouterUnavailableError as exc:
+    fallback = exc.to_response()
+    fallback.conversation_id = str(conversation_id)
+    fallback.message_id = str(uuid4())
+    return fallback
+```
+
+- [ ] **Step 7: Run router wiring tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_router_factory.py tests/services/test_agent_graph_service.py tests/contract/test_agent_graph_routes.py -q
+```
+
+Expected: pass, with production route tests asserting `build_production_agent_router` is called and no deterministic router fallback is used.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add src/services/agent_router_factory.py src/services/agent_graph_contracts.py src/services/agent_graph_service.py src/routers/agent.py tests/services/test_agent_router_factory.py tests/services/test_agent_graph_service.py tests/contract/test_agent_graph_routes.py
+git commit -m "feat: wire production structured agent router"
+```
+
+---
+
+### Task 7: Search Scope Escalation
 
 **Files:**
 - Create: `src/services/agent_search_scope_service.py`
@@ -1797,7 +2000,189 @@ git commit -m "feat: add agent search scope escalation"
 
 ---
 
-### Task 7: Router Integration, Dedupe, Locking, And 409 Responses
+### Task 8: Scope Expansion Confirmation And Expanded Retrieval
+
+This task completes the scope escalation loop. A current-path no-result offer must create thread-bound clarification state; a later "ok, search elsewhere" turn must approve expansion, rerun retrieval over expanded allowed paths, and disclose which path produced the answer.
+
+**Files:**
+- Modify: `src/services/agent_graph_contracts.py`
+- Modify: `src/services/agent_graph_service.py`
+- Modify: `src/services/agent_search_scope_service.py`
+- Modify: `src/services/agent_tool_nodes.py`
+- Test: `tests/services/test_agent_graph_service.py`
+- Test: `tests/services/test_agent_search_scope_service.py`
+
+- [ ] **Step 1: Add pending clarification contract tests**
+
+Append to `tests/services/test_agent_graph_contracts.py`:
+
+```python
+from src.services.agent_graph_contracts import PendingClarification
+
+
+def test_pending_clarification_tracks_scope_expansion():
+    pending = PendingClarification(
+        clarification_id="clar-scope-1",
+        type="search_scope_expansion",
+        status="awaiting_response",
+        payload={
+            "original_message": "attention mask ở đâu?",
+            "allowed_path_ids": ["computer_vision", "nlp"],
+            "current_path_ids": ["computer_vision"],
+        },
+    )
+
+    assert pending.type == "search_scope_expansion"
+    assert pending.payload["allowed_path_ids"] == ["computer_vision", "nlp"]
+```
+
+- [ ] **Step 2: Add expanded retrieval graph test**
+
+Append to `tests/services/test_agent_graph_service.py`:
+
+```python
+async def test_scope_expansion_confirmation_reruns_search_and_discloses_path():
+    calls = []
+
+    async def search(request, allowed_course_ids):
+        calls.append(list(allowed_course_ids))
+        if len(calls) == 1:
+            return UnitSearchResponse(
+                results=[],
+                trace=RetrievalTrace(trace_id="trace-current", ranking_version="unit_search_v1"),
+            )
+        return UnitSearchResponse(
+            results=[
+                {
+                    "canonical_unit_id": "unit-attention-mask",
+                    "course_id": "CS224n",
+                    "unit_name": "Attention Masks",
+                    "score": 3,
+                    "summary": "Attention mask content.",
+                    "path_id": "nlp",
+                }
+            ],
+            trace=RetrievalTrace(trace_id="trace-expanded", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+    )
+    conversation_id = str(uuid4())
+
+    first = await service.chat(
+        request=AgentChatRequest(message="attention mask ở đâu?", incomingMessageId="msg-scope-offer"),
+        conversation_id=conversation_id,
+        thread_id="thread-scope-expand",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n", "CS224n"],
+    )
+    second = await service.chat(
+        request=AgentChatRequest(message="ok, tìm path khác đi", incomingMessageId="msg-scope-approve"),
+        conversation_id=conversation_id,
+        thread_id="thread-scope-expand",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n", "CS224n"],
+    )
+
+    assert first.warning.type == "ambiguous_target"
+    assert second.answer.confidence in {"grounded", "partial"}
+    assert "NLP" in second.answer.markdown or "CS224n" in second.answer.markdown
+    assert calls == [["CS231n"], ["CS231n", "CS224n"]]
+```
+
+- [ ] **Step 3: Add pending clarification contract**
+
+In `src/services/agent_graph_contracts.py`, add:
+
+```python
+class PendingClarification(BaseModel):
+    clarification_id: str
+    type: Literal["search_scope_expansion", "slot_disambiguation", "intent_clarification"]
+    status: Literal["awaiting_response", "resolved", "cancelled", "expired"]
+    payload: dict[str, Any] = Field(default_factory=dict)
+    expires_at: datetime | None = None
+```
+
+Add `pending_clarification: PendingClarification | None = None` to `AgentCheckpointState`.
+
+- [ ] **Step 4: Implement approval detection without keyword routing override**
+
+In `src/services/agent_search_scope_service.py`, add:
+
+```python
+APPROVAL_PHRASES = {"ok", "yes", "approve", "được", "tìm path khác đi", "mở rộng tìm kiếm"}
+
+
+class AgentSearchScopeService:
+    def is_scope_expansion_approval(self, message: str, pending: PendingClarification | None) -> bool:
+        if pending is None or pending.type != "search_scope_expansion":
+            return False
+        normalized = message.lower().strip()
+        return normalized in APPROVAL_PHRASES or "mở rộng" in normalized or "path khác" in normalized
+```
+
+This approval detector may only resolve an already-pending scope expansion clarification. It must not classify fresh user intent.
+
+- [ ] **Step 5: Wire graph continuation**
+
+In `AgentGraphService._route_intent`, before calling the main router, check for a pending scope expansion clarification:
+
+```python
+pending = state.get("pending_clarification")
+scope_service = AgentSearchScopeService()
+if scope_service.is_scope_expansion_approval(state["message"], pending):
+    slots = AgentSlots(
+        raw_topic=pending.payload["original_message"],
+        search_scope="expanded_paths",
+        scope_expansion_approved=True,
+        resolved_search_path_ids=pending.payload["allowed_path_ids"],
+    )
+    return {
+        "intent": "find_content",
+        "intent_confidence": 1.0,
+        "slots": slots,
+        "pending_clarification": None,
+    }
+```
+
+In the no-result current-path branch, set:
+
+```python
+PendingClarification(
+    clarification_id=f"clar_{uuid4()}",
+    type="search_scope_expansion",
+    status="awaiting_response",
+    payload={
+        "original_message": state["message"],
+        "allowed_path_ids": ["computer_vision", "nlp"],
+        "current_path_ids": state["slots"].resolved_search_path_ids,
+    },
+)
+```
+
+- [ ] **Step 6: Run scope expansion continuation tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_search_scope_service.py tests/services/test_agent_graph_service.py tests/services/test_agent_graph_contracts.py -q
+```
+
+Expected: pass and expanded retrieval discloses the non-current path/source.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/services/agent_graph_contracts.py src/services/agent_graph_service.py src/services/agent_search_scope_service.py src/services/agent_tool_nodes.py tests/services/test_agent_graph_service.py tests/services/test_agent_search_scope_service.py tests/services/test_agent_graph_contracts.py
+git commit -m "feat: add agent scope expansion continuation"
+```
+
+---
+
+### Task 9: Router Integration, Dedupe, Locking, And 409 Responses
 
 This task routes traffic through the graph service and standardizes `409 in_progress`. It is not the full replay-safe persistence boundary. Until the following tasks move message persistence, response refs, and pending actions fully inside `AgentGraphService`, do not use this task as the production readiness checkpoint for dedupe/replay.
 
@@ -1944,13 +2329,14 @@ Modify imports in `src/routers/agent.py`:
 from fastapi.responses import JSONResponse
 from src.services.agent_graph_contracts import AgentInProgressError
 from src.services.agent_graph_service import AgentGraphService
+from src.services.agent_router_factory import build_production_agent_router
 ```
 
 Replace the body of `agent_chat` after conversation creation with:
 
 ```python
     try:
-        response = await AgentGraphService(search, requirements).chat(
+        response = await AgentGraphService(search, requirements, router=build_production_agent_router()).chat(
             request=body,
             conversation_id=str(conversation_id),
             thread_id=conversation.thread_id,
@@ -1987,7 +2373,219 @@ git commit -m "feat: route agent chat through LangGraph service"
 
 ---
 
-### Task 8: Pending Action API Shell And Continuation Endpoint
+### Task 10: Durable Run Lifecycle In `AgentGraphService`
+
+This task wires the runtime primitives into the graph orchestration path. After this task, `AgentGraphService.chat()` owns inbound dedupe, active-run checks, run status transitions, thread locking, response payload persistence, and exact replay of a prior `response_ref`.
+
+**Files:**
+- Modify: `src/services/agent_graph_service.py`
+- Modify: `src/repositories/agent_graph_repo.py`
+- Modify: `src/services/agent_lock_service.py`
+- Test: `tests/services/test_agent_graph_service.py`
+- Test: `tests/repositories/test_agent_graph_repo.py`
+
+- [ ] **Step 1: Add durable lifecycle tests**
+
+Append to `tests/services/test_agent_graph_service.py`:
+
+```python
+async def test_graph_chat_returns_prior_response_for_completed_incoming_message():
+    prior = AgentChatResponse(
+        conversation_id="conv-1",
+        message_id="assistant-1",
+        answer=AgentAnswer(markdown="Prior answer", confidence="grounded"),
+    )
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=prior),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=repo,
+        thread_lock=SimpleNamespace(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="retry", incomingMessageId="msg-dup"),
+        conversation_id="conv-1",
+        thread_id="thread-1",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response == prior
+
+
+async def test_graph_chat_active_run_returns_in_progress_before_invoking_graph():
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_active_run=AsyncMock(return_value=SimpleNamespace(graph_run_id="run-active")),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=repo,
+        thread_lock=SimpleNamespace(),
+    )
+
+    with pytest.raises(AgentInProgressError) as exc_info:
+        await service.chat(
+            request=AgentChatRequest(message="new", incomingMessageId="msg-new"),
+            conversation_id="conv-1",
+            thread_id="thread-1",
+            user_id=str(uuid4()),
+            allowed_course_ids=["CS231n"],
+        )
+
+    assert exc_info.value.graph_run_id == "run-active"
+```
+
+- [ ] **Step 2: Add success transition test**
+
+Append to `tests/services/test_agent_graph_service.py`:
+
+```python
+async def test_graph_chat_creates_run_locks_stores_response_and_marks_succeeded():
+    events = []
+
+    class Lock:
+        async def __aenter__(self):
+            events.append("lock")
+
+        async def __aexit__(self, exc_type, exc, tb):
+            events.append("unlock")
+
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_active_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(return_value=SimpleNamespace(graph_run_id="run-1")),
+        mark_run_running=AsyncMock(side_effect=lambda run_id: events.append("running")),
+        store_response_payload=AsyncMock(return_value="resp-1"),
+        mark_run_succeeded=AsyncMock(side_effect=lambda run_id, response_ref, checkpoint_id=None: events.append(("succeeded", response_ref))),
+        mark_run_failed=AsyncMock(),
+    )
+    lock_service = SimpleNamespace(
+        acquire=lambda **kwargs: Lock(),
+    )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-1", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=repo,
+        thread_lock=lock_service,
+    )
+
+    await service.chat(
+        request=AgentChatRequest(message="where is attention?", incomingMessageId="msg-1"),
+        conversation_id="conv-1",
+        thread_id="thread-1",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert events == ["lock", "running", ("succeeded", "resp-1"), "unlock"]
+```
+
+- [ ] **Step 3: Implement lifecycle orchestration**
+
+In `AgentGraphService.chat()`, wrap the existing graph invoke with this order:
+
+```python
+completed = await self.graph_repo.get_completed_response_by_incoming_message(
+    conversation_id=conversation_id,
+    thread_id=thread_id,
+    incoming_message_id=request.incoming_message_id,
+)
+if completed is not None:
+    return completed
+
+active_run = await self.graph_repo.get_active_run(thread_id=thread_id)
+if active_run is not None:
+    raise AgentInProgressError(conversation_id, thread_id, active_run.graph_run_id, retry_after_ms=1000)
+
+run = await self.graph_repo.create_run(
+    conversation_id=conversation_id,
+    thread_id=thread_id,
+    incoming_message_id=request.incoming_message_id,
+)
+
+async with self.thread_lock.acquire(
+    conversation_id=conversation_id,
+    thread_id=thread_id,
+    graph_run_id=run.graph_run_id,
+):
+    await self.graph_repo.mark_run_running(run.graph_run_id)
+    try:
+        response = await self._invoke_graph_and_compose(
+            request=request,
+            conversation_id=conversation_id,
+            thread_id=thread_id,
+            user_id=user_id,
+            allowed_course_ids=allowed_course_ids,
+        )
+        response_ref = await self.graph_repo.store_response_payload(
+            graph_run_id=run.graph_run_id,
+            response=response,
+            deterministic_key=f"{thread_id}:{request.incoming_message_id}",
+        )
+        await self.graph_repo.mark_run_succeeded(run.graph_run_id, response_ref=response_ref)
+        return response
+    except Exception as exc:
+        await self.graph_repo.mark_run_failed(run.graph_run_id, error=str(exc), retryable=True)
+        raise
+```
+
+Keep graph invocation in a private `_invoke_graph_and_compose()` helper so dedupe and run lifecycle cannot be bypassed by future route code.
+
+- [ ] **Step 4: Add repository response-ref helpers**
+
+In `src/repositories/agent_graph_repo.py`, add methods used above:
+
+```python
+async def get_completed_response_by_incoming_message(self, *, conversation_id: str, thread_id: str, incoming_message_id: str) -> AgentChatResponse | None:
+    run = await self.get_run_by_incoming_message(conversation_id, thread_id, incoming_message_id)
+    if run is None or run.status != "succeeded" or not run.response_ref:
+        return None
+    return await self.load_response_payload(run.response_ref)
+
+
+async def store_response_payload(self, *, graph_run_id: str, response: AgentChatResponse, deterministic_key: str) -> str:
+    response_ref = f"agent_response:{deterministic_key}"
+    await self.upsert_response_payload(response_ref=response_ref, graph_run_id=graph_run_id, payload=response.model_dump(mode="json", by_alias=True))
+    return response_ref
+```
+
+`response_ref` must be stable for the same `(thread_id, incoming_message_id)` so retries reuse the same assistant payload.
+
+- [ ] **Step 5: Run durable lifecycle tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_graph_service.py tests/repositories/test_agent_graph_repo.py -q
+```
+
+Expected: pass.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/services/agent_graph_service.py src/repositories/agent_graph_repo.py src/services/agent_lock_service.py tests/services/test_agent_graph_service.py tests/repositories/test_agent_graph_repo.py
+git commit -m "feat: wire durable agent graph run lifecycle"
+```
+
+---
+
+### Task 11: Pending Action API Shell And Continuation Endpoint
 
 This task creates the API and contract shell for pending-action continuation. It is not the production interrupt/resume implementation. Real LangGraph `interrupt()` boundaries, persisted pending-action validation, and idempotent commit nodes are completed in the path-switch, assessment, and replan action implementation tasks.
 
@@ -2011,7 +2609,11 @@ async def test_assessment_request_returns_pending_action_with_action_id():
             trace=RetrievalTrace(trace_id="trace-2", ranking_version="unit_search_v1"),
         )
 
-    service = AgentGraphService(search_service=SimpleNamespace(search=search), requirement_service=SimpleNamespace())
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+    )
 
     response = await service.chat(
         request=AgentChatRequest(message="Cho tôi quiz về attention mechanism", incomingMessageId="msg-3"),
@@ -2121,7 +2723,7 @@ async def agent_continue_action(
 ) -> AgentChatResponse:
     repo, _navigation, search, requirements = _services(db)
     try:
-        response = await AgentGraphService(search, requirements).resume_action(
+        response = await AgentGraphService(search, requirements, router=build_production_agent_router()).resume_action(
             request=body,
             user_id=str(user.id),
         )
@@ -2163,7 +2765,7 @@ git commit -m "feat: add agent pending action continuation shell"
 
 ---
 
-### Task 9: Path Switch Pending Action Workflow
+### Task 12: Path Switch Pending Action Workflow
 
 **Files:**
 - Create: `src/services/agent_path_switch_service.py`
@@ -2296,7 +2898,7 @@ Expected: missing path switch service.
 
 Create `src/services/agent_path_switch_service.py`:
 
-The in-memory `_commit_cache` below is a unit-test seam. Production wiring must back idempotency with `agent_pending_actions` / graph idempotency records, not process memory.
+The in-memory `_commit_cache` below is a unit-test seam. Production must not rely on process memory for idempotency; production wiring must back idempotency with `agent_pending_actions` / graph idempotency records.
 
 ```python
 from __future__ import annotations
@@ -2474,9 +3076,288 @@ git commit -m "feat: add agent path switch proposal workflow"
 
 ---
 
-### Task 10: Memory Compaction And Operational Safety
+### Task 13: Real LangGraph Interrupt/Resume Action Flow
 
-This task creates the initial compaction primitive and tests preservation of active context. It is not the final memory policy implementation until persistence is idempotent, summaries are stored by `memory_ref`, and refresh/version behavior is wired into `AgentGraphService`.
+This task replaces the pending-action shell with production graph boundaries. Assessment, replan, and path switch proposals must persist pending actions, pause with `interrupt()`, resume with the same `thread_id`, validate ownership/status/expiry/payload version, commit side effects with `idempotency_key`, and mark final action state exactly once.
+
+**Files:**
+- Modify: `src/services/agent_graph_service.py`
+- Modify: `src/services/agent_tool_nodes.py`
+- Modify: `src/repositories/agent_graph_repo.py`
+- Modify: `src/services/agent_path_switch_service.py`
+- Modify: `src/services/agent_action_service.py`
+- Test: `tests/services/test_agent_graph_actions.py`
+- Test: `tests/services/test_agent_path_switch_service.py`
+
+- [ ] **Step 1: Write interrupt proposal persistence test**
+
+Create `tests/services/test_agent_graph_actions.py`:
+
+```python
+from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
+from uuid import uuid4
+
+import pytest
+
+from src.schemas.agent import AgentActionResumeRequest, AgentChatRequest
+from src.services.agent_graph_router import AgentRoute, DeterministicAgentRouter
+from src.services.agent_graph_contracts import AgentSlots
+from src.services.agent_graph_service import AgentGraphService
+
+pytestmark = pytest.mark.asyncio
+
+
+class NoopLock:
+    async def __aenter__(self):
+        return None
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return None
+
+
+class NoopThreadLock:
+    def acquire(self, **kwargs):
+        return NoopLock()
+
+
+class PathSwitchRouter:
+    def route(self, message, route_context):
+        return AgentRoute(
+            intent="request_path_switch",
+            confidence=0.95,
+            extracted_slots=AgentSlots(target_path="nlp", requested_path_id="nlp"),
+            rationale="switch path",
+        )
+
+
+async def test_path_switch_proposal_persists_pending_action_before_interrupt():
+    repo = SimpleNamespace(
+        create_pending_action=AsyncMock(return_value=SimpleNamespace(action_id="act-1")),
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_active_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(return_value=SimpleNamespace(graph_run_id="run-1")),
+        mark_run_running=AsyncMock(),
+        store_response_payload=AsyncMock(return_value="resp-1"),
+        mark_run_succeeded=AsyncMock(),
+        mark_run_failed=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=PathSwitchRouter(),
+        graph_repo=repo,
+        thread_lock=NoopThreadLock(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Tôi muốn chuyển từ CV sang NLP.", incomingMessageId="msg-path"),
+        conversation_id="conv-1",
+        thread_id="thread-1",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS230", "CS224n", "CS231n"],
+    )
+
+    repo.create_pending_action.assert_awaited_once()
+    assert response.actions[0].action_id == "act-1"
+```
+
+- [ ] **Step 2: Write approve replay idempotency test**
+
+Append to `tests/services/test_agent_graph_actions.py`:
+
+```python
+async def test_resume_approve_commits_action_once_for_replayed_request():
+    pending = SimpleNamespace(
+        action_id="act-1",
+        type="request_path_switch",
+        status="awaiting_confirmation",
+        thread_id="thread-1",
+        conversation_id="conv-1",
+        user_id="user-1",
+        payload={"target_path_id": "nlp", "payload_version": 1},
+        payload_version=1,
+        idempotency_key="idem-act-1",
+        expires_at=datetime.now(UTC) + timedelta(minutes=30),
+    )
+    repo = SimpleNamespace(
+        get_pending_action=AsyncMock(return_value=pending),
+        get_committed_action_result=AsyncMock(side_effect=[None, {"targetPathId": "nlp"}]),
+        mark_action_committed=AsyncMock(),
+        mark_action_cancelled=AsyncMock(),
+    )
+    path_switch = SimpleNamespace(commit=AsyncMock(return_value={"targetPathId": "nlp"}))
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=repo,
+        thread_lock=NoopThreadLock(),
+        path_switch_service=path_switch,
+    )
+    request = AgentActionResumeRequest(
+        conversationId="conv-1",
+        actionId="act-1",
+        decision="approve",
+        incomingMessageId="msg-resume-1",
+    )
+
+    first = await service.resume_action(request=request, user_id="user-1")
+    second = await service.resume_action(request=request, user_id="user-1")
+
+    path_switch.commit.assert_awaited_once()
+    assert first.answer.markdown == second.answer.markdown
+```
+
+- [ ] **Step 3: Implement pending action persistence before interrupt**
+
+In `src/services/agent_graph_service.py`, add proposal nodes:
+
+```python
+from langgraph.types import interrupt
+
+
+async def _persist_pending_action_node(self, state: dict) -> dict:
+    proposal = state["action_proposal"]
+    pending = await self.graph_repo.create_pending_action(
+        conversation_id=state["conversation_id"],
+        thread_id=state["thread_id"],
+        user_id=state["user_id"],
+        action_type=proposal.type,
+        payload=proposal.payload,
+        payload_version=proposal.payload_version,
+        idempotency_key=proposal.idempotency_key,
+        expires_at=proposal.expires_at,
+    )
+    return {"pending_action": pending}
+
+
+async def _await_confirmation_node(self, state: dict) -> dict:
+    pending = state["pending_action"]
+    decision = interrupt(
+        {
+            "action_id": pending.action_id,
+            "type": pending.type,
+            "summary": pending.payload.get("impact_summary"),
+            "expires_at": pending.expires_at.isoformat(),
+        }
+    )
+    return {"resume_decision": decision}
+```
+
+The node that calls `interrupt()` must not perform business side effects. It only returns the resume decision.
+
+- [ ] **Step 4: Implement resume validation node**
+
+In `src/services/agent_graph_service.py`, add:
+
+```python
+async def _validate_pending_action_node(self, state: dict) -> dict:
+    pending = await self.graph_repo.get_pending_action(action_id=state["action_id"])
+    if pending is None:
+        return {"action_error": "missing_action"}
+    if pending.user_id != state["user_id"] or pending.thread_id != state["thread_id"]:
+        return {"action_error": "ownership_mismatch"}
+    if pending.status != "awaiting_confirmation":
+        return {"action_error": f"invalid_status:{pending.status}"}
+    if pending.expires_at <= datetime.now(UTC):
+        await self.graph_repo.mark_action_expired(pending.action_id)
+        return {"action_error": "expired"}
+    if pending.payload.get("payload_version") != pending.payload_version:
+        return {"action_error": "payload_version_mismatch"}
+    return {"pending_action": pending}
+```
+
+- [ ] **Step 5: Implement commit action node**
+
+In `src/services/agent_graph_service.py`, add dispatch by action type:
+
+```python
+async def _commit_action_node(self, state: dict) -> dict:
+    pending = state["pending_action"]
+    existing = await self.graph_repo.get_committed_action_result(pending.action_id)
+    if existing is not None:
+        return {"committed_action_result": existing}
+
+    if pending.type == "request_path_switch":
+        result = await self.path_switch_service.commit(
+            db=state["db"],
+            user=state["user"],
+            target_path_id=pending.payload["target_path_id"],
+            idempotency_key=pending.idempotency_key,
+        )
+    elif pending.type == "request_replan":
+        result = await self.replan_service.commit_replan(
+            db=state["db"],
+            user=state["user"],
+            payload=pending.payload,
+            idempotency_key=pending.idempotency_key,
+        )
+    elif pending.type in {"propose_assessment", "start_assessment"}:
+        result = await self.assessment_service.commit_assessment(
+            db=state["db"],
+            user=state["user"],
+            payload=pending.payload,
+            idempotency_key=pending.idempotency_key,
+        )
+    else:
+        raise ValueError(f"Unsupported pending action type: {pending.type}")
+
+    await self.graph_repo.mark_action_committed(pending.action_id, result=result)
+    return {"committed_action_result": result}
+```
+
+All business side effects must be inside commit services that accept `idempotency_key`; no proposal or interrupt node may mutate planner, assessment, or active path state.
+
+- [ ] **Step 6: Wire `resume_action()` to same `thread_id` and graph resume**
+
+In `resume_action()`, load the pending action, acquire the same thread lock, and resume:
+
+```python
+pending = await self.graph_repo.get_pending_action(action_id=request.action_id)
+if pending is None:
+    return self.composer.compose_action_error(request.conversation_id, "missing_action")
+
+async with self.thread_lock.acquire(
+    conversation_id=pending.conversation_id,
+    thread_id=pending.thread_id,
+    graph_run_id=f"resume:{request.incoming_message_id}",
+):
+    if request.decision == "reject":
+        await self.graph_repo.mark_action_cancelled(pending.action_id)
+        return self.composer.compose_action_cancelled(pending.conversation_id)
+    if request.decision == "edit":
+        edited = await self._validate_and_rebuild_action_proposal(pending, request.edit_payload)
+        return await self._interrupt_with_rebuilt_proposal(edited)
+    return await self._resume_graph_with_command(
+        thread_id=pending.thread_id,
+        resume_payload={"decision": "approve", "action_id": pending.action_id},
+    )
+```
+
+- [ ] **Step 7: Run real action flow tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_graph_actions.py tests/services/test_agent_path_switch_service.py tests/services/test_agent_graph_service.py -q
+```
+
+Expected: pass, including replay-safe approve behavior.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add src/services/agent_graph_service.py src/services/agent_tool_nodes.py src/repositories/agent_graph_repo.py src/services/agent_path_switch_service.py src/services/agent_action_service.py tests/services/test_agent_graph_actions.py tests/services/test_agent_path_switch_service.py tests/services/test_agent_graph_service.py
+git commit -m "feat: implement agent interrupt resume action flow"
+```
+
+---
+
+### Task 14: Memory Compaction And Operational Safety
+
+This task creates the initial compaction primitive and tests preservation of active context. It is not the final memory policy implementation: it does not yet integrate into `memory_ref`, enforce the full token/message threshold policy, or persist/version refreshes idempotently inside `AgentGraphService`.
 
 **Files:**
 - Create: `src/services/agent_memory_compaction_service.py`
@@ -2589,7 +3470,7 @@ git commit -m "feat: add agent thread memory compaction"
 
 ---
 
-### Task 11: Frontend Idempotency And Action IDs
+### Task 15: Frontend Idempotency And Action IDs
 
 **Files:**
 - Modify: `frontend/features/agent/api.ts`
@@ -2702,20 +3583,62 @@ Add continuation API:
 
 - [ ] **Step 4: Send stable incoming message ids from chat page**
 
-In `frontend/features/agent/components/AgentChatPage.tsx`, update `sendMessage`:
+In `frontend/features/agent/components/AgentChatPage.tsx`, create `incomingMessageId` once when the outbound user message object is created and store it on that local pending message. Retries for the same outbound message must reuse the stored id; they must not call `crypto.randomUUID()` again.
 
 ```ts
-const incomingMessageId =
-  typeof crypto !== "undefined" && "randomUUID" in crypto
+type PendingAgentMessage = {
+  localId: string;
+  role: "user";
+  content: string;
+  incomingMessageId: string;
+  retryCount: number;
+};
+
+function createIncomingMessageId() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `msg-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
 
+const pendingMessage: PendingAgentMessage = {
+  localId:
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+  role: "user",
+  content: message,
+  incomingMessageId: createIncomingMessageId(),
+  retryCount: 0,
+};
+```
+
+Send and retry with the same `pendingMessage.incomingMessageId`:
+
+```ts
 const response = await agentApi.chat({
-  message,
-  incomingMessageId,
+  message: pendingMessage.content,
+  incomingMessageId: pendingMessage.incomingMessageId,
   conversationId: activeSessionId,
   traceMode: "summary",
 });
+
+async function retryPendingMessage(pendingMessage: PendingAgentMessage) {
+  return agentApi.chat({
+    message: pendingMessage.content,
+    incomingMessageId: pendingMessage.incomingMessageId,
+    conversationId: activeSessionId,
+    traceMode: "summary",
+  });
+}
+```
+
+Do not implement retry by constructing a new outbound message object. A new UUID is correct only for a new user message or a new action continuation request:
+
+```ts
+const actionIncomingMessageId =
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `msg-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 ```
 
 When action buttons trigger backend continuation, use `getActionId(action)` and a new `incomingMessageId` for the continuation.
@@ -2739,7 +3662,7 @@ git commit -m "feat: add agent idempotency fields to frontend"
 
 ---
 
-### Task 12: Evaluation Suite, Janitor, And Operational Checks
+### Task 16: Evaluation Suite, Janitor, And Operational Checks
 
 The evaluation lane must target the production `StructuredAgentRouter` when a model provider is configured. The deterministic router seam may be used only for local unit tests that do not call a model.
 
@@ -2754,9 +3677,11 @@ The evaluation lane must target the production `StructuredAgentRouter` when a mo
 Create `tests/services/test_agent_routing_eval.py`:
 
 ```python
+import os
+
 import pytest
 
-from src.services.agent_graph_router import DeterministicAgentRouter
+from src.services.agent_router_factory import build_production_agent_router
 
 
 @pytest.mark.parametrize(
@@ -2770,8 +3695,12 @@ from src.services.agent_graph_router import DeterministicAgentRouter
         ("Trong path NLP có bài nào về attention mask không?", "request_path_switch"),
     ],
 )
+@pytest.mark.skipif(
+    os.getenv("RUN_AGENT_ROUTER_EVAL") != "1",
+    reason="Set RUN_AGENT_ROUTER_EVAL=1 to call the configured production router model.",
+)
 def test_adversarial_routing_does_not_follow_keyword_traps(message, not_intent):
-    route = DeterministicAgentRouter().route(message=message, route_context=None)
+    route = build_production_agent_router().route(message=message, route_context=None)
 
     assert route.intent != not_intent
 ```
@@ -2869,7 +3798,7 @@ git commit -m "test: add agent routing eval and ops janitor"
 
 ---
 
-### Task 13: Final Integration Verification And Legacy Path Deprecation
+### Task 17: Final Integration Verification And Legacy Path Deprecation
 
 **Files:**
 - Modify: `src/services/agent_chat_service.py`
@@ -2930,9 +3859,9 @@ git commit -m "chore: mark legacy agent chat service deprecated"
 
 ## Self-Review Checklist
 
-- Spec coverage: persistence ids, thread/checkpoint semantics, in-progress 409 payload, advisory lock, production structured router, context-aware routing, slot ambiguity, search scope escalation, path switch workflow, policy, typed results, no-evidence composer, pending actions, interrupt/resume shell, memory compaction, eval suite, ops runbook, frontend idempotency are covered by tasks.
+- Spec coverage: persistence ids, thread/checkpoint semantics, in-progress 409 payload, advisory lock, production structured router wiring, context-aware routing, slot ambiguity, search scope escalation, scope expansion continuation, path switch workflow, durable run lifecycle, policy, typed results, no-evidence composer, pending actions, real interrupt/resume action flow, memory compaction, eval suite, ops runbook, frontend idempotency are covered by tasks.
 - AI Tutor separation: no task modifies tutor routes/services.
 - Replay safety: response refs, run statuses, pending action idempotency, and janitor are covered.
 - Concurrency: V1 PostgreSQL advisory lock and `409 in_progress` payload are covered.
 - Rollout: legacy service is deprecated but retained for rollback.
-- Bootstrap caveats: deterministic router, graph skeleton, pending-action shell, and memory compaction primitive are explicitly marked as non-production-complete until later tasks replace or harden them.
+- Bootstrap caveats: deterministic router, graph skeleton, pending-action shell, and memory compaction primitive are explicitly marked as non-production-complete until later tasks replace or harden them. Production must not fall back to deterministic keyword routing or process-memory idempotency.
