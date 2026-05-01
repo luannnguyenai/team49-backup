@@ -14,7 +14,7 @@ from src.schemas.agent import (
     UnitSearchResponse,
     UnitSearchResult,
 )
-from src.services.agent_graph_contracts import AgentRoute, AgentSlots
+from src.services.agent_graph_contracts import AgentRoute, AgentSlots, PendingClarification
 from src.services.agent_graph_contracts import AgentInProgressError
 from src.services.agent_graph_router import DeterministicAgentRouter
 from src.services.agent_graph_service import AgentGraphService
@@ -95,6 +95,125 @@ async def test_graph_offers_scope_expansion_when_current_path_has_no_result():
     assert response.answer.confidence == "partial"
     assert response.warning is not None
     assert response.warning.type == "ambiguous_target"
+
+
+async def test_scope_expansion_pending_clarification_persists_to_thread_memory():
+    conversation_id = uuid4()
+    user_id = uuid4()
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-empty", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={"memoryRef": f"agent_memory:{conversation_id}:v1", "summaryVersion": 1},
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    await service.chat(
+        request=AgentChatRequest(message="attention mask ở đâu?", incomingMessageId="msg-scope-save"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-scope-save",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    summary = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]
+    pending = summary["pendingClarification"]
+    assert summary["memoryRef"] == f"agent_memory:{conversation_id}:v1"
+    assert pending["threadId"] == "thread-scope-save"
+    assert pending["clarification"]["type"] == "search_scope_expansion"
+    assert pending["clarification"]["payload"]["original_message"] == "attention mask ở đâu?"
+
+
+async def test_scope_expansion_approval_loads_persisted_clarification_and_clears_it():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    upserts = []
+    pending = PendingClarification(
+        clarification_id="clar-persisted",
+        type="search_scope_expansion",
+        status="awaiting_response",
+        payload={
+            "original_message": "attention mask ở đâu?",
+            "allowed_path_ids": ["computer_vision", "nlp"],
+            "current_path_ids": ["computer_vision"],
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        if request.course_ids and "CS224n" in request.course_ids:
+            return UnitSearchResponse(
+                results=[
+                    UnitSearchResult(
+                        canonical_unit_id="unit-mask",
+                        course_id="CS224n",
+                        unit_name="Attention Mask",
+                        summary="Attention mask content.",
+                        score=3,
+                        quiz_available=True,
+                    )
+                ],
+                trace=RetrievalTrace(trace_id="trace-expanded", ranking_version="unit_search_v1"),
+            )
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-empty", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-scope-approve",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(side_effect=lambda **kwargs: upserts.append(kwargs)),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="ok", incomingMessageId="msg-scope-approve"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-scope-approve",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert response.citations[0].course_id == "CS224n"
+    assert any("CS224n" in (request.course_ids or []) for request in search_requests)
+    assert upserts[-1]["summary_json"].get("pendingClarification") is None
 
 
 async def test_graph_chat_returns_prior_response_for_completed_incoming_message():

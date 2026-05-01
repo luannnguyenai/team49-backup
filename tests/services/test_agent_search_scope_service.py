@@ -22,6 +22,22 @@ def test_explicit_path_uses_requested_scope_directly():
     assert slots.resolved_search_path_ids == ["nlp"]
 
 
+def test_resolve_initial_scope_preserves_expanded_search_scope():
+    slots = AgentSearchScopeService().resolve_initial_scope(
+        slots=AgentSlots(
+            raw_topic="attention mask",
+            search_scope="expanded_paths",
+            scope_expansion_approved=True,
+            resolved_search_path_ids=["computer_vision", "nlp"],
+        ),
+        current_path_ids=["computer_vision"],
+    )
+
+    assert slots.search_scope == "expanded_paths"
+    assert slots.scope_expansion_approved is True
+    assert slots.resolved_search_path_ids == ["computer_vision", "nlp"]
+
+
 def test_approved_expansion_uses_allowed_paths():
     slots = AgentSearchScopeService().approve_expansion(
         slots=AgentSlots(raw_topic="attention mask", scope_expansion_offered=True),

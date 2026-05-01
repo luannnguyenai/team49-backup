@@ -13,6 +13,8 @@ APPROVAL_PHRASES = {"ok", "yes", "approve", "được", "duoc"}
 
 class AgentSearchScopeService:
     def resolve_initial_scope(self, slots: AgentSlots, current_path_ids: list[str]) -> AgentSlots:
+        if slots.search_scope != "current_path" and slots.resolved_search_path_ids:
+            return slots
         if slots.requested_path_id:
             return slots.model_copy(
                 update={

@@ -12,7 +12,7 @@
 
 ## Current Implementation Status
 
-Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, `6723d0e`, and `6ab4aeb`.
+Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, `6723d0e`, `6ab4aeb`, and the durable clarification-state follow-up.
 
 Status meanings:
 
@@ -30,14 +30,14 @@ Status meanings:
 | Task 5: Minimal Bootstrap LangGraph Service Skeleton And Tool Nodes | bootstrap-only | Graph skeleton and typed tool nodes are implemented. This task remains intentionally non-spec-complete. |
 | Task 6: Production Router Wiring And Fail-Safe | done | `/api/agent/chat` instantiates the production structured router factory; deterministic keyword routing is not used as production fallback. |
 | Task 7: Search Scope Escalation | done | Current-path-first search and scope expansion offer are implemented. |
-| Task 8: Scope Expansion Confirmation And Expanded Retrieval | partial | Approval phrase can continue expanded retrieval. Pending clarification is currently in service memory, not durable checkpoint/store state. |
+| Task 8: Scope Expansion Confirmation And Expanded Retrieval | done | Approval phrase continues expanded retrieval; pending scope-expansion clarification is stored in thread memory and cleared after resolution. |
 | Task 9: Router Integration, Dedupe, Locking, And 409 Responses | done | Chat route goes through `AgentGraphService`, dedupes by `incomingMessageId`, checks active runs, and returns `409 in_progress`. |
 | Task 10: Durable Run Lifecycle In `AgentGraphService` | done | Run creation/running/interrupted/succeeded/failed, response refs, active non-interrupted resume checks, and checkpoint id capture from LangGraph snapshots are wired. |
 | Task 10a: Interrupted Run Finalization | production-hardening added during implementation | Added `6723d0e` so approve/reject/expire finalizes the latest interrupted run and prevents permanent `409 in_progress` locks. |
 | Task 11: Pending Action API Shell And Continuation Endpoint | done | API shell, continuation contract, response persistence, and resume response replay by `incomingMessageId` are implemented. |
 | Task 12: Path Switch Pending Action Workflow | done | Path switch intent, validation, proposal payload, pending action, commit service, and result persistence are implemented. Ops/dashboard coverage remains outside this task. |
 | Task 13: Real LangGraph Interrupt/Resume Action Flow | done | Proposal nodes persist pending actions before a separate `interrupt()` node; `/actions/continue` resumes with `Command(resume=...)`; commit side effects run after resume with idempotency through pending-action `result_json`. Assessment and replan now call authoritative backend services. |
-| Task 14: Memory Compaction And Operational Safety | partial | Versioned `memory_ref` persistence, checkpoint id capture, and pending-action janitor exist. Full durable clarification-state storage and Postgres checkpointer wiring remain follow-up hardening. |
+| Task 14: Memory Compaction And Operational Safety | partial | Versioned `memory_ref` persistence, durable clarification state, checkpoint id capture, and pending-action janitor exist. Postgres checkpointer wiring and ops dashboards remain follow-up hardening. |
 | Task 15: Frontend Idempotency And Action IDs | done | Stable `incomingMessageId`, action ids, and `/actions/continue` approve/reject UI are implemented and covered by page tests. Unrelated dirty UI hunks remain isolated from the committed diff. |
 | Task 16: Evaluation Suite, Janitor, And Operational Checks | partial | Janitor primitive, migration checks, action-resume tests, and route/frontend coverage exist. Full LangSmith/offline eval suite and ops dashboards remain follow-up work. |
 | Task 17: Final Integration Verification And Legacy Path Deprecation | partial | Backend subset and frontend type-check/page tests pass. Legacy `AgentChatService` remains present as compatibility/reference until final deprecation is explicitly scheduled. |
@@ -56,6 +56,7 @@ Done-true in the current implementation:
 - Native LangGraph `interrupt()` / `Command(resume=...)` boundary for pending actions.
 - Authoritative assessment/replan/path-switch commit calls after resume.
 - Versioned `memory_ref` writes to conversation memory.
+- Durable pending clarification storage for scope-expansion approvals.
 - Checkpoint id capture from LangGraph state snapshots.
 - No-evidence/no-grounded-answer composer guard.
 - Search scope escalation offer and expanded-search continuation.
@@ -64,7 +65,6 @@ Done-true in the current implementation:
 
 Done-temporary or partial:
 
-- Durable clarification state for scope-expansion approval is still process-local until folded into the memory/checkpoint store.
 - Production Postgres checkpointer is dependency-injection ready, but the app still defaults to `InMemorySaver` unless a durable checkpointer is provided.
 - Full offline/online eval and ops dashboards are not implemented in this code pass.
 - Legacy `AgentChatService` is not removed yet.
@@ -76,7 +76,8 @@ Done-temporary or partial:
 - Added native LangGraph `interrupt()` / `Command(resume=...)` for pending action confirmations after the initial shell implementation.
 - Added `AgentActionCommitService` so assessment/replan approvals call authoritative backend services instead of generic confirmation.
 - Added checkpoint id capture from LangGraph state snapshots and versioned `memory_ref` persistence into conversation memory.
-- Frontend retry idempotency was implemented, but unrelated dirty hunks remain in `AgentChatPage.tsx` and must be isolated before final review.
+- Folded scope-expansion pending clarification into the conversation memory summary store; process memory is now only a hot cache.
+- Frontend retry idempotency was implemented; unrelated UI polish hunks were left out of the committed agent-flow changes.
 
 ---
 
