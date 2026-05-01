@@ -31,7 +31,7 @@ interface LearningPathState {
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) return error.message;
-  return "Không tải được lộ trình. Vui lòng thử lại.";
+  return "Unable to load the learning path. Please try again.";
 }
 
 function recomputeSummary(items: PathItemResponse[]): Omit<LearningPathResponse, "items"> {
