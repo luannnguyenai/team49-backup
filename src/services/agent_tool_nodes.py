@@ -11,6 +11,7 @@ from src.schemas.agent import (
     PathRequirementsRequest,
     UnitSearchRequest,
 )
+from src.services.agent_evidence_quality import AgentEvidenceQualityService
 from src.services.agent_graph_contracts import AgentSlots, ToolResult
 from src.services.agent_search_scope_service import AgentSearchScopeService
 
@@ -22,6 +23,7 @@ class AgentToolNodes:
         self.search_service = search_service
         self.requirement_service = requirement_service
         self.scope_service = AgentSearchScopeService()
+        self.evidence_quality = AgentEvidenceQualityService()
 
     async def clarify(self, message: str, reason: str = "ambiguous_target") -> ToolResult:
         clarification = "Could you clarify the course, unit, or learning goal you want help with?"
@@ -57,7 +59,7 @@ class AgentToolNodes:
                 scope="current_path",
                 courseIds=course_ids,
                 intent=intent,
-                limit=5,
+                limit=20,
             ),
             allowed_course_ids=allowed_course_ids,
         )
@@ -93,7 +95,38 @@ class AgentToolNodes:
                 },
                 trace=trace,
             )
-        results = all_results[:3]
+        verdict = self.evidence_quality.score(slots.raw_topic or message, all_results)
+        if verdict.label == "weak_match" and slots.search_scope == "current_path" and len(allowed_course_ids) > len(course_ids):
+            trace = search.trace.model_copy(
+                update={
+                    "intent": intent,
+                    "selected_path": slots.search_scope,
+                    "candidate_courses": course_ids,
+                    "selected_unit_ids": [],
+                }
+            )
+            return ToolResult(
+                kind="clarification",
+                answer_markdown=(
+                    "I only found weakly related results in your current path. "
+                    "Do you want me to expand the search to other allowed paths?"
+                ),
+                warning=AgentWarning(
+                    type="ambiguous_target",
+                    message="Current-path evidence was weak; expansion requires confirmation.",
+                ),
+                requires_evidence=False,
+                metadata={
+                    "scope_expansion_offered": True,
+                    "evidence_verdict": verdict.label,
+                    "evidence_reason_codes": verdict.reason_codes,
+                },
+                trace=trace,
+            )
+        selected_ids = set(verdict.selected_unit_ids)
+        results = [
+            result for result in all_results if result.canonical_unit_id in selected_ids
+        ][:3] or all_results[:3]
         citations = [
             AgentCitation(
                 canonical_unit_id=result.canonical_unit_id,
@@ -125,6 +158,19 @@ class AgentToolNodes:
                 "selected_unit_ids": [citation.canonical_unit_id for citation in citations],
             }
         )
+        if verdict.label == "weak_match" and not actions:
+            return ToolResult(
+                kind="find_content",
+                answer_markdown="I could not find a direct grounded source for that request.",
+                citations=[],
+                actions=[],
+                requires_evidence=True,
+                metadata={
+                    "evidence_verdict": verdict.label,
+                    "evidence_reason_codes": verdict.reason_codes,
+                },
+                trace=trace,
+            )
         if not citations and slots.search_scope == "current_path":
             return ToolResult(
                 kind="clarification",
@@ -142,6 +188,23 @@ class AgentToolNodes:
                 ),
                 requires_evidence=False,
                 metadata={"scope_expansion_offered": True},
+                trace=trace,
+            )
+        if not citations:
+            return ToolResult(
+                kind="find_content",
+                answer_markdown="I could not find a grounded source for that request.",
+                citations=[],
+                actions=[],
+                fallback=AgentFallback(
+                    reason="no_retrieval_result",
+                    message="No matching learning unit was found in the selected search scope.",
+                ),
+                requires_evidence=True,
+                metadata={
+                    "evidence_verdict": verdict.label,
+                    "evidence_reason_codes": verdict.reason_codes,
+                },
                 trace=trace,
             )
         if slots.search_scope == "expanded_paths" and citations:
@@ -209,12 +272,25 @@ class AgentToolNodes:
         disclosure = ""
         if slots.search_scope == "expanded_paths" and citations:
             disclosure = "\n\nI found this outside the original current-path search scope."
+        answer_markdown = disclosure.strip() or None
+        metadata = {
+            "evidence_verdict": verdict.label,
+            "evidence_reason_codes": verdict.reason_codes,
+            "match_reasons": verdict.match_reasons,
+        }
+        if verdict.label in {"related_match", "weak_match"}:
+            answer_markdown = answer_markdown or (
+                f"I found related results for {slots.raw_topic or message}, but they may not be an exact match. "
+                "If these are not what you need, describe the target more specifically."
+            )
+            metadata["answer_confidence"] = "partial"
         return ToolResult(
             kind="find_content",
-            answer_markdown=disclosure.strip() or None,
+            answer_markdown=answer_markdown,
             citations=citations,
             actions=actions,
-            requires_evidence=True,
+            requires_evidence=verdict.requires_grounded_answer,
+            metadata=metadata,
             trace=trace,
         )
 

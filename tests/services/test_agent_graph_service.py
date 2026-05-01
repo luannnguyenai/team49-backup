@@ -84,6 +84,7 @@ async def test_graph_returns_grounded_find_content_from_search():
     assert response.trace is not None
     assert response.trace.trace_id == "trace-1"
     assert response.trace.selected_path == "current_path"
+    assert response.trace.selected_unit_ids == ["unit-attn"]
 
 
 async def test_graph_dispatches_navigation_intent_to_content_search():
@@ -184,6 +185,54 @@ async def test_graph_downgrades_grounded_answer_when_llm_rejects_evidence():
     assert response.answer.confidence == "no_source"
     assert response.citations == []
     assert response.fallback is not None
+
+
+async def test_graph_marks_related_evidence_partial_before_llm_grounding():
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="cnn object detection"),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            raise AssertionError("Related evidence should not be treated as grounded evidence")
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-related-cnn",
+                    course_id="CS231n",
+                    unit_name="Visual recognition project examples",
+                    summary="Mentions CNNs and detection datasets at a high level.",
+                    score=1,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/related-cnn",
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-related-quality", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Where should I review cnn object detection?", incomingMessageId="msg-related-quality"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-related-quality",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert response.citations[0].canonical_unit_id == "unit-related-cnn"
+    assert response.actions[0].type == "open_unit"
 
 
 async def test_graph_offers_scope_expansion_when_current_path_evidence_is_weak():
@@ -396,6 +445,65 @@ async def test_expanded_search_with_too_many_results_asks_to_refine_or_show_top_
     assert persisted["clarification"]["payload"]["kind"] == "retrieval_query"
     assert persisted["clarification"]["payload"]["original_intent"] == "find_content"
     assert persisted["clarification"]["payload"]["show_top_results_allowed"] is True
+
+
+async def test_expanded_search_without_results_returns_no_source_not_generic_clarify():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    pending = PendingClarification(
+        clarification_id="clar-expanded-empty",
+        type="search_scope_expansion",
+        status="awaiting_response",
+        payload={
+            "original_message": "Where should I review dependency parsing?",
+            "raw_topic": "dependency parsing",
+            "allowed_path_ids": ["computer_vision", "nlp"],
+            "current_path_ids": ["computer_vision"],
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-expanded-empty-source", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-expanded-empty-source",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="yes, search other paths", incomingMessageId="msg-expanded-empty-source"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-expanded-empty-source",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "no_source"
+    assert "grounded source" in response.answer.markdown
+    assert response.fallback is not None
 
 
 async def test_current_path_search_with_too_many_results_asks_to_refine_or_show_top_results():

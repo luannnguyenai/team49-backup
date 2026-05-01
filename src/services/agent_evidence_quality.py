@@ -1,0 +1,122 @@
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from typing import Literal
+
+from src.schemas.agent import UnitSearchResult
+
+
+EvidenceLabel = Literal["direct_match", "related_match", "weak_match", "no_match"]
+
+
+@dataclass(frozen=True)
+class EvidenceQualityVerdict:
+    label: EvidenceLabel
+    selected_unit_ids: list[str] = field(default_factory=list)
+    reason_codes: list[str] = field(default_factory=list)
+    match_reasons: dict[str, str] = field(default_factory=dict)
+
+    @property
+    def requires_grounded_answer(self) -> bool:
+        return self.label == "direct_match"
+
+
+class AgentEvidenceQualityService:
+    def score(self, query: str, results: list[UnitSearchResult]) -> EvidenceQualityVerdict:
+        positive_results = [result for result in results if result.score > 0]
+        if not positive_results:
+            return EvidenceQualityVerdict(label="no_match", reason_codes=["no_positive_score"])
+
+        query_terms = self._terms(query)
+        if not query_terms:
+            return EvidenceQualityVerdict(
+                label="weak_match",
+                selected_unit_ids=[result.canonical_unit_id for result in positive_results[:3]],
+                reason_codes=["empty_query_terms"],
+            )
+
+        match_reasons: dict[str, str] = {}
+        direct_ids: list[str] = []
+        related_ids: list[str] = []
+        for result in positive_results[:5]:
+            title_text = " ".join(
+                [
+                    result.unit_name or "",
+                    result.lecture_title or "",
+                ]
+            )
+            body_text = " ".join(
+                [
+                    result.summary or "",
+                    result.unit_name or "",
+                    result.lecture_title or "",
+                ]
+            )
+            title_coverage = self._coverage(query_terms, title_text)
+            body_coverage = self._coverage(query_terms, body_text)
+            if self._has_phrase_match(query_terms, title_text) or title_coverage >= 0.75 or body_coverage >= 0.85:
+                direct_ids.append(result.canonical_unit_id)
+                match_reasons[result.canonical_unit_id] = "Strong title, lecture, or summary coverage."
+            elif body_coverage >= 0.35 or result.score >= 2:
+                related_ids.append(result.canonical_unit_id)
+                match_reasons[result.canonical_unit_id] = "Related result with partial topic overlap."
+
+        if direct_ids:
+            return EvidenceQualityVerdict(
+                label="direct_match",
+                selected_unit_ids=direct_ids[:3],
+                reason_codes=["title_or_lecture_match"],
+                match_reasons=match_reasons,
+            )
+        if related_ids:
+            return EvidenceQualityVerdict(
+                label="related_match",
+                selected_unit_ids=related_ids[:3],
+                reason_codes=["summary_partial_match"],
+                match_reasons=match_reasons,
+            )
+        return EvidenceQualityVerdict(
+            label="weak_match",
+            selected_unit_ids=[result.canonical_unit_id for result in positive_results[:3]],
+            reason_codes=["low_query_coverage"],
+            match_reasons={
+                result.canonical_unit_id: "Weak lexical overlap only."
+                for result in positive_results[:3]
+            },
+        )
+
+    def _terms(self, query: str) -> list[str]:
+        return [
+            self._normalize_term(term)
+            for term in re.findall(r"[a-zA-Z0-9]+", query.lower())
+            if len(term) > 2
+        ]
+
+    def _coverage(self, terms: list[str], text: str) -> float:
+        normalized = text.lower()
+        if not terms:
+            return 0.0
+        matched = sum(1 for term in terms if self._term_in_text(term, normalized))
+        return matched / len(terms)
+
+    def _has_phrase_match(self, terms: list[str], text: str) -> bool:
+        if len(terms) < 2:
+            return False
+        normalized = text.lower()
+        return any(
+            self._term_in_text(first, normalized) and self._term_in_text(second, normalized)
+            for first, second in zip(terms, terms[1:])
+        )
+
+    def _normalize_term(self, term: str) -> str:
+        if term == "cnns":
+            return "cnn"
+        if len(term) > 4 and term.endswith("s"):
+            return term[:-1]
+        return term
+
+    def _term_in_text(self, term: str, text: str) -> bool:
+        if term == "cnn":
+            return "cnn" in text or "convolutional neural network" in text
+        return term in text
