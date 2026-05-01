@@ -29,6 +29,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { canonicalSectionApi, historyApi } from "@/lib/api";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import type {
   BloomLevel,
   CourseSectionListItem,
@@ -524,6 +525,7 @@ function Th({
 // ---------------------------------------------------------------------------
 
 export default function HistoryPage() {
+  usePageTitle("AI Learning Hub - History");
   const searchParams = useSearchParams();
   const targetSessionId = searchParams.get("session_id");
 
