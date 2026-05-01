@@ -22,15 +22,19 @@ class AgentToolNodes:
         self.scope_service = AgentSearchScopeService()
 
     async def clarify(self, message: str, reason: str = "ambiguous_target") -> ToolResult:
-        clarification = (
-            "Mình cần thêm ngữ cảnh để xác định đúng ý định. "
-            "Bạn có thể nói rõ course, unit, hoặc mục tiêu học bạn muốn hỏi không?"
-        )
-        warning_message = clarification if reason == "ambiguous_target" else reason
+        clarification = "Could you clarify the course, unit, or learning goal you want help with?"
+        answer_markdown = clarification if reason == "ambiguous_target" else reason
         return ToolResult(
             kind="clarification",
-            answer_markdown=clarification,
-            warning=AgentWarning(type="ambiguous_target", message=warning_message),
+            answer_markdown=answer_markdown,
+            warning=AgentWarning(type="ambiguous_target", message=answer_markdown),
+            requires_evidence=False,
+        )
+
+    async def assistant_help(self, answer_markdown: str) -> ToolResult:
+        return ToolResult(
+            kind="clarification",
+            answer_markdown=answer_markdown,
             requires_evidence=False,
         )
 
@@ -92,7 +96,7 @@ class AgentToolNodes:
             disclosure = "\n\nI found this outside the original current-path search scope."
         return ToolResult(
             kind="find_content",
-            answer_markdown=("I found relevant learning units." + disclosure) if citations else None,
+            answer_markdown=disclosure.strip() or None,
             citations=citations,
             requires_evidence=True,
         )

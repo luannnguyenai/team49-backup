@@ -55,6 +55,7 @@ from src.services.agent_response_composer import AgentResponseComposer
 from src.services.agent_router_factory import build_production_agent_router
 from src.services.agent_search_service import AgentUnitSearchService
 from src.services.agent_unit_context_service import AgentUnitContextService
+from src.services.agent_error_codes import classify_agent_error
 from src.services.recommendation_engine import generate_learning_path
 
 
@@ -147,7 +148,11 @@ async def agent_chat(
         raise
     except Exception as exc:
         await _safe_rollback(db)
-        return _agent_system_error_response(error_conversation_id, "AGENT_CHAT_ERROR", exc)
+        return _agent_system_error_response(
+            error_conversation_id,
+            classify_agent_error(exc, default="AGENT_CHAT_ERROR"),
+            exc,
+        )
     return response
 
 
@@ -183,7 +188,11 @@ async def agent_continue_action(
         response = exc.to_response(conversation_id=body.conversation_id, message_id=str(uuid4()))
     except Exception as exc:
         await _safe_rollback(db)
-        return _agent_system_error_response(body.conversation_id, "AGENT_ACTION_ERROR", exc)
+        return _agent_system_error_response(
+            body.conversation_id,
+            classify_agent_error(exc, default="AGENT_ACTION_ERROR"),
+            exc,
+        )
     return response
 
 

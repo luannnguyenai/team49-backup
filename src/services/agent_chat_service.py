@@ -248,7 +248,7 @@ class AgentChatService:
             conversation_id=conversation_id,
             message_id=str(uuid4()),
             answer=AgentAnswer(
-                markdown="I found relevant learning units." if citations else "I could not find a grounded source.",
+                markdown="Review the cited learning units." if citations else "I could not find a grounded source.",
                 confidence="grounded" if citations else "no_source",
             ),
             citations=citations,

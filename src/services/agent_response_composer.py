@@ -3,6 +3,7 @@ from __future__ import annotations
 from uuid import uuid4
 
 from src.schemas.agent import AgentAnswer, AgentChatResponse, AgentFallback, AgentWarning
+from src.services.agent_error_codes import agent_system_error_message
 from src.services.agent_graph_contracts import ToolResult
 
 
@@ -36,7 +37,7 @@ class AgentResponseComposer:
             conversation_id=conversation_id,
             message_id=message_id or str(uuid4()),
             answer=AgentAnswer(
-                markdown=result.answer_markdown or "I need a little more context before I can help.",
+                markdown=result.answer_markdown or "Could you clarify what you want help with?",
                 confidence="grounded" if result.citations else "partial",
             ),
             citations=result.citations,
@@ -70,10 +71,7 @@ class AgentResponseComposer:
             conversation_id=conversation_id,
             message_id=str(uuid4()),
             answer=AgentAnswer(
-                markdown=(
-                    "Hiện tại hệ thống đang có sự cố. "
-                    f"Vui lòng thử lại sau. Mã lỗi: {error_code}."
-                ),
+                markdown=agent_system_error_message(error_code),
                 confidence="fallback",
             ),
             warning=AgentWarning(type="agent_unavailable", message=error_code),

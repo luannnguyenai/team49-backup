@@ -37,6 +37,10 @@ class NoopThreadLock:
 
 
 async def test_graph_returns_grounded_find_content_from_search():
+    class Router(DeterministicAgentRouter):
+        def compose_grounded_answer(self, message, citations):
+            return f"LLM grounded answer for {citations[0]['unit_name']}"
+
     async def search(request, allowed_course_ids):
         return UnitSearchResponse(
             results=[
@@ -55,7 +59,7 @@ async def test_graph_returns_grounded_find_content_from_search():
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=Router(),
     )
 
     response = await service.chat(
@@ -67,7 +71,54 @@ async def test_graph_returns_grounded_find_content_from_search():
     )
 
     assert response.answer.confidence == "grounded"
+    assert response.answer.markdown == "LLM grounded answer for Attention"
     assert response.citations[0].canonical_unit_id == "unit-attn"
+
+
+async def test_graph_dispatches_navigation_intent_to_content_search():
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="navigate_to_unit",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="CNNs"),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return "Review the CNN unit."
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn",
+                    course_id="CS231n",
+                    unit_name="Convolutional Neural Networks",
+                    summary="CNN content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-cnn", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Where should I review CNNs?", incomingMessageId="msg-nav"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-nav",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Review the CNN unit."
+    assert response.answer.confidence == "grounded"
+    assert response.citations[0].canonical_unit_id == "unit-cnn"
 
 
 async def test_graph_offers_scope_expansion_when_current_path_has_no_result():

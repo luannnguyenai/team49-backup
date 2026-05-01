@@ -5,6 +5,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from src.config import settings
+from src.services.agent_error_codes import agent_system_error_message
 
 _postgres_setup_done = False
 _postgres_setup_lock = asyncio.Lock()
@@ -18,7 +19,7 @@ class AgentCheckpointerUnavailableError(RuntimeError):
             conversation_id=conversation_id,
             message_id=message_id,
             answer=AgentAnswer(
-                markdown="Hiện tại hệ thống đang có sự cố. Vui lòng thử lại sau. Mã lỗi: AGENT_CHECKPOINTER_UNAVAILABLE.",
+                markdown=agent_system_error_message("AGENT_CHECKPOINTER_UNAVAILABLE"),
                 confidence="fallback",
             ),
             warning=AgentWarning(

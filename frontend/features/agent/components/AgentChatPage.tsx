@@ -100,7 +100,7 @@ function buildAgentClientErrorMessage(error: unknown): UiMessage {
   return {
     id: `assistant-error-${Date.now()}`,
     role: "assistant",
-    markdown: `Hiện tại hệ thống đang có sự cố. Vui lòng thử lại sau. Mã lỗi: ${errorCode}.`,
+    markdown: `The AI assistant is temporarily unavailable due to a system incident. Please try again later. Error code: ${errorCode}.`,
     createdAt: new Date().toISOString(),
     confidence: "fallback",
     citations: [],

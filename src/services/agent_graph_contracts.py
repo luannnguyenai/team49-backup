@@ -14,6 +14,7 @@ from src.schemas.agent import (
     AgentWarning,
     RouteContext,
 )
+from src.services.agent_error_codes import agent_system_error_message
 
 
 AGENT_INTENT_NODE_REGISTRY: dict[AgentIntent, str] = {
@@ -26,6 +27,7 @@ AGENT_INTENT_NODE_REGISTRY: dict[AgentIntent, str] = {
     "explain_planner_decision": "explain_planner_decision_node",
     "summarize_progress": "summarize_progress_node",
     "general_course_question": "general_course_question_node",
+    "assistant_help": "assistant_help_node",
     "request_path_switch": "request_path_switch_node",
     "clarify": "clarify_node",
 }
@@ -67,22 +69,26 @@ class AgentInProgressError(RuntimeError):
 
 
 class AgentRouterUnavailableError(RuntimeError):
+    def __init__(self, message: str = "agent_router_unavailable", error_code: str = "AGENT_ROUTER_UNAVAILABLE"):
+        super().__init__(message)
+        self.error_code = error_code
+
     def to_response(self, conversation_id: str = "", message_id: str = "") -> AgentChatResponse:
         return AgentChatResponse(
             conversation_id=conversation_id,
             message_id=message_id,
             answer=AgentAnswer(
-                markdown="Hiện tại hệ thống đang có sự cố. Vui lòng thử lại sau. Mã lỗi: AGENT_ROUTER_UNAVAILABLE.",
+                markdown=agent_system_error_message(self.error_code),
                 confidence="fallback",
             ),
             warning=AgentWarning(
                 type="agent_unavailable",
-                message="AGENT_ROUTER_UNAVAILABLE",
+                message=self.error_code,
             ),
             fallback=AgentFallback(
                 reason="agent_unavailable",
                 message="The production router model is unavailable.",
-                errorCode="AGENT_ROUTER_UNAVAILABLE",
+                errorCode=self.error_code,
             ),
         )
 
@@ -111,6 +117,7 @@ class AgentRoute(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     extracted_slots: AgentSlots = Field(default_factory=AgentSlots)
     rationale: str | None = None
+    clarification_question: str | None = None
 
 
 class PolicyDecision(BaseModel):

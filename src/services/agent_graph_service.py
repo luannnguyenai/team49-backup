@@ -17,6 +17,7 @@ from src.services.agent_action_commit_service import AgentActionCommitService
 from src.services.agent_graph_contracts import (
     AgentCheckpointState,
     AgentInProgressError,
+    AgentRouterUnavailableError,
     AgentSlots,
     PendingClarification,
     PolicyDecision,
@@ -188,8 +189,8 @@ class AgentGraphService:
                         user_id=UUID(str(user_id)),
                         role="assistant",
                         markdown=response.answer.markdown,
-                        citations=[citation.model_dump() for citation in response.citations],
-                        actions=[action.model_dump() for action in response.actions],
+                        citations=[citation.model_dump(mode="json") for citation in response.citations],
+                        actions=[action.model_dump(mode="json") for action in response.actions],
                     )
                     await self._compact_thread_memory_if_needed(
                         conversation_id=conversation_id,
@@ -299,6 +300,7 @@ class AgentGraphService:
             "intent": route.intent,
             "intent_confidence": route.confidence,
             "slots": route.extracted_slots,
+            "clarification_question": route.clarification_question,
         }
 
     async def _canonicalize_slots(self, state: dict) -> dict:
@@ -346,16 +348,41 @@ class AgentGraphService:
             )
             return {**state, "tool_result": result}
         if state["intent_confidence"] < 0.65 or slots.ambiguity_options:
-            result = await self.tools.clarify(state["message"])
+            result = await self.tools.clarify(
+                state["message"],
+                reason=state.get("clarification_question") or "ambiguous_target",
+            )
             return {**state, "tool_result": result}
 
-        if state["intent"] in {"find_content", "explain_concept", "general_course_question"}:
+        if state["intent"] == "assistant_help":
+            compose_help = getattr(self.router, "compose_assistant_help", None)
+            if compose_help is None:
+                raise AgentRouterUnavailableError("agent_assistant_help_model_missing")
+            result = await self.tools.assistant_help(
+                compose_help(state["message"], state.get("route_context"))
+            )
+            return {**state, "tool_result": result}
+
+        if state["intent"] in {
+            "find_content",
+            "explain_concept",
+            "general_course_question",
+            "navigate_to_unit",
+        }:
             result = await self.tools.find_content(
                 state["message"],
                 state["intent"],
                 slots,
                 state["allowed_course_ids"],
             )
+            if result.requires_evidence and result.citations:
+                compose_grounded = getattr(self.router, "compose_grounded_answer", None)
+                if compose_grounded is not None:
+                    answer_markdown = compose_grounded(
+                        state["message"],
+                        [citation.model_dump(mode="json") for citation in result.citations],
+                    )
+                    result = result.model_copy(update={"answer_markdown": answer_markdown})
             update: dict = {**state, "tool_result": result}
             if result.metadata.get("scope_expansion_offered"):
                 allowed_paths = self.scope_service.path_ids_for_courses(state["allowed_course_ids"])

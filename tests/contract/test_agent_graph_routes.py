@@ -160,7 +160,7 @@ async def test_agent_chat_returns_safe_error_response_for_unhandled_failure():
     body = response.json()
     assert response.status_code == 200
     assert body["answer"]["confidence"] == "fallback"
-    assert "Hiện tại hệ thống đang có sự cố" in body["answer"]["markdown"]
+    assert "system incident" in body["answer"]["markdown"]
     assert body["fallback"]["errorCode"] == "AGENT_CHAT_ERROR"
     db.rollback.assert_awaited_once()
 

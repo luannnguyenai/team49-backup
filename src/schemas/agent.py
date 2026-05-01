@@ -25,6 +25,7 @@ AgentIntent = Literal[
     "explain_planner_decision",
     "summarize_progress",
     "general_course_question",
+    "assistant_help",
     "request_path_switch",
     "clarify",
 ]
