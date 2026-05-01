@@ -3,20 +3,21 @@
 This plan aligns the `fine-tune-chatbot` folder to the current target:
 
 - English-only tutor
-- text-only fine-tuning
+- vision-capable base model with text-first fine-tuning in v1
 - project dataset as domain anchor
 - filtered ELI5 as auxiliary explanation-style data
-- `Qwen/Qwen2.5-7B-Instruct` as the base model
+- `Qwen/Qwen2.5-VL-3B-Instruct` as the base model
 
 ## Decisions
 
 | Item | Value |
 |---|---|
 | Target tutor | English AI/ML/NLP/CV tutor |
-| Base model | `Qwen/Qwen2.5-7B-Instruct` |
+| Base model | `Qwen/Qwen2.5-VL-3B-Instruct` |
 | Fine-tune method | QLoRA 4-bit |
 | Primary data | Project domain dataset |
 | Auxiliary data | Filtered ELI5 only |
+| Training supervision in v1 | Text-first SFT, no new multimodal research corpus |
 | Main eval gate | Held-out internal domain set |
 | Secondary eval | MMLU selected subjects, MMLU-Pro, TheoremQA |
 | Style eval | Filtered ELI5 dev/test |
@@ -26,11 +27,10 @@ This plan aligns the `fine-tune-chatbot` folder to the current target:
 The earlier plan optimized for a different problem:
 
 - Vietnamese support
-- vision-language serving
 - tool-calling preservation
-- self-hosted vLLM runtime as the central design constraint
+- self-hosted runtime as the central design constraint
 
-That is no longer the active target. This plan replaces those assumptions with an English-only tutor pipeline.
+That is no longer the active target. The active target is now an English-only tutor pipeline that keeps the existing dataset research intact while switching the serving/model layer to a vision-capable Qwen VL model.
 
 ## Roadmap
 
@@ -48,7 +48,8 @@ That is no longer the active target. This plan replaces those assumptions with a
 
 ### P3. Fine-tuning
 
-- Run QLoRA on `Qwen/Qwen2.5-7B-Instruct`.
+- Run QLoRA on `Qwen/Qwen2.5-VL-3B-Instruct`.
+- Keep v1 supervision text-first so dataset research remains unchanged.
 - Save adapters per ablation run.
 - Track validation loss, but do not use it as the sole selection criterion.
 
@@ -63,6 +64,7 @@ That is no longer the active target. This plan replaces those assumptions with a
 - Pick the best run using domain-first decision rules.
 - Prepare the selected adapter for integration.
 - Keep serving and deployment work separate from the training decision.
+- Preserve multimodal serving compatibility at the API layer even though v1 training data remains text-first.
 
 ## Success criteria
 
@@ -93,4 +95,4 @@ That is no longer the active target. This plan replaces those assumptions with a
 
 ## Scope note
 
-The serving and codebase integration docs remain in this folder because they may still be needed later, but they are now subordinate to the fine-tuning strategy above. Training strategy is no longer driven by Vietnamese, vision, or tool-calling requirements.
+The serving and codebase integration docs remain in this folder because they are part of the active target again. Dataset research and mixing strategy stay domain-first and text-first; the change in this revision is the selected base model and runtime assumptions, not the dataset thesis.
