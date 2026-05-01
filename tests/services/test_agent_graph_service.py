@@ -15,7 +15,7 @@ from src.schemas.agent import (
     UnitSearchResult,
 )
 from src.services.agent_graph_contracts import AgentRoute, AgentSlots, PendingClarification
-from src.services.agent_graph_contracts import AgentInProgressError
+from src.services.agent_graph_contracts import AgentInProgressError, AgentRouterUnavailableError
 from src.services.agent_graph_router import DeterministicAgentRouter
 from src.services.agent_graph_service import AgentGraphService
 from src.services.agent_memory_compaction_service import AgentMemoryCompactionService
@@ -1639,6 +1639,202 @@ async def test_graph_chat_active_run_returns_in_progress_before_invoking_graph()
         )
 
     assert exc_info.value.graph_run_id == "run-active"
+
+
+async def test_graph_persists_failed_request_retry_context_when_router_model_fails():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    upserts = []
+
+    class Router:
+        def route(self, message, route_context):
+            raise AgentRouterUnavailableError("model timeout", "AGENT_LLM_TIMEOUT")
+
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_run_by_incoming_message=AsyncMock(return_value=None),
+        get_active_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(return_value=SimpleNamespace(graph_run_id="run-failed")),
+        mark_run_running=AsyncMock(),
+        mark_run_failed=AsyncMock(),
+    )
+    conversation_repo = SimpleNamespace(
+        add_message=AsyncMock(),
+        get_memory=AsyncMock(return_value=None),
+        upsert_memory=AsyncMock(side_effect=lambda **kwargs: upserts.append(kwargs)),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        graph_repo=repo,
+        thread_lock=NoopThreadLock(),
+        conversation_repo=conversation_repo,
+    )
+
+    with pytest.raises(AgentRouterUnavailableError):
+        await service.chat(
+            request=AgentChatRequest(
+                message="kiểm cho tôi thông tin về UNet",
+                incomingMessageId="msg-failed",
+            ),
+            conversation_id=str(conversation_id),
+            thread_id="thread-failed",
+            user_id=str(user_id),
+            allowed_course_ids=["CS231n"],
+        )
+
+    repo.mark_run_failed.assert_awaited_once()
+    pending = upserts[-1]["summary_json"]["pendingClarification"]["clarification"]
+    assert pending["payload"]["kind"] == "failed_request_retry"
+    assert pending["payload"]["original_message"] == "kiểm cho tôi thông tin về UNet"
+
+
+async def test_graph_retries_failed_run_with_same_incoming_message_id():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    run_id = uuid4()
+
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="U-Net"),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return "U-Net appears in the segmentation unit."
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-unet",
+                    course_id="CS231n",
+                    unit_name="Semantic segmentation from per-pixel labeling to U-Net",
+                    summary="U-Net segmentation content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-retry", ranking_version="unit_search_v1"),
+        )
+
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_run_by_incoming_message=AsyncMock(
+            return_value=SimpleNamespace(id=run_id, status="failed_retryable")
+        ),
+        get_active_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(),
+        mark_run_running=AsyncMock(),
+        store_response_payload=AsyncMock(return_value="resp-retry"),
+        mark_run_succeeded=AsyncMock(),
+        mark_run_interrupted=AsyncMock(),
+        mark_run_failed=AsyncMock(),
+    )
+    conversation_repo = SimpleNamespace(
+        add_message=AsyncMock(),
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(return_value=[]),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        graph_repo=repo,
+        thread_lock=NoopThreadLock(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="kiểm cho tôi thông tin về UNet", incomingMessageId="msg-retry"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-retry",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "U-Net appears in the segmentation unit."
+    repo.create_run.assert_not_called()
+    repo.mark_run_running.assert_awaited_once_with(str(run_id))
+    conversation_repo.add_message.assert_awaited_once()
+    assert conversation_repo.add_message.await_args.kwargs["role"] == "assistant"
+
+
+async def test_graph_resolves_failed_request_retry_followup_through_structured_router():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    pending = PendingClarification(
+        clarification_id="clar-failed-retry",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "failed_request_retry",
+            "original_message": "kiểm cho tôi thông tin về UNet",
+            "original_incoming_message_id": "msg-original",
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+    routed_messages = []
+
+    class Router(PendingDecisionRouter):
+        def route(self, message, route_context):
+            routed_messages.append(message)
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="U-Net"),
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-unet",
+                    course_id="CS231n",
+                    unit_name="Semantic segmentation from per-pixel labeling to U-Net",
+                    summary="U-Net segmentation content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-followup-retry", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_json={
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-followup-retry",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(action="approve", grounded_answer="Found U-Net after retry."),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="thử lại", incomingMessageId="msg-followup-retry"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-followup-retry",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert routed_messages == ["kiểm cho tôi thông tin về UNet"]
+    assert response.answer.markdown == "Found U-Net after retry."
+    assert response.citations[0].canonical_unit_id == "unit-unet"
 
 
 async def test_graph_persists_pending_path_switch_action():

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 from uuid import UUID, uuid4
 
 try:
@@ -152,15 +153,31 @@ class AgentGraphService:
         if completed is not None:
             return completed
 
-        active_run = await self.graph_repo.get_active_run(thread_id=thread_id)
-        if active_run is not None:
-            raise AgentInProgressError(conversation_id, thread_id, active_run.graph_run_id)
+        retrying_failed_run = False
+        existing_run = None
+        get_run = getattr(self.graph_repo, "get_run_by_incoming_message", None)
+        if get_run is not None:
+            existing_run = await get_run(
+                conversation_id=conversation_id,
+                thread_id=thread_id,
+                incoming_message_id=request.incoming_message_id,
+            )
+        if existing_run is not None and getattr(existing_run, "status", None) == "failed_retryable":
+            active_run = await self.graph_repo.get_active_run(thread_id=thread_id)
+            if active_run is not None and active_run.graph_run_id != str(existing_run.id):
+                raise AgentInProgressError(conversation_id, thread_id, active_run.graph_run_id)
+            run = SimpleNamespace(graph_run_id=str(existing_run.id))
+            retrying_failed_run = True
+        else:
+            active_run = await self.graph_repo.get_active_run(thread_id=thread_id)
+            if active_run is not None:
+                raise AgentInProgressError(conversation_id, thread_id, active_run.graph_run_id)
 
-        run = await self.graph_repo.create_run(
-            conversation_id=conversation_id,
-            thread_id=thread_id,
-            incoming_message_id=request.incoming_message_id,
-        )
+            run = await self.graph_repo.create_run(
+                conversation_id=conversation_id,
+                thread_id=thread_id,
+                incoming_message_id=request.incoming_message_id,
+            )
         async with self.thread_lock.acquire(
             conversation_id=conversation_id,
             thread_id=thread_id,
@@ -168,7 +185,7 @@ class AgentGraphService:
         ):
             await self.graph_repo.mark_run_running(run.graph_run_id)
             try:
-                if self.conversation_repo is not None:
+                if self.conversation_repo is not None and not retrying_failed_run:
                     await self.conversation_repo.add_message(
                         conversation_id=UUID(str(conversation_id)),
                         user_id=UUID(str(user_id)),
@@ -223,6 +240,14 @@ class AgentGraphService:
                     error=str(exc),
                     retryable=True,
                 )
+                if isinstance(exc, AgentRouterUnavailableError):
+                    await self._persist_failed_request_retry_clarification(
+                        conversation_id=conversation_id,
+                        user_id=user_id,
+                        thread_id=thread_id,
+                        request=request,
+                        error=exc,
+                    )
                 raise
 
     async def _invoke_graph_and_compose(
@@ -281,6 +306,14 @@ class AgentGraphService:
         if (
             pending is not None
             and pending.type == "slot_disambiguation"
+            and pending.payload.get("kind") == "failed_request_retry"
+        ):
+            pending_result = self._resolve_pending_failed_request_retry(state, pending)
+            if pending_result is not None:
+                return pending_result
+        if (
+            pending is not None
+            and pending.type == "slot_disambiguation"
             and pending.payload.get("kind") == "retrieval_query"
         ):
             pending_result = self._resolve_pending_retrieval_query(state, pending)
@@ -307,6 +340,62 @@ class AgentGraphService:
             "slots": route.extracted_slots,
             "clarification_question": route.clarification_question,
             "candidate_intent": route.candidate_intent,
+        }
+
+    def _resolve_pending_failed_request_retry(
+        self,
+        state: dict,
+        pending: PendingClarification,
+    ) -> dict | None:
+        payload = pending.payload
+        decision = self._resolve_pending_followup_decision(state, pending)
+
+        if decision.action == "clarify":
+            return {
+                **state,
+                "intent": "clarify",
+                "intent_confidence": 0.0,
+                "slots": AgentSlots(),
+                "pending_clarification": pending,
+                "clarification_question": decision.clarification_question
+                or "Please clarify whether you want me to retry the failed request or ask something new.",
+            }
+        if decision.action == "reject":
+            return {
+                **state,
+                "intent": "assistant_help",
+                "intent_confidence": 1.0,
+                "slots": AgentSlots(),
+                "pending_clarification": None,
+                "clarification_question": None,
+            }
+
+        retry_message = (
+            decision.refined_query
+            if decision.action == "refine" and decision.refined_query
+            else payload.get("original_message")
+        )
+        retry_message = str(retry_message or "").strip()
+        if not retry_message:
+            return {
+                **state,
+                "intent": "clarify",
+                "intent_confidence": 0.0,
+                "slots": AgentSlots(),
+                "pending_clarification": pending,
+                "clarification_question": "Please restate the request you want me to retry.",
+            }
+
+        route = self.router.route(message=retry_message, route_context=state.get("route_context"))
+        return {
+            **state,
+            "message": retry_message,
+            "intent": route.intent,
+            "intent_confidence": route.confidence,
+            "slots": route.extracted_slots,
+            "clarification_question": route.clarification_question,
+            "candidate_intent": route.candidate_intent,
+            "pending_clarification": None,
         }
 
     def _resolve_pending_retrieval_query(
@@ -771,6 +860,34 @@ class AgentGraphService:
                 "clarification_question": state.get("clarification_question"),
             },
             expires_at=datetime.now(UTC) + timedelta(minutes=30),
+        )
+
+    async def _persist_failed_request_retry_clarification(
+        self,
+        *,
+        conversation_id: str,
+        user_id: str,
+        thread_id: str,
+        request: AgentChatRequest,
+        error: Exception,
+    ) -> None:
+        pending = PendingClarification(
+            clarification_id=f"clar_{uuid4()}",
+            type="slot_disambiguation",
+            status="awaiting_response",
+            payload={
+                "kind": "failed_request_retry",
+                "original_message": request.message,
+                "original_incoming_message_id": request.incoming_message_id,
+                "error": str(error),
+            },
+            expires_at=datetime.now(UTC) + timedelta(minutes=10),
+        )
+        await self._persist_pending_clarification(
+            conversation_id=conversation_id,
+            user_id=user_id,
+            thread_id=thread_id,
+            pending=pending,
         )
 
     async def _await_confirmation(self, state: dict) -> dict:

@@ -144,6 +144,7 @@ async def agent_chat(
         response = exc.to_response(conversation_id=error_conversation_id, message_id=str(uuid4()))
     except AgentRouterUnavailableError as exc:
         response = exc.to_response(conversation_id=error_conversation_id, message_id=str(uuid4()))
+        await db.commit()
     except HTTPException:
         raise
     except Exception as exc:

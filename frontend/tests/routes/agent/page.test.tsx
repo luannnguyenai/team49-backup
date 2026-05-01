@@ -90,6 +90,41 @@ describe("agent page", () => {
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
   });
 
+  it("renders assistant markdown and retries a failed request with the same message id", async () => {
+    agentApiMock.chat
+      .mockRejectedValueOnce(new Error("network down"))
+      .mockResolvedValueOnce({
+        conversationId: "conversation-1",
+        messageId: "message-retry",
+        answer: {
+          markdown: "Retry found **U-Net** content.",
+          confidence: "grounded",
+        },
+        citations: [],
+        actions: [],
+        warning: null,
+      });
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Message AI Assistant...");
+    fireEvent.change(input, { target: { value: "kiểm cho tôi thông tin về UNet" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    const retry = await screen.findByRole("button", { name: /retry/i });
+    const firstCall = agentApiMock.chat.mock.calls[0][0];
+    fireEvent.click(retry);
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenCalledTimes(2);
+    });
+    expect(agentApiMock.chat.mock.calls[1][0]).toMatchObject({
+      message: "kiểm cho tôi thông tin về UNet",
+      incomingMessageId: firstCall.incomingMessageId,
+    });
+    const strong = await screen.findByText("U-Net");
+    expect(strong.tagName).toBe("STRONG");
+  });
+
   it("continues a pending action with a stable action id", async () => {
     agentApiMock.chat.mockResolvedValueOnce({
       conversationId: "conversation-1",

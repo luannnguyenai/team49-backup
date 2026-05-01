@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 import {
   AlertTriangle,
   ArrowRight,
@@ -24,6 +25,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
   Plus,
+  RotateCcw,
   Search,
   Send,
   Sparkles,
@@ -79,6 +81,8 @@ type UiMessage = {
   actions: AgentAction[];
   warning?: AgentWarning | null;
   fallback?: AgentChatResponse["fallback"];
+  retryMessage?: string;
+  retryIncomingMessageId?: string;
 };
 
 function createIncomingMessageId() {
@@ -91,7 +95,10 @@ function getFallbackErrorCode(fallback: AgentChatResponse["fallback"] | undefine
   return fallback?.errorCode ?? fallback?.error_code ?? null;
 }
 
-function buildAgentClientErrorMessage(error: unknown): UiMessage {
+function buildAgentClientErrorMessage(
+  error: unknown,
+  retry: { message: string; incomingMessageId: string },
+): UiMessage {
   const responseStatus =
     typeof error === "object" && error !== null && "response" in error
       ? (error as { response?: { status?: number } }).response?.status
@@ -114,6 +121,8 @@ function buildAgentClientErrorMessage(error: unknown): UiMessage {
       message: "The agent request failed before a safe answer could be produced.",
       errorCode,
     },
+    retryMessage: retry.message,
+    retryIncomingMessageId: retry.incomingMessageId,
   };
 }
 
@@ -597,10 +606,12 @@ function ChatMessageItem({
   message,
   conversationId,
   onActionResponse,
+  onRetry,
 }: {
   message: UiMessage;
   conversationId: string | null;
   onActionResponse: (response: AgentChatResponse) => void;
+  onRetry: (message: string, incomingMessageId: string) => void;
 }) {
   const isUser = message.role === "user";
   const prereqAction = message.actions.find((action) => action.type === "review_prerequisite_path");
@@ -627,7 +638,13 @@ function ChatMessageItem({
               : "rounded-tl-md border border-slate-200 bg-white text-slate-800",
           )}
         >
-          <p className="whitespace-pre-wrap">{message.markdown}</p>
+          {isUser ? (
+            <p className="whitespace-pre-wrap">{message.markdown}</p>
+          ) : (
+            <div className="prose prose-sm prose-slate max-w-none leading-7">
+              <ReactMarkdown>{message.markdown}</ReactMarkdown>
+            </div>
+          )}
           {!isUser && message.warning ? <WarningBlock warning={message.warning} /> : null}
           {!isUser && !message.warning && getFallbackErrorCode(message.fallback) ? (
             <WarningBlock
@@ -636,6 +653,16 @@ function ChatMessageItem({
                 message: getFallbackErrorCode(message.fallback) ?? "AGENT_ERROR",
               }}
             />
+          ) : null}
+          {!isUser && getFallbackErrorCode(message.fallback) && message.retryMessage && message.retryIncomingMessageId ? (
+            <button
+              type="button"
+              onClick={() => onRetry(message.retryMessage!, message.retryIncomingMessageId!)}
+              className="mt-3 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wider text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-600"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Retry
+            </button>
           ) : null}
         </div>
 
@@ -1123,19 +1150,24 @@ export default function AgentChatPage() {
     }
   };
 
-  const sendMessage = async (message: string) => {
+  const sendMessage = async (
+    message: string,
+    options: { incomingMessageId?: string; appendUser?: boolean } = {},
+  ) => {
     setError(null);
-    const incomingMessageId = createIncomingMessageId();
-    const userMessage: UiMessage = {
-      id: `local-${Date.now()}`,
-      role: "user",
-      markdown: message,
-      createdAt: new Date().toISOString(),
-      incomingMessageId,
-      citations: [],
-      actions: [],
-    };
-    setMessages((current) => [...current, userMessage]);
+    const incomingMessageId = options.incomingMessageId ?? createIncomingMessageId();
+    if (options.appendUser !== false) {
+      const userMessage: UiMessage = {
+        id: `local-${Date.now()}`,
+        role: "user",
+        markdown: message,
+        createdAt: new Date().toISOString(),
+        incomingMessageId,
+        citations: [],
+        actions: [],
+      };
+      setMessages((current) => [...current, userMessage]);
+    }
     setIsThinking(true);
     try {
       const response = await agentApi.chat({
@@ -1146,7 +1178,10 @@ export default function AgentChatPage() {
       });
       appendAgentResponse(response);
     } catch (err) {
-      setMessages((current) => [...current, buildAgentClientErrorMessage(err)]);
+      setMessages((current) => [
+        ...current,
+        buildAgentClientErrorMessage(err, { message, incomingMessageId }),
+      ]);
     } finally {
       setIsThinking(false);
     }
@@ -1270,6 +1305,12 @@ export default function AgentChatPage() {
                     message={message}
                     conversationId={activeSessionId}
                     onActionResponse={appendAgentResponse}
+                    onRetry={(retryMessage, retryIncomingMessageId) =>
+                      sendMessage(retryMessage, {
+                        incomingMessageId: retryIncomingMessageId,
+                        appendUser: false,
+                      })
+                    }
                   />
                 ))}
                 {isThinking ? (
