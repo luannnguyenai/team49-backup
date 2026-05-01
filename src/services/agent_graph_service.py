@@ -389,9 +389,11 @@ class AgentGraphService:
             return self.composer.compose_action_error(request.conversation_id, f"invalid_status:{pending.status}")
         if pending.expires_at <= datetime.now(UTC):
             await self.graph_repo.mark_action_expired(pending.action_id)
+            await self._finalize_interrupted_run(str(pending.thread_id), "cancelled")
             return self.composer.compose_action_error(request.conversation_id, "expired")
         if request.decision == "reject":
             await self.graph_repo.mark_action_cancelled(pending.action_id)
+            await self._finalize_interrupted_run(str(pending.thread_id), "cancelled")
             return self.composer.compose_action_cancelled(str(pending.conversation_id))
         existing = await self.graph_repo.get_committed_action_result(pending.action_id)
         if existing is not None:
@@ -410,6 +412,7 @@ class AgentGraphService:
                 pending.idempotency_key,
             )
             await self.graph_repo.mark_action_committed(pending.action_id, result=result)
+            await self._finalize_interrupted_run(str(pending.thread_id), "succeeded")
             return AgentChatResponse(
                 conversation_id=str(pending.conversation_id),
                 message_id=str(uuid4()),
@@ -425,8 +428,15 @@ class AgentGraphService:
             pending.action_id,
             result={"type": pending.type, "status": "confirmed"},
         )
+        await self._finalize_interrupted_run(str(pending.thread_id), "succeeded")
         return AgentChatResponse(
             conversation_id=str(pending.conversation_id),
             message_id=str(uuid4()),
             answer={"markdown": "Action confirmed.", "confidence": "partial"},
         )
+
+    async def _finalize_interrupted_run(self, thread_id: str, status: str) -> None:
+        finalize = getattr(self.graph_repo, "mark_latest_interrupted_run_final", None)
+        if finalize is None:
+            return
+        await finalize(thread_id=thread_id, status=status)

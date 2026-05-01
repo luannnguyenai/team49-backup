@@ -1,3 +1,4 @@
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
@@ -5,6 +6,7 @@ from uuid import uuid4
 import pytest
 
 from src.schemas.agent import (
+    AgentActionResumeRequest,
     AgentAnswer,
     AgentChatRequest,
     AgentChatResponse,
@@ -187,3 +189,93 @@ async def test_graph_persists_pending_path_switch_action():
     repo.create_pending_action.assert_awaited_once()
     assert response.actions[0].action_id == "act-1"
     assert events == ["interrupted"]
+
+
+async def test_resume_reject_closes_interrupted_run_as_cancelled():
+    conversation_id = str(uuid4())
+    user_id = str(uuid4())
+    pending = SimpleNamespace(
+        action_id="act-reject",
+        conversation_id=conversation_id,
+        thread_id="thread-reject",
+        user_id=user_id,
+        status="awaiting_confirmation",
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+        type="request_replan",
+        payload_json={},
+        idempotency_key="idem-reject",
+    )
+    repo = SimpleNamespace(
+        get_pending_action=AsyncMock(return_value=pending),
+        mark_action_cancelled=AsyncMock(),
+        mark_latest_interrupted_run_final=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=repo,
+    )
+
+    response = await service.resume_action(
+        AgentActionResumeRequest(
+            conversationId=conversation_id,
+            actionId="act-reject",
+            decision="reject",
+        ),
+        user_id=user_id,
+    )
+
+    assert response.answer.markdown == "Cancelled."
+    repo.mark_action_cancelled.assert_awaited_once_with("act-reject")
+    repo.mark_latest_interrupted_run_final.assert_awaited_once_with(
+        thread_id="thread-reject",
+        status="cancelled",
+    )
+
+
+async def test_resume_approve_closes_interrupted_run_as_succeeded():
+    conversation_id = str(uuid4())
+    user_id = str(uuid4())
+    pending = SimpleNamespace(
+        action_id="act-approve",
+        conversation_id=conversation_id,
+        thread_id="thread-approve",
+        user_id=user_id,
+        status="awaiting_confirmation",
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+        type="request_replan",
+        payload_json={},
+        idempotency_key="idem-approve",
+    )
+    repo = SimpleNamespace(
+        get_pending_action=AsyncMock(return_value=pending),
+        get_committed_action_result=AsyncMock(return_value=None),
+        mark_action_committed=AsyncMock(),
+        mark_latest_interrupted_run_final=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=repo,
+    )
+
+    response = await service.resume_action(
+        AgentActionResumeRequest(
+            conversationId=conversation_id,
+            actionId="act-approve",
+            decision="approve",
+        ),
+        user_id=user_id,
+    )
+
+    assert response.answer.markdown == "Action confirmed."
+    repo.mark_action_committed.assert_awaited_once_with(
+        "act-approve",
+        result={"type": "request_replan", "status": "confirmed"},
+    )
+    repo.mark_latest_interrupted_run_final.assert_awaited_once_with(
+        thread_id="thread-approve",
+        status="succeeded",
+    )

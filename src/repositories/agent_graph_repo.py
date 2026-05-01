@@ -129,6 +129,28 @@ class AgentGraphRepository:
         )
         await self.session.flush()
 
+    async def mark_latest_interrupted_run_final(
+        self,
+        *,
+        thread_id: str,
+        status: str,
+    ) -> None:
+        result = await self.session.execute(
+            select(AgentGraphRun.id)
+            .where(AgentGraphRun.thread_id == thread_id, AgentGraphRun.status == "interrupted")
+            .order_by(AgentGraphRun.updated_at.desc(), AgentGraphRun.created_at.desc())
+            .limit(1)
+        )
+        run_id = result.scalar_one_or_none()
+        if run_id is None:
+            return
+        await self.session.execute(
+            update(AgentGraphRun)
+            .where(AgentGraphRun.id == run_id)
+            .values(status=status, updated_at=datetime.now(UTC))
+        )
+        await self.session.flush()
+
     async def _mark_run_status(self, graph_run_id: str, status: str) -> None:
         await self.session.execute(
             update(AgentGraphRun)
