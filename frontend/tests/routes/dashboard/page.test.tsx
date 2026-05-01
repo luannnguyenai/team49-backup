@@ -114,6 +114,16 @@ describe("dashboard search", () => {
     });
   });
 
+  it("does not show overlapping ready-state helper text for available courses", async () => {
+    render(<DashboardPage />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Ready" }));
+
+    expect(await screen.findByText(CS231N_ITEM.title)).toBeInTheDocument();
+    expect(screen.queryByText("Ready to learn")).not.toBeInTheDocument();
+    expect(screen.queryByText("Ready to start right now")).not.toBeInTheDocument();
+  });
+
   it("applies search after the active dashboard tab filter", async () => {
     navigationMock.searchParams = new URLSearchParams("q=operations");
 
@@ -147,5 +157,16 @@ describe("dashboard search", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText(CS231N_ITEM.title)).not.toBeInTheDocument();
     expect(screen.queryByText(CS224N_ITEM.title)).not.toBeInTheDocument();
+  });
+
+  it("does not show fake in-progress state for coming-soon courses", async () => {
+    render(<DashboardPage />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Coming soon" }));
+
+    expect(await screen.findByText("Upcoming AI Operations")).toBeInTheDocument();
+    expect(screen.queryByText("In progress")).not.toBeInTheDocument();
+    expect(screen.queryByText("Progress: 0%")).not.toBeInTheDocument();
+    expect(screen.getByText("This course is visible before its metadata is finalized")).toBeInTheDocument();
   });
 });
