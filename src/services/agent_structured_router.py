@@ -11,10 +11,19 @@ from src.services.agent_graph_contracts import AgentRoute, AgentRouterUnavailabl
 
 class StructuredRouteOutput(BaseModel):
     intent: AgentIntent
+    candidate_intent: AgentIntent | None = None
     confidence: float = Field(ge=0.0, le=1.0)
     raw_topic: str | None = None
     target_path: Literal["computer_vision", "nlp"] | None = None
+    explicit_scope_requested: bool = False
     rationale: str
+    clarification_question: str | None = None
+
+
+class GroundedAnswerOutput(BaseModel):
+    answer_markdown: str
+    evidence_sufficient: bool
+    confidence: Literal["grounded", "partial", "no_source"] = "grounded"
     clarification_question: str | None = None
 
 
@@ -40,13 +49,22 @@ class StructuredAgentRouter:
                             "quiz eligibility questions from assessment creation, and path search from path switch. "
                             "Requests like 'where should I review X' or 'what should I review for X' are usually "
                             "course-content review/navigation requests with raw_topic=X. "
+                            "Set target_path only when the user explicitly names a path, course, or track scope. "
+                            "Set explicit_scope_requested=true only when the user's words explicitly request "
+                            "another path, course, track, or broader catalog scope. "
+                            "Do not infer target_path from the topic domain alone; for example CNN topics do not "
+                            "automatically mean computer_vision and dependency parsing topics do not automatically "
+                            "mean nlp unless the user named that scope. "
+                            "For underspecified content/navigation requests, keep the likely content intent with "
+                            "low confidence and a clarification_question instead of choosing clarify as the primary intent. "
                             "Use assistant_help for greetings, capability questions, and broad help requests "
                             "that do not ask about a specific course content item, navigation target, assessment, "
                             "progress summary, or planning action. Broad help requests such as asking whether the "
                             "assistant can help should be assistant_help, not clarification. "
                             "Use request_path_switch only when the user asks to change the active learning path. "
                             "If intent or entity context is ambiguous, lower confidence and provide one concise "
-                            "clarification_question."
+                            "clarification_question. If you choose clarify, set candidate_intent to the likely "
+                            "business intent being clarified when one exists."
                         ),
                     },
                     {
@@ -60,22 +78,28 @@ class StructuredAgentRouter:
                 "agent_router_model_error",
                 classify_agent_error(exc, default="AGENT_ROUTER_UNAVAILABLE"),
             ) from exc
+        candidate_intent: AgentIntent | None = result.candidate_intent
         intent: AgentIntent = result.intent
         if result.confidence < self.confidence_threshold:
+            candidate_intent = result.candidate_intent or result.intent
             intent = "clarify"
-        search_scope = "explicit_path" if result.target_path and intent != "request_path_switch" else "current_path"
+        effective_target_path = result.target_path
+        if intent != "request_path_switch" and not result.explicit_scope_requested:
+            effective_target_path = None
+        search_scope = "explicit_path" if effective_target_path and intent != "request_path_switch" else "current_path"
         return AgentRoute(
             intent=intent,
             confidence=result.confidence,
             extracted_slots=AgentSlots(
                 raw_topic=result.raw_topic,
-                target_path=result.target_path,
-                requested_path_id=result.target_path if search_scope == "explicit_path" else None,
-                resolved_search_path_ids=[result.target_path] if search_scope == "explicit_path" else [],
+                target_path=effective_target_path,
+                requested_path_id=effective_target_path if search_scope == "explicit_path" else None,
+                resolved_search_path_ids=[effective_target_path] if search_scope == "explicit_path" else [],
                 search_scope=search_scope,
             ),
             rationale=result.rationale,
             clarification_question=result.clarification_question,
+            candidate_intent=candidate_intent,
         )
 
     def _response_text(self, response: Any) -> str:
@@ -97,7 +121,8 @@ class StructuredAgentRouter:
                             "You are the AI Learning Hub assistant for AI/ML course learning. "
                             "Most indexed course material is English; do not force the reply language. "
                             "Reply naturally and briefly. "
-                            "For greetings or broad help requests, answer directly "
+                            "For simple greetings, greet briefly and ask what the user needs. "
+                            "For broad help requests, answer directly "
                             "and explain what you can help with: finding course content, suggesting what to "
                             "review next, explaining planner decisions, proposing assessments, and helping with replans. "
                             "Do not invent course facts or claim tool results."
@@ -117,9 +142,9 @@ class StructuredAgentRouter:
 
         return self._response_text(response)
 
-    def compose_grounded_answer(self, message: str, citations: list[dict]) -> str:
+    def compose_grounded_answer(self, message: str, citations: list[dict]) -> GroundedAnswerOutput:
         try:
-            response = self.model.invoke(
+            response = self.model.with_structured_output(GroundedAnswerOutput).invoke(
                 [
                     {
                         "role": "system",
@@ -128,8 +153,12 @@ class StructuredAgentRouter:
                             "Use only these retrieved learning units as evidence. "
                             "Most indexed course material is English; reply naturally in the user's language "
                             "when appropriate. "
-                            "Do not invent missing course facts. If the evidence is insufficient, ask one concise "
-                            "clarifying question instead of guessing."
+                            "Do not invent missing course facts. If the retrieved units do not directly support "
+                            "the user's requested topic, set evidence_sufficient=false, choose no_source or partial "
+                            "confidence, and ask one concise clarifying question or say that no direct grounded "
+                            "source was found. If the retrieved units are related but not exact, say that you found "
+                            "related results below and ask the user to describe the target more specifically if those "
+                            "results are not what they need. Do not answer from outside the retrieved evidence."
                         ),
                     },
                     {
@@ -144,4 +173,8 @@ class StructuredAgentRouter:
                 classify_agent_error(exc, default="AGENT_LLM_UNAVAILABLE"),
             ) from exc
 
-        return self._response_text(response)
+        if isinstance(response, GroundedAnswerOutput):
+            return response
+        if isinstance(response, dict):
+            return GroundedAnswerOutput.model_validate(response)
+        return GroundedAnswerOutput.model_validate(response.model_dump())

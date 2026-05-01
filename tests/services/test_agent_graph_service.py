@@ -49,11 +49,18 @@ async def test_graph_returns_grounded_find_content_from_search():
                     course_id="CS224n",
                     unit_name="Attention",
                     summary="Attention content.",
+                    learn_href="/courses/cs224n/learn/attention",
                     score=3,
                     quiz_available=True,
                 )
             ],
-            trace=RetrievalTrace(trace_id="trace-1", ranking_version="unit_search_v1"),
+            trace=RetrievalTrace(
+                trace_id="trace-1",
+                intent="find_content",
+                selected_path="current_path",
+                candidate_courses=["CS224n"],
+                ranking_version="unit_search_v1",
+            ),
         )
 
     service = AgentGraphService(
@@ -73,6 +80,10 @@ async def test_graph_returns_grounded_find_content_from_search():
     assert response.answer.confidence == "grounded"
     assert response.answer.markdown == "LLM grounded answer for Attention"
     assert response.citations[0].canonical_unit_id == "unit-attn"
+    assert response.actions[0].type == "open_unit"
+    assert response.trace is not None
+    assert response.trace.trace_id == "trace-1"
+    assert response.trace.selected_path == "current_path"
 
 
 async def test_graph_dispatches_navigation_intent_to_content_search():
@@ -119,6 +130,536 @@ async def test_graph_dispatches_navigation_intent_to_content_search():
     assert response.answer.markdown == "Review the CNN unit."
     assert response.answer.confidence == "grounded"
     assert response.citations[0].canonical_unit_id == "unit-cnn"
+
+
+async def test_graph_downgrades_grounded_answer_when_llm_rejects_evidence():
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="explain_concept",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="attention mask in transformers"),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown="I do not have enough evidence for that topic.",
+                evidence_sufficient=False,
+                confidence="no_source",
+                clarification_question="Which masking behavior do you mean?",
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-overview",
+                    course_id="CS230",
+                    unit_name="Course Overview",
+                    summary="Deep learning overview.",
+                    score=1,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-weak", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="attention mask in transformers",
+            incomingMessageId="msg-weak-grounding",
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-weak-grounding",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS230"],
+    )
+
+    assert response.answer.confidence == "no_source"
+    assert response.citations == []
+    assert response.fallback is not None
+
+
+async def test_graph_offers_scope_expansion_when_current_path_evidence_is_weak():
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="CNNs"),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown="The current-path evidence is not direct enough.",
+                evidence_sufficient=False,
+                confidence="no_source",
+                clarification_question="The current path did not have a direct CNN match. Search other paths?",
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-weak",
+                    course_id="CS224n",
+                    unit_name="Neural Network Overview",
+                    summary="General neural network content.",
+                    score=1,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-weak-current", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Where should I review CNNs?", incomingMessageId="msg-weak-current"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-weak-current",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert "current path" in response.answer.markdown
+    assert response.citations == []
+    assert response.actions == []
+
+
+async def test_scope_expansion_approval_returns_path_choice_actions_when_multiple_paths_match():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    pending = PendingClarification(
+        clarification_id="clar-path-catalog",
+        type="search_scope_expansion",
+        status="awaiting_response",
+        payload={
+            "original_message": "Where should I review CNNs?",
+            "raw_topic": "CNNs",
+            "allowed_path_ids": ["computer_vision", "nlp"],
+            "current_path_ids": ["nlp"],
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cv-cnn",
+                    course_id="CS231n",
+                    unit_name="CNNs for Vision",
+                    summary="Computer vision CNN content.",
+                    score=3,
+                    quiz_available=True,
+                ),
+                UnitSearchResult(
+                    canonical_unit_id="unit-nlp-cnn",
+                    course_id="CS224n",
+                    unit_name="CNNs for Sentence Classification",
+                    summary="NLP CNN content.",
+                    score=3,
+                    quiz_available=True,
+                ),
+            ],
+            trace=RetrievalTrace(trace_id="trace-path-catalog", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-path-catalog",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="yes, search other paths", incomingMessageId="msg-path-catalog"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-path-catalog",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert {action.type for action in response.actions} == {"choose_target_path"}
+    assert {action.workflow_id for action in response.actions} == {"computer_vision", "nlp"}
+    assert response.citations == []
+
+
+async def test_path_choice_action_searches_selected_path_with_original_topic():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-path-select",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "path_selection",
+            "original_intent": "find_content",
+            "original_message": "Where should I review CNNs?",
+            "raw_topic": "CNNs",
+            "path_options": ["computer_vision", "nlp"],
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cv-cnn",
+                    course_id="CS231n",
+                    unit_name="CNNs for Vision",
+                    summary="Computer vision CNN content.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/cnn",
+                ),
+            ],
+            trace=RetrievalTrace(trace_id="trace-path-select", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-path-select",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="choose_path:computer_vision", incomingMessageId="msg-path-select"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-path-select",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert search_requests[0].query == "CNNs"
+    assert search_requests[0].course_ids == ["CS231n"]
+    assert response.actions[0].type == "open_unit"
+
+
+async def test_selected_path_with_related_but_weak_evidence_keeps_result_cards_as_partial():
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=1.0,
+                extracted_slots=AgentSlots(
+                    raw_topic="CNNs",
+                    target_path="computer_vision",
+                    requested_path_id="computer_vision",
+                    search_scope="explicit_path",
+                    resolved_search_path_ids=["computer_vision"],
+                ),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown="I only found related CNN results, not an exact match.",
+                evidence_sufficient=False,
+                confidence="partial",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cv-related",
+                    course_id="CS231n",
+                    unit_name="CNN applications",
+                    summary="Related CNN application content.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/cnn-applications",
+                ),
+            ],
+            trace=RetrievalTrace(trace_id="trace-related", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="choose_path:computer_vision", incomingMessageId="msg-related"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-related",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert "related CNN results" in response.answer.markdown
+    assert response.citations[0].canonical_unit_id == "unit-cv-related"
+    assert response.actions[0].type == "open_unit"
+
+
+async def test_content_intent_without_extracted_topic_clarifies_before_search():
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic=None),
+                clarification_question="Which topic should I search for?",
+            )
+
+    async def search(request, allowed_course_ids):
+        raise AssertionError("Graph must clarify before retrieval when raw_topic is missing")
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Where should I review?", incomingMessageId="msg-missing-topic"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-missing-topic",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert response.answer.markdown == "Which topic should I search for?"
+
+
+async def test_missing_retrieval_topic_persists_pending_query_clarification():
+    conversation_id = uuid4()
+    user_id = uuid4()
+
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic=None),
+                clarification_question="Which topic should I search for?",
+            )
+
+    async def search(request, allowed_course_ids):
+        raise AssertionError("Graph must not retrieve before query clarification")
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={"memoryRef": f"agent_memory:{conversation_id}:v1", "summaryVersion": 1},
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    await service.chat(
+        request=AgentChatRequest(message="Where should I review?", incomingMessageId="msg-query-clarify"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-query-clarify",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    pending = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]["pendingClarification"]
+    assert pending["threadId"] == "thread-query-clarify"
+    assert pending["clarification"]["type"] == "slot_disambiguation"
+    assert pending["clarification"]["payload"]["kind"] == "retrieval_query"
+    assert pending["clarification"]["payload"]["original_intent"] == "find_content"
+
+
+async def test_pending_retrieval_query_confirmation_uses_proposed_topic():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-query",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "proposed_raw_topic": "dependency parsing",
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-dep",
+                    course_id="CS224n",
+                    unit_name="Dependency Parsing",
+                    summary="Dependency parsing content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-dep", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-query-confirm",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    upserts = []
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(side_effect=lambda **kwargs: upserts.append(kwargs)),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="yes", incomingMessageId="msg-query-confirm"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-query-confirm",
+        user_id=str(user_id),
+        allowed_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert search_requests[0].query == "dependency parsing"
+    assert upserts[-1]["summary_json"].get("pendingClarification") is None
+
+
+async def test_pending_retrieval_query_user_detail_becomes_search_topic():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-query-detail",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={"kind": "retrieval_query", "original_intent": "find_content"},
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-mask",
+                    course_id="CS224n",
+                    unit_name="Attention Mask",
+                    summary="Attention mask content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-mask", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-query-detail",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="attention mask in transformers",
+            incomingMessageId="msg-query-detail",
+        ),
+        conversation_id=str(conversation_id),
+        thread_id="thread-query-detail",
+        user_id=str(user_id),
+        allowed_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert search_requests[0].query == "attention mask in transformers"
 
 
 async def test_graph_offers_scope_expansion_when_current_path_has_no_result():
@@ -189,6 +730,57 @@ async def test_scope_expansion_pending_clarification_persists_to_thread_memory()
     assert pending["threadId"] == "thread-scope-save"
     assert pending["clarification"]["type"] == "search_scope_expansion"
     assert pending["clarification"]["payload"]["original_message"] == "attention mask ở đâu?"
+
+
+async def test_scope_expansion_pending_clarification_stores_extracted_raw_topic():
+    conversation_id = uuid4()
+    user_id = uuid4()
+
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="dependency parsing"),
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-empty-topic", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={"memoryRef": f"agent_memory:{conversation_id}:v1", "summaryVersion": 1},
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    await service.chat(
+        request=AgentChatRequest(
+            message="Where should I review dependency parsing?",
+            incomingMessageId="msg-scope-topic",
+        ),
+        conversation_id=str(conversation_id),
+        thread_id="thread-scope-topic",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    pending = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]["pendingClarification"]
+    assert pending["clarification"]["payload"]["original_message"] == "Where should I review dependency parsing?"
+    assert pending["clarification"]["payload"]["raw_topic"] == "dependency parsing"
 
 
 async def test_scope_expansion_approval_loads_persisted_clarification_and_clears_it():
@@ -264,6 +856,121 @@ async def test_scope_expansion_approval_loads_persisted_clarification_and_clears
     assert response.answer.confidence == "grounded"
     assert response.citations[0].course_id == "CS224n"
     assert any("CS224n" in (request.course_ids or []) for request in search_requests)
+    assert upserts[-1]["summary_json"].get("pendingClarification") is None
+
+
+async def test_scope_expansion_approval_uses_extracted_raw_topic_for_bm25_query():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-persisted-topic",
+        type="search_scope_expansion",
+        status="awaiting_response",
+        payload={
+            "original_message": "Where should I review dependency parsing?",
+            "raw_topic": "dependency parsing",
+            "allowed_path_ids": ["computer_vision", "nlp"],
+            "current_path_ids": ["computer_vision"],
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-expanded-empty", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-scope-topic-approve",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    await service.chat(
+        request=AgentChatRequest(message="yes, search other paths", incomingMessageId="msg-scope-topic-approve"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-scope-topic-approve",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert search_requests[0].query == "dependency parsing"
+
+
+async def test_scope_expansion_rejection_clears_pending_clarification_without_search():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    pending = PendingClarification(
+        clarification_id="clar-persisted",
+        type="search_scope_expansion",
+        status="awaiting_response",
+        payload={
+            "original_message": "attention mask ở đâu?",
+            "allowed_path_ids": ["computer_vision", "nlp"],
+            "current_path_ids": ["computer_vision"],
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        raise AssertionError("Scope expansion rejection must not run retrieval")
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-scope-reject",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    upserts = []
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(side_effect=lambda **kwargs: upserts.append(kwargs)),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="no, keep current path", incomingMessageId="msg-scope-reject"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-scope-reject",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert "current path" in response.answer.markdown
     assert upserts[-1]["summary_json"].get("pendingClarification") is None
 
 

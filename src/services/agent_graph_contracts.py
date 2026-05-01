@@ -11,6 +11,8 @@ from src.schemas.agent import (
     AgentCitation,
     AgentFallback,
     AgentIntent,
+    AgentAction,
+    RetrievalTrace,
     AgentWarning,
     RouteContext,
 )
@@ -118,6 +120,7 @@ class AgentRoute(BaseModel):
     extracted_slots: AgentSlots = Field(default_factory=AgentSlots)
     rationale: str | None = None
     clarification_question: str | None = None
+    candidate_intent: AgentIntent | None = None
 
 
 class PolicyDecision(BaseModel):
@@ -173,11 +176,12 @@ class ToolResult(BaseModel):
     ]
     answer_markdown: str | None = None
     citations: list[AgentCitation] = Field(default_factory=list)
-    actions: list[Any] = Field(default_factory=list)
+    actions: list[AgentAction] = Field(default_factory=list)
     warning: AgentWarning | None = None
     fallback: AgentFallback | None = None
     requires_evidence: bool = False
     metadata: dict[str, Any] = Field(default_factory=dict)
+    trace: RetrievalTrace | None = None
 
 
 class AgentCheckpointState(BaseModel):

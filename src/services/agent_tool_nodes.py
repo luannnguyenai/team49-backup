@@ -73,6 +73,24 @@ class AgentToolNodes:
             )
             for result in results
         ]
+        actions = [
+            AgentAction(
+                type="open_unit",
+                label=f"Open {result.unit_name}",
+                learn_href=result.learn_href,
+                canonical_unit_id=result.canonical_unit_id,
+            )
+            for result in results
+            if result.learn_href
+        ]
+        trace = search.trace.model_copy(
+            update={
+                "intent": intent,
+                "selected_path": slots.search_scope,
+                "candidate_courses": course_ids,
+                "selected_unit_ids": [citation.canonical_unit_id for citation in citations],
+            }
+        )
         if not citations and slots.search_scope == "current_path":
             return ToolResult(
                 kind="clarification",
@@ -90,7 +108,45 @@ class AgentToolNodes:
                 ),
                 requires_evidence=False,
                 metadata={"scope_expansion_offered": True},
+                trace=trace,
             )
+        if slots.search_scope == "expanded_paths" and citations:
+            allowed_path_ids = slots.resolved_search_path_ids
+            path_hits: dict[str, list[AgentCitation]] = {}
+            for citation in citations:
+                for path_id in self.scope_service.path_ids_for_course(
+                    citation.course_id,
+                    allowed_path_ids,
+                ):
+                    path_hits.setdefault(path_id, []).append(citation)
+            if len(path_hits) > 1:
+                raw_topic = slots.raw_topic or message
+                actions = [
+                    AgentAction(
+                        type="choose_target_path",
+                        label=f"{raw_topic} in {self.scope_service.path_label(path_id)}",
+                        workflowId=path_id,
+                    )
+                    for path_id in path_hits
+                ]
+                return ToolResult(
+                    kind="clarification",
+                    answer_markdown=(
+                        f"I found information related to {raw_topic} in multiple paths. "
+                        "Which path do you want me to search more deeply?"
+                    ),
+                    actions=actions,
+                    warning=AgentWarning(
+                        type="ambiguous_target",
+                        message="Expanded search found multiple matching paths.",
+                    ),
+                    requires_evidence=False,
+                    metadata={
+                        "path_selection_offered": True,
+                        "path_options": list(path_hits.keys()),
+                    },
+                    trace=trace,
+                )
         disclosure = ""
         if slots.search_scope == "expanded_paths" and citations:
             disclosure = "\n\nI found this outside the original current-path search scope."
@@ -98,7 +154,9 @@ class AgentToolNodes:
             kind="find_content",
             answer_markdown=disclosure.strip() or None,
             citations=citations,
+            actions=actions,
             requires_evidence=True,
+            trace=trace,
         )
 
     async def planner_decision(

@@ -278,10 +278,26 @@ class AgentGraphService:
         pending = state.get("pending_clarification")
         if isinstance(pending, dict):
             pending = PendingClarification.model_validate(pending)
+        if (
+            pending is not None
+            and pending.type == "slot_disambiguation"
+            and pending.payload.get("kind") == "retrieval_query"
+        ):
+            pending_result = self._resolve_pending_retrieval_query(state, pending)
+            if pending_result is not None:
+                return pending_result
+        if (
+            pending is not None
+            and pending.type == "slot_disambiguation"
+            and pending.payload.get("kind") == "path_selection"
+        ):
+            pending_result = self._resolve_pending_path_selection(state, pending)
+            if pending_result is not None:
+                return pending_result
         if self.scope_service.is_scope_expansion_approval(state["message"], pending):
             payload = pending.payload if pending else {}
             slots = AgentSlots(
-                raw_topic=payload.get("original_message", state["message"]),
+                raw_topic=payload.get("raw_topic") or payload.get("original_message", state["message"]),
                 search_scope="expanded_paths",
                 scope_expansion_approved=True,
                 resolved_search_path_ids=payload.get("allowed_path_ids", []),
@@ -293,6 +309,18 @@ class AgentGraphService:
                 "slots": slots,
                 "pending_clarification": None,
             }
+        if self.scope_service.is_scope_expansion_rejection(state["message"], pending):
+            return {
+                **state,
+                "intent": "clarify",
+                "intent_confidence": 0.0,
+                "slots": AgentSlots(),
+                "pending_clarification": None,
+                "clarification_question": (
+                    "Okay, I will keep the search scoped to your current path. "
+                    "Please add a course, unit, or topic if you want me to try again there."
+                ),
+            }
 
         route = self.router.route(message=state["message"], route_context=state.get("route_context"))
         return {
@@ -301,6 +329,105 @@ class AgentGraphService:
             "intent_confidence": route.confidence,
             "slots": route.extracted_slots,
             "clarification_question": route.clarification_question,
+            "candidate_intent": route.candidate_intent,
+        }
+
+    def _resolve_pending_retrieval_query(
+        self,
+        state: dict,
+        pending: PendingClarification,
+    ) -> dict | None:
+        payload = pending.payload
+        message = state["message"].strip()
+        normalized = message.lower()
+        proposed = str(payload.get("proposed_raw_topic") or "").strip()
+        is_confirmation = normalized in {"yes", "y", "ok", "correct", "right", "đúng", "dung"}
+        is_rejection = normalized in {"no", "nope", "không", "khong"} or normalized.startswith("no,")
+
+        if is_rejection:
+            return {
+                **state,
+                "intent": "clarify",
+                "intent_confidence": 0.0,
+                "slots": AgentSlots(),
+                "pending_clarification": None,
+                "clarification_question": (
+                    "Okay. Please describe the topic or concept you want me to search for."
+                ),
+            }
+        if is_confirmation and not proposed:
+            return {
+                **state,
+                "intent": "clarify",
+                "intent_confidence": 0.0,
+                "slots": AgentSlots(),
+                "pending_clarification": pending,
+                "clarification_question": (
+                    "Please add the topic or concept name so I can search accurately."
+                ),
+            }
+
+        raw_topic = proposed if is_confirmation else message
+        return {
+            **state,
+            "intent": payload.get("original_intent") or "find_content",
+            "intent_confidence": 1.0,
+            "slots": AgentSlots(
+                raw_topic=raw_topic,
+                target_path=payload.get("target_path"),
+                requested_path_id=payload.get("requested_path_id"),
+                search_scope=payload.get("search_scope") or "current_path",
+                resolved_search_path_ids=payload.get("resolved_search_path_ids") or [],
+            ),
+            "pending_clarification": None,
+            "clarification_question": None,
+        }
+
+    def _resolve_pending_path_selection(
+        self,
+        state: dict,
+        pending: PendingClarification,
+    ) -> dict | None:
+        payload = pending.payload
+        message = state["message"].strip()
+        normalized = message.lower()
+        options = [str(path_id) for path_id in payload.get("path_options", [])]
+        selected_path_id = ""
+        if normalized.startswith("choose_path:"):
+            selected_path_id = normalized.split(":", 1)[1].strip()
+        else:
+            selected_path_id = next(
+                (
+                    path_id
+                    for path_id in options
+                    if normalized == path_id.lower()
+                    or normalized == self.scope_service.path_label(path_id).lower()
+                ),
+                "",
+            )
+        if selected_path_id not in options:
+            return {
+                **state,
+                "intent": "clarify",
+                "intent_confidence": 0.0,
+                "slots": AgentSlots(),
+                "pending_clarification": pending,
+                "clarification_question": "Please choose one of the paths shown below.",
+            }
+        raw_topic = str(payload.get("raw_topic") or payload.get("original_message") or "").strip()
+        return {
+            **state,
+            "intent": payload.get("original_intent") or "find_content",
+            "intent_confidence": 1.0,
+            "slots": AgentSlots(
+                raw_topic=raw_topic,
+                target_path=selected_path_id,
+                requested_path_id=selected_path_id,
+                search_scope="explicit_path",
+                resolved_search_path_ids=[selected_path_id],
+            ),
+            "pending_clarification": None,
+            "clarification_question": None,
         }
 
     async def _canonicalize_slots(self, state: dict) -> dict:
@@ -352,7 +479,18 @@ class AgentGraphService:
                 state["message"],
                 reason=state.get("clarification_question") or "ambiguous_target",
             )
-            return {**state, "tool_result": result}
+            update = {**state, "tool_result": result}
+            if (
+                state.get("candidate_intent")
+                in {"find_content", "explain_concept", "general_course_question", "navigate_to_unit"}
+                and not (slots.raw_topic or "").strip()
+            ):
+                update["pending_clarification"] = self._build_retrieval_query_clarification(
+                    state,
+                    slots,
+                    original_intent=state["candidate_intent"],
+                )
+            return update
 
         if state["intent"] == "assistant_help":
             compose_help = getattr(self.router, "compose_assistant_help", None)
@@ -369,6 +507,21 @@ class AgentGraphService:
             "general_course_question",
             "navigate_to_unit",
         }:
+            if not (slots.raw_topic or "").strip():
+                result = await self.tools.clarify(
+                    state["message"],
+                    reason=state.get("clarification_question")
+                    or "Which topic or concept should I search for?",
+                )
+                return {
+                    **state,
+                    "tool_result": result,
+                    "pending_clarification": self._build_retrieval_query_clarification(
+                        state,
+                        slots,
+                        original_intent=state["intent"],
+                    ),
+                }
             result = await self.tools.find_content(
                 state["message"],
                 state["intent"],
@@ -378,11 +531,71 @@ class AgentGraphService:
             if result.requires_evidence and result.citations:
                 compose_grounded = getattr(self.router, "compose_grounded_answer", None)
                 if compose_grounded is not None:
-                    answer_markdown = compose_grounded(
+                    grounded_answer = compose_grounded(
                         state["message"],
                         [citation.model_dump(mode="json") for citation in result.citations],
                     )
-                    result = result.model_copy(update={"answer_markdown": answer_markdown})
+                    if isinstance(grounded_answer, str):
+                        result = result.model_copy(update={"answer_markdown": grounded_answer})
+                    elif getattr(grounded_answer, "evidence_sufficient", False):
+                        result = result.model_copy(
+                            update={"answer_markdown": grounded_answer.answer_markdown}
+                        )
+                    else:
+                        answer_markdown = (
+                            getattr(grounded_answer, "clarification_question", None)
+                            or getattr(grounded_answer, "answer_markdown", None)
+                            or "I could not find a direct grounded source for that request."
+                        )
+                        if slots.search_scope == "explicit_path":
+                            result = result.model_copy(
+                                update={
+                                    "answer_markdown": answer_markdown,
+                                    "requires_evidence": False,
+                                    "metadata": {
+                                        **result.metadata,
+                                        "answer_confidence": "partial",
+                                        "grounding_evidence_sufficient": False,
+                                    },
+                                }
+                            )
+                        elif slots.search_scope == "current_path" and len(state["allowed_course_ids"]) > len(
+                            state.get("current_path_course_ids") or []
+                        ):
+                            result = ToolResult(
+                                kind="clarification",
+                                answer_markdown=(
+                                    "I could not find a direct match in your current path. "
+                                    "Do you want me to expand the search to other allowed paths?"
+                                ),
+                                warning=result.warning,
+                                fallback=result.fallback,
+                                requires_evidence=False,
+                                metadata={
+                                    **result.metadata,
+                                    "scope_expansion_offered": True,
+                                    "grounding_evidence_sufficient": False,
+                                },
+                                trace=result.trace,
+                            )
+                        else:
+                            result = result.model_copy(
+                                update={
+                                    "answer_markdown": answer_markdown,
+                                    "citations": [],
+                                    "actions": [],
+                                    "requires_evidence": getattr(
+                                        grounded_answer,
+                                        "confidence",
+                                        "no_source",
+                                    )
+                                    == "no_source",
+                                    "metadata": {
+                                        **result.metadata,
+                                        "grounding_evidence_sufficient": False,
+                                    },
+                                }
+                            )
             update: dict = {**state, "tool_result": result}
             if result.metadata.get("scope_expansion_offered"):
                 allowed_paths = self.scope_service.path_ids_for_courses(state["allowed_course_ids"])
@@ -392,12 +605,28 @@ class AgentGraphService:
                     status="awaiting_response",
                     payload={
                         "original_message": state["message"],
+                        "raw_topic": slots.raw_topic,
                         "allowed_path_ids": allowed_paths,
                         "current_path_ids": slots.resolved_search_path_ids,
                     },
                     expires_at=datetime.now(UTC) + timedelta(minutes=30),
                 )
+            if result.metadata.get("path_selection_offered"):
+                update["pending_clarification"] = PendingClarification(
+                    clarification_id=f"clar_{uuid4()}",
+                    type="slot_disambiguation",
+                    status="awaiting_response",
+                    payload={
+                        "kind": "path_selection",
+                        "original_intent": state["intent"],
+                        "original_message": state["message"],
+                        "raw_topic": slots.raw_topic,
+                        "path_options": result.metadata.get("path_options", []),
+                    },
+                    expires_at=datetime.now(UTC) + timedelta(minutes=30),
+                )
             return update
+
         if state["intent"] == "explain_planner_decision":
             result = await self.tools.planner_decision(
                 state["message"],
@@ -433,6 +662,31 @@ class AgentGraphService:
             return {**state, "tool_result": result}
 
         return {**state, "tool_result": await self.tools.clarify(state["message"])}
+
+    def _build_retrieval_query_clarification(
+        self,
+        state: dict,
+        slots: AgentSlots,
+        *,
+        original_intent: str,
+    ) -> PendingClarification:
+        return PendingClarification(
+            clarification_id=f"clar_{uuid4()}",
+            type="slot_disambiguation",
+            status="awaiting_response",
+            payload={
+                "kind": "retrieval_query",
+                "original_intent": original_intent,
+                "original_message": state["message"],
+                "proposed_raw_topic": slots.raw_topic,
+                "target_path": slots.target_path,
+                "requested_path_id": slots.requested_path_id,
+                "search_scope": slots.search_scope,
+                "resolved_search_path_ids": slots.resolved_search_path_ids,
+                "clarification_question": state.get("clarification_question"),
+            },
+            expires_at=datetime.now(UTC) + timedelta(minutes=30),
+        )
 
     async def _await_confirmation(self, state: dict) -> dict:
         if interrupt is None:

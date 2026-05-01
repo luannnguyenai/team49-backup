@@ -32,18 +32,22 @@ class AgentResponseComposer:
                     reason="no_retrieval_result",
                     message="No grounded evidence was returned for a grounded answer.",
                 ),
+                trace=result.trace,
             )
         return AgentChatResponse(
             conversation_id=conversation_id,
             message_id=message_id or str(uuid4()),
             answer=AgentAnswer(
                 markdown=result.answer_markdown or "Could you clarify what you want help with?",
-                confidence="grounded" if result.citations else "partial",
+                confidence=result.metadata.get("answer_confidence")
+                if result.metadata.get("answer_confidence") in {"grounded", "partial", "no_source", "fallback"}
+                else ("grounded" if result.citations else "partial"),
             ),
             citations=result.citations,
             actions=result.actions,
             warning=result.warning,
             fallback=result.fallback,
+            trace=result.trace,
         )
 
     def compose_action_error(self, conversation_id: str, reason: str) -> AgentChatResponse:

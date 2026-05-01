@@ -8,7 +8,13 @@ PATH_COURSE_IDS: dict[str, list[str]] = {
     "nlp": ["CS230", "CS224n"],
 }
 
+PATH_LABELS: dict[str, str] = {
+    "computer_vision": "Computer Vision",
+    "nlp": "NLP",
+}
+
 APPROVAL_PHRASES = {"ok", "yes", "approve", "được", "duoc"}
+REJECTION_PHRASES = {"no", "nope", "cancel", "không", "khong", "thôi", "thoi"}
 
 
 class AgentSearchScopeService:
@@ -68,6 +74,17 @@ class AgentSearchScopeService:
                     courses.append(course_id)
         return courses or allowed_course_ids
 
+    def path_ids_for_course(self, course_id: str, allowed_path_ids: list[str]) -> list[str]:
+        allowed_paths = set(allowed_path_ids)
+        return [
+            path_id
+            for path_id, course_ids in PATH_COURSE_IDS.items()
+            if path_id in allowed_paths and course_id in course_ids
+        ]
+
+    def path_label(self, path_id: str) -> str:
+        return PATH_LABELS.get(path_id, path_id.replace("_", " ").title())
+
     def is_scope_expansion_approval(
         self,
         message: str,
@@ -78,8 +95,29 @@ class AgentSearchScopeService:
         normalized = message.lower().strip()
         return (
             normalized in APPROVAL_PHRASES
+            or ("yes" in normalized and ("other path" in normalized or "other paths" in normalized))
+            or "search other path" in normalized
+            or "search other paths" in normalized
             or "mở rộng" in normalized
             or "mo rong" in normalized
             or "path khác" in normalized
             or "path khac" in normalized
+        )
+
+    def is_scope_expansion_rejection(
+        self,
+        message: str,
+        pending: PendingClarification | None,
+    ) -> bool:
+        if pending is None or pending.type != "search_scope_expansion":
+            return False
+        normalized = message.lower().strip()
+        return (
+            normalized in REJECTION_PHRASES
+            or normalized.startswith("no,")
+            or normalized.startswith("no ")
+            or "keep current path" in normalized
+            or "current path only" in normalized
+            or "không mở rộng" in normalized
+            or "khong mo rong" in normalized
         )

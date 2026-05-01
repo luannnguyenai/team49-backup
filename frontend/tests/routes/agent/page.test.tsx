@@ -137,4 +137,52 @@ describe("agent page", () => {
     });
     expect(await screen.findByText("I recalculated your learning plan from the latest assessment evidence.")).toBeInTheDocument();
   });
+
+  it("chooses a target path card through the active conversation", async () => {
+    agentApiMock.chat
+      .mockResolvedValueOnce({
+        conversationId: "conversation-1",
+        messageId: "message-path-choice",
+        answer: {
+          markdown: "I found CNN in multiple paths. Which path do you want?",
+          confidence: "partial",
+        },
+        citations: [],
+        actions: [
+          {
+            type: "choose_target_path",
+            label: "CNNs in Computer Vision",
+            workflowId: "computer_vision",
+          },
+        ],
+        warning: null,
+      })
+      .mockResolvedValueOnce({
+        conversationId: "conversation-1",
+        messageId: "message-cv-results",
+        answer: {
+          markdown: "I found relevant CNN units in Computer Vision.",
+          confidence: "grounded",
+        },
+        citations: [],
+        actions: [],
+        warning: null,
+      });
+    render(<AgentPage />);
+
+    const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
+    fireEvent.click(promptButtons[0]);
+    const pathChoice = await screen.findByRole("button", { name: /cnns in computer vision/i });
+    fireEvent.click(pathChoice);
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenLastCalledWith({
+        message: "choose_path:computer_vision",
+        incomingMessageId: expect.any(String),
+        conversationId: "conversation-1",
+        traceMode: "summary",
+      });
+    });
+    expect(await screen.findByText("I found relevant CNN units in Computer Vision.")).toBeInTheDocument();
+  });
 });

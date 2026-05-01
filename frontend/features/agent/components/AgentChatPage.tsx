@@ -453,6 +453,26 @@ function ActionButton({
     }
   };
 
+  const chooseTargetPath = async () => {
+    const targetPathId = getWorkflowId(action);
+    if (!conversationId || !targetPathId || disabled || !onActionResponse) return;
+    setIsStarting(true);
+    setStartError(null);
+    try {
+      const response = await agentApi.chat({
+        message: `choose_path:${targetPathId}`,
+        incomingMessageId: createIncomingMessageId(),
+        conversationId,
+        traceMode: "summary",
+      });
+      onActionResponse(response);
+    } catch (err) {
+      setStartError(err instanceof Error ? err.message : "Path selection could not be completed.");
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
   const content = (
     <span
       className={cn(
@@ -497,6 +517,14 @@ function ActionButton({
   if (action.type === "start_assessment") {
     return (
       <button type="button" disabled={disabled || isStarting} onClick={startAssessment} className="w-full">
+        {content}
+      </button>
+    );
+  }
+
+  if (action.type === "choose_target_path") {
+    return (
+      <button type="button" disabled={disabled || isStarting} onClick={chooseTargetPath} className="w-full">
         {content}
       </button>
     );

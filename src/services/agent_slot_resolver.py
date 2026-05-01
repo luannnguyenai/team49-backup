@@ -22,12 +22,7 @@ class AgentSlotResolver:
             current_path_course_ids or allowed_course_ids
         )
         slots = self.scope_service.resolve_initial_scope(raw_slots, current_path_ids)
-        if slots.canonical_unit_ids or intent not in {
-            "find_content",
-            "explain_concept",
-            "general_course_question",
-            "assess_knowledge",
-        }:
+        if slots.canonical_unit_ids or intent != "assess_knowledge":
             return slots
 
         query = slots.raw_topic or ""

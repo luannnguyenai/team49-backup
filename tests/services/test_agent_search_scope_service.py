@@ -57,4 +57,17 @@ def test_scope_expansion_approval_only_resolves_pending_clarification():
     )
 
     assert service.is_scope_expansion_approval("ok", pending) is True
+    assert service.is_scope_expansion_approval("yes, search other paths", pending) is True
     assert service.is_scope_expansion_approval("ok", None) is False
+
+
+def test_scope_expansion_rejection_only_resolves_pending_clarification():
+    service = AgentSearchScopeService()
+    pending = PendingClarification(
+        clarification_id="clar-1",
+        type="search_scope_expansion",
+        status="awaiting_response",
+    )
+
+    assert service.is_scope_expansion_rejection("no, keep current path", pending) is True
+    assert service.is_scope_expansion_rejection("no", None) is False

@@ -5,10 +5,11 @@ from src.services.agent_structured_router import StructuredAgentRouter
 
 
 class FakeStructuredModel:
-    def __init__(self, payload):
+    def __init__(self, payload, owner=None):
         self.payload = payload
         self.schema = None
         self.messages = None
+        self.owner = owner
 
     def with_structured_output(self, schema):
         self.schema = schema
@@ -16,6 +17,8 @@ class FakeStructuredModel:
 
     def invoke(self, messages):
         self.messages = messages
+        if self.owner is not None:
+            self.owner.messages = messages
         return self.schema(**self.payload)
 
 
@@ -26,6 +29,7 @@ def test_structured_router_returns_explicit_path_route():
             "confidence": 0.91,
             "raw_topic": "attention mask",
             "target_path": "nlp",
+            "explicit_scope_requested": True,
             "rationale": "User explicitly asked for NLP content.",
         }
     )
@@ -58,6 +62,7 @@ def test_structured_router_low_confidence_clarifies():
     assert route.intent == "clarify"
     assert route.confidence == 0.4
     assert route.clarification_question == "Which action are you approving?"
+    assert route.candidate_intent == "request_replan"
 
 
 def test_structured_router_routes_general_help_to_assistant_help():
@@ -83,6 +88,7 @@ def test_structured_router_path_switch_intent_is_not_explicit_search_scope():
             "confidence": 0.94,
             "raw_topic": None,
             "target_path": "nlp",
+            "explicit_scope_requested": True,
             "rationale": "User asked to switch to NLP.",
         }
     )
@@ -94,6 +100,28 @@ def test_structured_router_path_switch_intent_is_not_explicit_search_scope():
 
     assert route.intent == "request_path_switch"
     assert route.extracted_slots.target_path == "nlp"
+    assert route.extracted_slots.requested_path_id is None
+    assert route.extracted_slots.search_scope == "current_path"
+
+
+def test_structured_router_ignores_inferred_target_path_without_explicit_scope():
+    model = FakeStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.9,
+            "raw_topic": "CNNs",
+            "target_path": "computer_vision",
+            "explicit_scope_requested": False,
+            "rationale": "The topic is related to computer vision but the user did not name a path.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="Where should I review CNNs?",
+        route_context=None,
+    )
+
+    assert route.extracted_slots.target_path is None
     assert route.extracted_slots.requested_path_id is None
     assert route.extracted_slots.search_scope == "current_path"
 
@@ -118,10 +146,53 @@ def test_structured_router_prompt_rejects_keyword_routing_as_source_of_truth():
     assert "Do not use raw keyword matching as the source of truth" in system_prompt
     assert "quiz eligibility questions from assessment creation" in system_prompt
     assert "where should I review" in system_prompt
+    assert "Set target_path only when the user explicitly names a path" in system_prompt
+    assert "explicit_scope_requested=true" in system_prompt
+    assert "Do not infer target_path from the topic domain alone" in system_prompt
+    assert "underspecified content/navigation requests" in system_prompt
+    assert "candidate_intent" in system_prompt
+
+
+def test_structured_router_preserves_model_candidate_intent_for_clarify():
+    model = FakeStructuredModel(
+        {
+            "intent": "clarify",
+            "candidate_intent": "find_content",
+            "confidence": 0.28,
+            "raw_topic": None,
+            "target_path": None,
+            "rationale": "Missing topic.",
+            "clarification_question": "Which topic should I search for?",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="Where should I review?",
+        route_context=None,
+    )
+
+    assert route.intent == "clarify"
+    assert route.candidate_intent == "find_content"
 
 
 class FakeChatModel:
+    def __init__(self, grounded_payload=None):
+        self.grounded_payload = grounded_payload
+
     def with_structured_output(self, schema):
+        if "evidence_sufficient" in schema.model_fields:
+            structured = FakeStructuredModel(
+                self.grounded_payload
+                or {
+                    "answer_markdown": "I can help you find content and plan reviews.",
+                    "evidence_sufficient": True,
+                    "confidence": "grounded",
+                    "clarification_question": None,
+                },
+                owner=self,
+            )
+            structured.schema = schema
+            return structured
         return FakeStructuredModel(
             {
                 "intent": "assistant_help",
@@ -146,6 +217,7 @@ def test_structured_router_composes_assistant_help_with_llm():
     )
 
     assert answer == "I can help you find content and plan reviews."
+    assert "For simple greetings, greet briefly" in model.messages[0]["content"]
 
 
 def test_structured_router_composes_grounded_answer_with_llm():
@@ -165,9 +237,36 @@ def test_structured_router_composes_grounded_answer_with_llm():
         citations=citations,
     )
 
-    assert answer == "I can help you find content and plan reviews."
+    assert answer.answer_markdown == "I can help you find content and plan reviews."
+    assert answer.evidence_sufficient is True
     assert "Use only these retrieved learning units" in model.messages[0]["content"]
+    assert "related results below" in model.messages[0]["content"]
     assert "Where should I review CNNs?" in model.messages[1]["content"]
+
+
+def test_structured_router_grounded_answer_can_report_insufficient_evidence():
+    model = FakeChatModel(
+        grounded_payload={
+            "answer_markdown": "I do not have enough evidence for that topic.",
+            "evidence_sufficient": False,
+            "confidence": "no_source",
+            "clarification_question": "Which specific transformer masking behavior do you mean?",
+        }
+    )
+
+    answer = StructuredAgentRouter(model=model).compose_grounded_answer(
+        message="attention mask in transformers",
+        citations=[
+            {
+                "course_id": "CS230",
+                "unit_name": "Course overview",
+                "quote": "Deep learning overview.",
+            }
+        ],
+    )
+
+    assert answer.evidence_sufficient is False
+    assert answer.confidence == "no_source"
 
 
 class GenericRateLimitedModel:
