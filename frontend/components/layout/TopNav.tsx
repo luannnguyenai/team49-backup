@@ -33,6 +33,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
   const [hasLoadedCourses, setHasLoadedCourses] = useState(false);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
       mountedRef.current = false;
     };
