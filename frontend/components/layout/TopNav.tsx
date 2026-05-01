@@ -68,6 +68,12 @@ function TopNavSearch({ pathname }: { pathname: string }) {
     setIsDropdownOpen(false);
   };
 
+  const routeToCourse = (courseSlug: string) => {
+    setIsDropdownOpen(false);
+    setDraftQuery("");
+    router.push(getCourseHref(courseSlug));
+  };
+
   const ensureCatalogLoaded = () => {
     if (hasLoadedCourses || isLoadingCourses) {
       return;
@@ -121,6 +127,12 @@ function TopNavSearch({ pathname }: { pathname: string }) {
               if (event.key === "Escape") {
                 event.preventDefault();
                 setIsDropdownOpen(false);
+                return;
+              }
+
+              if (event.key === "Enter" && matchingCourses.length > 0) {
+                event.preventDefault();
+                routeToCourse(matchingCourses[0].slug);
               }
             }}
             className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
@@ -162,11 +174,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
                 <li key={course.id}>
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      setDraftQuery("");
-                      router.push(getCourseHref(course.slug));
-                    }}
+                    onClick={() => routeToCourse(course.slug)}
                     className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     <span className="min-w-0">
