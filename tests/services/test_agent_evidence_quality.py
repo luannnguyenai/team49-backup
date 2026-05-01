@@ -57,3 +57,31 @@ def test_evidence_quality_marks_low_coverage_as_weak_match():
 
     assert verdict.label == "weak_match"
     assert verdict.requires_grounded_answer is False
+
+
+def test_evidence_quality_finds_direct_title_match_buried_below_broad_results():
+    broad_results = [
+        UnitSearchResult(
+            canonical_unit_id=f"unit-broad-{index}",
+            course_id="CS231n",
+            unit_name=f"Generic object detection result {index}",
+            summary="This row overlaps with broad search terms but is not the requested topic.",
+            score=4,
+        )
+        for index in range(20)
+    ]
+    direct_result = UnitSearchResult(
+        canonical_unit_id="unit-yolo",
+        course_id="CS231n",
+        unit_name="Single-stage and transformer detectors: YOLO and DETR",
+        summary="YOLO is the canonical single-stage detector example.",
+        score=1,
+    )
+
+    verdict = AgentEvidenceQualityService().score(
+        query="YOLO",
+        results=[*broad_results, direct_result],
+    )
+
+    assert verdict.label == "direct_match"
+    assert verdict.selected_unit_ids == ["unit-yolo"]

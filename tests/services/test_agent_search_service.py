@@ -35,9 +35,10 @@ async def test_search_intersects_course_scope_and_sorts_by_score():
     captured = {}
 
     class Repo:
-        async def search_canonical_units(self, terms, course_ids, limit):
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
             captured["terms"] = terms
             captured["course_ids"] = course_ids
+            captured["title_only"] = title_only
             return [
                 SimpleNamespace(
                     unit_id="weak",
@@ -68,6 +69,7 @@ async def test_search_intersects_course_scope_and_sorts_by_score():
     )
 
     assert captured["course_ids"] == ["CS231n"]
+    assert captured["title_only"] is True
     assert response.results[0].canonical_unit_id == "strong"
     assert response.results[0].learn_href == "/courses/cs231n/learn/strong-slug"
     assert response.trace.candidate_courses == ["CS231n"]
@@ -77,7 +79,7 @@ async def test_search_intersects_course_scope_and_sorts_by_score():
 @pytest.mark.asyncio
 async def test_search_scores_punctuation_insensitive_matches_without_domain_synonyms():
     class Repo:
-        async def search_canonical_units(self, terms, course_ids, limit):
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
             return [
                 SimpleNamespace(
                     unit_id="u-net-segmentation",
@@ -104,7 +106,7 @@ async def test_search_scores_punctuation_insensitive_matches_without_domain_syno
 @pytest.mark.asyncio
 async def test_search_does_not_compact_match_across_word_boundaries():
     class Repo:
-        async def search_canonical_units(self, terms, course_ids, limit):
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
             return [
                 SimpleNamespace(
                     unit_id="gan-tuning",

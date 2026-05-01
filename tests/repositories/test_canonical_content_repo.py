@@ -69,3 +69,22 @@ async def test_search_canonical_units_matches_mixed_case_course_ids_case_insensi
     compiled = str(statement.compile(dialect=postgresql.dialect()))
 
     assert "lower(units.course_id) IN" in compiled
+
+
+@pytest.mark.asyncio
+async def test_search_canonical_units_title_only_excludes_body_fields():
+    session = AsyncMock()
+    result = Mock()
+    result.scalars.return_value.all.return_value = []
+    session.execute.return_value = result
+    repo = CanonicalContentRepository(session)
+
+    await repo.search_canonical_units(["yolo"], ["CS231n"], title_only=True)
+
+    statement = session.execute.await_args.args[0]
+    compiled = str(statement.compile(dialect=postgresql.dialect()))
+
+    assert "units.unit_name" in compiled
+    assert "units.lecture_title" in compiled
+    assert "lower(coalesce(units.summary" not in compiled
+    assert "lower(coalesce(units.description" not in compiled

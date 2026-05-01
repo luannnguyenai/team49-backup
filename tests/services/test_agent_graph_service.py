@@ -163,7 +163,7 @@ async def test_graph_dispatches_navigation_intent_to_content_search():
     )
 
     assert response.answer.markdown == "Review the CNN unit."
-    assert response.answer.confidence == "grounded"
+    assert response.answer.confidence == "partial"
     assert response.citations[0].canonical_unit_id == "unit-cnn"
 
 
@@ -221,7 +221,7 @@ async def test_graph_downgrades_grounded_answer_when_llm_rejects_evidence():
     assert response.fallback is not None
 
 
-async def test_graph_marks_related_evidence_partial_before_llm_grounding():
+async def test_graph_lets_llm_review_related_evidence_as_partial_context():
     class Router:
         def route(self, message, route_context):
             return AgentRoute(
@@ -231,7 +231,12 @@ async def test_graph_marks_related_evidence_partial_before_llm_grounding():
             )
 
         def compose_grounded_answer(self, message, citations):
-            raise AssertionError("Related evidence should not be treated as grounded evidence")
+            return SimpleNamespace(
+                answer_markdown="I only found related detection context.",
+                evidence_sufficient=False,
+                confidence="partial",
+                clarification_question=None,
+            )
 
     async def search(request, allowed_course_ids):
         return UnitSearchResponse(
@@ -265,6 +270,7 @@ async def test_graph_marks_related_evidence_partial_before_llm_grounding():
     )
 
     assert response.answer.confidence == "partial"
+    assert response.answer.markdown == "I only found related detection context."
     assert response.citations[0].canonical_unit_id == "unit-related-cnn"
     assert response.actions[0].type == "open_unit"
 
@@ -679,6 +685,80 @@ async def test_direct_evidence_is_returned_even_when_search_page_is_full():
     assert [request.query for request in search_requests] == ["UNet", "U-Net segmentation"]
     assert response.citations[0].canonical_unit_id == "unit-unet"
     assert "20 results" not in response.answer.markdown
+
+
+async def test_direct_evidence_buried_under_broad_search_results_is_returned():
+    conversation_id = uuid4()
+    user_id = uuid4()
+
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(
+                    raw_topic="YOLO",
+                    search_queries=[
+                        "YOLO object detection",
+                        "YOLO architecture grid prediction",
+                        "YOLO loss function bounding box",
+                    ],
+                ),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown="YOLO is covered in the single-stage detector unit.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        broad_results = [
+            UnitSearchResult(
+                canonical_unit_id=f"unit-broad-{request.query}-{index}",
+                course_id="CS231n",
+                unit_name=f"Generic detection result {index}",
+                summary="This overlaps broad search terms but is not the requested topic.",
+                score=4,
+                quiz_available=True,
+                learn_href=f"/courses/cs231n/learn/broad-{index}",
+            )
+            for index in range(20)
+        ]
+        yolo_result = UnitSearchResult(
+            canonical_unit_id="unit-yolo",
+            course_id="CS231n",
+            unit_name="Single-stage and transformer detectors: YOLO and DETR",
+            summary="YOLO is the canonical single-stage detector example.",
+            score=1,
+            quiz_available=True,
+            learn_href="/courses/cs231n/learn/yolo",
+        )
+        return UnitSearchResponse(
+            results=[*broad_results, yolo_result],
+            trace=RetrievalTrace(trace_id="trace-yolo-broad", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="tìm thông tin về YOLO", incomingMessageId="msg-yolo-buried"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-yolo-buried",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert response.citations[0].canonical_unit_id == "unit-yolo"
+    assert "results related" not in response.answer.markdown
 
 
 async def test_too_many_results_approval_shows_top_results_without_requerying_router():

@@ -147,6 +147,8 @@ def test_structured_router_prompt_rejects_keyword_routing_as_source_of_truth():
     system_prompt = model.messages[0]["content"]
     assert "Do not use raw keyword matching as the source of truth" in system_prompt
     assert "quiz eligibility questions from assessment creation" in system_prompt
+    assert "short title-level BM25 queries first" in system_prompt
+    assert "try retrieval before asking about the desired angle" in system_prompt
 
 
 def test_structured_router_resolves_pending_followup_with_model_output():

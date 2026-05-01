@@ -23,6 +23,8 @@ class EvidenceQualityVerdict:
 
 
 class AgentEvidenceQualityService:
+    MAX_EVIDENCE_CANDIDATES = 100
+
     def score(self, query: str, results: list[UnitSearchResult]) -> EvidenceQualityVerdict:
         positive_results = [result for result in results if result.score > 0]
         if not positive_results:
@@ -37,9 +39,9 @@ class AgentEvidenceQualityService:
             )
 
         match_reasons: dict[str, str] = {}
-        direct_ids: list[str] = []
-        related_ids: list[str] = []
-        for result in positive_results[:5]:
+        direct_matches: list[tuple[float, float, int, str]] = []
+        related_matches: list[tuple[float, float, int, str]] = []
+        for index, result in enumerate(positive_results[: self.MAX_EVIDENCE_CANDIDATES]):
             title_text = " ".join(
                 [
                     result.unit_name or "",
@@ -55,24 +57,32 @@ class AgentEvidenceQualityService:
             )
             title_coverage = self._coverage(query_terms, title_text)
             body_coverage = self._coverage(query_terms, body_text)
-            if self._has_phrase_match(query_terms, title_text) or title_coverage >= 0.75 or body_coverage >= 0.85:
-                direct_ids.append(result.canonical_unit_id)
+            title_direct = self._has_phrase_match(query_terms, title_text) or title_coverage >= 0.75
+            body_direct = len(query_terms) > 1 and body_coverage >= 0.85
+            if title_direct or body_direct:
+                direct_matches.append(
+                    (title_coverage, body_coverage, index, result.canonical_unit_id)
+                )
                 match_reasons[result.canonical_unit_id] = "Strong title, lecture, or summary coverage."
             elif body_coverage >= 0.35 or result.score >= 2:
-                related_ids.append(result.canonical_unit_id)
+                related_matches.append(
+                    (title_coverage, body_coverage, index, result.canonical_unit_id)
+                )
                 match_reasons[result.canonical_unit_id] = "Related result with partial topic overlap."
 
-        if direct_ids:
+        if direct_matches:
+            direct_matches.sort(key=lambda item: (-item[0], -item[1], item[2]))
             return EvidenceQualityVerdict(
                 label="direct_match",
-                selected_unit_ids=direct_ids[:3],
+                selected_unit_ids=[item[3] for item in direct_matches[:3]],
                 reason_codes=["title_or_lecture_match"],
                 match_reasons=match_reasons,
             )
-        if related_ids:
+        if related_matches:
+            related_matches.sort(key=lambda item: (-item[0], -item[1], item[2]))
             return EvidenceQualityVerdict(
                 label="related_match",
-                selected_unit_ids=related_ids[:3],
+                selected_unit_ids=[item[3] for item in related_matches[:3]],
                 reason_codes=["summary_partial_match"],
                 match_reasons=match_reasons,
             )
@@ -87,11 +97,14 @@ class AgentEvidenceQualityService:
         )
 
     def _terms(self, query: str) -> list[str]:
-        terms = [
-            self._normalize_term(term)
-            for term in re.findall(r"[a-zA-Z0-9]+", query.lower())
-            if len(term) > 2
-        ]
+        terms = []
+        for raw_term in re.findall(r"[a-zA-Z0-9]+", query):
+            term = raw_term.lower()
+            if len(term) <= 2:
+                continue
+            terms.append(self._normalize_term(term))
+            if raw_term.endswith("s") and raw_term[:-1].isupper() and len(raw_term) > 2:
+                terms.append(raw_term[:-1].lower())
         for compactable in re.findall(r"[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)+", query.lower()):
             parts = [part for part in re.split(r"[-_]+", compactable) if part]
             compacted = re.sub(r"[^a-z0-9]+", "", compactable)
@@ -118,8 +131,6 @@ class AgentEvidenceQualityService:
         )
 
     def _normalize_term(self, term: str) -> str:
-        if term == "cnns":
-            return "cnn"
         if len(term) > 4 and term.endswith("s"):
             return term[:-1]
         return term

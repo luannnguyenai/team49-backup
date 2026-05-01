@@ -682,7 +682,9 @@ class AgentGraphService:
                 slots,
                 state["allowed_course_ids"],
             )
-            if result.requires_evidence and result.citations:
+            if result.citations and (
+                result.requires_evidence or result.metadata.get("evidence_verdict") == "related_match"
+            ):
                 compose_grounded = getattr(self.router, "compose_grounded_answer", None)
                 if compose_grounded is not None:
                     grounded_answer = compose_grounded(
@@ -731,6 +733,18 @@ class AgentGraphService:
                                     "grounding_evidence_sufficient": False,
                                 },
                                 trace=result.trace,
+                            )
+                        elif getattr(grounded_answer, "confidence", "no_source") == "partial":
+                            result = result.model_copy(
+                                update={
+                                    "answer_markdown": answer_markdown,
+                                    "requires_evidence": False,
+                                    "metadata": {
+                                        **result.metadata,
+                                        "answer_confidence": "partial",
+                                        "grounding_evidence_sufficient": False,
+                                    },
+                                }
                             )
                         else:
                             result = result.model_copy(

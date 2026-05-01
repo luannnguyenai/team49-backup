@@ -41,20 +41,28 @@ class AgentUnitSearchService:
             terms,
             scoped_courses,
             limit=max(request.limit * 4, request.limit),
+            title_only=True,
         )
         nav_by_id = await self.navigation_service.resolve_many([unit.unit_id for unit in units])
         scored = []
         for unit in units:
-            haystack = " ".join(
+            title_haystack = " ".join(
                 [
                     unit.unit_name or "",
-                    unit.summary or "",
-                    unit.description or "",
                     unit.lecture_title or "",
                 ]
             ).lower()
-            compact_haystack = _compact_text(haystack)
-            score = float(sum(1 for term in terms if _term_matches(term, haystack, compact_haystack)))
+            body_haystack = " ".join(
+                [
+                    unit.summary or "",
+                    unit.description or "",
+                ]
+            ).lower()
+            compact_title = _compact_text(title_haystack)
+            compact_body = _compact_text(body_haystack)
+            title_score = sum(1 for term in terms if _term_matches(term, title_haystack, compact_title))
+            body_score = sum(1 for term in terms if _term_matches(term, body_haystack, compact_body))
+            score = float(title_score * 3 + body_score)
             nav = nav_by_id.get(unit.unit_id)
             scored.append(
                 UnitSearchResult(
@@ -81,8 +89,12 @@ class AgentUnitSearchService:
             resolved_scope=request.scope or "current_path",
             candidate_courses=scoped_courses,
             query_expansions=expansions,
-            applied_filters=["hidden_logistics_excluded", "allowed_course_intersection"],
-            ranking_version="unit_search_v1",
+            applied_filters=[
+                "hidden_logistics_excluded",
+                "allowed_course_intersection",
+                "unit_title_only",
+            ],
+            ranking_version="unit_title_search_v1",
             runtime_navigation_resolution=[
                 self.navigation_service.to_trace(nav_by_id[result.canonical_unit_id])
                 for result in results

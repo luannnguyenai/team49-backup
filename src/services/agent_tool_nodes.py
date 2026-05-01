@@ -110,6 +110,7 @@ class AgentToolNodes:
                 metadata={
                     "too_many_results_offered": True,
                     "result_count": len(all_results),
+                    "search_queries": search_queries,
                     "top_results_allowed": True,
                 },
                 trace=trace,
@@ -138,6 +139,7 @@ class AgentToolNodes:
                     "scope_expansion_offered": True,
                     "evidence_verdict": verdict.label,
                     "evidence_reason_codes": verdict.reason_codes,
+                    "search_queries": search_queries,
                 },
                 trace=trace,
             )
@@ -186,6 +188,7 @@ class AgentToolNodes:
                 metadata={
                     "evidence_verdict": verdict.label,
                     "evidence_reason_codes": verdict.reason_codes,
+                    "search_queries": search_queries,
                 },
                 trace=trace,
             )
@@ -222,6 +225,7 @@ class AgentToolNodes:
                 metadata={
                     "evidence_verdict": verdict.label,
                     "evidence_reason_codes": verdict.reason_codes,
+                    "search_queries": search_queries,
                 },
                 trace=trace,
             )
@@ -295,6 +299,8 @@ class AgentToolNodes:
             "evidence_verdict": verdict.label,
             "evidence_reason_codes": verdict.reason_codes,
             "match_reasons": verdict.match_reasons,
+            "result_count": len(all_results),
+            "search_queries": search_queries,
         }
         if verdict.label in {"related_match", "weak_match"}:
             answer_markdown = answer_markdown or (
