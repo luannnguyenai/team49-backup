@@ -87,11 +87,19 @@ class AgentEvidenceQualityService:
         )
 
     def _terms(self, query: str) -> list[str]:
-        return [
+        terms = [
             self._normalize_term(term)
             for term in re.findall(r"[a-zA-Z0-9]+", query.lower())
             if len(term) > 2
         ]
+        for compactable in re.findall(r"[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)+", query.lower()):
+            parts = [part for part in re.split(r"[-_]+", compactable) if part]
+            compacted = re.sub(r"[^a-z0-9]+", "", compactable)
+            if len(compacted) > 2:
+                terms.append(self._normalize_term(compacted))
+            if any(len(part) == 1 for part in parts):
+                terms = [term for term in terms if term not in parts]
+        return sorted(set(terms))
 
     def _coverage(self, terms: list[str], text: str) -> float:
         normalized = text.lower()
@@ -117,6 +125,6 @@ class AgentEvidenceQualityService:
         return term
 
     def _term_in_text(self, term: str, text: str) -> bool:
-        if term == "cnn":
-            return "cnn" in text or "convolutional neural network" in text
-        return term in text
+        compact_text = re.sub(r"[-_]+", "", text.lower())
+        compact_term = re.sub(r"[-_]+", "", term.lower())
+        return term in text or bool(compact_term and compact_term in compact_text)

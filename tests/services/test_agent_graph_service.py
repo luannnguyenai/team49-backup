@@ -36,6 +36,40 @@ class NoopThreadLock:
         return NoopLock()
 
 
+class PendingDecisionRouter:
+    def __init__(
+        self,
+        *,
+        action: str = "approve",
+        refined_query: str | None = None,
+        clarification_question: str | None = None,
+        grounded_answer: str = "Pending follow-up answer.",
+        evidence_sufficient: bool = True,
+        confidence: str = "grounded",
+    ):
+        self.action = action
+        self.refined_query = refined_query
+        self.clarification_question = clarification_question
+        self.grounded_answer = grounded_answer
+        self.evidence_sufficient = evidence_sufficient
+        self.confidence = confidence
+
+    def resolve_pending_followup(self, message, pending_payload, route_context):
+        return SimpleNamespace(
+            action=self.action,
+            refined_query=self.refined_query,
+            clarification_question=self.clarification_question,
+        )
+
+    def compose_grounded_answer(self, message, citations):
+        return SimpleNamespace(
+            answer_markdown=self.grounded_answer,
+            evidence_sufficient=self.evidence_sufficient,
+            confidence=self.confidence,
+            clarification_question=None,
+        )
+
+
 async def test_graph_returns_grounded_find_content_from_search():
     class Router(DeterministicAgentRouter):
         def compose_grounded_answer(self, message, citations):
@@ -348,13 +382,11 @@ async def test_scope_expansion_approval_searches_other_path_directly_when_fewer_
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=SimpleNamespace(
-            compose_grounded_answer=lambda message, citations: SimpleNamespace(
-                answer_markdown="I found related CNN results in another path.",
-                evidence_sufficient=False,
-                confidence="partial",
-                clarification_question=None,
-            )
+        router=PendingDecisionRouter(
+            action="approve",
+            grounded_answer="I found related CNN results in another path.",
+            evidence_sufficient=False,
+            confidence="partial",
         ),
         conversation_repo=conversation_repo,
     )
@@ -425,7 +457,7 @@ async def test_expanded_search_with_too_many_results_asks_to_refine_or_show_top_
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=PendingDecisionRouter(action="approve", evidence_sufficient=False, confidence="partial"),
         conversation_repo=conversation_repo,
     )
 
@@ -488,7 +520,7 @@ async def test_expanded_search_without_results_returns_no_source_not_generic_cla
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=PendingDecisionRouter(action="approve"),
         conversation_repo=conversation_repo,
     )
 
@@ -568,6 +600,87 @@ async def test_current_path_search_with_too_many_results_asks_to_refine_or_show_
     assert persisted["clarification"]["payload"]["show_top_results_allowed"] is True
 
 
+async def test_direct_evidence_is_returned_even_when_search_page_is_full():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="U-Net", search_queries=["UNet", "U-Net segmentation"]),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown="U-Net appears in the segmentation unit.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-unet",
+                    course_id="CS231n",
+                    unit_name="Semantic segmentation from per-pixel labeling to U-Net",
+                    summary="U-Net content.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/u-net",
+                ),
+                *[
+                    UnitSearchResult(
+                        canonical_unit_id=f"unit-broad-{index}",
+                        course_id="CS231n",
+                        unit_name=f"Broad segmentation result {index}",
+                        summary="General segmentation content.",
+                        score=1,
+                        quiz_available=True,
+                        learn_href=f"/courses/cs231n/learn/broad-{index}",
+                    )
+                    for index in range(29)
+                ],
+            ],
+            trace=RetrievalTrace(trace_id="trace-unet-full", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={"memoryRef": f"agent_memory:{conversation_id}:v1", "summaryVersion": 1},
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Tìm thông tin về UNet", incomingMessageId="msg-unet-direct"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-unet-direct",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert [request.query for request in search_requests] == ["UNet", "U-Net segmentation"]
+    assert response.citations[0].canonical_unit_id == "unit-unet"
+    assert "20 results" not in response.answer.markdown
+
+
 async def test_too_many_results_approval_shows_top_results_without_requerying_router():
     conversation_id = uuid4()
     user_id = uuid4()
@@ -626,13 +739,11 @@ async def test_too_many_results_approval_shows_top_results_without_requerying_ro
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=SimpleNamespace(
-            compose_grounded_answer=lambda message, citations: SimpleNamespace(
-                answer_markdown="Here are the top related results.",
-                evidence_sufficient=False,
-                confidence="partial",
-                clarification_question=None,
-            )
+        router=PendingDecisionRouter(
+            action="approve",
+            grounded_answer="Here are the top related results.",
+            evidence_sufficient=False,
+            confidence="partial",
         ),
         conversation_repo=conversation_repo,
     )
@@ -650,6 +761,96 @@ async def test_too_many_results_approval_shows_top_results_without_requerying_ro
     assert len(response.citations) == 3
     assert len(response.actions) == 3
     assert search_requests[0].query == "CNN"
+
+
+async def test_too_many_results_approval_uses_structured_followup_not_message_as_query():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-too-many-typo-top",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "proposed_raw_topic": "U-Net",
+            "search_scope": "current_path",
+            "resolved_search_path_ids": ["computer_vision"],
+            "show_top_results_allowed": True,
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    class Router:
+        def resolve_pending_followup(self, message, pending_payload, route_context):
+            assert message == "top réult"
+            return SimpleNamespace(
+                action="approve",
+                refined_query=None,
+                clarification_question=None,
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown="Here are the top U-Net results.",
+                evidence_sufficient=False,
+                confidence="partial",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-unet",
+                    course_id="CS231n",
+                    unit_name="Semantic segmentation from per-pixel labeling to U-Net",
+                    summary="U-Net segmentation content.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/u-net",
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-unet-top", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-too-many-typo-top",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="top réult", incomingMessageId="msg-too-many-typo-top"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-too-many-typo-top",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert search_requests[0].query == "U-Net"
+    assert "top réult" not in search_requests[0].query
 
 
 async def test_too_many_results_user_detail_refines_original_query():
@@ -708,13 +909,12 @@ async def test_too_many_results_user_detail_refines_original_query():
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=SimpleNamespace(
-            compose_grounded_answer=lambda message, citations: SimpleNamespace(
-                answer_markdown="I found detection-specific CNN results.",
-                evidence_sufficient=True,
-                confidence="grounded",
-                clarification_question=None,
-            )
+        router=PendingDecisionRouter(
+            action="refine",
+            refined_query="CNN object detection",
+            grounded_answer="I found detection-specific CNN results.",
+            evidence_sufficient=True,
+            confidence="grounded",
         ),
         conversation_repo=conversation_repo,
     )
@@ -786,7 +986,7 @@ async def test_path_choice_action_searches_selected_path_with_original_topic():
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=PendingDecisionRouter(action="approve"),
         conversation_repo=conversation_repo,
     )
 
@@ -995,7 +1195,7 @@ async def test_pending_retrieval_query_confirmation_uses_proposed_topic():
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=PendingDecisionRouter(action="approve"),
         conversation_repo=conversation_repo,
     )
 
@@ -1059,7 +1259,7 @@ async def test_pending_retrieval_query_user_detail_becomes_search_topic():
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=PendingDecisionRouter(action="refine", refined_query="attention mask in transformers"),
         conversation_repo=conversation_repo,
     )
 
@@ -1256,7 +1456,7 @@ async def test_scope_expansion_approval_loads_persisted_clarification_and_clears
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=PendingDecisionRouter(action="approve"),
         conversation_repo=conversation_repo,
     )
 
@@ -1318,7 +1518,7 @@ async def test_scope_expansion_approval_uses_extracted_raw_topic_for_bm25_query(
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=PendingDecisionRouter(action="approve"),
         conversation_repo=conversation_repo,
     )
 
@@ -1372,7 +1572,7 @@ async def test_scope_expansion_rejection_clears_pending_clarification_without_se
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=PendingDecisionRouter(action="reject"),
         conversation_repo=conversation_repo,
     )
 

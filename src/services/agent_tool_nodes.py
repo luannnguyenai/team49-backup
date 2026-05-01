@@ -53,20 +53,39 @@ class AgentToolNodes:
             slots.resolved_search_path_ids,
             allowed_course_ids,
         )
-        search = await self.search_service.search(
-            UnitSearchRequest(
-                query=slots.raw_topic or message,
-                scope="current_path",
-                courseIds=course_ids,
-                intent=intent,
-                limit=20,
-            ),
-            allowed_course_ids=allowed_course_ids,
+        search_queries = self._search_queries(message, slots)
+        searches = [
+            await self.search_service.search(
+                UnitSearchRequest(
+                    query=query,
+                    scope="global_catalog" if slots.search_scope == "expanded_paths" else "current_path",
+                    courseIds=course_ids,
+                    intent=intent,
+                    limit=20,
+                ),
+                allowed_course_ids=allowed_course_ids,
+            )
+            for query in search_queries
+        ]
+        search = searches[0]
+        merged_results = {}
+        for response in searches:
+            for result in response.results:
+                if result.score <= 0:
+                    continue
+                existing = merged_results.get(result.canonical_unit_id)
+                if existing is None or result.score > existing.score:
+                    merged_results[result.canonical_unit_id] = result
+        all_results = sorted(
+            merged_results.values(),
+            key=lambda result: result.score,
+            reverse=True,
         )
-        all_results = [result for result in search.results if result.score > 0]
+        verdict = self.evidence_quality.score(slots.raw_topic or search_queries[0], all_results)
         if (
             len(all_results) >= self.TOO_MANY_RESULTS_THRESHOLD
             and not slots.show_top_results_approved
+            and not (verdict.label == "direct_match" and len(verdict.selected_unit_ids) < 3)
         ):
             raw_topic = slots.raw_topic or message
             trace = search.trace.model_copy(
@@ -95,7 +114,6 @@ class AgentToolNodes:
                 },
                 trace=trace,
             )
-        verdict = self.evidence_quality.score(slots.raw_topic or message, all_results)
         if verdict.label == "weak_match" and slots.search_scope == "current_path" and len(allowed_course_ids) > len(course_ids):
             trace = search.trace.model_copy(
                 update={
@@ -293,6 +311,23 @@ class AgentToolNodes:
             metadata=metadata,
             trace=trace,
         )
+
+    def _search_queries(self, message: str, slots: AgentSlots) -> list[str]:
+        candidates = [query.strip() for query in slots.search_queries if query and query.strip()]
+        if not candidates and slots.raw_topic and slots.raw_topic.strip():
+            candidates.insert(0, slots.raw_topic.strip())
+        if not candidates:
+            candidates.append(message.strip())
+
+        deduped: list[str] = []
+        seen = set()
+        for candidate in candidates:
+            key = candidate.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(candidate)
+        return deduped[:5]
 
     async def planner_decision(
         self,

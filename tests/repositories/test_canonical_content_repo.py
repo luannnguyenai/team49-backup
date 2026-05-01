@@ -53,3 +53,19 @@ async def test_search_canonical_units_casts_json_section_flags_before_like():
     compiled = str(statement.compile(dialect=postgresql.dialect()))
 
     assert "CAST(units.section_flags AS VARCHAR) NOT LIKE" in compiled
+
+
+@pytest.mark.asyncio
+async def test_search_canonical_units_matches_mixed_case_course_ids_case_insensitively():
+    session = AsyncMock()
+    result = Mock()
+    result.scalars.return_value.all.return_value = []
+    session.execute.return_value = result
+    repo = CanonicalContentRepository(session)
+
+    await repo.search_canonical_units(["unet"], ["CS231n"])
+
+    statement = session.execute.await_args.args[0]
+    compiled = str(statement.compile(dialect=postgresql.dialect()))
+
+    assert "lower(units.course_id) IN" in compiled

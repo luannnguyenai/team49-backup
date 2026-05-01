@@ -1,11 +1,7 @@
 from __future__ import annotations
 
 from src.services.agent_path_catalog import AGENT_PATH_CATALOG, fallback_path_label
-from src.services.agent_graph_contracts import AgentSlots, PendingClarification
-
-
-APPROVAL_PHRASES = {"ok", "yes", "approve", "được", "duoc"}
-REJECTION_PHRASES = {"no", "nope", "cancel", "không", "khong", "thôi", "thoi"}
+from src.services.agent_graph_contracts import AgentSlots
 
 
 class AgentSearchScopeService:
@@ -79,40 +75,3 @@ class AgentSearchScopeService:
     def path_label(self, path_id: str) -> str:
         entry = AGENT_PATH_CATALOG.get(path_id)
         return entry.label if entry is not None else fallback_path_label(path_id)
-
-    def is_scope_expansion_approval(
-        self,
-        message: str,
-        pending: PendingClarification | None,
-    ) -> bool:
-        if pending is None or pending.type != "search_scope_expansion":
-            return False
-        normalized = message.lower().strip()
-        return (
-            normalized in APPROVAL_PHRASES
-            or ("yes" in normalized and ("other path" in normalized or "other paths" in normalized))
-            or "search other path" in normalized
-            or "search other paths" in normalized
-            or "mở rộng" in normalized
-            or "mo rong" in normalized
-            or "path khác" in normalized
-            or "path khac" in normalized
-        )
-
-    def is_scope_expansion_rejection(
-        self,
-        message: str,
-        pending: PendingClarification | None,
-    ) -> bool:
-        if pending is None or pending.type != "search_scope_expansion":
-            return False
-        normalized = message.lower().strip()
-        return (
-            normalized in REJECTION_PHRASES
-            or normalized.startswith("no,")
-            or normalized.startswith("no ")
-            or "keep current path" in normalized
-            or "current path only" in normalized
-            or "không mở rộng" in normalized
-            or "khong mo rong" in normalized
-        )

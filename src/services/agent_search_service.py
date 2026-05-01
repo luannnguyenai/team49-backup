@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+import re
 from uuid import uuid4
 
 from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.schemas.agent import RetrievalTrace, UnitSearchRequest, UnitSearchResponse, UnitSearchResult
 from src.services.agent_navigation_service import AgentNavigationService
 from src.services.agent_query_normalizer import normalize_query
+
+
+def _compact_text(value: str) -> str:
+    return re.sub(r"[-_]+", "", value.lower())
+
+
+def _term_matches(term: str, text: str, compact_text: str) -> bool:
+    if term in text:
+        return True
+    compact_term = _compact_text(term)
+    return bool(compact_term and compact_term in compact_text)
 
 
 class AgentUnitSearchService:
@@ -41,7 +53,8 @@ class AgentUnitSearchService:
                     unit.lecture_title or "",
                 ]
             ).lower()
-            score = float(sum(1 for term in terms if term in haystack))
+            compact_haystack = _compact_text(haystack)
+            score = float(sum(1 for term in terms if _term_matches(term, haystack, compact_haystack)))
             nav = nav_by_id.get(unit.unit_id)
             scored.append(
                 UnitSearchResult(

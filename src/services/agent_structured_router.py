@@ -14,6 +14,7 @@ class StructuredRouteOutput(BaseModel):
     candidate_intent: AgentIntent | None = None
     confidence: float = Field(ge=0.0, le=1.0)
     raw_topic: str | None = None
+    search_queries: list[str] = Field(default_factory=list)
     target_path: Literal["computer_vision", "nlp"] | None = None
     explicit_scope_requested: bool = False
     rationale: str
@@ -25,6 +26,13 @@ class GroundedAnswerOutput(BaseModel):
     evidence_sufficient: bool
     confidence: Literal["grounded", "partial", "no_source"] = "grounded"
     clarification_question: str | None = None
+
+
+class PendingFollowupDecisionOutput(BaseModel):
+    action: Literal["approve", "reject", "refine", "clarify"]
+    refined_query: str | None = None
+    clarification_question: str | None = None
+    rationale: str
 
 
 class StructuredAgentRouter:
@@ -49,6 +57,11 @@ class StructuredAgentRouter:
                             "quiz eligibility questions from assessment creation, and path search from path switch. "
                             "Requests like 'where should I review X' or 'what should I review for X' are usually "
                             "course-content review/navigation requests with raw_topic=X. "
+                            "For content retrieval intents, provide search_queries as concise BM25-ready queries. "
+                            "The model may include spelling, punctuation, abbreviation, or contextual variants it "
+                            "infers from the user message and route context. Do not rely on application code to add "
+                            "domain synonyms. If the user request lacks enough searchable terms, lower confidence "
+                            "and ask for clarification instead of guessing. "
                             "Set target_path only when the user explicitly names a path, course, or track scope. "
                             "Set explicit_scope_requested=true only when the user's words explicitly request "
                             "another path, course, track, or broader catalog scope. "
@@ -92,6 +105,7 @@ class StructuredAgentRouter:
             confidence=result.confidence,
             extracted_slots=AgentSlots(
                 raw_topic=result.raw_topic,
+                search_queries=result.search_queries,
                 target_path=effective_target_path,
                 requested_path_id=effective_target_path if search_scope == "explicit_path" else None,
                 resolved_search_path_ids=[effective_target_path] if search_scope == "explicit_path" else [],
@@ -101,6 +115,51 @@ class StructuredAgentRouter:
             clarification_question=result.clarification_question,
             candidate_intent=candidate_intent,
         )
+
+    def resolve_pending_followup(
+        self,
+        message: str,
+        pending_payload: dict[str, Any],
+        route_context: RouteContext | None,
+    ) -> PendingFollowupDecisionOutput:
+        try:
+            response = self.model.with_structured_output(PendingFollowupDecisionOutput).invoke(
+                [
+                    {
+                        "role": "system",
+                        "content": (
+                            "Resolve the user's reply to a pending agent clarification with structured output. "
+                            "Do not use keyword matching or phrase matching as the source of truth. "
+                            "Use the pending payload and conversation context to decide whether the user approved "
+                            "the pending option, rejected it, refined the retrieval query, or still needs clarification. "
+                            "If the user provides more detail for a retrieval query, set action=refine and return a "
+                            "single BM25-ready refined_query that combines the pending topic with the new detail. "
+                            "If the user approves showing offered top results or expanding search scope, set "
+                            "action=approve and leave refined_query empty. If the reply is unclear, set action=clarify "
+                            "with one concise clarification_question."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Pending payload: {pending_payload}\n"
+                            f"User reply: {message}"
+                        ),
+                    },
+                ]
+            )
+        except Exception as exc:
+            raise AgentRouterUnavailableError(
+                "agent_pending_followup_model_error",
+                classify_agent_error(exc, default="AGENT_LLM_UNAVAILABLE"),
+            ) from exc
+
+        if isinstance(response, PendingFollowupDecisionOutput):
+            return response
+        if isinstance(response, dict):
+            return PendingFollowupDecisionOutput.model_validate(response)
+        return PendingFollowupDecisionOutput.model_validate(response.model_dump())
 
     def _response_text(self, response: Any) -> str:
         content = getattr(response, "content", response)

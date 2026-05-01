@@ -1,4 +1,4 @@
-from src.services.agent_graph_contracts import AgentSlots, PendingClarification
+from src.services.agent_graph_contracts import AgentSlots
 from src.services.agent_search_scope_service import AgentSearchScopeService
 
 
@@ -48,26 +48,8 @@ def test_approved_expansion_uses_allowed_paths():
     assert slots.search_scope == "expanded_paths"
 
 
-def test_scope_expansion_approval_only_resolves_pending_clarification():
+def test_scope_service_does_not_interpret_user_followup_text():
     service = AgentSearchScopeService()
-    pending = PendingClarification(
-        clarification_id="clar-1",
-        type="search_scope_expansion",
-        status="awaiting_response",
-    )
 
-    assert service.is_scope_expansion_approval("ok", pending) is True
-    assert service.is_scope_expansion_approval("yes, search other paths", pending) is True
-    assert service.is_scope_expansion_approval("ok", None) is False
-
-
-def test_scope_expansion_rejection_only_resolves_pending_clarification():
-    service = AgentSearchScopeService()
-    pending = PendingClarification(
-        clarification_id="clar-1",
-        type="search_scope_expansion",
-        status="awaiting_response",
-    )
-
-    assert service.is_scope_expansion_rejection("no, keep current path", pending) is True
-    assert service.is_scope_expansion_rejection("no", None) is False
+    assert not hasattr(service, "is_scope_expansion_approval")
+    assert not hasattr(service, "is_scope_expansion_rejection")

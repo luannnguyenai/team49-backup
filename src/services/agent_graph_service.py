@@ -294,34 +294,10 @@ class AgentGraphService:
             pending_result = self._resolve_pending_path_selection(state, pending)
             if pending_result is not None:
                 return pending_result
-        if self.scope_service.is_scope_expansion_approval(state["message"], pending):
-            payload = pending.payload if pending else {}
-            slots = AgentSlots(
-                raw_topic=payload.get("raw_topic") or payload.get("original_message", state["message"]),
-                search_scope="expanded_paths",
-                scope_expansion_approved=True,
-                resolved_search_path_ids=payload.get("allowed_path_ids", []),
-                excluded_search_path_ids=payload.get("current_path_ids", []),
-            )
-            return {
-                **state,
-                "intent": "find_content",
-                "intent_confidence": 1.0,
-                "slots": slots,
-                "pending_clarification": None,
-            }
-        if self.scope_service.is_scope_expansion_rejection(state["message"], pending):
-            return {
-                **state,
-                "intent": "clarify",
-                "intent_confidence": 0.0,
-                "slots": AgentSlots(),
-                "pending_clarification": None,
-                "clarification_question": (
-                    "Okay, I will keep the search scoped to your current path. "
-                    "Please add a course, unit, or topic if you want me to try again there."
-                ),
-            }
+        if pending is not None and pending.type == "search_scope_expansion":
+            pending_result = self._resolve_pending_scope_expansion(state, pending)
+            if pending_result is not None:
+                return pending_result
 
         route = self.router.route(message=state["message"], route_context=state.get("route_context"))
         return {
@@ -340,24 +316,10 @@ class AgentGraphService:
     ) -> dict | None:
         payload = pending.payload
         message = state["message"].strip()
-        normalized = message.lower()
         proposed = str(payload.get("proposed_raw_topic") or "").strip()
-        is_confirmation = normalized in {"yes", "y", "ok", "correct", "right", "đúng", "dung"}
-        show_top_requested = (
-            bool(payload.get("show_top_results_allowed"))
-            and (
-                is_confirmation
-                or "top result" in normalized
-                or "top results" in normalized
-                or "show top" in normalized
-                or "show me" in normalized
-                or "xuất" in normalized
-                or "xuat" in normalized
-            )
-        )
-        is_rejection = normalized in {"no", "nope", "không", "khong"} or normalized.startswith("no,")
+        decision = self._resolve_pending_followup_decision(state, pending)
 
-        if is_rejection:
+        if decision.action == "reject":
             return {
                 **state,
                 "intent": "clarify",
@@ -368,7 +330,17 @@ class AgentGraphService:
                     "Okay. Please describe the topic or concept you want me to search for."
                 ),
             }
-        if is_confirmation and not proposed:
+        if decision.action == "clarify":
+            return {
+                **state,
+                "intent": "clarify",
+                "intent_confidence": 0.0,
+                "slots": AgentSlots(),
+                "pending_clarification": pending,
+                "clarification_question": decision.clarification_question
+                or "Please clarify what you want me to search for.",
+            }
+        if decision.action == "approve" and not proposed:
             return {
                 **state,
                 "intent": "clarify",
@@ -380,14 +352,14 @@ class AgentGraphService:
                 ),
             }
 
-        if show_top_requested:
+        if decision.action == "approve":
             raw_topic = proposed or message
             scope_expansion_approved = True
-        elif proposed and not is_confirmation:
-            raw_topic = f"{proposed} {message}".strip()
+        elif decision.action == "refine":
+            raw_topic = (decision.refined_query or message).strip()
             scope_expansion_approved = False
         else:
-            raw_topic = proposed if is_confirmation else message
+            raw_topic = message
             scope_expansion_approved = False
         return {
             **state,
@@ -401,11 +373,80 @@ class AgentGraphService:
                 resolved_search_path_ids=payload.get("resolved_search_path_ids") or [],
                 excluded_search_path_ids=payload.get("excluded_search_path_ids") or [],
                 scope_expansion_approved=scope_expansion_approved,
-                show_top_results_approved=show_top_requested,
+                show_top_results_approved=decision.action == "approve",
             ),
             "pending_clarification": None,
             "clarification_question": None,
         }
+
+    def _resolve_pending_scope_expansion(
+        self,
+        state: dict,
+        pending: PendingClarification,
+    ) -> dict | None:
+        payload = pending.payload
+        decision = self._resolve_pending_followup_decision(state, pending)
+        if decision.action == "approve":
+            slots = AgentSlots(
+                raw_topic=payload.get("raw_topic") or payload.get("original_message", state["message"]),
+                search_queries=[query for query in [payload.get("raw_topic")] if query],
+                search_scope="expanded_paths",
+                scope_expansion_approved=True,
+                resolved_search_path_ids=payload.get("allowed_path_ids", []),
+                excluded_search_path_ids=payload.get("current_path_ids", []),
+            )
+            return {
+                **state,
+                "intent": "find_content",
+                "intent_confidence": 1.0,
+                "slots": slots,
+                "pending_clarification": None,
+            }
+        if decision.action == "refine":
+            slots = AgentSlots(
+                raw_topic=decision.refined_query or payload.get("raw_topic") or state["message"],
+                search_queries=[decision.refined_query] if decision.refined_query else [],
+                search_scope="current_path",
+                resolved_search_path_ids=payload.get("current_path_ids", []),
+            )
+            return {
+                **state,
+                "intent": "find_content",
+                "intent_confidence": 1.0,
+                "slots": slots,
+                "pending_clarification": None,
+            }
+        if decision.action == "reject":
+            return {
+                **state,
+                "intent": "clarify",
+                "intent_confidence": 0.0,
+                "slots": AgentSlots(),
+                "pending_clarification": None,
+                "clarification_question": (
+                    "Okay, I will keep the search scoped to your current path. "
+                    "Please add a course, unit, or topic if you want me to try again there."
+                ),
+            }
+        return {
+            **state,
+            "intent": "clarify",
+            "intent_confidence": 0.0,
+            "slots": AgentSlots(),
+            "pending_clarification": pending,
+            "clarification_question": decision.clarification_question
+            or "Please clarify whether you want me to expand the search or refine the topic.",
+        }
+
+    def _resolve_pending_followup_decision(self, state: dict, pending: PendingClarification):
+        resolver = getattr(self.router, "resolve_pending_followup", None)
+        if resolver is None:
+            raise AgentRouterUnavailableError("agent_pending_followup_model_missing")
+        return resolver(
+            state["message"],
+            pending.payload,
+            state.get("route_context"),
+        )
 
     def _resolve_pending_path_selection(
         self,

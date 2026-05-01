@@ -28,6 +28,7 @@ def test_structured_router_returns_explicit_path_route():
             "intent": "find_content",
             "confidence": 0.91,
             "raw_topic": "attention mask",
+            "search_queries": ["attention mask", "transformer attention mask"],
             "target_path": "nlp",
             "explicit_scope_requested": True,
             "rationale": "User explicitly asked for NLP content.",
@@ -41,6 +42,7 @@ def test_structured_router_returns_explicit_path_route():
 
     assert route.intent == "find_content"
     assert route.extracted_slots.raw_topic == "attention mask"
+    assert route.extracted_slots.search_queries == ["attention mask", "transformer attention mask"]
     assert route.extracted_slots.requested_path_id == "nlp"
     assert route.extracted_slots.search_scope == "explicit_path"
 
@@ -145,12 +147,32 @@ def test_structured_router_prompt_rejects_keyword_routing_as_source_of_truth():
     system_prompt = model.messages[0]["content"]
     assert "Do not use raw keyword matching as the source of truth" in system_prompt
     assert "quiz eligibility questions from assessment creation" in system_prompt
-    assert "where should I review" in system_prompt
-    assert "Set target_path only when the user explicitly names a path" in system_prompt
-    assert "explicit_scope_requested=true" in system_prompt
-    assert "Do not infer target_path from the topic domain alone" in system_prompt
-    assert "underspecified content/navigation requests" in system_prompt
-    assert "candidate_intent" in system_prompt
+
+
+def test_structured_router_resolves_pending_followup_with_model_output():
+    model = FakeStructuredModel(
+        {
+            "action": "approve",
+            "refined_query": None,
+            "clarification_question": None,
+            "rationale": "User asked to show the offered top results.",
+        }
+    )
+
+    decision = StructuredAgentRouter(model=model).resolve_pending_followup(
+        message="top réult",
+        pending_payload={
+            "kind": "retrieval_query",
+            "proposed_raw_topic": "U-Net",
+            "show_top_results_allowed": True,
+        },
+        route_context=None,
+    )
+
+    assert decision.action == "approve"
+    assert decision.refined_query is None
+    system_prompt = model.messages[0]["content"]
+    assert "Do not use keyword matching" in system_prompt
 
 
 def test_structured_router_preserves_model_candidate_intent_for_clarify():

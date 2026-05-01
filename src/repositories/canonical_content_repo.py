@@ -153,18 +153,35 @@ class CanonicalContentRepository:
         if not query_terms or not course_ids:
             return []
 
-        normalized_courses = [course_id.upper() for course_id in course_ids]
+        normalized_courses = [course_id.lower() for course_id in course_ids]
         like_filters = []
         for term in query_terms:
             pattern = f"%{term.lower()}%"
+            compact_term = "".join(ch for ch in term.lower() if ch.isalnum())
+            compact_pattern = f"%{compact_term}%"
             like_filters.append(func.lower(CanonicalUnit.unit_name).like(pattern))
             like_filters.append(func.lower(func.coalesce(CanonicalUnit.summary, "")).like(pattern))
             like_filters.append(func.lower(func.coalesce(CanonicalUnit.description, "")).like(pattern))
             like_filters.append(func.lower(func.coalesce(CanonicalUnit.lecture_title, "")).like(pattern))
+            if compact_term:
+                for column in (
+                    CanonicalUnit.unit_name,
+                    func.coalesce(CanonicalUnit.summary, ""),
+                    func.coalesce(CanonicalUnit.description, ""),
+                    func.coalesce(CanonicalUnit.lecture_title, ""),
+                ):
+                    like_filters.append(
+                        func.regexp_replace(
+                            func.lower(column),
+                            "[-_]+",
+                            "",
+                            "g",
+                        ).like(compact_pattern)
+                    )
 
         content_filters = [
             CanonicalUnit.active.is_not(False),
-            CanonicalUnit.course_id.in_(normalized_courses),
+            func.lower(CanonicalUnit.course_id).in_(normalized_courses),
         ]
         if not include_reference:
             section_flags_text = cast(CanonicalUnit.section_flags, String)

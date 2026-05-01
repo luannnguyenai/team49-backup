@@ -97,6 +97,7 @@ class AgentRouterUnavailableError(RuntimeError):
 
 class AgentSlots(BaseModel):
     raw_topic: str | None = None
+    search_queries: list[str] = Field(default_factory=list)
     target_path: str | None = None
     assessment_phase: str | None = None
     canonical_unit_ids: list[str] = Field(default_factory=list)
