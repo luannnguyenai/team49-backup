@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import desc, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,7 +26,13 @@ class AgentConversationRepository:
         return list(result.scalars().all())
 
     async def create_conversation(self, user_id: UUID, title: str = "New chat") -> AgentConversation:
-        row = AgentConversation(user_id=user_id, title=title, preview="", message_count=0)
+        row = AgentConversation(
+            user_id=user_id,
+            title=title,
+            preview="",
+            message_count=0,
+            thread_id=f"thread_{uuid4()}",
+        )
         self.session.add(row)
         await self.session.flush()
 

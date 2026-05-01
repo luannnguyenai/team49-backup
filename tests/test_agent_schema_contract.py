@@ -4,11 +4,13 @@ from pydantic import ValidationError
 
 from src.schemas.agent import (
     AgentAction,
+    AgentActionResumeRequest,
     AgentChatRequest,
     AgentChatResponse,
     AgentCitation,
     AgentConversationMessage,
     AgentConversationSummary,
+    AgentInProgressResponse,
     AgentWarning,
     UnitSearchRequest,
     UnitSearchResponse,
@@ -19,8 +21,38 @@ def test_chat_request_accepts_minimal_message():
     request = AgentChatRequest(message="Where is receptive field taught?")
 
     assert request.message == "Where is receptive field taught?"
+    assert request.incoming_message_id.startswith("msg_")
     assert request.response_mode == "non_streaming"
     assert request.trace_mode == "summary"
+
+
+def test_chat_request_accepts_client_incoming_message_id():
+    request = AgentChatRequest(
+        message="Where is receptive field taught?",
+        incomingMessageId="msg-client-1",
+    )
+
+    assert request.incoming_message_id == "msg-client-1"
+
+
+def test_in_progress_and_resume_contracts_are_stable():
+    progress = AgentInProgressResponse(
+        conversationId="conv-1",
+        threadId="thread-1",
+        graphRunId="run-1",
+        retryAfterMs=1000,
+    )
+    resume = AgentActionResumeRequest(
+        conversationId="conv-1",
+        actionId="act-1",
+        decision="approve",
+        incomingMessageId="msg-resume-1",
+    )
+
+    assert progress.model_dump(by_alias=True)["status"] == "in_progress"
+    assert progress.model_dump(by_alias=True)["threadId"] == "thread-1"
+    assert resume.action_id == "act-1"
+    assert resume.incoming_message_id == "msg-resume-1"
 
 
 def test_chat_response_supports_citations_disabled_action_and_warning():
@@ -44,6 +76,8 @@ def test_chat_response_supports_citations_disabled_action_and_warning():
             AgentAction(
                 type="start_assessment",
                 label="Verify with a short quiz",
+                actionId="act-quiz",
+                status="awaiting_confirmation",
                 canonical_unit_ids=["local::lecture_5::seg6"],
                 default_phase="skip_verification",
                 eligible=False,
@@ -57,6 +91,7 @@ def test_chat_response_supports_citations_disabled_action_and_warning():
     )
 
     assert response.actions[0].eligible is False
+    assert response.actions[0].action_id == "act-quiz"
     assert response.actions[0].disabled_reason == "no_eligible_questions"
     assert response.warning and response.warning.type == "outside_current_path"
 
@@ -69,9 +104,11 @@ def test_agent_actions_support_prerequisite_path_and_target_choice():
         eligible=True,
     )
     target = AgentAction(type="choose_target_path", label="Computer Vision", eligible=True)
+    path_switch = AgentAction(type="request_path_switch", label="Switch to NLP", eligible=True)
 
     assert prereq.canonical_unit_ids == ["cs230-l01-u05", "cs230-l03-u02"]
     assert target.type == "choose_target_path"
+    assert path_switch.type == "request_path_switch"
 
 
 def test_conversation_replay_accepts_datetime_and_raw_response_json():

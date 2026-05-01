@@ -22,6 +22,7 @@ class AgentConversation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False, default="New chat")
     preview: Mapped[str] = mapped_column(String(500), nullable=False, default="")
     message_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    thread_id: Mapped[str] = mapped_column(String(120), nullable=False, unique=True, index=True)
 
     __table_args__ = (Index("ix_agent_conversations_user_updated", "user_id", "updated_at"),)
 

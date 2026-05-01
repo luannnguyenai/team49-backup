@@ -11,6 +11,12 @@ from src.models.agent_conversation import (  # noqa: F401
     AgentConversationMemory,
     AgentConversationMessage,
 )
+from src.models.agent_graph import (  # noqa: F401
+    AgentGraphRun,
+    AgentPendingAction,
+    AgentResponsePayload,
+    AgentTraceEvent,
+)
 from src.models.canonical import (  # noqa: F401
     CanonicalUnit,
     ConceptKP,
@@ -58,6 +64,10 @@ __all__ = [
     "AgentConversation",
     "AgentConversationMessage",
     "AgentConversationMemory",
+    "AgentGraphRun",
+    "AgentResponsePayload",
+    "AgentPendingAction",
+    "AgentTraceEvent",
     # Lecture models
     "Lecture",
     "Chapter",

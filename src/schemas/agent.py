@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Any, Literal
+from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -24,6 +25,8 @@ AgentIntent = Literal[
     "explain_planner_decision",
     "summarize_progress",
     "general_course_question",
+    "request_path_switch",
+    "clarify",
 ]
 
 AssessmentPhase = Literal[
@@ -83,6 +86,10 @@ class RetrievalTrace(BaseModel):
 class AgentChatRequest(BaseModel):
     message: str = Field(min_length=1)
     conversation_id: str | None = Field(default=None, alias="conversationId")
+    incoming_message_id: str = Field(
+        default_factory=lambda: f"msg_{uuid4()}",
+        alias="incomingMessageId",
+    )
     route_context: RouteContext | None = Field(default=None, alias="routeContext")
     intent: AgentIntent | None = None
     response_mode: Literal["non_streaming", "streaming"] = Field(
@@ -95,7 +102,7 @@ class AgentChatRequest(BaseModel):
 
 class AgentAnswer(BaseModel):
     markdown: str
-    confidence: Literal["grounded", "partial", "no_source"]
+    confidence: Literal["grounded", "partial", "no_source", "fallback"]
 
 
 class AgentCitation(BaseModel):
@@ -155,10 +162,22 @@ class AgentAction(BaseModel):
         "start_assessment_workflow",
         "start_assessment",
         "request_replan_dry_run",
+        "request_replan",
+        "request_path_switch",
         "continue_assessment_workflow",
         "choose_target_path",
     ]
     label: str
+    action_id: str | None = Field(default=None, alias="actionId")
+    status: Literal[
+        "proposed",
+        "awaiting_confirmation",
+        "confirmed",
+        "cancelled",
+        "committed",
+        "expired",
+    ] | None = None
+    expires_at: datetime | None = Field(default=None, alias="expiresAt")
     learn_href: str | None = None
     workflow_id: str | None = Field(default=None, alias="workflowId")
     canonical_unit_id: str | None = None
@@ -185,12 +204,24 @@ class AgentAction(BaseModel):
 
 
 class AgentFallback(BaseModel):
-    reason: Literal["no_retrieval_result", "out_of_scope", "unsafe_action", "tool_error"]
+    reason: Literal[
+        "no_retrieval_result",
+        "out_of_scope",
+        "unsafe_action",
+        "tool_error",
+        "agent_unavailable",
+        "action_error",
+    ]
     message: str
 
 
 class AgentWarning(BaseModel):
-    type: Literal["outside_current_path", "needs_assessment", "ambiguous_target"]
+    type: Literal[
+        "outside_current_path",
+        "needs_assessment",
+        "ambiguous_target",
+        "agent_unavailable",
+    ]
     message: str
 
 
@@ -203,6 +234,29 @@ class AgentChatResponse(BaseModel):
     warning: AgentWarning | None = None
     fallback: AgentFallback | None = None
     trace: RetrievalTrace | None = None
+
+
+class AgentInProgressResponse(BaseModel):
+    status: Literal["in_progress"] = "in_progress"
+    conversation_id: str = Field(alias="conversationId")
+    thread_id: str = Field(alias="threadId")
+    graph_run_id: str = Field(alias="graphRunId")
+    retry_after_ms: int = Field(default=1000, alias="retryAfterMs")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentActionResumeRequest(BaseModel):
+    conversation_id: str = Field(alias="conversationId")
+    action_id: str = Field(alias="actionId")
+    decision: Literal["approve", "reject", "edit"]
+    incoming_message_id: str = Field(
+        default_factory=lambda: f"msg_{uuid4()}",
+        alias="incomingMessageId",
+    )
+    edit_payload: dict[str, Any] | None = Field(default=None, alias="editPayload")
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class AgentConversationSummary(BaseModel):

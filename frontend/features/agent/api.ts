@@ -1,12 +1,18 @@
 import { api } from "@/lib/api";
 
-export type AgentWarningType = "outside_current_path" | "needs_assessment" | "ambiguous_target";
+export type AgentWarningType =
+  | "outside_current_path"
+  | "needs_assessment"
+  | "ambiguous_target"
+  | "agent_unavailable";
 export type AgentActionType =
   | "open_unit"
   | "review_prerequisite_path"
   | "start_assessment_workflow"
   | "start_assessment"
   | "request_replan_dry_run"
+  | "request_replan"
+  | "request_path_switch"
   | "continue_assessment_workflow"
   | "choose_target_path";
 
@@ -32,6 +38,11 @@ export interface AgentCitation {
 export interface AgentAction {
   type: AgentActionType;
   label: string;
+  action_id?: string | null;
+  actionId?: string | null;
+  status?: string | null;
+  expires_at?: string | null;
+  expiresAt?: string | null;
   learn_href?: string | null;
   learnHref?: string | null;
   workflow_id?: string | null;
@@ -57,7 +68,7 @@ export interface AgentWarning {
 
 export interface AgentAnswer {
   markdown: string;
-  confidence: "grounded" | "partial" | "no_source";
+  confidence: "grounded" | "partial" | "no_source" | "fallback";
 }
 
 export interface AgentChatResponse {
@@ -70,6 +81,14 @@ export interface AgentChatResponse {
   actions: AgentAction[];
   warning?: AgentWarning | null;
   fallback?: { reason: string; message: string } | null;
+}
+
+export interface AgentInProgressResponse {
+  status: "in_progress";
+  conversationId: string;
+  threadId: string;
+  graphRunId: string;
+  retryAfterMs: number;
 }
 
 export interface AgentConversationSummary {
@@ -177,10 +196,19 @@ export const agentApi = {
 
   chat: (payload: {
     message: string;
+    incomingMessageId: string;
     conversationId?: string | null;
     routeContext?: Record<string, unknown>;
     traceMode?: "none" | "summary" | "full";
   }) => api.post<AgentChatResponse>("/api/agent/chat", payload).then((r) => r.data),
+
+  continueAction: (payload: {
+    conversationId: string;
+    actionId: string;
+    decision: "approve" | "reject" | "edit";
+    editPayload?: Record<string, unknown> | null;
+    incomingMessageId: string;
+  }) => api.post<AgentChatResponse>("/api/agent/actions/continue", payload).then((r) => r.data),
 
   startAssessmentWorkflow: (payload: {
     candidateCanonicalUnitIds: string[];
@@ -224,6 +252,19 @@ export function getMessageId(value: AgentConversationMessage | AgentChatResponse
   return value.messageId ?? value.message_id ?? "";
 }
 
+export function isAgentInProgress(value: unknown): value is AgentInProgressResponse {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      (value as AgentInProgressResponse).status === "in_progress" &&
+      typeof (value as AgentInProgressResponse).retryAfterMs === "number",
+  );
+}
+
+export function getInProgressRetryAfter(value: AgentInProgressResponse) {
+  return value.retryAfterMs;
+}
+
 export function getUpdatedAt(value: AgentConversationSummary) {
   return value.updatedAt ?? value.updated_at ?? "";
 }
@@ -258,6 +299,10 @@ export function getActionCanonicalIds(value: AgentAction) {
 
 export function getActionDisabledReason(value: AgentAction) {
   return value.disabledReason ?? value.disabled_reason ?? null;
+}
+
+export function getActionId(value: AgentAction) {
+  return value.actionId ?? value.action_id ?? "";
 }
 
 export function getActionQuestionBudget(value: AgentAction) {

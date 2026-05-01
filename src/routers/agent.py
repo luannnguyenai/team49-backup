@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_db
@@ -12,6 +13,7 @@ from src.repositories.agent_conversation_repo import AgentConversationRepository
 from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.schemas.agent import (
     AgentActionResponse,
+    AgentActionResumeRequest,
     AgentAssessmentWorkflowRequest,
     AgentAssessmentWorkflowResponse,
     AgentChatRequest,
@@ -34,11 +36,15 @@ from src.services.agent_action_service import (
 )
 from src.exceptions import ValidationError
 from src.services.agent_assessment_workflow import AgentAssessmentWorkflowService
-from src.services.agent_chat_service import AgentChatService
 from src.services.agent_context_service import AgentContextResolver
 from src.services.agent_conversation_service import AgentConversationService
+from src.services.agent_graph_contracts import AgentInProgressError, AgentRouterUnavailableError
+from src.services.agent_graph_service import AgentGraphService
+from src.services.agent_lock_service import AgentThreadLock
 from src.services.agent_navigation_service import AgentNavigationService
 from src.services.agent_requirement_service import AgentPathRequirementService
+from src.repositories.agent_graph_repo import AgentGraphRepository
+from src.services.agent_router_factory import build_production_agent_router
 from src.services.agent_search_service import AgentUnitSearchService
 from src.services.agent_unit_context_service import AgentUnitContextService
 
@@ -79,27 +85,49 @@ async def agent_chat(
         conversation_id = conversation.id
         body.conversation_id = str(conversation_id)
 
-    await conversation_repo.add_message(
-        conversation_id=conversation_id,
-        user_id=user.id,
-        role="user",
-        markdown=body.message,
-    )
-    response = await AgentChatService(search, requirements).chat(
-        body,
-        allowed_course_ids=context.allowed_course_ids,
-        current_path_course_ids=context.selected_path_course_ids,
-        user_id=str(user.id),
-        is_reviewer=False,
-    )
-    await conversation_repo.add_message(
-        conversation_id=conversation_id,
-        user_id=user.id,
-        role="assistant",
-        markdown=response.answer.markdown,
-        citations=[citation.model_dump() for citation in response.citations],
-        actions=[action.model_dump() for action in response.actions],
-    )
+    try:
+        response = await AgentGraphService(
+            search,
+            requirements,
+            router=build_production_agent_router(),
+            graph_repo=AgentGraphRepository(db),
+            thread_lock=AgentThreadLock(db),
+            conversation_repo=conversation_repo,
+        ).chat(
+            request=body,
+            conversation_id=str(conversation_id),
+            thread_id=conversation.thread_id,
+            user_id=str(user.id),
+            allowed_course_ids=context.allowed_course_ids,
+            current_path_course_ids=context.selected_path_course_ids,
+        )
+    except AgentInProgressError as exc:
+        return JSONResponse(status_code=409, content=exc.to_response().model_dump(by_alias=True))
+    except AgentRouterUnavailableError as exc:
+        response = exc.to_response(conversation_id=str(conversation_id), message_id=str(uuid4()))
+    await db.commit()
+    return response
+
+
+@agent_router.post("/actions/continue", response_model=AgentChatResponse)
+async def agent_continue_action(
+    body: AgentActionResumeRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AgentChatResponse:
+    _repo, _navigation, search, requirements = _services(db)
+    try:
+        response = await AgentGraphService(
+            search,
+            requirements,
+            router=build_production_agent_router(),
+            graph_repo=AgentGraphRepository(db),
+            thread_lock=AgentThreadLock(db),
+        ).resume_action(request=body, user_id=str(user.id))
+    except AgentInProgressError as exc:
+        return JSONResponse(status_code=409, content=exc.to_response().model_dump(by_alias=True))
+    except AgentRouterUnavailableError as exc:
+        response = exc.to_response(conversation_id=body.conversation_id, message_id=str(uuid4()))
     await db.commit()
     return response
 

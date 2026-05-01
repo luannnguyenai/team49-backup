@@ -71,11 +71,18 @@ type UiMessage = {
   role: "user" | "assistant";
   markdown: string;
   createdAt: string;
-  confidence?: "grounded" | "partial" | "no_source";
+  confidence?: "grounded" | "partial" | "no_source" | "fallback";
+  incomingMessageId?: string;
   citations: AgentCitation[];
   actions: AgentAction[];
   warning?: AgentWarning | null;
 };
+
+function createIncomingMessageId() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `msg-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
 
 const QUICK_PROMPTS = [
   "Where should I review CNNs?",
@@ -962,11 +969,13 @@ export default function AgentChatPage() {
 
   const sendMessage = async (message: string) => {
     setError(null);
+    const incomingMessageId = createIncomingMessageId();
     const userMessage: UiMessage = {
       id: `local-${Date.now()}`,
       role: "user",
       markdown: message,
       createdAt: new Date().toISOString(),
+      incomingMessageId,
       citations: [],
       actions: [],
     };
@@ -975,6 +984,7 @@ export default function AgentChatPage() {
     try {
       const response = await agentApi.chat({
         message,
+        incomingMessageId,
         conversationId: activeSessionId,
         traceMode: "summary",
       });
