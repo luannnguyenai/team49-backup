@@ -70,6 +70,8 @@ interface InlineQuizSessionState {
   questions: QuestionForQuiz[];
   currentIndex: number;
   selectedAnswer: SelectedAnswer | null;
+  submitError: string | null;
+  isSubmittingAnswer: boolean;
   feedback: QuizAnswerResponse | null;
   result: QuizCompleteResponse | null;
   phase: InlineQuizOverlayPhase;
@@ -148,6 +150,17 @@ function buildTutorSuggestions(unitTitle: string, activeChapter: ChapterView | n
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+function getInlineQuizSubmitErrorMessage(error: unknown): string {
+  const detail =
+    typeof error === "object" && error !== null && "response" in error
+      ? (error as { response?: { data?: { detail?: unknown } } }).response?.data?.detail
+      : null;
+  if (typeof detail === "string" && detail.trim()) {
+    return detail;
+  }
+  return "Unable to check that answer right now. Please try again.";
 }
 
 function readPanelPreference(storageKey: string, defaultWidth: number) {
@@ -491,7 +504,7 @@ function InlineQuizOverlay({
                       "flex w-full items-start gap-3 rounded-2xl border px-4 py-3 text-left transition-colors",
                       getQuestionRowTone(isSelected, isCorrect),
                     ].join(" ")}
-                    disabled={session.phase !== "quiz"}
+                    disabled={session.phase !== "quiz" || session.isSubmittingAnswer}
                     onClick={() => onSelectAnswer(optionKey)}
                     type="button"
                   >
@@ -515,15 +528,24 @@ function InlineQuizOverlay({
               </div>
             ) : null}
 
+            {session.phase === "quiz" && session.submitError ? (
+              <div
+                className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm"
+                role="alert"
+              >
+                {session.submitError}
+              </div>
+            ) : null}
+
             <div className="flex items-center justify-end gap-2">
               {session.phase === "quiz" ? (
                 <button
                   className="rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={session.selectedAnswer === null}
+                  disabled={session.selectedAnswer === null || session.isSubmittingAnswer}
                   onClick={onSubmitAnswer}
                   type="button"
                 >
-                  Submit answer
+                  {session.isSubmittingAnswer ? "Checking answer..." : "Submit answer"}
                 </button>
               ) : (
                 <button
@@ -596,6 +618,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   );
   const quizProgressRef = useRef<InlineQuizProgress>({});
   const lastWatchSyncRef = useRef(0);
+  const inlineQuizSubmitPendingRef = useRef(false);
   const handledCheckpointHashRef = useRef<string | null>(null);
   const handledUnitSeekRef = useRef<string | null>(null);
 
@@ -829,6 +852,8 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
         questions: response.questions,
         currentIndex: Math.min(answeredCount, Math.max(response.questions.length - 1, 0)),
         selectedAnswer: null,
+        submitError: null,
+        isSubmittingAnswer: false,
         feedback: null,
         result: null,
         phase: "quiz",
@@ -937,7 +962,24 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   }, [checkpointStatus, startCheckpointQuiz]);
 
   const submitInlineQuizAnswer = useCallback(async () => {
-    if (!quizSession || !activeQuizQuestion || quizSession.selectedAnswer === null) return;
+    if (
+      !quizSession ||
+      !activeQuizQuestion ||
+      quizSession.selectedAnswer === null ||
+      inlineQuizSubmitPendingRef.current
+    ) {
+      return;
+    }
+    inlineQuizSubmitPendingRef.current = true;
+    setQuizSession((previous) =>
+      previous
+        ? {
+            ...previous,
+            submitError: null,
+            isSubmittingAnswer: true,
+          }
+        : previous,
+    );
     try {
       const feedback = await quizApi.answer(quizSession.sessionId, {
         question_id: activeQuizQuestion.id,
@@ -963,12 +1005,26 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
         previous
           ? {
               ...previous,
+              submitError: null,
+              isSubmittingAnswer: false,
               feedback,
               phase: "feedback",
             }
           : previous,
       );
-    } catch {}
+    } catch (error) {
+      setQuizSession((previous) =>
+        previous
+          ? {
+              ...previous,
+              submitError: getInlineQuizSubmitErrorMessage(error),
+              isSubmittingAnswer: false,
+            }
+          : previous,
+      );
+    } finally {
+      inlineQuizSubmitPendingRef.current = false;
+    }
   }, [activeQuizQuestion, quizSession, syncInlineQuizProgress]);
 
   const advanceInlineQuiz = useCallback(async () => {
@@ -982,6 +1038,8 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
               ...previous,
               currentIndex: previous.currentIndex + 1,
               selectedAnswer: null,
+              submitError: null,
+              isSubmittingAnswer: false,
               feedback: null,
               phase: "quiz",
               questionStartedAt: Date.now(),
@@ -1403,6 +1461,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                         ? {
                             ...previous,
                             selectedAnswer: answer,
+                            submitError: null,
                           }
                         : previous,
                     )
