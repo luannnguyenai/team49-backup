@@ -9,6 +9,7 @@ const agentApiMock = vi.hoisted(() => ({
   messages: vi.fn(),
   memory: vi.fn(),
   chat: vi.fn(),
+  continueAction: vi.fn(),
   startAssessmentWorkflow: vi.fn(),
   resumeAssessmentWorkflow: vi.fn(),
   startAssessmentAction: vi.fn(),
@@ -79,6 +80,7 @@ describe("agent page", () => {
     await waitFor(() => {
       expect(agentApiMock.chat).toHaveBeenCalledWith({
         message: "Where should I review CNNs?",
+        incomingMessageId: expect.any(String),
         conversationId: null,
         traceMode: "summary",
       });
@@ -86,5 +88,53 @@ describe("agent page", () => {
 
     expect(await screen.findByText("Receptive fields are covered in CS231n.")).toBeInTheDocument();
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
+  });
+
+  it("continues a pending action with a stable action id", async () => {
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-action",
+      answer: {
+        markdown: "I can replan after you confirm.",
+        confidence: "partial",
+      },
+      citations: [],
+      actions: [
+        {
+          type: "request_replan",
+          label: "Confirm replan",
+          actionId: "act-1",
+          status: "awaiting_confirmation",
+        },
+      ],
+      warning: null,
+    });
+    agentApiMock.continueAction.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-commit",
+      answer: {
+        markdown: "I recalculated your learning plan from the latest assessment evidence.",
+        confidence: "partial",
+      },
+      citations: [],
+      actions: [],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
+    fireEvent.click(promptButtons[0]);
+    const confirm = await screen.findByRole("button", { name: /confirm replan/i });
+    fireEvent.click(confirm);
+
+    await waitFor(() => {
+      expect(agentApiMock.continueAction).toHaveBeenCalledWith({
+        conversationId: "conversation-1",
+        actionId: "act-1",
+        decision: "approve",
+        incomingMessageId: expect.any(String),
+      });
+    });
+    expect(await screen.findByText("I recalculated your learning plan from the latest assessment evidence.")).toBeInTheDocument();
   });
 });

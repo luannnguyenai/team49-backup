@@ -37,6 +37,7 @@ import {
   agentApi,
   getActionCanonicalIds,
   getActionDisabledReason,
+  getActionId,
   getActionQuestionBudget,
   getCitationCanonicalId,
   getCitationCourseId,
@@ -56,6 +57,7 @@ import {
   getWorkflowId,
   type AgentAction,
   type AgentAssessmentWorkflowResponse,
+  type AgentChatResponse,
   type AgentCitation,
   type AgentConversationMemory,
   type AgentConversationMessage,
@@ -343,13 +345,42 @@ function AssessmentProposalCard({
   );
 }
 
-function ActionButton({ action }: { action: AgentAction }) {
+function ActionButton({
+  action,
+  conversationId,
+  onActionResponse,
+}: {
+  action: AgentAction;
+  conversationId?: string | null;
+  onActionResponse?: (response: AgentChatResponse) => void;
+}) {
   const router = useRouter();
   const [isStarting, setIsStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
   const href = getCitationHref(action);
+  const actionId = getActionId(action);
   const disabledReason = getActionDisabledReason(action);
   const disabled = action.eligible === false || Boolean(disabledReason);
+  const isPendingConfirmation = action.status === "awaiting_confirmation" && Boolean(actionId);
+
+  const continuePendingAction = async (decision: "approve" | "reject") => {
+    if (!conversationId || !actionId || disabled || !onActionResponse) return;
+    setIsStarting(true);
+    setStartError(null);
+    try {
+      const response = await agentApi.continueAction({
+        conversationId,
+        actionId,
+        decision,
+        incomingMessageId: createIncomingMessageId(),
+      });
+      onActionResponse(response);
+    } catch (err) {
+      setStartError(err instanceof Error ? err.message : "Action could not be completed.");
+    } finally {
+      setIsStarting(false);
+    }
+  };
 
   const startAssessment = async () => {
     if (disabled || action.type !== "start_assessment") return;
@@ -408,6 +439,29 @@ function ActionButton({ action }: { action: AgentAction }) {
       {isStarting ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
     </span>
   );
+
+  if (isPendingConfirmation) {
+    return (
+      <div className="space-y-2">
+        <button
+          type="button"
+          disabled={disabled || isStarting}
+          onClick={() => continuePendingAction("approve")}
+          className="w-full"
+        >
+          {content}
+        </button>
+        <button
+          type="button"
+          disabled={disabled || isStarting}
+          onClick={() => continuePendingAction("reject")}
+          className="min-h-10 w-full rounded-2xl border border-slate-200 px-4 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+        >
+          Not now
+        </button>
+      </div>
+    );
+  }
 
   if (action.type === "start_assessment") {
     return (
@@ -480,7 +534,15 @@ function WorkflowAction({ action }: { action: AgentAction }) {
   );
 }
 
-function ChatMessageItem({ message }: { message: UiMessage }) {
+function ChatMessageItem({
+  message,
+  conversationId,
+  onActionResponse,
+}: {
+  message: UiMessage;
+  conversationId: string | null;
+  onActionResponse: (response: AgentChatResponse) => void;
+}) {
   const isUser = message.role === "user";
   const prereqAction = message.actions.find((action) => action.type === "review_prerequisite_path");
   const workflowActions = message.actions.filter(
@@ -529,7 +591,12 @@ function ChatMessageItem({ message }: { message: UiMessage }) {
         {!isUser && simpleActions.length > 0 ? (
           <div className="mt-3 space-y-2">
             {simpleActions.map((action, index) => (
-              <ActionButton key={`${action.type}-${action.label}-${index}`} action={action} />
+              <ActionButton
+                key={`${action.type}-${action.label}-${index}`}
+                action={action}
+                conversationId={conversationId}
+                onActionResponse={onActionResponse}
+              />
             ))}
           </div>
         ) : null}
@@ -952,6 +1019,27 @@ export default function AgentChatPage() {
     agentApi.listConversations().then(setSessions).catch(() => undefined);
   };
 
+  const appendAgentResponse = (response: AgentChatResponse) => {
+    const conversationId = getConversationId(response);
+    if (conversationId && conversationId !== activeSessionId) {
+      setActiveSessionId(conversationId);
+    }
+    setMessages((current) => [
+      ...current,
+      {
+        id: getMessageId(response) || `assistant-${Date.now()}`,
+        role: "assistant",
+        markdown: response.answer.markdown,
+        createdAt: new Date().toISOString(),
+        confidence: response.answer.confidence,
+        citations: response.citations ?? [],
+        actions: response.actions ?? [],
+        warning: response.warning,
+      },
+    ]);
+    refreshSessions();
+  };
+
   const newChat = async () => {
     setError(null);
     try {
@@ -988,24 +1076,7 @@ export default function AgentChatPage() {
         conversationId: activeSessionId,
         traceMode: "summary",
       });
-      const conversationId = getConversationId(response);
-      if (conversationId && conversationId !== activeSessionId) {
-        setActiveSessionId(conversationId);
-      }
-      setMessages((current) => [
-        ...current,
-        {
-          id: getMessageId(response) || `assistant-${Date.now()}`,
-          role: "assistant",
-          markdown: response.answer.markdown,
-          createdAt: new Date().toISOString(),
-          confidence: response.answer.confidence,
-          citations: response.citations ?? [],
-          actions: response.actions ?? [],
-          warning: response.warning,
-        },
-      ]);
-      refreshSessions();
+      appendAgentResponse(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send message.");
     } finally {
@@ -1126,7 +1197,12 @@ export default function AgentChatPage() {
             ) : (
               <>
                 {messages.map((message) => (
-                  <ChatMessageItem key={message.id} message={message} />
+                  <ChatMessageItem
+                    key={message.id}
+                    message={message}
+                    conversationId={activeSessionId}
+                    onActionResponse={appendAgentResponse}
+                  />
                 ))}
                 {isThinking ? (
                   <div className="flex gap-3">

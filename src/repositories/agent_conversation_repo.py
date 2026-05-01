@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from uuid import UUID, uuid4
 
+from datetime import UTC, datetime
+
 from sqlalchemy import desc, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -123,3 +125,33 @@ class AgentConversationRepository:
             )
         )
         return result.scalar_one_or_none()
+
+    async def upsert_memory(
+        self,
+        *,
+        conversation_id: UUID,
+        user_id: UUID,
+        summary_status: str,
+        recent_message_window: int,
+        summary_json: dict,
+        last_updated_at: datetime | None = None,
+    ) -> AgentConversationMemory:
+        memory = await self.get_memory(conversation_id, user_id)
+        now = last_updated_at or datetime.now(UTC)
+        if memory is None:
+            memory = AgentConversationMemory(
+                conversation_id=conversation_id,
+                user_id=user_id,
+                summary_status=summary_status,
+                recent_message_window=recent_message_window,
+                summary_json=summary_json,
+                last_updated_at=now,
+            )
+            self.session.add(memory)
+        else:
+            memory.summary_status = summary_status
+            memory.recent_message_window = recent_message_window
+            memory.summary_json = summary_json
+            memory.last_updated_at = now
+        await self.session.flush()
+        return memory

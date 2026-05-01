@@ -6,18 +6,23 @@ from uuid import UUID, uuid4
 try:
     from langgraph.checkpoint.memory import InMemorySaver
     from langgraph.graph import END, START, StateGraph
+    from langgraph.types import Command, interrupt
 except ModuleNotFoundError:  # pragma: no cover - dependency exists in production env
     InMemorySaver = None
     END = START = StateGraph = None
+    Command = interrupt = None
 
 from src.schemas.agent import AgentActionResumeRequest, AgentChatRequest, AgentChatResponse
+from src.services.agent_action_commit_service import AgentActionCommitService
 from src.services.agent_graph_contracts import (
     AgentCheckpointState,
     AgentInProgressError,
     AgentSlots,
     PendingClarification,
     PolicyDecision,
+    ToolResult,
 )
+from src.services.agent_memory_compaction_service import AgentMemoryCompactionService
 from src.services.agent_policy_service import AgentPolicyService
 from src.services.agent_response_composer import AgentResponseComposer
 from src.services.agent_search_scope_service import AgentSearchScopeService
@@ -48,8 +53,11 @@ class AgentGraphService:
         thread_lock=None,
         conversation_repo=None,
         path_switch_service=None,
+        action_commit_service=None,
+        memory_compaction_service=None,
         action_db=None,
         action_user=None,
+        checkpointer=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -58,15 +66,18 @@ class AgentGraphService:
         self.thread_lock = thread_lock or _NoopThreadLock()
         self.conversation_repo = conversation_repo
         self.path_switch_service = path_switch_service
+        self.action_commit_service = action_commit_service or AgentActionCommitService()
+        self.memory_compaction = memory_compaction_service or AgentMemoryCompactionService()
         self.action_db = action_db
         self.action_user = action_user
         self.policy = AgentPolicyService()
         self.composer = AgentResponseComposer()
         self.scope_service = AgentSearchScopeService()
         self.tools = AgentToolNodes(search_service, requirement_service)
-        self._checkpointer = InMemorySaver() if InMemorySaver is not None else None
+        self._checkpointer = checkpointer or (InMemorySaver() if InMemorySaver is not None else None)
         self._graph = self._build_graph() if StateGraph is not None else None
         self._pending_clarifications: dict[str, PendingClarification] = {}
+        self._latest_checkpoint_ids: dict[str, str | None] = {}
 
     def _build_graph(self):
         if StateGraph is None:
@@ -76,12 +87,30 @@ class AgentGraphService:
         graph.add_node("canonicalize_slots", self._canonicalize_slots)
         graph.add_node("policy_guard", self._policy_guard)
         graph.add_node("dispatch", self._dispatch)
+        graph.add_node("await_confirmation", self._await_confirmation)
+        graph.add_node("commit_action", self._commit_action)
         graph.add_edge(START, "route_intent")
         graph.add_edge("route_intent", "canonicalize_slots")
         graph.add_edge("canonicalize_slots", "policy_guard")
         graph.add_edge("policy_guard", "dispatch")
-        graph.add_edge("dispatch", END)
+        graph.add_conditional_edges(
+            "dispatch",
+            self._next_after_dispatch,
+            {"await_confirmation": "await_confirmation", "end": END},
+        )
+        graph.add_edge("await_confirmation", "commit_action")
+        graph.add_edge("commit_action", END)
         return graph.compile(checkpointer=self._checkpointer)
+
+    def _next_after_dispatch(self, state: dict) -> str:
+        result = state.get("tool_result")
+        if isinstance(result, dict):
+            result = ToolResult.model_validate(result)
+        if isinstance(result, ToolResult) and any(
+            getattr(action, "status", None) == "awaiting_confirmation" for action in result.actions
+        ):
+            return "await_confirmation"
+        return "end"
 
     async def chat(
         self,
@@ -150,6 +179,10 @@ class AgentGraphService:
                         citations=[citation.model_dump() for citation in response.citations],
                         actions=[action.model_dump() for action in response.actions],
                     )
+                    await self._compact_thread_memory_if_needed(
+                        conversation_id=conversation_id,
+                        user_id=user_id,
+                    )
                 response_ref = await self.graph_repo.store_response_payload(
                     graph_run_id=run.graph_run_id,
                     response=response,
@@ -162,11 +195,13 @@ class AgentGraphService:
                     await self.graph_repo.mark_run_interrupted(
                         run.graph_run_id,
                         response_ref=response_ref,
+                        checkpoint_id=self._latest_checkpoint_ids.get(thread_id),
                     )
                 else:
                     await self.graph_repo.mark_run_succeeded(
                         run.graph_run_id,
                         response_ref=response_ref,
+                        checkpoint_id=self._latest_checkpoint_ids.get(thread_id),
                     )
                 return response
             except Exception as exc:
@@ -199,12 +234,14 @@ class AgentGraphService:
         state["allowed_course_ids"] = allowed_course_ids
         state["current_path_course_ids"] = current_path_course_ids or allowed_course_ids
         state["pending_clarification"] = self._pending_clarifications.get(thread_id)
+        state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id)
         if self._graph is None:
             raise RuntimeError("langgraph_not_installed")
         final_state = await self._graph.ainvoke(
             state,
             config={"configurable": {"thread_id": thread_id}},
         )
+        self._latest_checkpoint_ids[thread_id] = await self._capture_checkpoint_id(thread_id)
         pending = final_state.get("pending_clarification")
         if isinstance(pending, PendingClarification):
             self._pending_clarifications[thread_id] = pending
@@ -331,11 +368,68 @@ class AgentGraphService:
             result = await self._persist_pending_action_for_result(state, result, "request_replan")
             return {**state, "tool_result": result}
         if state["intent"] == "request_path_switch":
+            if self.path_switch_service is not None:
+                decision = await self.path_switch_service.validate_request(
+                    UUID(str(state["user_id"])),
+                    state.get("current_path_course_ids") or [],
+                    slots.target_path,
+                    state["allowed_course_ids"],
+                )
+                if not decision.allow:
+                    result = await self.tools.clarify(
+                        state["message"],
+                        reason=decision.user_safe_message or "Path switch is not allowed.",
+                    )
+                    return {**state, "tool_result": result}
             result = await self.tools.path_switch_proposal(slots)
             result = await self._persist_pending_action_for_result(state, result, "request_path_switch")
             return {**state, "tool_result": result}
 
         return {**state, "tool_result": await self.tools.clarify(state["message"])}
+
+    async def _await_confirmation(self, state: dict) -> dict:
+        if interrupt is None:
+            return {**state, "resume_decision": {"decision": "approve"}}
+        result = state.get("tool_result")
+        if isinstance(result, dict):
+            result = ToolResult.model_validate(result)
+        action = result.actions[0] if isinstance(result, ToolResult) and result.actions else None
+        resume_decision = interrupt(
+            {
+                "type": "pending_action_confirmation",
+                "action_id": getattr(action, "action_id", None),
+                "action_type": getattr(action, "type", None),
+                "summary": result.answer_markdown if isinstance(result, ToolResult) else None,
+            }
+        )
+        return {**state, "resume_decision": resume_decision}
+
+    async def _commit_action(self, state: dict) -> dict:
+        decision = state.get("resume_decision") or {}
+        action_id = decision.get("action_id")
+        if not action_id or self.graph_repo is None:
+            return {
+                **state,
+                "tool_result": ToolResult(
+                    kind="clarification",
+                    answer_markdown="That action can no longer be completed.",
+                    requires_evidence=False,
+                ),
+            }
+        pending = await self.graph_repo.get_pending_action(action_id=action_id)
+        if pending is None:
+            result = self.composer.compose_action_error(state["conversation_id"], "missing_action")
+            return {
+                **state,
+                "tool_result": ToolResult(
+                    kind="clarification",
+                    answer_markdown=result.answer.markdown,
+                    fallback=result.fallback,
+                    requires_evidence=False,
+                ),
+            }
+        result = await self._resolve_pending_action_decision(pending, decision)
+        return {**state, "tool_result": result}
 
     async def _persist_pending_action_for_result(
         self,
@@ -347,12 +441,7 @@ class AgentGraphService:
             return result
         action = result.actions[0]
         expires_at = action.expires_at or datetime.now(UTC) + timedelta(minutes=30)
-        payload = {
-            "payload_version": 1,
-            "canonical_unit_ids": action.canonical_unit_ids,
-            "target_path_id": state["slots"].target_path if hasattr(state["slots"], "target_path") else None,
-            "intent": state["intent"],
-        }
+        payload = self._build_pending_action_payload(state, action, action_type)
         pending = await self.graph_repo.create_pending_action(
             conversation_id=state["conversation_id"],
             thread_id=state["thread_id"],
@@ -366,6 +455,44 @@ class AgentGraphService:
         updated_action = action.model_copy(update={"action_id": pending.action_id})
         return result.model_copy(update={"actions": [updated_action, *result.actions[1:]]})
 
+    def _build_pending_action_payload(self, state: dict, action, action_type: str) -> dict:
+        slots = state["slots"]
+        if isinstance(slots, dict):
+            slots = AgentSlots.model_validate(slots)
+        payload = {
+            "payload_version": 1,
+            "intent": state["intent"],
+            "reason": state.get("message"),
+        }
+        if action_type == "start_assessment":
+            payload.update(
+                {
+                    "canonical_unit_ids": action.canonical_unit_ids,
+                    "phase": action.default_phase or "skip_verification",
+                    "question_budget": action.question_budget or 15,
+                }
+            )
+        elif action_type == "request_replan":
+            payload.update(
+                {
+                    "assessment_session_id": None,
+                    "source_canonical_unit_ids": action.source_canonical_unit_ids
+                    or slots.canonical_unit_ids,
+                    "dry_run": False,
+                }
+            )
+        elif action_type == "request_path_switch":
+            if self.path_switch_service is not None and slots.target_path:
+                payload.update(
+                    self.path_switch_service.build_proposal(
+                        state.get("current_path_course_ids") or [],
+                        slots.target_path,
+                    )
+                )
+            else:
+                payload["target_path_id"] = slots.target_path
+        return payload
+
     async def resume_action(self, request: AgentActionResumeRequest, user_id: str) -> AgentChatResponse:
         if self.graph_repo is None:
             return AgentChatResponse(
@@ -376,6 +503,20 @@ class AgentGraphService:
         pending = await self.graph_repo.get_pending_action(action_id=request.action_id)
         if pending is None:
             return self.composer.compose_action_error(request.conversation_id, "missing_action")
+        completed = await self.graph_repo.get_completed_response_by_incoming_message(
+            conversation_id=str(pending.conversation_id),
+            thread_id=str(pending.thread_id),
+            incoming_message_id=request.incoming_message_id,
+        )
+        if completed is not None:
+            return completed
+        active_run = await self.graph_repo.get_active_non_interrupted_run(thread_id=str(pending.thread_id))
+        if active_run is not None:
+            raise AgentInProgressError(
+                str(pending.conversation_id),
+                str(pending.thread_id),
+                active_run.graph_run_id,
+            )
         if str(pending.user_id) != str(user_id):
             return self.composer.compose_action_error(request.conversation_id, "ownership_mismatch")
         if pending.status != "awaiting_confirmation":
@@ -387,56 +528,238 @@ class AgentGraphService:
                     answer={"markdown": "Action was already completed.", "confidence": "partial"},
                 )
             return self.composer.compose_action_error(request.conversation_id, f"invalid_status:{pending.status}")
-        if pending.expires_at <= datetime.now(UTC):
-            await self.graph_repo.mark_action_expired(pending.action_id)
-            await self._finalize_interrupted_run(str(pending.thread_id), "cancelled")
-            return self.composer.compose_action_error(request.conversation_id, "expired")
-        if request.decision == "reject":
-            await self.graph_repo.mark_action_cancelled(pending.action_id)
-            await self._finalize_interrupted_run(str(pending.thread_id), "cancelled")
-            return self.composer.compose_action_cancelled(str(pending.conversation_id))
-        existing = await self.graph_repo.get_committed_action_result(pending.action_id)
-        if existing is not None:
-            return AgentChatResponse(
-                conversation_id=str(pending.conversation_id),
-                message_id=str(uuid4()),
-                answer={"markdown": "Action was already completed.", "confidence": "partial"},
-            )
-        if pending.type == "request_path_switch" and self.path_switch_service is not None:
-            if self.action_db is None or self.action_user is None:
-                return self.composer.compose_action_error(request.conversation_id, "missing_action_context")
-            result = await self.path_switch_service.commit(
-                self.action_db,
-                self.action_user,
-                pending.payload_json["target_path_id"],
-                pending.idempotency_key,
-            )
-            await self.graph_repo.mark_action_committed(pending.action_id, result=result)
-            await self._finalize_interrupted_run(str(pending.thread_id), "succeeded")
-            return AgentChatResponse(
-                conversation_id=str(pending.conversation_id),
-                message_id=str(uuid4()),
-                answer={
-                    "markdown": (
-                        "I switched your active path and recalculated the learning plan. "
-                        "Open the plan view to continue with the updated recommendation."
-                    ),
-                    "confidence": "partial",
-                },
-            )
-        await self.graph_repo.mark_action_committed(
-            pending.action_id,
-            result={"type": pending.type, "status": "confirmed"},
-        )
-        await self._finalize_interrupted_run(str(pending.thread_id), "succeeded")
-        return AgentChatResponse(
+        run = await self.graph_repo.create_run(
             conversation_id=str(pending.conversation_id),
-            message_id=str(uuid4()),
-            answer={"markdown": "Action confirmed.", "confidence": "partial"},
+            thread_id=str(pending.thread_id),
+            incoming_message_id=request.incoming_message_id,
         )
+        async with self.thread_lock.acquire(
+            conversation_id=str(pending.conversation_id),
+            thread_id=str(pending.thread_id),
+            graph_run_id=run.graph_run_id,
+        ):
+            await self.graph_repo.mark_run_running(run.graph_run_id)
+            try:
+                if self._graph is not None and Command is not None:
+                    final_state = await self._graph.ainvoke(
+                        Command(
+                            resume={
+                                "decision": request.decision,
+                                "action_id": pending.action_id,
+                                "user_id": user_id,
+                                "edit_payload": request.edit_payload,
+                            }
+                        ),
+                        config={"configurable": {"thread_id": str(pending.thread_id)}},
+                    )
+                    self._latest_checkpoint_ids[str(pending.thread_id)] = await self._capture_checkpoint_id(
+                        str(pending.thread_id)
+                    )
+                    response = self.composer.compose(
+                        conversation_id=str(pending.conversation_id),
+                        message_id=str(uuid4()),
+                        result=final_state["tool_result"],
+                    )
+                else:
+                    result = await self._resolve_pending_action_decision(
+                        pending,
+                        {
+                            "decision": request.decision,
+                            "action_id": pending.action_id,
+                            "user_id": user_id,
+                            "edit_payload": request.edit_payload,
+                        },
+                    )
+                    response = self.composer.compose(
+                        conversation_id=str(pending.conversation_id),
+                        message_id=str(uuid4()),
+                        result=result,
+                    )
+                response_ref = await self.graph_repo.store_response_payload(
+                    graph_run_id=run.graph_run_id,
+                    response=response,
+                    deterministic_key=f"{pending.thread_id}:{request.incoming_message_id}",
+                )
+                await self.graph_repo.mark_run_succeeded(
+                    run.graph_run_id,
+                    response_ref=response_ref,
+                    checkpoint_id=self._latest_checkpoint_ids.get(str(pending.thread_id)),
+                )
+                return response
+            except Exception as exc:
+                await self.graph_repo.mark_run_failed(
+                    run.graph_run_id,
+                    error=str(exc),
+                    retryable=True,
+                )
+                raise
 
     async def _finalize_interrupted_run(self, thread_id: str, status: str) -> None:
         finalize = getattr(self.graph_repo, "mark_latest_interrupted_run_final", None)
         if finalize is None:
             return
         await finalize(thread_id=thread_id, status=status)
+
+    async def _resolve_pending_action_decision(self, pending, decision: dict) -> ToolResult:
+        if str(pending.user_id) != str(decision.get("user_id")):
+            return ToolResult(
+                kind="clarification",
+                answer_markdown="That action can no longer be completed.",
+                fallback={"reason": "action_error", "message": "ownership_mismatch"},
+            )
+        if pending.status != "awaiting_confirmation":
+            existing = await self.graph_repo.get_committed_action_result(pending.action_id)
+            if existing is not None:
+                return ToolResult(
+                    kind="what_next",
+                    answer_markdown="Action was already completed.",
+                    metadata={"result": existing},
+                )
+            return ToolResult(
+                kind="clarification",
+                answer_markdown="That action can no longer be completed.",
+                fallback={"reason": "action_error", "message": f"invalid_status:{pending.status}"},
+            )
+        if pending.expires_at <= datetime.now(UTC):
+            await self.graph_repo.mark_action_expired(pending.action_id)
+            await self._finalize_interrupted_run(str(pending.thread_id), "cancelled")
+            return ToolResult(
+                kind="clarification",
+                answer_markdown="That action expired. Please ask me to generate a fresh proposal.",
+                fallback={"reason": "action_error", "message": "expired"},
+            )
+        if decision.get("decision") == "reject":
+            await self.graph_repo.mark_action_cancelled(pending.action_id)
+            await self._finalize_interrupted_run(str(pending.thread_id), "cancelled")
+            return ToolResult(kind="clarification", answer_markdown="Cancelled.")
+        if decision.get("decision") == "edit":
+            return ToolResult(
+                kind="clarification",
+                answer_markdown="I need to generate a fresh proposal for that edit before committing it.",
+                fallback={"reason": "action_error", "message": "edit_requires_new_proposal"},
+            )
+
+        existing = await self.graph_repo.get_committed_action_result(pending.action_id)
+        if existing is not None:
+            return ToolResult(
+                kind="what_next",
+                answer_markdown="Action was already completed.",
+                metadata={"result": existing},
+            )
+        if pending.type in {"request_path_switch", "start_assessment", "request_replan"} and (
+            self.action_db is None or self.action_user is None
+        ):
+            return ToolResult(
+                kind="clarification",
+                answer_markdown="That action can no longer be completed.",
+                fallback={"reason": "action_error", "message": "missing_action_context"},
+            )
+
+        if pending.type == "request_path_switch":
+            if self.path_switch_service is None:
+                return ToolResult(
+                    kind="clarification",
+                    answer_markdown="That action can no longer be completed.",
+                    fallback={"reason": "action_error", "message": "missing_path_switch_service"},
+                )
+            result = await self.path_switch_service.commit(
+                self.action_db,
+                self.action_user,
+                pending.payload_json["target_path_id"],
+                pending.idempotency_key,
+            )
+            message = (
+                "I switched your active path and recalculated the learning plan. "
+                "Open the plan view to continue with the updated recommendation."
+            )
+        elif pending.type == "start_assessment":
+            result = await self.action_commit_service.commit_start_assessment(
+                self.action_db,
+                user_id=self.action_user.id,
+                payload=pending.payload_json,
+                idempotency_key=pending.idempotency_key,
+            )
+            message = "Assessment is ready. You can start it now."
+        elif pending.type == "request_replan":
+            result = await self.action_commit_service.commit_replan(
+                self.action_db,
+                user=self.action_user,
+                payload=pending.payload_json,
+                idempotency_key=pending.idempotency_key,
+            )
+            if not result.get("accepted", True):
+                await self.graph_repo.mark_action_cancelled(pending.action_id)
+                await self._finalize_interrupted_run(str(pending.thread_id), "cancelled")
+                return ToolResult(
+                    kind="clarification",
+                    answer_markdown="I could not safely replan from that proposal.",
+                    fallback={
+                        "reason": "action_error",
+                        "message": result.get("rejectedReason") or "replan_rejected",
+                    },
+                    metadata={"result": result},
+                )
+            message = "I recalculated your learning plan from the latest assessment evidence."
+        else:
+            result = {"type": pending.type, "status": "confirmed"}
+            message = "Action confirmed."
+
+        await self.graph_repo.mark_action_committed(pending.action_id, result=result)
+        await self._finalize_interrupted_run(str(pending.thread_id), "succeeded")
+        return ToolResult(kind="what_next", answer_markdown=message, metadata={"result": result})
+
+    async def _load_memory_ref(self, conversation_id: str, user_id: str) -> str | None:
+        if self.conversation_repo is None:
+            return None
+        memory = await self.conversation_repo.get_memory(UUID(str(conversation_id)), UUID(str(user_id)))
+        if memory is None or not isinstance(memory.summary_json, dict):
+            return None
+        return memory.summary_json.get("memoryRef")
+
+    async def _compact_thread_memory_if_needed(self, conversation_id: str, user_id: str) -> None:
+        if self.conversation_repo is None:
+            return
+        conversation_uuid = UUID(str(conversation_id))
+        user_uuid = UUID(str(user_id))
+        messages = await self.conversation_repo.list_messages(conversation_uuid, user_uuid, limit=200)
+        if not self.memory_compaction.should_compact(messages):
+            return
+        memory = await self.conversation_repo.get_memory(conversation_uuid, user_uuid)
+        previous_summary = memory.summary_json if memory and isinstance(memory.summary_json, dict) else {}
+        compacted = self.memory_compaction.compact(
+            messages,
+            pending_action=None,
+            active_slots={},
+            clarification_target=None,
+            previous_summary_version=int(previous_summary.get("summaryVersion") or 0),
+        )
+        memory_ref = f"agent_memory:{conversation_id}:v{compacted.summary_version}"
+        await self.conversation_repo.upsert_memory(
+            conversation_id=conversation_uuid,
+            user_id=user_uuid,
+            summary_status="fresh",
+            recent_message_window=self.memory_compaction.max_recent_turns,
+            summary_json={
+                "memoryRef": memory_ref,
+                "summaryVersion": compacted.summary_version,
+                **compacted.summary,
+                "activeSlots": compacted.active_slots,
+                "pendingAction": compacted.pending_action,
+                "clarificationTarget": compacted.clarification_target,
+            },
+            last_updated_at=datetime.now(UTC),
+        )
+
+    async def _capture_checkpoint_id(self, thread_id: str) -> str | None:
+        if self._graph is None:
+            return None
+        try:
+            snapshot = await self._graph.aget_state({"configurable": {"thread_id": thread_id}})
+        except Exception:
+            return None
+        config = getattr(snapshot, "config", None) or {}
+        configurable = config.get("configurable") if isinstance(config, dict) else None
+        if not isinstance(configurable, dict):
+            return None
+        checkpoint_id = configurable.get("checkpoint_id")
+        return str(checkpoint_id) if checkpoint_id else None

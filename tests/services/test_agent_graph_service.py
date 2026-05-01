@@ -14,9 +14,11 @@ from src.schemas.agent import (
     UnitSearchResponse,
     UnitSearchResult,
 )
+from src.services.agent_graph_contracts import AgentRoute, AgentSlots
 from src.services.agent_graph_contracts import AgentInProgressError
 from src.services.agent_graph_router import DeterministicAgentRouter
 from src.services.agent_graph_service import AgentGraphService
+from src.services.agent_memory_compaction_service import AgentMemoryCompactionService
 
 pytestmark = pytest.mark.asyncio
 
@@ -201,21 +203,30 @@ async def test_resume_reject_closes_interrupted_run_as_cancelled():
         user_id=user_id,
         status="awaiting_confirmation",
         expires_at=datetime.now(UTC) + timedelta(minutes=5),
-        type="request_replan",
+        type="custom_action",
         payload_json={},
         idempotency_key="idem-reject",
     )
     repo = SimpleNamespace(
         get_pending_action=AsyncMock(return_value=pending),
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_active_non_interrupted_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(return_value=SimpleNamespace(graph_run_id="resume-run-reject")),
+        mark_run_running=AsyncMock(),
         mark_action_cancelled=AsyncMock(),
         mark_latest_interrupted_run_final=AsyncMock(),
+        store_response_payload=AsyncMock(return_value="resp-reject"),
+        mark_run_succeeded=AsyncMock(),
+        mark_run_failed=AsyncMock(),
     )
     service = AgentGraphService(
         search_service=SimpleNamespace(),
         requirement_service=SimpleNamespace(),
         router=DeterministicAgentRouter(),
         graph_repo=repo,
+        thread_lock=NoopThreadLock(),
     )
+    service._graph = None
 
     response = await service.resume_action(
         AgentActionResumeRequest(
@@ -244,22 +255,31 @@ async def test_resume_approve_closes_interrupted_run_as_succeeded():
         user_id=user_id,
         status="awaiting_confirmation",
         expires_at=datetime.now(UTC) + timedelta(minutes=5),
-        type="request_replan",
+        type="custom_action",
         payload_json={},
         idempotency_key="idem-approve",
     )
     repo = SimpleNamespace(
         get_pending_action=AsyncMock(return_value=pending),
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_active_non_interrupted_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(return_value=SimpleNamespace(graph_run_id="resume-run-approve")),
+        mark_run_running=AsyncMock(),
         get_committed_action_result=AsyncMock(return_value=None),
         mark_action_committed=AsyncMock(),
         mark_latest_interrupted_run_final=AsyncMock(),
+        store_response_payload=AsyncMock(return_value="resp-approve"),
+        mark_run_succeeded=AsyncMock(),
+        mark_run_failed=AsyncMock(),
     )
     service = AgentGraphService(
         search_service=SimpleNamespace(),
         requirement_service=SimpleNamespace(),
         router=DeterministicAgentRouter(),
         graph_repo=repo,
+        thread_lock=NoopThreadLock(),
     )
+    service._graph = None
 
     response = await service.resume_action(
         AgentActionResumeRequest(
@@ -273,9 +293,265 @@ async def test_resume_approve_closes_interrupted_run_as_succeeded():
     assert response.answer.markdown == "Action confirmed."
     repo.mark_action_committed.assert_awaited_once_with(
         "act-approve",
-        result={"type": "request_replan", "status": "confirmed"},
+        result={"type": "custom_action", "status": "confirmed"},
     )
     repo.mark_latest_interrupted_run_final.assert_awaited_once_with(
         thread_id="thread-approve",
         status="succeeded",
     )
+
+
+async def test_native_resume_approve_commits_start_assessment_once():
+    conversation_id = str(uuid4())
+    user_id = uuid4()
+    pending_holder = {}
+    commit_calls = []
+
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="assess_knowledge",
+                confidence=0.95,
+                extracted_slots=AgentSlots(canonical_unit_ids=["unit-a"], raw_topic="attention"),
+            )
+
+    async def create_pending_action(**kwargs):
+        pending = SimpleNamespace(
+            action_id="act-assessment",
+            conversation_id=kwargs["conversation_id"],
+            thread_id=kwargs["thread_id"],
+            user_id=kwargs["user_id"],
+            status="awaiting_confirmation",
+            expires_at=kwargs["expires_at"],
+            type=kwargs["action_type"],
+            payload_json=kwargs["payload"],
+            idempotency_key=kwargs["idempotency_key"],
+        )
+        pending_holder["pending"] = pending
+        return pending
+
+    class CommitService:
+        async def commit_start_assessment(self, db, *, user_id, payload, idempotency_key):
+            commit_calls.append((user_id, payload, idempotency_key))
+            return {
+                "type": "start_assessment",
+                "status": "committed",
+                "sessionId": "session-1",
+                "totalQuestions": 3,
+                "questions": [],
+                "canonicalUnitIds": payload["canonical_unit_ids"],
+                "phase": payload["phase"],
+                "href": "/assessment",
+            }
+
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_active_run=AsyncMock(return_value=None),
+        get_active_non_interrupted_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(
+            side_effect=[
+                SimpleNamespace(graph_run_id="run-chat"),
+                SimpleNamespace(graph_run_id="run-resume"),
+            ]
+        ),
+        mark_run_running=AsyncMock(),
+        create_pending_action=AsyncMock(side_effect=create_pending_action),
+        store_response_payload=AsyncMock(side_effect=["resp-chat", "resp-resume"]),
+        mark_run_interrupted=AsyncMock(),
+        mark_run_succeeded=AsyncMock(),
+        mark_run_failed=AsyncMock(),
+        get_pending_action=AsyncMock(side_effect=lambda action_id: pending_holder["pending"]),
+        get_committed_action_result=AsyncMock(return_value=None),
+        mark_action_committed=AsyncMock(),
+        mark_latest_interrupted_run_final=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        graph_repo=repo,
+        thread_lock=NoopThreadLock(),
+        action_commit_service=CommitService(),
+        action_db=object(),
+        action_user=SimpleNamespace(id=user_id),
+    )
+
+    proposal = await service.chat(
+        request=AgentChatRequest(message="quiz me on attention", incomingMessageId="msg-chat"),
+        conversation_id=conversation_id,
+        thread_id="thread-assessment",
+        user_id=str(user_id),
+        allowed_course_ids=["CS224n"],
+    )
+    response = await service.resume_action(
+        AgentActionResumeRequest(
+            conversationId=conversation_id,
+            actionId=proposal.actions[0].action_id,
+            decision="approve",
+            incomingMessageId="msg-resume",
+        ),
+        user_id=str(user_id),
+    )
+
+    assert proposal.actions[0].action_id == "act-assessment"
+    assert response.answer.markdown == "Assessment is ready. You can start it now."
+    assert len(commit_calls) == 1
+    assert commit_calls[0][1]["canonical_unit_ids"] == ["unit-a"]
+    repo.mark_run_interrupted.assert_awaited_once()
+    repo.mark_action_committed.assert_awaited_once()
+    repo.mark_latest_interrupted_run_final.assert_awaited_once_with(
+        thread_id="thread-assessment",
+        status="succeeded",
+    )
+
+
+async def test_native_resume_approve_commits_replan_once():
+    conversation_id = str(uuid4())
+    user_id = uuid4()
+    pending_holder = {}
+    commit_calls = []
+
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="request_replan",
+                confidence=0.95,
+                extracted_slots=AgentSlots(canonical_unit_ids=["unit-a"]),
+            )
+
+    async def create_pending_action(**kwargs):
+        pending = SimpleNamespace(
+            action_id="act-replan",
+            conversation_id=kwargs["conversation_id"],
+            thread_id=kwargs["thread_id"],
+            user_id=kwargs["user_id"],
+            status="awaiting_confirmation",
+            expires_at=kwargs["expires_at"],
+            type=kwargs["action_type"],
+            payload_json=kwargs["payload"],
+            idempotency_key=kwargs["idempotency_key"],
+        )
+        pending_holder["pending"] = pending
+        return pending
+
+    class CommitService:
+        async def commit_replan(self, db, *, user, payload, idempotency_key):
+            commit_calls.append((user.id, payload, idempotency_key))
+            return {
+                "type": "request_replan",
+                "status": "committed",
+                "accepted": True,
+                "dryRun": False,
+                "impact": {"mode": "replanned", "totalUnits": 4},
+            }
+
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_active_run=AsyncMock(return_value=None),
+        get_active_non_interrupted_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(
+            side_effect=[
+                SimpleNamespace(graph_run_id="run-chat"),
+                SimpleNamespace(graph_run_id="run-resume"),
+            ]
+        ),
+        mark_run_running=AsyncMock(),
+        create_pending_action=AsyncMock(side_effect=create_pending_action),
+        store_response_payload=AsyncMock(side_effect=["resp-chat", "resp-resume"]),
+        mark_run_interrupted=AsyncMock(),
+        mark_run_succeeded=AsyncMock(),
+        mark_run_failed=AsyncMock(),
+        get_pending_action=AsyncMock(side_effect=lambda action_id: pending_holder["pending"]),
+        get_committed_action_result=AsyncMock(return_value=None),
+        mark_action_committed=AsyncMock(),
+        mark_latest_interrupted_run_final=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        graph_repo=repo,
+        thread_lock=NoopThreadLock(),
+        action_commit_service=CommitService(),
+        action_db=object(),
+        action_user=SimpleNamespace(id=user_id),
+    )
+
+    proposal = await service.chat(
+        request=AgentChatRequest(message="replan this", incomingMessageId="msg-chat-replan"),
+        conversation_id=conversation_id,
+        thread_id="thread-replan",
+        user_id=str(user_id),
+        allowed_course_ids=["CS224n"],
+    )
+    response = await service.resume_action(
+        AgentActionResumeRequest(
+            conversationId=conversation_id,
+            actionId=proposal.actions[0].action_id,
+            decision="approve",
+            incomingMessageId="msg-resume-replan",
+        ),
+        user_id=str(user_id),
+    )
+
+    assert response.answer.markdown == "I recalculated your learning plan from the latest assessment evidence."
+    assert len(commit_calls) == 1
+    assert commit_calls[0][1]["dry_run"] is False
+    repo.mark_action_committed.assert_awaited_once()
+    repo.mark_latest_interrupted_run_final.assert_awaited_once_with(
+        thread_id="thread-replan",
+        status="succeeded",
+    )
+
+
+async def test_thread_memory_compaction_persists_versioned_memory_ref():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    upserts = []
+    messages = [
+        SimpleNamespace(role="user", markdown=f"message {index}")
+        for index in range(5)
+    ]
+
+    repo = SimpleNamespace(
+        list_messages=AsyncMock(return_value=messages),
+        get_memory=AsyncMock(
+            return_value=SimpleNamespace(summary_json={"summaryVersion": 2})
+        ),
+        upsert_memory=AsyncMock(side_effect=lambda **kwargs: upserts.append(kwargs)),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=repo,
+        memory_compaction_service=AgentMemoryCompactionService(
+            max_recent_turns=2,
+            max_messages_before_compaction=3,
+        ),
+    )
+
+    await service._compact_thread_memory_if_needed(str(conversation_id), str(user_id))
+
+    assert upserts
+    summary = upserts[0]["summary_json"]
+    assert summary["memoryRef"] == f"agent_memory:{conversation_id}:v3"
+    assert summary["summaryVersion"] == 3
+    assert summary["messageCount"] == 3
+
+
+async def test_capture_checkpoint_id_reads_langgraph_snapshot_config():
+    class Graph:
+        async def aget_state(self, config):
+            return SimpleNamespace(
+                config={"configurable": {"thread_id": "thread-1", "checkpoint_id": "chk-1"}}
+            )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+    )
+    service._graph = Graph()
+
+    assert await service._capture_checkpoint_id("thread-1") == "chk-1"

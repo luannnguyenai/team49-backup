@@ -62,6 +62,18 @@ class AgentGraphRepository:
             return None
         return SimpleNamespace(graph_run_id=str(row.id), status=row.status)
 
+    async def get_active_non_interrupted_run(self, *, thread_id: str) -> SimpleNamespace | None:
+        result = await self.session.execute(
+            select(AgentGraphRun)
+            .where(AgentGraphRun.thread_id == thread_id, AgentGraphRun.status.in_({"created", "running"}))
+            .order_by(AgentGraphRun.created_at.desc())
+            .limit(1)
+        )
+        row = result.scalar_one_or_none()
+        if row is None:
+            return None
+        return SimpleNamespace(graph_run_id=str(row.id), status=row.status)
+
     async def create_run(
         self,
         *,
@@ -209,6 +221,9 @@ class AgentGraphRepository:
         idempotency_key: str,
         expires_at: datetime,
     ) -> AgentPendingAction:
+        existing = await self.get_pending_action_by_idempotency_key(idempotency_key)
+        if existing is not None:
+            return existing
         action_id = f"act_{uuid4()}"
         row = AgentPendingAction(
             action_id=action_id,
@@ -225,6 +240,15 @@ class AgentGraphRepository:
         self.session.add(row)
         await self.session.flush()
         return row
+
+    async def get_pending_action_by_idempotency_key(
+        self,
+        idempotency_key: str,
+    ) -> AgentPendingAction | None:
+        result = await self.session.execute(
+            select(AgentPendingAction).where(AgentPendingAction.idempotency_key == idempotency_key)
+        )
+        return result.scalar_one_or_none()
 
     async def get_pending_action(self, *, action_id: str) -> AgentPendingAction | None:
         result = await self.session.execute(
