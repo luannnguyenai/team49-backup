@@ -78,12 +78,43 @@ type UiMessage = {
   citations: AgentCitation[];
   actions: AgentAction[];
   warning?: AgentWarning | null;
+  fallback?: AgentChatResponse["fallback"];
 };
 
 function createIncomingMessageId() {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `msg-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getFallbackErrorCode(fallback: AgentChatResponse["fallback"] | undefined) {
+  return fallback?.errorCode ?? fallback?.error_code ?? null;
+}
+
+function buildAgentClientErrorMessage(error: unknown): UiMessage {
+  const responseStatus =
+    typeof error === "object" && error !== null && "response" in error
+      ? (error as { response?: { status?: number } }).response?.status
+      : undefined;
+  const errorCode = responseStatus ? `AGENT_HTTP_${responseStatus}` : "AGENT_NETWORK_ERROR";
+  return {
+    id: `assistant-error-${Date.now()}`,
+    role: "assistant",
+    markdown: `Hiện tại hệ thống đang có sự cố. Vui lòng thử lại sau. Mã lỗi: ${errorCode}.`,
+    createdAt: new Date().toISOString(),
+    confidence: "fallback",
+    citations: [],
+    actions: [],
+    warning: {
+      type: "agent_unavailable",
+      message: errorCode,
+    },
+    fallback: {
+      reason: "agent_unavailable",
+      message: "The agent request failed before a safe answer could be produced.",
+      errorCode,
+    },
+  };
 }
 
 const QUICK_PROMPTS = [
@@ -570,6 +601,14 @@ function ChatMessageItem({
         >
           <p className="whitespace-pre-wrap">{message.markdown}</p>
           {!isUser && message.warning ? <WarningBlock warning={message.warning} /> : null}
+          {!isUser && !message.warning && getFallbackErrorCode(message.fallback) ? (
+            <WarningBlock
+              warning={{
+                type: "agent_unavailable",
+                message: getFallbackErrorCode(message.fallback) ?? "AGENT_ERROR",
+              }}
+            />
+          ) : null}
         </div>
 
         {!isUser && message.citations.length > 0 ? (
@@ -1035,6 +1074,7 @@ export default function AgentChatPage() {
         citations: response.citations ?? [],
         actions: response.actions ?? [],
         warning: response.warning,
+        fallback: response.fallback,
       },
     ]);
     refreshSessions();
@@ -1078,7 +1118,7 @@ export default function AgentChatPage() {
       });
       appendAgentResponse(response);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send message.");
+      setMessages((current) => [...current, buildAgentClientErrorMessage(err)]);
     } finally {
       setIsThinking(false);
     }

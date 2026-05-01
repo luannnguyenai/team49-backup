@@ -18,16 +18,17 @@ class AgentCheckpointerUnavailableError(RuntimeError):
             conversation_id=conversation_id,
             message_id=message_id,
             answer=AgentAnswer(
-                markdown="I cannot resume the agent graph safely right now. Please try again shortly.",
+                markdown="Hiện tại hệ thống đang có sự cố. Vui lòng thử lại sau. Mã lỗi: AGENT_CHECKPOINTER_UNAVAILABLE.",
                 confidence="fallback",
             ),
             warning=AgentWarning(
                 type="agent_unavailable",
-                message="The durable graph checkpointer is unavailable.",
+                message="AGENT_CHECKPOINTER_UNAVAILABLE",
             ),
             fallback=AgentFallback(
                 reason="agent_unavailable",
                 message="The durable graph checkpointer is unavailable.",
+                errorCode="AGENT_CHECKPOINTER_UNAVAILABLE",
             ),
         )
 

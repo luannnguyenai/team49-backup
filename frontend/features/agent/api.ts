@@ -80,7 +80,7 @@ export interface AgentChatResponse {
   citations: AgentCitation[];
   actions: AgentAction[];
   warning?: AgentWarning | null;
-  fallback?: { reason: string; message: string } | null;
+  fallback?: { reason: string; message: string; errorCode?: string | null; error_code?: string | null } | null;
 }
 
 export interface AgentInProgressResponse {

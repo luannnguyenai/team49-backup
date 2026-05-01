@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -50,12 +51,14 @@ from src.services.agent_navigation_service import AgentNavigationService
 from src.services.agent_requirement_service import AgentPathRequirementService
 from src.repositories.agent_graph_repo import AgentGraphRepository
 from src.services.agent_path_switch_service import AgentPathSwitchService
+from src.services.agent_response_composer import AgentResponseComposer
 from src.services.agent_router_factory import build_production_agent_router
 from src.services.agent_search_service import AgentUnitSearchService
 from src.services.agent_unit_context_service import AgentUnitContextService
 from src.services.recommendation_engine import generate_learning_path
 
 
+logger = logging.getLogger(__name__)
 agent_router = APIRouter(prefix="/api/agent", tags=["agent"])
 assessment_workflow_service = AgentAssessmentWorkflowService()
 
@@ -72,27 +75,44 @@ def _services(db: AsyncSession):
     return repo, navigation, search, requirements
 
 
+async def _safe_rollback(db: AsyncSession) -> None:
+    try:
+        await db.rollback()
+    except Exception:
+        logger.exception("agent_db_rollback_failed")
+
+
+def _agent_system_error_response(conversation_id: str, error_code: str, exc: Exception) -> AgentChatResponse:
+    logger.exception("agent_request_failed code=%s conversation_id=%s", error_code, conversation_id)
+    return AgentResponseComposer().compose_system_error(
+        conversation_id=conversation_id,
+        error_code=error_code,
+    )
+
+
 @agent_router.post("/chat", response_model=AgentChatResponse)
 async def agent_chat(
     body: AgentChatRequest,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AgentChatResponse:
-    context = await _agent_context_for_user(user, db)
-    _repo, _navigation, search, requirements = _services(db)
-    conversation_repo = AgentConversationRepository(db)
-    conversation_id: UUID
-    if body.conversation_id:
-        conversation_id = UUID(body.conversation_id)
-        conversation = await conversation_repo.get_conversation(conversation_id, user.id)
-        if not conversation:
-            raise HTTPException(status_code=404, detail="conversation_not_found")
-    else:
-        conversation = await conversation_repo.create_conversation(user.id)
-        conversation_id = conversation.id
-        body.conversation_id = str(conversation_id)
-
+    error_conversation_id = body.conversation_id or ""
     try:
+        context = await _agent_context_for_user(user, db)
+        _repo, _navigation, search, requirements = _services(db)
+        conversation_repo = AgentConversationRepository(db)
+        conversation_id: UUID
+        if body.conversation_id:
+            conversation_id = UUID(body.conversation_id)
+            conversation = await conversation_repo.get_conversation(conversation_id, user.id)
+            if not conversation:
+                raise HTTPException(status_code=404, detail="conversation_not_found")
+        else:
+            conversation = await conversation_repo.create_conversation(user.id)
+            conversation_id = conversation.id
+            body.conversation_id = str(conversation_id)
+        error_conversation_id = str(conversation_id)
+
         async with build_agent_graph_checkpointer() as checkpointer:
             response = await AgentGraphService(
                 search,
@@ -116,13 +136,18 @@ async def agent_chat(
                 allowed_course_ids=context.allowed_course_ids,
                 current_path_course_ids=context.selected_path_course_ids,
             )
+        await db.commit()
     except AgentInProgressError as exc:
         return JSONResponse(status_code=409, content=exc.to_response().model_dump(by_alias=True))
     except AgentCheckpointerUnavailableError as exc:
-        response = exc.to_response(conversation_id=str(conversation_id), message_id=str(uuid4()))
+        response = exc.to_response(conversation_id=error_conversation_id, message_id=str(uuid4()))
     except AgentRouterUnavailableError as exc:
-        response = exc.to_response(conversation_id=str(conversation_id), message_id=str(uuid4()))
-    await db.commit()
+        response = exc.to_response(conversation_id=error_conversation_id, message_id=str(uuid4()))
+    except HTTPException:
+        raise
+    except Exception as exc:
+        await _safe_rollback(db)
+        return _agent_system_error_response(error_conversation_id, "AGENT_CHAT_ERROR", exc)
     return response
 
 
@@ -132,8 +157,8 @@ async def agent_continue_action(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AgentChatResponse:
-    _repo, _navigation, search, requirements = _services(db)
     try:
+        _repo, _navigation, search, requirements = _services(db)
         async with build_agent_graph_checkpointer() as checkpointer:
             response = await AgentGraphService(
                 search,
@@ -149,13 +174,16 @@ async def agent_continue_action(
                 action_user=user,
                 checkpointer=checkpointer,
             ).resume_action(request=body, user_id=str(user.id))
+        await db.commit()
     except AgentInProgressError as exc:
         return JSONResponse(status_code=409, content=exc.to_response().model_dump(by_alias=True))
     except AgentCheckpointerUnavailableError as exc:
         response = exc.to_response(conversation_id=body.conversation_id, message_id=str(uuid4()))
     except AgentRouterUnavailableError as exc:
         response = exc.to_response(conversation_id=body.conversation_id, message_id=str(uuid4()))
-    await db.commit()
+    except Exception as exc:
+        await _safe_rollback(db)
+        return _agent_system_error_response(body.conversation_id, "AGENT_ACTION_ERROR", exc)
     return response
 
 

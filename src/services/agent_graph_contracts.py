@@ -72,16 +72,17 @@ class AgentRouterUnavailableError(RuntimeError):
             conversation_id=conversation_id,
             message_id=message_id,
             answer=AgentAnswer(
-                markdown="I cannot classify this request right now. Please try again shortly.",
+                markdown="Hiện tại hệ thống đang có sự cố. Vui lòng thử lại sau. Mã lỗi: AGENT_ROUTER_UNAVAILABLE.",
                 confidence="fallback",
             ),
             warning=AgentWarning(
                 type="agent_unavailable",
-                message="The production router model is unavailable.",
+                message="AGENT_ROUTER_UNAVAILABLE",
             ),
             fallback=AgentFallback(
                 reason="agent_unavailable",
                 message="The production router model is unavailable.",
+                errorCode="AGENT_ROUTER_UNAVAILABLE",
             ),
         )
 

@@ -10,6 +10,7 @@ from src.schemas.agent import (
     AgentCitation,
     AgentConversationMessage,
     AgentConversationSummary,
+    AgentFallback,
     AgentInProgressResponse,
     AgentWarning,
     UnitSearchRequest,
@@ -53,6 +54,17 @@ def test_in_progress_and_resume_contracts_are_stable():
     assert progress.model_dump(by_alias=True)["threadId"] == "thread-1"
     assert resume.action_id == "act-1"
     assert resume.incoming_message_id == "msg-resume-1"
+
+
+def test_fallback_supports_error_code_alias():
+    fallback = AgentFallback(
+        reason="agent_unavailable",
+        message="The agent request failed.",
+        errorCode="AGENT_CHAT_ERROR",
+    )
+
+    assert fallback.error_code == "AGENT_CHAT_ERROR"
+    assert fallback.model_dump(by_alias=True)["errorCode"] == "AGENT_CHAT_ERROR"
 
 
 def test_chat_response_supports_citations_disabled_action_and_warning():

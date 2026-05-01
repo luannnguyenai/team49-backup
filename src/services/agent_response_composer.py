@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from src.schemas.agent import AgentAnswer, AgentChatResponse, AgentFallback
+from src.schemas.agent import AgentAnswer, AgentChatResponse, AgentFallback, AgentWarning
 from src.services.agent_graph_contracts import ToolResult
 
 
@@ -58,4 +58,28 @@ class AgentResponseComposer:
             conversation_id=conversation_id,
             message_id=str(uuid4()),
             answer=AgentAnswer(markdown="Cancelled.", confidence="partial"),
+        )
+
+    def compose_system_error(
+        self,
+        *,
+        conversation_id: str,
+        error_code: str,
+    ) -> AgentChatResponse:
+        return AgentChatResponse(
+            conversation_id=conversation_id,
+            message_id=str(uuid4()),
+            answer=AgentAnswer(
+                markdown=(
+                    "Hiện tại hệ thống đang có sự cố. "
+                    f"Vui lòng thử lại sau. Mã lỗi: {error_code}."
+                ),
+                confidence="fallback",
+            ),
+            warning=AgentWarning(type="agent_unavailable", message=error_code),
+            fallback=AgentFallback(
+                reason="agent_unavailable",
+                message="The agent request failed before a safe answer could be produced.",
+                errorCode=error_code,
+            ),
         )

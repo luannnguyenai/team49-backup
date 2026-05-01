@@ -213,6 +213,9 @@ class AgentFallback(BaseModel):
         "action_error",
     ]
     message: str
+    error_code: str | None = Field(default=None, alias="errorCode")
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class AgentWarning(BaseModel):
