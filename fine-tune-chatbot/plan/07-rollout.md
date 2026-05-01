@@ -11,6 +11,7 @@ Roll out the selected English-only tutor safely after it passes the training and
 - manual checks on representative AI/ML/NLP/CV questions
 - verify English-only output
 - confirm answers remain domain-grounded
+- run a small multimodal smoke pass on representative diagrams or screenshots
 
 ### Stage 1 — Limited canary
 
@@ -36,6 +37,7 @@ Roll out the selected English-only tutor safely after it passes the training and
 | fallback rate | deployment health |
 | human review score | answer quality |
 | hallucination reports | factual safety |
+| multimodal request success rate | vision-serving reliability |
 
 ## Risk register
 
