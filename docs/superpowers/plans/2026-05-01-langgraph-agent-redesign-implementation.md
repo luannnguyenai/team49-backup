@@ -10,6 +10,71 @@
 
 ---
 
+## Current Implementation Status
+
+Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, and `6723d0e`.
+
+Status meanings:
+
+- `done`: implemented and verified for the intended production path.
+- `partial`: some production behavior exists, but the task still has known gaps.
+- `bootstrap-only`: intentionally implemented as an integration seam or placeholder, not production-complete.
+- `production-hardening added during implementation`: not originally called out as a standalone task, but added because implementation exposed a production failure mode.
+
+| Task | Status | Notes |
+|---|---|---|
+| Task 1: Schema And Runtime Contract Tests | done | Agent request/response/action contracts, in-progress payload, and graph contract tests are implemented. |
+| Task 2: Graph Runtime Persistence | partial | Runtime tables, `thread_id`, repository, response refs, pending actions, and run statuses exist. Real DB migration/backfill verification and repository integration coverage still need a dedicated pass. |
+| Task 3: Bootstrap Router Seam, Slot Resolver, Policy, And Composer | bootstrap-only | Deterministic router exists only as a test/bootstrap seam. It must not be used as production fallback. Slot resolver, policy, and composer primitives exist. |
+| Task 4: Production Structured Router | partial | `StructuredAgentRouter` and factory exist. Production wiring uses the factory, but provider-level failure/evaluation coverage still needs hardening. |
+| Task 5: Minimal Bootstrap LangGraph Service Skeleton And Tool Nodes | bootstrap-only | Graph skeleton and typed tool nodes are implemented. This task remains intentionally non-spec-complete. |
+| Task 6: Production Router Wiring And Fail-Safe | done | `/api/agent/chat` instantiates the production structured router factory; deterministic keyword routing is not used as production fallback. |
+| Task 7: Search Scope Escalation | done | Current-path-first search and scope expansion offer are implemented. |
+| Task 8: Scope Expansion Confirmation And Expanded Retrieval | partial | Approval phrase can continue expanded retrieval. Pending clarification is currently in service memory, not durable checkpoint/store state. |
+| Task 9: Router Integration, Dedupe, Locking, And 409 Responses | done | Chat route goes through `AgentGraphService`, dedupes by `incomingMessageId`, checks active runs, and returns `409 in_progress`. |
+| Task 10: Durable Run Lifecycle In `AgentGraphService` | partial | Run creation/running/interrupted/succeeded/failed and response refs are wired. Real checkpoint id metadata persistence remains partial. |
+| Task 10a: Interrupted Run Finalization | production-hardening added during implementation | Added `6723d0e` so approve/reject/expire finalizes the latest interrupted run and prevents permanent `409 in_progress` locks. |
+| Task 11: Pending Action API Shell And Continuation Endpoint | bootstrap-only | API shell and continuation contract exist. It is not the production interrupt/resume implementation by itself. |
+| Task 12: Path Switch Pending Action Workflow | partial | Path switch intent, proposal, pending action, and commit service base exist. Validation, replay, and ops coverage still need a fuller production pass. |
+| Task 13: Real LangGraph Interrupt/Resume Action Flow | partial | Pending actions are persisted and interrupted runs are tracked, but native LangGraph `interrupt()` / `Command(resume=...)` is not fully wired on the hot path. Assessment/replan commit flows are still generic and not production-complete. |
+| Task 14: Memory Compaction And Operational Safety | bootstrap-only | Initial compaction primitive and pending-action janitor exist. Versioned persistent `memory_ref` integration is not complete. |
+| Task 15: Frontend Idempotency And Action IDs | partial | Stable `incomingMessageId` retry semantics and API contracts are implemented. Unrelated dirty hunks remain in `AgentChatPage.tsx` and must be isolated before final review. |
+| Task 16: Evaluation Suite, Janitor, And Operational Checks | partial | Janitor primitive and focused tests exist. Full eval suite, ops runbook coverage, and production dashboards are not complete. |
+| Task 17: Final Integration Verification And Legacy Path Deprecation | partial | Backend subset and frontend type-check pass. Legacy `AgentChatService` remains present and some dirty legacy files are outside this implementation. |
+
+### Done-True Vs Temporary Boundaries
+
+Done-true in the current implementation:
+
+- Production route wiring through `AgentGraphService`.
+- Structured router factory on the production route.
+- Inbound request idempotency using `incomingMessageId`.
+- `409 in_progress` response contract.
+- Per-thread lock service.
+- Durable graph run rows and deterministic response refs.
+- Pending action persistence for action proposals.
+- No-evidence/no-grounded-answer composer guard.
+- Search scope escalation offer and expanded-search continuation.
+- Interrupted-run finalization after action approve/reject/expire.
+
+Done-temporary or partial:
+
+- Native LangGraph `interrupt()` and `Command(resume=...)` are not fully wired into the hot path.
+- Assessment/replan approve flows persist/confirm the action but do not yet call authoritative assessment/replan commit services.
+- Path switch is more complete than assessment/replan, but still needs full validation/replay/ops coverage.
+- Memory compaction is an initial primitive, not the final versioned `memory_ref` implementation.
+- Checkpoint metadata is modeled but not fully sourced from a production checkpointer.
+
+### Implementation Deviations
+
+- Added explicit interrupted-run finalization to prevent permanent `409 in_progress` locks.
+- LangGraph is lazy-imported for non-production/test environments; production still requires LangGraph.
+- Pending actions are persisted and interrupted runs are tracked, but native LangGraph interrupt/resume is not fully wired yet.
+- Path switch workflow is more complete than assessment/replan commit flows.
+- Frontend retry idempotency was implemented, but unrelated dirty hunks remain in `AgentChatPage.tsx` and must be isolated before final review.
+
+---
+
 ## File Structure
 
 Create:
@@ -66,7 +131,7 @@ Do not modify:
 
 ---
 
-### Task 1: Schema And Runtime Contract Tests
+### Task 1: Schema And Runtime Contract Tests `[done]`
 
 **Files:**
 - Modify: `src/schemas/agent.py`
@@ -421,7 +486,7 @@ git commit -m "feat: add agent graph runtime contracts"
 
 ---
 
-### Task 2: Graph Runtime Persistence
+### Task 2: Graph Runtime Persistence `[partial]`
 
 **Files:**
 - Create: `src/models/agent_graph.py`
@@ -856,7 +921,7 @@ git commit -m "feat: add agent graph runtime persistence"
 
 ---
 
-### Task 3: Bootstrap Router Seam, Slot Resolver, Policy, And Composer
+### Task 3: Bootstrap Router Seam, Slot Resolver, Policy, And Composer `[bootstrap-only]`
 
 This task creates a deterministic router seam only for early tests and graph integration. It is not the production router and must not become the production fallback. The production structured-output router is implemented in a later task and must replace this seam before rollout.
 
@@ -1144,7 +1209,7 @@ git commit -m "feat: add agent graph routing primitives"
 
 ---
 
-### Task 4: Production Structured Router
+### Task 4: Production Structured Router `[partial]`
 
 **Files:**
 - Create: `src/services/agent_structured_router.py`
@@ -1335,7 +1400,7 @@ git commit -m "feat: add structured agent intent router"
 
 ---
 
-### Task 5: Minimal Bootstrap LangGraph Service Skeleton And Tool Nodes
+### Task 5: Minimal Bootstrap LangGraph Service Skeleton And Tool Nodes `[bootstrap-only]`
 
 This is a minimal bootstrap skeleton to prove graph invocation and typed tool-node flow. It is not spec-complete: `hydrate_min_context`, `load_intent_scoped_context`, `compose_response_ref`, durable pending actions, real `interrupt()`/resume, and policy-safe denial responses are completed in later tasks.
 
@@ -1611,7 +1676,7 @@ git commit -m "feat: add agent LangGraph service skeleton"
 
 ---
 
-### Task 6: Production Router Wiring And Fail-Safe
+### Task 6: Production Router Wiring And Fail-Safe `[done]`
 
 This task is the production cutover from the deterministic seam to the structured-output router. The deterministic router remains importable for tests/bootstrap only. Production `/api/agent/chat` must not fall back to keyword routing when the model/provider is unavailable.
 
@@ -1811,7 +1876,7 @@ git commit -m "feat: wire production structured agent router"
 
 ---
 
-### Task 7: Search Scope Escalation
+### Task 7: Search Scope Escalation `[done]`
 
 **Files:**
 - Create: `src/services/agent_search_scope_service.py`
@@ -2000,7 +2065,7 @@ git commit -m "feat: add agent search scope escalation"
 
 ---
 
-### Task 8: Scope Expansion Confirmation And Expanded Retrieval
+### Task 8: Scope Expansion Confirmation And Expanded Retrieval `[partial]`
 
 This task completes the scope escalation loop. A current-path no-result offer must create thread-bound clarification state; a later "ok, search elsewhere" turn must approve expansion, rerun retrieval over expanded allowed paths, and disclose which path produced the answer.
 
@@ -2182,7 +2247,7 @@ git commit -m "feat: add agent scope expansion continuation"
 
 ---
 
-### Task 9: Router Integration, Dedupe, Locking, And 409 Responses
+### Task 9: Router Integration, Dedupe, Locking, And 409 Responses `[done]`
 
 This task routes traffic through the graph service and standardizes `409 in_progress`. It is not the full replay-safe persistence boundary. Until the following tasks move message persistence, response refs, and pending actions fully inside `AgentGraphService`, do not use this task as the production readiness checkpoint for dedupe/replay.
 
@@ -2373,7 +2438,7 @@ git commit -m "feat: route agent chat through LangGraph service"
 
 ---
 
-### Task 10: Durable Run Lifecycle In `AgentGraphService`
+### Task 10: Durable Run Lifecycle In `AgentGraphService` `[partial]`
 
 This task wires the runtime primitives into the graph orchestration path. After this task, `AgentGraphService.chat()` owns inbound dedupe, active-run checks, run status transitions, thread locking, response payload persistence, and exact replay of a prior `response_ref`.
 
@@ -2585,7 +2650,7 @@ git commit -m "feat: wire durable agent graph run lifecycle"
 
 ---
 
-### Task 11: Pending Action API Shell And Continuation Endpoint
+### Task 11: Pending Action API Shell And Continuation Endpoint `[bootstrap-only]`
 
 This task creates the API and contract shell for pending-action continuation. It is not the production interrupt/resume implementation. Real LangGraph `interrupt()` boundaries, persisted pending-action validation, and idempotent commit nodes are completed in the path-switch, assessment, and replan action implementation tasks.
 
@@ -2765,7 +2830,7 @@ git commit -m "feat: add agent pending action continuation shell"
 
 ---
 
-### Task 12: Path Switch Pending Action Workflow
+### Task 12: Path Switch Pending Action Workflow `[partial]`
 
 **Files:**
 - Create: `src/services/agent_path_switch_service.py`
@@ -3076,7 +3141,7 @@ git commit -m "feat: add agent path switch proposal workflow"
 
 ---
 
-### Task 13: Real LangGraph Interrupt/Resume Action Flow
+### Task 13: Real LangGraph Interrupt/Resume Action Flow `[partial]`
 
 This task replaces the pending-action shell with production graph boundaries. Assessment, replan, and path switch proposals must persist pending actions, pause with `interrupt()`, resume with the same `thread_id`, validate ownership/status/expiry/payload version, commit side effects with `idempotency_key`, and mark final action state exactly once.
 
@@ -3355,7 +3420,7 @@ git commit -m "feat: implement agent interrupt resume action flow"
 
 ---
 
-### Task 14: Memory Compaction And Operational Safety
+### Task 14: Memory Compaction And Operational Safety `[bootstrap-only]`
 
 This task creates the initial compaction primitive and tests preservation of active context. It is not the final memory policy implementation: it does not yet integrate into `memory_ref`, enforce the full token/message threshold policy, or persist/version refreshes idempotently inside `AgentGraphService`.
 
@@ -3470,7 +3535,7 @@ git commit -m "feat: add agent thread memory compaction"
 
 ---
 
-### Task 15: Frontend Idempotency And Action IDs
+### Task 15: Frontend Idempotency And Action IDs `[partial]`
 
 **Files:**
 - Modify: `frontend/features/agent/api.ts`
@@ -3662,7 +3727,7 @@ git commit -m "feat: add agent idempotency fields to frontend"
 
 ---
 
-### Task 16: Evaluation Suite, Janitor, And Operational Checks
+### Task 16: Evaluation Suite, Janitor, And Operational Checks `[partial]`
 
 The evaluation lane must target the production `StructuredAgentRouter` when a model provider is configured. The deterministic router seam may be used only for local unit tests that do not call a model.
 
@@ -3798,7 +3863,7 @@ git commit -m "test: add agent routing eval and ops janitor"
 
 ---
 
-### Task 17: Final Integration Verification And Legacy Path Deprecation
+### Task 17: Final Integration Verification And Legacy Path Deprecation `[partial]`
 
 **Files:**
 - Modify: `src/services/agent_chat_service.py`
