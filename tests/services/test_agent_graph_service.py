@@ -239,7 +239,7 @@ async def test_graph_offers_scope_expansion_when_current_path_evidence_is_weak()
     assert response.actions == []
 
 
-async def test_scope_expansion_approval_returns_path_choice_actions_when_multiple_paths_match():
+async def test_scope_expansion_approval_searches_other_path_directly_when_fewer_than_three_paths_match():
     conversation_id = uuid4()
     user_id = uuid4()
     pending = PendingClarification(
@@ -265,6 +265,7 @@ async def test_scope_expansion_approval_returns_path_choice_actions_when_multipl
                     summary="Computer vision CNN content.",
                     score=3,
                     quiz_available=True,
+                    learn_href="/courses/cs231n/learn/cnn-vision",
                 ),
                 UnitSearchResult(
                     canonical_unit_id="unit-nlp-cnn",
@@ -273,6 +274,7 @@ async def test_scope_expansion_approval_returns_path_choice_actions_when_multipl
                     summary="NLP CNN content.",
                     score=3,
                     quiz_available=True,
+                    learn_href="/courses/cs224n/learn/cnn-text",
                 ),
             ],
             trace=RetrievalTrace(trace_id="trace-path-catalog", ranking_version="unit_search_v1"),
@@ -297,7 +299,14 @@ async def test_scope_expansion_approval_returns_path_choice_actions_when_multipl
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
-        router=DeterministicAgentRouter(),
+        router=SimpleNamespace(
+            compose_grounded_answer=lambda message, citations: SimpleNamespace(
+                answer_markdown="I found related CNN results in another path.",
+                evidence_sufficient=False,
+                confidence="partial",
+                clarification_question=None,
+            )
+        ),
         conversation_repo=conversation_repo,
     )
 
@@ -311,9 +320,8 @@ async def test_scope_expansion_approval_returns_path_choice_actions_when_multipl
     )
 
     assert response.answer.confidence == "partial"
-    assert {action.type for action in response.actions} == {"choose_target_path"}
-    assert {action.workflow_id for action in response.actions} == {"computer_vision", "nlp"}
-    assert response.citations == []
+    assert {citation.course_id for citation in response.citations} == {"CS231n"}
+    assert {action.type for action in response.actions} == {"open_unit"}
 
 
 async def test_path_choice_action_searches_selected_path_with_original_topic():

@@ -107,6 +107,7 @@ class AgentSlots(BaseModel):
     scope_expansion_approved: bool = False
     requested_path_id: str | None = None
     resolved_search_path_ids: list[str] = Field(default_factory=list)
+    excluded_search_path_ids: list[str] = Field(default_factory=list)
 
 
 class RouteContextSnapshot(BaseModel):

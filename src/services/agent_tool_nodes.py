@@ -120,33 +120,58 @@ class AgentToolNodes:
                 ):
                     path_hits.setdefault(path_id, []).append(citation)
             if len(path_hits) > 1:
-                raw_topic = slots.raw_topic or message
-                actions = [
-                    AgentAction(
-                        type="choose_target_path",
-                        label=f"{raw_topic} in {self.scope_service.path_label(path_id)}",
-                        workflowId=path_id,
+                non_current_path_hits = {
+                    path_id: hits
+                    for path_id, hits in path_hits.items()
+                    if path_id not in set(slots.excluded_search_path_ids)
+                }
+                if non_current_path_hits:
+                    path_hits = non_current_path_hits
+                if len(path_hits) < 3:
+                    allowed_course_ids_for_path = {
+                        citation.course_id
+                        for hits in path_hits.values()
+                        for citation in hits
+                    }
+                    citations = [
+                        citation
+                        for citation in citations
+                        if citation.course_id in allowed_course_ids_for_path
+                    ]
+                    actions = [
+                        action
+                        for action in actions
+                        if action.canonical_unit_id
+                        in {citation.canonical_unit_id for citation in citations}
+                    ]
+                else:
+                    raw_topic = slots.raw_topic or message
+                    actions = [
+                        AgentAction(
+                            type="choose_target_path",
+                            label=f"{raw_topic} in {self.scope_service.path_label(path_id)}",
+                            workflowId=path_id,
+                        )
+                        for path_id in path_hits
+                    ]
+                    return ToolResult(
+                        kind="clarification",
+                        answer_markdown=(
+                            f"I found information related to {raw_topic} in multiple paths. "
+                            "Which path do you want me to search more deeply?"
+                        ),
+                        actions=actions,
+                        warning=AgentWarning(
+                            type="ambiguous_target",
+                            message="Expanded search found multiple matching paths.",
+                        ),
+                        requires_evidence=False,
+                        metadata={
+                            "path_selection_offered": True,
+                            "path_options": list(path_hits.keys()),
+                        },
+                        trace=trace,
                     )
-                    for path_id in path_hits
-                ]
-                return ToolResult(
-                    kind="clarification",
-                    answer_markdown=(
-                        f"I found information related to {raw_topic} in multiple paths. "
-                        "Which path do you want me to search more deeply?"
-                    ),
-                    actions=actions,
-                    warning=AgentWarning(
-                        type="ambiguous_target",
-                        message="Expanded search found multiple matching paths.",
-                    ),
-                    requires_evidence=False,
-                    metadata={
-                        "path_selection_offered": True,
-                        "path_options": list(path_hits.keys()),
-                    },
-                    trace=trace,
-                )
         disclosure = ""
         if slots.search_scope == "expanded_paths" and citations:
             disclosure = "\n\nI found this outside the original current-path search scope."

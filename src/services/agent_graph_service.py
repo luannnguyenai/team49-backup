@@ -301,6 +301,7 @@ class AgentGraphService:
                 search_scope="expanded_paths",
                 scope_expansion_approved=True,
                 resolved_search_path_ids=payload.get("allowed_path_ids", []),
+                excluded_search_path_ids=payload.get("current_path_ids", []),
             )
             return {
                 **state,
@@ -547,7 +548,7 @@ class AgentGraphService:
                             or getattr(grounded_answer, "answer_markdown", None)
                             or "I could not find a direct grounded source for that request."
                         )
-                        if slots.search_scope == "explicit_path":
+                        if slots.search_scope in {"explicit_path", "expanded_paths"}:
                             result = result.model_copy(
                                 update={
                                     "answer_markdown": answer_markdown,

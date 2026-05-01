@@ -5,18 +5,7 @@ from uuid import UUID
 
 from src.schemas.learning_path import GeneratePathRequest
 from src.services.agent_graph_contracts import PolicyDecision
-
-
-SUPPORTED_AGENT_PATHS: dict[str, dict[str, Any]] = {
-    "computer_vision": {
-        "label": "Computer Vision",
-        "selected_course_ids": ["CS230", "CS231n"],
-    },
-    "nlp": {
-        "label": "Natural Language Processing",
-        "selected_course_ids": ["CS230", "CS224n"],
-    },
-}
+from src.services.agent_path_catalog import AGENT_PATH_CATALOG, get_agent_path
 
 
 class AgentPathSwitchService:
@@ -32,14 +21,15 @@ class AgentPathSwitchService:
         target_path_id: str | None,
         allowed_course_ids: list[str],
     ) -> PolicyDecision:
-        if target_path_id not in SUPPORTED_AGENT_PATHS:
+        target = get_agent_path(target_path_id)
+        if target is None:
             return PolicyDecision(
                 allow=False,
                 codes=["TARGET_PATH_NOT_FOUND"],
                 user_safe_message="That learning path is not available.",
                 audit_context={"targetPathId": target_path_id},
             )
-        target_courses = SUPPORTED_AGENT_PATHS[target_path_id]["selected_course_ids"]
+        target_courses = list(target.selected_course_ids)
         if sorted(current_course_ids) == sorted(target_courses):
             return PolicyDecision(
                 allow=False,
@@ -58,15 +48,15 @@ class AgentPathSwitchService:
         return PolicyDecision(allow=True)
 
     def build_proposal(self, current_course_ids: list[str], target_path_id: str) -> dict[str, Any]:
-        target = SUPPORTED_AGENT_PATHS[target_path_id]
+        target = AGENT_PATH_CATALOG[target_path_id]
         return {
             "current_course_ids": current_course_ids,
             "target_path_id": target_path_id,
-            "target_course_ids": target["selected_course_ids"],
+            "target_course_ids": list(target.selected_course_ids),
             "reuse_profile": True,
             "recompute_plan": True,
             "impact_summary": (
-                f"Switch to {target['label']} and recompute the learning plan using "
+                f"Switch to {target.label} and recompute the learning plan using "
                 "the learner profile."
             ),
             "payload_version": 1,
@@ -76,16 +66,16 @@ class AgentPathSwitchService:
         # Unit-test fallback only; production idempotency must be backed by agent_pending_actions.
         if idempotency_key in self._commit_cache:
             return self._commit_cache[idempotency_key]
-        target = SUPPORTED_AGENT_PATHS[target_path_id]
+        target = AGENT_PATH_CATALOG[target_path_id]
         await self.goal_repo.upsert_for_user(
             user.id,
-            selected_course_ids=target["selected_course_ids"],
+            selected_course_ids=list(target.selected_course_ids),
             notes=f"agent_path_switch:{idempotency_key}",
         )
         generated = await self.planner(db, user, GeneratePathRequest())
         result = {
             "targetPathId": target_path_id,
-            "targetCourseIds": target["selected_course_ids"],
+            "targetCourseIds": list(target.selected_course_ids),
             "totalUnits": generated.total_units,
             "totalHours": generated.total_hours,
             "warnings": generated.warnings,

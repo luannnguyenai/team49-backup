@@ -1,17 +1,8 @@
 from __future__ import annotations
 
+from src.services.agent_path_catalog import AGENT_PATH_CATALOG, fallback_path_label
 from src.services.agent_graph_contracts import AgentSlots, PendingClarification
 
-
-PATH_COURSE_IDS: dict[str, list[str]] = {
-    "computer_vision": ["CS230", "CS231n"],
-    "nlp": ["CS230", "CS224n"],
-}
-
-PATH_LABELS: dict[str, str] = {
-    "computer_vision": "Computer Vision",
-    "nlp": "NLP",
-}
 
 APPROVAL_PHRASES = {"ok", "yes", "approve", "được", "duoc"}
 REJECTION_PHRASES = {"no", "nope", "cancel", "không", "khong", "thôi", "thoi"}
@@ -60,8 +51,8 @@ class AgentSearchScopeService:
         selected = set(course_ids)
         path_ids = [
             path_id
-            for path_id, mapped_courses in PATH_COURSE_IDS.items()
-            if selected.intersection(mapped_courses)
+            for path_id, entry in AGENT_PATH_CATALOG.items()
+            if selected.intersection(entry.selected_course_ids)
         ]
         return path_ids or ["computer_vision"]
 
@@ -69,7 +60,10 @@ class AgentSearchScopeService:
         allowed = set(allowed_course_ids)
         courses: list[str] = []
         for path_id in path_ids:
-            for course_id in PATH_COURSE_IDS.get(path_id, []):
+            entry = AGENT_PATH_CATALOG.get(path_id)
+            if entry is None:
+                continue
+            for course_id in entry.selected_course_ids:
                 if course_id in allowed and course_id not in courses:
                     courses.append(course_id)
         return courses or allowed_course_ids
@@ -78,12 +72,13 @@ class AgentSearchScopeService:
         allowed_paths = set(allowed_path_ids)
         return [
             path_id
-            for path_id, course_ids in PATH_COURSE_IDS.items()
-            if path_id in allowed_paths and course_id in course_ids
+            for path_id, entry in AGENT_PATH_CATALOG.items()
+            if path_id in allowed_paths and course_id in entry.selected_course_ids
         ]
 
     def path_label(self, path_id: str) -> str:
-        return PATH_LABELS.get(path_id, path_id.replace("_", " ").title())
+        entry = AGENT_PATH_CATALOG.get(path_id)
+        return entry.label if entry is not None else fallback_path_label(path_id)
 
     def is_scope_expansion_approval(
         self,
