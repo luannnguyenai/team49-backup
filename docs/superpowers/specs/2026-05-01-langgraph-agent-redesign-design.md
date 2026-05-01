@@ -261,7 +261,6 @@ class AgentCheckpointState(TypedDict, total=False):
     response_ref: str | None
 
     trace_id: str
-    checkpoint_id: str | None
 ```
 
 Large data is held outside checkpoint state:
@@ -277,6 +276,30 @@ AgentRuntimeEnvelope
 ```
 
 The graph stores references to runtime payloads only when durable replay or audit needs them.
+
+`checkpoint_id` is intentionally not part of business checkpoint state. It is runtime/checkpointer metadata that should be persisted in run logs, assistant message metadata, trace metadata, and ops/debug views. Business node logic must not branch on `checkpoint_id`. Business flow decisions must depend on domain state such as `pending_action.status`, `intent`, `slots`, `policy`, ownership checks, and `state_version`.
+
+## Checkpoint Metadata Versus Business State
+
+Business state is data the agent needs to make product decisions:
+
+- user id and conversation id
+- intent and confidence
+- canonicalized slots
+- policy decision
+- pending action and status
+- last committed action metadata
+- refs to current tool result, response payload, and memory summary
+
+Checkpoint metadata is data the platform needs for debug, replay, and operations:
+
+- `checkpoint_id`
+- checkpointer namespace
+- runtime checkpoint version
+- graph run id
+- trace/run links
+
+Persist checkpoint metadata, but do not make it a source of truth for business flow. Nodes must not implement logic such as "if checkpoint id changed, clear state" or "only commit if checkpoint id is newest". Commit eligibility comes from pending action validation, ownership, expiry, policy, payload version/hash, and idempotency records.
 
 ## State Version Migration
 
@@ -408,6 +431,22 @@ Memory is split:
 Graph checkpoint state stores `memory_ref`, not full memory.
 
 Checkpoint state may contain only small durable identifiers, routing state, canonicalized slots, policy decision, pending action metadata, and refs. Cross-thread learner memory must live in a profile/store layer, not in thread checkpoint state. Thread checkpoint data is for resuming one conversation thread; learner/profile data is for reuse across threads.
+
+## Thread Memory Compaction Policy
+
+Thread memory must be compacted when the conversation exceeds a configured threshold by message count or token count. The exact thresholds are deployment config, but the behavior is mandatory.
+
+Compaction rules:
+
+- keep the latest active user/assistant turns
+- keep the current pending action, clarification target, and canonicalized active slots
+- keep stable system/policy instructions outside the summary
+- summarize older turns into a durable thread summary record
+- store the summary outside checkpoint state and reference it by `memory_ref`
+- summary refresh must be idempotent and versioned
+- if summary confidence is low or key context may be lost, prefer clarification over guessing
+
+Thread summaries are thread-local. Cross-thread learner profile, progress, mastery, completed assessments, committed plans, and preferences remain in their own profile/progress stores.
 
 ## New Chat And Reset Semantics
 
@@ -627,6 +666,20 @@ Assistant responses are upserted by `incoming_message_id` or `graph_run_id`, not
 
 V1 does not join active runs and does not queue duplicate active requests. The client may retry after the suggested retry interval or poll the conversation.
 
+The `409 in_progress` response payload must be stable:
+
+```json
+{
+  "status": "in_progress",
+  "conversationId": "conv_...",
+  "threadId": "thread_...",
+  "graphRunId": "run_...",
+  "retryAfterMs": 1000
+}
+```
+
+The frontend should use this response uniformly for duplicate retries, double-clicks, and same-thread concurrent runs.
+
 ## Transaction Boundaries
 
 Inbound message persistence:
@@ -700,6 +753,17 @@ class AgentActionResumeRequest(BaseModel):
     incoming_message_id: str
 ```
 
+Concurrent/duplicate active run responses use:
+
+```python
+class AgentInProgressResponse(BaseModel):
+    status: Literal["in_progress"]
+    conversation_id: str
+    thread_id: str
+    graph_run_id: str
+    retry_after_ms: int
+```
+
 `AgentAction` should include:
 
 ```python
@@ -764,6 +828,28 @@ agent_trace_events
 ```
 
 Trace storage can be trimmed or sampled separately from business state.
+
+`agent_graph_runs.status` is a shared state machine for backend retry logic, ops views, and frontend conflict handling:
+
+```text
+created
+running
+interrupted
+succeeded
+failed_retryable
+failed_terminal
+cancelled
+```
+
+Status meanings:
+
+- `created`: inbound message and run record exist, graph has not started.
+- `running`: graph execution is active and owns the per-thread lock.
+- `interrupted`: graph paused for user confirmation or clarification.
+- `succeeded`: graph produced a committed `response_ref` and assistant message persistence succeeded or is safely retryable via upsert.
+- `failed_retryable`: graph failed before an unsafe side effect, retry/resume is allowed.
+- `failed_terminal`: graph failed in a way requiring a safe fallback/new thread/manual review.
+- `cancelled`: run was explicitly cancelled or superseded before committing response/action state.
 
 ## Error Handling
 
@@ -862,8 +948,9 @@ Required production tests:
 - No evidence/no citation result cannot produce `confidence="grounded"`.
 - Slot extraction and deterministic canonicalization are separated.
 - `incoming_message_id` retry with existing `response_ref` returns the exact same response.
-- Duplicate active `incoming_message_id` or active same-thread run returns HTTP `409` with status `in_progress`.
+- Duplicate active `incoming_message_id` or active same-thread run returns HTTP `409` with the `AgentInProgressResponse` payload.
 - Same `thread_id` resumes the same checkpoint thread.
+- `agent_graph_runs.status` transitions only through the documented status machine.
 - Interrupt approve/reject/edit validates the correct pending action.
 - Edit-resume validates schema, payload version/hash, ownership, and editable fields.
 - Expired pending action cannot commit.
@@ -871,6 +958,8 @@ Required production tests:
 - Replay from checkpoint does not duplicate assessment, replan, assistant message, or pending action.
 - Nodes with side effects after checkpoints are idempotent or move side effects into `commit_action_node`.
 - Concurrent requests for one thread are rejected with HTTP `409` and status `in_progress`.
+- Checkpoint metadata such as `checkpoint_id` is persisted for ops/debug but not used by business node logic.
+- Thread memory compaction preserves active turns, active slots, current pending action/clarification, and stores versioned summary outside checkpoint state.
 - State version migration succeeds for supported older versions.
 - Unsupported old state version fails safely.
 - Frontend action continuation sends `actionId`.
@@ -882,7 +971,7 @@ Required production tests:
 ## Implementation Phases
 
 1. Data model and persistence primitives: thread ids, run logs, response refs, pending actions, idempotency records.
-2. Graph state, state versioning, and checkpoint configuration.
+2. Graph state, state versioning, checkpoint configuration, and checkpoint metadata handling.
 3. Router structured output and intent registry parity tests.
 4. Minimal graph with content search and grounded composer.
 5. Intent-scoped context loading and slot canonicalization.
@@ -902,9 +991,11 @@ Required production tests:
 - No keyword table is used as the primary intent router.
 - Every intent has a registered graph node and CI parity coverage.
 - Graph checkpoint state is reference-based and versioned.
+- Checkpoint metadata is persisted for replay/debug and is not business logic input.
 - Conversation id, thread id, checkpoint id, graph run id, incoming message id, response ref, and action id are persisted and distinct.
 - User retries do not duplicate messages or graph side effects.
-- Duplicate active requests return HTTP `409` with status `in_progress`.
+- Duplicate active requests return HTTP `409` with the standard `in_progress` payload.
+- Thread memory compaction is versioned, reference-based, and does not lose active pending action or clarification context.
 - Assessment and replan confirmations use pending actions plus interrupt/resume semantics.
 - Expired pending actions cannot commit.
 - Concurrent active runs on one thread cannot corrupt state.
