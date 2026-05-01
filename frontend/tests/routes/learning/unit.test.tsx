@@ -684,10 +684,21 @@ describe("learning unit page (US3)", () => {
     });
   });
 
+  async function renderTopNavAndWaitForCatalog() {
+    render(<TopNav />);
+
+    await waitFor(() => {
+      expect(courseApiMock.catalog).toHaveBeenCalledWith({
+        view: "all",
+        includeUnavailable: true,
+      });
+    });
+  }
+
   it("hides the Courses nav item after login on a nested learning route", async () => {
     navigationMock.pathname = "/courses/cs231n/learn/lecture-1-introduction";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
     expect(screen.queryByRole("link", { name: "Courses" })).not.toBeInTheDocument();
   });
@@ -695,7 +706,7 @@ describe("learning unit page (US3)", () => {
   it("renders desktop top nav in the order logo, search, then navigation links", async () => {
     navigationMock.pathname = "/dashboard";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
     const brand = screen.getByRole("link", { name: "AI Learning Hub" });
     const search = screen.getByLabelText("Search courses");
@@ -725,7 +736,7 @@ describe("learning unit page (US3)", () => {
 
     navigationMock.pathname = "/dashboard";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
     fireEvent.click(screen.getByRole("button", { name: /sign out/i }));
 
@@ -742,7 +753,7 @@ describe("learning unit page (US3)", () => {
   it("shows the search input on non-course routes as a global nav control", async () => {
     navigationMock.pathname = "/history";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
     expect(screen.getByLabelText("Search courses")).toBeInTheDocument();
   });
@@ -765,14 +776,7 @@ describe("learning unit page (US3)", () => {
   it("preloads the course catalog before the search input is focused", async () => {
     navigationMock.pathname = "/dashboard";
 
-    render(<TopNav />);
-
-    await waitFor(() => {
-      expect(courseApiMock.catalog).toHaveBeenCalledWith({
-        view: "all",
-        includeUnavailable: true,
-      });
-    });
+    await renderTopNavAndWaitForCatalog();
   });
 
   it("shows matching courses in a dropdown beneath the search input", async () => {
@@ -799,7 +803,7 @@ describe("learning unit page (US3)", () => {
   it("hides the clear button when the search input is empty", async () => {
     navigationMock.pathname = "/dashboard";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
     expect(
       screen.queryByRole("button", { name: "Clear search query" }),
