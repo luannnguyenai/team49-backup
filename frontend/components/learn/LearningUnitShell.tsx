@@ -882,6 +882,13 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
 
   const activeQuizQuestion = quizSession ? quizSession.questions[quizSession.currentIndex] : null;
 
+  useEffect(() => {
+    if (!currentPromptCheckpoint) return;
+    if (videoRef.current && !videoRef.current.paused) {
+      videoRef.current.pause();
+    }
+  }, [currentPromptCheckpoint]);
+
   const startCheckpointQuiz = useCallback(
     async (checkpoint: InlineQuizCheckpointKey) => {
       if (videoRef.current && !videoRef.current.paused) {
