@@ -12,6 +12,13 @@ Look up `agent_pending_actions` by `conversation_id`, `thread_id`, or `action_id
 
 If `expires_at` is in the past and status is `awaiting_confirmation`, run the pending-action janitor. Expired actions must not be approved from stale user confirmations.
 
+HTTP entrypoint:
+
+```bash
+curl -X POST "$API_BASE/api/agent/ops/pending-actions/janitor" \
+  -H "x-admin-token: $ADMIN_TOKEN"
+```
+
 ## Response Persist Failed After Graph Success
 
 Look up the run by `incoming_message_id`.

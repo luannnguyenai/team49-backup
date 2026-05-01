@@ -36,6 +36,7 @@ from src.services.llm_service import get_context_and_stream_langgraph
 from src.routers.auth import auth_router, users_router
 from src.routers.assessment import assessment_router, _deprecated_router as placement_deprecated_router
 from src.routers.agent import agent_router
+from src.routers.agent_ops import agent_ops_router
 from src.routers.content import content_router
 from src.routers.courses import courses_router
 from src.routers.history import history_router
@@ -116,6 +117,7 @@ app.include_router(content_router)
 app.include_router(courses_router)
 app.include_router(assessment_router)
 app.include_router(agent_router)
+app.include_router(agent_ops_router)
 app.include_router(history_router)
 app.include_router(learning_path_router)
 app.include_router(learning_session_router)
