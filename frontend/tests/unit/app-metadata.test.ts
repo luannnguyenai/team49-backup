@@ -12,6 +12,8 @@ describe("root app metadata", () => {
   });
 
   it("uses a page name title for the landing route instead of the marketing headline", () => {
-    expect(homeMetadata.title).toBe("Home");
+    expect(homeMetadata.title).toEqual({
+      absolute: "AI Learning Hub - Home",
+    });
   });
 });
