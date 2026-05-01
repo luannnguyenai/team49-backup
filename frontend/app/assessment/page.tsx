@@ -325,7 +325,7 @@ function AssessmentPageInner() {
 
   return (
     <div className="min-h-screen px-4 py-10" style={{ backgroundColor: "var(--bg-page)" }}>
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <header
           className="rounded-3xl border px-5 py-5 shadow-sm backdrop-blur-sm"
           style={{
@@ -363,81 +363,82 @@ function AssessmentPageInner() {
           </div>
         </header>
 
-        <section className="card">
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-              Questions
-            </span>
-            <span
-              className="ml-auto text-xs font-medium tabular-nums"
+        <div className="flex flex-1 flex-col gap-6 lg:flex-row lg:items-start">
+          <aside className="card lg:sticky lg:top-6 lg:w-72 lg:shrink-0">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                Questions
+              </span>
+              <span
+                className="ml-auto text-xs font-medium tabular-nums"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {currentIdx + 1}/{questions.length}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-4 gap-1.5">
+              {questions.map((q, idx) => {
+                const qKey = getAssessmentQuestionKey(q);
+                const isAns = answers[qKey] != null;
+                const isSkipped = answers[qKey] === null;
+                const isCur = idx === currentIdx;
+                const isQFlagged = flagged.has(qKey);
+
+                return (
+                  <button
+                    key={qKey}
+                    onClick={() => jumpTo(idx)}
+                    title={`Question ${idx + 1}${isQFlagged ? " · Marked for review" : ""}`}
+                    className={cn(
+                      "relative flex h-10 w-full items-center justify-center rounded-lg text-xs font-bold transition-all duration-150",
+                      isCur
+                        ? "scale-105 bg-primary-600 text-white shadow-sm"
+                        : isSkipped
+                        ? "bg-amber-100 text-amber-700 hover:brightness-95 dark:bg-amber-900/30 dark:text-amber-400"
+                        : isAns
+                        ? "bg-emerald-100 text-emerald-700 hover:brightness-95 dark:bg-emerald-900/30 dark:text-emerald-400"
+                        : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                    )}
+                    style={
+                      !isCur && !isAns && !isSkipped
+                        ? { color: "var(--text-secondary)", backgroundColor: "var(--bg-page)" }
+                        : undefined
+                    }
+                  >
+                    {idx + 1}
+                    {isQFlagged && (
+                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-yellow-400 ring-1 ring-white dark:ring-slate-900" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div
+              className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs"
               style={{ color: "var(--text-muted)" }}
             >
-              {currentIdx + 1}/{questions.length}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6 md:grid-cols-8">
-            {questions.map((q, idx) => {
-              const qKey = getAssessmentQuestionKey(q);
-              const isAns = answers[qKey] != null;
-              const isSkipped = answers[qKey] === null;
-              const isCur = idx === currentIdx;
-              const isQFlagged = flagged.has(qKey);
-
-              return (
-                <button
-                  key={qKey}
-                  onClick={() => jumpTo(idx)}
-                  title={`Question ${idx + 1}${isQFlagged ? " · Marked for review" : ""}`}
-                  className={cn(
-                    "relative flex h-9 w-full items-center justify-center rounded-lg text-xs font-bold transition-all duration-150",
-                    isCur
-                      ? "scale-105 bg-primary-600 text-white shadow-sm"
-                      : isSkipped
-                      ? "bg-amber-100 text-amber-700 hover:brightness-95 dark:bg-amber-900/30 dark:text-amber-400"
-                      : isAns
-                      ? "bg-emerald-100 text-emerald-700 hover:brightness-95 dark:bg-emerald-900/30 dark:text-emerald-400"
-                      : "hover:bg-slate-100 dark:hover:bg-slate-800"
-                  )}
-                  style={
-                    !isCur && !isAns && !isSkipped
-                      ? { color: "var(--text-secondary)", backgroundColor: "var(--bg-page)" }
-                      : undefined
-                  }
-                >
-                  {idx + 1}
-                  {isQFlagged && (
-                    <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-yellow-400 ring-1 ring-white dark:ring-slate-900" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          <div
-            className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs"
-            style={{ color: "var(--text-muted)" }}
-          >
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 shrink-0 rounded bg-primary-600" />
-              <span>Current</span>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 shrink-0 rounded bg-primary-600" />
+                <span>Current</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 shrink-0 rounded border border-emerald-300 bg-emerald-100" />
+                <span>Answered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 shrink-0 rounded border border-amber-300 bg-amber-100" />
+                <span>Skipped</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="ml-0.5 h-2 w-2 shrink-0 rounded-full bg-yellow-400" />
+                <span>Marked for review</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 shrink-0 rounded border border-emerald-300 bg-emerald-100" />
-              <span>Answered</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 shrink-0 rounded border border-amber-300 bg-amber-100" />
-              <span>Skipped</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="ml-0.5 h-2 w-2 shrink-0 rounded-full bg-yellow-400" />
-              <span>Marked for review</span>
-            </div>
-          </div>
-        </section>
+          </aside>
 
-        <main className="flex flex-1 flex-col gap-6">
+          <main className="min-w-0 flex flex-1 flex-col gap-6">
           {errorMsg && phase === "active" && (
             <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-400">
               {errorMsg}
@@ -582,7 +583,8 @@ function AssessmentPageInner() {
               {isLastQuestion ? "Submit assessment" : "Next question"}
             </Button>
           </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
