@@ -12,13 +12,13 @@ vi.mock("next/link", () => ({
 }));
 
 describe("AuthLayout", () => {
-  it("renders a back-to-landing link in the auth card header", () => {
+  it("does not render the back-to-landing link inside the shared auth layout", () => {
     render(
       <AuthLayout>
         <div>Auth content</div>
       </AuthLayout>,
     );
 
-    expect(screen.getByRole("link", { name: "Back to Landing Page" })).toHaveAttribute("href", "/");
+    expect(screen.queryByRole("link", { name: "Back to Landing Page" })).not.toBeInTheDocument();
   });
 });

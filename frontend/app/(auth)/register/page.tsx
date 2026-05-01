@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import AuthBackLink from "@/components/auth/AuthBackLink";
 import RegisterForm from "@/components/auth/RegisterForm";
 
 export const metadata: Metadata = { title: "Sign Up" };
@@ -20,6 +21,7 @@ export default function RegisterPage() {
       <Suspense>
         <RegisterForm />
       </Suspense>
+      <AuthBackLink />
     </>
   );
 }
