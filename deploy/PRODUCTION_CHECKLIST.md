@@ -9,11 +9,14 @@
 - [ ] Reverse proxy is installed
 - [ ] TLS certificates are configured
 - [ ] `SECRET_KEY` is replaced with a strong random value
+- [ ] `CORS_ORIGINS` is set to the production frontend domain
 - [ ] LLM provider keys are valid and funded
 - [ ] `NEXT_PUBLIC_API_URL` points to the public API domain
+- [ ] Target PostgreSQL provider supports `pgvector`
 - [ ] PostgreSQL persistence and backups are configured
 - [ ] Redis password is changed from default
 - [ ] Host firewall blocks public DB and Redis access
+- [ ] Reverse proxy rate limiting is configured for auth and API endpoints
 - [ ] Production `.env` is stored securely
 - [ ] Staging smoke tests pass
 
@@ -39,6 +42,7 @@
 - [ ] Verify database connections stay healthy
 - [ ] Confirm Redis is reachable only from private network
 - [ ] Confirm backups completed successfully
+- [ ] Confirm frontend `/api/health` and backend `/health` both stay green
 - [ ] Confirm one rollback path has been tested
 - [ ] Record the deployed git commit SHA
 - [ ] Record known issues and follow-up tasks
