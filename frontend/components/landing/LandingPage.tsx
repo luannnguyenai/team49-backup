@@ -20,31 +20,31 @@ import { MOCK_COURSES } from "@/lib/mock-course-catalog";
 const audienceCards = [
   {
     title: "Beginners",
-    description: "Build from the basics toward AI/ML with a clearer learning direction.",
+    description: "Start with a learning path that feels clearer, calmer, and easier to follow.",
     icon: Compass,
   },
   {
-    title: "Students and self-learners",
-    description: "Turn scattered knowledge into a learning path with clear goals.",
+    title: "Self-paced learners",
+    description: "Turn scattered studying into a more organized path with clear next steps.",
     icon: GraduationCap,
   },
   {
-    title: "Working technical professionals",
-    description: "Level up your AI/ML/CV/NLP skills with a practical, guided approach.",
+    title: "Learners rebuilding foundations",
+    description: "Get back on track with a path that helps you study in the right order.",
     icon: BrainCircuit,
   },
 ] as const;
 
 const roadmapPoints = [
-  "Choose a learning goal that matches AI/ML/CV/NLP",
-  "Assess your current foundation so you do not waste time relearning at random",
-  "Follow a clear roadmap instead of jumping between disconnected courses",
+  "Choose a learning direction without getting overwhelmed by too many starting points",
+  "Assess your current foundation so you can start at the right level",
+  "Follow a clear path instead of jumping between disconnected lessons and resources",
 ] as const;
 
 const tutorPoints = [
-  "Ask immediately when you get stuck on a concept, formula, or technical idea",
-  "Keep your learning momentum instead of leaving to search for clues elsewhere",
-  "Get help tied to the lesson you are studying instead of generic chat replies",
+  "Ask for help the moment something stops making sense",
+  "Keep your momentum instead of leaving to search through scattered explanations",
+  "Get support that stays connected to the lesson you are already studying",
 ] as const;
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -82,15 +82,15 @@ export default function LandingPage() {
           <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_45%,#ecfeff_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.24),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.2),_transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_48%,#082f49_100%)]" />
           <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl gap-14 px-4 py-16 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-center lg:py-20">
             <ScrollReveal className="space-y-8">
-              <SectionLabel>Guided AI learning product</SectionLabel>
+              <SectionLabel>Structured learning experience</SectionLabel>
 
               <div className="space-y-5">
                 <h1 className="max-w-4xl text-4xl font-semibold leading-tight text-slate-950 dark:text-white md:text-5xl lg:text-6xl">
-                  Learn AI, ML, CV, and NLP through a clearer roadmap
+                  A clearer path to learning AI
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-200 md:text-lg">
-                  A learning platform that helps you find direction, study systematically, and
-                  keep moving when the hard parts show up.
+                  Start with a structured path that helps you focus, build momentum, and keep
+                  moving without piecing everything together on your own.
                 </p>
               </div>
 
@@ -99,7 +99,7 @@ export default function LandingPage() {
                   href="/register"
                   className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
                 >
-                  Sign up now
+                  Create your account
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
@@ -134,7 +134,7 @@ export default function LandingPage() {
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">AI Learning Hub</p>
-                    <p className="mt-1 text-sm text-slate-200">Guided skill roadmap</p>
+                    <p className="mt-1 text-sm text-slate-200">A guided learning path</p>
                   </div>
                   <div className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
                     Ready to start
@@ -146,9 +146,9 @@ export default function LandingPage() {
                     <div className="rounded-[calc(1.5rem-1px)] bg-slate-950/90 p-5">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold">Recommended roadmap</p>
+                          <p className="text-sm font-semibold">Recommended path</p>
                           <p className="mt-1 text-xs text-slate-300">
-                            AI Foundations → Machine Learning → Computer Vision
+                            Foundations → Core concepts → Applied practice
                           </p>
                         </div>
                         <Network className="h-5 w-5 text-cyan-200" />
@@ -162,25 +162,25 @@ export default function LandingPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
                       <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Roadmap</p>
-                      <p className="mt-3 text-lg font-semibold">Personalized to your goals</p>
+                      <p className="mt-3 text-lg font-semibold">Personalized to your starting point</p>
                       <p className="mt-2 text-sm leading-6 text-slate-300">
-                        Get a suggested roadmap based on your current foundation instead of learning randomly.
+                        Get a suggested path that helps you begin in the right place instead of studying at random.
                       </p>
                     </div>
                     <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
                       <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">AI Tutor</p>
-                      <p className="mt-3 text-lg font-semibold">Support while you learn</p>
+                      <p className="mt-3 text-lg font-semibold">Support when you get stuck</p>
                       <p className="mt-2 text-sm leading-6 text-slate-300">
-                        Ask questions while studying so you do not lose your train of thought.
+                        Ask questions in the middle of studying so confusion does not break your flow.
                       </p>
                     </div>
                   </div>
 
                   <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                    <p className="text-sm font-semibold">Focused on real learning progress</p>
+                    <p className="text-sm font-semibold">Built for clearer learning, not more noise</p>
                     <p className="mt-2 text-sm leading-6 text-slate-300">
-                      More than a course list. This landing page points learners toward a guided,
-                      supported way to build AI/ML/CV/NLP skills.
+                      This experience is designed to make self-study feel more ordered, more manageable,
+                      and easier to continue.
                     </p>
                   </div>
                 </div>
@@ -201,8 +201,8 @@ export default function LandingPage() {
                   Personalized learning path
                 </h2>
                 <p className="max-w-xl text-base leading-8 text-slate-600 dark:text-slate-200">
-                  The platform turns your AI learning goal into a more concrete journey, instead of
-                  making you stitch courses together and guess the next step.
+                  Instead of piecing together lessons on your own, follow a path that gives you a
+                  clearer starting point and a more natural next step.
                 </p>
               </div>
               <BulletList items={roadmapPoints} />
@@ -214,9 +214,9 @@ export default function LandingPage() {
                 className="rounded-[28px] border border-border-subtle bg-surface-card p-5 shadow-card dark:border-slate-800 dark:bg-slate-900"
               >
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">01</p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Goal</h3>
+                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Direction</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
-                  Choose the AI/ML/CV/NLP direction that fits your current needs.
+                  Start with a learning direction that fits what you need right now.
                 </p>
               </ScrollReveal>
               <ScrollReveal
@@ -227,7 +227,7 @@ export default function LandingPage() {
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">02</p>
                 <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Baseline assessment</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
-                  Find the right starting point so you can learn faster with less detouring.
+                  Find a starting point that matches your foundation so you can avoid unnecessary detours.
                 </p>
               </ScrollReveal>
               <ScrollReveal
@@ -238,7 +238,7 @@ export default function LandingPage() {
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">03</p>
                 <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Clear progression</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
-                  Study through an ordered roadmap instead of hopping between disconnected topics.
+                  Move through an ordered path instead of hopping between disconnected topics.
                 </p>
               </ScrollReveal>
             </div>
@@ -252,14 +252,14 @@ export default function LandingPage() {
           <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),radial-gradient(circle_at_bottom_left,_rgba(99,102,241,0.18),_transparent_32%)]" />
           <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
             <ScrollReveal className="space-y-6">
-              <SectionLabel>AI Tutor while you learn</SectionLabel>
+              <SectionLabel>Stay in your learning flow</SectionLabel>
               <div className="space-y-4">
                 <h2 className="text-3xl font-semibold leading-tight text-white md:text-4xl">
-                  AI chatbot support right while you study
+                  Support that keeps you learning
                 </h2>
                 <p className="max-w-xl text-base leading-8 text-slate-300">
-                  When you get stuck on an idea, formula, or concept, the chatbot helps you get
-                  back into the learning flow instead of letting self-study break down.
+                  When you get stuck, the tutor helps you get unstuck without turning one confusing
+                  moment into a lost study session.
                 </p>
               </div>
               <BulletList items={tutorPoints} />
@@ -295,7 +295,7 @@ export default function LandingPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Study flow</p>
-                      <p className="mt-2 text-lg font-semibold">Study, ask, then keep going</p>
+                      <p className="mt-2 text-lg font-semibold">Study, ask, and keep going</p>
                     </div>
                     <MessagesSquare className="h-5 w-5 text-cyan-200" />
                   </div>
@@ -303,13 +303,13 @@ export default function LandingPage() {
                     <div className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3">
                       <p className="text-sm font-medium">Lecture context</p>
                       <p className="mt-1 text-sm text-slate-300">
-                        Stay focused on the exact lesson section you are viewing.
+                        Stay focused on the exact part of the lesson you are viewing.
                       </p>
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3">
                       <p className="text-sm font-medium">Clarify fast</p>
                       <p className="mt-1 text-sm text-slate-300">
-                        Get a quick explanation so you do not lose momentum.
+                        Get a quick explanation before confusion starts to slow you down.
                       </p>
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3">
@@ -331,11 +331,11 @@ export default function LandingPage() {
               <div className="space-y-4 text-center">
                 <SectionLabel>Catalog in progress</SectionLabel>
                 <h2 className="text-3xl font-semibold leading-tight text-slate-950 dark:text-white md:text-4xl">
-                  More courses are on the way
+                  More learning paths are on the way
                 </h2>
                 <p className="mx-auto max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-200">
-                  These are the learning directions coming next in the catalog. They already appear
-                  as coming soon so learners can see how the platform is expanding.
+                  These upcoming additions show how the platform will keep expanding into new
+                  learning directions while preserving the same guided experience.
                 </p>
               </div>
 
@@ -375,18 +375,18 @@ export default function LandingPage() {
           <ScrollReveal className="mx-auto max-w-5xl px-4 py-20 text-center md:px-6">
             <SectionLabel>Start with direction</SectionLabel>
             <h2 className="mt-6 text-3xl font-semibold leading-tight text-slate-950 dark:text-white md:text-4xl">
-              If you want a more structured way to learn AI, start here
+              Start with a path that feels easier to follow
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-200">
-              Built for beginners, self-learners, and technical professionals who want to develop
-              AI/ML/CV/NLP skills in a more structured way.
+              Built for beginners and self-learners who want to study with more structure, less
+              guesswork, and a clearer sense of what comes next.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href="/register"
                 className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
               >
-                Sign up now
+                Create your account
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -406,10 +406,10 @@ export default function LandingPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
               Product team
             </p>
-            <h2 className="text-2xl font-semibold">Building a more guided AI learning experience</h2>
+            <h2 className="text-2xl font-semibold">Building a more structured way to learn AI</h2>
             <p className="max-w-2xl text-sm leading-7 text-slate-300">
-              This landing page reflects the product direction: help learners approach AI/ML/CV/NLP
-              in a structured, supported way with less reliance on stitching together scattered knowledge.
+              This product direction is centered on making self-study feel clearer, less fragmented,
+              and easier to continue for learners who need structure more than hype.
             </p>
           </ScrollReveal>
 
@@ -421,7 +421,7 @@ export default function LandingPage() {
             <div className="mt-4 space-y-3 text-sm text-slate-300">
               <p>Support channel: the internal product team behind AI Learning Hub</p>
               <p>Technical contact: through the project repository and the current internal collaboration channel</p>
-              <p>Product scope: guided learning, roadmap support, and AI tutor for AI/ML/CV/NLP</p>
+              <p>Product scope: guided learning paths, baseline assessment, and in-context study support</p>
             </div>
           </ScrollReveal>
         </div>

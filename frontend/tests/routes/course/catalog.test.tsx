@@ -6,20 +6,22 @@ import CourseOverviewInteractive from "@/components/course/CourseOverviewInterac
 import type { CourseOverviewResponse } from "@/types";
 
 describe("landing page route", () => {
-  it("renders a public landing page focused on guided AI learning", () => {
+  it("renders a public landing page focused on a clearer learning path", () => {
     render(<HomePage />);
 
     expect(
       screen.getByRole("heading", {
-        name: "Learn AI, ML, CV, and NLP through a clearer roadmap",
+        name: "A clearer path to learning AI",
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("A learning platform that helps you find direction, study systematically, and keep moving when the hard parts show up."),
+      screen.getByText(
+        "Start with a structured path that helps you focus, build momentum, and keep moving without piecing everything together on your own.",
+      ),
     ).toBeInTheDocument();
     expect(
       screen
-        .getAllByRole("link", { name: "Sign up now" })
+        .getAllByRole("link", { name: "Create your account" })
         .every((link) => link.getAttribute("href") === "/register"),
     ).toBe(true);
     expect(
@@ -35,7 +37,7 @@ describe("landing page route", () => {
       screen.getByRole("heading", { name: "Personalized learning path" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "AI chatbot support right while you study" }),
+      screen.getByRole("heading", { name: "Support that keeps you learning" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Product team")).toBeInTheDocument();
   });
