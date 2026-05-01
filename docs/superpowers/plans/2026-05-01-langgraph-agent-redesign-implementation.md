@@ -12,7 +12,7 @@
 
 ## Current Implementation Status
 
-Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, `6723d0e`, `6ab4aeb`, `68bfc31`, and the final router/eval/deprecation follow-up.
+Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, `6723d0e`, `6ab4aeb`, `68bfc31`, `3df8490`, and the Postgres checkpointer follow-up.
 
 Status meanings:
 
@@ -37,7 +37,7 @@ Status meanings:
 | Task 11: Pending Action API Shell And Continuation Endpoint | done | API shell, continuation contract, response persistence, and resume response replay by `incomingMessageId` are implemented. |
 | Task 12: Path Switch Pending Action Workflow | done | Path switch intent, validation, proposal payload, pending action, commit service, and result persistence are implemented. Ops/dashboard coverage remains outside this task. |
 | Task 13: Real LangGraph Interrupt/Resume Action Flow | done | Proposal nodes persist pending actions before a separate `interrupt()` node; `/actions/continue` resumes with `Command(resume=...)`; commit side effects run after resume with idempotency through pending-action `result_json`. Assessment and replan now call authoritative backend services. |
-| Task 14: Memory Compaction And Operational Safety | partial | Versioned `memory_ref` persistence, durable clarification state, checkpoint id capture, and pending-action janitor exist. Postgres checkpointer wiring and ops dashboards remain follow-up hardening. |
+| Task 14: Memory Compaction And Operational Safety | done | Versioned `memory_ref` persistence, durable clarification state, checkpoint id capture, Postgres checkpointer wiring, and pending-action janitor exist. LangSmith dashboards remain optional operational rollout work. |
 | Task 15: Frontend Idempotency And Action IDs | done | Stable `incomingMessageId`, action ids, and `/actions/continue` approve/reject UI are implemented and covered by page tests. Unrelated dirty UI hunks remain isolated from the committed diff. |
 | Task 16: Evaluation Suite, Janitor, And Operational Checks | done | Adversarial routing eval scaffold, janitor service/tests, migration checks, action-resume tests, route/frontend coverage, and ops runbook exist. Live model eval remains opt-in via `RUN_AGENT_ROUTER_EVAL=1`. |
 | Task 17: Final Integration Verification And Legacy Path Deprecation | done | Focused backend/frontend verification is part of the final pass. Legacy `AgentChatService` is explicitly deprecated and retained only for rollback/reference tests. |
@@ -58,6 +58,7 @@ Done-true in the current implementation:
 - Authoritative assessment/replan/path-switch commit calls after resume.
 - Versioned `memory_ref` writes to conversation memory.
 - Durable pending clarification storage for scope-expansion approvals.
+- Production route wiring for `AsyncPostgresSaver` through a dedicated checkpointer factory.
 - Checkpoint id capture from LangGraph state snapshots.
 - No-evidence/no-grounded-answer composer guard.
 - Search scope escalation offer and expanded-search continuation.
@@ -68,7 +69,6 @@ Done-true in the current implementation:
 
 Done-temporary or partial:
 
-- Production Postgres checkpointer is dependency-injection ready, but the app still defaults to `InMemorySaver` unless a durable checkpointer is provided.
 - Live router model eval is opt-in via `RUN_AGENT_ROUTER_EVAL=1`; it is not run in ordinary unit-test traffic.
 - Full LangSmith online dashboards are not implemented in this code pass.
 - Legacy `AgentChatService` is deprecated but not removed yet.
@@ -84,6 +84,7 @@ Done-temporary or partial:
 - Added router factory/structured-router tests after discovering the planned files were missing from the repo.
 - Added `AgentPendingActionJanitor.run_once()` while preserving the existing `expire_pending_actions()` compatibility method.
 - Added opt-in adversarial router eval tests that are skipped unless `RUN_AGENT_ROUTER_EVAL=1`.
+- Added `AgentCheckpointerFactory` after Task 14 to wire `AsyncPostgresSaver` into production routes while keeping unit tests injectable.
 - Frontend retry idempotency was implemented; unrelated UI polish hunks were left out of the committed agent-flow changes.
 
 ---
@@ -95,6 +96,7 @@ Create:
 - `src/models/agent_graph.py` - SQLAlchemy models for graph runs, pending actions, response payloads, and trace events.
 - `src/repositories/agent_graph_repo.py` - persistence/idempotency helpers for graph runs, pending actions, response refs, lock metadata, and retry state.
 - `src/services/agent_lock_service.py` - PostgreSQL advisory lock helper keyed by `thread_id`.
+- `src/services/agent_checkpointer_factory.py` - LangGraph checkpointer factory for memory/test and Postgres production backends.
 - `src/services/agent_memory_compaction_service.py` - versioned thread summary compaction and `memory_ref` management.
 - `src/services/agent_graph_contracts.py` - Pydantic/domain contracts for checkpoint state, routing, slots, policy, pending actions, typed tool results, and graph node names.
 - `src/services/agent_graph_router.py` - structured intent router and deterministic test router seam.
@@ -113,6 +115,7 @@ Create:
 - `tests/services/test_agent_graph_router.py`
 - `tests/services/test_agent_structured_router.py`
 - `tests/services/test_agent_router_factory.py`
+- `tests/services/test_agent_checkpointer_factory.py`
 - `tests/services/test_agent_slot_resolver.py`
 - `tests/services/test_agent_search_scope_service.py`
 - `tests/services/test_agent_policy_service.py`

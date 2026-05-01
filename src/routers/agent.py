@@ -37,6 +37,10 @@ from src.services.agent_action_service import (
 )
 from src.exceptions import ValidationError
 from src.services.agent_assessment_workflow import AgentAssessmentWorkflowService
+from src.services.agent_checkpointer_factory import (
+    AgentCheckpointerUnavailableError,
+    build_agent_graph_checkpointer,
+)
 from src.services.agent_context_service import AgentContextResolver
 from src.services.agent_conversation_service import AgentConversationService
 from src.services.agent_graph_contracts import AgentInProgressError, AgentRouterUnavailableError
@@ -89,29 +93,33 @@ async def agent_chat(
         body.conversation_id = str(conversation_id)
 
     try:
-        response = await AgentGraphService(
-            search,
-            requirements,
-            router=build_production_agent_router(),
-            graph_repo=AgentGraphRepository(db),
-            thread_lock=AgentThreadLock(db),
-            conversation_repo=conversation_repo,
-            path_switch_service=AgentPathSwitchService(
-                GoalPreferenceRepository(db),
-                generate_learning_path,
-            ),
-            action_db=db,
-            action_user=user,
-        ).chat(
-            request=body,
-            conversation_id=str(conversation_id),
-            thread_id=conversation.thread_id,
-            user_id=str(user.id),
-            allowed_course_ids=context.allowed_course_ids,
-            current_path_course_ids=context.selected_path_course_ids,
-        )
+        async with build_agent_graph_checkpointer() as checkpointer:
+            response = await AgentGraphService(
+                search,
+                requirements,
+                router=build_production_agent_router(),
+                graph_repo=AgentGraphRepository(db),
+                thread_lock=AgentThreadLock(db),
+                conversation_repo=conversation_repo,
+                path_switch_service=AgentPathSwitchService(
+                    GoalPreferenceRepository(db),
+                    generate_learning_path,
+                ),
+                action_db=db,
+                action_user=user,
+                checkpointer=checkpointer,
+            ).chat(
+                request=body,
+                conversation_id=str(conversation_id),
+                thread_id=conversation.thread_id,
+                user_id=str(user.id),
+                allowed_course_ids=context.allowed_course_ids,
+                current_path_course_ids=context.selected_path_course_ids,
+            )
     except AgentInProgressError as exc:
         return JSONResponse(status_code=409, content=exc.to_response().model_dump(by_alias=True))
+    except AgentCheckpointerUnavailableError as exc:
+        response = exc.to_response(conversation_id=str(conversation_id), message_id=str(uuid4()))
     except AgentRouterUnavailableError as exc:
         response = exc.to_response(conversation_id=str(conversation_id), message_id=str(uuid4()))
     await db.commit()
@@ -126,21 +134,25 @@ async def agent_continue_action(
 ) -> AgentChatResponse:
     _repo, _navigation, search, requirements = _services(db)
     try:
-        response = await AgentGraphService(
-            search,
-            requirements,
-            router=build_production_agent_router(),
-            graph_repo=AgentGraphRepository(db),
-            thread_lock=AgentThreadLock(db),
-            path_switch_service=AgentPathSwitchService(
-                GoalPreferenceRepository(db),
-                generate_learning_path,
-            ),
-            action_db=db,
-            action_user=user,
-        ).resume_action(request=body, user_id=str(user.id))
+        async with build_agent_graph_checkpointer() as checkpointer:
+            response = await AgentGraphService(
+                search,
+                requirements,
+                router=build_production_agent_router(),
+                graph_repo=AgentGraphRepository(db),
+                thread_lock=AgentThreadLock(db),
+                path_switch_service=AgentPathSwitchService(
+                    GoalPreferenceRepository(db),
+                    generate_learning_path,
+                ),
+                action_db=db,
+                action_user=user,
+                checkpointer=checkpointer,
+            ).resume_action(request=body, user_id=str(user.id))
     except AgentInProgressError as exc:
         return JSONResponse(status_code=409, content=exc.to_response().model_dump(by_alias=True))
+    except AgentCheckpointerUnavailableError as exc:
+        response = exc.to_response(conversation_id=body.conversation_id, message_id=str(uuid4()))
     except AgentRouterUnavailableError as exc:
         response = exc.to_response(conversation_id=body.conversation_id, message_id=str(uuid4()))
     await db.commit()

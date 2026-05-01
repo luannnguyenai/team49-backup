@@ -46,6 +46,14 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://postgres:change_me_strong_password@localhost:5432/ai_learning",
         description="Full asyncpg-compatible connection URL",
     )
+    agent_graph_checkpointer_backend: Literal["memory", "postgres"] = Field(
+        default="postgres",
+        description="LangGraph checkpointer backend for /agent graph state.",
+    )
+    agent_graph_checkpointer_setup: bool = Field(
+        default=True,
+        description="Run LangGraph checkpointer setup before graph use. Disable after schema is managed separately.",
+    )
     db_echo: bool = Field(default=False, description="Log all SQL statements")
     db_pool_size: int = Field(default=10)
     db_max_overflow: int = Field(default=20)
