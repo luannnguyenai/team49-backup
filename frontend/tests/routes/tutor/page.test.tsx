@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import TutorPage from "@/app/tutor/page";
@@ -124,6 +124,14 @@ describe("tutor page search", () => {
     expect(await screen.findByText(CS224N_ITEM.title)).toBeInTheDocument();
     expect(screen.getByText("AI Language Operations")).toBeInTheDocument();
     expect(screen.queryByText("Vision Rollout Foundations")).not.toBeInTheDocument();
+  });
+
+  it("sets the browser tab title for the tutor route", async () => {
+    render(<TutorPage />);
+
+    await waitFor(() => {
+      expect(document.title).toBe("AI Learning Hub - AI Tutor");
+    });
   });
 
   it("shows a search-specific empty state without hiding the active course panel", async () => {
