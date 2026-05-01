@@ -19,6 +19,19 @@ from src.services.agent_graph_service import AgentGraphService
 pytestmark = pytest.mark.asyncio
 
 
+class NoopLock:
+    async def __aenter__(self):
+        return None
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return None
+
+
+class NoopThreadLock:
+    def acquire(self, **kwargs):
+        return NoopLock()
+
+
 async def test_graph_returns_grounded_find_content_from_search():
     async def search(request, allowed_course_ids):
         return UnitSearchResponse(
@@ -129,3 +142,48 @@ async def test_graph_chat_active_run_returns_in_progress_before_invoking_graph()
         )
 
     assert exc_info.value.graph_run_id == "run-active"
+
+
+async def test_graph_persists_pending_path_switch_action():
+    class Router:
+        def route(self, message, route_context):
+            from src.services.agent_graph_contracts import AgentRoute, AgentSlots
+
+            return AgentRoute(
+                intent="request_path_switch",
+                confidence=0.95,
+                extracted_slots=AgentSlots(target_path="nlp"),
+                rationale="switch path",
+            )
+
+    events = []
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_active_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(return_value=SimpleNamespace(graph_run_id="run-1")),
+        mark_run_running=AsyncMock(),
+        create_pending_action=AsyncMock(return_value=SimpleNamespace(action_id="act-1")),
+        store_response_payload=AsyncMock(return_value="resp-1"),
+        mark_run_interrupted=AsyncMock(side_effect=lambda run_id, response_ref=None, checkpoint_id=None: events.append("interrupted")),
+        mark_run_succeeded=AsyncMock(),
+        mark_run_failed=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        graph_repo=repo,
+        thread_lock=NoopThreadLock(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Tôi muốn chuyển sang NLP", incomingMessageId="msg-path"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-path",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS230", "CS224n", "CS231n"],
+    )
+
+    repo.create_pending_action.assert_awaited_once()
+    assert response.actions[0].action_id == "act-1"
+    assert events == ["interrupted"]

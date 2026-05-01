@@ -10,6 +10,7 @@ from src.database import get_async_db
 from src.dependencies.auth import get_current_user
 from src.models.user import User
 from src.repositories.agent_conversation_repo import AgentConversationRepository
+from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.schemas.agent import (
     AgentActionResponse,
@@ -44,9 +45,11 @@ from src.services.agent_lock_service import AgentThreadLock
 from src.services.agent_navigation_service import AgentNavigationService
 from src.services.agent_requirement_service import AgentPathRequirementService
 from src.repositories.agent_graph_repo import AgentGraphRepository
+from src.services.agent_path_switch_service import AgentPathSwitchService
 from src.services.agent_router_factory import build_production_agent_router
 from src.services.agent_search_service import AgentUnitSearchService
 from src.services.agent_unit_context_service import AgentUnitContextService
+from src.services.recommendation_engine import generate_learning_path
 
 
 agent_router = APIRouter(prefix="/api/agent", tags=["agent"])
@@ -93,6 +96,12 @@ async def agent_chat(
             graph_repo=AgentGraphRepository(db),
             thread_lock=AgentThreadLock(db),
             conversation_repo=conversation_repo,
+            path_switch_service=AgentPathSwitchService(
+                GoalPreferenceRepository(db),
+                generate_learning_path,
+            ),
+            action_db=db,
+            action_user=user,
         ).chat(
             request=body,
             conversation_id=str(conversation_id),
@@ -123,6 +132,12 @@ async def agent_continue_action(
             router=build_production_agent_router(),
             graph_repo=AgentGraphRepository(db),
             thread_lock=AgentThreadLock(db),
+            path_switch_service=AgentPathSwitchService(
+                GoalPreferenceRepository(db),
+                generate_learning_path,
+            ),
+            action_db=db,
+            action_user=user,
         ).resume_action(request=body, user_id=str(user.id))
     except AgentInProgressError as exc:
         return JSONResponse(status_code=409, content=exc.to_response().model_dump(by_alias=True))

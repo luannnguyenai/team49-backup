@@ -48,6 +48,8 @@ class AgentGraphService:
         thread_lock=None,
         conversation_repo=None,
         path_switch_service=None,
+        action_db=None,
+        action_user=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -56,6 +58,8 @@ class AgentGraphService:
         self.thread_lock = thread_lock or _NoopThreadLock()
         self.conversation_repo = conversation_repo
         self.path_switch_service = path_switch_service
+        self.action_db = action_db
+        self.action_user = action_user
         self.policy = AgentPolicyService()
         self.composer = AgentResponseComposer()
         self.scope_service = AgentSearchScopeService()
@@ -151,10 +155,19 @@ class AgentGraphService:
                     response=response,
                     deterministic_key=f"{thread_id}:{request.incoming_message_id}",
                 )
-                await self.graph_repo.mark_run_succeeded(
-                    run.graph_run_id,
-                    response_ref=response_ref,
+                has_pending_action = any(
+                    action.status == "awaiting_confirmation" for action in response.actions
                 )
+                if has_pending_action:
+                    await self.graph_repo.mark_run_interrupted(
+                        run.graph_run_id,
+                        response_ref=response_ref,
+                    )
+                else:
+                    await self.graph_repo.mark_run_succeeded(
+                        run.graph_run_id,
+                        response_ref=response_ref,
+                    )
                 return response
             except Exception as exc:
                 await self.graph_repo.mark_run_failed(
@@ -310,13 +323,48 @@ class AgentGraphService:
             )
             return {**state, "tool_result": result}
         if state["intent"] == "assess_knowledge":
-            return {**state, "tool_result": await self.tools.assessment_proposal(slots)}
+            result = await self.tools.assessment_proposal(slots)
+            result = await self._persist_pending_action_for_result(state, result, "start_assessment")
+            return {**state, "tool_result": result}
         if state["intent"] == "request_replan":
-            return {**state, "tool_result": await self.tools.replan_proposal()}
+            result = await self.tools.replan_proposal()
+            result = await self._persist_pending_action_for_result(state, result, "request_replan")
+            return {**state, "tool_result": result}
         if state["intent"] == "request_path_switch":
-            return {**state, "tool_result": await self.tools.path_switch_proposal(slots)}
+            result = await self.tools.path_switch_proposal(slots)
+            result = await self._persist_pending_action_for_result(state, result, "request_path_switch")
+            return {**state, "tool_result": result}
 
         return {**state, "tool_result": await self.tools.clarify(state["message"])}
+
+    async def _persist_pending_action_for_result(
+        self,
+        state: dict,
+        result,
+        action_type: str,
+    ):
+        if self.graph_repo is None or not result.actions:
+            return result
+        action = result.actions[0]
+        expires_at = action.expires_at or datetime.now(UTC) + timedelta(minutes=30)
+        payload = {
+            "payload_version": 1,
+            "canonical_unit_ids": action.canonical_unit_ids,
+            "target_path_id": state["slots"].target_path if hasattr(state["slots"], "target_path") else None,
+            "intent": state["intent"],
+        }
+        pending = await self.graph_repo.create_pending_action(
+            conversation_id=state["conversation_id"],
+            thread_id=state["thread_id"],
+            user_id=state["user_id"],
+            action_type=action_type,
+            payload=payload,
+            payload_version=1,
+            idempotency_key=f"{state['thread_id']}:{state['incoming_message_id']}:{action_type}",
+            expires_at=expires_at,
+        )
+        updated_action = action.model_copy(update={"action_id": pending.action_id})
+        return result.model_copy(update={"actions": [updated_action, *result.actions[1:]]})
 
     async def resume_action(self, request: AgentActionResumeRequest, user_id: str) -> AgentChatResponse:
         if self.graph_repo is None:
@@ -345,6 +393,38 @@ class AgentGraphService:
         if request.decision == "reject":
             await self.graph_repo.mark_action_cancelled(pending.action_id)
             return self.composer.compose_action_cancelled(str(pending.conversation_id))
+        existing = await self.graph_repo.get_committed_action_result(pending.action_id)
+        if existing is not None:
+            return AgentChatResponse(
+                conversation_id=str(pending.conversation_id),
+                message_id=str(uuid4()),
+                answer={"markdown": "Action was already completed.", "confidence": "partial"},
+            )
+        if pending.type == "request_path_switch" and self.path_switch_service is not None:
+            if self.action_db is None or self.action_user is None:
+                return self.composer.compose_action_error(request.conversation_id, "missing_action_context")
+            result = await self.path_switch_service.commit(
+                self.action_db,
+                self.action_user,
+                pending.payload_json["target_path_id"],
+                pending.idempotency_key,
+            )
+            await self.graph_repo.mark_action_committed(pending.action_id, result=result)
+            return AgentChatResponse(
+                conversation_id=str(pending.conversation_id),
+                message_id=str(uuid4()),
+                answer={
+                    "markdown": (
+                        "I switched your active path and recalculated the learning plan. "
+                        "Open the plan view to continue with the updated recommendation."
+                    ),
+                    "confidence": "partial",
+                },
+            )
+        await self.graph_repo.mark_action_committed(
+            pending.action_id,
+            result={"type": pending.type, "status": "confirmed"},
+        )
         return AgentChatResponse(
             conversation_id=str(pending.conversation_id),
             message_id=str(uuid4()),
