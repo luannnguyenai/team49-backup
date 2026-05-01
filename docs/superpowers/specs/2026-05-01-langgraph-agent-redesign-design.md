@@ -53,7 +53,9 @@ POST /api/agent/chat
   -> Resolve/create thread_id
   -> Persist inbound user message
   -> Dedupe by incoming_message_id
-  -> Acquire per-thread lock
+  -> Return previous response if incoming_message_id already has response_ref
+  -> Return 409 in_progress if incoming_message_id/thread_id is already active
+  -> Acquire PostgreSQL advisory lock keyed by thread_id
   -> LangGraph.invoke(input, config={configurable: {thread_id}})
       -> hydrate_min_context
       -> route_intent
@@ -67,7 +69,7 @@ POST /api/agent/chat
       -> compose_response
   -> Persist assistant response from response_ref
   -> Store graph run/checkpoint metadata
-  -> Release per-thread lock
+  -> Release PostgreSQL advisory lock
   -> AgentChatResponse
 ```
 
@@ -81,6 +83,136 @@ POST /api/agent/chat
 - assessment workflow/action services
 - planner/progress services, when wired
 - conversation repository/service
+
+### End-To-End Flow Diagram
+
+```mermaid
+flowchart TD
+    A[Client sends /api/agent/chat] --> B[Auth]
+    B --> C[Resolve or create conversation_id]
+    C --> D[Resolve or create thread_id]
+    D --> E[Check incoming_message_id dedupe]
+
+    E -->|Already completed| E1[Return existing response_ref]
+    E -->|Already active| E2[Return 409 in_progress]
+    E -->|New message| F[Persist inbound user message and create graph_run]
+
+    F --> G[Acquire PostgreSQL advisory lock by thread_id]
+    G --> H[LangGraph invoke with thread_id]
+
+    H --> I[hydrate_min_context]
+    I --> J[route_intent]
+    J --> K{Low confidence or ambiguous?}
+
+    K -->|Yes| K1[clarify_node]
+    K -->|No| L[load_intent_scoped_context]
+
+    L --> M[policy_guard]
+    M --> N{Policy allow?}
+
+    N -->|No| N1[compose safe fallback]
+    N -->|Yes| O[extract_slots_llm]
+    O --> P[canonicalize_slots]
+
+    P --> Q{Canonical slots sufficient?}
+    Q -->|No| Q1[clarify_node]
+    Q -->|Yes| R[route_by_intent]
+
+    R --> S1[find_content_node]
+    R --> S2[explain_concept_node]
+    R --> S3[navigate_to_unit_node]
+    R --> S4[ask_what_next_node]
+    R --> S5[assess_knowledge_node]
+    R --> S6[request_replan_node]
+    R --> S7[explain_planner_decision_node]
+    R --> S8[summarize_progress_node]
+    R --> S9[general_course_question_node]
+    R --> S10[clarify_node]
+
+    S1 --> T[Typed ToolResult]
+    S2 --> T
+    S3 --> T
+    S4 --> T
+    S5 --> U{Proposal needed?}
+    S6 --> U
+    S7 --> T
+    S8 --> T
+    S9 --> T
+    S10 --> T
+
+    U -->|No| T
+    U -->|Yes| V[build_proposal_node]
+    V --> W[persist_pending_action_node]
+    W --> X[await_confirmation_node interrupt]
+
+    X --> X1[Return response_ref with action_id]
+    T --> Y[compose_response]
+    Y --> Z[Persist assistant message and checkpoint/run metadata]
+    Z --> AA[Release advisory lock]
+    AA --> AB[Return AgentChatResponse]
+
+    K1 --> Y
+    Q1 --> Y
+    N1 --> Y
+    X1 --> Z
+    E1 --> AB
+    E2 --> AB
+```
+
+### Resume Flow Diagram
+
+```mermaid
+flowchart TD
+    A[Client sends action continue] --> B[Auth]
+    B --> C[Resolve conversation_id]
+    C --> D[Load pending action by action_id]
+    D --> E{Owner, thread, status, expiry valid?}
+
+    E -->|No| E1[Return safe fallback or clarification]
+    E -->|Yes| F[Acquire advisory lock by thread_id]
+    F --> G[LangGraph resume with same thread_id]
+
+    G --> H[validate_pending_action_node]
+    H --> I{Decision type?}
+
+    I -->|reject| J[mark_action_final_node cancelled]
+    I -->|edit| K[apply edit validation]
+    K --> L{Edit valid?}
+    L -->|No| L1[clarify edit request]
+    L -->|Yes| M[rebuild proposal or adjusted payload]
+    M --> N[interrupt again for confirmation]
+
+    I -->|approve| O[commit_action_node with idempotency_key]
+    O --> P[record committed result]
+    P --> Q[mark_action_final_node committed]
+    Q --> R[compose_response]
+    R --> S[Persist assistant message and checkpoint/run metadata]
+    S --> T[Release advisory lock]
+    T --> U[Return AgentChatResponse]
+
+    J --> R
+    N --> R
+    E1 --> U
+    L1 --> U
+```
+
+### Dedupe And Concurrency Diagram
+
+```mermaid
+flowchart TD
+    A[Request arrives] --> B[Check incoming_message_id]
+    B -->|Seen and completed| C[Return existing response_ref]
+    B -->|Seen and active| D[Return 409 in_progress]
+    B -->|New| E[Persist inbound message]
+
+    E --> F[Acquire PostgreSQL advisory lock]
+    F --> G{Lock acquired?}
+    G -->|No| H[Return 409 in_progress]
+    G -->|Yes| I[Invoke graph]
+
+    I --> J[Persist assistant response]
+    J --> K[Release advisory lock]
+```
 
 ## Identity And Persistence Semantics
 
@@ -219,6 +351,10 @@ class AgentRoute(BaseModel):
 
 Low-confidence routing must go to `clarify_node`. The system must not silently guess an intent when confidence is below threshold or required slots are missing.
 
+Intent routing and slot extraction must be context-aware. Raw lexical matches or keyword heuristics must not be used as the primary or fallback source of truth for user intent. Lexical features may be used only as weak signals for ranking, retrieval, or canonicalization, never to override structured intent classification.
+
+If route confidence is low, context is insufficient, or multiple plausible intents exist, the graph must route to clarification rather than guess. The UI is English-first, but user messages may still be Vietnamese or mixed-language; router behavior must not rely on exact English-only keyword matches.
+
 ## Intent Registry
 
 Intent enum, graph conditional edges, and node registry must stay in sync.
@@ -271,6 +407,31 @@ Memory is split:
 
 Graph checkpoint state stores `memory_ref`, not full memory.
 
+Checkpoint state may contain only small durable identifiers, routing state, canonicalized slots, policy decision, pending action metadata, and refs. Cross-thread learner memory must live in a profile/store layer, not in thread checkpoint state. Thread checkpoint data is for resuming one conversation thread; learner/profile data is for reuse across threads.
+
+## New Chat And Reset Semantics
+
+Creating a new chat/session creates a new `conversation_id` and a new `thread_id`.
+
+Reset for the new thread:
+
+- thread checkpoint history
+- thread conversation summary/window
+- pending clarification state
+- local conversational state
+- pending actions from the previous thread
+
+Do not reset:
+
+- learner profile
+- preferences/profile data scoped to the user
+- progress/mastery
+- completed assessments
+- committed planner state
+- committed action audit records
+
+Pending actions are thread-bound. If an old thread has `pending_action.status="awaiting_confirmation"` and the user opens a new chat, the new chat must not inherit or auto-confirm that pending action. To continue it, the user must return to the original conversation/thread. This is safer than carrying stale confirmations across threads.
+
 ## Slot Processing
 
 Slot processing is two-step:
@@ -287,6 +448,10 @@ Canonicalization: canonical_unit_ids=[...], course_ids=[...], quiz eligibility=[
 ```
 
 Business logic must use canonicalized slots, not raw LLM extraction.
+
+Intent confidence is not enough. Canonical entity/context resolution must also be sufficient. If the user asks "test me on attention" and the current scope has multiple plausible units such as attention, self-attention, visual attention, and attention masks, the graph must clarify which entity the user means before proposing an assessment.
+
+Slot ambiguity must route to clarification even when intent is high confidence.
 
 ## Policy Guard
 
@@ -423,19 +588,44 @@ mark_action_final_node
 
 If the user says "ok", the graph should resolve "ok" against `pending_action`. If there is no active pending action or there are multiple ambiguous actions, return clarification instead of committing.
 
+`decision="edit"` requires strict validation:
+
+- validate the edit payload against a typed schema for that action type
+- verify pending action owner, status, expiry, payload version, and payload hash
+- allow only explicitly editable fields
+- re-run policy and canonicalization for edited fields
+- if the edit changes the proposal materially, create an updated proposal and interrupt again instead of committing directly
+
+Edit resume must not become a bypass around ownership, policy, or eligibility checks.
+
+## Task And Replay Boundaries
+
+All nodes that perform side effects or non-deterministic work must have an explicit task boundary. Side effects include database writes, external API calls, assessment session creation, replan commits, pending action writes, response payload writes, and audit event writes. Non-deterministic work includes LLM calls, time-dependent generation, random selection, and any call whose output may differ on retry.
+
+Replay rule:
+
+```text
+Any node after a checkpoint that can re-execute and has a side effect must be idempotent.
+Otherwise, the side effect must be moved into commit_action_node and guarded by idempotency_key.
+```
+
+For action flows, only `commit_action_node` may perform the business side effect that changes assessment/planner state. Proposal persistence must be idempotent. `await_confirmation_node` must call `interrupt()` before any side effect in that node.
+
 ## Dedupe And Retry Safety
 
 `incoming_message_id` is the idempotency key for user messages.
 
 If the same `incoming_message_id` is received again for the same `conversation_id` and `thread_id`:
 
-- if `response_ref` exists, return the existing response
-- if a run is active, return in-progress status or wait according to API policy
+- if `response_ref` exists, return the exact existing response payload
+- if a run is active, return HTTP `409` with machine-readable status `in_progress`
 - if the previous run failed before a checkpoint-safe response, retry/resume according to failure classification
 - do not persist duplicate user messages
 - do not invoke a new graph run unless explicitly classified as retryable
 
 Assistant responses are upserted by `incoming_message_id` or `graph_run_id`, not blindly inserted.
+
+V1 does not join active runs and does not queue duplicate active requests. The client may retry after the suggested retry interval or poll the conversation.
 
 ## Transaction Boundaries
 
@@ -467,6 +657,8 @@ after graph success:
 
 If assistant message persistence fails after graph success, retry must reuse the existing `response_ref` and upsert the missing assistant message.
 
+`response_ref` must be stable for the same completed turn. It should be derived from either `graph_run_id` or from the tuple `(thread_id, incoming_message_id, checkpoint_id)`. A retry for the same completed turn must not create a second response payload with different wording or actions.
+
 Commit side effects:
 
 ```text
@@ -482,13 +674,9 @@ Replay from checkpoint must not duplicate assessments, replans, messages, or pen
 
 There must be only one active graph run per `thread_id`.
 
-Use one of:
+V1 uses PostgreSQL advisory locks keyed by `thread_id`. This matches the current Postgres-backed stack and avoids introducing Redis solely for agent locking.
 
-- database row lock on conversation/thread row
-- PostgreSQL advisory lock keyed by `thread_id`
-- Redis lock if the deployment already depends on Redis
-
-Concurrent requests for the same thread should be queued, rejected with a retryable response, or joined to the active run. The implementation must choose one behavior explicitly. The initial production implementation should reject the second active run with a safe retryable status unless product requirements demand queueing.
+Concurrent requests for the same thread are rejected with HTTP `409` and machine-readable status `in_progress`. The response should include a retry hint. Later versions may add queueing or run joining, but V1 must not allow concurrent graph execution for the same thread.
 
 ## API Changes
 
@@ -585,8 +773,82 @@ Trace storage can be trimmed or sampled separately from business state.
 - Tool no result: no-source fallback.
 - Tool failure: retryable or safe fallback depending on tool type.
 - Pending action expired: mark expired and ask user to regenerate.
-- Concurrent run: retryable conflict response.
+- Concurrent run: HTTP `409` with status `in_progress`.
 - State migration failure: fail safe and start a new thread with migration note.
+
+## Streaming And Observability
+
+The initial production path may remain non-streaming, but the design must leave room for streaming. Useful stream events include:
+
+- routing started/completed
+- clarification required
+- search/tool work started
+- pending action proposal created
+- safe partial answer or progress update
+
+Streaming must not expose full graph state, raw policy audit context, raw router rationale, or debug-only traces to normal users. Debug stream modes are internal/reviewer-only.
+
+Trace hygiene:
+
+- trace by graph run or user turn, not by unbounded conversation
+- include `conversation_id`, `thread_id`, `graph_run_id`, `incoming_message_id`, and `checkpoint_id` as metadata
+- keep large state snapshots out of trace payloads
+- sample or trim verbose node events separately from business state
+
+## Evaluation Lane
+
+In addition to unit and contract tests, the project needs an offline evaluation dataset before rollout. The dataset should include golden-path prompts and adversarial routing/context traps.
+
+Required evaluation groups:
+
+- lexical traps such as `skip connection` vs skip/replan actions
+- `quiz eligibility` as a concept vs "make me a quiz" as assessment intent
+- ambiguous entity resolution across multiple units/courses
+- missing route/path context
+- stale pending actions
+- expired pending confirmations
+- Vietnamese and mixed-language queries
+- no-source retrieval cases
+
+After deploy, online evaluation should monitor route distribution, clarification rate, no-source rate, policy denial rate, pending-action expiry rate, and duplicate/retry behavior.
+
+## Operational Runbook
+
+Production operations need explicit playbooks for stuck or partially completed runs:
+
+- pending action stuck in `awaiting_confirmation`
+- action committed but assistant message persistence failed
+- graph run failed after `response_ref` was created
+- graph run failed before safe checkpoint
+- duplicate active run conflict rate spikes
+- state migration failed and new thread was created
+- janitor expired pending actions
+
+Ops views or queries should expose graph runs, pending actions, response refs, last checkpoint id, error code, and action status by `conversation_id` and `thread_id`.
+
+## Timeout And Degradation Policy
+
+Each node type must have a timeout budget and safe degradation path.
+
+Suggested V1 behavior:
+
+- router and slot extraction: short timeout, clarify/fallback on failure
+- unit search and navigation: short timeout, no-source fallback on failure
+- planner decision and progress summary: medium timeout, safe fallback or partial context response
+- assessment/replan proposal: medium timeout, no commit if proposal cannot be validated
+- commit nodes: bounded timeout with idempotent retry
+
+Requests must not hang indefinitely. Timeout fallback must not invent grounded answers or create actions without validation.
+
+## Rollout Strategy
+
+Ship in phases:
+
+1. Shadow mode: run LangGraph in parallel for `/agent`, record traces/evals, keep current response path serving users.
+2. Canary: serve LangGraph responses to a small internal or low-risk traffic slice.
+3. Gradual rollout: increase traffic while monitoring route quality, retry conflicts, action proposals, and fallback rates.
+4. Cutover: make LangGraph the primary `/agent` path.
+5. Deprecation: remove or quarantine keyword-based routing after parity and regression gates pass.
 
 ## Test Requirements
 
@@ -599,16 +861,23 @@ Required production tests:
 - Policy denial returns safe fallback and audit codes.
 - No evidence/no citation result cannot produce `confidence="grounded"`.
 - Slot extraction and deterministic canonicalization are separated.
-- `incoming_message_id` retry returns same response or same active-run status.
+- `incoming_message_id` retry with existing `response_ref` returns the exact same response.
+- Duplicate active `incoming_message_id` or active same-thread run returns HTTP `409` with status `in_progress`.
 - Same `thread_id` resumes the same checkpoint thread.
 - Interrupt approve/reject/edit validates the correct pending action.
+- Edit-resume validates schema, payload version/hash, ownership, and editable fields.
 - Expired pending action cannot commit.
 - Janitor marks stale pending actions expired.
 - Replay from checkpoint does not duplicate assessment, replan, assistant message, or pending action.
-- Concurrent requests for one thread are rejected, queued, or joined according to chosen policy.
+- Nodes with side effects after checkpoints are idempotent or move side effects into `commit_action_node`.
+- Concurrent requests for one thread are rejected with HTTP `409` and status `in_progress`.
 - State version migration succeeds for supported older versions.
 - Unsupported old state version fails safely.
 - Frontend action continuation sends `actionId`.
+- Ambiguous lexical overlap: `Giải thích skip connection` routes to `explain_concept` or `general_course_question`, not `request_replan`.
+- Action word inside concept phrase: `Cho tôi quiz về attention mechanism` may route to `assess_knowledge`, but `Quiz eligibility của unit này tính thế nào?` routes to `general_course_question` or `explain_concept` and must not auto-create an assessment proposal.
+- Ambiguous slots: `test me on attention` with multiple plausible attention units routes to clarification.
+- New chat/session creates a new thread and does not inherit pending actions from the previous thread.
 
 ## Implementation Phases
 
@@ -621,7 +890,11 @@ Required production tests:
 7. Replan pending-action interrupt/resume flow.
 8. Dedupe, concurrency lock, replay safety tests.
 9. Frontend action id and retry/idempotency wiring.
-10. Replace or deprecate keyword-based `AgentChatService` path.
+10. Streaming-safe event contract and reviewer-only debug stream gating.
+11. Offline evaluation dataset and adversarial routing suite.
+12. Ops runbook, janitor, timeout/degradation policy.
+13. Shadow/canary rollout.
+14. Replace or deprecate keyword-based `AgentChatService` path.
 
 ## Acceptance Criteria
 
@@ -631,8 +904,11 @@ Required production tests:
 - Graph checkpoint state is reference-based and versioned.
 - Conversation id, thread id, checkpoint id, graph run id, incoming message id, response ref, and action id are persisted and distinct.
 - User retries do not duplicate messages or graph side effects.
+- Duplicate active requests return HTTP `409` with status `in_progress`.
 - Assessment and replan confirmations use pending actions plus interrupt/resume semantics.
 - Expired pending actions cannot commit.
 - Concurrent active runs on one thread cannot corrupt state.
 - Composer never returns grounded answers without evidence where evidence is required.
+- Lexical keyword traps do not override context-aware intent and slot classification.
+- New chats do not inherit thread-local pending actions or clarifications.
 - AI Tutor behavior remains separate and unchanged.
