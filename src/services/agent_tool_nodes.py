@@ -16,6 +16,8 @@ from src.services.agent_search_scope_service import AgentSearchScopeService
 
 
 class AgentToolNodes:
+    TOO_MANY_RESULTS_THRESHOLD = 20
+
     def __init__(self, search_service, requirement_service):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -59,7 +61,39 @@ class AgentToolNodes:
             ),
             allowed_course_ids=allowed_course_ids,
         )
-        results = [result for result in search.results if result.score > 0][:3]
+        all_results = [result for result in search.results if result.score > 0]
+        if (
+            len(all_results) >= self.TOO_MANY_RESULTS_THRESHOLD
+            and not slots.show_top_results_approved
+        ):
+            raw_topic = slots.raw_topic or message
+            trace = search.trace.model_copy(
+                update={
+                    "intent": intent,
+                    "selected_path": slots.search_scope,
+                    "candidate_courses": course_ids,
+                    "selected_unit_ids": [],
+                }
+            )
+            return ToolResult(
+                kind="clarification",
+                answer_markdown=(
+                    f"I found {len(all_results)} results related to {raw_topic}. "
+                    "Do you want to describe it more specifically, or should I show the top results?"
+                ),
+                warning=AgentWarning(
+                    type="ambiguous_target",
+                    message="Search returned many matching results; refinement is recommended.",
+                ),
+                requires_evidence=False,
+                metadata={
+                    "too_many_results_offered": True,
+                    "result_count": len(all_results),
+                    "top_results_allowed": True,
+                },
+                trace=trace,
+            )
+        results = all_results[:3]
         citations = [
             AgentCitation(
                 canonical_unit_id=result.canonical_unit_id,

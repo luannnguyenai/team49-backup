@@ -324,6 +324,306 @@ async def test_scope_expansion_approval_searches_other_path_directly_when_fewer_
     assert {action.type for action in response.actions} == {"open_unit"}
 
 
+async def test_expanded_search_with_too_many_results_asks_to_refine_or_show_top_results():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    pending = PendingClarification(
+        clarification_id="clar-too-many",
+        type="search_scope_expansion",
+        status="awaiting_response",
+        payload={
+            "original_message": "Where should I review CNN?",
+            "raw_topic": "CNN",
+            "allowed_path_ids": ["computer_vision", "nlp"],
+            "current_path_ids": ["nlp"],
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id=f"unit-cnn-{index}",
+                    course_id="CS231n",
+                    unit_name=f"CNN result {index}",
+                    summary="CNN content.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href=f"/courses/cs231n/learn/cnn-{index}",
+                )
+                for index in range(30)
+            ],
+            trace=RetrievalTrace(trace_id="trace-too-many", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-too-many",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="yes, search other paths", incomingMessageId="msg-too-many"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-too-many",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert "30 results" in response.answer.markdown
+    assert response.citations == []
+    persisted = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]["pendingClarification"]
+    assert persisted["clarification"]["payload"]["kind"] == "retrieval_query"
+    assert persisted["clarification"]["payload"]["original_intent"] == "find_content"
+    assert persisted["clarification"]["payload"]["show_top_results_allowed"] is True
+
+
+async def test_current_path_search_with_too_many_results_asks_to_refine_or_show_top_results():
+    conversation_id = uuid4()
+    user_id = uuid4()
+
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="CNN"),
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id=f"unit-current-cnn-{index}",
+                    course_id="CS231n",
+                    unit_name=f"Current CNN result {index}",
+                    summary="CNN content.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href=f"/courses/cs231n/learn/current-cnn-{index}",
+                )
+                for index in range(30)
+            ],
+            trace=RetrievalTrace(trace_id="trace-current-too-many", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={"memoryRef": f"agent_memory:{conversation_id}:v1", "summaryVersion": 1},
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Where should I review CNN?", incomingMessageId="msg-current-too-many"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-current-too-many",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert "30 results" in response.answer.markdown
+    assert response.citations == []
+    persisted = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]["pendingClarification"]
+    assert persisted["clarification"]["payload"]["search_scope"] == "current_path"
+    assert persisted["clarification"]["payload"]["show_top_results_allowed"] is True
+
+
+async def test_too_many_results_approval_shows_top_results_without_requerying_router():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-too-many-top",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "original_message": "Where should I review CNN?",
+            "proposed_raw_topic": "CNN",
+            "search_scope": "expanded_paths",
+            "resolved_search_path_ids": ["computer_vision", "nlp"],
+            "excluded_search_path_ids": ["nlp"],
+            "show_top_results_allowed": True,
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id=f"unit-cnn-top-{index}",
+                    course_id="CS231n",
+                    unit_name=f"CNN top result {index}",
+                    summary="CNN content.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href=f"/courses/cs231n/learn/cnn-top-{index}",
+                )
+                for index in range(30)
+            ],
+            trace=RetrievalTrace(trace_id="trace-too-many-top", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-too-many-top",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=SimpleNamespace(
+            compose_grounded_answer=lambda message, citations: SimpleNamespace(
+                answer_markdown="Here are the top related results.",
+                evidence_sufficient=False,
+                confidence="partial",
+                clarification_question=None,
+            )
+        ),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="show top results", incomingMessageId="msg-too-many-top"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-too-many-top",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert len(response.citations) == 3
+    assert len(response.actions) == 3
+    assert search_requests[0].query == "CNN"
+
+
+async def test_too_many_results_user_detail_refines_original_query():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-too-many-refine",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "proposed_raw_topic": "CNN",
+            "search_scope": "expanded_paths",
+            "resolved_search_path_ids": ["computer_vision", "nlp"],
+            "excluded_search_path_ids": ["nlp"],
+            "show_top_results_allowed": True,
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn-detection",
+                    course_id="CS231n",
+                    unit_name="CNN object detection",
+                    summary="CNN detection content.",
+                    score=4,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/cnn-detection",
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-too-many-refine", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-too-many-refine",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=SimpleNamespace(
+            compose_grounded_answer=lambda message, citations: SimpleNamespace(
+                answer_markdown="I found detection-specific CNN results.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+        ),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="object detection", incomingMessageId="msg-too-many-refine"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-too-many-refine",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert search_requests[0].query == "CNN object detection"
+
+
 async def test_path_choice_action_searches_selected_path_with_original_topic():
     conversation_id = uuid4()
     user_id = uuid4()

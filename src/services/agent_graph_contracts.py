@@ -108,6 +108,7 @@ class AgentSlots(BaseModel):
     requested_path_id: str | None = None
     resolved_search_path_ids: list[str] = Field(default_factory=list)
     excluded_search_path_ids: list[str] = Field(default_factory=list)
+    show_top_results_approved: bool = False
 
 
 class RouteContextSnapshot(BaseModel):

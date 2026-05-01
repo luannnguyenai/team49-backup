@@ -343,6 +343,18 @@ class AgentGraphService:
         normalized = message.lower()
         proposed = str(payload.get("proposed_raw_topic") or "").strip()
         is_confirmation = normalized in {"yes", "y", "ok", "correct", "right", "đúng", "dung"}
+        show_top_requested = (
+            bool(payload.get("show_top_results_allowed"))
+            and (
+                is_confirmation
+                or "top result" in normalized
+                or "top results" in normalized
+                or "show top" in normalized
+                or "show me" in normalized
+                or "xuất" in normalized
+                or "xuat" in normalized
+            )
+        )
         is_rejection = normalized in {"no", "nope", "không", "khong"} or normalized.startswith("no,")
 
         if is_rejection:
@@ -368,7 +380,15 @@ class AgentGraphService:
                 ),
             }
 
-        raw_topic = proposed if is_confirmation else message
+        if show_top_requested:
+            raw_topic = proposed or message
+            scope_expansion_approved = True
+        elif proposed and not is_confirmation:
+            raw_topic = f"{proposed} {message}".strip()
+            scope_expansion_approved = False
+        else:
+            raw_topic = proposed if is_confirmation else message
+            scope_expansion_approved = False
         return {
             **state,
             "intent": payload.get("original_intent") or "find_content",
@@ -379,6 +399,9 @@ class AgentGraphService:
                 requested_path_id=payload.get("requested_path_id"),
                 search_scope=payload.get("search_scope") or "current_path",
                 resolved_search_path_ids=payload.get("resolved_search_path_ids") or [],
+                excluded_search_path_ids=payload.get("excluded_search_path_ids") or [],
+                scope_expansion_approved=scope_expansion_approved,
+                show_top_results_approved=show_top_requested,
             ),
             "pending_clarification": None,
             "clarification_question": None,
@@ -623,6 +646,26 @@ class AgentGraphService:
                         "original_message": state["message"],
                         "raw_topic": slots.raw_topic,
                         "path_options": result.metadata.get("path_options", []),
+                    },
+                    expires_at=datetime.now(UTC) + timedelta(minutes=30),
+                )
+            if result.metadata.get("too_many_results_offered"):
+                update["pending_clarification"] = PendingClarification(
+                    clarification_id=f"clar_{uuid4()}",
+                    type="slot_disambiguation",
+                    status="awaiting_response",
+                    payload={
+                        "kind": "retrieval_query",
+                        "original_intent": state["intent"],
+                        "original_message": state["message"],
+                        "proposed_raw_topic": slots.raw_topic,
+                        "target_path": slots.target_path,
+                        "requested_path_id": slots.requested_path_id,
+                        "search_scope": slots.search_scope,
+                        "resolved_search_path_ids": slots.resolved_search_path_ids,
+                        "excluded_search_path_ids": slots.excluded_search_path_ids,
+                        "show_top_results_allowed": True,
+                        "result_count": result.metadata.get("result_count"),
                     },
                     expires_at=datetime.now(UTC) + timedelta(minutes=30),
                 )
