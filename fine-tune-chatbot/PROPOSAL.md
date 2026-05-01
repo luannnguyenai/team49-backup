@@ -1,481 +1,446 @@
-# Đề xuất: Kế hoạch Fine-tune tiếng Anh cho `fine-tune-chatbot`
+# PROPOSAL: Kế hoạch Fine-tune Chatbot bằng tiếng Anh
 
 ## 1. Mục tiêu
 
-Tài liệu này đề xuất một hướng fine-tune mới cho chatbot trong thư mục `fine-tune-chatbot` với các quyết định chính sau:
+Proposal này đề xuất hướng fine-tune mới cho `fine-tune-chatbot` với 4 quyết định chính:
 
-- Giữ nguyên bộ dataset hiện tại của dự án và xem đây là **nguồn dữ liệu domain chính**.
-- Chuyển chatbot sang **full tiếng Anh**.
-- Dùng **`Qwen/Qwen2.5-7B-Instruct`** làm base model.
-- Dùng **ELI5** như một **dataset phụ trợ đã lọc**, không dùng như nguồn dữ liệu duy nhất hay nguồn dữ liệu chi phối.
-- Đánh giá mô hình bằng bộ benchmark bám sát bài toán thật hơn: **trợ giảng AI/ML/NLP/CV**, không chỉ benchmark instruction-following chung chung.
+| Hạng mục | Đề xuất |
+|---|---|
+| Dataset domain chính | Giữ nguyên dataset hiện tại của dự án |
+| Ngôn ngữ | Chuyển sang full tiếng Anh |
+| Base model | `Qwen/Qwen2.5-7B-Instruct` |
+| External dataset | Dùng **ELI5 đã lọc** như dữ liệu phụ trợ, không dùng làm corpus chính |
 
-Luận điểm chính của proposal này là:
+Luận điểm trung tâm:
 
-> ELI5 hữu ích để dạy mô hình cách trả lời giải thích dài, mạch lạc bằng tiếng Anh, nhưng không phù hợp để thay thế dataset domain hiện có của dự án. Với bài toán này, ELI5 nên được dùng như một nguồn phụ trợ để cải thiện phong cách giải thích.
-
----
-
-## 2. Vì sao hướng hiện tại chưa đủ thuyết phục
-
-Từ các tài liệu hiện có trong thư mục `fine-tune-chatbot`, pipeline cũ đang biện minh external data chủ yếu theo hướng “bổ sung thêm instruction data”. Cách lập luận đó chưa đủ mạnh cho bài toán này, vì chatbot đích không phải trợ lý tổng quát mà gần với một **domain tutor** cho AI/ML/NLP/CV.
-
-Các điểm yếu chính của hướng cũ:
-
-- External data còn quá generic so với domain đích.
-- Mục tiêu huấn luyện chưa tách bạch rõ:
-  - tri thức domain,
-  - phong cách giải thích,
-  - năng lực dùng để benchmark.
-- Bộ benchmark còn rộng và chưa đủ sát với bài toán trợ giảng AI/ML/NLP/CV.
-
-Muốn proposal thuyết phục hơn, cần làm rõ:
-
-1. dataset hiện tại của dự án dạy mô hình điều gì,
-2. ELI5 bổ sung được điều gì mà dataset hiện tại chưa mạnh,
-3. ELI5 không nên bị kỳ vọng làm được điều gì,
-4. đánh giá thành công của mô hình bằng tiêu chí nào.
+> ELI5 phù hợp để dạy mô hình cách giải thích dài, mạch lạc bằng tiếng Anh, nhưng không phù hợp để thay thế dataset domain hiện có. Với bài toán chatbot AI/ML/NLP/CV, ELI5 chỉ nên đóng vai trò dữ liệu phụ trợ cho explanation style.
 
 ---
 
-## 3. Mô hình nền khuyến nghị
+## 2. Kết luận đề xuất
 
-Đề xuất dùng **`Qwen/Qwen2.5-7B-Instruct`**.
-
-Lý do mô hình này phù hợp:
-
-- Đây là một open 7B instruct model mạnh, có năng lực tốt về **reasoning, coding, structured output và long-context generation**.
-- Model card hiện tại trên Hugging Face ghi rõ license **Apache-2.0** và hỗ trợ ngữ cảnh dài tới **128K**.
-- Vì proposal này định hướng chatbot sang **full English**, `Qwen2.5-7B-Instruct` hợp lý hơn so với cách trộn nhiều nguồn dữ liệu nghiêng về tiếng Việt.
-
-Proposal này giả định **fine-tune text-only**. Nếu sau này dự án cần hỗ trợ mạnh cho ảnh, slide, sơ đồ CV, thì đó nên là một phase multimodal riêng, không nên trộn vào quyết định dataset ở giai đoạn này.
-
----
-
-## 4. Quan điểm về ELI5
-
-## Kết luận ngắn
-
-Có thể dùng ELI5, nhưng:
-
-- **không dùng raw**,
-- **không dùng toàn bộ**,
-- **không dùng làm corpus chính**.
-
-## Vì sao ELI5 hấp dẫn
-
-ELI5 được giới thiệu bởi Fan et al. như một dataset long-form question answering với khoảng **270K thread Reddit**, tập trung vào kiểu trả lời mang tính giải thích.
-
-Điều này quan trọng với dự án vì chatbot của bạn không chỉ cần trả lời ngắn, mà còn cần:
-
-- trả lời được các câu hỏi kiểu “why” và “how”,
-- tạo câu trả lời dài theo đoạn,
-- giữ giọng điệu mang tính giảng giải,
-- diễn đạt ý kỹ thuật bằng tiếng Anh tự nhiên hơn.
-
-Đây chính là phần mà ELI5 mạnh hơn một bộ MCQ domain nhỏ.
-
-## Vì sao ELI5 không đủ nếu dùng một mình
-
-ELI5 vẫn là một lựa chọn sai nếu dùng thiếu kiểm soát:
-
-- Đây là **general-domain**, không phải dataset chuyên cho AI/ML/NLP/CV.
-- Dữ liệu đến từ **Reddit**, nên phong cách và chất lượng factual không đồng đều.
-- Nó được tạo cho bài toán **long-form QA**, không phải tutor bám sát course material.
-- Các công trình sau này đã chỉ ra những vấn đề quan trọng của benchmark ELI5, như **train/validation overlap** và metric tự động yếu cho LFQA.
-
-Do đó, ELI5 nên được dùng để dạy mô hình:
-
-- độ dài lời giải thích,
-- cách tổ chức câu trả lời,
-- phong cách “giải thích như người dạy”,
-- độ trôi chảy của long-form QA bằng tiếng Anh.
-
-ELI5 **không nên** bị xem là nguồn tri thức chính cho chatbot AI/ML/NLP/CV.
+| Câu hỏi | Kết luận |
+|---|---|
+| Có nên dùng ELI5 không? | Có |
+| Có nên dùng raw/full ELI5 không? | Không |
+| ELI5 có nên là nguồn tri thức chính không? | Không |
+| ELI5 nên dùng để làm gì? | Dạy cách trả lời giải thích dài bằng tiếng Anh |
+| Dataset nào giữ vai trò chính? | Dataset hiện tại của dự án |
+| Model phù hợp? | `Qwen/Qwen2.5-7B-Instruct` |
 
 ---
 
-## 5. Vì sao ELI5 vẫn hợp lý cho dự án này
+## 3. Vì sao hướng hiện tại chưa đủ mạnh
 
-ELI5 vẫn đáng dùng ở đây vì bốn lý do cụ thể.
+Trong thư mục `fine-tune-chatbot`, hướng cũ chưa đủ thuyết phục vì external data đang được biện minh chủ yếu như một nguồn “instruction data bổ sung”, trong khi bài toán thật là một **domain tutor** cho AI/ML/NLP/CV.
 
-### 5.1 ELI5 bổ sung cho dataset hiện tại thay vì cạnh tranh với nó
+### Vấn đề chính
 
-Dataset hiện tại của dự án đã mang tín hiệu domain quan trọng nhất. ELI5 đóng góp một loại năng lực khác:
+| Vấn đề | Mô tả |
+|---|---|
+| External data quá generic | Không bám sát AI/ML/NLP/CV |
+| Mục tiêu huấn luyện chưa tách rõ | Chưa phân biệt domain knowledge và explanation style |
+| Benchmark chưa sát bài toán | Đang nghiêng về benchmark tổng quát hơn là tutor benchmark |
 
-- dataset hiện tại dạy mô hình **nói cái gì** trong domain,
-- ELI5 dạy mô hình **giải thích dài bằng tiếng Anh như thế nào**.
+### Điều proposal mới cần làm rõ
 
-Cách phân vai này rõ ràng và dễ bảo vệ.
-
-### 5.2 ELI5 phù hợp với định hướng chuyển sang full English
-
-Nếu dự án chuyển từ dữ liệu trộn ngôn ngữ sang full English, ELI5 hợp lý hơn nhiều so với các bộ translated instruction data generic, vì:
-
-- bản chất nó là tiếng Anh,
-- thiên về giải thích,
-- chứa nhiều câu hỏi “why/how” hơn là các cặp instruction-response ngắn.
-
-### 5.3 ELI5 có nền tảng nghiên cứu đủ mạnh
-
-ELI5 không phải một bộ dữ liệu ngẫu nhiên trên Hugging Face. Nó gắn với nhiều công trình long-form QA có uy tín và các benchmark lớn sau này.
-
-ELI5 xuất hiện trong:
-
-- **Fan et al., ACL 2019**: bài báo gốc giới thiệu ELI5.
-- **Petroni et al., NAACL 2021 (KILT)**: ELI5 được đưa vào benchmark KILT cho các tác vụ knowledge-intensive.
-- **Krishna et al., NAACL 2021**: phân tích phê bình, chỉ ra ELI5 quan trọng nhưng phải đánh giá cẩn thận.
-- **Su et al., Findings of ACL 2022**: dùng ELI5 làm benchmark chính cho faithful long-form QA.
-- **WebGPT (OpenAI, 2021)**: huấn luyện và đánh giá trên các câu hỏi mở kiểu ELI5.
-
-Đây là chuỗi citation đủ mạnh để biện minh với giảng viên rằng việc chọn ELI5 có cơ sở học thuật.
-
-### 5.4 ELI5 nhắm đúng kiểu lỗi quan trọng của tutor chatbot
-
-Với một chatbot trợ giảng, nhiều lỗi không phải là sai fact đơn thuần mà là lỗi giải thích:
-
-- trả lời quá ngắn,
-- giải thích quá nông,
-- câu trả lời rời rạc,
-- không có tính sư phạm,
-- không giữ được mạch logic qua cả đoạn văn.
-
-ELI5 đánh trực tiếp vào nhóm vấn đề này.
+| Câu hỏi cần trả lời | Trả lời trong proposal này |
+|---|---|
+| Dataset hiện tại dạy mô hình điều gì? | Dạy tri thức domain |
+| ELI5 bổ sung điều gì? | Dạy phong cách giải thích dài bằng tiếng Anh |
+| ELI5 không nên gánh vai trò gì? | Không làm nguồn tri thức chính |
+| Thành công được đo bằng gì? | Held-out domain eval + benchmark domain-relevant |
 
 ---
 
-## 6. Lưu ý quan trọng: dùng ELI5 đã lọc, không dùng full ELI5
+## 4. Base model đề xuất
 
-Khuyến nghị của tôi là tạo một **ELI5-filtered subset** dành riêng cho repo này.
+### Chọn mô hình
 
-### 6.1 Luật lọc cơ bản
+| Hạng mục | Lựa chọn |
+|---|---|
+| Base model | `Qwen/Qwen2.5-7B-Instruct` |
+| Hình thức fine-tune | QLoRA / LoRA |
+| Loại dữ liệu | Text-only |
+| Ngôn ngữ mục tiêu | English |
 
-Chỉ giữ các sample thỏa phần lớn các điều kiện sau:
+### Lý do chọn
 
-- Câu hỏi mang tính giải thích: bắt đầu bằng hoặc ngầm mang nghĩa `why`, `how`, `what happens`, `what is the difference`, `how does`.
-- Câu trả lời có độ dài trung bình đến dài, ví dụ `120-450` từ.
-- Câu trả lời mạch lạc, thiên về giải thích, không quá nhiều joke hoặc chat noise.
-- Chủ đề phải ít nhất gần với khoa học, toán, tính toán, logic, dữ liệu, ngôn ngữ, tối ưu, xác suất hoặc kỹ thuật.
-- Loại bỏ các nhóm chủ đề như celebrity trivia, sports trivia, politics, entertainment và các nội dung không liên quan.
-
-### 6.2 Bộ lọc bám theo bài toán của dự án
-
-Nên xây bộ lọc topic relevance theo keyword hoặc semantic similarity quanh các nhóm:
-
-- machine learning
-- deep learning
-- neural networks
-- statistics
-- probability
-- optimization
-- linear algebra
-- NLP / language models / embeddings / transformers
-- computer vision / CNN / image features / segmentation / detection
-- algorithms / computation / information theory
-
-### 6.3 Bộ lọc chất lượng dữ liệu
-
-Nên loại bỏ các sample có dấu hiệu:
-
-- quá thiên về ý kiến chủ quan hoặc suy đoán,
-- nặng first-person anecdote,
-- có sarcasm hoặc Reddit meta-discussion,
-- answer không khớp question,
-- duplicate hoặc near-duplicate.
-
-### 6.4 Vai trò cuối cùng của ELI5 trong pipeline
-
-Sau khi lọc, ELI5 nên trở thành một **nguồn phụ trợ để dạy explanation behavior**, không phải nguồn dữ liệu chi phối.
+| Lý do | Giải thích |
+|---|---|
+| Phù hợp quy mô | 7B là mức hợp lý để fine-tune thực tế |
+| Mạnh về reasoning và instruction-following | Phù hợp chatbot kỹ thuật |
+| Hỗ trợ ngữ cảnh dài | Hữu ích cho câu trả lời giải thích nhiều đoạn |
+| Hệ sinh thái phổ biến | Dễ triển khai, dễ benchmark, dễ báo cáo |
 
 ---
 
-## 7. Tỷ lệ trộn dữ liệu đề xuất
+## 5. Vai trò của dataset hiện tại và ELI5
 
-Tỷ lệ trộn dữ liệu cho vòng đầu:
+### Phân vai dữ liệu
 
-- **65-75%**: dataset hiện tại của dự án, giữ nguyên
-- **20-30%**: filtered ELI5 subset
-- **5-10%**: dữ liệu cân bằng format / instruction nếu cần
+| Nguồn dữ liệu | Vai trò chính | Có nên là nguồn tri thức chính không? |
+|---|---|---|
+| Dataset hiện tại của dự án | Tri thức AI/ML/NLP/CV, phong cách course-specific | Có |
+| ELI5 đã lọc | Long-form explanation style bằng tiếng Anh | Không |
 
-Tôi **không khuyến nghị** vượt quá ~30% ELI5 ở v1, vì khi đó độ lệch domain sẽ bắt đầu kéo hành vi mô hình đi xa bài toán thật.
+### Ý nghĩa của cách phân vai này
 
-### Vì sao tỷ lệ này hợp lý
+| Thành phần | Dạy mô hình điều gì |
+|---|---|
+| Dataset hiện tại | “Nói cái gì” trong domain |
+| ELI5 | “Giải thích như thế nào” bằng tiếng Anh |
 
-- Dataset hiện tại vẫn là neo chính cho tri thức AI/ML/NLP/CV.
-- ELI5 bổ sung phong cách giải thích bằng tiếng Anh.
-- Mô hình vẫn giữ trọng tâm domain thay vì biến thành một general explainer.
-
-Nếu sau này thấy mô hình giải thích chưa tốt, có thể tăng ELI5 nhẹ.  
-Nếu thấy mô hình bị domain drift, nên giảm ELI5 trước khi thay đổi các yếu tố khác.
-
----
-
-## 8. Preview vài dòng dữ liệu ELI5
-
-Dưới đây là các preview ngắn, đã **lược bớt**, để minh họa kiểu dữ liệu ELI5.
-
-### Ví dụ A
-
-- Question: `why chemical weapons are considered more indiscriminate than conventional weapons`
-- Kiểu answer: giải thích nhiều câu về độ lan rộng, độ tồn dư và collateral damage
-
-### Ví dụ B
-
-- Question: `in football, why waste the first two plays with a rush up the middle`
-- Kiểu answer: giải thích reasoning của chiến thuật, không chỉ trả lời 1 dòng
-
-### Ví dụ C
-
-- Trong bản KILT mirror, sample có dạng một prompt mở cùng một hoặc nhiều answer, kèm provenance
-- Giá trị với dự án: có thể convert thành instruction-style QA, nhưng vẫn phải lọc theo domain
-
-Các preview này cho thấy lợi ích chính:
-
-- ELI5 dạy **cấu trúc giải thích**,
-- nhưng phân bố chủ đề thô của nó quá rộng để đưa thẳng vào fine-tune.
+Đây là điểm lập luận mạnh nhất của proposal.
 
 ---
 
-## 9. ELI5 đã được dùng trong những paper nào
+## 6. Vì sao chọn ELI5
 
-ELI5 có độ tin cậy vì đã xuất hiện hoặc được phân tích trong nhiều bối cảnh nghiên cứu quan trọng:
+### Điểm mạnh của ELI5
 
-1. **ELI5: Long Form Question Answering**  
-   Fan et al., ACL 2019  
-   Bài báo gốc giới thiệu ELI5 là dataset long-form QA quy mô lớn.
+| Điểm mạnh | Ý nghĩa với dự án |
+|---|---|
+| Long-form QA | Phù hợp chatbot cần trả lời giải thích dài |
+| Nhiều câu hỏi kiểu why/how | Hợp với vai trò tutor |
+| Dữ liệu tiếng Anh tự nhiên | Phù hợp định hướng full English |
+| Có nền tảng học thuật mạnh | Dễ bảo vệ khi viết proposal |
 
-2. **KILT: a Benchmark for Knowledge Intensive Language Tasks**  
-   Petroni et al., NAACL 2021  
-   Đưa ELI5 vào benchmark lớn có grounding trên cùng một Wikipedia snapshot.
+### ELI5 giúp cải thiện nhóm năng lực nào
 
-3. **Hurdles to Progress in Long-form Question Answering**  
-   Krishna et al., NAACL 2021  
-   Chỉ ra các vấn đề quan trọng khi dùng ELI5 và nhấn mạnh không nên đánh giá ngây thơ.
-
-4. **Read before Generate! Faithful Long Form Question Answering with Machine Reading**  
-   Su et al., Findings of ACL 2022  
-   Dùng ELI5 như một benchmark chính cho long-form QA có grounding tốt hơn.
-
-5. **WebGPT: Improving the factual accuracy of language models through web browsing**  
-   OpenAI, December 2021  
-   Dùng các câu hỏi kiểu ELI5 để huấn luyện và đánh giá hệ thống.
-
-Điểm quan trọng khi trình bày với giảng viên là:
-
-- ELI5 là dataset có tiếng,
-- nhưng các paper mạnh cũng chỉ ra giới hạn của nó,
-- vì vậy phải dùng ELI5 có kiểm soát, kèm benchmark cẩn thận.
-
-Lập luận đó mạnh hơn nhiều so với việc chỉ nói “ELI5 lớn nên train tốt”.
+| Năng lực | ELI5 có giúp không? |
+|---|---|
+| Trả lời theo đoạn, mạch lạc | Có |
+| Giải thích khái niệm bằng tiếng Anh | Có |
+| Giữ giọng điệu “giảng giải” | Có |
+| Tri thức chuyên sâu AI/ML/NLP/CV | Không đủ |
+| Bám sát course material | Không |
 
 ---
 
-## 10. Bộ benchmark phù hợp với bài toán của dự án
+## 7. Vì sao không nên dùng ELI5 làm dataset chính
 
-Bài toán thật của chatbot là: **hỏi đáp và giải thích về AI/ML/NLP/CV**.  
-Vì vậy benchmark phải đo đúng việc đó.
+| Rủi ro | Giải thích |
+|---|---|
+| General-domain | Chủ đề quá rộng, nhiều nội dung không liên quan |
+| Chất lượng không đồng đều | Dữ liệu Reddit có nhiễu |
+| Không course-grounded | Không bám CS224n/CS231n/CS230 hay tài liệu riêng của dự án |
+| Có hạn chế benchmark đã được chỉ ra | Có overlap và metric LFQA chưa thật sự mạnh |
 
-## Tier A: Benchmark chính của repo
+### Kết luận sử dụng
 
-Dùng **held-out split từ chính dataset hiện tại của dự án** làm shipping gate quan trọng nhất.
-
-Đây là benchmark quan trọng nhất vì nó đo trực tiếp đúng hành vi chatbot cần có trong dự án.
-
-Các chỉ số nên có:
-
-- độ chính xác MCQ trên tập câu hỏi course-held-out,
-- chất lượng câu trả lời giải thích trên các câu hỏi mở chuyển đổi từ tập held-out,
-- độ chính xác của thuật ngữ AI/ML/NLP/CV,
-- khả năng điều chỉnh mức độ ngắn/dài của câu trả lời.
-
-Chính sách split nên là:
-
-- group theo lecture / topic / source unit,
-- train/val/test phải tách nhau theo topic,
-- không để paraphrase của cùng một câu hỏi xuất hiện khác split.
-
-## Tier B: Benchmark học thuật external nhưng sát domain hơn
-
-### 10.1 MMLU theo subject subset
-
-Nên dùng **MMLU**, nhưng **không dùng global score** làm câu chuyện chính.  
-Chỉ lấy các subject gần bài toán:
-
-- `machine_learning`
-- `college_computer_science`
-- `college_mathematics`
-- `high_school_statistics`
-- `abstract_algebra` hoặc `formal_logic` như stress test phụ
-
-Lý do:
-
-- Đây là benchmark quen thuộc, dễ trao đổi học thuật.
-- Subject slicing khiến nó sát bài toán hơn nhiều so với một điểm MMLU tổng.
-
-### 10.2 MMLU-Pro
-
-Nên dùng **MMLU-Pro** như benchmark khó hơn ở tầng thứ hai.
-
-Lý do:
-
-- Đây là benchmark được đề xuất để robust hơn và khó hơn MMLU.
-- Hữu ích để kiểm tra mô hình fine-tune không chỉ học các pattern dễ.
-
-### 10.3 TheoremQA
-
-Nên dùng **TheoremQA**, đặc biệt các phần **EE&CS, Math, Physics**.
-
-Lý do phù hợp:
-
-- Nó gần technical reasoning hơn các benchmark chat thông thường.
-- Dataset này được curate bởi domain experts.
-- Nó phù hợp với một tutor cần giải thích các nền tảng toán cho ML.
-
-Đây là benchmark rất hợp với loại tri thức nằm gần CS224n / CS231n / CS230.
-
-## Tier C: Benchmark cho phong cách giải thích
-
-Dùng một **dev/test slice riêng của filtered ELI5** chỉ như **style-and-explanation benchmark**.
-
-Không dùng phần này làm tiêu chí chính để ship model.
-
-Phần này chỉ để đo:
-
-- độ dài câu trả lời,
-- độ mạch lạc,
-- cấu trúc giải thích,
-- giọng điệu giải thích bằng tiếng Anh.
-
-Mục đích là kiểm tra xem ELI5 có thật sự giúp phần behavior mà ta muốn cải thiện hay không.
+| Cách dùng | Có khuyến nghị không? |
+|---|---|
+| Dùng full ELI5 để train chính | Không |
+| Dùng ELI5 làm auxiliary explanation corpus | Có |
+| Dùng ELI5 dev/test để đo style | Có |
 
 ---
 
-## 11. Những benchmark không nên dùng làm tiêu chí chính
+## 8. Preview dữ liệu ELI5
 
-Tôi không khuyến nghị dùng các benchmark sau làm câu chuyện chính cho dự án:
+Dưới đây là preview rút gọn để minh họa kiểu dữ liệu của ELI5.
 
-- **global MMLU score**  
-  Quá rộng và không đủ sát bài toán trợ giảng AI/ML/NLP/CV.
+| Ví dụ | Question | Kiểu answer |
+|---|---|---|
+| A | `why chemical weapons are considered more indiscriminate than conventional weapons` | Giải thích nhiều câu về mức độ lan rộng, tồn dư và collateral damage |
+| B | `in football, why waste the first two plays with a rush up the middle` | Giải thích reasoning chiến thuật, không chỉ đáp án ngắn |
+| C | Prompt mở trong KILT-ELI5 | Một hoặc nhiều câu trả lời kèm provenance, nhưng vẫn cần lọc mạnh trước khi huấn luyện |
 
-- **GSM8K đơn lẻ**  
-  Hữu ích cho arithmetic reasoning nhưng quá hẹp so với chatbot mục tiêu.
+### Ý nghĩa của preview
 
-- **generic chat benchmark**  
-  Không trả lời được câu hỏi liệu mô hình có giải thích tốt transformer, backpropagation, attention, CNN hay không.
-
-- **raw ELI5 score làm shipping gate**  
-  Cách này dễ đánh giá quá cao độ trôi chảy long-form và đánh giá quá thấp độ đúng domain.
+| Quan sát | Kết luận |
+|---|---|
+| Câu hỏi thiên về giải thích | Hợp để dạy explanation behavior |
+| Câu trả lời dài theo đoạn | Hợp để cải thiện long-form response |
+| Chủ đề rất rộng | Không phù hợp dùng raw cho domain tutor |
 
 ---
 
-## 12. Giao thức benchmark cụ thể
+## 9. Cách dùng ELI5 đúng cho dự án này
 
-### 12.1 Trước khi fine-tune
+### Nguyên tắc sử dụng
+
+| Nguyên tắc | Mô tả |
+|---|---|
+| Không dùng raw | Phải lọc kỹ trước khi huấn luyện |
+| Không dùng toàn bộ | Chỉ lấy subset liên quan |
+| Không dùng làm domain corpus | Dataset hiện tại vẫn là trục chính |
+| Chỉ dùng để bù capability gap | Tập trung vào explanation style |
+
+### Luật lọc dữ liệu đề xuất
+
+| Nhóm lọc | Luật lọc |
+|---|---|
+| Loại câu hỏi | Ưu tiên `why`, `how`, `difference`, `what happens`, `how does` |
+| Độ dài câu trả lời | Khoảng `120-450` từ |
+| Chất lượng | Mạch lạc, giải thích rõ, ít noise |
+| Topic | Science, math, computing, probability, optimization, NLP, CV, ML |
+| Loại bỏ | Celebrity, sports, politics, entertainment, anecdotal answers, sarcasm |
+
+### Topic filter gợi ý cho bài toán AI/ML/NLP/CV
+
+| Cụm chủ đề nên ưu tiên |
+|---|
+| machine learning |
+| deep learning |
+| neural networks |
+| probability |
+| statistics |
+| optimization |
+| linear algebra |
+| NLP / transformers / embeddings / language models |
+| computer vision / CNN / segmentation / detection |
+| algorithms / computation / information theory |
+
+---
+
+## 10. Tỷ lệ trộn dữ liệu đề xuất
+
+| Thành phần | Tỷ lệ đề xuất |
+|---|---|
+| Dataset hiện tại của dự án | 65-75% |
+| Filtered ELI5 subset | 20-30% |
+| Dữ liệu cân bằng format / instruction khác nếu cần | 5-10% |
+
+### Giải thích
+
+| Quyết định | Lý do |
+|---|---|
+| Không vượt quá ~30% ELI5 ở v1 | Tránh domain drift |
+| Giữ dataset dự án làm anchor | Bảo toàn tri thức AI/ML/NLP/CV |
+| Tăng ELI5 chỉ khi cần | Chỉ tăng nếu explanation quality còn yếu |
+
+---
+
+## 11. Các paper liên quan và mức độ uy tín
+
+### 11.1 Bảng phân loại độ uy tín
+
+| Paper / nguồn | Venue | Peer review | Mức uy tín học thuật | Ghi chú sử dụng |
+|---|---|---:|---|---|
+| **ELI5: Long Form Question Answering** | ACL 2019 | Có | Rất cao | Paper gốc của ELI5 |
+| **KILT: a Benchmark for Knowledge Intensive Language Tasks** | NAACL 2021 | Có | Rất cao | Đưa ELI5 vào benchmark lớn |
+| **Hurdles to Progress in Long-form Question Answering** | NAACL 2021 | Có | Rất cao | Quan trọng vì chỉ ra hạn chế của ELI5 |
+| **TheoremQA** | EMNLP 2023 | Có | Rất cao | Benchmark phù hợp technical reasoning |
+| **MMLU** | ICLR 2021 | Có | Rất cao | Benchmark chuẩn, top ML venue |
+| **MMLU-Pro** | NeurIPS 2024 Datasets & Benchmarks Track | Có | Rất cao | Bản nâng cấp mạnh của MMLU |
+| **Read before Generate!** | Findings of ACL 2022 | Có | Cao | Dùng được, nhưng thấp hơn main conference |
+| **WebGPT** | OpenAI Research page | Không chuẩn conference/journal | Trung bình | Chỉ nên dùng phụ trợ, không làm citation chính |
+| Hugging Face dataset/model cards | Không phải paper | Không | Thấp | Chỉ dùng làm nguồn kỹ thuật |
+| GitHub repo / blog | Không phải paper | Không | Thấp | Không dùng làm nguồn học thuật chính |
+
+### 11.2 Xếp hạng venue lớn
+
+| Venue | Loại | Mức xếp hạng tham khảo |
+|---|---|---|
+| ACL | Top conference NLP | A* |
+| ICLR | Top conference ML | A* |
+| NeurIPS | Top conference ML | A* |
+| NAACL | Top conference NLP | A |
+| EMNLP | Top conference NLP | A |
+
+### 11.3 Nếu cần nguồn journal Q1 / WoS / Scopus
+
+| Journal | Mức uy tín | Dùng để làm gì |
+|---|---|---|
+| **Transactions of the Association for Computational Linguistics (TACL)** | Q1, indexed in Web of Science | Bổ sung citation journal mạnh |
+| **Computational Linguistics** | Q1 | Bổ sung citation journal mạnh |
+
+### 11.4 Journal Q1 có nhắc trực tiếp đến ELI5
+
+| Bài báo | Journal | Vai trò |
+|---|---|---|
+| **FeTaQA: Free-form Table Question Answering** | TACL 2022 | Nhắc ELI5 như long-form QA dataset quan trọng |
+| **CLAPnq: Cohesive Long-form Answers from Passages in Natural Questions for RAG systems** | TACL 2025 | So sánh và nêu giới hạn của ELI5 trong grounded RAG |
+
+### 11.5 Kết luận về nguồn học thuật
+
+| Nhóm nguồn | Có nên dùng trong proposal không? |
+|---|---|
+| Top conference peer-reviewed | Có, nên là nguồn chính |
+| Journal Q1 / WoS / Scopus | Có, rất nên bổ sung |
+| Blog / model card / dataset card | Chỉ dùng phụ trợ |
+
+---
+
+## 12. Bộ benchmark phù hợp với bài toán AI/ML/NLP/CV
+
+### 12.1 Nguyên tắc chọn benchmark
+
+| Nguyên tắc | Ý nghĩa |
+|---|---|
+| Phải bám bài toán chatbot thật | Không dùng benchmark chung chung làm tiêu chí chính |
+| Ưu tiên domain relevance | AI/ML/NLP/CV quan trọng hơn điểm tổng quát |
+| Có benchmark nội bộ | Held-out set của chính dự án là quan trọng nhất |
+| Có benchmark external để báo cáo học thuật | Tăng sức thuyết phục với giảng viên |
+
+### 12.2 Benchmark stack đề xuất
+
+| Tier | Benchmark | Vai trò |
+|---|---|---|
+| A | Held-out internal dataset | Shipping gate quan trọng nhất |
+| B1 | MMLU selected subjects | Kiểm tra nền tảng kiến thức học thuật |
+| B2 | MMLU-Pro | Kiểm tra độ khó và reasoning mạnh hơn |
+| B3 | TheoremQA | Kiểm tra technical reasoning gần AI/ML |
+| C | Filtered ELI5 dev/test | Chỉ đo explanation style bằng tiếng Anh |
+
+### 12.3 Subject subset nên dùng trong MMLU
+
+| Subject | Có nên dùng? | Lý do |
+|---|---:|---|
+| `machine_learning` | Có | Sát nhất với bài toán |
+| `college_computer_science` | Có | Sát nền tảng CS |
+| `college_mathematics` | Có | Quan trọng cho ML foundations |
+| `high_school_statistics` | Có | Hữu ích cho xác suất, thống kê |
+| `abstract_algebra` | Tùy chọn | Stress test lý luận |
+| `formal_logic` | Tùy chọn | Stress test lập luận |
+
+---
+
+## 13. Benchmark nào không nên là tiêu chí chính
+
+| Benchmark / cách dùng | Vì sao không nên là tiêu chí chính |
+|---|---|
+| Global MMLU score | Quá rộng, không sát AI/ML/NLP/CV tutor |
+| GSM8K đơn lẻ | Quá hẹp, chỉ thiên về arithmetic reasoning |
+| Generic chat benchmark | Không đo được khả năng giải thích khái niệm kỹ thuật |
+| Raw ELI5 score | Dễ ưu tiên fluency hơn factual correctness |
+
+---
+
+## 14. Giao thức đánh giá
+
+### 14.1 Trước fine-tune
 
 Đánh giá base `Qwen/Qwen2.5-7B-Instruct` trên:
 
-- internal held-out domain set,
-- MMLU selected subjects,
-- MMLU-Pro STEM slice hoặc full,
-- TheoremQA selected categories,
-- filtered ELI5 dev slice.
+| Bộ đánh giá |
+|---|
+| internal held-out domain set |
+| MMLU selected subjects |
+| MMLU-Pro |
+| TheoremQA |
+| filtered ELI5 dev/test |
 
-### 12.2 Sau khi fine-tune
+### 14.2 Sau fine-tune
 
-Chạy lại đúng bộ đánh giá đó và so sánh delta.
+Chạy lại toàn bộ và so sánh delta.
 
-### 12.3 Tiêu chí thành công
+### 14.3 Tiêu chí thành công
 
-Các ngưỡng thực dụng nên là:
+| Chỉ số | Kỳ vọng |
+|---|---|
+| Internal domain benchmark | Phải tăng |
+| MMLU selected subjects | Không được giảm đáng kể |
+| TheoremQA | Tăng nhẹ hoặc ít nhất không tụt mạnh |
+| ELI5 style eval | Phải cải thiện rõ về explanation quality |
 
-- Internal domain benchmark: **phải tăng**
-- MMLU selected subjects: **không được giảm đáng kể**
-- TheoremQA: **tăng nhẹ hoặc ít nhất không tụt mạnh**
-- Filtered ELI5 explanation benchmark: **phải cải thiện rõ về chất lượng giải thích**
+### 14.4 Quy tắc ra quyết định
 
-Nếu internal domain tăng nhưng MMLU-style score giảm nhẹ thì vẫn có thể chấp nhận.  
-Nếu ELI5-style fluency tăng nhưng độ đúng AI/ML/NLP/CV giảm thì run đó nên bị loại.
-
----
-
-## 13. Kế hoạch triển khai thực tế trong repo này
-
-### Phase 1
-
-- Base model: `Qwen/Qwen2.5-7B-Instruct`
-- Phương pháp: QLoRA / LoRA
-- Ngôn ngữ: English only
-- Dữ liệu:
-  - dataset hiện tại của dự án, giữ nguyên
-  - filtered ELI5 subset
-
-### Phase 2
-
-Tạo ba file validation:
-
-- `domain_eval.jsonl`
-- `eli5_style_eval.jsonl`
-- `external_reasoning_eval.jsonl`
-
-### Phase 3
-
-Theo dõi ablation:
-
-- run A: chỉ dataset của dự án
-- run B: dataset dự án + 10% ELI5
-- run C: dataset dự án + 20% ELI5
-- run D: dataset dự án + 30% ELI5
-
-Điểm này rất quan trọng vì nó cho phép chứng minh ELI5 có thực sự giúp hay không, thay vì giả định nó giúp.
+| Tình huống | Kết luận |
+|---|---|
+| Internal domain tăng, MMLU giảm nhẹ | Có thể chấp nhận |
+| ELI5 fluency tăng, domain correctness giảm | Loại run |
+| Explanation không tăng rõ | Xem lại tỷ lệ ELI5 hoặc lọc ELI5 |
 
 ---
 
-## 14. Khuyến nghị cuối cùng
+## 15. Kế hoạch triển khai trong repo này
 
-Proposal mạnh nhất cho dự án này là:
+### Phase 1: Chuẩn hóa dữ liệu
 
-1. Giữ dataset hiện tại làm nguồn domain chính.
-2. Chuyển sang `Qwen/Qwen2.5-7B-Instruct`.
-3. Chuyển chatbot sang full English.
-4. Dùng **filtered ELI5** như một dataset phụ trợ cho explanation style.
-5. Benchmark chủ yếu bằng:
-   - held-out internal AI/ML/NLP/CV data,
-   - MMLU selected subjects,
-   - MMLU-Pro,
-   - TheoremQA,
-   - filtered ELI5 dev chỉ để đo explanation style.
+| Việc cần làm | Mục tiêu |
+|---|---|
+| Giữ nguyên dataset domain hiện tại | Làm anchor chính |
+| Tạo filtered ELI5 subset | Bổ sung explanation style |
+| Chuẩn hóa toàn bộ sang English | Đồng bộ mục tiêu huấn luyện |
 
-Nếu trình bày ELI5 theo hướng này, lập luận sẽ mạnh hơn nhiều:
+### Phase 2: Tạo bộ eval
 
-- ELI5 không thay dataset domain của bạn,
-- ELI5 lấp đúng khoảng trống về cách giải thích bằng tiếng Anh,
-- ELI5 có hậu thuẫn từ các paper mạnh,
-- các giới hạn của ELI5 đã được thừa nhận và kiểm soát,
-- benchmark thì bám sát đúng bài toán chatbot trợ giảng.
+| File gợi ý | Vai trò |
+|---|---|
+| `domain_eval.jsonl` | Đánh giá domain chính |
+| `eli5_style_eval.jsonl` | Đánh giá explanation style |
+| `external_reasoning_eval.jsonl` | Đánh giá benchmark ngoài |
 
-Đây là một kế hoạch fine-tune có thể bảo vệ được và có thể triển khai ngay trong repo này.
+### Phase 3: Chạy ablation
+
+| Run | Thành phần dữ liệu |
+|---|---|
+| A | Chỉ dataset dự án |
+| B | Dataset dự án + 10% ELI5 |
+| C | Dataset dự án + 20% ELI5 |
+| D | Dataset dự án + 30% ELI5 |
+
+### Ý nghĩa của ablation
+
+| Mục đích | Lý do |
+|---|---|
+| Chứng minh ELI5 có ích thật hay không | Tránh kết luận cảm tính |
+| Tìm tỷ lệ trộn tối ưu | Giảm nguy cơ domain drift |
 
 ---
 
-## 15. Nguồn tham khảo
+## 16. Khuyến nghị cuối cùng
 
-Các nguồn được dùng để xây dựng proposal này:
+| Hạng mục | Khuyến nghị cuối cùng |
+|---|---|
+| Dataset chính | Dataset hiện tại của dự án |
+| Base model | `Qwen/Qwen2.5-7B-Instruct` |
+| Ngôn ngữ | Full English |
+| Vai trò của ELI5 | Auxiliary explanation dataset đã lọc |
+| Benchmark chính | Held-out internal AI/ML/NLP/CV set |
+| Benchmark học thuật phụ | MMLU selected subjects, MMLU-Pro, TheoremQA |
+| Benchmark phong cách | Filtered ELI5 dev/test |
 
-- ELI5 official repository: https://github.com/facebookresearch/ELI5
-- ELI5 dataset explorer: https://facebookresearch.github.io/ELI5/
-- ELI5 original paper (ACL 2019): https://aclanthology.org/P19-1346/
-- KILT paper (NAACL 2021): https://aclanthology.org/2021.naacl-main.200/
-- Hurdles to Progress in Long-form Question Answering (NAACL 2021): https://aclanthology.org/2021.naacl-main.393/
-- Read before Generate! (Findings of ACL 2022): https://aclanthology.org/2022.findings-acl.61/
-- WebGPT: https://openai.com/research/webgpt
-- Qwen2.5-7B-Instruct model card: https://huggingface.co/Qwen/Qwen2.5-7B-Instruct
-- KILT dataset card on Hugging Face: https://huggingface.co/datasets/facebook/kilt_tasks
-- MMLU paper: https://openreview.net/forum?id=d7KBjmI3GmQ
-- MMLU-Pro paper: https://huggingface.co/papers/2406.01574
-- TheoremQA paper: https://aclanthology.org/2023.emnlp-main.489/
+### Kết luận tổng hợp
 
-Ghi chú triển khai:
+Proposal mạnh nhất cho dự án này không phải là:
 
-- Dataset card hiện tại của `facebook/kilt_tasks` trên Hugging Face ghi `mit`.
-- Repository gốc của ELI5 cũng nêu rõ dữ liệu processed Reddit/CommonCrawl có ràng buộc về hosting.
-- Khi triển khai trong dự án, cần pin đúng nguồn dataset được tải và ghi lại trong training manifest.
+> “Dùng ELI5 vì nó lớn.”
+
+Mà phải là:
+
+> “Giữ dataset hiện tại làm nguồn tri thức domain chính, và dùng ELI5 đã lọc để bù đúng khoảng trống về phong cách giải thích dài bằng tiếng Anh; sau đó đánh giá bằng benchmark bám sát bài toán AI/ML/NLP/CV.”
+
+Đây là cách lập luận chặt hơn, đúng học thuật hơn, và dễ thuyết phục giảng viên hơn.
+
+---
+
+## 17. Nguồn tham khảo chính
+
+### 17.1 Paper / venue học thuật
+
+| Tên | Link |
+|---|---|
+| ELI5 (ACL 2019) | https://aclanthology.org/P19-1346/ |
+| KILT (NAACL 2021) | https://aclanthology.org/2021.naacl-main.200/ |
+| Hurdles to Progress in LFQA (NAACL 2021) | https://aclanthology.org/2021.naacl-main.393/ |
+| TheoremQA (EMNLP 2023) | https://aclanthology.org/2023.emnlp-main.489/ |
+| MMLU (ICLR 2021) | https://openreview.net/forum?id=d7KBjmI3GmQ |
+| MMLU-Pro (NeurIPS 2024) | https://proceedings.neurips.cc/paper_files/paper/2024/hash/ad236edc564f3e3156e1b2feafb99a24-Abstract-Datasets_and_Benchmarks_Track.html |
+| FeTaQA (TACL 2022) | https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00446/109273/FeTaQA-Free-form-Table-Question-Answering |
+| CLAPnq (TACL 2025) | https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00729/127456/CLAPnq-Cohesive-Long-form-Answers-from-Passages-in |
+
+### 17.2 Xếp hạng venue / journal
+
+| Tên | Link |
+|---|---|
+| ACL rank | https://portal.core.edu.au/conf-ranks/196/ |
+| ICLR rank | https://portal.core.edu.au/conf-ranks/2273/ |
+| NeurIPS rank | https://portal.core.edu.au/conf-ranks/98/ |
+| NAACL rank | https://portal.core.edu.au/conf-ranks/?by=acronym&search=NAACL |
+| EMNLP rank | https://portal.core.edu.au/conf-ranks/?by=acronym&search=EMNLP |
+| TACL Q1 | https://www.scimagojr.com/journalsearch.php?clean=0&q=21101049047&tip=sid |
+| Computational Linguistics Q1 | https://www.scimagojr.com/journalsearch.php?q=26801&tip=sid |
+| TACL indexing | https://direct.mit.edu/tacl/pages/abstracting-indexing |
+
+### 17.3 Nguồn kỹ thuật phụ trợ
+
+| Tên | Link |
+|---|---|
+| ELI5 official repo | https://github.com/facebookresearch/ELI5 |
+| ELI5 dataset explorer | https://facebookresearch.github.io/ELI5/ |
+| Qwen2.5-7B-Instruct model card | https://huggingface.co/Qwen/Qwen2.5-7B-Instruct |
+
