@@ -23,18 +23,6 @@ api.example.com {
 		Referrer-Policy strict-origin-when-cross-origin
 	}
 
-	@auth path /api/auth/*
-	handle @auth {
-		rate_limit {
-			zone auth_zone {
-				key {remote_host}
-				events 20
-				window 1m
-			}
-		}
-		reverse_proxy 127.0.0.1:8000
-	}
-
 	@api path /api/*
 	handle @api {
 		request_body {
