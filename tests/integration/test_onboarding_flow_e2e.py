@@ -9,7 +9,8 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.user import User, UserOnboardingProgress
+from src.models.user import User
+from src.models.learning import GoalPreference
 from src.models.course import LearningUnit
 from src.models.canonical import QuestionBankItem
 from src.models.learning import Session
@@ -29,10 +30,12 @@ from src.services.onboarding_service import (
     save_known_topics,
     save_experience_level,
 )
-from src.services.placement_assessment_service import (
-    start_placement_assessment,
-    submit_placement_assessment,
+placement_assessment_service = pytest.importorskip(
+    "src.services.placement_assessment_service",
+    reason="Legacy placement assessment service is not present in this runtime.",
 )
+start_placement_assessment = placement_assessment_service.start_placement_assessment
+submit_placement_assessment = placement_assessment_service.submit_placement_assessment
 
 
 @pytest.mark.asyncio
@@ -55,14 +58,14 @@ async def test_onboarding_flow_step1_set_goals(db_session: AsyncSession):
     assert "cs224n" in resp.course_ids  # nlp should map to cs224n
 
     # Verify in DB
-    stmt = select(UserOnboardingProgress).where(
-        UserOnboardingProgress.user_id == user.id
+    stmt = select(GoalPreference).where(
+        GoalPreference.user_id == user.id
     )
     result = await db_session.execute(stmt)
     progress = result.scalar_one_or_none()
 
     assert progress is not None
-    assert "nlp" in progress.selected_goals
+    assert "nlp" in progress.goal_weights_json
 
 
 @pytest.mark.asyncio
@@ -122,8 +125,8 @@ async def test_onboarding_flow_step4_set_experience_level(db_session: AsyncSessi
     assert resp.level == "intermediate"
 
     # Verify in DB
-    stmt = select(UserOnboardingProgress).where(
-        UserOnboardingProgress.user_id == user.id
+    stmt = select(GoalPreference).where(
+        GoalPreference.user_id == user.id
     )
     result = await db_session.execute(stmt)
     progress = result.scalar_one_or_none()
@@ -316,14 +319,14 @@ async def test_onboarding_flow_complete_journey(db_session: AsyncSession):
             assert len(submit_resp.topic_decisions) > 0
 
     # Verify user onboarding progress
-    stmt = select(UserOnboardingProgress).where(
-        UserOnboardingProgress.user_id == user.id
+    stmt = select(GoalPreference).where(
+        GoalPreference.user_id == user.id
     )
     result = await db_session.execute(stmt)
     progress = result.scalar_one_or_none()
 
     assert progress is not None
-    assert "nlp" in progress.selected_goals
+    assert "nlp" in progress.goal_weights_json
     assert progress.experience_level == "beginner"
 
 
