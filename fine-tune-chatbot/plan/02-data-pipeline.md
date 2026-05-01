@@ -24,17 +24,10 @@ Record:
 
 - source names
 - sample counts
-- language distribution
 - domain coverage
 - held-out split policy
 
-### 2. Normalize to English
-
-- translate any Vietnamese or mixed-language content to English
-- keep technical terms intact
-- reject low-quality translations
-
-### 3. Convert to chat format
+### 2. Convert to chat format
 
 Use a stable chat template with:
 
@@ -42,7 +35,7 @@ Use a stable chat template with:
 - user question
 - assistant answer
 
-### 4. Filter ELI5
+### 3. Filter ELI5
 
 Apply:
 
@@ -51,7 +44,7 @@ Apply:
 - noise exclusion
 - style quality review
 
-### 5. Prepare ablation mixes
+### 4. Prepare ablation mixes
 
 | Run | Mix |
 |---|---|
@@ -60,7 +53,7 @@ Apply:
 | C | domain + 20% ELI5 |
 | D | domain + 30% ELI5 |
 
-### 6. Split eval sets
+### 5. Split eval sets
 
 - internal held-out domain set
 - filtered ELI5 dev/test
