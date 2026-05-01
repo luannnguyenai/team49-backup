@@ -20,8 +20,11 @@ Create:
 - `src/services/agent_memory_compaction_service.py` - versioned thread summary compaction and `memory_ref` management.
 - `src/services/agent_graph_contracts.py` - Pydantic/domain contracts for checkpoint state, routing, slots, policy, pending actions, typed tool results, and graph node names.
 - `src/services/agent_graph_router.py` - structured intent router and deterministic test router seam.
+- `src/services/agent_structured_router.py` - production structured-output LLM router with schema validation and clarify fallback.
 - `src/services/agent_slot_resolver.py` - deterministic canonicalization from extracted slots to canonical unit/course/planner ids.
+- `src/services/agent_search_scope_service.py` - current-path, explicit-path, and expanded-path search scope policy.
 - `src/services/agent_policy_service.py` - `PolicyDecision` validation before tool execution/action proposal.
+- `src/services/agent_path_switch_service.py` - validated active-path switch proposal and commit service using `GoalPreference.selected_course_ids` and planner regeneration.
 - `src/services/agent_tool_nodes.py` - LangGraph intent nodes backed by existing deterministic services.
 - `src/services/agent_response_composer.py` - typed response composer enforcing no-evidence/no-grounded-answer.
 - `src/services/agent_graph_service.py` - graph construction/invoke/resume orchestration and route integration API.
@@ -29,8 +32,11 @@ Create:
 - `tests/services/test_agent_graph_contracts.py`
 - `tests/repositories/test_agent_graph_repo.py`
 - `tests/services/test_agent_graph_router.py`
+- `tests/services/test_agent_structured_router.py`
 - `tests/services/test_agent_slot_resolver.py`
+- `tests/services/test_agent_search_scope_service.py`
 - `tests/services/test_agent_policy_service.py`
+- `tests/services/test_agent_path_switch_service.py`
 - `tests/services/test_agent_response_composer.py`
 - `tests/services/test_agent_graph_service.py`
 - `tests/contract/test_agent_graph_routes.py`
@@ -42,6 +48,7 @@ Modify:
 - `src/models/agent_conversation.py` - add `thread_id` to `AgentConversation`.
 - `src/repositories/agent_conversation_repo.py` - create/get conversations with thread ids and idempotent message helpers.
 - `src/schemas/agent.py` - add `incomingMessageId`, `AgentInProgressResponse`, `AgentActionResumeRequest`, action ids/status/expiry, and `clarify` intent.
+- `src/repositories/goal_preference_repo.py` - support active path switch commits by updating selected course ids.
 - `src/routers/agent.py` - route chat/continuation through `AgentGraphService`; preserve existing direct search/context endpoints.
 - `frontend/features/agent/api.ts` - send `incomingMessageId`, parse `409 in_progress`, include `actionId`.
 - `frontend/features/agent/components/AgentChatPage.tsx` - generate stable message ids and send action continuation payloads.
@@ -124,6 +131,7 @@ from src.services.agent_graph_contracts import (
 def test_every_agent_intent_has_registered_node():
     intents = set(AgentIntent.__args__)
     assert intents == set(AGENT_INTENT_NODE_REGISTRY)
+    assert "request_path_switch" in intents
 
 
 def test_graph_run_status_machine_values_are_stable():
@@ -165,6 +173,21 @@ def test_in_progress_error_payload_is_stable():
         "graphRunId": "run-1",
         "retryAfterMs": 1000,
     }
+
+
+def test_agent_slots_track_search_scope_state():
+    from src.services.agent_graph_contracts import AgentSlots
+
+    slots = AgentSlots(
+        raw_topic="attention mask",
+        search_scope="explicit_path",
+        requested_path_id="nlp",
+        resolved_search_path_ids=["nlp"],
+    )
+
+    assert slots.search_scope == "explicit_path"
+    assert slots.scope_expansion_offered is False
+    assert slots.scope_expansion_approved is False
 ```
 
 - [ ] **Step 3: Run failing tests**
@@ -179,7 +202,7 @@ Expected: failures for missing `incoming_message_id`, missing response/request m
 
 - [ ] **Step 4: Implement schema additions**
 
-In `src/schemas/agent.py`, add `"clarify"` to `AgentIntent`, add `incoming_message_id` to `AgentChatRequest`, add action metadata to `AgentAction`, and add new request/response models:
+In `src/schemas/agent.py`, add `"clarify"` and `"request_path_switch"` to `AgentIntent`, add `incoming_message_id` to `AgentChatRequest`, add action metadata to `AgentAction`, and add new request/response models:
 
 ```python
 AgentIntent = Literal[
@@ -192,6 +215,7 @@ AgentIntent = Literal[
     "explain_planner_decision",
     "summarize_progress",
     "general_course_question",
+    "request_path_switch",
     "clarify",
 ]
 
@@ -233,6 +257,7 @@ class AgentActionResumeRequest(BaseModel):
 In `AgentAction`, add:
 
 ```python
+    # Add "request_path_switch" to the existing AgentAction.type Literal.
     action_id: str | None = Field(default=None, alias="actionId")
     status: str | None = None
     expires_at: datetime | None = Field(default=None, alias="expiresAt")
@@ -273,6 +298,7 @@ AGENT_INTENT_NODE_REGISTRY: dict[AgentIntent, str] = {
     "explain_planner_decision": "explain_planner_decision_node",
     "summarize_progress": "summarize_progress_node",
     "general_course_question": "general_course_question_node",
+    "request_path_switch": "request_path_switch_node",
     "clarify": "clarify_node",
 }
 
@@ -283,6 +309,11 @@ class AgentSlots(BaseModel):
     canonical_unit_ids: list[str] = Field(default_factory=list)
     course_ids: list[str] = Field(default_factory=list)
     ambiguity_options: list[dict[str, Any]] = Field(default_factory=list)
+    search_scope: Literal["current_path", "explicit_path", "expanded_paths"] = "current_path"
+    scope_expansion_offered: bool = False
+    scope_expansion_approved: bool = False
+    requested_path_id: str | None = None
+    resolved_search_path_ids: list[str] = Field(default_factory=list)
 
 
 class PolicyDecision(BaseModel):
@@ -294,7 +325,7 @@ class PolicyDecision(BaseModel):
 
 class PendingAction(BaseModel):
     action_id: str
-    type: Literal["propose_assessment", "start_assessment", "request_replan"]
+    type: Literal["propose_assessment", "start_assessment", "request_replan", "request_path_switch"]
     status: Literal["proposed", "awaiting_confirmation", "confirmed", "cancelled", "committed", "expired"]
     payload_ref: str
     idempotency_key: str
@@ -331,6 +362,7 @@ class ToolResult(BaseModel):
         "what_next",
         "assessment_proposal",
         "replan_proposal",
+        "path_switch_proposal",
         "progress_summary",
         "clarification",
     ]
@@ -648,7 +680,42 @@ def upgrade() -> None:
     )
 ```
 
-- [ ] **Step 5: Implement repository helpers**
+- [ ] **Step 5: Add migration safety checks**
+
+Append to `tests/test_agent_schema_contract.py` or create `tests/test_agent_graph_runtime_migration.py`:
+
+```python
+from pathlib import Path
+
+
+def test_agent_graph_runtime_migration_backfills_thread_id_and_uniqueness():
+    text = Path("alembic/versions/20260501_agent_graph_runtime.py").read_text()
+
+    assert "UPDATE agent_conversations SET thread_id" in text
+    assert "thread_id IS NULL" in text
+    assert "nullable=False" in text
+    assert "ix_agent_conversations_thread_id" in text
+    assert "unique=True" in text
+
+
+def test_agent_graph_runtime_migration_has_run_status_and_dedupe_constraint():
+    text = Path("alembic/versions/20260501_agent_graph_runtime.py").read_text()
+
+    assert "agent_graph_runs" in text
+    assert "uq_agent_graph_run_message" in text
+    assert "incoming_message_id" in text
+    assert "status" in text
+```
+
+Run:
+
+```bash
+pytest tests/test_agent_graph_runtime_migration.py -q
+```
+
+Expected: pass after the migration file is created.
+
+- [ ] **Step 6: Implement repository helpers**
 
 Create `src/repositories/agent_graph_repo.py` with methods used by the tests:
 
@@ -756,7 +823,7 @@ class AgentGraphRepository:
         return int(result.rowcount or 0)
 ```
 
-- [ ] **Step 6: Update conversation repository to create thread ids**
+- [ ] **Step 7: Update conversation repository to create thread ids**
 
 In `src/repositories/agent_conversation_repo.py`, change `create_conversation`:
 
@@ -767,7 +834,7 @@ thread_id = f"thread_{uuid4()}"
 row = AgentConversation(user_id=user_id, title=title, preview="", message_count=0, thread_id=thread_id)
 ```
 
-- [ ] **Step 7: Run repository tests**
+- [ ] **Step 8: Run repository tests**
 
 Run:
 
@@ -777,16 +844,18 @@ pytest tests/repositories/test_agent_graph_repo.py tests/services/test_agent_con
 
 Expected: pass.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
-git add src/models/agent_graph.py src/models/agent_conversation.py src/models/__init__.py src/repositories/agent_graph_repo.py src/repositories/agent_conversation_repo.py alembic/versions/20260501_agent_graph_runtime.py tests/repositories/test_agent_graph_repo.py
+git add src/models/agent_graph.py src/models/agent_conversation.py src/models/__init__.py src/repositories/agent_graph_repo.py src/repositories/agent_conversation_repo.py alembic/versions/20260501_agent_graph_runtime.py tests/repositories/test_agent_graph_repo.py tests/test_agent_graph_runtime_migration.py
 git commit -m "feat: add agent graph runtime persistence"
 ```
 
 ---
 
-### Task 3: Router, Slot Resolver, Policy, And Composer
+### Task 3: Bootstrap Router Seam, Slot Resolver, Policy, And Composer
+
+This task creates a deterministic router seam only for early tests and graph integration. It is not the production router and must not become the production fallback. The production structured-output router is implemented in a later task and must replace this seam before rollout.
 
 **Files:**
 - Create: `src/services/agent_graph_router.py`
@@ -937,6 +1006,8 @@ class AgentRoute(BaseModel):
 
 
 class DeterministicAgentRouter:
+    """Test/integration seam only. Do not use as the production router."""
+
     def route(self, message: str, route_context: RouteContext | None) -> AgentRoute:
         text = message.lower().strip()
         if text in {"ok", "yes", "approve"}:
@@ -1070,7 +1141,201 @@ git commit -m "feat: add agent graph routing primitives"
 
 ---
 
-### Task 4: LangGraph Service Skeleton And Tool Nodes
+### Task 4: Production Structured Router
+
+**Files:**
+- Create: `src/services/agent_structured_router.py`
+- Modify: `src/services/agent_graph_service.py`
+- Test: `tests/services/test_agent_structured_router.py`
+
+- [ ] **Step 1: Write structured router tests with a fake structured-output model**
+
+Create `tests/services/test_agent_structured_router.py`:
+
+```python
+from src.services.agent_structured_router import StructuredAgentRouter
+
+
+class FakeStructuredModel:
+    def __init__(self, payload):
+        self.payload = payload
+        self.schema = None
+
+    def with_structured_output(self, schema):
+        self.schema = schema
+        return self
+
+    def invoke(self, messages):
+        return self.schema(**self.payload)
+
+
+def test_structured_router_returns_explicit_path_route():
+    model = FakeStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.91,
+            "raw_topic": "attention mask",
+            "target_path": "nlp",
+            "rationale": "User explicitly asked for NLP content.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="Trong path NLP có bài nào về attention mask không?",
+        route_context=None,
+    )
+
+    assert route.intent == "find_content"
+    assert route.extracted_slots.raw_topic == "attention mask"
+    assert route.extracted_slots.requested_path_id == "nlp"
+    assert route.extracted_slots.search_scope == "explicit_path"
+
+
+def test_structured_router_low_confidence_clarifies():
+    model = FakeStructuredModel(
+        {
+            "intent": "request_replan",
+            "confidence": 0.4,
+            "raw_topic": None,
+            "target_path": None,
+            "rationale": "Ambiguous short confirmation.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(message="ok", route_context=None)
+
+    assert route.intent == "clarify"
+    assert route.confidence == 0.4
+
+
+def test_structured_router_path_switch_intent():
+    model = FakeStructuredModel(
+        {
+            "intent": "request_path_switch",
+            "confidence": 0.94,
+            "raw_topic": None,
+            "target_path": "nlp",
+            "rationale": "User asked to switch to NLP.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="Tôi muốn chuyển từ CV sang NLP.",
+        route_context=None,
+    )
+
+    assert route.intent == "request_path_switch"
+    assert route.extracted_slots.target_path == "nlp"
+```
+
+- [ ] **Step 2: Run failing structured router tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_structured_router.py -q
+```
+
+Expected: missing `agent_structured_router` module.
+
+- [ ] **Step 3: Implement production structured router**
+
+Create `src/services/agent_structured_router.py`:
+
+```python
+from __future__ import annotations
+
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+from src.schemas.agent import AgentIntent, RouteContext
+from src.services.agent_graph_contracts import AgentSlots
+from src.services.agent_graph_router import AgentRoute
+
+
+class StructuredRouteOutput(BaseModel):
+    intent: AgentIntent
+    confidence: float = Field(ge=0.0, le=1.0)
+    raw_topic: str | None = None
+    target_path: Literal["computer_vision", "nlp"] | None = None
+    rationale: str
+
+
+class StructuredAgentRouter:
+    """Production router backed by structured model output."""
+
+    def __init__(self, model, confidence_threshold: float = 0.65):
+        self.model = model
+        self.confidence_threshold = confidence_threshold
+        self.structured_model = model.with_structured_output(StructuredRouteOutput)
+
+    def route(self, message: str, route_context: RouteContext | None) -> AgentRoute:
+        result = self.structured_model.invoke(
+            [
+                {
+                    "role": "system",
+                    "content": (
+                        "Classify the user's /agent request. Do not route by raw keywords. "
+                        "Distinguish concepts like skip connection from path/replan actions, "
+                        "and quiz eligibility questions from assessment creation requests. "
+                        "Use request_path_switch only when the user asks to change their active learning path."
+                    ),
+                },
+                {"role": "user", "content": message},
+            ]
+        )
+        intent: AgentIntent = result.intent
+        if result.confidence < self.confidence_threshold:
+            intent = "clarify"
+        search_scope = "explicit_path" if result.target_path else "current_path"
+        return AgentRoute(
+            intent=intent,
+            confidence=result.confidence,
+            extracted_slots=AgentSlots(
+                raw_topic=result.raw_topic,
+                target_path=result.target_path,
+                requested_path_id=result.target_path,
+                resolved_search_path_ids=[result.target_path] if result.target_path else [],
+                search_scope=search_scope,
+            ),
+            rationale=result.rationale,
+        )
+```
+
+- [ ] **Step 4: Mark deterministic router as test/bootstrap-only in graph service**
+
+In `src/services/agent_graph_service.py`, keep `DeterministicAgentRouter` only as a test default:
+
+```python
+    def __init__(self, search_service, requirement_service, router=None):
+        # router=None is allowed only for tests and bootstrap integration.
+        # Production route wiring must pass StructuredAgentRouter.
+        self.router = router or DeterministicAgentRouter()
+```
+
+- [ ] **Step 5: Run structured router tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_structured_router.py tests/services/test_agent_graph_router.py -q
+```
+
+Expected: pass.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/services/agent_structured_router.py src/services/agent_graph_service.py tests/services/test_agent_structured_router.py
+git commit -m "feat: add structured agent intent router"
+```
+
+---
+
+### Task 5: Minimal Bootstrap LangGraph Service Skeleton And Tool Nodes
+
+This is a minimal bootstrap skeleton to prove graph invocation and typed tool-node flow. It is not spec-complete: `hydrate_min_context`, `load_intent_scoped_context`, `compose_response_ref`, durable pending actions, real `interrupt()`/resume, and policy-safe denial responses are completed in later tasks.
 
 **Files:**
 - Create: `src/services/agent_tool_nodes.py`
@@ -1343,7 +1608,198 @@ git commit -m "feat: add agent LangGraph service skeleton"
 
 ---
 
-### Task 5: Router Integration, Dedupe, Locking, And 409 Responses
+### Task 6: Search Scope Escalation
+
+**Files:**
+- Create: `src/services/agent_search_scope_service.py`
+- Modify: `src/services/agent_graph_contracts.py`
+- Modify: `src/services/agent_slot_resolver.py`
+- Modify: `src/services/agent_tool_nodes.py`
+- Test: `tests/services/test_agent_search_scope_service.py`
+- Test: `tests/services/test_agent_graph_service.py`
+
+- [ ] **Step 1: Write search scope escalation tests**
+
+Create `tests/services/test_agent_search_scope_service.py`:
+
+```python
+from src.services.agent_graph_contracts import AgentSlots
+from src.services.agent_search_scope_service import AgentSearchScopeService
+
+
+def test_default_scope_starts_current_path():
+    slots = AgentSearchScopeService().resolve_initial_scope(
+        slots=AgentSlots(raw_topic="attention mask"),
+        current_path_ids=["computer_vision"],
+    )
+
+    assert slots.search_scope == "current_path"
+    assert slots.resolved_search_path_ids == ["computer_vision"]
+
+
+def test_explicit_path_uses_requested_scope_directly():
+    slots = AgentSearchScopeService().resolve_initial_scope(
+        slots=AgentSlots(raw_topic="attention mask", requested_path_id="nlp"),
+        current_path_ids=["computer_vision"],
+    )
+
+    assert slots.search_scope == "explicit_path"
+    assert slots.resolved_search_path_ids == ["nlp"]
+
+
+def test_no_current_path_result_offers_expansion():
+    slots = AgentSearchScopeService().offer_expansion_if_no_results(
+        slots=AgentSlots(raw_topic="attention mask", search_scope="current_path"),
+        current_path_result_count=0,
+        allowed_path_ids=["computer_vision", "nlp"],
+    )
+
+    assert slots.scope_expansion_offered is True
+    assert slots.search_scope == "current_path"
+
+
+def test_approved_expansion_uses_allowed_paths():
+    slots = AgentSearchScopeService().approve_expansion(
+        slots=AgentSlots(raw_topic="attention mask", scope_expansion_offered=True),
+        allowed_path_ids=["computer_vision", "nlp"],
+    )
+
+    assert slots.scope_expansion_approved is True
+    assert slots.search_scope == "expanded_paths"
+    assert slots.resolved_search_path_ids == ["computer_vision", "nlp"]
+```
+
+- [ ] **Step 2: Run failing search scope tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_search_scope_service.py -q
+```
+
+Expected: missing search scope service.
+
+- [ ] **Step 3: Implement search scope service**
+
+Create `src/services/agent_search_scope_service.py`:
+
+```python
+from __future__ import annotations
+
+from src.services.agent_graph_contracts import AgentSlots
+
+
+class AgentSearchScopeService:
+    def resolve_initial_scope(self, slots: AgentSlots, current_path_ids: list[str]) -> AgentSlots:
+        if slots.requested_path_id:
+            return slots.model_copy(
+                update={
+                    "search_scope": "explicit_path",
+                    "resolved_search_path_ids": [slots.requested_path_id],
+                }
+            )
+        return slots.model_copy(
+            update={
+                "search_scope": "current_path",
+                "resolved_search_path_ids": current_path_ids,
+            }
+        )
+
+    def offer_expansion_if_no_results(
+        self,
+        slots: AgentSlots,
+        current_path_result_count: int,
+        allowed_path_ids: list[str],
+    ) -> AgentSlots:
+        if slots.search_scope != "current_path" or current_path_result_count > 0:
+            return slots
+        if len(allowed_path_ids) <= len(slots.resolved_search_path_ids):
+            return slots
+        return slots.model_copy(update={"scope_expansion_offered": True})
+
+    def approve_expansion(self, slots: AgentSlots, allowed_path_ids: list[str]) -> AgentSlots:
+        return slots.model_copy(
+            update={
+                "scope_expansion_approved": True,
+                "search_scope": "expanded_paths",
+                "resolved_search_path_ids": allowed_path_ids,
+            }
+        )
+```
+
+- [ ] **Step 4: Add graph behavior test for no-result current path expansion clarification**
+
+Append to `tests/services/test_agent_graph_service.py`:
+
+```python
+async def test_graph_offers_scope_expansion_when_current_path_has_no_result():
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-empty", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="attention mask ở đâu?", incomingMessageId="msg-scope-1"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-scope-1",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n", "CS224n"],
+    )
+
+    assert response.answer.confidence == "no_source"
+    assert response.warning is not None
+    assert response.warning.type == "ambiguous_target"
+```
+
+- [ ] **Step 5: Wire initial scope resolution into slot resolver/tool node**
+
+In `src/services/agent_slot_resolver.py`, apply `AgentSearchScopeService.resolve_initial_scope` before search. For V1 path ids map directly to path keys, and course id filtering still uses `allowed_course_ids`; later path-to-course mapping can be added in `AgentContextResolver`.
+
+In `src/services/agent_tool_nodes.py`, if `find_content` returns no citations and `slots.search_scope == "current_path"`, return a clarification/no-source response that asks for approval before expanded search:
+
+```python
+from src.schemas.agent import AgentFallback, AgentWarning
+
+def build_current_scope_no_source_result(slots: AgentSlots, citations: list[AgentCitation]) -> ToolResult | None:
+    if citations or slots.search_scope != "current_path":
+        return None
+
+    return ToolResult(
+        kind="clarification",
+        answer_markdown="I could not find this in your current path. Do you want me to expand the search to other allowed paths?",
+        warning=AgentWarning(type="ambiguous_target", message="No result was found in the current path; expansion requires confirmation."),
+        fallback=AgentFallback(reason="no_retrieval_result", message="Current-path search returned no grounded result."),
+    )
+```
+
+- [ ] **Step 6: Run search scope tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_search_scope_service.py tests/services/test_agent_graph_service.py -q
+```
+
+Expected: pass.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/services/agent_search_scope_service.py src/services/agent_graph_contracts.py src/services/agent_slot_resolver.py src/services/agent_tool_nodes.py tests/services/test_agent_search_scope_service.py tests/services/test_agent_graph_service.py
+git commit -m "feat: add agent search scope escalation"
+```
+
+---
+
+### Task 7: Router Integration, Dedupe, Locking, And 409 Responses
+
+This task routes traffic through the graph service and standardizes `409 in_progress`. It is not the full replay-safe persistence boundary. Until the following tasks move message persistence, response refs, and pending actions fully inside `AgentGraphService`, do not use this task as the production readiness checkpoint for dedupe/replay.
 
 **Files:**
 - Create: `src/services/agent_lock_service.py`
@@ -1510,7 +1966,7 @@ Replace the body of `agent_chat` after conversation creation with:
     return response
 ```
 
-Do not persist duplicate user/assistant messages in `agent_chat`; message persistence moves inside `AgentGraphService` in Task 6.
+Do not persist duplicate user/assistant messages in `agent_chat`; message persistence moves inside `AgentGraphService` in the pending-action/persistence tasks. Before those tasks are complete, persistence behavior is intentionally bootstrap-only and not full-spec replay-safe.
 
 - [ ] **Step 5: Run contract tests**
 
@@ -1531,7 +1987,9 @@ git commit -m "feat: route agent chat through LangGraph service"
 
 ---
 
-### Task 6: Pending Actions, Interrupt Resume, And Continuation Endpoint
+### Task 8: Pending Action API Shell And Continuation Endpoint
+
+This task creates the API and contract shell for pending-action continuation. It is not the production interrupt/resume implementation. Real LangGraph `interrupt()` boundaries, persisted pending-action validation, and idempotent commit nodes are completed in the path-switch, assessment, and replan action implementation tasks.
 
 **Files:**
 - Modify: `src/services/agent_graph_service.py`
@@ -1684,7 +2142,7 @@ Add `resume_action` to `AgentGraphService`:
         )
 ```
 
-This initial method is a safe non-mutating shell. Commit side effects are added in the assessment/replan tasks that wire existing backend services with idempotency keys.
+This initial method is a safe non-mutating shell. It is not the production interrupt/resume flow. Commit side effects are added in the assessment/replan/path-switch tasks that wire existing backend services with idempotency keys.
 
 - [ ] **Step 6: Run tests**
 
@@ -1705,7 +2163,320 @@ git commit -m "feat: add agent pending action continuation shell"
 
 ---
 
-### Task 7: Memory Compaction And Operational Safety
+### Task 9: Path Switch Pending Action Workflow
+
+**Files:**
+- Create: `src/services/agent_path_switch_service.py`
+- Modify: `src/services/agent_graph_contracts.py`
+- Modify: `src/services/agent_tool_nodes.py`
+- Modify: `src/services/agent_policy_service.py`
+- Modify: `src/services/agent_graph_service.py`
+- Modify: `src/repositories/goal_preference_repo.py`
+- Test: `tests/services/test_agent_path_switch_service.py`
+- Test: `tests/services/test_agent_graph_service.py`
+
+- [ ] **Step 1: Write path switch service tests**
+
+Create `tests/services/test_agent_path_switch_service.py`:
+
+```python
+from types import SimpleNamespace
+from uuid import uuid4
+
+import pytest
+
+from src.services.agent_path_switch_service import AgentPathSwitchService
+
+pytestmark = pytest.mark.asyncio
+
+
+async def test_path_switch_rejects_same_path():
+    service = AgentPathSwitchService(
+        goal_repo=SimpleNamespace(),
+        planner=lambda *args, **kwargs: None,
+    )
+
+    result = await service.validate_request(
+        user_id=uuid4(),
+        current_course_ids=["CS230", "CS224n"],
+        target_path_id="nlp",
+        allowed_course_ids=["CS230", "CS224n", "CS231n"],
+    )
+
+    assert result.allow is False
+    assert result.codes == ["SAME_PATH_SWITCH"]
+
+
+async def test_path_switch_builds_valid_proposal_for_nlp():
+    service = AgentPathSwitchService(
+        goal_repo=SimpleNamespace(),
+        planner=lambda *args, **kwargs: None,
+    )
+
+    result = await service.validate_request(
+        user_id=uuid4(),
+        current_course_ids=["CS230", "CS231n"],
+        target_path_id="nlp",
+        allowed_course_ids=["CS230", "CS224n", "CS231n"],
+    )
+
+    assert result.allow is True
+    proposal = service.build_proposal(
+        current_course_ids=["CS230", "CS231n"],
+        target_path_id="nlp",
+    )
+    assert proposal["target_path_id"] == "nlp"
+    assert proposal["target_course_ids"] == ["CS230", "CS224n"]
+    assert proposal["reuse_profile"] is True
+    assert proposal["recompute_plan"] is True
+
+
+async def test_commit_path_switch_updates_goal_and_replans_once():
+    calls = {"goal": 0, "planner": 0}
+
+    async def upsert_for_user(user_id, **goal_data):
+        calls["goal"] += 1
+        return SimpleNamespace(selected_course_ids=goal_data["selected_course_ids"])
+
+    async def planner(db, user, request):
+        calls["planner"] += 1
+        return SimpleNamespace(total_units=10, total_hours=8.5, warnings=[])
+
+    service = AgentPathSwitchService(
+        goal_repo=SimpleNamespace(upsert_for_user=upsert_for_user),
+        planner=planner,
+    )
+
+    result = await service.commit(
+        db=SimpleNamespace(),
+        user=SimpleNamespace(id=uuid4()),
+        target_path_id="nlp",
+        idempotency_key="idem-path-1",
+    )
+
+    assert result["targetPathId"] == "nlp"
+    assert calls == {"goal": 1, "planner": 1}
+
+
+async def test_commit_path_switch_replay_reuses_idempotency_key():
+    calls = {"goal": 0, "planner": 0}
+
+    async def upsert_for_user(user_id, **goal_data):
+        calls["goal"] += 1
+        return SimpleNamespace(selected_course_ids=goal_data["selected_course_ids"])
+
+    async def planner(db, user, request):
+        calls["planner"] += 1
+        return SimpleNamespace(total_units=10, total_hours=8.5, warnings=[])
+
+    service = AgentPathSwitchService(
+        goal_repo=SimpleNamespace(upsert_for_user=upsert_for_user),
+        planner=planner,
+    )
+    user = SimpleNamespace(id=uuid4())
+
+    first = await service.commit(SimpleNamespace(), user, "nlp", "idem-path-1")
+    second = await service.commit(SimpleNamespace(), user, "nlp", "idem-path-1")
+
+    assert first == second
+    assert calls == {"goal": 1, "planner": 1}
+```
+
+- [ ] **Step 2: Run failing path switch tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_path_switch_service.py -q
+```
+
+Expected: missing path switch service.
+
+- [ ] **Step 3: Implement path switch service**
+
+Create `src/services/agent_path_switch_service.py`:
+
+The in-memory `_commit_cache` below is a unit-test seam. Production wiring must back idempotency with `agent_pending_actions` / graph idempotency records, not process memory.
+
+```python
+from __future__ import annotations
+
+from typing import Any
+from uuid import UUID
+
+from src.schemas.learning_path import GeneratePathRequest
+from src.services.agent_graph_contracts import PolicyDecision
+
+
+SUPPORTED_AGENT_PATHS: dict[str, dict[str, Any]] = {
+    "computer_vision": {
+        "label": "Computer Vision",
+        "selected_course_ids": ["CS230", "CS231n"],
+    },
+    "nlp": {
+        "label": "Natural Language Processing",
+        "selected_course_ids": ["CS230", "CS224n"],
+    },
+}
+
+
+class AgentPathSwitchService:
+    def __init__(self, goal_repo, planner):
+        self.goal_repo = goal_repo
+        self.planner = planner
+        self._commit_cache: dict[str, dict[str, Any]] = {}
+
+    async def validate_request(
+        self,
+        user_id: UUID,
+        current_course_ids: list[str],
+        target_path_id: str | None,
+        allowed_course_ids: list[str],
+    ) -> PolicyDecision:
+        if target_path_id not in SUPPORTED_AGENT_PATHS:
+            return PolicyDecision(
+                allow=False,
+                codes=["TARGET_PATH_NOT_FOUND"],
+                user_safe_message="That learning path is not available.",
+                audit_context={"targetPathId": target_path_id},
+            )
+        target_courses = SUPPORTED_AGENT_PATHS[target_path_id]["selected_course_ids"]
+        if sorted(current_course_ids) == sorted(target_courses):
+            return PolicyDecision(
+                allow=False,
+                codes=["SAME_PATH_SWITCH"],
+                user_safe_message="You are already on that learning path.",
+                audit_context={"targetPathId": target_path_id},
+            )
+        missing = [course_id for course_id in target_courses if course_id not in allowed_course_ids]
+        if missing:
+            return PolicyDecision(
+                allow=False,
+                codes=["TARGET_PATH_OUT_OF_SCOPE"],
+                user_safe_message="That learning path is outside your current access scope.",
+                audit_context={"missingCourseIds": missing},
+            )
+        return PolicyDecision(allow=True)
+
+    def build_proposal(self, current_course_ids: list[str], target_path_id: str) -> dict[str, Any]:
+        target = SUPPORTED_AGENT_PATHS[target_path_id]
+        return {
+            "current_course_ids": current_course_ids,
+            "target_path_id": target_path_id,
+            "target_course_ids": target["selected_course_ids"],
+            "reuse_profile": True,
+            "recompute_plan": True,
+            "impact_summary": f"Switch to {target['label']} and recompute the learning plan using the learner profile.",
+            "payload_version": 1,
+        }
+
+    async def commit(self, db, user, target_path_id: str, idempotency_key: str) -> dict[str, Any]:
+        if idempotency_key in self._commit_cache:
+            return self._commit_cache[idempotency_key]
+        target = SUPPORTED_AGENT_PATHS[target_path_id]
+        await self.goal_repo.upsert_for_user(
+            user.id,
+            selected_course_ids=target["selected_course_ids"],
+            notes=f"agent_path_switch:{idempotency_key}",
+        )
+        generated = await self.planner(db, user, GeneratePathRequest())
+        result = {
+            "targetPathId": target_path_id,
+            "targetCourseIds": target["selected_course_ids"],
+            "totalUnits": generated.total_units,
+            "totalHours": generated.total_hours,
+            "warnings": generated.warnings,
+        }
+        self._commit_cache[idempotency_key] = result
+        return result
+```
+
+- [ ] **Step 4: Add path switch graph behavior test**
+
+Append to `tests/services/test_agent_graph_service.py`:
+
+```python
+async def test_graph_path_switch_request_returns_pending_action():
+    class Router:
+        def route(self, message, route_context):
+            from src.services.agent_graph_router import AgentRoute
+            from src.services.agent_graph_contracts import AgentSlots
+
+            return AgentRoute(
+                intent="request_path_switch",
+                confidence=0.92,
+                extracted_slots=AgentSlots(target_path="nlp", requested_path_id="nlp"),
+                rationale="User asked to switch to NLP.",
+            )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Tôi muốn chuyển từ CV sang NLP.", incomingMessageId="msg-path-1"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-path-1",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS230", "CS224n", "CS231n"],
+    )
+
+    assert response.actions
+    assert response.actions[0].action_id
+    assert response.actions[0].type == "request_path_switch"
+```
+
+- [ ] **Step 5: Wire path switch proposal into tool nodes**
+
+In `src/services/agent_tool_nodes.py`, add a path-switch proposal method:
+
+```python
+    async def path_switch_proposal(self, slots: AgentSlots) -> ToolResult:
+        action_id = f"act_{uuid4()}"
+        expires_at = datetime.now(UTC) + timedelta(minutes=30)
+        return ToolResult(
+            kind="path_switch_proposal",
+            answer_markdown="I can switch your active learning path after you confirm.",
+            actions=[
+                AgentAction(
+                    type="request_path_switch",
+                    label="Confirm path switch",
+                    actionId=action_id,
+                    status="awaiting_confirmation",
+                    expiresAt=expires_at,
+                    eligible=True,
+                )
+            ],
+            requires_evidence=False,
+        )
+```
+
+In `AgentGraphService._dispatch`, route `request_path_switch` to `self.tools.path_switch_proposal(state["slots"])`.
+
+- [ ] **Step 6: Run path switch tests**
+
+Run:
+
+```bash
+pytest tests/services/test_agent_path_switch_service.py tests/services/test_agent_graph_service.py -q
+```
+
+Expected: pass.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/services/agent_path_switch_service.py src/services/agent_graph_contracts.py src/services/agent_tool_nodes.py src/services/agent_policy_service.py src/services/agent_graph_service.py src/repositories/goal_preference_repo.py tests/services/test_agent_path_switch_service.py tests/services/test_agent_graph_service.py
+git commit -m "feat: add agent path switch proposal workflow"
+```
+
+---
+
+### Task 10: Memory Compaction And Operational Safety
+
+This task creates the initial compaction primitive and tests preservation of active context. It is not the final memory policy implementation until persistence is idempotent, summaries are stored by `memory_ref`, and refresh/version behavior is wired into `AgentGraphService`.
 
 **Files:**
 - Create: `src/services/agent_memory_compaction_service.py`
@@ -1818,7 +2589,7 @@ git commit -m "feat: add agent thread memory compaction"
 
 ---
 
-### Task 8: Frontend Idempotency And Action IDs
+### Task 11: Frontend Idempotency And Action IDs
 
 **Files:**
 - Modify: `frontend/features/agent/api.ts`
@@ -1889,6 +2660,7 @@ export function getInProgressRetryAfter(value: AgentInProgressResponse) {
 Extend `AgentAction`:
 
 ```ts
+// Add "request_path_switch" to AgentActionType.
   action_id?: string | null;
   actionId?: string | null;
   status?: string | null;
@@ -1967,7 +2739,9 @@ git commit -m "feat: add agent idempotency fields to frontend"
 
 ---
 
-### Task 9: Evaluation Suite, Janitor, And Operational Checks
+### Task 12: Evaluation Suite, Janitor, And Operational Checks
+
+The evaluation lane must target the production `StructuredAgentRouter` when a model provider is configured. The deterministic router seam may be used only for local unit tests that do not call a model.
 
 **Files:**
 - Create: `tests/services/test_agent_routing_eval.py`
@@ -1992,6 +2766,8 @@ from src.services.agent_graph_router import DeterministicAgentRouter
         ("Quiz eligibility của unit này tính thế nào?", "assess_knowledge"),
         ("next token prediction là gì", "ask_what_next"),
         ("cho tôi replan, nhưng đừng skip phần attention", "assess_knowledge"),
+        ("Tôi muốn chuyển từ CV sang NLP.", "find_content"),
+        ("Trong path NLP có bài nào về attention mask không?", "request_path_switch"),
     ],
 )
 def test_adversarial_routing_does_not_follow_keyword_traps(message, not_intent):
@@ -2093,7 +2869,7 @@ git commit -m "test: add agent routing eval and ops janitor"
 
 ---
 
-### Task 10: Final Integration Verification And Legacy Path Deprecation
+### Task 13: Final Integration Verification And Legacy Path Deprecation
 
 **Files:**
 - Modify: `src/services/agent_chat_service.py`
@@ -2154,8 +2930,9 @@ git commit -m "chore: mark legacy agent chat service deprecated"
 
 ## Self-Review Checklist
 
-- Spec coverage: persistence ids, thread/checkpoint semantics, in-progress 409 payload, advisory lock, context-aware routing, slot ambiguity, policy, typed results, no-evidence composer, pending actions, interrupt/resume shell, memory compaction, eval suite, ops runbook, frontend idempotency are covered by tasks.
+- Spec coverage: persistence ids, thread/checkpoint semantics, in-progress 409 payload, advisory lock, production structured router, context-aware routing, slot ambiguity, search scope escalation, path switch workflow, policy, typed results, no-evidence composer, pending actions, interrupt/resume shell, memory compaction, eval suite, ops runbook, frontend idempotency are covered by tasks.
 - AI Tutor separation: no task modifies tutor routes/services.
 - Replay safety: response refs, run statuses, pending action idempotency, and janitor are covered.
 - Concurrency: V1 PostgreSQL advisory lock and `409 in_progress` payload are covered.
 - Rollout: legacy service is deprecated but retained for rollback.
+- Bootstrap caveats: deterministic router, graph skeleton, pending-action shell, and memory compaction primitive are explicitly marked as non-production-complete until later tasks replace or harden them.
