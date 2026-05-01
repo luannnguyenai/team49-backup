@@ -35,6 +35,10 @@ class PendingFollowupDecisionOutput(BaseModel):
     rationale: str
 
 
+class RetrievalRefinementOutput(BaseModel):
+    answer_markdown: str
+
+
 class StructuredAgentRouter:
     def __init__(self, model, confidence_threshold: float = 0.65):
         self.model = model
@@ -166,6 +170,50 @@ class StructuredAgentRouter:
         if isinstance(response, dict):
             return PendingFollowupDecisionOutput.model_validate(response)
         return PendingFollowupDecisionOutput.model_validate(response.model_dump())
+
+    def compose_retrieval_refinement(
+        self,
+        *,
+        message: str,
+        raw_topic: str | None,
+        result_count: int,
+        route_context: RouteContext | None,
+    ) -> str:
+        try:
+            response = self.model.with_structured_output(RetrievalRefinementOutput).invoke(
+                [
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are the AI Learning Hub assistant. "
+                            "The catalog search found many title-level learning units for the user's topic. "
+                            "Write one concise, natural clarification in the user's language. "
+                            "Ask whether they want to narrow the topic with more detail or see the strongest "
+                            "current results. Do not invent course facts and do not mention implementation details."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"User message: {message}\n"
+                            f"Raw topic: {raw_topic or ''}\n"
+                            f"Result count: {result_count}"
+                        ),
+                    },
+                ]
+            )
+        except Exception as exc:
+            raise AgentRouterUnavailableError(
+                "agent_retrieval_refinement_model_error",
+                classify_agent_error(exc, default="AGENT_LLM_UNAVAILABLE"),
+            ) from exc
+
+        if isinstance(response, RetrievalRefinementOutput):
+            return response.answer_markdown
+        if isinstance(response, dict):
+            return RetrievalRefinementOutput.model_validate(response).answer_markdown
+        return RetrievalRefinementOutput.model_validate(response.model_dump()).answer_markdown
 
     def _response_text(self, response: Any) -> str:
         content = getattr(response, "content", response)

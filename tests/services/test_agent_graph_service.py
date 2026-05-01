@@ -69,6 +69,9 @@ class PendingDecisionRouter:
             clarification_question=None,
         )
 
+    def compose_retrieval_refinement(self, *, message, raw_topic, result_count, route_context):
+        return f"Router generated refinement question for {raw_topic} with {result_count} results."
+
 
 async def test_graph_returns_grounded_find_content_from_search():
     class Router(DeterministicAgentRouter):
@@ -556,6 +559,9 @@ async def test_current_path_search_with_too_many_results_asks_to_refine_or_show_
                 extracted_slots=AgentSlots(raw_topic="CNN"),
             )
 
+        def compose_retrieval_refinement(self, *, message, raw_topic, result_count, route_context):
+            return f"Router generated refinement question for {raw_topic} with {result_count} results."
+
     async def search(request, allowed_course_ids):
         return UnitSearchResponse(
             results=[
@@ -599,7 +605,8 @@ async def test_current_path_search_with_too_many_results_asks_to_refine_or_show_
     )
 
     assert response.answer.confidence == "partial"
-    assert "30 results" in response.answer.markdown
+    assert response.answer.markdown == "Router generated refinement question for CNN with 30 results."
+    assert "I found" not in response.answer.markdown
     assert response.citations == []
     persisted = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]["pendingClarification"]
     assert persisted["clarification"]["payload"]["search_scope"] == "current_path"

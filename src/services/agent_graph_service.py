@@ -765,6 +765,22 @@ class AgentGraphService:
                                 }
                             )
             update: dict = {**state, "tool_result": result}
+            if result.metadata.get("too_many_results_offered"):
+                compose_refinement = getattr(self.router, "compose_retrieval_refinement", None)
+                if compose_refinement is None:
+                    raise AgentRouterUnavailableError("agent_retrieval_refinement_model_missing")
+                result = result.model_copy(
+                    update={
+                        "answer_markdown": compose_refinement(
+                            message=state["message"],
+                            raw_topic=result.metadata.get("raw_topic") or slots.raw_topic,
+                            result_count=int(result.metadata.get("result_count") or 0),
+                            route_context=state.get("route_context"),
+                        ),
+                        "warning": None,
+                    }
+                )
+                update["tool_result"] = result
             if result.metadata.get("scope_expansion_offered"):
                 allowed_paths = self.scope_service.path_ids_for_courses(state["allowed_course_ids"])
                 update["pending_clarification"] = PendingClarification(

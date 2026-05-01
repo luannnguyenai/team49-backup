@@ -217,6 +217,13 @@ class FakeChatModel:
             )
             structured.schema = schema
             return structured
+        if set(schema.model_fields) == {"answer_markdown"}:
+            structured = FakeStructuredModel(
+                {"answer_markdown": "There are several matching units. Would you like to narrow it or see the strongest results?"},
+                owner=self,
+            )
+            structured.schema = schema
+            return structured
         return FakeStructuredModel(
             {
                 "intent": "assistant_help",
@@ -291,6 +298,21 @@ def test_structured_router_grounded_answer_can_report_insufficient_evidence():
 
     assert answer.evidence_sufficient is False
     assert answer.confidence == "no_source"
+
+
+def test_structured_router_composes_retrieval_refinement_with_llm():
+    model = FakeChatModel()
+
+    answer = StructuredAgentRouter(model=model).compose_retrieval_refinement(
+        message="tìm thông tin về CNN",
+        raw_topic="CNN",
+        result_count=30,
+        route_context=None,
+    )
+
+    assert "strongest results" in answer
+    assert "many title-level learning units" in model.messages[0]["content"]
+    assert "Result count: 30" in model.messages[1]["content"]
 
 
 class GenericRateLimitedModel:

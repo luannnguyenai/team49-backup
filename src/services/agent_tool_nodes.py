@@ -98,18 +98,13 @@ class AgentToolNodes:
             )
             return ToolResult(
                 kind="clarification",
-                answer_markdown=(
-                    f"I found {len(all_results)} results related to {raw_topic}. "
-                    "Do you want to describe it more specifically, or should I show the top results?"
-                ),
-                warning=AgentWarning(
-                    type="ambiguous_target",
-                    message="Search returned many matching results; refinement is recommended.",
-                ),
+                answer_markdown=None,
+                warning=None,
                 requires_evidence=False,
                 metadata={
                     "too_many_results_offered": True,
                     "result_count": len(all_results),
+                    "raw_topic": raw_topic,
                     "search_queries": search_queries,
                     "top_results_allowed": True,
                 },
