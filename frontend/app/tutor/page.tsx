@@ -204,12 +204,12 @@ function TutorPageContent() {
 
           {filteredOthers.length > 0 && (
             <div className="pt-2 text-center text-sm text-text-muted">
-              There are {filteredOthers.length} more courses in the catalog.{" "}
+              Looking for something else? Explore the full course catalog.{" "}
               <Link
                 href="/dashboard"
                 className="font-semibold text-primary-600 underline"
               >
-                View all
+                Explore courses
               </Link>
             </div>
           )}
