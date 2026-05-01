@@ -12,7 +12,7 @@
 
 ## Current Implementation Status
 
-Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, and `6723d0e`.
+Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, `6723d0e`, and `6ab4aeb`.
 
 Status meanings:
 
@@ -24,7 +24,7 @@ Status meanings:
 | Task | Status | Notes |
 |---|---|---|
 | Task 1: Schema And Runtime Contract Tests | done | Agent request/response/action contracts, in-progress payload, and graph contract tests are implemented. |
-| Task 2: Graph Runtime Persistence | partial | Runtime tables, `thread_id`, repository, response refs, pending actions, and run statuses exist. Real DB migration/backfill verification and repository integration coverage still need a dedicated pass. |
+| Task 2: Graph Runtime Persistence | done | Runtime tables, `thread_id`, repository, response refs, pending actions, run statuses, idempotent pending-action lookup, repository tests, and migration checks exist. Repository DB tests skip when the local test DB has not applied the migration. |
 | Task 3: Bootstrap Router Seam, Slot Resolver, Policy, And Composer | bootstrap-only | Deterministic router exists only as a test/bootstrap seam. It must not be used as production fallback. Slot resolver, policy, and composer primitives exist. |
 | Task 4: Production Structured Router | partial | `StructuredAgentRouter` and factory exist. Production wiring uses the factory, but provider-level failure/evaluation coverage still needs hardening. |
 | Task 5: Minimal Bootstrap LangGraph Service Skeleton And Tool Nodes | bootstrap-only | Graph skeleton and typed tool nodes are implemented. This task remains intentionally non-spec-complete. |
@@ -32,15 +32,15 @@ Status meanings:
 | Task 7: Search Scope Escalation | done | Current-path-first search and scope expansion offer are implemented. |
 | Task 8: Scope Expansion Confirmation And Expanded Retrieval | partial | Approval phrase can continue expanded retrieval. Pending clarification is currently in service memory, not durable checkpoint/store state. |
 | Task 9: Router Integration, Dedupe, Locking, And 409 Responses | done | Chat route goes through `AgentGraphService`, dedupes by `incomingMessageId`, checks active runs, and returns `409 in_progress`. |
-| Task 10: Durable Run Lifecycle In `AgentGraphService` | partial | Run creation/running/interrupted/succeeded/failed and response refs are wired. Real checkpoint id metadata persistence remains partial. |
+| Task 10: Durable Run Lifecycle In `AgentGraphService` | done | Run creation/running/interrupted/succeeded/failed, response refs, active non-interrupted resume checks, and checkpoint id capture from LangGraph snapshots are wired. |
 | Task 10a: Interrupted Run Finalization | production-hardening added during implementation | Added `6723d0e` so approve/reject/expire finalizes the latest interrupted run and prevents permanent `409 in_progress` locks. |
-| Task 11: Pending Action API Shell And Continuation Endpoint | bootstrap-only | API shell and continuation contract exist. It is not the production interrupt/resume implementation by itself. |
-| Task 12: Path Switch Pending Action Workflow | partial | Path switch intent, proposal, pending action, and commit service base exist. Validation, replay, and ops coverage still need a fuller production pass. |
-| Task 13: Real LangGraph Interrupt/Resume Action Flow | partial | Pending actions are persisted and interrupted runs are tracked, but native LangGraph `interrupt()` / `Command(resume=...)` is not fully wired on the hot path. Assessment/replan commit flows are still generic and not production-complete. |
-| Task 14: Memory Compaction And Operational Safety | bootstrap-only | Initial compaction primitive and pending-action janitor exist. Versioned persistent `memory_ref` integration is not complete. |
-| Task 15: Frontend Idempotency And Action IDs | partial | Stable `incomingMessageId` retry semantics and API contracts are implemented. Unrelated dirty hunks remain in `AgentChatPage.tsx` and must be isolated before final review. |
-| Task 16: Evaluation Suite, Janitor, And Operational Checks | partial | Janitor primitive and focused tests exist. Full eval suite, ops runbook coverage, and production dashboards are not complete. |
-| Task 17: Final Integration Verification And Legacy Path Deprecation | partial | Backend subset and frontend type-check pass. Legacy `AgentChatService` remains present and some dirty legacy files are outside this implementation. |
+| Task 11: Pending Action API Shell And Continuation Endpoint | done | API shell, continuation contract, response persistence, and resume response replay by `incomingMessageId` are implemented. |
+| Task 12: Path Switch Pending Action Workflow | done | Path switch intent, validation, proposal payload, pending action, commit service, and result persistence are implemented. Ops/dashboard coverage remains outside this task. |
+| Task 13: Real LangGraph Interrupt/Resume Action Flow | done | Proposal nodes persist pending actions before a separate `interrupt()` node; `/actions/continue` resumes with `Command(resume=...)`; commit side effects run after resume with idempotency through pending-action `result_json`. Assessment and replan now call authoritative backend services. |
+| Task 14: Memory Compaction And Operational Safety | partial | Versioned `memory_ref` persistence, checkpoint id capture, and pending-action janitor exist. Full durable clarification-state storage and Postgres checkpointer wiring remain follow-up hardening. |
+| Task 15: Frontend Idempotency And Action IDs | done | Stable `incomingMessageId`, action ids, and `/actions/continue` approve/reject UI are implemented and covered by page tests. Unrelated dirty UI hunks remain isolated from the committed diff. |
+| Task 16: Evaluation Suite, Janitor, And Operational Checks | partial | Janitor primitive, migration checks, action-resume tests, and route/frontend coverage exist. Full LangSmith/offline eval suite and ops dashboards remain follow-up work. |
+| Task 17: Final Integration Verification And Legacy Path Deprecation | partial | Backend subset and frontend type-check/page tests pass. Legacy `AgentChatService` remains present as compatibility/reference until final deprecation is explicitly scheduled. |
 
 ### Done-True Vs Temporary Boundaries
 
@@ -53,24 +53,29 @@ Done-true in the current implementation:
 - Per-thread lock service.
 - Durable graph run rows and deterministic response refs.
 - Pending action persistence for action proposals.
+- Native LangGraph `interrupt()` / `Command(resume=...)` boundary for pending actions.
+- Authoritative assessment/replan/path-switch commit calls after resume.
+- Versioned `memory_ref` writes to conversation memory.
+- Checkpoint id capture from LangGraph state snapshots.
 - No-evidence/no-grounded-answer composer guard.
 - Search scope escalation offer and expanded-search continuation.
 - Interrupted-run finalization after action approve/reject/expire.
+- Frontend pending action approve/reject continuation.
 
 Done-temporary or partial:
 
-- Native LangGraph `interrupt()` and `Command(resume=...)` are not fully wired into the hot path.
-- Assessment/replan approve flows persist/confirm the action but do not yet call authoritative assessment/replan commit services.
-- Path switch is more complete than assessment/replan, but still needs full validation/replay/ops coverage.
-- Memory compaction is an initial primitive, not the final versioned `memory_ref` implementation.
-- Checkpoint metadata is modeled but not fully sourced from a production checkpointer.
+- Durable clarification state for scope-expansion approval is still process-local until folded into the memory/checkpoint store.
+- Production Postgres checkpointer is dependency-injection ready, but the app still defaults to `InMemorySaver` unless a durable checkpointer is provided.
+- Full offline/online eval and ops dashboards are not implemented in this code pass.
+- Legacy `AgentChatService` is not removed yet.
 
 ### Implementation Deviations
 
 - Added explicit interrupted-run finalization to prevent permanent `409 in_progress` locks.
 - LangGraph is lazy-imported for non-production/test environments; production still requires LangGraph.
-- Pending actions are persisted and interrupted runs are tracked, but native LangGraph interrupt/resume is not fully wired yet.
-- Path switch workflow is more complete than assessment/replan commit flows.
+- Added native LangGraph `interrupt()` / `Command(resume=...)` for pending action confirmations after the initial shell implementation.
+- Added `AgentActionCommitService` so assessment/replan approvals call authoritative backend services instead of generic confirmation.
+- Added checkpoint id capture from LangGraph state snapshots and versioned `memory_ref` persistence into conversation memory.
 - Frontend retry idempotency was implemented, but unrelated dirty hunks remain in `AgentChatPage.tsx` and must be isolated before final review.
 
 ---
@@ -486,7 +491,7 @@ git commit -m "feat: add agent graph runtime contracts"
 
 ---
 
-### Task 2: Graph Runtime Persistence `[partial]`
+### Task 2: Graph Runtime Persistence `[done]`
 
 **Files:**
 - Create: `src/models/agent_graph.py`
@@ -2438,7 +2443,7 @@ git commit -m "feat: route agent chat through LangGraph service"
 
 ---
 
-### Task 10: Durable Run Lifecycle In `AgentGraphService` `[partial]`
+### Task 10: Durable Run Lifecycle In `AgentGraphService` `[done]`
 
 This task wires the runtime primitives into the graph orchestration path. After this task, `AgentGraphService.chat()` owns inbound dedupe, active-run checks, run status transitions, thread locking, response payload persistence, and exact replay of a prior `response_ref`.
 
@@ -2650,7 +2655,7 @@ git commit -m "feat: wire durable agent graph run lifecycle"
 
 ---
 
-### Task 11: Pending Action API Shell And Continuation Endpoint `[bootstrap-only]`
+### Task 11: Pending Action API Shell And Continuation Endpoint `[done]`
 
 This task creates the API and contract shell for pending-action continuation. It is not the production interrupt/resume implementation. Real LangGraph `interrupt()` boundaries, persisted pending-action validation, and idempotent commit nodes are completed in the path-switch, assessment, and replan action implementation tasks.
 
@@ -2830,7 +2835,7 @@ git commit -m "feat: add agent pending action continuation shell"
 
 ---
 
-### Task 12: Path Switch Pending Action Workflow `[partial]`
+### Task 12: Path Switch Pending Action Workflow `[done]`
 
 **Files:**
 - Create: `src/services/agent_path_switch_service.py`
@@ -3141,7 +3146,7 @@ git commit -m "feat: add agent path switch proposal workflow"
 
 ---
 
-### Task 13: Real LangGraph Interrupt/Resume Action Flow `[partial]`
+### Task 13: Real LangGraph Interrupt/Resume Action Flow `[done]`
 
 This task replaces the pending-action shell with production graph boundaries. Assessment, replan, and path switch proposals must persist pending actions, pause with `interrupt()`, resume with the same `thread_id`, validate ownership/status/expiry/payload version, commit side effects with `idempotency_key`, and mark final action state exactly once.
 
@@ -3535,7 +3540,7 @@ git commit -m "feat: add agent thread memory compaction"
 
 ---
 
-### Task 15: Frontend Idempotency And Action IDs `[partial]`
+### Task 15: Frontend Idempotency And Action IDs `[done]`
 
 **Files:**
 - Modify: `frontend/features/agent/api.ts`
