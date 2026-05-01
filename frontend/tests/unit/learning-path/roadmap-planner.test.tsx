@@ -174,7 +174,7 @@ describe("RoadmapPlanner", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Expand Deep Learning/ }));
 
-    expect(screen.getByText("End quiz đã mở")).toBeInTheDocument();
+    expect(screen.getByText("End quiz unlocked")).toBeInTheDocument();
   });
 
   it("renders a path-required state for missing concrete path data", () => {
