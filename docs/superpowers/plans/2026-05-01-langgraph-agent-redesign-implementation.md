@@ -12,7 +12,7 @@
 
 ## Current Implementation Status
 
-Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, `6723d0e`, `6ab4aeb`, and the durable clarification-state follow-up.
+Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, `6723d0e`, `6ab4aeb`, `68bfc31`, and the final router/eval/deprecation follow-up.
 
 Status meanings:
 
@@ -26,7 +26,7 @@ Status meanings:
 | Task 1: Schema And Runtime Contract Tests | done | Agent request/response/action contracts, in-progress payload, and graph contract tests are implemented. |
 | Task 2: Graph Runtime Persistence | done | Runtime tables, `thread_id`, repository, response refs, pending actions, run statuses, idempotent pending-action lookup, repository tests, and migration checks exist. Repository DB tests skip when the local test DB has not applied the migration. |
 | Task 3: Bootstrap Router Seam, Slot Resolver, Policy, And Composer | bootstrap-only | Deterministic router exists only as a test/bootstrap seam. It must not be used as production fallback. Slot resolver, policy, and composer primitives exist. |
-| Task 4: Production Structured Router | partial | `StructuredAgentRouter` and factory exist. Production wiring uses the factory, but provider-level failure/evaluation coverage still needs hardening. |
+| Task 4: Production Structured Router | done | `StructuredAgentRouter`, factory fail-safe tests, and prompt guards exist. Production wiring uses the factory and never falls back to deterministic routing. |
 | Task 5: Minimal Bootstrap LangGraph Service Skeleton And Tool Nodes | bootstrap-only | Graph skeleton and typed tool nodes are implemented. This task remains intentionally non-spec-complete. |
 | Task 6: Production Router Wiring And Fail-Safe | done | `/api/agent/chat` instantiates the production structured router factory; deterministic keyword routing is not used as production fallback. |
 | Task 7: Search Scope Escalation | done | Current-path-first search and scope expansion offer are implemented. |
@@ -39,8 +39,8 @@ Status meanings:
 | Task 13: Real LangGraph Interrupt/Resume Action Flow | done | Proposal nodes persist pending actions before a separate `interrupt()` node; `/actions/continue` resumes with `Command(resume=...)`; commit side effects run after resume with idempotency through pending-action `result_json`. Assessment and replan now call authoritative backend services. |
 | Task 14: Memory Compaction And Operational Safety | partial | Versioned `memory_ref` persistence, durable clarification state, checkpoint id capture, and pending-action janitor exist. Postgres checkpointer wiring and ops dashboards remain follow-up hardening. |
 | Task 15: Frontend Idempotency And Action IDs | done | Stable `incomingMessageId`, action ids, and `/actions/continue` approve/reject UI are implemented and covered by page tests. Unrelated dirty UI hunks remain isolated from the committed diff. |
-| Task 16: Evaluation Suite, Janitor, And Operational Checks | partial | Janitor primitive, migration checks, action-resume tests, and route/frontend coverage exist. Full LangSmith/offline eval suite and ops dashboards remain follow-up work. |
-| Task 17: Final Integration Verification And Legacy Path Deprecation | partial | Backend subset and frontend type-check/page tests pass. Legacy `AgentChatService` remains present as compatibility/reference until final deprecation is explicitly scheduled. |
+| Task 16: Evaluation Suite, Janitor, And Operational Checks | done | Adversarial routing eval scaffold, janitor service/tests, migration checks, action-resume tests, route/frontend coverage, and ops runbook exist. Live model eval remains opt-in via `RUN_AGENT_ROUTER_EVAL=1`. |
+| Task 17: Final Integration Verification And Legacy Path Deprecation | done | Focused backend/frontend verification is part of the final pass. Legacy `AgentChatService` is explicitly deprecated and retained only for rollback/reference tests. |
 
 ### Done-True Vs Temporary Boundaries
 
@@ -48,6 +48,7 @@ Done-true in the current implementation:
 
 - Production route wiring through `AgentGraphService`.
 - Structured router factory on the production route.
+- Structured router/factory hardening tests and opt-in adversarial routing eval scaffold.
 - Inbound request idempotency using `incomingMessageId`.
 - `409 in_progress` response contract.
 - Per-thread lock service.
@@ -61,13 +62,16 @@ Done-true in the current implementation:
 - No-evidence/no-grounded-answer composer guard.
 - Search scope escalation offer and expanded-search continuation.
 - Interrupted-run finalization after action approve/reject/expire.
+- Pending-action janitor service and ops runbook.
 - Frontend pending action approve/reject continuation.
+- Legacy keyword `AgentChatService` marked deprecated.
 
 Done-temporary or partial:
 
 - Production Postgres checkpointer is dependency-injection ready, but the app still defaults to `InMemorySaver` unless a durable checkpointer is provided.
-- Full offline/online eval and ops dashboards are not implemented in this code pass.
-- Legacy `AgentChatService` is not removed yet.
+- Live router model eval is opt-in via `RUN_AGENT_ROUTER_EVAL=1`; it is not run in ordinary unit-test traffic.
+- Full LangSmith online dashboards are not implemented in this code pass.
+- Legacy `AgentChatService` is deprecated but not removed yet.
 
 ### Implementation Deviations
 
@@ -77,6 +81,9 @@ Done-temporary or partial:
 - Added `AgentActionCommitService` so assessment/replan approvals call authoritative backend services instead of generic confirmation.
 - Added checkpoint id capture from LangGraph state snapshots and versioned `memory_ref` persistence into conversation memory.
 - Folded scope-expansion pending clarification into the conversation memory summary store; process memory is now only a hot cache.
+- Added router factory/structured-router tests after discovering the planned files were missing from the repo.
+- Added `AgentPendingActionJanitor.run_once()` while preserving the existing `expire_pending_actions()` compatibility method.
+- Added opt-in adversarial router eval tests that are skipped unless `RUN_AGENT_ROUTER_EVAL=1`.
 - Frontend retry idempotency was implemented; unrelated UI polish hunks were left out of the committed agent-flow changes.
 
 ---

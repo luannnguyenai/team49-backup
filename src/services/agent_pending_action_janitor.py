@@ -7,5 +7,8 @@ class AgentPendingActionJanitor:
     def __init__(self, graph_repo):
         self.graph_repo = graph_repo
 
-    async def expire_pending_actions(self, now: datetime | None = None) -> int:
+    async def run_once(self, now: datetime | None = None) -> int:
         return await self.graph_repo.expire_pending_actions(now or datetime.now(UTC))
+
+    async def expire_pending_actions(self, now: datetime | None = None) -> int:
+        return await self.run_once(now)

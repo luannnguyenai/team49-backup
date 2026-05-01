@@ -1,3 +1,8 @@
+"""
+Deprecated compatibility service for pre-LangGraph tests and rollback.
+Production /api/agent/chat requests must use AgentGraphService.
+"""
+
 from __future__ import annotations
 
 import re
