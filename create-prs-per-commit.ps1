@@ -4,14 +4,7 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ e9052a6d9a00f79ca67847f2a953a4b1e2825bd9 Update LandingPage.tsx
-+ 753aeaa0a2f55515d594d8f164198ebb0081caae Update 04-eval-quantize.md
-+ 677eb109a36570e9358a4a71cb0b07def2cf4724 Update 05-serving-vllm.md
-+ 7c3242fe57f49788609052a892f17d566974ea27 Update 06-codebase-changes.md
-+ 6426a1774d18d43e9bda36fe442798d262014ca7 Update 07-rollout.md
-+ a941dc16e8d706f8833546cd7762e2506ad0c20c Update datasets.md
-+ e38ae0134a56b981c1d154059a8b890a6e748236 Update README.md
-+ 95b6b4aa189884158aeab78e27f27b7e721dbe07 Update PIPELINE.md
+
 + 
 "@
 
