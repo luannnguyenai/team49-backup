@@ -59,6 +59,7 @@ _DIFFICULTY_SLOTS: list[tuple[DifficultyBucket, int]] = [
 _RECENT_ASSESSMENT_LOOKBACK = 2
 _SELECTOR_DIFFICULTY_ORDER = {"medium": 0, "easy": 1, "hard": 2}
 _INLINE_QUIZ_CHECKPOINTS = {"midpoint", "end"}
+_QUIZ_ANSWER_TIMING_LOG_THRESHOLD_MS = 150.0
 
 
 async def start_quiz(
@@ -358,8 +359,30 @@ async def _answer_canonical_quiz_question(
         )
     )
     duplicate_check_at = perf_counter()
-    if existing.scalar_one_or_none() is not None:
-        raise ConflictError("Câu hỏi này đã được trả lời trong phiên quiz này.")
+    existing_interaction = existing.scalar_one_or_none()
+    if existing_interaction is not None:
+        all_interactions_result = await db.execute(
+            select(Interaction.is_correct).where(Interaction.session_id == session.id)
+        )
+        all_correct_flags = all_interactions_result.scalars().all()
+        tally_loaded_at = perf_counter()
+        total_ms = round((tally_loaded_at - started_at) * 1000, 1)
+        log.info(
+            "quiz_answer_timing session=%s phase=%s duplicate_reused=1 unit_lookup_ms=%.1f "
+            "item_lookup_ms=%.1f duplicate_check_ms=%.1f tally_ms=%.1f total_ms=%.1f",
+            session.id,
+            session.canonical_phase or "mini_quiz",
+            (unit_loaded_at - started_at) * 1000,
+            (item_loaded_at - unit_loaded_at) * 1000,
+            (duplicate_check_at - item_loaded_at) * 1000,
+            (tally_loaded_at - duplicate_check_at) * 1000,
+            total_ms,
+        )
+        return _build_quiz_answer_response(
+            item=item,
+            is_correct=bool(existing_interaction.is_correct),
+            all_correct_flags=all_correct_flags,
+        )
 
     is_correct = item.answer_index == selected_answer_to_index(req.selected_answer.value)
     count_result = await db.execute(select(func.count()).where(Interaction.session_id == session.id))
@@ -420,9 +443,11 @@ async def _answer_canonical_quiz_question(
     all_correct_flags = all_interactions_result.scalars().all()
     tally_loaded_at = perf_counter()
     total_ms = round((tally_loaded_at - started_at) * 1000, 1)
-    log.debug(
+    timing_log = (
         "quiz_answer_timing session=%s phase=%s unit_lookup_ms=%.1f item_lookup_ms=%.1f "
-        "duplicate_check_ms=%.1f write_ms=%.1f progress_sync_ms=%.1f tally_ms=%.1f total_ms=%.1f",
+        "duplicate_check_ms=%.1f write_ms=%.1f progress_sync_ms=%.1f tally_ms=%.1f total_ms=%.1f"
+    )
+    timing_args = (
         session.id,
         session.canonical_phase or "mini_quiz",
         (unit_loaded_at - started_at) * 1000,
@@ -433,12 +458,17 @@ async def _answer_canonical_quiz_question(
         (tally_loaded_at - progress_synced_at) * 1000,
         total_ms,
     )
-    return QuizAnswerResponse(
+    if (
+        session.canonical_phase in {"inline_midpoint_quiz", "inline_end_quiz"}
+        or total_ms >= _QUIZ_ANSWER_TIMING_LOG_THRESHOLD_MS
+    ):
+        log.info(timing_log, *timing_args)
+    else:
+        log.debug(timing_log, *timing_args)
+    return _build_quiz_answer_response(
+        item=item,
         is_correct=is_correct,
-        correct_answer=answer_index_to_correct_answer(item.answer_index),
-        explanation_text=item.explanation,
-        questions_answered=len(all_correct_flags),
-        questions_correct=sum(1 for correct in all_correct_flags if correct),
+        all_correct_flags=all_correct_flags,
     )
 
 
@@ -629,6 +659,21 @@ def _canonical_bloom_breakdown(rows: list[tuple[Interaction, QuestionBankItem]])
     return {"canonical": f"{correct}/{total}"}
 
 
+def _build_quiz_answer_response(
+    *,
+    item: QuestionBankItem,
+    is_correct: bool,
+    all_correct_flags: list[bool],
+) -> QuizAnswerResponse:
+    return QuizAnswerResponse(
+        is_correct=is_correct,
+        correct_answer=answer_index_to_correct_answer(item.answer_index),
+        explanation_text=item.explanation,
+        questions_answered=len(all_correct_flags),
+        questions_correct=sum(1 for correct in all_correct_flags if correct),
+    )
+
+
 async def _get_quiz_session(db: AsyncSession, user_id: uuid.UUID, session_id: uuid.UUID) -> Session:
     result = await db.execute(
         select(Session).where(
@@ -665,8 +710,9 @@ async def _current_quiz_progress_state(
     user_id: uuid.UUID,
 ) -> dict:
     state = await PlannerAuditRepository(db).get_session_state(user_id, CANONICAL_SESSION_ID)
-    if state is not None and isinstance(state.current_progress, dict):
-        return dict(state.current_progress)
+    current_progress = getattr(state, "current_progress", None) if state is not None else None
+    if isinstance(current_progress, dict):
+        return dict(current_progress)
     return {}
 
 
