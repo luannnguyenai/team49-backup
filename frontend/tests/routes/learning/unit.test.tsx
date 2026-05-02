@@ -201,6 +201,29 @@ const TOC_SUMMARY = {
   ],
 };
 
+const INLINE_QUIZ_START_RESPONSE = {
+  session_id: "inline-quiz-session-1",
+  learning_unit_id: "unit_lecture_01",
+  total_questions: 1,
+  questions: [
+    {
+      id: "00000000-0000-0000-0000-000000000101",
+      item_id: "item-inline-quiz-1",
+      learning_unit_id: "unit_lecture_01",
+      bloom_level: "understand",
+      difficulty_bucket: "medium",
+      stem_text: "Which option is correct?",
+      option_a: "Option A",
+      option_b: "Option B",
+      option_c: "Option C",
+      option_d: "Option D",
+      time_expected_seconds: 30,
+    },
+  ],
+  source: "inline_video",
+  checkpoint: "midpoint",
+} as const;
+
 const LECTURE_2_UNIT: LearningUnitResponse = {
   course: {
     slug: "cs231n",
@@ -651,6 +674,116 @@ describe("learning unit page (US3)", () => {
 
     expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
     expect(pauseSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows an inline quiz error message when answer submission fails", async () => {
+    canonicalQuizApiMock.start.mockResolvedValue(INLINE_QUIZ_START_RESPONSE);
+    quizApiMock.answer.mockRejectedValue({
+      response: {
+        data: {
+          detail: "Quiz answer could not be saved.",
+        },
+      },
+    });
+
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Start quiz" }));
+    fireEvent.click(await screen.findByRole("button", { name: /Option A/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Submit answer" }));
+
+    expect(await screen.findByText("Quiz answer could not be saved.")).toBeInTheDocument();
+    expect(screen.queryByText("You answered correctly.")).not.toBeInTheDocument();
+  });
+
+  it("disables inline quiz submit while the answer request is pending", async () => {
+    canonicalQuizApiMock.start.mockResolvedValue(INLINE_QUIZ_START_RESPONSE);
+
+    let resolveAnswer: ((value: {
+      is_correct: boolean;
+      correct_answer: "A" | "B" | "C" | "D";
+      explanation_text: string | null;
+      questions_answered: number;
+      questions_correct: number;
+    }) => void) | null = null;
+
+    quizApiMock.answer.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveAnswer = resolve;
+        }),
+    );
+
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Start quiz" }));
+    fireEvent.click(await screen.findByRole("button", { name: /Option A/i }));
+
+    const submitButton = screen.getByRole("button", { name: "Submit answer" });
+    fireEvent.click(submitButton);
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(quizApiMock.answer).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByRole("button", { name: "Checking answer..." })).toBeDisabled();
+
+    expect(resolveAnswer).not.toBeNull();
+    resolveAnswer!({
+      is_correct: true,
+      correct_answer: "A",
+      explanation_text: "Because A is correct.",
+      questions_answered: 1,
+      questions_correct: 1,
+    });
+
+    expect(await screen.findByText("You answered correctly.")).toBeInTheDocument();
   });
 
   it("shows the end-of-video quiz overlay when playback finishes", async () => {
