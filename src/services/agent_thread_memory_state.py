@@ -17,13 +17,17 @@ class AgentThreadMemoryStateStore:
         self.memory_compaction = memory_compaction
         self._pending_clarifications: dict[str, PendingClarification] = {}
 
-    async def load_memory_ref(self, conversation_id: str, user_id: str) -> str | None:
+    async def load_memory_ref(self, conversation_id: str, user_id: str, thread_id: str) -> str | None:
         if self.conversation_repo is None:
             return None
-        memory = await self.conversation_repo.get_memory(UUID(str(conversation_id)), UUID(str(user_id)))
+        memory = await self.conversation_repo.get_memory(
+            UUID(str(conversation_id)),
+            UUID(str(user_id)),
+            thread_id=thread_id,
+        )
         if memory is None or not isinstance(memory.summary_json, dict):
             return None
-        return memory.summary_json.get("memoryRef")
+        return self._memory_ref(thread_id, memory.summary_json)
 
     def coerce_pending_clarification(self, value) -> PendingClarification | None:
         if isinstance(value, PendingClarification):
@@ -49,7 +53,11 @@ class AgentThreadMemoryStateStore:
                 return cached
         if self.conversation_repo is None:
             return None
-        memory = await self.conversation_repo.get_memory(UUID(str(conversation_id)), UUID(str(user_id)))
+        memory = await self.conversation_repo.get_memory(
+            UUID(str(conversation_id)),
+            UUID(str(user_id)),
+            thread_id=thread_id,
+        )
         summary = memory.summary_json if memory and isinstance(memory.summary_json, dict) else {}
         stored = summary.get("pendingClarification")
         if not isinstance(stored, dict) or stored.get("threadId") != thread_id:
@@ -84,8 +92,14 @@ class AgentThreadMemoryStateStore:
             return
         conversation_uuid = UUID(str(conversation_id))
         user_uuid = UUID(str(user_id))
-        memory = await self.conversation_repo.get_memory(conversation_uuid, user_uuid)
+        memory = await self.conversation_repo.get_memory(
+            conversation_uuid,
+            user_uuid,
+            thread_id=thread_id,
+        )
         summary = dict(memory.summary_json) if memory and isinstance(memory.summary_json, dict) else {}
+        summary.setdefault("summaryVersion", 1)
+        summary["memoryRef"] = self._memory_ref(thread_id, summary)
         if pending is None:
             existing = summary.get("pendingClarification")
             if not isinstance(existing, dict) or existing.get("threadId") != thread_id:
@@ -99,6 +113,7 @@ class AgentThreadMemoryStateStore:
         await self.conversation_repo.upsert_memory(
             conversation_id=conversation_uuid,
             user_id=user_uuid,
+            thread_id=thread_id,
             summary_status=getattr(memory, "summary_status", None) or "fresh",
             recent_message_window=getattr(
                 memory,
@@ -109,7 +124,11 @@ class AgentThreadMemoryStateStore:
             last_updated_at=datetime.now(UTC),
         )
 
-    async def compact_if_needed(self, conversation_id: str, user_id: str) -> None:
+    def _memory_ref(self, thread_id: str, summary: dict) -> str:
+        version = int(summary.get("summaryVersion") or 1)
+        return f"agent_memory:{thread_id}:v{version}"
+
+    async def compact_if_needed(self, conversation_id: str, user_id: str, thread_id: str) -> None:
         if self.conversation_repo is None:
             return
         conversation_uuid = UUID(str(conversation_id))
@@ -117,7 +136,11 @@ class AgentThreadMemoryStateStore:
         messages = await self.conversation_repo.list_messages(conversation_uuid, user_uuid, limit=200)
         if not self.memory_compaction.should_compact(messages):
             return
-        memory = await self.conversation_repo.get_memory(conversation_uuid, user_uuid)
+        memory = await self.conversation_repo.get_memory(
+            conversation_uuid,
+            user_uuid,
+            thread_id=thread_id,
+        )
         previous_summary = memory.summary_json if memory and isinstance(memory.summary_json, dict) else {}
         pending_clarification = previous_summary.get("pendingClarification")
         compacted = self.memory_compaction.compact(
@@ -129,7 +152,7 @@ class AgentThreadMemoryStateStore:
             else None,
             previous_summary_version=int(previous_summary.get("summaryVersion") or 0),
         )
-        memory_ref = f"agent_memory:{conversation_id}:v{compacted.summary_version}"
+        memory_ref = f"agent_memory:{thread_id}:v{compacted.summary_version}"
         summary_json = {
             "memoryRef": memory_ref,
             "summaryVersion": compacted.summary_version,
@@ -143,6 +166,7 @@ class AgentThreadMemoryStateStore:
         await self.conversation_repo.upsert_memory(
             conversation_id=conversation_uuid,
             user_id=user_uuid,
+            thread_id=thread_id,
             summary_status="fresh",
             recent_message_window=self.memory_compaction.max_recent_turns,
             summary_json=summary_json,

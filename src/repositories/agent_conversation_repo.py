@@ -40,6 +40,7 @@ class AgentConversationRepository:
 
         memory = AgentConversationMemory(
             conversation_id=row.id,
+            thread_id=row.thread_id,
             user_id=user_id,
             summary_status="empty",
             recent_message_window=10,
@@ -117,12 +118,16 @@ class AgentConversationRepository:
         self,
         conversation_id: UUID,
         user_id: UUID,
+        thread_id: str | None = None,
     ) -> AgentConversationMemory | None:
+        filters = [
+            AgentConversationMemory.conversation_id == conversation_id,
+            AgentConversationMemory.user_id == user_id,
+        ]
+        if thread_id is not None:
+            filters.append(AgentConversationMemory.thread_id == thread_id)
         result = await self.session.execute(
-            select(AgentConversationMemory).where(
-                AgentConversationMemory.conversation_id == conversation_id,
-                AgentConversationMemory.user_id == user_id,
-            )
+            select(AgentConversationMemory).where(*filters)
         )
         return result.scalar_one_or_none()
 
@@ -131,16 +136,18 @@ class AgentConversationRepository:
         *,
         conversation_id: UUID,
         user_id: UUID,
+        thread_id: str,
         summary_status: str,
         recent_message_window: int,
         summary_json: dict,
         last_updated_at: datetime | None = None,
     ) -> AgentConversationMemory:
-        memory = await self.get_memory(conversation_id, user_id)
+        memory = await self.get_memory(conversation_id, user_id, thread_id=thread_id)
         now = last_updated_at or datetime.now(UTC)
         if memory is None:
             memory = AgentConversationMemory(
                 conversation_id=conversation_id,
+                thread_id=thread_id,
                 user_id=user_id,
                 summary_status=summary_status,
                 recent_message_window=recent_message_window,
@@ -149,6 +156,7 @@ class AgentConversationRepository:
             )
             self.session.add(memory)
         else:
+            memory.thread_id = thread_id
             memory.summary_status = summary_status
             memory.recent_message_window = recent_message_window
             memory.summary_json = summary_json

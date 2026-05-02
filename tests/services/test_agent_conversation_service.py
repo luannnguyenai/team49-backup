@@ -45,12 +45,40 @@ async def test_conversation_service_returns_empty_memory_when_not_summarized():
 
     class Repo:
         async def get_conversation(self, requested_conversation_id, requested_user_id):
-            return SimpleNamespace(id=conversation_id)
+            return SimpleNamespace(id=conversation_id, thread_id="thread-memory-empty")
 
-        async def get_memory(self, requested_conversation_id, requested_user_id):
+        async def get_memory(self, requested_conversation_id, requested_user_id, thread_id=None):
+            assert thread_id == "thread-memory-empty"
             return None
 
     memory = await AgentConversationService(Repo()).get_memory(conversation_id, user_id)
 
+    assert memory.thread_id == "thread-memory-empty"
     assert memory.summary_status == "empty"
     assert memory.summary == {}
+
+
+@pytest.mark.asyncio
+async def test_conversation_service_returns_thread_scoped_memory():
+    user_id = uuid4()
+    conversation_id = uuid4()
+    now = datetime(2026, 5, 2, 9, 0, tzinfo=UTC)
+
+    class Repo:
+        async def get_conversation(self, requested_conversation_id, requested_user_id):
+            return SimpleNamespace(id=conversation_id, thread_id="thread-memory-fresh")
+
+        async def get_memory(self, requested_conversation_id, requested_user_id, thread_id=None):
+            assert thread_id == "thread-memory-fresh"
+            return SimpleNamespace(
+                thread_id="thread-memory-fresh",
+                summary_status="fresh",
+                recent_message_window=10,
+                last_updated_at=now,
+                summary_json={"memoryRef": "agent_memory:thread-memory-fresh:v1"},
+            )
+
+    memory = await AgentConversationService(Repo()).get_memory(conversation_id, user_id)
+
+    assert memory.thread_id == "thread-memory-fresh"
+    assert memory.summary["memoryRef"] == "agent_memory:thread-memory-fresh:v1"

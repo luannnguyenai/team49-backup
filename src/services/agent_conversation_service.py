@@ -58,10 +58,11 @@ class AgentConversationService:
         conversation = await self.repo.get_conversation(conversation_id, user_id)
         if not conversation:
             raise ValueError("conversation_not_found")
-        row = await self.repo.get_memory(conversation_id, user_id)
+        row = await self.repo.get_memory(conversation_id, user_id, thread_id=conversation.thread_id)
         if not row:
             return AgentConversationMemory(
                 conversationId=str(conversation_id),
+                threadId=conversation.thread_id,
                 summaryStatus="empty",
                 recentMessageWindow=10,
                 lastUpdatedAt=None,
@@ -69,6 +70,7 @@ class AgentConversationService:
             )
         return AgentConversationMemory(
             conversationId=str(conversation_id),
+            threadId=row.thread_id,
             summaryStatus=row.summary_status,
             recentMessageWindow=row.recent_message_window,
             lastUpdatedAt=row.last_updated_at,

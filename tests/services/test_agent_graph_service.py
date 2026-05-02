@@ -1429,7 +1429,8 @@ async def test_scope_expansion_pending_clarification_persists_to_thread_memory()
 
     summary = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]
     pending = summary["pendingClarification"]
-    assert summary["memoryRef"] == f"agent_memory:{conversation_id}:v1"
+    assert conversation_repo.upsert_memory.await_args.kwargs["thread_id"] == "thread-scope-save"
+    assert summary["memoryRef"] == "agent_memory:thread-scope-save:v1"
     assert pending["threadId"] == "thread-scope-save"
     assert pending["clarification"]["type"] == "search_scope_expansion"
     assert pending["clarification"]["payload"]["original_message"] == "attention mask ở đâu?"
@@ -2392,11 +2393,16 @@ async def test_thread_memory_compaction_persists_versioned_memory_ref():
         ),
     )
 
-    await service._compact_thread_memory_if_needed(str(conversation_id), str(user_id))
+    await service._compact_thread_memory_if_needed(
+        str(conversation_id),
+        str(user_id),
+        "thread-memory-compact",
+    )
 
     assert upserts
+    assert upserts[0]["thread_id"] == "thread-memory-compact"
     summary = upserts[0]["summary_json"]
-    assert summary["memoryRef"] == f"agent_memory:{conversation_id}:v3"
+    assert summary["memoryRef"] == "agent_memory:thread-memory-compact:v3"
     assert summary["summaryVersion"] == 3
     assert summary["messageCount"] == 3
 

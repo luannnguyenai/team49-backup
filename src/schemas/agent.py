@@ -275,6 +275,7 @@ class AgentConversationSummary(BaseModel):
 
 class AgentConversationMemory(BaseModel):
     conversation_id: str = Field(alias="conversationId")
+    thread_id: str | None = Field(default=None, alias="threadId")
     summary_status: Literal["empty", "fresh", "stale", "updating"] = Field(alias="summaryStatus")
     recent_message_window: int = Field(alias="recentMessageWindow")
     last_updated_at: datetime | None = Field(default=None, alias="lastUpdatedAt")

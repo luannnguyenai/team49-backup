@@ -213,6 +213,7 @@ class AgentGraphService:
                     await self._compact_thread_memory_if_needed(
                         conversation_id=conversation_id,
                         user_id=user_id,
+                        thread_id=thread_id,
                     )
                 response_ref = await self.graph_repo.store_response_payload(
                     graph_run_id=run.graph_run_id,
@@ -281,7 +282,7 @@ class AgentGraphService:
             user_id,
             thread_id,
         )
-        state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id)
+        state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id, thread_id)
         if self._graph is None:
             raise RuntimeError("langgraph_not_installed")
         final_state = await self._graph.ainvoke(
@@ -1152,8 +1153,8 @@ class AgentGraphService:
     async def _resolve_pending_action_decision(self, pending, decision: dict) -> ToolResult:
         return await self.action_decisions.resolve(pending, decision)
 
-    async def _load_memory_ref(self, conversation_id: str, user_id: str) -> str | None:
-        return await self.thread_memory.load_memory_ref(conversation_id, user_id)
+    async def _load_memory_ref(self, conversation_id: str, user_id: str, thread_id: str) -> str | None:
+        return await self.thread_memory.load_memory_ref(conversation_id, user_id, thread_id)
 
     async def _load_recent_message_context(self, conversation_id: str, user_id: str) -> list[dict]:
         if self.conversation_repo is None or not hasattr(self.conversation_repo, "list_messages"):
@@ -1207,8 +1208,13 @@ class AgentGraphService:
             pending=pending,
         )
 
-    async def _compact_thread_memory_if_needed(self, conversation_id: str, user_id: str) -> None:
-        await self.thread_memory.compact_if_needed(conversation_id, user_id)
+    async def _compact_thread_memory_if_needed(
+        self,
+        conversation_id: str,
+        user_id: str,
+        thread_id: str,
+    ) -> None:
+        await self.thread_memory.compact_if_needed(conversation_id, user_id, thread_id)
 
     async def _capture_checkpoint_id(self, thread_id: str) -> str | None:
         if self._graph is None:
