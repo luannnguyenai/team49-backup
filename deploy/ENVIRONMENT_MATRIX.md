@@ -1,47 +1,144 @@
-# Environment Matrix
+# Environment Matrix — Railway + AWS S3
 
-## Backend Secrets And Runtime
+Set qua Railway dashboard (**Service → Variables**), không commit `.env` thật.
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `DATABASE_URL` | Yes | FastAPI and SQLAlchemy PostgreSQL connection |
-| `REDIS_URL` | Yes | Redis connection for cache and rate-limit/session behavior |
-| `SECRET_KEY` | Yes | JWT and application security secret |
-| `CORS_ORIGINS` | Yes | Explicit list of allowed frontend origins for credentialed browser requests |
-| `MODEL_PROVIDER` | Yes | Active LLM provider |
-| `DEFAULT_MODEL` | Yes | Default tutoring/application model |
-| `FAST_MODEL` | Recommended | Lower-latency model for cheaper paths |
-| `OPENAI_API_KEY` | If using OpenAI | LLM access |
-| `ANTHROPIC_API_KEY` | If using Anthropic | LLM access |
-| `GEMINI_API_KEY` | If using Gemini | LLM access |
-| `DB_POOL_SIZE` | Recommended | SQLAlchemy connection pool sizing |
-| `DB_MAX_OVERFLOW` | Recommended | SQLAlchemy overflow pool sizing |
-| `LOG_LEVEL` | Recommended | Logging verbosity |
-| `DEBUG` | Yes | Must be `false` in production |
+Cú pháp Railway reference cross-service: `${{ServiceName.VAR}}`.
 
-## Frontend Build And Runtime
+---
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Yes | Public API base URL baked into frontend build |
-| `NODE_ENV` | Yes | Must be `production` |
-| `API_INTERNAL_URL` | Optional | Internal backend URL during image build or server-side calls |
+## Service `backend` (FastAPI)
 
-## Infrastructure
+### Database
+| Variable | Value | Note |
+|---|---|---|
+| `DATABASE_URL` | `postgresql+asyncpg://ailearning:<PASSWORD>@${{postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/ai_learning` | **Prefix bắt buộc `postgresql+asyncpg://`** vì SQLAlchemy async. Railway service tên `postgres` (custom) cấp `RAILWAY_PRIVATE_DOMAIN`. |
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `POSTGRES_DB` | If self-hosted DB | Database name |
-| `POSTGRES_USER` | If self-hosted DB | Database user |
-| `POSTGRES_PASSWORD` | If self-hosted DB | Database password |
-| `REDIS_PASSWORD` | If self-hosted Redis | Redis password |
-| `BACKEND_PORT` | Optional | Host bind port if directly mapped |
-| `FRONTEND_PORT` | Optional | Host bind port if directly mapped |
+### Cache / Session
+| Variable | Value | Note |
+|---|---|---|
+| `REDIS_URL` | `${{Redis.REDIS_URL}}` | Railway plugin Redis cấp sẵn (đã có password) |
 
-## Important Notes
+### Auth & Security
+| Variable | Value | Note |
+|---|---|---|
+| `SECRET_KEY` | random 64 hex | `openssl rand -hex 32` |
+| `ALGORITHM` | `HS256` | |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | `7` | |
+| `RATE_LIMIT_LOGIN_PER_MINUTE` | `5` | |
 
-- `NEXT_PUBLIC_API_URL` is a frontend public variable and must point to the real production API hostname.
-- `CORS_ORIGINS` should be a JSON array or comma-separated string accepted by `src/config.py`.
-- Do not leave production secrets only in a manually edited `.env` on a developer machine.
-- Keep production values separate from local development values.
-- If frontend and backend are deployed from images, rebuild frontend whenever `NEXT_PUBLIC_API_URL` changes.
+### CORS
+| Variable | Value | Note |
+|---|---|---|
+| `CORS_ORIGINS` | `["https://<frontend>.up.railway.app"]` | JSON array, **chính xác origin** frontend Railway. Parser ở `src/config.py:163` chấp nhận JSON array hoặc CSV. |
+
+### LLM
+| Variable | Value | Note |
+|---|---|---|
+| `MODEL_PROVIDER` | `openai` / `anthropic` / `gemini` | Chọn 1 |
+| `DEFAULT_MODEL` | `gpt-4o-mini` | |
+| `FAST_MODEL` | `gpt-4o-mini` | |
+| `OPENAI_API_KEY` | `sk-...` | Nếu `MODEL_PROVIDER=openai` |
+| `ANTHROPIC_API_KEY` | `sk-ant-...` | Nếu `MODEL_PROVIDER=anthropic` |
+| `GEMINI_API_KEY` | `AIza...` | Nếu `MODEL_PROVIDER=gemini` |
+
+### Runtime tuning
+| Variable | Value | Note |
+|---|---|---|
+| `DEBUG` | `false` | **Bắt buộc false** trong production |
+| `LOG_LEVEL` | `INFO` | `WARNING` nếu logs quá ồn |
+| `DB_POOL_SIZE` | `5` | Demo nhỏ, không cần lớn |
+| `DB_MAX_OVERFLOW` | `10` | |
+| `DB_ECHO` | `false` | Tránh log SQL spam |
+| `PORT` | (Railway inject) | Backend đọc qua CMD shell `${PORT:-8000}` |
+
+### AWS S3 (cho video redirect)
+| Variable | Value | Note |
+|---|---|---|
+| `AWS_ACCESS_KEY_ID` | `AKIA...` | IAM user `ai-learning-backend-demo` |
+| `AWS_SECRET_ACCESS_KEY` | `<secret>` | |
+| `AWS_REGION` | `us-east-1` | Trùng region bucket |
+| `S3_VIDEO_BUCKET` | `ai-learning-videos-demo` | Tên bucket đã tạo |
+| `S3_PRESIGNED_URL_TTL` | `3600` | TTL presigned URL (giây) |
+
+---
+
+## Service `frontend` (Next.js)
+
+### Build args (Settings → Build → Build Args)
+| Variable | Value | Note |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `https://<backend>.up.railway.app` | **Build arg, KHÔNG phải runtime env** vì `NEXT_PUBLIC_*` bake vào bundle JS. Đổi → phải redeploy. |
+| `API_INTERNAL_URL` | `http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:8000` | Server-side rewrites trong `next.config.mjs` dùng biến này |
+
+### Runtime env (Settings → Variables)
+| Variable | Value | Note |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `https://<backend>.up.railway.app` | Cũng set runtime để consistency |
+| `API_INTERNAL_URL` | `http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:8000` | |
+| `NODE_ENV` | `production` | |
+| `PORT` | (Railway inject) | Next standalone đọc tự động |
+| `HOSTNAME` | `0.0.0.0` | Đã set trong Dockerfile |
+
+---
+
+## Service `postgres` (custom, image `pgvector/pgvector:pg16`)
+
+| Variable | Value | Note |
+|---|---|---|
+| `POSTGRES_USER` | `ailearning` | |
+| `POSTGRES_PASSWORD` | random 24 char | `openssl rand -base64 24` |
+| `POSTGRES_DB` | `ai_learning` | |
+| `PGDATA` | `/var/lib/postgresql/data/pgdata` | Volume mount path subdir |
+
+Volume: 5GB tại `/var/lib/postgresql/data`.
+
+Sau khi service up, vào shell chạy 1 lần:
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+(Image `pgvector/pgvector:pg16` đã có extension binary, chỉ cần `CREATE EXTENSION`.)
+
+---
+
+## Plugin `Redis`
+
+Railway tự cấp:
+- `REDIS_URL` (đã có password và TLS nếu có)
+- `REDIS_PRIVATE_URL`
+
+Backend dùng `${{Redis.REDIS_URL}}`.
+
+---
+
+## Lưu ý quan trọng
+
+### Driver scheme Postgres
+Railway custom service Postgres cấp env `DATABASE_URL` dạng `postgresql://...` qua reference. Code dùng SQLAlchemy async → **phải `postgresql+asyncpg://`**. Vì vậy KHÔNG dùng reference `${{postgres.DATABASE_URL}}`, mà tự construct:
+```
+postgresql+asyncpg://<user>:<password>@${{postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/<db>
+```
+
+### `NEXT_PUBLIC_*` là build-time
+- `NEXT_PUBLIC_API_URL` bake vào bundle JS lúc `npm run build`.
+- Đổi giá trị → **phải redeploy frontend**.
+- Set ở **Build Args**, không chỉ Variables.
+
+### `RAILWAY_PRIVATE_DOMAIN`
+- Railway tự cấp domain private dạng `<service>.railway.internal` cho mỗi service.
+- Reference qua `${{<service>.RAILWAY_PRIVATE_DOMAIN}}`.
+- Chỉ resolve trong Railway internal network, không qua public internet → free egress.
+
+### CORS
+- `CORS_ORIGINS` phải đúng origin frontend Railway sau khi generate domain.
+- Nếu sau này gắn custom domain → cập nhật lại + redeploy backend.
+
+### S3 region
+- `AWS_REGION` phải trùng region bucket. Sai region → presigned URL sai signature → 403.
+
+### Không cần biến cũ
+Loại bỏ khỏi production env:
+- `POSTGRES_*` (chỉ Postgres service cần, không phải backend)
+- `REDIS_PASSWORD` (Redis plugin tự quản qua URL)
+- `BACKEND_PORT`, `FRONTEND_PORT` (Railway inject `PORT`)
+- `NEXT_PUBLIC_API_URL=http://localhost:8000` (giá trị dev)
