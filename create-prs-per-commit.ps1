@@ -5,27 +5,6 @@ $progressFile = ".pr-cherry-pick-progress.json"
 
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ fd2a364d8c3368a23fecbc4697470ec1ccd7caaf Delete DESIGN_SUMMARY.md
-+ 234bb49670797808d3259206f6dd8980a819a244 Delete opus-review.md
-+ 9620e56113f18aeeabea19f7507e182cdb27c00a Delete PLAN.md
-+ 0b81acf6e98b7d4742e82b82946e61d026df16a9 Delete .gitkeep
-+ 519cc11343453fcab414e1370f6ac321ab3aace7 Create DEPLOYMENT_PLAN.md
-+ dd215cb56e48e658fc47177298541018e8bcc605 Create ENVIRONMENT_MATRIX.md
-+ 4b9bb9f561b1aa3383896494f384252a16b2ccdf Create PRODUCTION_CHECKLIST.md
-+ 7bb814d1696ae198fe73411ee24ddcc524d7ae51 Create README.md
-+ 8f7cbca7dc7c7adc27660cf60115e0c373bd1095 Create .env.production.example
-+ 5e0b6e4835cb903391e0a000ca6ed7f5e7df3460 Create BACKUP_RESTORE_RUNBOOK.md
-+ b17e727bf8d70c0f5113c869450351a5ae8f7552 Create Caddyfile
-+ dc769aea4a16674459421ec0f4f4010afe153838 Create deploy.sh
-+ 115e857e18d794fca86320b04569d00ec6b1568f Update Caddyfile
-+ dcd9f695e674ac230a7bf3917938f1ff667e5e54 Create nginx.conf
-+ 336c66442b90ed2670d3e602777891363aceaa25 Update PRODUCTION_CHECKLIST.md
-+ 471bbec8b6027cef6e0691a8ca74ad5ccba345c7 Update ENVIRONMENT_MATRIX.md
-+ d84ea034ddccf8fddeb486140d9141e3ef7d0645 Update DEPLOYMENT_PLAN.md
-+ 10c20e5e6f1f9ea18b9e8dc69038a1539ad49cce Update README.md
-+ c5061602ff8c9fba5139f30530a5903b9f7eed82 Update FinetuneLoRA-2.ipynb
-+ 0d46135e41f1e04992e0a653b7db35bc2f9f21e7 Update PIPELINE.md
-+ e4b40f9e33caa4eb82d9c389eeb19d1975749da5 Create 01-environment.md
 + 1eb56286806a38da85113afaffd4ffa7ae81a1f1 Create 02-data-pipeline.md
 + 16e8d6a7f3c37454f697f053815a893e51f7a156 Create 03-finetune.md
 + 753aeaa0a2f55515d594d8f164198ebb0081caae Update 04-eval-quantize.md
