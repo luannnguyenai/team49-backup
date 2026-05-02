@@ -1,10 +1,10 @@
-# Fine-tune Pipeline — English AI/ML Tutor with Qwen2.5-7B-Instruct
+# Fine-tune Pipeline — English AI/ML Tutor with Qwen2.5-VL-3B-Instruct
 
-> Source of truth: [PROPOSAL.md](./PROPOSAL.md). This pipeline replaces the older Vietnamese/VLM-first plan.
+> Source of truth: [PROPOSAL.md](./PROPOSAL.md). This pipeline keeps the current dataset research, but updates the model/runtime choice to a vision-capable Qwen VL stack.
 
 ## Overview
 
-Fine-tune `Qwen/Qwen2.5-7B-Instruct` as a text-only English tutor for AI/ML/NLP/CV.
+Fine-tune `Qwen/Qwen2.5-VL-3B-Instruct` as an English tutor for AI/ML/NLP/CV. In v1, supervision remains text-first so the existing dataset research does not change, while the deployed model still supports vision inputs.
 
 ```mermaid
 flowchart LR
@@ -12,9 +12,9 @@ flowchart LR
     E[Filtered ELI5 subset<br/>style-only] --> C[Mixing + Chat formatting]
     B --> C
     C --> D[Ablation runs<br/>A/B/C/D]
-    D --> F[QLoRA fine-tune]
+    D --> F[QLoRA fine-tune<br/>on VL base, text-first supervision]
     F --> G[Adapter checkpoints]
-    G --> H[Eval gates<br/>domain + style + regression]
+    G --> H[Eval gates<br/>domain + style + regression + vision retention smoke]
     H --> I[Select best run]
 ```
 
@@ -80,6 +80,8 @@ Do not use raw ELI5. Keep only a filtered subset that matches explanation-style 
 
 Use chat-format SFT so the fine-tuned model matches deployment behavior.
 
+In v1, keep the training samples text-only unless the project later adds vetted multimodal supervision. This preserves the current dataset thesis instead of inventing a new image corpus requirement.
+
 Example sample:
 
 ```json
@@ -131,18 +133,20 @@ Decision rule:
 
 | Item | Value |
 |---|---|
-| Base model | `Qwen/Qwen2.5-7B-Instruct` |
+| Base model | `Qwen/Qwen2.5-VL-3B-Instruct` |
 | Fine-tune method | QLoRA 4-bit |
-| Target type | Text-only |
+| Target type | Vision-capable model, text-first SFT in v1 |
 | Max sequence length | 2048 or 4096 depending on GPU |
 | Suggested LoRA rank | `r=16` or `r=32` |
 | Suggested target modules | `q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj` |
+| Vision tower policy | Freeze in v1 unless later multimodal data is added deliberately |
 
 ## 8. Evaluation stack
 
 ### Primary
 
 - Held-out internal domain set
+- Manual vision-retention smoke prompts on representative course images, diagrams, or screenshots
 
 ### Secondary
 
@@ -183,5 +187,6 @@ Decision rule:
 ## 11. Current status
 
 - `PROPOSAL.md` is aligned with this pipeline.
-- Older Vietnamese/VLM-first assumptions should be considered deprecated.
+- Older Vietnamese-specific assumptions should be considered deprecated.
+- Vision capability is active again at the model and serving layers, but the dataset research remains unchanged.
 - `FinetuneLoRA-2.ipynb` is a legacy notebook and is not the source of truth for v1 of the English-only plan.
