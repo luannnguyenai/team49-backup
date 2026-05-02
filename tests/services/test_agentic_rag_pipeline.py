@@ -2,6 +2,7 @@ import pytest
 
 from src.services.agent_graph_contracts import AgentSlots, ToolResult
 from src.services.agentic_rag_contracts import AgenticRAGObservation, AgenticRAGToolCall
+from src.services.agentic_rag_pipeline import AgenticRAGPipeline
 from src.services.agentic_rag_tools import AgenticRAGToolExecutor
 
 
@@ -84,3 +85,120 @@ async def test_tool_executor_blocks_expanded_search_without_approval():
 
     assert observation.evidence_status == "scope_expansion_required"
     assert observation.result.kind == "clarification"
+
+
+class FakePipelineRouter:
+    def __init__(self):
+        self.calls = []
+
+    def rag_think(self, **kwargs):
+        self.calls.append(("think", kwargs))
+        return {"user_goal": "Find YOLO", "active_topic": "YOLO"}
+
+    def rag_act(self, **kwargs):
+        self.calls.append(("act", kwargs))
+        return AgenticRAGToolCall(
+            tool="search_current_path_units",
+            arguments={"query": "YOLO"},
+            rationale="Search current path.",
+        )
+
+    def rag_observe(self, **kwargs):
+        self.calls.append(("observe", kwargs))
+        return kwargs["tool_observation"]
+
+    def rag_respond(self, **kwargs):
+        self.calls.append(("respond", kwargs))
+        return type(
+            "Final",
+            (),
+            {
+                "answer_markdown": "YOLO is covered as a single-stage detector.",
+                "evidence_status": "grounded",
+                "evidence_sufficient": True,
+                "clarification_question": None,
+            },
+        )()
+
+
+class GroundedToolNodes(FakeToolNodes):
+    async def find_content(self, message, intent, slots, allowed_course_ids):
+        from src.schemas.agent import AgentAction, AgentCitation
+
+        self.calls.append(("find_content", message, intent, slots, allowed_course_ids))
+        return ToolResult(
+            kind="find_content",
+            citations=[
+                AgentCitation(
+                    canonical_unit_id="u-yolo",
+                    course_id="CS231N",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    quote="YOLO is introduced as a single-stage detector.",
+                    source="summary",
+                )
+            ],
+            actions=[
+                AgentAction(
+                    type="open_unit",
+                    label="Open YOLO",
+                    canonical_unit_id="u-yolo",
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                )
+            ],
+            requires_evidence=True,
+        )
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_pipeline_runs_stages_in_order_and_returns_tool_result():
+    router = FakePipelineRouter()
+    tool_executor = AgenticRAGToolExecutor(GroundedToolNodes())
+    pipeline = AgenticRAGPipeline(router=router, tool_executor=tool_executor)
+
+    result = await pipeline.run(
+        message="Tìm thông tin YOLO",
+        intent="find_content",
+        slots=AgentSlots(raw_topic="YOLO"),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS231N"],
+    )
+
+    assert [name for name, _ in router.calls] == ["think", "act", "observe", "respond"]
+    assert result.answer_markdown == "YOLO is covered as a single-stage detector."
+    assert result.citations[0].canonical_unit_id == "u-yolo"
+    assert result.actions[0].learn_href == "/courses/cs231n/learn/lecture-9-seg4"
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_pipeline_does_not_emit_hidden_thinking():
+    class LeakyRouter(FakePipelineRouter):
+        def rag_respond(self, **kwargs):
+            self.calls.append(("respond", kwargs))
+            return type(
+                "Final",
+                (),
+                {
+                    "answer_markdown": "Hidden thought: search current path. Final: YOLO is covered.",
+                    "evidence_status": "grounded",
+                    "evidence_sufficient": True,
+                    "clarification_question": None,
+                },
+            )()
+
+    pipeline = AgenticRAGPipeline(
+        router=LeakyRouter(),
+        tool_executor=AgenticRAGToolExecutor(GroundedToolNodes()),
+    )
+
+    result = await pipeline.run(
+        message="Tìm thông tin YOLO",
+        intent="find_content",
+        slots=AgentSlots(raw_topic="YOLO"),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS231N"],
+    )
+
+    assert "Hidden thought" not in result.answer_markdown
+    assert result.answer_markdown == "YOLO is covered."
