@@ -6,8 +6,10 @@ Canonical-only quiz runtime.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import UTC, datetime
+from time import perf_counter
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -47,6 +49,7 @@ from src.services.canonical_question_selector import CanonicalQuestionSelector
 from src.services.mastery_evaluator import classify_mastery
 from src.services.learning_session_service import CANONICAL_SESSION_ID
 
+log = logging.getLogger(__name__)
 
 _DIFFICULTY_SLOTS: list[tuple[DifficultyBucket, int]] = [
     (DifficultyBucket.easy, 3),
@@ -328,11 +331,14 @@ async def _answer_canonical_quiz_question(
     session: Session,
     req: QuizAnswerRequest,
 ) -> QuizAnswerResponse:
+    started_at = perf_counter()
     if session.completed_at is not None:
         raise ConflictError("Quiz đã hoàn thành. Không thể ghi thêm câu trả lời.")
 
     unit = await _get_learning_unit_or_404(db, session.canonical_unit_id)
+    unit_loaded_at = perf_counter()
     item = await _get_canonical_quiz_item_by_surrogate(db, unit, req.question_id)
+    item_loaded_at = perf_counter()
     if item is None:
         raise ValidationError("Question does not belong to this canonical quiz unit.")
 
@@ -342,6 +348,7 @@ async def _answer_canonical_quiz_question(
             Interaction.canonical_item_id == item.item_id,
         )
     )
+    duplicate_check_at = perf_counter()
     if existing.scalar_one_or_none() is not None:
         raise ConflictError("Câu hỏi này đã được trả lời trong phiên quiz này.")
 
@@ -371,6 +378,7 @@ async def _answer_canonical_quiz_question(
         )
     )
     await db.flush()
+    interaction_written_at = perf_counter()
 
     answered_result = await db.execute(
         select(Interaction.canonical_item_id)
@@ -398,11 +406,27 @@ async def _answer_canonical_quiz_question(
         checkpoint=_quiz_checkpoint_for_session(session),
         quiz_phase=session.canonical_phase or "mini_quiz",
     )
+    progress_synced_at = perf_counter()
 
     all_interactions_result = await db.execute(
         select(Interaction.is_correct).where(Interaction.session_id == session.id)
     )
     all_correct_flags = all_interactions_result.scalars().all()
+    tally_loaded_at = perf_counter()
+    total_ms = round((tally_loaded_at - started_at) * 1000, 1)
+    log.debug(
+        "quiz_answer_timing session=%s phase=%s unit_lookup_ms=%.1f item_lookup_ms=%.1f "
+        "duplicate_check_ms=%.1f write_ms=%.1f progress_sync_ms=%.1f tally_ms=%.1f total_ms=%.1f",
+        session.id,
+        session.canonical_phase or "mini_quiz",
+        (unit_loaded_at - started_at) * 1000,
+        (item_loaded_at - unit_loaded_at) * 1000,
+        (duplicate_check_at - item_loaded_at) * 1000,
+        (interaction_written_at - duplicate_check_at) * 1000,
+        (progress_synced_at - interaction_written_at) * 1000,
+        (tally_loaded_at - progress_synced_at) * 1000,
+        total_ms,
+    )
     return QuizAnswerResponse(
         is_correct=is_correct,
         correct_answer=answer_index_to_correct_answer(item.answer_index),
