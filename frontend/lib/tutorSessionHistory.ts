@@ -7,13 +7,14 @@ export interface StoredTutorMessage {
   senderName: string;
   sentAt: string;
   rating?: number | null;
+  statusSteps?: string[];
 }
 
 export function buildTutorConversationKey(
   lessonKey: string,
-  contextBindingId?: string,
+  _contextBindingId?: string,
 ): string {
-  return `${lessonKey}::${contextBindingId ?? "__lesson__"}`;
+  return lessonKey;
 }
 
 function canUseSessionStorage(): boolean {
