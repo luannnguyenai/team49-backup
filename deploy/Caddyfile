@@ -1,0 +1,47 @@
+{
+	email ops@example.com
+}
+
+app.example.com {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+
+	reverse_proxy 127.0.0.1:3000
+}
+
+api.example.com {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+
+	@auth path /api/auth/*
+	handle @auth {
+		rate_limit {
+			zone auth_zone {
+				key {remote_host}
+				events 20
+				window 1m
+			}
+		}
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	@api path /api/*
+	handle @api {
+		request_body {
+			max_size 25MB
+		}
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	reverse_proxy 127.0.0.1:8000
+}
