@@ -12,7 +12,7 @@
 
 ## Current Implementation Status
 
-Last updated: 2026-05-01 after commits `f0f904b`, `1299233`, `6723d0e`, `6ab4aeb`, `68bfc31`, `3df8490`, `2e89940`, and the final refactor/ops follow-up.
+Last updated: 2026-05-02 after the thread-memory and Agentic RAG follow-up refactors.
 
 Status meanings:
 
@@ -41,6 +41,7 @@ Status meanings:
 | Task 15: Frontend Idempotency And Action IDs | done | Stable `incomingMessageId`, action ids, and `/actions/continue` approve/reject UI are implemented and covered by page tests. Unrelated dirty UI hunks remain isolated from the committed diff. |
 | Task 16: Evaluation Suite, Janitor, And Operational Checks | done | Adversarial routing eval scaffold, janitor service/tests, admin-protected janitor route, migration checks, action-resume tests, route/frontend coverage, and ops runbook exist. Live model eval remains opt-in via `RUN_AGENT_ROUTER_EVAL=1`. |
 | Task 17: Final Integration Verification And Legacy Path Deprecation | done | Focused backend/frontend verification is part of the final pass. Legacy `AgentChatService` is explicitly deprecated and retained only for rollback/reference tests. |
+| Task 18: Agentic RAG Natural Follow-Up Refactor | partial | RAG now uses visible thread context for routing, pending follow-up resolution, and assistant-help responses. Pending follow-ups can yield `new_request` so unrelated memory/help questions are rerouted instead of being forced into stale pending state. Grounded answer prompts and output guards forbid unvalidated suggestions/options, title-level retrieval remains the active stable search tool, and provider-neutral reasoning config is added. A full ReAct graph loop with explicit tool-call/observe/final states is still pending. |
 
 ### Done-True Vs Temporary Boundaries
 
@@ -67,12 +68,19 @@ Done-true in the current implementation:
 - Frontend pending action approve/reject continuation.
 - Legacy keyword `AgentChatService` marked deprecated.
 - `AgentGraphService` was slimmed by extracting thread-memory state and pending-action decision handling.
+- Visible thread context is passed to the production structured router for short follow-ups, pending retrieval approvals, failed-request retry resolution, and assistant-help memory questions.
+- Grounded answers are constrained to retrieved citations or persisted pending tool actions; the LLM must not suggest rankings, variants, comparisons, or choices that were not validated by a tool.
+- Model reasoning is configurable via `MODEL_REASONING_EFFORT` for providers that support it and `MODEL_EXTRA_KWARGS` for provider-specific thinking controls.
+- Pending follow-up resolution supports `new_request`; if the user asks something unrelated to the pending clarification, the pending state is cleared and the message is routed normally with visible thread context.
+- Text rendering filters provider reasoning blocks and strips trailing optional follow-up offers when evidence is already sufficient.
 
 Done-temporary or partial:
 
 - Live router model eval is opt-in via `RUN_AGENT_ROUTER_EVAL=1`; it is not run in ordinary unit-test traffic.
 - Full LangSmith online dashboards are not implemented in this code pass.
 - Legacy `AgentChatService` is deprecated but not removed yet.
+- The current RAG implementation is still a bounded router/tool/composer graph, not a complete ReAct loop. The next refactor should introduce explicit `decide -> tool_call -> observe -> final` nodes for RAG while preserving idempotency, thread memory, and no-hardcode policy.
+- Planner Mode canvas for replan/repath is design-approved but not implemented in this pass.
 
 ### Implementation Deviations
 
@@ -89,6 +97,21 @@ Done-temporary or partial:
 - Extracted thread-memory state handling and pending-action decision handling from `AgentGraphService` as final cleanup.
 - Added an admin-token protected pending-action janitor route after the initial runbook-only ops implementation.
 - Frontend retry idempotency was implemented; unrelated UI polish hunks were left out of the committed agent-flow changes.
+- Removed the remaining domain-specific target-path inference example from the router prompt to avoid creating an implicit hardcoded routing rule.
+- Added follow-up-context wiring for `resolve_pending_followup()` and `compose_assistant_help()` after UX testing showed the agent forgot the visible thread topic.
+- Added a provider-neutral thinking configuration path instead of hardcoding an OpenAI-only provider assumption.
+- Added explicit plan status for Agentic RAG: current work is partial, with full ReAct tool-call loop still outstanding.
+- Added `new_request` handling for pending clarification replies so memory/help questions are not trapped by stale retrieval clarification state.
+- Added grounded-answer postprocessing to remove trailing optional follow-up offers after evidence-backed answers.
+
+### Agentic RAG Refactor Guardrails
+
+- Production RAG must not add domain-specific keyword maps, synonym dictionaries, or special-case topic locks without explicit product approval.
+- The LLM may generate search queries from the visible user request, visible thread context, and validated route context; application code should execute and validate those tool calls, not inject topic-specific synonyms.
+- Search remains title-first for stability. Deeper transcript/content retrieval can be added later as a separate tool with its own evidence and ranking contract.
+- If the assistant asks a follow-up question that expects a short user reply, the expected continuation must be represented by a persisted pending clarification/action or be answerable from visible thread context.
+- Assistant memory for `/agent` is scoped to the current chat thread and contains only user-visible messages, assistant final answers, citations, actions, and active pending state. Hidden model reasoning, prompts, traces, raw tool dumps, and internal planner state must not be written into memory.
+- New chat creates a new `thread_id` and resets thread memory. Cross-thread learner profile, mastery, completed assessments, and committed planner state remain outside thread memory.
 
 ---
 
@@ -3885,7 +3908,7 @@ git commit -m "test: add agent routing eval and ops janitor"
 
 ---
 
-### Task 17: Final Integration Verification And Legacy Path Deprecation `[partial]`
+### Task 17: Final Integration Verification And Legacy Path Deprecation `[done]`
 
 **Files:**
 - Modify: `src/services/agent_chat_service.py`
@@ -3944,6 +3967,66 @@ git commit -m "chore: mark legacy agent chat service deprecated"
 
 ---
 
+### Task 18: Agentic RAG Natural Follow-Up Refactor `[partial]`
+
+**Files:**
+- Modify: `src/services/agent_structured_router.py`
+- Modify: `src/services/agent_graph_service.py`
+- Modify: `src/services/chat_model_factory.py`
+- Modify: `src/services/agent_router_factory.py`
+- Modify: `src/config.py`
+- Modify: `.env.example`
+- Modify: `docker-compose.yml`
+- Modify: `tests/services/test_agent_structured_router.py`
+- Modify: `tests/services/test_agent_graph_service.py`
+- Modify: `tests/test_chat_model_factory.py`
+- Modify: `tests/test_config.py`
+
+- [x] **Step 1: Pass visible thread context through RAG follow-up seams**
+
+`AgentGraphService` passes `recent_messages` into `resolve_pending_followup()` and `compose_assistant_help()` when those router methods support it. This fixes short replies such as "xem kết quả mạnh nhất", "thử lại", and "bạn có nhớ..." being handled as detached new requests.
+
+- [x] **Step 2: Tighten grounded answer and refinement guardrails**
+
+`StructuredAgentRouter` now tells the model that suggestions, rankings, variants, comparisons, and choices must come from retrieved evidence or persisted pending tool actions. It must not invent follow-up options from general model knowledge.
+
+- [x] **Step 3: Reroute unrelated replies out of stale pending clarification**
+
+Pending follow-up resolution supports `new_request`. When the user asks a fresh help/memory question while a retrieval refinement is pending, the graph clears pending state and routes the new request with visible thread context.
+
+- [x] **Step 4: Remove remaining domain-specific target-path prompt example**
+
+The router prompt no longer uses topic-specific examples as an implicit routing rule. Scope selection must come from explicit user/path context, not inferred domain keywords.
+
+- [x] **Step 5: Add provider-neutral reasoning config**
+
+`MODEL_REASONING_EFFORT=medium` enables reasoning for OpenAI-compatible models that support it, while `MODEL_EXTRA_KWARGS` provides a provider-specific escape hatch for Gemini/self-hosted thinking controls without hardcoding a provider in agent code.
+
+- [x] **Step 6: Filter reasoning blocks and grounded follow-up tails**
+
+Provider reasoning blocks are not rendered into chat text. When a grounded answer has sufficient evidence, trailing optional follow-up questions/offers are stripped so successful retrieval does not immediately ask the user to choose more unvalidated options.
+
+- [ ] **Step 7: Implement the full bounded ReAct RAG loop**
+
+Still pending. Replace the current router/tool/composer RAG slice with explicit graph nodes:
+
+```text
+hydrate_visible_thread_context
+  -> agent_decide_tool
+  -> execute_validated_tool
+  -> agent_observe
+  -> continue_or_final
+```
+
+Rules:
+- no domain-specific keyword/synonym dictionaries
+- tool calls must be schema-validated
+- final answers must cite executed tool evidence
+- short follow-ups must resolve from visible thread context or persisted pending state
+- Planner Mode must be a tool/action boundary, not free-form chat mutation
+
+---
+
 ## Self-Review Checklist
 
 - Spec coverage: persistence ids, thread/checkpoint semantics, in-progress 409 payload, advisory lock, production structured router wiring, context-aware routing, slot ambiguity, search scope escalation, scope expansion continuation, path switch workflow, durable run lifecycle, policy, typed results, no-evidence composer, pending actions, real interrupt/resume action flow, memory compaction, eval suite, ops runbook, frontend idempotency are covered by tasks.
@@ -3951,4 +4034,4 @@ git commit -m "chore: mark legacy agent chat service deprecated"
 - Replay safety: response refs, run statuses, pending action idempotency, and janitor are covered.
 - Concurrency: V1 PostgreSQL advisory lock and `409 in_progress` payload are covered.
 - Rollout: legacy service is deprecated but retained for rollback.
-- Bootstrap caveats: deterministic router, graph skeleton, pending-action shell, and memory compaction primitive are explicitly marked as non-production-complete until later tasks replace or harden them. Production must not fall back to deterministic keyword routing or process-memory idempotency.
+- Bootstrap caveats: deterministic router, graph skeleton, pending-action shell, memory compaction primitive, and current non-ReAct RAG orchestration are explicitly marked as non-production-complete until later tasks replace or harden them. Production must not fall back to deterministic keyword routing, domain-specific keyword maps, or process-memory idempotency.

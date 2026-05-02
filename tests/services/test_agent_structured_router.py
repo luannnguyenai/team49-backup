@@ -182,6 +182,68 @@ def test_structured_router_prompt_uses_recent_context_for_short_followups():
     assert "kiến trúc" in user_prompt
 
 
+def test_structured_router_prompt_requires_contextual_followup_before_clarify():
+    model = FakeStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.82,
+            "raw_topic": "YOLO variants",
+            "search_queries": ["YOLO variants", "YOLO"],
+            "target_path": None,
+            "rationale": "The short aspect request refers to the prior cited YOLO topic.",
+        }
+    )
+
+    StructuredAgentRouter(model=model).route(
+        message="tóm tắt các biến thể",
+        route_context=None,
+        recent_messages=[
+            {
+                "role": "assistant",
+                "markdown": "YOLO là một single-stage detector.",
+                "citations": [{"unit_name": "Single-stage and transformer detectors: YOLO and DETR"}],
+            }
+        ],
+    )
+
+    system_prompt = model.messages[0]["content"]
+    assert "one active cited topic" in system_prompt
+    assert "route to retrieval first" in system_prompt
+    route = StructuredAgentRouter(model=model).route(
+        message="tóm tắt các biến thể",
+        route_context=None,
+        recent_messages=[
+            {
+                "role": "assistant",
+                "markdown": "YOLO là một single-stage detector.",
+                "citations": [{"unit_name": "Single-stage and transformer detectors: YOLO and DETR"}],
+            }
+        ],
+    )
+    assert route.extracted_slots.search_queries == ["YOLO variants"]
+
+
+def test_structured_router_prompt_routes_current_topic_questions_to_help():
+    model = FakeStructuredModel(
+        {
+            "intent": "assistant_help",
+            "confidence": 0.9,
+            "raw_topic": None,
+            "target_path": None,
+            "rationale": "The user asks what the current visible conversation topic is.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="bạn có nhớ nãy giờ chúng ta đang nói chủ đề gì k",
+        route_context=None,
+        recent_messages=[{"role": "assistant", "markdown": "Mình vừa tóm tắt YOLO."}],
+    )
+
+    assert route.intent == "assistant_help"
+    assert "currently discussing" in model.messages[0]["content"]
+
+
 def test_structured_router_resolves_pending_followup_with_model_output():
     model = FakeStructuredModel(
         {
@@ -206,6 +268,41 @@ def test_structured_router_resolves_pending_followup_with_model_output():
     assert decision.refined_query is None
     system_prompt = model.messages[0]["content"]
     assert "Do not use keyword matching" in system_prompt
+
+
+def test_structured_router_resolves_pending_followup_with_recent_context():
+    model = FakeStructuredModel(
+        {
+            "action": "approve",
+            "refined_query": None,
+            "clarification_question": None,
+            "rationale": "The user approved the stored top-results offer for the active YOLO topic.",
+        }
+    )
+
+    StructuredAgentRouter(model=model).resolve_pending_followup(
+        message="xem kết quả mạnh nhất",
+        pending_payload={
+            "kind": "retrieval_query",
+            "proposed_raw_topic": "YOLO variants",
+            "show_top_results_allowed": True,
+        },
+        route_context=None,
+        recent_messages=[
+            {
+                "role": "assistant",
+                "markdown": "Trong tài liệu hiện tại, YOLO đang được nói ở mức single-stage detector.",
+                "citations": [{"unit_name": "Single-stage and transformer detectors: YOLO and DETR"}],
+            }
+        ],
+    )
+
+    system_prompt = model.messages[0]["content"]
+    user_prompt = model.messages[1]["content"]
+    assert "Recent visible thread messages" in user_prompt
+    assert "YOLO and DETR" in user_prompt
+    assert "Only approve offered actions that exist in the pending payload" in system_prompt
+    assert "action=new_request" in system_prompt
 
 
 def test_structured_router_preserves_model_candidate_intent_for_clarify():
@@ -282,6 +379,50 @@ def test_structured_router_composes_assistant_help_with_llm():
     assert "For simple greetings, greet briefly" in model.messages[0]["content"]
 
 
+def test_structured_router_composes_assistant_help_with_recent_context():
+    model = FakeChatModel()
+
+    StructuredAgentRouter(model=model).compose_assistant_help(
+        message="bạn có nhớ nãy giờ chúng ta đang nói chủ đề gì k",
+        route_context=None,
+        recent_messages=[
+            {"role": "user", "markdown": "Tìm cho tôi thông tin YOLO"},
+            {
+                "role": "assistant",
+                "markdown": "Mình thấy có nội dung về YOLO trong bài CS231n Lecture 9.",
+            },
+        ],
+    )
+
+    assert "Recent visible thread messages" in model.messages[1]["content"]
+    assert "YOLO" in model.messages[1]["content"]
+    assert "When the user asks what the current topic is" in model.messages[0]["content"]
+
+
+def test_structured_router_filters_reasoning_blocks_from_text_response():
+    class ReasoningBlockModel(FakeChatModel):
+        def invoke(self, messages):
+            self.messages = messages
+            return type(
+                "Response",
+                (),
+                {
+                    "content": [
+                        {"type": "reasoning", "summary": []},
+                        {"type": "output_text", "text": "Chúng ta đang nói về YOLO."},
+                    ]
+                },
+            )()
+
+    answer = StructuredAgentRouter(model=ReasoningBlockModel()).compose_assistant_help(
+        message="bạn có nhớ không",
+        route_context=None,
+        recent_messages=[],
+    )
+
+    assert answer == "Chúng ta đang nói về YOLO."
+
+
 def test_structured_router_composes_grounded_answer_with_llm():
     model = FakeChatModel()
     citations = [
@@ -304,6 +445,7 @@ def test_structured_router_composes_grounded_answer_with_llm():
     assert "Use only these retrieved learning units" in model.messages[0]["content"]
     assert "related results below" in model.messages[0]["content"]
     assert "When evidence_sufficient=true, do not end with a follow-up question" in model.messages[0]["content"]
+    assert "Do not suggest variants, rankings, comparisons, or choices" in model.messages[0]["content"]
     assert "Where should I review CNNs?" in model.messages[1]["content"]
 
 
@@ -332,6 +474,54 @@ def test_structured_router_grounded_answer_can_report_insufficient_evidence():
     assert answer.confidence == "no_source"
 
 
+def test_structured_router_strips_trailing_followup_when_evidence_is_sufficient():
+    model = FakeChatModel(
+        grounded_payload={
+            "answer_markdown": "YOLO is covered in this unit.\n\nDo you want me to explain variants?",
+            "evidence_sufficient": True,
+            "confidence": "grounded",
+            "clarification_question": None,
+        }
+    )
+
+    answer = StructuredAgentRouter(model=model).compose_grounded_answer(
+        message="Tìm YOLO",
+        citations=[
+            {
+                "course_id": "CS231n",
+                "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                "quote": "YOLO is a single-stage detector.",
+            }
+        ],
+    )
+
+    assert answer.answer_markdown == "YOLO is covered in this unit."
+
+
+def test_structured_router_strips_trailing_optional_offer_when_evidence_is_sufficient():
+    model = FakeChatModel(
+        grounded_payload={
+            "answer_markdown": "YOLO is covered in this unit.\n\nNếu bạn muốn, mình có thể tóm tắt thêm.",
+            "evidence_sufficient": True,
+            "confidence": "grounded",
+            "clarification_question": None,
+        }
+    )
+
+    answer = StructuredAgentRouter(model=model).compose_grounded_answer(
+        message="Tìm YOLO",
+        citations=[
+            {
+                "course_id": "CS231n",
+                "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                "quote": "YOLO is a single-stage detector.",
+            }
+        ],
+    )
+
+    assert answer.answer_markdown == "YOLO is covered in this unit."
+
+
 def test_structured_router_composes_retrieval_refinement_with_llm():
     model = FakeChatModel()
 
@@ -344,6 +534,8 @@ def test_structured_router_composes_retrieval_refinement_with_llm():
 
     assert "strongest results" in answer
     assert "many title-level learning units" in model.messages[0]["content"]
+    assert "Do not mention examples, versions, subtypes" in model.messages[0]["content"]
+    assert "The only allowed choices are" in model.messages[0]["content"]
     assert "Result count: 30" in model.messages[1]["content"]
 
 

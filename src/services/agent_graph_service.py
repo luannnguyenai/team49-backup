@@ -356,6 +356,8 @@ class AgentGraphService:
         payload = pending.payload
         decision = self._resolve_pending_followup_decision(state, pending)
 
+        if decision.action == "new_request":
+            return self._route_new_request_after_pending(state)
         if decision.action == "clarify":
             return {
                 **state,
@@ -428,6 +430,8 @@ class AgentGraphService:
         proposed = str(payload.get("proposed_raw_topic") or "").strip()
         decision = self._resolve_pending_followup_decision(state, pending)
 
+        if decision.action == "new_request":
+            return self._route_new_request_after_pending(state)
         if decision.action == "reject":
             return {
                 **state,
@@ -495,6 +499,8 @@ class AgentGraphService:
     ) -> dict | None:
         payload = pending.payload
         decision = self._resolve_pending_followup_decision(state, pending)
+        if decision.action == "new_request":
+            return self._route_new_request_after_pending(state)
         if decision.action == "approve":
             slots = AgentSlots(
                 raw_topic=payload.get("raw_topic") or payload.get("original_message", state["message"]),
@@ -547,10 +553,33 @@ class AgentGraphService:
             or "Please clarify whether you want me to expand the search or refine the topic.",
         }
 
+    def _route_new_request_after_pending(self, state: dict) -> dict:
+        route = self._route_with_recent_context(state["message"], state)
+        return {
+            **state,
+            "intent": route.intent,
+            "intent_confidence": route.confidence,
+            "slots": route.extracted_slots,
+            "clarification_question": route.clarification_question,
+            "candidate_intent": route.candidate_intent,
+            "pending_clarification": None,
+        }
+
     def _resolve_pending_followup_decision(self, state: dict, pending: PendingClarification):
         resolver = getattr(self.router, "resolve_pending_followup", None)
         if resolver is None:
             raise AgentRouterUnavailableError("agent_pending_followup_model_missing")
+        try:
+            parameters = signature(resolver).parameters
+        except (TypeError, ValueError):
+            parameters = {}
+        if "recent_messages" in parameters:
+            return resolver(
+                state["message"],
+                pending.payload,
+                state.get("route_context"),
+                recent_messages=state.get("recent_messages") or [],
+            )
         return resolver(
             state["message"],
             pending.payload,
@@ -670,9 +699,19 @@ class AgentGraphService:
             compose_help = getattr(self.router, "compose_assistant_help", None)
             if compose_help is None:
                 raise AgentRouterUnavailableError("agent_assistant_help_model_missing")
-            result = await self.tools.assistant_help(
-                compose_help(state["message"], state.get("route_context"))
-            )
+            try:
+                parameters = signature(compose_help).parameters
+            except (TypeError, ValueError):
+                parameters = {}
+            if "recent_messages" in parameters:
+                help_markdown = compose_help(
+                    state["message"],
+                    state.get("route_context"),
+                    recent_messages=state.get("recent_messages") or [],
+                )
+            else:
+                help_markdown = compose_help(state["message"], state.get("route_context"))
+            result = await self.tools.assistant_help(help_markdown)
             return {**state, "tool_result": result}
 
         if state["intent"] in {

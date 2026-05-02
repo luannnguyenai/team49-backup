@@ -2010,6 +2010,228 @@ async def test_graph_passes_recent_thread_context_to_router_for_short_followup()
     assert seen_recent_messages[1]["citations"][0]["unit_name"] == "Single-stage and transformer detectors: YOLO and DETR"
 
 
+async def test_graph_passes_recent_thread_context_to_pending_followup_resolver():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    seen_recent_messages = []
+
+    class Router:
+        def resolve_pending_followup(self, message, pending_payload, route_context, recent_messages=None):
+            seen_recent_messages.extend(recent_messages or [])
+            return SimpleNamespace(
+                action="approve",
+                refined_query=None,
+                clarification_question=None,
+                rationale="approve stored top results",
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown="Top YOLO title match.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        assert request.query == "YOLO"
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-yolo",
+                    course_id="CS231n",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    summary="YOLO is the canonical single-stage detector example.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-yolo-top", ranking_version="unit_title_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_text="",
+        summary_json={
+            "pendingClarification": {
+                "threadId": "thread-yolo-top",
+                "clarification": {
+                    "clarification_id": "clar-top-yolo",
+                    "type": "slot_disambiguation",
+                    "status": "awaiting_response",
+                    "payload": {
+                        "kind": "retrieval_query",
+                        "original_intent": "find_content",
+                        "original_message": "Tìm cho tôi thông tin YOLO",
+                        "proposed_raw_topic": "YOLO",
+                        "search_scope": "current_path",
+                        "show_top_results_allowed": True,
+                    },
+                    "expires_at": (datetime.now(UTC) + timedelta(minutes=30)).isoformat(),
+                },
+            }
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình thấy có nhiều kết quả liên quan YOLO.",
+                    citations_json=[{"unit_name": "Single-stage and transformer detectors: YOLO and DETR"}],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="xem kết quả mạnh nhất", incomingMessageId="msg-yolo-top"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-yolo-top",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Top YOLO title match."
+    assert seen_recent_messages[0]["role"] == "assistant"
+    assert "YOLO" in seen_recent_messages[0]["markdown"]
+
+
+async def test_graph_passes_recent_thread_context_to_assistant_help():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    seen_recent_messages = []
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="assistant_help",
+                confidence=0.95,
+                extracted_slots=AgentSlots(),
+            )
+
+        def compose_assistant_help(self, message, route_context, recent_messages=None):
+            seen_recent_messages.extend(recent_messages or [])
+            return "Chúng ta đang nói về YOLO."
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình thấy có nội dung về YOLO trong CS231n Lecture 9.",
+                    citations_json=[],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=AsyncMock()),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="bạn có nhớ nãy giờ chúng ta đang nói chủ đề gì k",
+            incomingMessageId="msg-memory-question",
+        ),
+        conversation_id=str(conversation_id),
+        thread_id="thread-memory-question",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Chúng ta đang nói về YOLO."
+    assert "YOLO" in seen_recent_messages[0]["markdown"]
+
+
+async def test_graph_routes_new_request_instead_of_forcing_pending_retrieval_answer():
+    conversation_id = uuid4()
+    user_id = uuid4()
+
+    class Router:
+        def resolve_pending_followup(self, message, pending_payload, route_context, recent_messages=None):
+            return SimpleNamespace(
+                action="new_request",
+                refined_query=None,
+                clarification_question=None,
+                rationale="The user is asking about the conversation, not answering the pending refinement.",
+            )
+
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="assistant_help",
+                confidence=0.95,
+                extracted_slots=AgentSlots(),
+            )
+
+        def compose_assistant_help(self, message, route_context, recent_messages=None):
+            return "Chúng ta đang nói về YOLO."
+
+    memory = SimpleNamespace(
+        summary_text="",
+        summary_json={
+            "pendingClarification": {
+                "threadId": "thread-new-request-over-pending",
+                "clarification": {
+                    "clarification_id": "clar-top-yolo",
+                    "type": "slot_disambiguation",
+                    "status": "awaiting_response",
+                    "payload": {
+                        "kind": "retrieval_query",
+                        "original_intent": "find_content",
+                        "original_message": "Tóm tắt các biến thể YOLO",
+                        "proposed_raw_topic": "YOLO variants",
+                        "show_top_results_allowed": True,
+                    },
+                    "expires_at": (datetime.now(UTC) + timedelta(minutes=30)).isoformat(),
+                },
+            }
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        list_messages=AsyncMock(return_value=[]),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=AsyncMock()),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="bạn có nhớ nãy giờ chúng ta đang nói chủ đề gì k",
+            incomingMessageId="msg-new-request-over-pending",
+        ),
+        conversation_id=str(conversation_id),
+        thread_id="thread-new-request-over-pending",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Chúng ta đang nói về YOLO."
+    persisted_summary = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]
+    assert "pendingClarification" not in persisted_summary
+
+
 async def test_graph_persists_pending_path_switch_action():
     class Router:
         def route(self, message, route_context):

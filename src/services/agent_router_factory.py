@@ -23,6 +23,8 @@ def build_production_agent_router(
                 model=model,
                 model_provider=provider,
                 temperature=0,
+                reasoning_effort=getattr(app_settings, "model_reasoning_effort", None),
+                extra_kwargs=getattr(app_settings, "model_extra_kwargs", None),
             )
         )
     except Exception as exc:

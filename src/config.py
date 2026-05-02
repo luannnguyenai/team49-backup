@@ -34,6 +34,14 @@ class Settings(BaseSettings):
         description="Fast model for minor tasks",
     )
     model_provider: str = Field(default ="openai", description="LLM provider")
+    model_reasoning_effort: Literal["off", "low", "medium", "high", "xhigh"] = Field(
+        default="medium",
+        description="Optional reasoning effort for providers that support it.",
+    )
+    model_extra_kwargs: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Provider-specific chat model kwargs, parsed from JSON.",
+    )
     gemini_requests_per_minute: int = Field(
         default=15,
         ge=1,
@@ -197,6 +205,17 @@ class Settings(BaseSettings):
         if not isinstance(value, Mapping):
             raise ValueError("value must be a mapping or JSON object string")
         return {str(key): float(item) for key, item in value.items()}
+
+    @field_validator("model_extra_kwargs", mode="before")
+    @classmethod
+    def parse_any_mapping(cls, value: Any) -> dict[str, Any]:
+        if value is None or value == "":
+            return {}
+        if isinstance(value, str):
+            value = json.loads(value)
+        if not isinstance(value, Mapping):
+            raise ValueError("value must be a mapping or JSON object string")
+        return dict(value)
 
 
 settings = Settings()
