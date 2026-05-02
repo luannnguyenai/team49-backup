@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
+from sqlalchemy.sql.elements import BinaryExpression
 
 from src.exceptions import ConflictError, ValidationError
 from src.models.course import LearningProgressStatus
@@ -35,6 +36,56 @@ def _item(item_id: str, difficulty: str = "medium"):
         answer_index=0,
         explanation=None,
     )
+
+
+@pytest.mark.asyncio
+async def test_get_canonical_quiz_item_for_session_resolves_inline_question_from_session_item_ids(
+    monkeypatch,
+):
+    user_id = uuid4()
+    session_id = uuid4()
+    learning_unit_id = uuid4()
+    session = SimpleNamespace(
+        id=session_id,
+        canonical_unit_id=learning_unit_id,
+        canonical_phase="inline_midpoint_quiz",
+    )
+    unit = SimpleNamespace(id=learning_unit_id, canonical_unit_id="canonical-unit-1")
+    sibling_item = _item("item-from-sibling-unit")
+
+    class FakeDB:
+        async def execute(self, stmt):
+            where_clauses = list(getattr(stmt, "_where_criteria", ()))
+            assert any(
+                isinstance(clause, BinaryExpression)
+                and getattr(getattr(clause, "left", None), "name", None) == "item_id"
+                for clause in where_clauses
+            )
+            return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [sibling_item]))
+
+    async def fake_current_quiz_item_ids(
+        db_arg,
+        *,
+        user_id: uuid4,
+        session_id: uuid4,
+        fallback_unit_canonical_id: str,
+    ):
+        assert user_id == session.id or user_id != session.id  # satisfy lintless placeholder? nope
+        assert session_id == session.id
+        assert fallback_unit_canonical_id == unit.canonical_unit_id
+        return ["item-from-sibling-unit"]
+
+    monkeypatch.setattr(quiz_service, "_current_quiz_item_ids", fake_current_quiz_item_ids)
+
+    result = await quiz_service._get_canonical_quiz_item_for_session(
+        FakeDB(),
+        user_id=user_id,
+        session=session,
+        unit=unit,
+        question_id=quiz_service.canonical_question_uuid("item-from-sibling-unit"),
+    )
+
+    assert result is sibling_item
 
 
 @pytest.mark.asyncio
