@@ -151,6 +151,37 @@ def test_structured_router_prompt_rejects_keyword_routing_as_source_of_truth():
     assert "try retrieval before asking about the desired angle" in system_prompt
 
 
+def test_structured_router_prompt_uses_recent_context_for_short_followups():
+    model = FakeStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.86,
+            "raw_topic": "YOLO architecture",
+            "search_queries": ["YOLO architecture", "YOLO"],
+            "target_path": None,
+            "rationale": "The short reply refers to the previous YOLO answer.",
+        }
+    )
+
+    StructuredAgentRouter(model=model).route(
+        message="kiến trúc",
+        route_context=None,
+        recent_messages=[
+            {
+                "role": "assistant",
+                "markdown": "Mình thấy một unit phù hợp với nội dung YOLO trong bài CS231n.",
+                "citations": [{"unit_name": "Single-stage and transformer detectors: YOLO and DETR"}],
+            }
+        ],
+    )
+
+    system_prompt = model.messages[0]["content"]
+    user_prompt = model.messages[1]["content"]
+    assert "Use recent thread context to resolve short follow-up replies" in system_prompt
+    assert "YOLO" in user_prompt
+    assert "kiến trúc" in user_prompt
+
+
 def test_structured_router_resolves_pending_followup_with_model_output():
     model = FakeStructuredModel(
         {
@@ -272,6 +303,7 @@ def test_structured_router_composes_grounded_answer_with_llm():
     assert answer.evidence_sufficient is True
     assert "Use only these retrieved learning units" in model.messages[0]["content"]
     assert "related results below" in model.messages[0]["content"]
+    assert "When evidence_sufficient=true, do not end with a follow-up question" in model.messages[0]["content"]
     assert "Where should I review CNNs?" in model.messages[1]["content"]
 
 

@@ -45,7 +45,12 @@ class StructuredAgentRouter:
         self.confidence_threshold = confidence_threshold
         self.structured_model = model.with_structured_output(StructuredRouteOutput)
 
-    def route(self, message: str, route_context: RouteContext | None) -> AgentRoute:
+    def route(
+        self,
+        message: str,
+        route_context: RouteContext | None,
+        recent_messages: list[dict] | None = None,
+    ) -> AgentRoute:
         try:
             result = self.structured_model.invoke(
                 [
@@ -69,6 +74,9 @@ class StructuredAgentRouter:
                             "and ask for clarification instead of guessing. "
                             "When the user asks to find information about a named concept, title, or acronym, that "
                             "named topic is enough to try retrieval before asking about the desired angle. "
+                            "Use recent thread context to resolve short follow-up replies. If the current message "
+                            "is a short refinement, combine it with the prior active topic from recent context in "
+                            "raw_topic and search_queries instead of treating it as a standalone ambiguous query. "
                             "Set target_path only when the user explicitly names a path, course, or track scope. "
                             "Set explicit_scope_requested=true only when the user's words explicitly request "
                             "another path, course, track, or broader catalog scope. "
@@ -89,7 +97,11 @@ class StructuredAgentRouter:
                     },
                     {
                         "role": "user",
-                        "content": f"Route context: {route_context.model_dump() if route_context else {}}\nMessage: {message}",
+                        "content": (
+                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Recent thread messages: {recent_messages or []}\n"
+                            f"Message: {message}"
+                        ),
                     },
                 ]
             )
@@ -271,7 +283,9 @@ class StructuredAgentRouter:
                             "Do not invent missing course facts. If the retrieved units do not directly support "
                             "the user's requested topic, set evidence_sufficient=false, choose no_source or partial "
                             "confidence, and ask one concise clarifying question or say that no direct grounded "
-                            "source was found. If the retrieved units are related but not exact, say that you found "
+                            "source was found. When evidence_sufficient=true, do not end with a follow-up question; "
+                            "answer the user's request directly and stop. "
+                            "If the retrieved units are related but not exact, say that you found "
                             "related results below and ask the user to describe the target more specifically if those "
                             "results are not what they need. Do not answer from outside the retrieved evidence."
                         ),

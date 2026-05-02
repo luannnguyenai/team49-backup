@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from inspect import signature
 from types import SimpleNamespace
 from uuid import UUID, uuid4
 
@@ -271,6 +272,10 @@ class AgentGraphService:
         state["message"] = request.message
         state["allowed_course_ids"] = allowed_course_ids
         state["current_path_course_ids"] = current_path_course_ids or allowed_course_ids
+        state["recent_messages"] = await self._load_recent_message_context(
+            conversation_id,
+            user_id,
+        )
         state["pending_clarification"] = await self._load_pending_clarification(
             conversation_id,
             user_id,
@@ -332,7 +337,7 @@ class AgentGraphService:
             if pending_result is not None:
                 return pending_result
 
-        route = self.router.route(message=state["message"], route_context=state.get("route_context"))
+        route = self._route_with_recent_context(state["message"], state)
         return {
             **state,
             "intent": route.intent,
@@ -386,7 +391,7 @@ class AgentGraphService:
                 "clarification_question": "Please restate the request you want me to retry.",
             }
 
-        route = self.router.route(message=retry_message, route_context=state.get("route_context"))
+        route = self._route_with_recent_context(retry_message, state)
         return {
             **state,
             "message": retry_message,
@@ -397,6 +402,20 @@ class AgentGraphService:
             "candidate_intent": route.candidate_intent,
             "pending_clarification": None,
         }
+
+    def _route_with_recent_context(self, message: str, state: dict):
+        route = self.router.route
+        try:
+            parameters = signature(route).parameters
+        except (TypeError, ValueError):
+            parameters = {}
+        if "recent_messages" in parameters:
+            return route(
+                message=message,
+                route_context=state.get("route_context"),
+                recent_messages=state.get("recent_messages") or [],
+            )
+        return route(message=message, route_context=state.get("route_context"))
 
     def _resolve_pending_retrieval_query(
         self,
@@ -1135,6 +1154,28 @@ class AgentGraphService:
 
     async def _load_memory_ref(self, conversation_id: str, user_id: str) -> str | None:
         return await self.thread_memory.load_memory_ref(conversation_id, user_id)
+
+    async def _load_recent_message_context(self, conversation_id: str, user_id: str) -> list[dict]:
+        if self.conversation_repo is None or not hasattr(self.conversation_repo, "list_messages"):
+            return []
+        messages = await self.conversation_repo.list_messages(
+            UUID(str(conversation_id)),
+            UUID(str(user_id)),
+            limit=8,
+        )
+        recent = messages[-8:]
+        context: list[dict] = []
+        for message in recent:
+            markdown = str(getattr(message, "markdown", "") or "")
+            context.append(
+                {
+                    "role": getattr(message, "role", "unknown"),
+                    "markdown": markdown[:1200],
+                    "citations": getattr(message, "citations_json", None) or [],
+                    "actions": getattr(message, "actions_json", None) or [],
+                }
+            )
+        return context
 
     def _coerce_pending_clarification(self, value) -> PendingClarification | None:
         return self.thread_memory.coerce_pending_clarification(value)

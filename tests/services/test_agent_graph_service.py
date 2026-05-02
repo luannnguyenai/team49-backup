@@ -1924,6 +1924,91 @@ async def test_graph_resolves_failed_request_retry_followup_through_structured_r
     assert response.citations[0].canonical_unit_id == "unit-unet"
 
 
+async def test_graph_passes_recent_thread_context_to_router_for_short_followup():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    seen_recent_messages = []
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            seen_recent_messages.extend(recent_messages or [])
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(
+                    raw_topic="YOLO architecture",
+                    search_queries=["YOLO architecture", "YOLO"],
+                ),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown="YOLO architecture is covered in this unit.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-yolo",
+                    course_id="CS231n",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    summary="YOLO divides the image into a grid and predicts boxes, objectness, and class probabilities.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-yolo-followup", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="user",
+                    markdown="tôi muốn tìm nội dung về YOLO",
+                    citations_json=[],
+                    actions_json=[],
+                ),
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình thấy có nội dung về YOLO trong CS231n Lecture 9.",
+                    citations_json=[
+                        {"unit_name": "Single-stage and transformer detectors: YOLO and DETR"}
+                    ],
+                    actions_json=[],
+                ),
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="kiến trúc", incomingMessageId="msg-yolo-architecture-followup"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-yolo-architecture-followup",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "YOLO architecture is covered in this unit."
+    assert seen_recent_messages[1]["role"] == "assistant"
+    assert "YOLO" in seen_recent_messages[1]["markdown"]
+    assert seen_recent_messages[1]["citations"][0]["unit_name"] == "Single-stage and transformer detectors: YOLO and DETR"
+
+
 async def test_graph_persists_pending_path_switch_action():
     class Router:
         def route(self, message, route_context):
