@@ -16,6 +16,7 @@ from src.schemas.agent import (
 )
 from src.services.agent_graph_contracts import AgentRoute, AgentSlots, PendingClarification
 from src.services.agent_graph_contracts import AgentInProgressError, AgentRouterUnavailableError
+from src.services.agentic_rag_contracts import AgenticRAGFinal, AgenticRAGObservation, AgenticRAGToolCall
 from src.services.agent_graph_router import DeterministicAgentRouter
 from src.services.agent_graph_service import AgentGraphService
 from src.services.agent_memory_compaction_service import AgentMemoryCompactionService
@@ -211,6 +212,85 @@ async def test_graph_uses_react_rag_tool_decision_before_search():
         "final",
     ]
     assert calls[1][2][0]["markdown"] == "Mình vừa tóm tắt YOLO."
+
+
+async def test_graph_delegates_supported_router_to_agentic_rag_pipeline():
+    calls = []
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            calls.append(("route", message))
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="YOLO", search_queries=["YOLO"]),
+            )
+
+        def rag_think(self, **kwargs):
+            calls.append(("think", kwargs["message"]))
+            return {"user_goal": "Find YOLO", "active_topic": "YOLO"}
+
+        def rag_act(self, **kwargs):
+            calls.append(("act", kwargs["thought"]))
+            return AgenticRAGToolCall(
+                tool="search_current_path_units",
+                arguments={"query": "YOLO"},
+                rationale="Search current path.",
+            )
+
+        def rag_observe(self, **kwargs):
+            calls.append(("observe", kwargs["tool_observation"].evidence_status))
+            return kwargs["tool_observation"]
+
+        def rag_respond(self, **kwargs):
+            calls.append(("respond", kwargs["observations"][0]["evidence_status"]))
+            return AgenticRAGFinal(
+                answer_markdown="Agentic answer for YOLO.",
+                evidence_status="grounded",
+                evidence_sufficient=True,
+            )
+
+    async def search(request, allowed_course_ids):
+        calls.append(("search", request.query))
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-yolo-agentic",
+                    course_id="CS231n",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    summary="YOLO is introduced as a single-stage detector.",
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-agentic-yolo", ranking_version="unit_title_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Tìm thông tin YOLO", incomingMessageId="msg-agentic-rag"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-agentic-rag",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Agentic answer for YOLO."
+    assert response.citations[0].canonical_unit_id == "unit-yolo-agentic"
+    assert [call[0] for call in calls if call[0] in {"think", "act", "search", "observe", "respond"}] == [
+        "think",
+        "act",
+        "search",
+        "observe",
+        "respond",
+    ]
 
 
 async def test_graph_react_rag_can_ask_clarification_without_searching():

@@ -34,6 +34,8 @@ from src.services.agent_search_scope_service import AgentSearchScopeService
 from src.services.agent_slot_resolver import AgentSlotResolver
 from src.services.agent_thread_memory_state import AgentThreadMemoryStateStore
 from src.services.agent_tool_nodes import AgentToolNodes
+from src.services.agentic_rag_pipeline import AgenticRAGPipeline
+from src.services.agentic_rag_tools import AgenticRAGToolExecutor
 
 
 RAG_AGENT_INTENTS = {
@@ -99,6 +101,11 @@ class AgentGraphService:
         self.composer = AgentResponseComposer()
         self.scope_service = AgentSearchScopeService()
         self.tools = AgentToolNodes(search_service, requirement_service)
+        self.agentic_rag_tools = AgenticRAGToolExecutor(self.tools)
+        self.agentic_rag = AgenticRAGPipeline(
+            router=router,
+            tool_executor=self.agentic_rag_tools,
+        )
         self._checkpointer = checkpointer or (InMemorySaver() if InMemorySaver is not None else None)
         self._graph = self._build_graph() if StateGraph is not None else None
         self._latest_checkpoint_ids: dict[str, str | None] = {}
@@ -110,6 +117,7 @@ class AgentGraphService:
         graph.add_node("route_intent", self._route_intent)
         graph.add_node("canonicalize_slots", self._canonicalize_slots)
         graph.add_node("policy_guard", self._policy_guard)
+        graph.add_node("agentic_rag", self._agentic_rag)
         graph.add_node("rag_decide_tool", self._rag_decide_tool)
         graph.add_node("rag_execute_tool", self._rag_execute_tool)
         graph.add_node("rag_observe", self._rag_observe)
@@ -122,8 +130,13 @@ class AgentGraphService:
         graph.add_conditional_edges(
             "policy_guard",
             self._next_after_policy,
-            {"rag_decide_tool": "rag_decide_tool", "dispatch": "dispatch"},
+            {
+                "agentic_rag": "agentic_rag",
+                "rag_decide_tool": "rag_decide_tool",
+                "dispatch": "dispatch",
+            },
         )
+        graph.add_edge("agentic_rag", END)
         graph.add_edge("rag_decide_tool", "rag_execute_tool")
         graph.add_edge("rag_execute_tool", "rag_observe")
         graph.add_edge("rag_observe", END)
@@ -148,8 +161,16 @@ class AgentGraphService:
 
     def _next_after_policy(self, state: dict) -> str:
         if self._should_use_rag_react(state):
+            if self._router_supports_agentic_rag():
+                return "agentic_rag"
             return "rag_decide_tool"
         return "dispatch"
+
+    def _router_supports_agentic_rag(self) -> bool:
+        return all(
+            callable(getattr(self.router, name, None))
+            for name in ("rag_think", "rag_act", "rag_observe", "rag_respond")
+        )
 
     def _should_use_rag_react(self, state: dict) -> bool:
         policy = state.get("policy")
@@ -729,6 +750,21 @@ class AgentGraphService:
                 allowed_course_ids=state["allowed_course_ids"],
             )
         }
+
+    async def _agentic_rag(self, state: dict) -> dict:
+        slots = state["slots"]
+        if isinstance(slots, dict):
+            slots = AgentSlots.model_validate(slots)
+        result = await self.agentic_rag.run(
+            message=state["message"],
+            intent=state["intent"],
+            slots=slots,
+            route_context=state.get("route_context"),
+            recent_messages=state.get("recent_messages") or [],
+            allowed_course_ids=state["allowed_course_ids"],
+        )
+        update: dict = {**state, "slots": slots, "tool_result": result}
+        return self._attach_rag_pending_clarification(update, result, slots)
 
     async def _rag_decide_tool(self, state: dict) -> dict:
         slots = state["slots"]
