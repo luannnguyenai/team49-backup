@@ -5,6 +5,7 @@ $progressFile = ".pr-cherry-pick-progress.json"
 
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
++ 1eb56286806a38da85113afaffd4ffa7ae81a1f1 Create 02-data-pipeline.md
 + 16e8d6a7f3c37454f697f053815a893e51f7a156 Create 03-finetune.md
 + 753aeaa0a2f55515d594d8f164198ebb0081caae Update 04-eval-quantize.md
 + 677eb109a36570e9358a4a71cb0b07def2cf4724 Update 05-serving-vllm.md
