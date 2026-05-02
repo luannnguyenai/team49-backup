@@ -2,7 +2,7 @@
 
 ## Goal
 
-Prepare a reproducible training environment for the English-only text fine-tune pipeline.
+Prepare a reproducible training environment for the English-only fine-tune pipeline on a vision-capable Qwen VL base model.
 
 ## Requirements
 
@@ -15,13 +15,14 @@ Prepare a reproducible training environment for the English-only text fine-tune 
 
 ## Environment checks
 
-- Confirm the base model `Qwen/Qwen2.5-7B-Instruct` loads successfully.
+- Confirm the base model `Qwen/Qwen2.5-VL-3B-Instruct` loads successfully.
 - Confirm tokenizer and chat template work.
 - Confirm a small SFT dataset can be tokenized without schema errors.
 - Confirm evaluation datasets can be loaded separately from training data.
+- Confirm the processor can accept a simple image-plus-text chat message for later serving compatibility checks.
 
 ## Non-goals
 
-- No vision runtime checks.
 - No tool-calling parser validation.
 - No Vietnamese-specific environment setup.
+- No new multimodal training dataset preparation in this phase.
