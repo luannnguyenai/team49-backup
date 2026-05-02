@@ -1,6 +1,7 @@
 import pytest
 
-from src.services.agent_graph_contracts import AgentRouterUnavailableError
+from src.services.agent_graph_contracts import AgentRouterUnavailableError, ToolResult
+from src.services.agentic_rag_contracts import AgenticRAGObservation, AgenticRAGToolCall
 from src.services.agent_structured_router import StructuredAgentRouter
 
 
@@ -280,6 +281,124 @@ def test_structured_router_plans_rag_title_search_tool_call():
     assert "Allowed tools" in model.messages[0]["content"]
     assert "Do not invent domain-specific synonyms" in model.messages[0]["content"]
     assert "Recent visible thread messages" in model.messages[1]["content"]
+
+
+def test_structured_router_agentic_rag_thinking_stage_is_internal():
+    model = FakeStructuredModel(
+        {
+            "user_goal": "Find course evidence about YOLO.",
+            "active_topic": "YOLO",
+            "missing_information": ["course source"],
+            "evidence_need": "retrieval",
+            "tool_plan": ["search current path units"],
+        }
+    )
+
+    thought = StructuredAgentRouter(model=model).rag_think(
+        message="Tìm thông tin YOLO",
+        intent="find_content",
+        slots={"raw_topic": "YOLO"},
+        route_context=None,
+        recent_messages=[],
+    )
+
+    assert thought.active_topic == "YOLO"
+    assert "internal thinking stage" in model.messages[0]["content"]
+    assert "never shown to the user" in model.messages[0]["content"]
+
+
+def test_structured_router_agentic_rag_acting_stage_uses_allowed_tools():
+    model = FakeStructuredModel(
+        {
+            "tool": "search_current_path_units",
+            "arguments": {"query": "YOLO"},
+            "rationale": "Search current path before answering.",
+        }
+    )
+
+    call = StructuredAgentRouter(model=model).rag_act(
+        message="Tìm thông tin YOLO",
+        thought={"active_topic": "YOLO"},
+        slots={"raw_topic": "YOLO"},
+        route_context=None,
+        recent_messages=[],
+        observations=[],
+    )
+
+    assert call.tool == "search_current_path_units"
+    system_prompt = model.messages[0]["content"]
+    assert "Allowed tools" in system_prompt
+    assert "Do not invent domain-specific synonyms" in system_prompt
+    assert "Do not answer directly" in system_prompt
+
+
+def test_structured_router_agentic_rag_observing_stage_judges_evidence():
+    model = FakeStructuredModel(
+        {
+            "tool": "search_current_path_units",
+            "success": True,
+            "evidence_status": "grounded",
+            "result": {
+                "kind": "find_content",
+                "answer_markdown": None,
+                "citations": [],
+                "actions": [],
+                "requires_evidence": True,
+                "metadata": {},
+            },
+        }
+    )
+
+    observation = StructuredAgentRouter(model=model).rag_observe(
+        message="Tìm thông tin YOLO",
+        thought={"active_topic": "YOLO"},
+        tool_call=AgenticRAGToolCall(
+            tool="search_current_path_units",
+            arguments={"query": "YOLO"},
+            rationale="Search.",
+        ),
+        tool_observation=AgenticRAGObservation(
+            tool="search_current_path_units",
+            success=True,
+            evidence_status="grounded",
+            result=ToolResult(kind="find_content", requires_evidence=True),
+        ),
+        route_context=None,
+        recent_messages=[],
+    )
+
+    assert observation.evidence_status == "grounded"
+    assert "internal observing stage" in model.messages[0]["content"]
+    assert "grounded, partial, no_source, or needs_clarification" in model.messages[0]["content"]
+
+
+def test_structured_router_agentic_rag_responding_stage_uses_validated_evidence():
+    model = FakeStructuredModel(
+        {
+            "answer_markdown": "YOLO is covered as a single-stage detector.",
+            "evidence_status": "grounded",
+            "evidence_sufficient": True,
+            "clarification_question": None,
+        }
+    )
+
+    final = StructuredAgentRouter(model=model).rag_respond(
+        message="Tìm thông tin YOLO",
+        thought={"active_topic": "YOLO"},
+        observations=[
+            {
+                "tool": "search_current_path_units",
+                "evidence_status": "grounded",
+                "result": {"citations": [{"unit_name": "YOLO and DETR"}]},
+            }
+        ],
+        route_context=None,
+        recent_messages=[],
+    )
+
+    assert final.evidence_sufficient is True
+    assert "Use only validated observations and accepted citations" in model.messages[0]["content"]
+    assert "Do not reveal hidden thinking" in model.messages[0]["content"]
 
 
 def test_structured_router_composes_react_final_from_tool_observation():
