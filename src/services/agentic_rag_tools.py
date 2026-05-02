@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from src.schemas.agent import AgentFallback, AgentWarning
 from src.services.agent_graph_contracts import AgentSlots, ToolResult
 from src.services.agentic_rag_contracts import (
@@ -9,9 +11,55 @@ from src.services.agentic_rag_contracts import (
 )
 
 
+@dataclass(frozen=True)
+class AgentRAGToolSpec:
+    name: str
+    description: str
+    requires_evidence: bool
+    timeout_ms: int = 15_000
+
+
+class AgentRAGToolRegistry:
+    def __init__(self):
+        self._tools = {
+            "search_current_path_units": AgentRAGToolSpec(
+                name="search_current_path_units",
+                description="Search title-level course units in the learner's current path first.",
+                requires_evidence=True,
+            ),
+            "get_unit_summary": AgentRAGToolSpec(
+                name="get_unit_summary",
+                description="Retrieve normalized summary evidence for a selected learning unit.",
+                requires_evidence=True,
+            ),
+            "ask_clarification": AgentRAGToolSpec(
+                name="ask_clarification",
+                description="Ask the learner for missing or ambiguous retrieval context.",
+                requires_evidence=False,
+            ),
+            "offer_scope_expansion": AgentRAGToolSpec(
+                name="offer_scope_expansion",
+                description="Ask approval before searching outside the learner's current path.",
+                requires_evidence=False,
+            ),
+            "search_allowed_other_paths": AgentRAGToolSpec(
+                name="search_allowed_other_paths",
+                description="Search other allowed paths only after explicit expansion approval.",
+                requires_evidence=True,
+            ),
+        }
+
+    def resolve(self, name: str) -> AgentRAGToolSpec | None:
+        return self._tools.get(name)
+
+    def list_specs(self) -> list[AgentRAGToolSpec]:
+        return list(self._tools.values())
+
+
 class AgenticRAGToolExecutor:
-    def __init__(self, tools):
+    def __init__(self, tools, registry: AgentRAGToolRegistry | None = None):
         self.tools = tools
+        self.registry = registry or AgentRAGToolRegistry()
 
     async def execute(
         self,
@@ -22,6 +70,14 @@ class AgenticRAGToolExecutor:
         slots: AgentSlots,
         allowed_course_ids: list[str],
     ) -> AgenticRAGObservation:
+        spec = self.registry.resolve(tool_call.tool)
+        if spec is None:
+            result = await self.tools.clarify(
+                message,
+                reason="The agent selected an unsupported retrieval tool.",
+            )
+            return self._observation("ask_clarification", result, "needs_clarification")
+
         if tool_call.tool == "ask_clarification":
             question = str(tool_call.arguments.get("question") or "").strip()
             result = await self.tools.clarify(
@@ -76,10 +132,7 @@ class AgenticRAGToolExecutor:
             search_slots = slots.model_copy(update={"search_scope": "current_path"})
             return await self._search(tool_call, message, intent, search_slots, allowed_course_ids)
 
-        result = await self.tools.clarify(
-            message,
-            reason="The agent selected an unsupported retrieval tool.",
-        )
+        result = await self.tools.clarify(message, reason=f"Tool {spec.name} is not available yet.")
         return self._observation("ask_clarification", result, "needs_clarification")
 
     async def _search(

@@ -18,11 +18,84 @@ async def _client_for_user(user_id):
         return SimpleNamespace(id=user_id)
 
     async def override_db():
-        yield SimpleNamespace()
+        yield SimpleNamespace(commit=AsyncMock())
 
     app.dependency_overrides[get_current_user] = override_user
     app.dependency_overrides[get_async_db] = override_db
     return AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver")
+
+
+async def test_agent_conversation_management_routes_delegate_to_service():
+    user_id = uuid4()
+    conversation_id = uuid4()
+
+    async def rename_conversation(self, requested_conversation_id, requested_user_id, title):
+        assert requested_conversation_id == conversation_id
+        assert requested_user_id == user_id
+        assert title == "Renamed chat"
+        return {
+            "conversationId": str(conversation_id),
+            "title": title,
+            "preview": "",
+            "updatedAt": "2026-05-02T00:00:00Z",
+            "messageCount": 0,
+        }
+
+    async def clear_conversation(self, requested_conversation_id, requested_user_id):
+        assert requested_conversation_id == conversation_id
+        assert requested_user_id == user_id
+        return {
+            "conversationId": str(conversation_id),
+            "title": "New chat",
+            "preview": "",
+            "updatedAt": "2026-05-02T00:00:00Z",
+            "messageCount": 0,
+        }
+
+    async def delete_conversation(self, requested_conversation_id, requested_user_id):
+        assert requested_conversation_id == conversation_id
+        assert requested_user_id == user_id
+        return {"ok": True}
+
+    async def clear_memory(self, requested_conversation_id, requested_user_id):
+        assert requested_conversation_id == conversation_id
+        assert requested_user_id == user_id
+        return {
+            "conversationId": str(conversation_id),
+            "threadId": "thread-cleared",
+            "summaryStatus": "empty",
+            "recentMessageWindow": 10,
+            "lastUpdatedAt": None,
+            "summary": {},
+        }
+
+    with (
+        patch("src.routers.agent.AgentConversationService.rename_conversation", new=rename_conversation),
+        patch("src.routers.agent.AgentConversationService.clear_conversation", new=clear_conversation),
+        patch("src.routers.agent.AgentConversationService.delete_conversation", new=delete_conversation),
+        patch("src.routers.agent.AgentConversationService.clear_memory", new=clear_memory),
+    ):
+        client = await _client_for_user(user_id)
+        try:
+            renamed = await client.patch(
+                f"/api/agent/conversations/{conversation_id}",
+                json={"title": "Renamed chat"},
+            )
+            cleared = await client.post(f"/api/agent/conversations/{conversation_id}/clear")
+            memory = await client.post(f"/api/agent/conversations/{conversation_id}/memory/clear")
+            deleted = await client.delete(f"/api/agent/conversations/{conversation_id}")
+        finally:
+            await client.aclose()
+            app.dependency_overrides.clear()
+
+    assert renamed.status_code == 200
+    assert renamed.json()["title"] == "Renamed chat"
+    assert cleared.status_code == 200
+    assert cleared.json()["messageCount"] == 0
+    assert memory.status_code == 200
+    assert memory.json()["summaryStatus"] == "empty"
+    assert deleted.status_code == 200
+    assert deleted.json() == {"ok": True}
 
 
 async def test_assessment_workflow_start_validates_event_and_returns_proposal():

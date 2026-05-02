@@ -3,7 +3,7 @@ import pytest
 from src.services.agent_graph_contracts import AgentSlots, ToolResult
 from src.services.agentic_rag_contracts import AgenticRAGObservation, AgenticRAGToolCall
 from src.services.agentic_rag_pipeline import AgenticRAGPipeline
-from src.services.agentic_rag_tools import AgenticRAGToolExecutor
+from src.services.agentic_rag_tools import AgenticRAGToolExecutor, AgentRAGToolRegistry
 
 
 def test_agentic_rag_tool_call_rejects_unknown_tool():
@@ -23,6 +23,19 @@ def test_agentic_rag_observation_wraps_tool_result():
     )
 
     assert observation.result.answer_markdown == "Need more detail."
+
+
+def test_agent_rag_tool_registry_lists_policy_metadata():
+    registry = AgentRAGToolRegistry()
+
+    current_path = registry.resolve("search_current_path_units")
+    expansion = registry.resolve("offer_scope_expansion")
+
+    assert current_path is not None
+    assert current_path.requires_evidence is True
+    assert expansion is not None
+    assert expansion.requires_evidence is False
+    assert registry.resolve("unsupported_tool") is None
 
 
 class FakeToolNodes:

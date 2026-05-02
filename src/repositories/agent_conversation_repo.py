@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 from datetime import UTC, datetime
 
-from sqlalchemy import desc, func, select, update
+from sqlalchemy import delete, desc, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.agent_conversation import (
@@ -12,6 +12,7 @@ from src.models.agent_conversation import (
     AgentConversationMemory,
     AgentConversationMessage,
 )
+from src.models.agent_graph import AgentGraphRun, AgentPendingAction
 
 
 class AgentConversationRepository:
@@ -61,6 +62,68 @@ class AgentConversationRepository:
             )
         )
         return result.scalar_one_or_none()
+
+    async def rename_conversation(
+        self,
+        conversation_id: UUID,
+        user_id: UUID,
+        title: str,
+    ) -> AgentConversation | None:
+        conversation = await self.get_conversation(conversation_id, user_id)
+        if conversation is None:
+            return None
+        conversation.title = title
+        await self.session.flush()
+        await self.session.refresh(conversation)
+        return conversation
+
+    async def delete_conversation(self, conversation_id: UUID, user_id: UUID) -> bool:
+        result = await self.session.execute(
+            delete(AgentConversation).where(
+                AgentConversation.id == conversation_id,
+                AgentConversation.user_id == user_id,
+            )
+        )
+        await self.session.flush()
+        return bool(result.rowcount)
+
+    async def clear_conversation(self, conversation_id: UUID, user_id: UUID) -> AgentConversation | None:
+        conversation = await self.get_conversation(conversation_id, user_id)
+        if conversation is None:
+            return None
+
+        await self.session.execute(
+            delete(AgentPendingAction).where(
+                AgentPendingAction.conversation_id == conversation_id,
+                AgentPendingAction.user_id == user_id,
+            )
+        )
+        await self.session.execute(
+            delete(AgentGraphRun).where(AgentGraphRun.conversation_id == conversation_id)
+        )
+        await self.session.execute(
+            delete(AgentConversationMessage).where(
+                AgentConversationMessage.conversation_id == conversation_id,
+                AgentConversationMessage.user_id == user_id,
+            )
+        )
+
+        conversation.title = "New chat"
+        conversation.preview = ""
+        conversation.message_count = 0
+        conversation.thread_id = f"thread_{uuid4()}"
+
+        memory = await self.get_memory(conversation_id, user_id)
+        if memory is not None:
+            memory.thread_id = conversation.thread_id
+            memory.summary_status = "empty"
+            memory.recent_message_window = 10
+            memory.summary_json = {}
+            memory.last_updated_at = None
+
+        await self.session.flush()
+        await self.session.refresh(conversation)
+        return conversation
 
     async def list_messages(
         self,
@@ -162,4 +225,29 @@ class AgentConversationRepository:
             memory.summary_json = summary_json
             memory.last_updated_at = now
         await self.session.flush()
+        return memory
+
+    async def clear_memory(self, conversation_id: UUID, user_id: UUID) -> AgentConversationMemory | None:
+        conversation = await self.get_conversation(conversation_id, user_id)
+        if conversation is None:
+            return None
+        memory = await self.get_memory(conversation_id, user_id, thread_id=conversation.thread_id)
+        if memory is None:
+            memory = AgentConversationMemory(
+                conversation_id=conversation_id,
+                thread_id=conversation.thread_id,
+                user_id=user_id,
+                summary_status="empty",
+                recent_message_window=10,
+                summary_json={},
+                last_updated_at=None,
+            )
+            self.session.add(memory)
+        else:
+            memory.summary_status = "empty"
+            memory.recent_message_window = 10
+            memory.summary_json = {}
+            memory.last_updated_at = None
+        await self.session.flush()
+        await self.session.refresh(memory)
         return memory

@@ -12,6 +12,7 @@ import {
   Brain,
   CheckCircle2,
   ChevronRight,
+  Check,
   ExternalLink,
   FileText,
   History,
@@ -20,16 +21,19 @@ import {
   Map,
   Menu,
   MessageSquare,
+  MoreVertical,
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
+  Pencil,
   Plus,
   RotateCcw,
   Search,
   Send,
   Sparkles,
   Target,
+  Trash2,
   User,
   X,
 } from "lucide-react";
@@ -131,6 +135,14 @@ const QUICK_PROMPTS = [
   "What should I learn next?",
   "Can I skip the units I already know?",
   "Which DL parts are required for NLP?",
+];
+
+const TURN_PROGRESS_STEPS = [
+  "Preparing request",
+  "Routing intent",
+  "Searching current path",
+  "Reading sources",
+  "Composing answer",
 ];
 
 function formatDateLabel(value: string) {
@@ -710,14 +722,21 @@ function SessionSidebar({
   isMinimized,
   onSelect,
   onNewChat,
+  onRename,
+  onDelete,
 }: {
   sessions: AgentConversationSummary[];
   activeId: string | null;
   isMinimized: boolean;
   onSelect: (id: string) => void;
   onNewChat: () => void;
+  onRename: (id: string, title: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }) {
   const [filter, setFilter] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const [menuId, setMenuId] = useState<string | null>(null);
   const filtered = sessions.filter((session) => {
     const query = filter.trim().toLowerCase();
     if (!query) return true;
@@ -768,25 +787,105 @@ function SessionSidebar({
           filtered.map((session) => {
             const id = getConversationId(session);
             const isActive = id === activeId;
+            const isEditing = editingId === id;
             return (
-              <button
+              <div
                 key={id}
-                type="button"
-                onClick={() => onSelect(id)}
                 className={cn(
-                  "mb-2 w-full rounded-2xl border p-3 text-left transition",
+                  "group relative mb-2 rounded-2xl border p-3 transition",
                   isActive ? "border-blue-100 bg-blue-50 shadow-sm" : "border-transparent hover:bg-slate-50",
                 )}
               >
-                <div className="mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
-                  <span>{formatDateLabel(getUpdatedAt(session))}</span>
-                  <span>{session.messageCount ?? session.message_count ?? 0} messages</span>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => {
+                    if (!isEditing) onSelect(id);
+                  }}
+                  onKeyDown={(event) => {
+                    if (!isEditing && (event.key === "Enter" || event.key === " ")) onSelect(id);
+                  }}
+                  className="w-full cursor-pointer pr-9 text-left"
+                >
+                  <div className="mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    <span>{formatDateLabel(getUpdatedAt(session))}</span>
+                    <span>{session.messageCount ?? session.message_count ?? 0} messages</span>
+                  </div>
+                  {isEditing ? (
+                    <form
+                      onSubmit={async (event) => {
+                        event.preventDefault();
+                        const value = editingTitle.trim();
+                        if (value) await onRename(id, value);
+                        setEditingId(null);
+                        setMenuId(null);
+                      }}
+                      className="flex items-center gap-1"
+                    >
+                      <input
+                        value={editingTitle}
+                        onChange={(event) => setEditingTitle(event.target.value)}
+                        onClick={(event) => event.stopPropagation()}
+                        autoFocus
+                        className="min-w-0 flex-1 rounded-lg border border-blue-200 bg-white px-2 py-1 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20"
+                      />
+                      <button
+                        type="submit"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white"
+                        aria-label="Save chat title"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                    </form>
+                  ) : (
+                    <p className={cn("truncate text-sm font-black", isActive ? "text-blue-700" : "text-slate-900")}>
+                      {session.title || "New chat"}
+                    </p>
+                  )}
+                  <p className="mt-1 truncate text-xs font-medium text-slate-500">{session.preview || "No messages yet"}</p>
                 </div>
-                <p className={cn("truncate text-sm font-black", isActive ? "text-blue-700" : "text-slate-900")}>
-                  {session.title || "New chat"}
-                </p>
-                <p className="mt-1 truncate text-xs font-medium text-slate-500">{session.preview || "No messages yet"}</p>
-              </button>
+                {!isEditing ? (
+                  <div className="absolute right-2 top-2">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setMenuId((current) => (current === id ? null : id));
+                      }}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 opacity-100 transition hover:bg-white hover:text-slate-700 lg:opacity-0 lg:group-hover:opacity-100"
+                      aria-label="Chat actions"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </button>
+                    {menuId === id ? (
+                      <div className="absolute right-0 z-20 mt-1 w-36 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 text-sm font-semibold text-slate-700 shadow-xl">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId(id);
+                            setEditingTitle(session.title || "New chat");
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-slate-50"
+                        >
+                          <Pencil className="h-4 w-4" />
+                          Rename
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setMenuId(null);
+                            await onDelete(id);
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
             );
           })
         )}
@@ -874,11 +973,14 @@ function ContextPanel({
   memory,
   isMinimized,
   onOpenMemory,
+  onClearMemory,
 }: {
   memory: AgentConversationMemory | null;
   isMinimized: boolean;
   onOpenMemory: () => void;
+  onClearMemory: () => Promise<void>;
 }) {
+  const [isClearing, setIsClearing] = useState(false);
   if (isMinimized) {
     return (
       <div className="flex h-full flex-col items-center gap-6 p-4 text-slate-300">
@@ -898,16 +1000,17 @@ function ContextPanel({
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
             <Brain className="h-4 w-4" />
-            Memory
+            Thread memory
           </h2>
           <span className="rounded-full bg-green-50 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-700">
             {summaryStatus}
           </span>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm font-bold text-slate-900">Session scoped</p>
+          <p className="text-sm font-bold text-slate-900">Current chat only</p>
           <p className="mt-2 text-xs leading-5 text-slate-500">
-            New chats do not inherit old agent chat history. The assistant can still use scoped lecture tutor memory when relevant.
+            This summary belongs to the selected chat thread. Clearing it does not change your learner profile,
+            course progress, mastery, or completed assessments.
           </p>
           <p className="mt-3 text-xs font-bold text-slate-500">Recent window: {recentWindow || 10} messages</p>
           <button
@@ -917,6 +1020,22 @@ function ContextPanel({
           >
             <FileText className="h-4 w-4" />
             View summary
+          </button>
+          <button
+            type="button"
+            disabled={isClearing || summaryStatus === "empty"}
+            onClick={async () => {
+              setIsClearing(true);
+              try {
+                await onClearMemory();
+              } finally {
+                setIsClearing(false);
+              }
+            }}
+            className="mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-xs font-black uppercase tracking-widest text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isClearing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+            Clear memory
           </button>
         </div>
       </section>
@@ -1035,6 +1154,43 @@ function Composer({ onSend, disabled }: { onSend: (message: string) => void; dis
   );
 }
 
+function TurnProgress({ stepIndex }: { stepIndex: number }) {
+  return (
+    <div className="flex gap-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+        <Bot className="h-5 w-5" />
+      </div>
+      <div className="min-w-[260px] rounded-3xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600">
+          <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+          {TURN_PROGRESS_STEPS[Math.min(stepIndex, TURN_PROGRESS_STEPS.length - 1)]}
+        </div>
+        <div className="space-y-2">
+          {TURN_PROGRESS_STEPS.map((step, index) => {
+            const state =
+              index < stepIndex ? "done" : index === Math.min(stepIndex, TURN_PROGRESS_STEPS.length - 1) ? "active" : "pending";
+            return (
+              <div key={step} className="flex items-center gap-2 text-xs font-semibold">
+                <span
+                  className={cn(
+                    "flex h-4 w-4 items-center justify-center rounded-full border",
+                    state === "done" && "border-blue-600 bg-blue-600 text-white",
+                    state === "active" && "border-blue-600 bg-blue-50 text-blue-600",
+                    state === "pending" && "border-slate-200 bg-slate-50 text-slate-300",
+                  )}
+                >
+                  {state === "done" ? <Check className="h-3 w-3" /> : null}
+                </span>
+                <span className={cn(state === "pending" ? "text-slate-400" : "text-slate-700")}>{step}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AgentChatPage() {
   const { user } = useAuthStore();
   const [sessions, setSessions] = useState<AgentConversationSummary[]>([]);
@@ -1044,6 +1200,7 @@ export default function AgentChatPage() {
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [turnProgressIndex, setTurnProgressIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
@@ -1104,6 +1261,19 @@ export default function AgentChatPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isThinking]);
 
+  useEffect(() => {
+    if (!isThinking) {
+      setTurnProgressIndex(0);
+      return;
+    }
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      setTurnProgressIndex(Math.min(TURN_PROGRESS_STEPS.length - 1, Math.floor(elapsed / 1200)));
+    }, 350);
+    return () => window.clearInterval(timer);
+  }, [isThinking]);
+
   const activeSession = useMemo(
     () => sessions.find((session) => getConversationId(session) === activeSessionId) ?? null,
     [sessions, activeSessionId],
@@ -1111,6 +1281,39 @@ export default function AgentChatPage() {
 
   const refreshSessions = () => {
     agentApi.listConversations().then(setSessions).catch(() => undefined);
+  };
+
+  const renameSession = async (id: string, title: string) => {
+    const updated = await agentApi.renameConversation(id, title);
+    setSessions((current) => current.map((session) => (getConversationId(session) === id ? updated : session)));
+  };
+
+  const deleteSession = async (id: string) => {
+    if (!window.confirm("Delete this agent chat history? This will not delete your learning progress.")) return;
+    await agentApi.deleteConversation(id);
+    const remaining = sessions.filter((session) => getConversationId(session) !== id);
+    setSessions(remaining);
+    if (activeSessionId === id) {
+      setActiveSessionId(remaining[0] ? getConversationId(remaining[0]) : null);
+      setMessages([]);
+      setMemory(null);
+    }
+  };
+
+  const clearCurrentSession = async () => {
+    if (!activeSessionId) return;
+    if (!window.confirm("Clear messages and session memory for this chat? Your learner profile and progress stay unchanged.")) return;
+    const updated = await agentApi.clearConversation(activeSessionId);
+    setSessions((current) => current.map((session) => (getConversationId(session) === activeSessionId ? updated : session)));
+    setMessages([]);
+    setMemory(null);
+    void agentApi.memory(activeSessionId).then(setMemory).catch(() => undefined);
+  };
+
+  const clearCurrentMemory = async () => {
+    if (!activeSessionId) return;
+    const cleared = await agentApi.clearMemory(activeSessionId);
+    setMemory(cleared);
   };
 
   const appendAgentResponse = (response: AgentChatResponse) => {
@@ -1168,6 +1371,7 @@ export default function AgentChatPage() {
       };
       setMessages((current) => [...current, userMessage]);
     }
+    setTurnProgressIndex(0);
     setIsThinking(true);
     try {
       const response = await agentApi.chat({
@@ -1204,6 +1408,8 @@ export default function AgentChatPage() {
             setLeftOpen(false);
           }}
           onNewChat={newChat}
+          onRename={renameSession}
+          onDelete={deleteSession}
           isMinimized={false}
         />
       </div>
@@ -1219,7 +1425,12 @@ export default function AgentChatPage() {
         aria-label="Close context panel"
       />
       <div className="absolute bottom-0 right-0 top-0 w-[320px] border-l border-slate-200 bg-white shadow-2xl">
-        <ContextPanel memory={memory} isMinimized={false} onOpenMemory={() => setMemoryOpen(true)} />
+        <ContextPanel
+          memory={memory}
+          isMinimized={false}
+          onOpenMemory={() => setMemoryOpen(true)}
+          onClearMemory={clearCurrentMemory}
+        />
       </div>
     </div>
   );
@@ -1232,6 +1443,8 @@ export default function AgentChatPage() {
           activeId={activeSessionId}
           onSelect={setActiveSessionId}
           onNewChat={newChat}
+          onRename={renameSession}
+          onDelete={deleteSession}
           isMinimized={leftMinimized}
         />
       </div>
@@ -1264,6 +1477,16 @@ export default function AgentChatPage() {
           </div>
           <div className="flex items-center gap-2">
             {isLoadingSessions ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" /> : null}
+            <button
+              type="button"
+              disabled={!activeSessionId || messages.length === 0 || isThinking}
+              onClick={clearCurrentSession}
+              className="hidden h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 text-xs font-black uppercase tracking-widest text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 md:flex"
+              aria-label="Clear current chat"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Clear
+            </button>
             <button
               type="button"
               onClick={() => setRightOpen(true)}
@@ -1314,17 +1537,7 @@ export default function AgentChatPage() {
                   />
                 ))}
                 {isThinking ? (
-                  <div className="flex gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-                      <Bot className="h-5 w-5" />
-                    </div>
-                    <div className="rounded-3xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
-                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                        Thinking
-                      </div>
-                    </div>
-                  </div>
+                  <TurnProgress stepIndex={turnProgressIndex} />
                 ) : null}
               </>
             )}
@@ -1335,7 +1548,12 @@ export default function AgentChatPage() {
       </section>
 
       <div className={cn("hidden shrink-0 border-l border-slate-200 bg-white transition-all lg:block", rightMinimized ? "w-20" : "w-80")}>
-        <ContextPanel memory={memory} isMinimized={rightMinimized} onOpenMemory={() => setMemoryOpen(true)} />
+        <ContextPanel
+          memory={memory}
+          isMinimized={rightMinimized}
+          onOpenMemory={() => setMemoryOpen(true)}
+          onClearMemory={clearCurrentMemory}
+        />
       </div>
 
       {leftOpen ? mobileLeft : null}

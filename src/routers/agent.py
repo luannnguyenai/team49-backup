@@ -20,9 +20,11 @@ from src.schemas.agent import (
     AgentAssessmentWorkflowResponse,
     AgentChatRequest,
     AgentChatResponse,
+    AgentConversationMutationResponse,
     AgentConversationMemory,
     AgentConversationMessage,
     AgentConversationSummary,
+    AgentConversationUpdateRequest,
     PathRequirementsRequest,
     PathRequirementsResponse,
     RequestReplanActionRequest,
@@ -282,6 +284,59 @@ async def agent_create_conversation(
     return result
 
 
+@agent_router.patch("/conversations/{conversation_id}", response_model=AgentConversationSummary)
+async def agent_rename_conversation(
+    conversation_id: UUID,
+    body: AgentConversationUpdateRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AgentConversationSummary:
+    try:
+        result = await AgentConversationService(AgentConversationRepository(db)).rename_conversation(
+            conversation_id,
+            user.id,
+            body.title,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    await db.commit()
+    return result
+
+
+@agent_router.delete("/conversations/{conversation_id}", response_model=AgentConversationMutationResponse)
+async def agent_delete_conversation(
+    conversation_id: UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AgentConversationMutationResponse:
+    try:
+        result = await AgentConversationService(AgentConversationRepository(db)).delete_conversation(
+            conversation_id,
+            user.id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    await db.commit()
+    return result
+
+
+@agent_router.post("/conversations/{conversation_id}/clear", response_model=AgentConversationSummary)
+async def agent_clear_conversation(
+    conversation_id: UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AgentConversationSummary:
+    try:
+        result = await AgentConversationService(AgentConversationRepository(db)).clear_conversation(
+            conversation_id,
+            user.id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    await db.commit()
+    return result
+
+
 @agent_router.get("/conversations/{conversation_id}", response_model=list[AgentConversationMessage])
 async def agent_conversation_messages(
     conversation_id: UUID,
@@ -310,6 +365,23 @@ async def agent_conversation_memory(
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@agent_router.post("/conversations/{conversation_id}/memory/clear", response_model=AgentConversationMemory)
+async def agent_clear_conversation_memory(
+    conversation_id: UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_db),
+) -> AgentConversationMemory:
+    try:
+        result = await AgentConversationService(AgentConversationRepository(db)).clear_memory(
+            conversation_id,
+            user.id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    await db.commit()
+    return result
 
 
 async def _validate_workflow_candidates_in_scope(

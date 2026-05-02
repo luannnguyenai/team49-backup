@@ -125,6 +125,10 @@ export interface AgentConversationMemory {
   summary: Record<string, unknown>;
 }
 
+export interface AgentMutationResponse {
+  ok: boolean;
+}
+
 export interface AssessmentProposalScopeItem {
   label: string;
   unitCount?: number;
@@ -184,6 +188,21 @@ export const agentApi = {
   createConversation: () =>
     api.post<AgentConversationSummary>("/api/agent/conversations").then((r) => r.data),
 
+  renameConversation: (conversationId: string, title: string) =>
+    api
+      .patch<AgentConversationSummary>(`/api/agent/conversations/${conversationId}`, { title })
+      .then((r) => r.data),
+
+  deleteConversation: (conversationId: string) =>
+    api
+      .delete<AgentMutationResponse>(`/api/agent/conversations/${conversationId}`)
+      .then((r) => r.data),
+
+  clearConversation: (conversationId: string) =>
+    api
+      .post<AgentConversationSummary>(`/api/agent/conversations/${conversationId}/clear`)
+      .then((r) => r.data),
+
   messages: (conversationId: string) =>
     api
       .get<AgentConversationMessage[]>(`/api/agent/conversations/${conversationId}`)
@@ -192,6 +211,11 @@ export const agentApi = {
   memory: (conversationId: string) =>
     api
       .get<AgentConversationMemory>(`/api/agent/conversations/${conversationId}/memory`)
+      .then((r) => r.data),
+
+  clearMemory: (conversationId: string) =>
+    api
+      .post<AgentConversationMemory>(`/api/agent/conversations/${conversationId}/memory/clear`)
       .then((r) => r.data),
 
   chat: (payload: {

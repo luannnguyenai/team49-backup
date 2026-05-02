@@ -273,6 +273,14 @@ class AgentConversationSummary(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class AgentConversationUpdateRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=120)
+
+
+class AgentConversationMutationResponse(BaseModel):
+    ok: bool = True
+
+
 class AgentConversationMemory(BaseModel):
     conversation_id: str = Field(alias="conversationId")
     thread_id: str | None = Field(default=None, alias="threadId")
