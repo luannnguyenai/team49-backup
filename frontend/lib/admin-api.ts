@@ -1,0 +1,78 @@
+// lib/admin-api.ts
+// Thin wrapper around the existing axios client for /api/admin/* endpoints.
+// Reuses JWT auto-attach + refresh interceptor from lib/api.ts.
+
+import { api } from "@/lib/api";
+
+export type AdminOverview = {
+  total_users: number;
+  dau: number;
+  mau: number;
+  signups_7d: number;
+  llm_calls_24h: number;
+  avg_latency_ms: number | null;
+  error_rate: number | null;
+  uptime_seconds: number;
+};
+
+export type AdminUserRow = {
+  id: string;
+  email: string;
+  full_name: string;
+  role: "user" | "admin";
+  is_onboarded: boolean;
+  created_at: string | null;
+};
+
+export type AdminUsersPage = {
+  total: number;
+  page: number;
+  size: number;
+  items: AdminUserRow[];
+};
+
+export type SignupPoint = { date: string; count: number };
+
+export type SystemHealth = {
+  cpu_pct: number | null;
+  ram_pct: number | null;
+  disk_pct: number | null;
+  db_connections: number;
+  redis_hit_rate: number | null;
+  uptime_seconds: number;
+  services: { name: string; status: "healthy" | "degraded" | "down" | string }[];
+};
+
+export type TrafficSummary = {
+  rps_1m: number | null;
+  latency_seconds: { p50: number | null; p95: number | null; p99: number | null };
+  rate_4xx: number | null;
+  rate_5xx: number | null;
+  prometheus_url: string;
+};
+
+export type LlmStats = {
+  window_hours: number;
+  total_calls: number;
+  errors: number;
+  calls_per_hour: { hour: string; count: number }[];
+  top_users: { user_id: string; count: number }[];
+};
+
+export const adminApi = {
+  overview: () => api.get<AdminOverview>("/api/admin/stats/overview").then((r) => r.data),
+  users: (page = 1, size = 20, q?: string) =>
+    api
+      .get<AdminUsersPage>("/api/admin/users", { params: { page, size, q } })
+      .then((r) => r.data),
+  signups: (days = 30) =>
+    api
+      .get<SignupPoint[]>("/api/admin/signups/timeseries", { params: { days } })
+      .then((r) => r.data),
+  llmRecent: (limit = 50) =>
+    api.get<Record<string, unknown>[]>("/api/admin/llm/recent", { params: { limit } }).then((r) => r.data),
+  llmStats: (hours = 24) =>
+    api.get<LlmStats>("/api/admin/llm/stats", { params: { hours } }).then((r) => r.data),
+  systemHealth: () => api.get<SystemHealth>("/api/admin/system/health").then((r) => r.data),
+  trafficSummary: () => api.get<TrafficSummary>("/api/admin/traffic/summary").then((r) => r.data),
+};

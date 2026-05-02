@@ -1,0 +1,118 @@
+name: a20-observability
+
+# Localhost-only observability stack.
+# Run from repo root or admin-dashboard/:
+#   docker compose -f admin-dashboard/docker-compose.observability.yml up -d
+#
+# Ports (all bound to 127.0.0.1):
+#   3001 → Grafana (admin/admin)
+#   9090 → Prometheus
+#   3100 → Loki
+#   9187 → postgres_exporter
+#   9121 → redis_exporter
+
+networks:
+  observability:
+    name: a20_observability
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: a20_prometheus
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=14d"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - observability
+
+  loki:
+    image: grafana/loki:3.2.1
+    container_name: a20_loki
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - observability
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    container_name: a20_promtail
+    restart: unless-stopped
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - ../logs:/var/log/app:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - observability
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: a20_grafana
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_SECURITY_COOKIE_SAMESITE: "none"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - observability
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.16.0
+    container_name: a20_postgres_exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:change_me_strong_password@host.docker.internal:5433/ai_learning?sslmode=disable"
+    ports:
+      - "127.0.0.1:9187:9187"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - observability
+
+  redis_exporter:
+    image: oliver006/redis_exporter:v1.66.0
+    container_name: a20_redis_exporter
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: "redis://host.docker.internal:6379"
+      REDIS_PASSWORD: "change_me_redis_password"
+    ports:
+      - "127.0.0.1:9121:9121"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - observability
+
+volumes:
+  prometheus_data:
+  loki_data:
+  grafana_data:
