@@ -1,5 +1,5 @@
 $baseBranch = "main"
-$sourceBranch = "ed-fix-7"
+$sourceBranch = "deploy-plan"
 $remote = "origin"
 $progressFile = ".pr-cherry-pick-progress.json"
 
