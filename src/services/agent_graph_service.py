@@ -14,7 +14,7 @@ except ModuleNotFoundError:  # pragma: no cover - dependency exists in productio
     END = START = StateGraph = None
     Command = interrupt = None
 
-from src.schemas.agent import AgentActionResumeRequest, AgentChatRequest, AgentChatResponse
+from src.schemas.agent import AgentAction, AgentActionResumeRequest, AgentChatRequest, AgentChatResponse, AgentCitation
 from src.services.agent_action_commit_service import AgentActionCommitService
 from src.services.agent_graph_contracts import (
     AgentCheckpointState,
@@ -33,6 +33,14 @@ from src.services.agent_search_scope_service import AgentSearchScopeService
 from src.services.agent_slot_resolver import AgentSlotResolver
 from src.services.agent_thread_memory_state import AgentThreadMemoryStateStore
 from src.services.agent_tool_nodes import AgentToolNodes
+
+
+RAG_AGENT_INTENTS = {
+    "find_content",
+    "explain_concept",
+    "general_course_question",
+    "navigate_to_unit",
+}
 
 
 class _NoopLock:
@@ -101,13 +109,23 @@ class AgentGraphService:
         graph.add_node("route_intent", self._route_intent)
         graph.add_node("canonicalize_slots", self._canonicalize_slots)
         graph.add_node("policy_guard", self._policy_guard)
+        graph.add_node("rag_decide_tool", self._rag_decide_tool)
+        graph.add_node("rag_execute_tool", self._rag_execute_tool)
+        graph.add_node("rag_observe", self._rag_observe)
         graph.add_node("dispatch", self._dispatch)
         graph.add_node("await_confirmation", self._await_confirmation)
         graph.add_node("commit_action", self._commit_action)
         graph.add_edge(START, "route_intent")
         graph.add_edge("route_intent", "canonicalize_slots")
         graph.add_edge("canonicalize_slots", "policy_guard")
-        graph.add_edge("policy_guard", "dispatch")
+        graph.add_conditional_edges(
+            "policy_guard",
+            self._next_after_policy,
+            {"rag_decide_tool": "rag_decide_tool", "dispatch": "dispatch"},
+        )
+        graph.add_edge("rag_decide_tool", "rag_execute_tool")
+        graph.add_edge("rag_execute_tool", "rag_observe")
+        graph.add_edge("rag_observe", END)
         graph.add_conditional_edges(
             "dispatch",
             self._next_after_dispatch,
@@ -126,6 +144,28 @@ class AgentGraphService:
         ):
             return "await_confirmation"
         return "end"
+
+    def _next_after_policy(self, state: dict) -> str:
+        if self._should_use_rag_react(state):
+            return "rag_decide_tool"
+        return "dispatch"
+
+    def _should_use_rag_react(self, state: dict) -> bool:
+        policy = state.get("policy")
+        if isinstance(policy, dict):
+            policy = PolicyDecision.model_validate(policy)
+        slots = state.get("slots")
+        if isinstance(slots, dict):
+            slots = AgentSlots.model_validate(slots)
+        return (
+            isinstance(policy, PolicyDecision)
+            and policy.allow
+            and state.get("intent") in RAG_AGENT_INTENTS
+            and float(state.get("intent_confidence") or 0.0) >= 0.65
+            and isinstance(slots, AgentSlots)
+            and not slots.ambiguity_options
+            and bool((slots.raw_topic or "").strip())
+        )
 
     async def chat(
         self,
@@ -338,7 +378,10 @@ class AgentGraphService:
             if pending_result is not None:
                 return pending_result
 
-        route = self._route_with_recent_context(state["message"], state)
+        route = self._promote_contextual_rag_followup(
+            self._route_with_recent_context(state["message"], state),
+            state,
+        )
         return {
             **state,
             "intent": route.intent,
@@ -419,6 +462,27 @@ class AgentGraphService:
                 recent_messages=state.get("recent_messages") or [],
             )
         return route(message=message, route_context=state.get("route_context"))
+
+    def _promote_contextual_rag_followup(self, route: AgentRoute, state: dict) -> AgentRoute:
+        if route.intent != "clarify" or route.candidate_intent not in RAG_AGENT_INTENTS:
+            return route
+        if len(str(state.get("message") or "").split()) > 8:
+            return route
+        active = self._active_recent_citation(state)
+        if active is None:
+            return route
+        return route.model_copy(
+            update={
+                "intent": route.candidate_intent or "find_content",
+                "confidence": max(route.confidence, 0.8),
+                "extracted_slots": AgentSlots(
+                    raw_topic=active.unit_name,
+                    search_queries=[active.unit_name],
+                    search_scope="current_path",
+                ),
+                "clarification_question": None,
+            }
+        )
 
     def _resolve_pending_retrieval_query(
         self,
@@ -662,6 +726,419 @@ class AgentGraphService:
                 allowed_course_ids=state["allowed_course_ids"],
             )
         }
+
+    async def _rag_decide_tool(self, state: dict) -> dict:
+        slots = state["slots"]
+        if isinstance(slots, dict):
+            slots = AgentSlots.model_validate(slots)
+        planner = getattr(self.router, "plan_rag_tool", None)
+        observations = state.get("rag_observations") or []
+        if planner is None:
+            fallback_queries = slots.search_queries or [slots.raw_topic or state["message"]]
+            tool_call = SimpleNamespace(
+                tool="search_units_by_title",
+                query=fallback_queries[0],
+                search_queries=fallback_queries,
+                clarification_question=None,
+                rationale="Compatibility fallback: search title-level units for the routed topic.",
+                preserve_raw_topic=True,
+            )
+        else:
+            tool_call = planner(
+                message=state["message"],
+                intent=state["intent"],
+                slots=slots,
+                route_context=state.get("route_context"),
+                recent_messages=state.get("recent_messages") or [],
+                observations=observations,
+            )
+        tool_call = self._override_rag_clarification_with_active_citation(state, tool_call)
+        return {
+            **state,
+            "slots": slots,
+            "rag_tool_call": self._model_dump_like(tool_call),
+            "rag_observations": observations,
+        }
+
+    def _override_rag_clarification_with_active_citation(self, state: dict, tool_call):
+        if self._value_from(tool_call, "tool", "") != "ask_clarification":
+            return tool_call
+        if len(str(state.get("message") or "").split()) > 8:
+            return tool_call
+        active = self._active_recent_citation(state)
+        if active is None:
+            return tool_call
+        return {
+            "tool": "search_units_by_title",
+            "query": active.unit_name,
+            "search_queries": [active.unit_name],
+            "clarification_question": None,
+            "rationale": (
+                "Graph guard: a short follow-up has an active cited source, so search the "
+                "active source title before asking for clarification."
+            ),
+        }
+
+    async def _rag_execute_tool(self, state: dict) -> dict:
+        slots = state["slots"]
+        if isinstance(slots, dict):
+            slots = AgentSlots.model_validate(slots)
+        tool_call = state.get("rag_tool_call") or {}
+        tool_name = self._value_from(tool_call, "tool", "")
+        if tool_name == "ask_clarification":
+            question = self._value_from(
+                tool_call,
+                "clarification_question",
+                "Could you clarify the topic you want me to search for?",
+            )
+            result = await self.tools.clarify(state["message"], reason=question)
+            return {
+                **state,
+                "tool_result": result,
+                "rag_observations": self._append_rag_observation(
+                    state.get("rag_observations") or [],
+                    result,
+                    tool_name,
+                ),
+            }
+        if tool_name != "search_units_by_title":
+            result = await self.tools.clarify(
+                state["message"],
+                reason="The agent selected an unsupported retrieval tool.",
+            )
+            return {
+                **state,
+                "tool_result": result,
+                "rag_observations": self._append_rag_observation(
+                    state.get("rag_observations") or [],
+                    result,
+                    "unsupported_tool",
+                ),
+            }
+
+        search_queries = [
+            str(query).strip()
+            for query in self._value_from(tool_call, "search_queries", []) or []
+            if str(query).strip()
+        ]
+        query = str(self._value_from(tool_call, "query", "") or "").strip()
+        if query and query.casefold() not in {item.casefold() for item in search_queries}:
+            search_queries.insert(0, query)
+        if not search_queries:
+            search_queries = slots.search_queries or [slots.raw_topic or state["message"]]
+        search_slots = slots.model_copy(
+            update={
+                "raw_topic": slots.raw_topic
+                if self._value_from(tool_call, "preserve_raw_topic", False)
+                else query or slots.raw_topic,
+                "search_queries": search_queries[:5],
+            }
+        )
+        result = await self.tools.find_content(
+            state["message"],
+            state["intent"],
+            search_slots,
+            state["allowed_course_ids"],
+        )
+        if not result.citations:
+            active_result = self._recent_citation_result(state, result)
+            if active_result is not None:
+                result = active_result
+        return {
+            **state,
+            "slots": search_slots,
+            "tool_result": result,
+            "rag_observations": self._append_rag_observation(
+                state.get("rag_observations") or [],
+                result,
+                tool_name,
+            ),
+        }
+
+    async def _rag_observe(self, state: dict) -> dict:
+        result = state["tool_result"]
+        if isinstance(result, dict):
+            result = ToolResult.model_validate(result)
+        slots = state["slots"]
+        if isinstance(slots, dict):
+            slots = AgentSlots.model_validate(slots)
+        if result.citations and (
+            result.requires_evidence or result.metadata.get("evidence_verdict") == "related_match"
+        ):
+            result = self._compose_rag_final_answer(state, result)
+        if result.citations and self._is_followup_question_text(result.answer_markdown):
+            result = result.model_copy(
+                update={
+                    "answer_markdown": self._source_limited_answer_from_citations(result),
+                    "requires_evidence": False,
+                    "metadata": {
+                        **result.metadata,
+                        "answer_confidence": "partial",
+                        "replaced_followup_question": True,
+                    },
+                }
+            )
+        update: dict = {**state, "slots": slots, "tool_result": result}
+        return self._attach_rag_pending_clarification(update, result, slots)
+
+    def _compose_rag_final_answer(self, state: dict, result: ToolResult) -> ToolResult:
+        composer = getattr(self.router, "compose_react_final", None)
+        if composer is not None:
+            answer = composer(
+                message=state["message"],
+                tool_result=result,
+                route_context=state.get("route_context"),
+                recent_messages=state.get("recent_messages") or [],
+                observations=state.get("rag_observations") or [],
+            )
+        else:
+            compose_grounded = getattr(self.router, "compose_grounded_answer", None)
+            if compose_grounded is None:
+                return result
+            answer = compose_grounded(
+                state["message"],
+                [citation.model_dump(mode="json") for citation in result.citations],
+            )
+        if isinstance(answer, str):
+            return result.model_copy(update={"answer_markdown": answer})
+        if getattr(answer, "evidence_sufficient", False):
+            return result.model_copy(update={"answer_markdown": answer.answer_markdown})
+        answer_markdown = (
+            getattr(answer, "clarification_question", None)
+            or getattr(answer, "answer_markdown", None)
+            or "I could not find a direct grounded source for that request."
+        )
+        confidence = getattr(answer, "confidence", "no_source")
+        if result.citations and self._is_followup_question_text(answer_markdown):
+            return result.model_copy(
+                update={
+                    "answer_markdown": self._source_limited_answer_from_citations(result),
+                    "requires_evidence": False,
+                    "metadata": {
+                        **result.metadata,
+                        "answer_confidence": "partial",
+                        "grounding_evidence_sufficient": False,
+                        "replaced_followup_question": True,
+                    },
+                }
+            )
+        if confidence == "partial":
+            return result.model_copy(
+                update={
+                    "answer_markdown": answer_markdown,
+                    "requires_evidence": False,
+                    "metadata": {
+                        **result.metadata,
+                        "answer_confidence": "partial",
+                        "grounding_evidence_sufficient": False,
+                    },
+                }
+            )
+        return result.model_copy(
+            update={
+                "answer_markdown": answer_markdown,
+                "citations": [],
+                "actions": [],
+                "requires_evidence": confidence == "no_source",
+                "metadata": {
+                    **result.metadata,
+                    "grounding_evidence_sufficient": False,
+                },
+            }
+        )
+
+    def _is_followup_question_text(self, text: str | None) -> bool:
+        value = str(text or "").strip().lower()
+        if not value:
+            return False
+        return value.endswith("?") or value.startswith(
+            (
+                "do you want",
+                "would you like",
+                "which ",
+                "what ",
+                "bạn muốn",
+                "bạn có muốn",
+                "bạn cần",
+            )
+        )
+
+    def _source_limited_answer_from_citations(self, result: ToolResult) -> str:
+        lines = ["Mình tìm thấy nguồn liên quan trong tài liệu hiện có:"]
+        for citation in result.citations[:3]:
+            lines.append(f"- **{citation.unit_name}**")
+            if citation.quote:
+                lines.append(f"  - {citation.quote}")
+        lines.append(
+            "Mình chỉ trả lời trong phạm vi nguồn này; hiện chưa có nguồn riêng để xác nhận các lựa chọn ngoài phần đã được trích dẫn."
+        )
+        return "\n".join(lines)
+
+    def _attach_rag_pending_clarification(
+        self,
+        update: dict,
+        result: ToolResult,
+        slots: AgentSlots,
+    ) -> dict:
+        if result.metadata.get("too_many_results_offered"):
+            compose_refinement = getattr(self.router, "compose_retrieval_refinement", None)
+            if compose_refinement is None:
+                raise AgentRouterUnavailableError("agent_retrieval_refinement_model_missing")
+            result = result.model_copy(
+                update={
+                    "answer_markdown": compose_refinement(
+                        message=update["message"],
+                        raw_topic=result.metadata.get("raw_topic") or slots.raw_topic,
+                        result_count=int(result.metadata.get("result_count") or 0),
+                        route_context=update.get("route_context"),
+                    ),
+                    "warning": None,
+                }
+            )
+            update["tool_result"] = result
+            update["pending_clarification"] = PendingClarification(
+                clarification_id=f"clar_{uuid4()}",
+                type="slot_disambiguation",
+                status="awaiting_response",
+                payload={
+                    "kind": "retrieval_query",
+                    "original_intent": update["intent"],
+                    "original_message": update["message"],
+                    "proposed_raw_topic": slots.raw_topic,
+                    "target_path": slots.target_path,
+                    "requested_path_id": slots.requested_path_id,
+                    "search_scope": slots.search_scope,
+                    "resolved_search_path_ids": slots.resolved_search_path_ids,
+                    "excluded_search_path_ids": slots.excluded_search_path_ids,
+                    "show_top_results_allowed": True,
+                    "result_count": result.metadata.get("result_count"),
+                },
+                expires_at=datetime.now(UTC) + timedelta(minutes=30),
+            )
+        if result.metadata.get("scope_expansion_offered"):
+            allowed_paths = self.scope_service.path_ids_for_courses(update["allowed_course_ids"])
+            update["pending_clarification"] = PendingClarification(
+                clarification_id=f"clar_{uuid4()}",
+                type="search_scope_expansion",
+                status="awaiting_response",
+                payload={
+                    "original_message": update["message"],
+                    "raw_topic": slots.raw_topic,
+                    "allowed_path_ids": allowed_paths,
+                    "current_path_ids": slots.resolved_search_path_ids,
+                },
+                expires_at=datetime.now(UTC) + timedelta(minutes=30),
+            )
+        if result.metadata.get("path_selection_offered"):
+            update["pending_clarification"] = PendingClarification(
+                clarification_id=f"clar_{uuid4()}",
+                type="slot_disambiguation",
+                status="awaiting_response",
+                payload={
+                    "kind": "path_selection",
+                    "original_intent": update["intent"],
+                    "original_message": update["message"],
+                    "raw_topic": slots.raw_topic,
+                    "path_options": result.metadata.get("path_options", []),
+                },
+                expires_at=datetime.now(UTC) + timedelta(minutes=30),
+            )
+        return update
+
+    def _append_rag_observation(
+        self,
+        observations: list,
+        result: ToolResult,
+        tool_name: str,
+    ) -> list[dict]:
+        return [
+            *observations,
+            {
+                "tool": tool_name,
+                "result_kind": result.kind,
+                "citation_count": len(result.citations),
+                "action_count": len(result.actions),
+                "metadata": result.metadata,
+                "citations": [
+                    {
+                        "course_id": citation.course_id,
+                        "unit_name": citation.unit_name,
+                        "learn_href": citation.learn_href,
+                    }
+                    for citation in result.citations[:5]
+                ],
+            },
+        ]
+
+    def _recent_citation_result(self, state: dict, original_result: ToolResult) -> ToolResult | None:
+        if len(str(state.get("message") or "").split()) > 8:
+            return None
+        active = self._active_recent_citation(state)
+        if active is None:
+            return None
+        citations: list[AgentCitation] = [active]
+        actions: list[AgentAction] = []
+        for message in reversed(state.get("recent_messages") or []):
+            for action_payload in message.get("actions") or []:
+                try:
+                    actions.append(AgentAction.model_validate(action_payload))
+                except Exception:
+                    continue
+            if actions:
+                break
+        citation_ids = {citation.canonical_unit_id for citation in citations}
+        metadata = {
+            key: value
+            for key, value in original_result.metadata.items()
+            if key
+            not in {
+                "too_many_results_offered",
+                "result_count",
+                "top_results_allowed",
+                "scope_expansion_offered",
+                "path_selection_offered",
+            }
+        }
+        return ToolResult(
+            kind="find_content",
+            answer_markdown=None,
+            citations=citations[:3],
+            actions=[
+                action
+                for action in actions
+                if not action.canonical_unit_id or action.canonical_unit_id in citation_ids
+            ][:3],
+            requires_evidence=True,
+            metadata={
+                **metadata,
+                "evidence_verdict": "active_context_reuse",
+                "reused_recent_citations": True,
+            },
+            trace=original_result.trace,
+        )
+
+    def _active_recent_citation(self, state: dict) -> AgentCitation | None:
+        for message in reversed(state.get("recent_messages") or []):
+            for citation_payload in message.get("citations") or []:
+                try:
+                    return AgentCitation.model_validate(citation_payload)
+                except Exception:
+                    continue
+        return None
+
+    def _model_dump_like(self, value):
+        if isinstance(value, dict):
+            return value
+        if hasattr(value, "model_dump"):
+            return value.model_dump(mode="json")
+        if hasattr(value, "__dict__"):
+            return dict(value.__dict__)
+        return value
+
+    def _value_from(self, value, key: str, default=None):
+        if isinstance(value, dict):
+            return value.get(key, default)
+        return getattr(value, key, default)
 
     async def _dispatch(self, state: dict) -> dict:
         policy = state["policy"]

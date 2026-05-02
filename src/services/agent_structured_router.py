@@ -39,6 +39,14 @@ class RetrievalRefinementOutput(BaseModel):
     answer_markdown: str
 
 
+class RagToolCallOutput(BaseModel):
+    tool: Literal["search_units_by_title", "ask_clarification"]
+    query: str | None = None
+    search_queries: list[str] = Field(default_factory=list)
+    clarification_question: str | None = None
+    rationale: str
+
+
 class StructuredAgentRouter:
     def __init__(self, model, confidence_threshold: float = 0.65):
         self.model = model
@@ -62,8 +70,8 @@ class StructuredAgentRouter:
                             "Most indexed course material is English; do not force the reply language. "
                             "Do not use raw keyword matching as the source of truth. "
                             "Lexical tokens may only be weak context signals. "
-                            "Distinguish concept phrases such as skip connection from replan actions, "
-                            "quiz eligibility questions from assessment creation, and path search from path switch. "
+                            "Distinguish concept-phrase mentions from action requests, policy/course-mechanics "
+                            "questions from action creation, and path search from path switch. "
                             "Requests like 'where should I review X' or 'what should I review for X' are usually "
                             "course-content review/navigation requests with raw_topic=X. "
                             "For content retrieval intents, provide short title-level BM25 queries first: usually "
@@ -146,6 +154,126 @@ class StructuredAgentRouter:
             clarification_question=result.clarification_question,
             candidate_intent=candidate_intent,
         )
+
+    def plan_rag_tool(
+        self,
+        *,
+        message: str,
+        intent: str,
+        slots,
+        route_context: RouteContext | None,
+        recent_messages: list[dict],
+        observations: list[dict],
+    ) -> RagToolCallOutput:
+        try:
+            slots_dump = slots.model_dump(mode="json") if hasattr(slots, "model_dump") else dict(slots)
+            response = self.model.with_structured_output(RagToolCallOutput).invoke(
+                [
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are controlling the Agentic RAG loop for AI Learning Hub. "
+                            "Choose exactly one tool call before the assistant answers. "
+                            "Allowed tools: search_units_by_title, ask_clarification. "
+                            "Use search_units_by_title when there is a searchable topic, including short "
+                            "follow-ups that can be resolved from recent visible thread context. "
+                            "Use ask_clarification only when the visible request plus recent context still lacks "
+                            "enough searchable terms or has multiple plausible active topics. "
+                            "Search is title-level BM25 for now, so produce concise title-level queries. "
+                            "Do not invent domain-specific synonyms, hardcoded topic expansions, version lists, "
+                            "rankings, or options. Query terms must come from the user message, visible thread "
+                            "context, route context, slots, or prior observations. "
+                            "Do not answer directly in this step."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Intent: {intent}\n"
+                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Slots: {slots_dump}\n"
+                            f"Recent visible thread messages: {recent_messages}\n"
+                            f"Observation history: {observations}\n"
+                            f"User message: {message}"
+                        ),
+                    },
+                ]
+            )
+        except Exception as exc:
+            raise AgentRouterUnavailableError(
+                "agent_rag_tool_planner_model_error",
+                classify_agent_error(exc, default="AGENT_LLM_UNAVAILABLE"),
+            ) from exc
+
+        if isinstance(response, RagToolCallOutput):
+            return response
+        if isinstance(response, dict):
+            return RagToolCallOutput.model_validate(response)
+        return RagToolCallOutput.model_validate(response.model_dump())
+
+    def compose_react_final(
+        self,
+        *,
+        message: str,
+        tool_result,
+        route_context: RouteContext | None,
+        recent_messages: list[dict],
+        observations: list[dict],
+    ) -> GroundedAnswerOutput:
+        try:
+            result_dump = (
+                tool_result.model_dump(mode="json")
+                if hasattr(tool_result, "model_dump")
+                else tool_result
+            )
+            response = self.model.with_structured_output(GroundedAnswerOutput).invoke(
+                [
+                    {
+                        "role": "system",
+                        "content": (
+                            "Write the final Agentic RAG answer for AI Learning Hub. "
+                            "Use only the executed tool result and observation history as evidence. "
+                            "Do not invent course facts, versions, rankings, options, or choices that were not "
+                            "returned by the tool. "
+                            "Most indexed course material is English; reply naturally in the user's language. "
+                            "Use clean markdown. If the tool result does not support the user's request, set "
+                            "evidence_sufficient=false and provide a concise clarification or no-source message. "
+                            "When evidence_sufficient=true, answer directly and do not add a trailing follow-up offer."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Recent visible thread messages: {recent_messages}\n"
+                            f"Observation history: {observations}\n"
+                            f"Tool result: {result_dump}\n"
+                            f"User message: {message}"
+                        ),
+                    },
+                ]
+            )
+        except Exception as exc:
+            raise AgentRouterUnavailableError(
+                "agent_rag_final_model_error",
+                classify_agent_error(exc, default="AGENT_LLM_UNAVAILABLE"),
+            ) from exc
+
+        if isinstance(response, GroundedAnswerOutput):
+            answer = response
+        elif isinstance(response, dict):
+            answer = GroundedAnswerOutput.model_validate(response)
+        else:
+            answer = GroundedAnswerOutput.model_validate(response.model_dump())
+        if answer.evidence_sufficient:
+            return answer.model_copy(
+                update={
+                    "answer_markdown": self._strip_trailing_followup_question(
+                        answer.answer_markdown
+                    )
+                }
+            )
+        return answer
 
     def resolve_pending_followup(
         self,

@@ -41,7 +41,7 @@ Status meanings:
 | Task 15: Frontend Idempotency And Action IDs | done | Stable `incomingMessageId`, action ids, and `/actions/continue` approve/reject UI are implemented and covered by page tests. Unrelated dirty UI hunks remain isolated from the committed diff. |
 | Task 16: Evaluation Suite, Janitor, And Operational Checks | done | Adversarial routing eval scaffold, janitor service/tests, admin-protected janitor route, migration checks, action-resume tests, route/frontend coverage, and ops runbook exist. Live model eval remains opt-in via `RUN_AGENT_ROUTER_EVAL=1`. |
 | Task 17: Final Integration Verification And Legacy Path Deprecation | done | Focused backend/frontend verification is part of the final pass. Legacy `AgentChatService` is explicitly deprecated and retained only for rollback/reference tests. |
-| Task 18: Agentic RAG Natural Follow-Up Refactor | partial | RAG now uses visible thread context for routing, pending follow-up resolution, and assistant-help responses. Pending follow-ups can yield `new_request` so unrelated memory/help questions are rerouted instead of being forced into stale pending state. Grounded answer prompts and output guards forbid unvalidated suggestions/options, title-level retrieval remains the active stable search tool, and provider-neutral reasoning config is added. A full ReAct graph loop with explicit tool-call/observe/final states is still pending. |
+| Task 18: Agentic RAG Bounded ReAct Refactor | done | RAG now uses explicit graph nodes for `rag_decide_tool -> rag_execute_tool -> rag_observe`, with visible thread context, structured tool planning, schema-validated title search/clarification tool calls, citation-backed final composition, active-citation follow-up recovery, and provider-neutral reasoning config. Planner Mode canvas for replan/repath is intentionally split into a later feature. |
 
 ### Done-True Vs Temporary Boundaries
 
@@ -73,13 +73,16 @@ Done-true in the current implementation:
 - Model reasoning is configurable via `MODEL_REASONING_EFFORT` for providers that support it and `MODEL_EXTRA_KWARGS` for provider-specific thinking controls.
 - Pending follow-up resolution supports `new_request`; if the user asks something unrelated to the pending clarification, the pending state is cleared and the message is routed normally with visible thread context.
 - Text rendering filters provider reasoning blocks and strips trailing optional follow-up offers when evidence is already sufficient.
+- RAG content intents use a bounded ReAct slice with explicit `rag_decide_tool`, `rag_execute_tool`, and `rag_observe` graph nodes.
+- Structured RAG planning can call only validated tools such as `search_units_by_title` or `ask_clarification`; application code does not inject domain-specific synonym/topic maps.
+- Short follow-ups can reuse visible recent citation context when the cited source can answer the follow-up, avoiding stale clarification loops.
+- Citation-backed RAG answers have a source-limited fallback if the final model output still asks an unnecessary follow-up question.
 
 Done-temporary or partial:
 
 - Live router model eval is opt-in via `RUN_AGENT_ROUTER_EVAL=1`; it is not run in ordinary unit-test traffic.
 - Full LangSmith online dashboards are not implemented in this code pass.
 - Legacy `AgentChatService` is deprecated but not removed yet.
-- The current RAG implementation is still a bounded router/tool/composer graph, not a complete ReAct loop. The next refactor should introduce explicit `decide -> tool_call -> observe -> final` nodes for RAG while preserving idempotency, thread memory, and no-hardcode policy.
 - Planner Mode canvas for replan/repath is design-approved but not implemented in this pass.
 
 ### Implementation Deviations
@@ -103,6 +106,10 @@ Done-temporary or partial:
 - Added explicit plan status for Agentic RAG: current work is partial, with full ReAct tool-call loop still outstanding.
 - Added `new_request` handling for pending clarification replies so memory/help questions are not trapped by stale retrieval clarification state.
 - Added grounded-answer postprocessing to remove trailing optional follow-up offers after evidence-backed answers.
+- Implemented bounded ReAct RAG as an explicit graph slice for retrieval intents only; non-RAG action flows continue through their existing interrupt/resume boundaries.
+- Added active-citation recovery so short follow-ups do not ask for clarification when a visible cited source can answer safely.
+- Added a source-limited answer fallback when the final composer asks a follow-up despite having citation evidence.
+- Kept Planner Mode out of this PR/feature so replan/repath canvas work can merge separately after Agentic RAG lands.
 
 ### Agentic RAG Refactor Guardrails
 
@@ -3967,7 +3974,7 @@ git commit -m "chore: mark legacy agent chat service deprecated"
 
 ---
 
-### Task 18: Agentic RAG Natural Follow-Up Refactor `[partial]`
+### Task 18: Agentic RAG Bounded ReAct Refactor `[done]`
 
 **Files:**
 - Modify: `src/services/agent_structured_router.py`
@@ -4006,24 +4013,23 @@ The router prompt no longer uses topic-specific examples as an implicit routing 
 
 Provider reasoning blocks are not rendered into chat text. When a grounded answer has sufficient evidence, trailing optional follow-up questions/offers are stripped so successful retrieval does not immediately ask the user to choose more unvalidated options.
 
-- [ ] **Step 7: Implement the full bounded ReAct RAG loop**
+- [x] **Step 7: Implement the full bounded ReAct RAG loop**
 
-Still pending. Replace the current router/tool/composer RAG slice with explicit graph nodes:
+Implemented as an explicit RAG graph slice:
 
 ```text
-hydrate_visible_thread_context
-  -> agent_decide_tool
-  -> execute_validated_tool
-  -> agent_observe
-  -> continue_or_final
+rag_decide_tool
+  -> rag_execute_tool
+  -> rag_observe
+  -> final
 ```
 
 Rules:
 - no domain-specific keyword/synonym dictionaries
-- tool calls must be schema-validated
-- final answers must cite executed tool evidence
-- short follow-ups must resolve from visible thread context or persisted pending state
-- Planner Mode must be a tool/action boundary, not free-form chat mutation
+- tool calls are schema-validated
+- final answers cite executed tool evidence or fall back safely
+- short follow-ups resolve from visible thread context, recent citations, or persisted pending state
+- Planner Mode remains a separate feature and must be implemented as a tool/action boundary, not free-form chat mutation
 
 ---
 
@@ -4034,4 +4040,4 @@ Rules:
 - Replay safety: response refs, run statuses, pending action idempotency, and janitor are covered.
 - Concurrency: V1 PostgreSQL advisory lock and `409 in_progress` payload are covered.
 - Rollout: legacy service is deprecated but retained for rollback.
-- Bootstrap caveats: deterministic router, graph skeleton, pending-action shell, memory compaction primitive, and current non-ReAct RAG orchestration are explicitly marked as non-production-complete until later tasks replace or harden them. Production must not fall back to deterministic keyword routing, domain-specific keyword maps, or process-memory idempotency.
+- Bootstrap caveats: deterministic router, graph skeleton, pending-action shell, and memory compaction primitive are explicitly marked as non-production-complete until later tasks replace or harden them. Production must not fall back to deterministic keyword routing, domain-specific keyword maps, or process-memory idempotency.

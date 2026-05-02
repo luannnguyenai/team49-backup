@@ -124,6 +124,589 @@ async def test_graph_returns_grounded_find_content_from_search():
     assert response.trace.selected_unit_ids == ["unit-attn"]
 
 
+async def test_graph_uses_react_rag_tool_decision_before_search():
+    calls = []
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            calls.append(("route", message))
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="YOLO variants", search_queries=["model-should-rewrite"]),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            calls.append(("plan", slots.raw_topic, list(recent_messages), list(observations)))
+            return SimpleNamespace(
+                tool="search_units_by_title",
+                query="YOLO variants",
+                search_queries=["YOLO variants"],
+                clarification_question=None,
+                rationale="Need title-level search before answering.",
+            )
+
+        def compose_react_final(self, *, message, tool_result, route_context, recent_messages, observations):
+            calls.append(("final", tool_result.citations[0].unit_name, list(observations)))
+            return SimpleNamespace(
+                answer_markdown="Grounded ReAct answer for YOLO variants.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        calls.append(("search", request.query, request.course_ids if hasattr(request, "course_ids") else None))
+        assert request.query == "YOLO variants"
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-yolo",
+                    course_id="CS231n",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    summary="YOLO and DETR are detector variants discussed in this unit.",
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-react-yolo", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa tóm tắt YOLO.",
+                    citations_json=[{"unit_name": "Single-stage and transformer detectors: YOLO and DETR"}],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="tóm tắt các biến thể", incomingMessageId="msg-react-rag"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-react-rag",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Grounded ReAct answer for YOLO variants."
+    assert [call[0] for call in calls if call[0] in {"plan", "search", "final"}] == [
+        "plan",
+        "search",
+        "final",
+    ]
+    assert calls[1][2][0]["markdown"] == "Mình vừa tóm tắt YOLO."
+
+
+async def test_graph_react_rag_can_ask_clarification_without_searching():
+    search = AsyncMock()
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="it"),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                tool="ask_clarification",
+                query=None,
+                search_queries=[],
+                clarification_question="Which topic should I search for?",
+                rationale="The request lacks a searchable topic.",
+            )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="tìm nó", incomingMessageId="msg-react-clarify"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-react-clarify",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Which topic should I search for?"
+    search.assert_not_awaited()
+
+
+async def test_graph_react_rag_reuses_recent_citation_when_followup_title_search_misses():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="YOLO variants", search_queries=["YOLO variants"]),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                tool="search_units_by_title",
+                query="YOLO variants",
+                search_queries=["YOLO variants"],
+                clarification_question=None,
+                rationale="Search for the requested follow-up aspect first.",
+            )
+
+        def compose_react_final(self, *, message, tool_result, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                answer_markdown=f"Reused active source: {tool_result.citations[0].unit_name}",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-empty-followup", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa tìm thấy nguồn YOLO.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-yolo",
+                            "course_id": "CS231n",
+                            "lecture_title": "Object Detection",
+                            "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                            "learn_href": "/courses/cs231n/learn/lecture-9-seg4",
+                            "quote": "YOLO and DETR are covered here.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="tóm tắt các biến thể", incomingMessageId="msg-react-reuse"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-react-reuse",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Reused active source: Single-stage and transformer detectors: YOLO and DETR"
+    assert response.citations[0].canonical_unit_id == "unit-yolo"
+
+
+async def test_graph_react_rag_reuses_recent_citation_when_followup_search_is_too_broad():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="YOLO variants", search_queries=["YOLO variants"]),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                tool="search_units_by_title",
+                query="YOLO variants",
+                search_queries=["YOLO variants"],
+                clarification_question=None,
+                rationale="Search for the requested follow-up aspect.",
+            )
+
+        def compose_react_final(self, *, message, tool_result, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                answer_markdown=f"Answer from active source: {tool_result.citations[0].unit_name}",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+        def compose_retrieval_refinement(self, *, message, raw_topic, result_count, route_context):
+            return f"Should not ask refinement for {raw_topic}."
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id=f"unit-{index}",
+                    course_id="CS231n",
+                    unit_name=f"Broad result {index}",
+                    summary="Broad related content.",
+                    score=10 - index * 0.1,
+                )
+                for index in range(20)
+            ],
+            trace=RetrievalTrace(trace_id="trace-too-broad-followup", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa tìm thấy nguồn YOLO.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-yolo",
+                            "course_id": "CS231n",
+                            "lecture_title": "Object Detection",
+                            "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                            "learn_href": "/courses/cs231n/learn/lecture-9-seg4",
+                            "quote": "YOLO and DETR are covered here.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="tóm tắt các biến thể", incomingMessageId="msg-react-too-broad"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-react-too-broad",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Answer from active source: Single-stage and transformer detectors: YOLO and DETR"
+    assert response.citations[0].canonical_unit_id == "unit-yolo"
+    assert response.warning is None
+
+
+async def test_graph_promotes_short_followup_with_active_citation_out_of_clarify_route():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="clarify",
+                confidence=0.92,
+                extracted_slots=AgentSlots(),
+                candidate_intent="find_content",
+                clarification_question="Which topic do you mean?",
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown=f"Contextual follow-up answer for {citations[0]['unit_name']}.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        assert request.query == "Single-stage and transformer detectors: YOLO and DETR"
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-yolo",
+                    course_id="CS231n",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    summary="YOLO and DETR are covered here.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-promoted-followup", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa tìm thấy nguồn YOLO.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-yolo",
+                            "course_id": "CS231n",
+                            "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                            "learn_href": "/courses/cs231n/learn/lecture-9-seg4",
+                            "quote": "YOLO and DETR are covered here.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="tóm tắt các biến thể", incomingMessageId="msg-promote-followup"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-promote-followup",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Contextual follow-up answer for Single-stage and transformer detectors: YOLO and DETR."
+
+
+async def test_graph_overrides_react_clarification_when_active_citation_can_answer_followup():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="YOLO variants", search_queries=["YOLO variants"]),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                tool="ask_clarification",
+                query=None,
+                search_queries=[],
+                clarification_question="Which variant do you mean?",
+                rationale="Planner was too cautious.",
+            )
+
+        def compose_react_final(self, *, message, tool_result, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                answer_markdown=f"Answered from active citation {tool_result.citations[0].unit_name}.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        assert request.query == "Single-stage and transformer detectors: YOLO and DETR"
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-yolo",
+                    course_id="CS231n",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    summary="YOLO and DETR are covered here.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-override-clarify", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa tìm thấy nguồn YOLO.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-yolo",
+                            "course_id": "CS231n",
+                            "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                            "learn_href": "/courses/cs231n/learn/lecture-9-seg4",
+                            "quote": "YOLO and DETR are covered here.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="tóm tắt các biến thể", incomingMessageId="msg-override-react-clarify"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-override-react-clarify",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Answered from active citation Single-stage and transformer detectors: YOLO and DETR."
+
+
+async def test_graph_react_final_replaces_citation_backed_followup_question_with_source_limited_answer():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="YOLO variants", search_queries=["YOLO variants"]),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                tool="search_units_by_title",
+                query="Single-stage and transformer detectors: YOLO and DETR",
+                search_queries=["Single-stage and transformer detectors: YOLO and DETR"],
+                clarification_question=None,
+                rationale="Search active source.",
+            )
+
+        def compose_react_final(self, *, message, tool_result, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                answer_markdown="Bạn muốn tóm tắt biến thể YOLO hay DETR?",
+                evidence_sufficient=False,
+                confidence="partial",
+                clarification_question="Bạn muốn tóm tắt biến thể YOLO hay DETR?",
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-yolo",
+                    course_id="CS231n",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    summary="The unit covers YOLO as a single-stage detector and DETR as a transformer detector.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-source-limited", ranking_version="unit_title_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="tóm tắt các biến thể", incomingMessageId="msg-source-limited"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-source-limited",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert "Single-stage and transformer detectors: YOLO and DETR" in response.answer.markdown
+    assert "The unit covers YOLO as a single-stage detector" in response.answer.markdown
+    assert not response.answer.markdown.endswith("?")
+    assert response.answer.confidence == "partial"
+
+
+async def test_graph_react_observe_replaces_any_citation_backed_followup_question():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="YOLO variants", search_queries=["YOLO variants"]),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                tool="search_units_by_title",
+                query="Single-stage and transformer detectors: YOLO and DETR",
+                search_queries=["Single-stage and transformer detectors: YOLO and DETR"],
+                clarification_question=None,
+                rationale="Search active source.",
+            )
+
+        def compose_react_final(self, *, message, tool_result, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                answer_markdown="Bạn muốn xem kết quả nổi bật hiện có không?",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-yolo",
+                    course_id="CS231n",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    summary="The unit covers YOLO as a single-stage detector and DETR as a transformer detector.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-observe-guard", ranking_version="unit_title_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="tóm tắt các biến thể", incomingMessageId="msg-observe-guard"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-observe-guard",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert "Single-stage and transformer detectors: YOLO and DETR" in response.answer.markdown
+    assert not response.answer.markdown.endswith("?")
+
+
 async def test_graph_dispatches_navigation_intent_to_content_search():
     class Router:
         def route(self, message, route_context):
