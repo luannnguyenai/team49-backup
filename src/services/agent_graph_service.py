@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime, timedelta
 from inspect import signature
 from types import SimpleNamespace
@@ -471,6 +472,8 @@ class AgentGraphService:
         active = self._active_recent_citation(state)
         if active is None:
             return route
+        if self._message_names_unmatched_explicit_topic(state.get("message"), active):
+            return route
         return route.model_copy(
             update={
                 "intent": route.candidate_intent or "find_content",
@@ -768,6 +771,8 @@ class AgentGraphService:
         active = self._active_recent_citation(state)
         if active is None:
             return tool_call
+        if self._message_names_unmatched_explicit_topic(state.get("message"), active):
+            return tool_call
         return {
             "tool": "search_units_by_title",
             "query": active.unit_name,
@@ -840,8 +845,57 @@ class AgentGraphService:
             search_slots,
             state["allowed_course_ids"],
         )
+        active_result = self._recent_citation_result(
+            {**state, "slots": search_slots, "rag_tool_call": tool_call},
+            result,
+        )
+        if active_result is not None and result.citations:
+            active = active_result.citations[0]
+            matched_citations = [
+                citation
+                for citation in result.citations
+                if self._citation_matches_active_context(citation, active)
+            ]
+            if matched_citations:
+                matched_ids = {citation.canonical_unit_id for citation in matched_citations}
+                result = result.model_copy(
+                    update={
+                        "citations": matched_citations[:3],
+                        "actions": [
+                            action
+                            for action in result.actions
+                            if not action.canonical_unit_id or action.canonical_unit_id in matched_ids
+                        ][:3],
+                        "metadata": {
+                            **result.metadata,
+                            "discarded_context_mismatched_results": len(matched_citations)
+                            < len(result.citations),
+                        },
+                        "trace": result.trace.model_copy(
+                            update={
+                                "selected_unit_ids": [
+                                    citation.canonical_unit_id for citation in matched_citations[:3]
+                                ]
+                            }
+                        )
+                        if result.trace
+                        else result.trace,
+                    }
+                )
+            else:
+                result = active_result.model_copy(
+                    update={
+                        "metadata": {
+                            **active_result.metadata,
+                            "discarded_context_mismatched_results": True,
+                        }
+                    }
+                )
         if not result.citations:
-            active_result = self._recent_citation_result(state, result)
+            active_result = self._recent_citation_result(
+                {**state, "slots": search_slots, "rag_tool_call": tool_call},
+                result,
+            )
             if active_result is not None:
                 result = active_result
         return {
@@ -869,7 +923,7 @@ class AgentGraphService:
         if result.citations and self._is_followup_question_text(result.answer_markdown):
             result = result.model_copy(
                 update={
-                    "answer_markdown": self._source_limited_answer_from_citations(result),
+                    "answer_markdown": self._compose_source_limited_answer(state, result),
                     "requires_evidence": False,
                     "metadata": {
                         **result.metadata,
@@ -912,7 +966,7 @@ class AgentGraphService:
         if result.citations and self._is_followup_question_text(answer_markdown):
             return result.model_copy(
                 update={
-                    "answer_markdown": self._source_limited_answer_from_citations(result),
+                    "answer_markdown": self._compose_source_limited_answer(state, result),
                     "requires_evidence": False,
                     "metadata": {
                         **result.metadata,
@@ -963,16 +1017,20 @@ class AgentGraphService:
             )
         )
 
-    def _source_limited_answer_from_citations(self, result: ToolResult) -> str:
-        lines = ["Mình tìm thấy nguồn liên quan trong tài liệu hiện có:"]
-        for citation in result.citations[:3]:
-            lines.append(f"- **{citation.unit_name}**")
-            if citation.quote:
-                lines.append(f"  - {citation.quote}")
-        lines.append(
-            "Mình chỉ trả lời trong phạm vi nguồn này; hiện chưa có nguồn riêng để xác nhận các lựa chọn ngoài phần đã được trích dẫn."
+    def _compose_source_limited_answer(self, state: dict, result: ToolResult) -> str:
+        composer = getattr(self.router, "compose_source_limited_answer", None)
+        if composer is None:
+            raise AgentRouterUnavailableError("agent_source_limited_model_missing")
+        answer = composer(
+            message=state["message"],
+            tool_result=result,
+            route_context=state.get("route_context"),
+            recent_messages=state.get("recent_messages") or [],
+            observations=state.get("rag_observations") or [],
         )
-        return "\n".join(lines)
+        if isinstance(answer, str):
+            return answer
+        return getattr(answer, "answer_markdown", str(answer))
 
     def _attach_rag_pending_clarification(
         self,
@@ -1076,6 +1134,10 @@ class AgentGraphService:
         active = self._active_recent_citation(state)
         if active is None:
             return None
+        if self._message_names_unmatched_explicit_topic(state.get("message"), active):
+            return None
+        if not self._active_citation_matches_rag_query(state, active):
+            return None
         citations: list[AgentCitation] = [active]
         actions: list[AgentAction] = []
         for message in reversed(state.get("recent_messages") or []):
@@ -1117,6 +1179,81 @@ class AgentGraphService:
             trace=original_result.trace,
         )
 
+    def _active_citation_matches_rag_query(self, state: dict, active: AgentCitation) -> bool:
+        active_text = " ".join(
+            part
+            for part in [
+                active.unit_name,
+                active.lecture_title,
+            ]
+            if part
+        )
+        active_terms = self._normalized_terms(active_text)
+        active_compact = re.sub(r"[^a-z0-9]+", "", active_text.lower())
+        if not active_terms and not active_compact:
+            return False
+
+        candidates: list[str] = []
+        slots = state.get("slots")
+        if isinstance(slots, dict):
+            slots = AgentSlots.model_validate(slots)
+        if isinstance(slots, AgentSlots):
+            candidates.extend(slots.search_queries or [])
+            if slots.raw_topic:
+                candidates.append(slots.raw_topic)
+
+        tool_call = state.get("rag_tool_call") or {}
+        query = self._value_from(tool_call, "query", None)
+        if query:
+            candidates.append(str(query))
+        candidates.extend(
+            str(item)
+            for item in self._value_from(tool_call, "search_queries", []) or []
+            if str(item).strip()
+        )
+
+        for candidate in candidates:
+            candidate_terms = self._normalized_terms(candidate)
+            if not candidate_terms:
+                continue
+            candidate_compact = re.sub(r"[^a-z0-9]+", "", str(candidate).lower())
+            if candidate_compact and candidate_compact in active_compact:
+                return True
+            if any(term in active_terms for term in candidate_terms):
+                return True
+        return False
+
+    def _citation_matches_active_context(
+        self,
+        citation: AgentCitation,
+        active: AgentCitation,
+    ) -> bool:
+        if citation.canonical_unit_id == active.canonical_unit_id:
+            return True
+        active_terms = self._normalized_terms(active.unit_name)
+        citation_terms = self._normalized_terms(citation.unit_name)
+        if active_terms and citation_terms and active_terms.intersection(citation_terms):
+            return True
+        active_compact = re.sub(r"[^a-z0-9]+", "", active.unit_name.lower())
+        citation_compact = re.sub(r"[^a-z0-9]+", "", citation.unit_name.lower())
+        return bool(
+            active_compact
+            and citation_compact
+            and (active_compact in citation_compact or citation_compact in active_compact)
+        )
+
+    def _normalized_terms(self, text: str | None) -> set[str]:
+        terms: set[str] = set()
+        for raw_term in re.findall(r"[a-zA-Z0-9]+", str(text or "")):
+            raw = raw_term.lower()
+            if len(raw) > 3 or (len(raw) > 2 and raw_term.isupper()):
+                terms.add(raw)
+        for compactable in re.findall(r"[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)+", str(text or "").lower()):
+            compacted = re.sub(r"[^a-z0-9]+", "", compactable)
+            if len(compacted) > 2:
+                terms.add(compacted)
+        return terms
+
     def _active_recent_citation(self, state: dict) -> AgentCitation | None:
         for message in reversed(state.get("recent_messages") or []):
             for citation_payload in message.get("citations") or []:
@@ -1125,6 +1262,19 @@ class AgentGraphService:
                 except Exception:
                     continue
         return None
+
+    def _message_names_unmatched_explicit_topic(
+        self,
+        message: str | None,
+        active: AgentCitation,
+    ) -> bool:
+        active_terms = self._normalized_terms(active.unit_name)
+        for raw_term in re.findall(r"[a-zA-Z][a-zA-Z0-9]*", str(message or "")):
+            if len(raw_term) <= 2 or not raw_term.isupper():
+                continue
+            if raw_term.lower() not in active_terms:
+                return True
+        return False
 
     def _model_dump_like(self, value):
         if isinstance(value, dict):

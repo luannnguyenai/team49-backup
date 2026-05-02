@@ -85,3 +85,28 @@ def test_evidence_quality_finds_direct_title_match_buried_below_broad_results():
 
     assert verdict.label == "direct_match"
     assert verdict.selected_unit_ids == ["unit-yolo"]
+
+
+def test_evidence_quality_prioritizes_explicit_acronym_over_expanded_phrase_noise():
+    verdict = AgentEvidenceQualityService().score(
+        query="YOLO (You Only Look Once)",
+        results=[
+            UnitSearchResult(
+                canonical_unit_id="unit-yolo",
+                course_id="CS231n",
+                unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                summary="YOLO is the canonical single-stage detector example.",
+                score=3,
+            ),
+            UnitSearchResult(
+                canonical_unit_id="unit-look",
+                course_id="CS231n",
+                unit_name="Contrastive learning formulation and InfoNCE",
+                summary="The method looks at positive and negative pairs only once in this summary.",
+                score=2,
+            ),
+        ],
+    )
+
+    assert verdict.label == "direct_match"
+    assert verdict.selected_unit_ids == ["unit-yolo"]

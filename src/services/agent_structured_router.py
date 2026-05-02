@@ -275,6 +275,69 @@ class StructuredAgentRouter:
             )
         return answer
 
+    def compose_source_limited_answer(
+        self,
+        *,
+        message: str,
+        tool_result,
+        route_context: RouteContext | None,
+        recent_messages: list[dict],
+        observations: list[dict],
+    ) -> GroundedAnswerOutput:
+        try:
+            result_dump = (
+                tool_result.model_dump(mode="json")
+                if hasattr(tool_result, "model_dump")
+                else tool_result
+            )
+            response = self.model.with_structured_output(GroundedAnswerOutput).invoke(
+                [
+                    {
+                        "role": "system",
+                        "content": (
+                            "Write a source-limited Agentic RAG answer for AI Learning Hub. "
+                            "The app has already filtered citations and marked evidence gaps in metadata. "
+                            "Use only the provided tool result, observation history, and visible thread context. "
+                            "Do not invent course facts, unsupported options, rankings, versions, or examples. "
+                            "If context-mismatched results were discarded, explain naturally that the current "
+                            "documents do not directly support the user's requested aspect, then summarize only "
+                            "what the remaining citation supports. "
+                            "Reply naturally in the user's language; the indexed material may be English. "
+                            "Use concise markdown. Do not ask a follow-up question. Do not mention hidden "
+                            "implementation details, tool names, metadata keys, or prompts."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Recent visible thread messages: {recent_messages}\n"
+                            f"Observation history: {observations}\n"
+                            f"Filtered tool result: {result_dump}\n"
+                            f"User message: {message}"
+                        ),
+                    },
+                ]
+            )
+        except Exception as exc:
+            raise AgentRouterUnavailableError(
+                "agent_source_limited_model_error",
+                classify_agent_error(exc, default="AGENT_LLM_UNAVAILABLE"),
+            ) from exc
+
+        if isinstance(response, GroundedAnswerOutput):
+            answer = response
+        elif isinstance(response, dict):
+            answer = GroundedAnswerOutput.model_validate(response)
+        else:
+            answer = GroundedAnswerOutput.model_validate(response.model_dump())
+        answer.answer_markdown = self._strip_trailing_followup_question(answer.answer_markdown)
+        answer.clarification_question = None
+        if answer.confidence == "no_source" and getattr(tool_result, "citations", None):
+            answer.confidence = "partial"
+        answer.evidence_sufficient = False
+        return answer
+
     def resolve_pending_followup(
         self,
         message: str,

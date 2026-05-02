@@ -418,6 +418,245 @@ async def test_graph_react_rag_reuses_recent_citation_when_followup_search_is_to
     assert response.warning is None
 
 
+async def test_graph_react_rag_does_not_reuse_recent_citation_for_new_short_topic():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="CNN", search_queries=["CNN"]),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                tool="search_units_by_title",
+                query="CNN",
+                search_queries=["CNN"],
+                clarification_question=None,
+                rationale="The user changed to a new explicit topic.",
+            )
+
+        def compose_react_final(self, *, message, tool_result, route_context, recent_messages, observations):
+            raise AssertionError("Unrelated active citation must not be composed as evidence.")
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-new-topic-empty", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa tìm thấy nguồn YOLO.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-yolo",
+                            "course_id": "CS231n",
+                            "lecture_title": "Object Detection",
+                            "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                            "learn_href": "/courses/cs231n/learn/lecture-9-seg4",
+                            "quote": "YOLO and DETR are covered here.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="thế còn CNN", incomingMessageId="msg-react-new-topic"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-react-new-topic",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.citations == []
+    assert "YOLO" not in response.answer.markdown
+
+
+async def test_graph_react_rag_does_not_reuse_active_citation_when_model_mixes_new_acronym_with_old_topic():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="YOLO CNN", search_queries=["YOLO CNN"]),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                tool="search_units_by_title",
+                query="YOLO CNN",
+                search_queries=["YOLO CNN"],
+                clarification_question=None,
+                rationale="Model mixed the old active topic with the new explicit acronym.",
+            )
+
+        def compose_react_final(self, *, message, tool_result, route_context, recent_messages, observations):
+            raise AssertionError("The active YOLO citation must not answer a new CNN topic.")
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[],
+            trace=RetrievalTrace(trace_id="trace-mixed-new-topic-empty", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa tìm thấy nguồn YOLO.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-yolo",
+                            "course_id": "CS231n",
+                            "lecture_title": "Object Detection",
+                            "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                            "learn_href": "/courses/cs231n/learn/lecture-9-seg4",
+                            "quote": "YOLO and DETR are covered here.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="thế còn CNN", incomingMessageId="msg-react-mixed-new-topic"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-react-mixed-new-topic",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.citations == []
+    assert "YOLO" not in response.answer.markdown
+
+
+async def test_graph_react_rag_discards_generic_results_when_followup_has_active_topic():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="YOLO loss function", search_queries=["YOLO loss function"]),
+            )
+
+        def plan_rag_tool(self, *, message, intent, slots, route_context, recent_messages, observations):
+            return SimpleNamespace(
+                tool="search_units_by_title",
+                query="YOLO loss function",
+                search_queries=["YOLO loss function"],
+                clarification_question=None,
+                rationale="The user asks for an aspect of the active topic.",
+            )
+
+        def compose_react_final(self, *, message, tool_result, route_context, recent_messages, observations):
+            assert tool_result.citations[0].canonical_unit_id == "unit-yolo"
+            return SimpleNamespace(
+                answer_markdown="The active YOLO source does not provide a dedicated loss-function explanation.",
+                evidence_sufficient=False,
+                confidence="partial",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-loss",
+                    course_id="CS231n",
+                    unit_name="Recap: loss functions, gradients, and optimization",
+                    summary="This unit discusses generic loss functions and optimization.",
+                    learn_href="/courses/cs231n/learn/losses",
+                    score=5,
+                ),
+                UnitSearchResult(
+                    canonical_unit_id="unit-yolo",
+                    course_id="CS231n",
+                    unit_name="Single-stage and transformer detectors: YOLO and DETR",
+                    summary="YOLO divides the image into a grid and predicts boxes, objectness, and class probabilities.",
+                    learn_href="/courses/cs231n/learn/lecture-9-seg4",
+                    score=3,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-generic-loss", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa tìm thấy nguồn YOLO.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-yolo",
+                            "course_id": "CS231n",
+                            "lecture_title": "Object Detection",
+                            "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                            "learn_href": "/courses/cs231n/learn/lecture-9-seg4",
+                            "quote": "YOLO divides the image into a grid and predicts boxes, objectness, and class probabilities.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="loss function đi", incomingMessageId="msg-react-generic-loss"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-react-generic-loss",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert [citation.canonical_unit_id for citation in response.citations] == ["unit-yolo"]
+    assert "loss functions, gradients" not in response.answer.markdown
+
+
 async def test_graph_promotes_short_followup_with_active_citation_out_of_clarify_route():
     class Router:
         def route(self, message, route_context, recent_messages=None):
@@ -495,6 +734,64 @@ async def test_graph_promotes_short_followup_with_active_citation_out_of_clarify
     )
 
     assert response.answer.markdown == "Contextual follow-up answer for Single-stage and transformer detectors: YOLO and DETR."
+
+
+async def test_graph_does_not_promote_clarify_route_when_message_names_new_acronym_topic():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="clarify",
+                confidence=0.92,
+                extracted_slots=AgentSlots(),
+                candidate_intent="find_content",
+                clarification_question="Which topic do you mean?",
+            )
+
+    async def search(request, allowed_course_ids):
+        raise AssertionError("New explicit topic must not search the previous active citation.")
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa tìm thấy nguồn YOLO.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-yolo",
+                            "course_id": "CS231n",
+                            "unit_name": "Single-stage and transformer detectors: YOLO and DETR",
+                            "learn_href": "/courses/cs231n/learn/lecture-9-seg4",
+                            "quote": "YOLO and DETR are covered here.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="thế còn CNN", incomingMessageId="msg-promote-new-topic"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-promote-new-topic",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.citations == []
+    assert response.answer.markdown == "Could you clarify the course, unit, or learning goal you want help with?"
 
 
 async def test_graph_overrides_react_clarification_when_active_citation_can_answer_followup():
@@ -609,6 +906,20 @@ async def test_graph_react_final_replaces_citation_backed_followup_question_with
                 clarification_question="Bạn muốn tóm tắt biến thể YOLO hay DETR?",
             )
 
+        def compose_source_limited_answer(
+            self, *, message, tool_result, route_context, recent_messages, observations
+        ):
+            return SimpleNamespace(
+                answer_markdown=(
+                    "Single-stage and transformer detectors: YOLO and DETR. "
+                    "The available source only says: "
+                    "The unit covers YOLO as a single-stage detector and DETR as a transformer detector."
+                ),
+                evidence_sufficient=False,
+                confidence="partial",
+                clarification_question=None,
+            )
+
     async def search(request, allowed_course_ids):
         return UnitSearchResponse(
             results=[
@@ -669,6 +980,16 @@ async def test_graph_react_observe_replaces_any_citation_backed_followup_questio
                 answer_markdown="Bạn muốn xem kết quả nổi bật hiện có không?",
                 evidence_sufficient=True,
                 confidence="grounded",
+                clarification_question=None,
+            )
+
+        def compose_source_limited_answer(
+            self, *, message, tool_result, route_context, recent_messages, observations
+        ):
+            return SimpleNamespace(
+                answer_markdown="The available source is Single-stage and transformer detectors: YOLO and DETR.",
+                evidence_sufficient=False,
+                confidence="partial",
                 clarification_question=None,
             )
 
@@ -749,7 +1070,7 @@ async def test_graph_dispatches_navigation_intent_to_content_search():
     )
 
     assert response.answer.markdown == "Review the CNN unit."
-    assert response.answer.confidence == "partial"
+    assert response.answer.confidence == "grounded"
     assert response.citations[0].canonical_unit_id == "unit-cnn"
 
 

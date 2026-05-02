@@ -37,6 +37,7 @@ class AgentEvidenceQualityService:
                 selected_unit_ids=[result.canonical_unit_id for result in positive_results[:3]],
                 reason_codes=["empty_query_terms"],
             )
+        acronym_terms = self._acronym_terms(query)
 
         match_reasons: dict[str, str] = {}
         direct_matches: list[tuple[float, float, int, str]] = []
@@ -57,13 +58,24 @@ class AgentEvidenceQualityService:
             )
             title_coverage = self._coverage(query_terms, title_text)
             body_coverage = self._coverage(query_terms, body_text)
+            acronym_match = bool(
+                acronym_terms
+                and (
+                    self._coverage(acronym_terms, title_text) > 0
+                    or self._coverage(acronym_terms, body_text) > 0
+                )
+            )
             title_direct = self._has_phrase_match(query_terms, title_text) or title_coverage >= 0.75
             body_direct = len(query_terms) > 1 and body_coverage >= 0.85
-            if title_direct or body_direct:
+            if acronym_match or title_direct or body_direct:
                 direct_matches.append(
                     (title_coverage, body_coverage, index, result.canonical_unit_id)
                 )
-                match_reasons[result.canonical_unit_id] = "Strong title, lecture, or summary coverage."
+                match_reasons[result.canonical_unit_id] = (
+                    "Explicit acronym match."
+                    if acronym_match
+                    else "Strong title, lecture, or summary coverage."
+                )
             elif body_coverage >= 0.35 or result.score >= 2:
                 related_matches.append(
                     (title_coverage, body_coverage, index, result.canonical_unit_id)
@@ -113,6 +125,14 @@ class AgentEvidenceQualityService:
             if any(len(part) == 1 for part in parts):
                 terms = [term for term in terms if term not in parts]
         return sorted(set(terms))
+
+    def _acronym_terms(self, query: str) -> list[str]:
+        return sorted(
+            {
+                raw_term.lower()
+                for raw_term in re.findall(r"[A-Z][A-Z0-9]{2,}", query)
+            }
+        )
 
     def _coverage(self, terms: list[str], text: str) -> float:
         normalized = text.lower()
