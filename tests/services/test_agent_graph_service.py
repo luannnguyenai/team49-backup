@@ -2713,6 +2713,82 @@ async def test_graph_chat_active_run_returns_in_progress_before_invoking_graph()
     assert exc_info.value.graph_run_id == "run-active"
 
 
+async def test_graph_chat_duplicate_create_race_returns_existing_completed_response():
+    prior = AgentChatResponse(
+        conversation_id="conv-1",
+        message_id="assistant-1",
+        answer=AgentAnswer(markdown="Prior answer", confidence="grounded"),
+    )
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_run_by_incoming_message=AsyncMock(return_value=None),
+        get_active_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(
+            return_value=SimpleNamespace(
+                graph_run_id="run-existing",
+                status="succeeded",
+                response_ref="resp-existing",
+                existing=True,
+            )
+        ),
+        load_response_payload=AsyncMock(return_value=prior),
+        mark_run_running=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="retry", incomingMessageId="msg-dup"),
+        conversation_id="conv-1",
+        thread_id="thread-1",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response == prior
+    repo.load_response_payload.assert_awaited_once_with("resp-existing")
+    repo.mark_run_running.assert_not_called()
+
+
+async def test_graph_chat_duplicate_create_race_returns_in_progress_for_existing_active_run():
+    repo = SimpleNamespace(
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_run_by_incoming_message=AsyncMock(return_value=None),
+        get_active_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(
+            return_value=SimpleNamespace(
+                graph_run_id="run-existing-active",
+                status="running",
+                response_ref=None,
+                existing=True,
+            )
+        ),
+        mark_run_running=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=repo,
+    )
+
+    with pytest.raises(AgentInProgressError) as exc_info:
+        await service.chat(
+            request=AgentChatRequest(message="retry", incomingMessageId="msg-dup"),
+            conversation_id="conv-1",
+            thread_id="thread-1",
+            user_id=str(uuid4()),
+            allowed_course_ids=["CS231n"],
+        )
+
+    assert exc_info.value.graph_run_id == "run-existing-active"
+    repo.mark_run_running.assert_not_called()
+
+
 async def test_graph_persists_failed_request_retry_context_when_router_model_fails():
     conversation_id = uuid4()
     user_id = uuid4()

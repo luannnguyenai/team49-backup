@@ -245,6 +245,15 @@ class AgentGraphService:
                 thread_id=thread_id,
                 incoming_message_id=request.incoming_message_id,
             )
+            if getattr(run, "existing", False):
+                if getattr(run, "status", None) == "succeeded" and getattr(run, "response_ref", None):
+                    completed_after_race = await self.graph_repo.load_response_payload(run.response_ref)
+                    if completed_after_race is not None:
+                        return completed_after_race
+                if getattr(run, "status", None) == "failed_retryable":
+                    retrying_failed_run = True
+                else:
+                    raise AgentInProgressError(conversation_id, thread_id, run.graph_run_id)
         async with self.thread_lock.acquire(
             conversation_id=conversation_id,
             thread_id=thread_id,

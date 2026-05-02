@@ -69,6 +69,26 @@ async def test_graph_repo_run_response_and_dedupe_round_trip(db_session):
     assert completed == response
 
 
+async def test_graph_repo_create_run_is_idempotent_for_duplicate_incoming_message(db_session):
+    _user, conversation = await _conversation(db_session, thread_id="thread-duplicate-run")
+    repo = AgentGraphRepository(db_session)
+
+    first = await repo.create_run(
+        conversation_id=str(conversation.id),
+        thread_id=conversation.thread_id,
+        incoming_message_id="msg-duplicate",
+    )
+    second = await repo.create_run(
+        conversation_id=str(conversation.id),
+        thread_id=conversation.thread_id,
+        incoming_message_id="msg-duplicate",
+    )
+
+    assert second.graph_run_id == first.graph_run_id
+    assert second.existing is True
+    assert second.status == "created"
+
+
 async def test_graph_repo_pending_action_idempotency_and_expiry(db_session):
     user, conversation = await _conversation(db_session, thread_id="thread-action")
     repo = AgentGraphRepository(db_session)

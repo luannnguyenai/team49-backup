@@ -81,15 +81,48 @@ class AgentGraphRepository:
         thread_id: str,
         incoming_message_id: str,
     ) -> SimpleNamespace:
-        row = AgentGraphRun(
-            conversation_id=UUID(str(conversation_id)),
+        conversation_uuid = UUID(str(conversation_id))
+        stmt = (
+            pg_insert(AgentGraphRun)
+            .values(
+                conversation_id=conversation_uuid,
+                thread_id=thread_id,
+                incoming_message_id=incoming_message_id,
+                status="created",
+            )
+            .on_conflict_do_nothing(
+                index_elements=[
+                    AgentGraphRun.conversation_id,
+                    AgentGraphRun.thread_id,
+                    AgentGraphRun.incoming_message_id,
+                ]
+            )
+            .returning(AgentGraphRun.id, AgentGraphRun.status, AgentGraphRun.response_ref)
+        )
+        inserted = (await self.session.execute(stmt)).one_or_none()
+        await self.session.flush()
+        if inserted is not None:
+            run_id, status, response_ref = inserted
+            return SimpleNamespace(
+                graph_run_id=str(run_id),
+                status=status,
+                response_ref=response_ref,
+                existing=False,
+            )
+
+        existing = await self.get_run_by_incoming_message(
+            conversation_id=str(conversation_uuid),
             thread_id=thread_id,
             incoming_message_id=incoming_message_id,
-            status="created",
         )
-        self.session.add(row)
-        await self.session.flush()
-        return SimpleNamespace(graph_run_id=str(row.id))
+        if existing is None:
+            raise RuntimeError("agent_graph_run_insert_conflict_without_existing_row")
+        return SimpleNamespace(
+            graph_run_id=str(existing.id),
+            status=existing.status,
+            response_ref=existing.response_ref,
+            existing=True,
+        )
 
     async def mark_run_running(self, graph_run_id: str) -> None:
         await self._mark_run_status(graph_run_id, "running")
