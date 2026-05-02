@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { TUTOR_SESSION_HISTORY_STORAGE_KEY } from "@/lib/tutorSessionHistory";
 
 const logoutMock = vi.fn();
 const clearMock = vi.fn();
@@ -27,6 +28,20 @@ describe("useAuthStore.logout", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     localStorage.clear();
+    sessionStorage.clear();
+    sessionStorage.setItem(
+      TUTOR_SESSION_HISTORY_STORAGE_KEY,
+      JSON.stringify({
+        "cs231n-lecture-1::__lecture__": [
+          {
+            role: "user",
+            content: "Persist this for the session",
+            senderName: "Learner Example",
+            sentAt: "21:15",
+          },
+        ],
+      }),
+    );
     const { useAuthStore } = await import("@/stores/authStore");
     useAuthStore.setState({
       user: {
@@ -58,6 +73,7 @@ describe("useAuthStore.logout", () => {
     expect(useAuthStore.getState().user).toBeNull();
     expect(useAuthStore.getState().error).toBeNull();
     expect(useAuthStore.getState()._refreshTimer).toBeNull();
+    expect(sessionStorage.getItem(TUTOR_SESSION_HISTORY_STORAGE_KEY)).toBeNull();
   });
 
   it("still clears local auth state when backend logout fails", async () => {
@@ -71,5 +87,6 @@ describe("useAuthStore.logout", () => {
     expect(useAuthStore.getState().user).toBeNull();
     expect(useAuthStore.getState().error).toBeNull();
     expect(useAuthStore.getState()._refreshTimer).toBeNull();
+    expect(sessionStorage.getItem(TUTOR_SESSION_HISTORY_STORAGE_KEY)).toBeNull();
   });
 });
