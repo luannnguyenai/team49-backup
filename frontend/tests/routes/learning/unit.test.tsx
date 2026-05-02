@@ -488,7 +488,7 @@ describe("learning unit page (US3)", () => {
         const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
         const method = init?.method ?? (input instanceof Request ? input.method : "GET");
 
-        if (method === "POST" && url === "/api/lectures/ask") {
+        if (method === "POST" && url.endsWith("/api/lectures/ask")) {
           const encoder = new TextEncoder();
           const stream = new ReadableStream({
             start(controller) {
