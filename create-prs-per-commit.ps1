@@ -18,7 +18,27 @@ $commitLines = @"
 + 
 "@
 
-
+# + 679b6d92bc8eb87a57f4bd612c8abe9f50bf1e28 Delete Caddyfile
+# + 416155e2a1a7e3d729eabe72d2a8c076cb60001a Delete deploy.sh
+# + bbca047f82e6bf5bf1bc3c0c07240d20e3f74ca9 Update DEPLOYMENT_PLAN.md
+# + ac2f804b49202e27795a34d938a1e516682f34c7 Update ENVIRONMENT_MATRIX.md
+# + 7711ef8a6a3f6b39b7742a484ffc2f52b5c1369e Delete nginx.conf
+# + f4b56155e1e8650ed3f16c70b8c74da7ea04c1c9 Update PRODUCTION_CHECKLIST.md
+# + ca3b284a4d55cdbbedc09ebb9da1edff28932317 Create railway.toml
+# + d84a8ad222a7322cf666549a91ca4ba0a589f48d Update README.md
+# + 9a2b4e736753b2f8e519e076d641cb96c77fc8c5 Update PIPELINE.md
+# + e8c6fdf75c6aaaf3c1b8a301c3341f73268cc518 Update 02-data-pipeline.md
+# + 0e22a7b49f88e18fdcebf4a9e3dfe2a1d84e8d13 Update README.md
+# + e4497ee672663b20b8576bd85e3571ab4908465e Update quiz_service.py
+# + 46c4113ed5443fab9894a44c0cf4afd725b8c71f Update test_inline_video_quiz_service.py
+# + ce967813b5b64207aad08ccd43dfbf4b8cfe7c05 Update test_inline_video_quiz_service.py
+# + ddd2d2733d2e201130d1c4be15335deb0d0fe052 Update quiz_service.py
+# + 2dbe7f92be336c609b134b134231a2c41510e1fb Update test_inline_video_quiz_service.py
+# + b5d8aee0426a54042b5aaeed3b2b0d6159231e5d Update quiz_service.py
+# + 55c56a22e11db7263c2781989e5243cf9641ffc3 Update test_inline_video_quiz_service.py
+# + 6df3583b38d1860d41abefa46e9a840227bb797a Update quiz_service.py
+# + d420b11745d2d739a6a29bc8756ff505d7c86781 Update quiz_service.py
+# + 198b861b23e02b5d3e85bd21532baa2f09525545 Update test_inline_video_quiz_service.py
 
 function Save-Progress {
   param(
