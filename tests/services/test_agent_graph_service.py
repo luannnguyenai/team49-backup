@@ -2165,6 +2165,7 @@ async def test_content_intent_without_extracted_topic_clarifies_before_search():
 
     assert response.answer.confidence == "partial"
     assert response.answer.markdown == "Which topic should I search for?"
+    assert response.warning is None
 
 
 async def test_missing_retrieval_topic_persists_pending_query_clarification():

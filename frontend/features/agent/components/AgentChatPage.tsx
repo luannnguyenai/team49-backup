@@ -182,6 +182,13 @@ function WarningBlock({ warning }: { warning: AgentWarning }) {
   );
 }
 
+function isDuplicateWarning(message: UiMessage) {
+  return (
+    !!message.warning?.message &&
+    message.warning.message.trim() === message.markdown.trim()
+  );
+}
+
 function CitationCard({ citation }: { citation: AgentCitation }) {
   const href = getCitationHref(citation);
   const content = (
@@ -657,7 +664,7 @@ function ChatMessageItem({
               <ReactMarkdown>{message.markdown}</ReactMarkdown>
             </div>
           )}
-          {!isUser && message.warning ? <WarningBlock warning={message.warning} /> : null}
+          {!isUser && message.warning && !isDuplicateWarning(message) ? <WarningBlock warning={message.warning} /> : null}
           {!isUser && !message.warning && getFallbackErrorCode(message.fallback) ? (
             <WarningBlock
               warning={{

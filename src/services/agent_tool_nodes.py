@@ -31,7 +31,6 @@ class AgentToolNodes:
         return ToolResult(
             kind="clarification",
             answer_markdown=answer_markdown,
-            warning=AgentWarning(type="ambiguous_target", message=answer_markdown),
             requires_evidence=False,
         )
 
