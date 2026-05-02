@@ -14,13 +14,13 @@ Integrate the selected English-only tutor model into the application with minima
 
 - configuration for the selected self-hosted or remote model endpoint
 - provider selection in the tutor path
+- multimodal request formatting for OpenAI-compatible chat payloads when images are present
 - test coverage for the provider wiring
 
 ## Out of scope from the old plan
 
 The following assumptions are no longer part of the active integration design:
 
-- vision payload preservation
 - tool-calling-specific adapter behavior
 - Vietnamese-specific routing or evaluation logic
 
