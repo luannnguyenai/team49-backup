@@ -337,7 +337,13 @@ async def _answer_canonical_quiz_question(
 
     unit = await _get_learning_unit_or_404(db, session.canonical_unit_id)
     unit_loaded_at = perf_counter()
-    item = await _get_canonical_quiz_item_by_surrogate(db, unit, req.question_id)
+    item = await _get_canonical_quiz_item_for_session(
+        db,
+        user_id=user_id,
+        session=session,
+        unit=unit,
+        question_id=req.question_id,
+    )
     item_loaded_at = perf_counter()
     if item is None:
         raise ValidationError("Question does not belong to this canonical quiz unit.")
@@ -542,6 +548,35 @@ async def _get_canonical_quiz_item_by_surrogate(
         if canonical_question_uuid(item.item_id) == question_id:
             return item
     return None
+
+
+async def _get_canonical_quiz_item_for_session(
+    db: AsyncSession,
+    *,
+    user_id: uuid.UUID,
+    session: Session,
+    unit: LearningUnit,
+    question_id: uuid.UUID,
+) -> QuestionBankItem | None:
+    candidate_item_ids = await _current_quiz_item_ids(
+        db,
+        user_id=user_id,
+        session_id=session.id,
+        fallback_unit_canonical_id=unit.canonical_unit_id,
+    )
+    normalized_item_ids = [str(item_id) for item_id in candidate_item_ids if item_id]
+    if normalized_item_ids:
+        result = await db.execute(
+            select(QuestionBankItem).where(QuestionBankItem.item_id.in_(normalized_item_ids))
+        )
+        items_by_question_id = {
+            canonical_question_uuid(item.item_id): item for item in result.scalars().all()
+        }
+        resolved = items_by_question_id.get(question_id)
+        if resolved is not None:
+            return resolved
+
+    return await _get_canonical_quiz_item_by_surrogate(db, unit, question_id)
 
 
 async def _canonical_kp_names(db: AsyncSession, item_ids: list[str]) -> list[str]:
