@@ -8,13 +8,17 @@
 set -euo pipefail
 
 FORCE_REBUILD=false
+SKIP_OBSERVABILITY=false
 for arg in "$@"; do
   case $arg in
-    --rebuild) FORCE_REBUILD=true ;;
-    --prod)    FORCE_PROD=true ;;
+    --rebuild)        FORCE_REBUILD=true ;;
+    --prod)           FORCE_PROD=true ;;
+    --no-observability) SKIP_OBSERVABILITY=true ;;
   esac
 done
 FORCE_PROD=${FORCE_PROD:-false}
+
+OBS_COMPOSE="docker compose -f admin-dashboard/docker-compose.observability.yml"
 
 # ── Màu sắc terminal ──────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -326,21 +330,80 @@ for f in ["question_bank.jsonl", "item_phase_map.jsonl", "item_kp_map.jsonl"]:
 EOF
 
 # =============================================================================
+# BƯỚC 5 — Observability stack (Prometheus + Grafana + Loki + Promtail)
+# =============================================================================
+if [ "$SKIP_OBSERVABILITY" = true ]; then
+  log_warn "Bỏ qua observability stack (--no-observability)"
+else
+  log_section "Bước 5 — Observability stack (admin dashboard)"
+
+  log_info "Khởi chạy Prometheus + Grafana + Loki + Promtail + exporters..."
+  if $OBS_COMPOSE up -d 2>&1 | tail -10; then
+    log_ok "Observability containers đã start"
+  else
+    log_warn "Observability stack start thất bại — tiếp tục mà không có monitoring"
+  fi
+
+  # Chờ Grafana healthy (~10-15s)
+  log_info "Chờ Grafana healthy..."
+  TIMEOUT=60
+  ELAPSED=0
+  until curl -sf -m 2 http://localhost:3001/api/health &>/dev/null; do
+    if [ $ELAPSED -ge $TIMEOUT ]; then
+      log_warn "Grafana chưa healthy sau ${TIMEOUT}s — kiểm tra: docker logs a20_grafana"
+      break
+    fi
+    sleep 3
+    ELAPSED=$((ELAPSED + 3))
+    printf "."
+  done
+  echo ""
+  if curl -sf -m 2 http://localhost:3001/api/health &>/dev/null; then
+    log_ok "Grafana healthy tại http://localhost:3001 (admin/admin)"
+  fi
+fi
+
+# =============================================================================
+# BƯỚC 6 — Admin user (RBAC)
+# =============================================================================
+log_section "Bước 6 — Admin user setup"
+
+ADMIN_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM users WHERE role='admin';" 2>/dev/null | tr -d '[:space:]' || echo "0")
+if [ "$ADMIN_COUNT" = "0" ]; then
+  log_warn "Chưa có admin user nào."
+  log_warn "Để promote 1 user thành admin, đăng ký account trên frontend trước, sau đó chạy:"
+  echo -e "    ${YELLOW}docker compose exec backend uv run python admin-dashboard/scripts/seed_admin.py --email <your_email>${NC}"
+else
+  log_ok "Đã có ${ADMIN_COUNT} admin user(s)"
+fi
+
+# =============================================================================
 # HOÀN TẤT
 # =============================================================================
 log_section "Hoàn tất!"
 
 echo -e ""
-echo -e "  ${GREEN}Frontend:${NC}  http://localhost:3000"
-echo -e "  ${GREEN}Backend:${NC}   http://localhost:8000"
-echo -e "  ${GREEN}API Docs:${NC}  http://localhost:8000/docs"
-echo -e "  ${GREEN}Health:${NC}    http://localhost:8000/health"
+echo -e "  ${GREEN}Frontend:${NC}    http://localhost:3000"
+echo -e "  ${GREEN}Backend:${NC}     http://localhost:8000"
+echo -e "  ${GREEN}API Docs:${NC}    http://localhost:8000/docs"
+echo -e "  ${GREEN}Health:${NC}      http://localhost:8000/health"
+if [ "$SKIP_OBSERVABILITY" != true ]; then
+  echo -e ""
+  echo -e "  ${BOLD}Admin dashboard${NC}"
+  echo -e "  ${GREEN}Admin UI:${NC}    http://localhost:3000/admin       (cần role=admin)"
+  echo -e "  ${GREEN}Grafana:${NC}     http://localhost:3001             (admin/admin)"
+  echo -e "  ${GREEN}Prometheus:${NC}  http://localhost:9090"
+  echo -e "  ${GREEN}Loki:${NC}        http://localhost:3100"
+  echo -e "  ${GREEN}LangFuse:${NC}    https://cloud.langfuse.com         (set LANGFUSE_*_KEY trong .env)"
+fi
 echo -e ""
-echo -e "  Xem logs:         ${YELLOW}docker compose logs -f backend${NC}"
-echo -e "  Dừng app:         ${YELLOW}docker compose stop${NC}             # giữ container"
-echo -e "  Xóa container:    ${YELLOW}docker compose down${NC}             # giữ data volumes"
-echo -e "  Rebuild deps:     ${YELLOW}bash start.sh --rebuild${NC}         # khi thêm package npm/pip mới"
-echo -e "  Chạy production:  ${YELLOW}bash start.sh --prod${NC}            # production build (không hot reload)"
+echo -e "  Xem logs:           ${YELLOW}docker compose logs -f backend${NC}"
+echo -e "  Logs observability: ${YELLOW}docker compose -f admin-dashboard/docker-compose.observability.yml logs -f${NC}"
+echo -e "  Dừng app:           ${YELLOW}docker compose stop && $OBS_COMPOSE stop${NC}"
+echo -e "  Xóa container:      ${YELLOW}docker compose down && $OBS_COMPOSE down${NC}"
+echo -e "  Rebuild deps:       ${YELLOW}bash start.sh --rebuild${NC}         # khi thêm package npm/pip mới"
+echo -e "  Chạy production:    ${YELLOW}bash start.sh --prod${NC}            # production build (không hot reload)"
+echo -e "  Bỏ qua monitoring:  ${YELLOW}bash start.sh --no-observability${NC}"
 echo -e ""
 echo -e "  ${BLUE}[DEV MODE]${NC} Sửa code frontend → tự động hot reload, KHÔNG cần restart Docker"
 echo -e "  ${BLUE}[DEV MODE]${NC} Sửa code backend  → tự động reload (uvicorn --reload)"
