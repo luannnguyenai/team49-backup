@@ -57,7 +57,13 @@ class StructuredAgentRouter:
     def __init__(self, model, confidence_threshold: float = 0.65):
         self.model = model
         self.confidence_threshold = confidence_threshold
-        self.structured_model = model.with_structured_output(StructuredRouteOutput)
+        self.structured_model = self._with_structured_output(StructuredRouteOutput)
+
+    def _with_structured_output(self, schema):
+        try:
+            return self.model.with_structured_output(schema, method="function_calling")
+        except TypeError:
+            return self.model.with_structured_output(schema)
 
     def route(
         self,
@@ -175,7 +181,7 @@ class StructuredAgentRouter:
         # Production Agentic RAG uses rag_think/rag_act/rag_observe/rag_respond.
         try:
             slots_dump = slots.model_dump(mode="json") if hasattr(slots, "model_dump") else dict(slots)
-            response = self.model.with_structured_output(RagToolCallOutput).invoke(
+            response = self._with_structured_output(RagToolCallOutput).invoke(
                 [
                     {
                         "role": "system",
@@ -230,7 +236,7 @@ class StructuredAgentRouter:
     ) -> AgenticRAGThought:
         try:
             slots_dump = slots.model_dump(mode="json") if hasattr(slots, "model_dump") else slots
-            response = self.model.with_structured_output(AgenticRAGThought).invoke(
+            response = self._with_structured_output(AgenticRAGThought).invoke(
                 [
                     {
                         "role": "system",
@@ -273,7 +279,7 @@ class StructuredAgentRouter:
         observations: list[dict],
     ) -> AgenticRAGToolCall:
         try:
-            response = self.model.with_structured_output(AgenticRAGToolCall).invoke(
+            response = self._with_structured_output(AgenticRAGToolCall).invoke(
                 [
                     {
                         "role": "system",
@@ -319,7 +325,7 @@ class StructuredAgentRouter:
         recent_messages: list[dict],
     ) -> AgenticRAGObservation:
         try:
-            response = self.model.with_structured_output(AgenticRAGObservation).invoke(
+            response = self._with_structured_output(AgenticRAGObservation).invoke(
                 [
                     {
                         "role": "system",
@@ -361,7 +367,7 @@ class StructuredAgentRouter:
         recent_messages: list[dict],
     ) -> AgenticRAGFinal:
         try:
-            response = self.model.with_structured_output(AgenticRAGFinal).invoke(
+            response = self._with_structured_output(AgenticRAGFinal).invoke(
                 [
                     {
                         "role": "system",
@@ -419,7 +425,7 @@ class StructuredAgentRouter:
                 if hasattr(tool_result, "model_dump")
                 else tool_result
             )
-            response = self.model.with_structured_output(GroundedAnswerOutput).invoke(
+            response = self._with_structured_output(GroundedAnswerOutput).invoke(
                 [
                     {
                         "role": "system",
@@ -485,7 +491,7 @@ class StructuredAgentRouter:
                 if hasattr(tool_result, "model_dump")
                 else tool_result
             )
-            response = self.model.with_structured_output(GroundedAnswerOutput).invoke(
+            response = self._with_structured_output(GroundedAnswerOutput).invoke(
                 [
                     {
                         "role": "system",
@@ -541,7 +547,7 @@ class StructuredAgentRouter:
         recent_messages: list[dict] | None = None,
     ) -> PendingFollowupDecisionOutput:
         try:
-            response = self.model.with_structured_output(PendingFollowupDecisionOutput).invoke(
+            response = self._with_structured_output(PendingFollowupDecisionOutput).invoke(
                 [
                     {
                         "role": "system",
@@ -596,7 +602,7 @@ class StructuredAgentRouter:
         route_context: RouteContext | None,
     ) -> str:
         try:
-            response = self.model.with_structured_output(RetrievalRefinementOutput).invoke(
+            response = self._with_structured_output(RetrievalRefinementOutput).invoke(
                 [
                     {
                         "role": "system",
@@ -732,7 +738,7 @@ class StructuredAgentRouter:
 
     def compose_grounded_answer(self, message: str, citations: list[dict]) -> GroundedAnswerOutput:
         try:
-            response = self.model.with_structured_output(GroundedAnswerOutput).invoke(
+            response = self._with_structured_output(GroundedAnswerOutput).invoke(
                 [
                     {
                         "role": "system",

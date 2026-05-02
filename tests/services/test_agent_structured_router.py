@@ -23,6 +23,39 @@ class FakeStructuredModel:
         return self.schema(**self.payload)
 
 
+class MethodAwareStructuredModel(FakeStructuredModel):
+    def __init__(self, payload):
+        super().__init__(payload)
+        self.method = None
+
+    def with_structured_output(self, schema, method=None):
+        self.schema = schema
+        self.method = method
+        return self
+
+
+def test_structured_router_prefers_function_calling_structured_output():
+    model = MethodAwareStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.91,
+            "raw_topic": "RCNN",
+            "search_queries": ["RCNN"],
+            "target_path": None,
+            "explicit_scope_requested": False,
+            "rationale": "The user asked for course content.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="có thể tìm cho mình nội dung về RCNN không",
+        route_context=None,
+    )
+
+    assert route.intent == "find_content"
+    assert model.method == "function_calling"
+
+
 def test_structured_router_returns_explicit_path_route():
     model = FakeStructuredModel(
         {
