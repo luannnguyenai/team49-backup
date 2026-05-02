@@ -177,19 +177,37 @@ for ($i = $startIndex; $i -lt $commits.Count; $i++) {
 
   git cherry-pick -X theirs $commit
 
-  if ($LASTEXITCODE -ne 0) {
-    Write-Host "Conflict remained. Trying forced incoming changes..." -ForegroundColor Yellow
+if ($LASTEXITCODE -ne 0) {
+  $statusText = git status 2>&1 | Out-String
 
-    git checkout --theirs .
-    git add .
-    git cherry-pick --continue
-
-    if ($LASTEXITCODE -ne 0) {
-      Write-Host "Cannot auto-resolve commit $commit. Rerun will resume from this commit." -ForegroundColor Red
-      Save-Progress -LastMergedCommit $null -FailedCommit $commit
-      exit 1
-    }
+  if ($statusText -match "previous cherry-pick is now empty" -or $statusText -match "nothing to commit") {
+    Write-Host "Commit $commit is already applied / empty. Skipping..." -ForegroundColor Yellow
+    git cherry-pick --skip 2>$null
+    Save-Progress -LastMergedCommit $commit -FailedCommit $null
+    continue
   }
+
+  Write-Host "Conflict remained. Trying forced incoming changes..." -ForegroundColor Yellow
+
+  git checkout --theirs .
+  git add .
+  git cherry-pick --continue
+
+  if ($LASTEXITCODE -ne 0) {
+    $statusText = git status 2>&1 | Out-String
+
+    if ($statusText -match "previous cherry-pick is now empty" -or $statusText -match "nothing to commit") {
+      Write-Host "Commit $commit became empty after conflict resolution. Skipping..." -ForegroundColor Yellow
+      git cherry-pick --skip 2>$null
+      Save-Progress -LastMergedCommit $commit -FailedCommit $null
+      continue
+    }
+
+    Write-Host "Cannot auto-resolve commit $commit. Rerun will resume from this commit." -ForegroundColor Red
+    Save-Progress -LastMergedCommit $null -FailedCommit $commit
+    exit 1
+  }
+}
 
   git push -u $remote $branchName --force
   if ($LASTEXITCODE -ne 0) {
