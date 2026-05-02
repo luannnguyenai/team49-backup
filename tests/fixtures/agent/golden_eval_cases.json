@@ -1,0 +1,840 @@
+{
+  "version": 1,
+  "description": "Reviewable golden evaluation scenarios for the /agent ReAct RAG flow. These cases are product contracts, not prompt examples or production keyword rules.",
+  "review_rules": [
+    "Use these cases to review expected behavior, not to train production code to match exact phrases.",
+    "Do not copy fixture terms into production routing logic, synonym maps, or canned response branches.",
+    "When behavior changes intentionally, update the case expectation and explain why in PR review.",
+    "Runtime code must still rely on structured model decisions, tool evidence, and policy validation."
+  ],
+  "defaults": {
+    "current_path_first": true,
+    "title_first_retrieval": true,
+    "no_domain_keyword_maps": true,
+    "answer_language_policy": "Respond naturally in the user's language or mixed-language style; do not force English or Vietnamese.",
+    "evidence_policy": "Only answer from validated tool evidence. If evidence is missing or only context-level, say so naturally and do not invent facts."
+  },
+  "cases": [
+    {
+      "id": "vi_yolo_initial_search",
+      "language": "vi",
+      "category": "rag_initial_retrieval",
+      "turns": [
+        {
+          "role": "user",
+          "text": "bạn có thể kiếm cho mình thông tin về YOLO không?"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["find_content", "explain_concept", "general_course_question"],
+        "tool_any_of": ["search_units_by_title"],
+        "search_query_should_include_any": ["YOLO"],
+        "citation_should_include_any": ["YOLO", "Single-stage"],
+        "answer_should_communicate": [
+          "YOLO is covered as a single-stage detector",
+          "image grid / bounding boxes / objectness / class probabilities",
+          "thresholding or NMS if supported by the retrieved source"
+        ],
+        "confidence_any_of": ["grounded", "partial"]
+      },
+      "forbidden": {
+        "must_not_cite_unrelated_units": true,
+        "must_not_claim_unretrieved_yolo_versions": true,
+        "must_not_use_domain_keyword_map": true
+      }
+    },
+    {
+      "id": "en_yolo_initial_search",
+      "language": "en",
+      "category": "rag_initial_retrieval",
+      "turns": [
+        {
+          "role": "user",
+          "text": "Can you find information about YOLO?"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["find_content", "explain_concept", "general_course_question"],
+        "tool_any_of": ["search_units_by_title"],
+        "search_query_should_include_any": ["YOLO"],
+        "citation_should_include_any": ["YOLO", "Single-stage"],
+        "answer_should_communicate": [
+          "YOLO is covered as a single-stage detector",
+          "image grid / bounding boxes / objectness / class probabilities"
+        ],
+        "confidence_any_of": ["grounded", "partial"]
+      },
+      "forbidden": {
+        "must_not_cite_unrelated_units": true,
+        "must_not_claim_unretrieved_yolo_versions": true,
+        "must_not_force_vietnamese": true
+      }
+    },
+    {
+      "id": "vi_yolo_more_same_topic",
+      "language": "vi",
+      "category": "rag_followup_same_topic",
+      "given_thread_context": [
+        {
+          "role": "user",
+          "text": "bạn có thể kiếm cho mình thông tin về YOLO không?"
+        },
+        {
+          "role": "assistant",
+          "summary": "Answered from the YOLO / single-stage detector citation.",
+          "citations": ["Single-stage and transformer detectors: YOLO and DETR"]
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "Còn thông tin thêm nữa về nó k"
+        }
+      ],
+      "expected": {
+        "should_resolve_pronoun_to_active_topic": "YOLO",
+        "tool_any_of": ["search_units_by_title"],
+        "search_query_should_include_any": ["YOLO"],
+        "citation_should_include_any": ["YOLO", "Single-stage"],
+        "answer_should_not_ask_for_topic_again": true,
+        "answer_should_communicate": [
+          "additional information must still be bounded to the retrieved YOLO source",
+          "if no new source is found, say the current source only supports the same bounded details"
+        ]
+      },
+      "forbidden": {
+        "must_not_ask_what_topic_it_refers_to": true,
+        "must_not_introduce_unvalidated_yolo_versions": true,
+        "must_not_cite_unrelated_units": true
+      }
+    },
+    {
+      "id": "en_yolo_more_same_topic",
+      "language": "en",
+      "category": "rag_followup_same_topic",
+      "given_thread_context": [
+        {
+          "role": "assistant",
+          "summary": "Answered from the YOLO / single-stage detector citation.",
+          "citations": ["Single-stage and transformer detectors: YOLO and DETR"]
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "Anything else about it?"
+        }
+      ],
+      "expected": {
+        "should_resolve_pronoun_to_active_topic": "YOLO",
+        "tool_any_of": ["search_units_by_title"],
+        "search_query_should_include_any": ["YOLO"],
+        "answer_language": "en",
+        "answer_should_not_ask_for_topic_again": true
+      },
+      "forbidden": {
+        "must_not_force_vietnamese": true,
+        "must_not_introduce_unvalidated_yolo_versions": true
+      }
+    },
+    {
+      "id": "vi_yolo_only_source_boundary",
+      "language": "vi",
+      "category": "source_limited_answer",
+      "given_thread_context": [
+        {
+          "role": "assistant",
+          "summary": "Answered from the YOLO / single-stage detector citation.",
+          "citations": ["Single-stage and transformer detectors: YOLO and DETR"]
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "chỉ có vậy thôi à?"
+        }
+      ],
+      "expected": {
+        "should_resolve_to_active_topic": "YOLO",
+        "citation_should_include_any": ["YOLO", "Single-stage"],
+        "answer_should_communicate": [
+          "the current documents only provide bounded YOLO details",
+          "do not add unsupported facts outside retrieved evidence"
+        ],
+        "answer_should_not_dump_full_raw_summary": true
+      },
+      "forbidden": {
+        "must_not_cite_unrelated_units": true,
+        "must_not_claim_hidden_extra_sources": true,
+        "must_not_use_fixed_application_sentence": true
+      }
+    },
+    {
+      "id": "en_yolo_only_source_boundary",
+      "language": "en",
+      "category": "source_limited_answer",
+      "given_thread_context": [
+        {
+          "role": "assistant",
+          "summary": "Answered from the YOLO / single-stage detector citation.",
+          "citations": ["Single-stage and transformer detectors: YOLO and DETR"]
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "Is that all?"
+        }
+      ],
+      "expected": {
+        "should_resolve_to_active_topic": "YOLO",
+        "answer_language": "en",
+        "answer_should_communicate": [
+          "the current documents only provide bounded YOLO details",
+          "do not add unsupported facts outside retrieved evidence"
+        ]
+      },
+      "forbidden": {
+        "must_not_force_vietnamese": true,
+        "must_not_cite_unrelated_units": true,
+        "must_not_claim_unretrieved_yolo_versions": true
+      }
+    },
+    {
+      "id": "vi_yolo_loss_function_no_direct_source",
+      "language": "vi",
+      "category": "contextual_evidence_gap",
+      "given_thread_context": [
+        {
+          "role": "assistant",
+          "summary": "Answered from the YOLO / single-stage detector citation.",
+          "citations": ["Single-stage and transformer detectors: YOLO and DETR"]
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "loss function đi"
+        }
+      ],
+      "expected": {
+        "should_expand_query_from_context": "YOLO loss function",
+        "tool_any_of": ["search_units_by_title"],
+        "search_query_should_include_all": ["YOLO", "loss"],
+        "generic_loss_units_are_context_mismatch_unless_they_also_support_yolo": true,
+        "answer_should_communicate": [
+          "no direct source for YOLO loss function if the retrieved evidence only gives high-level YOLO details",
+          "remaining YOLO source may be used as context only"
+        ],
+        "confidence_any_of": ["partial", "no_source"]
+      },
+      "forbidden": {
+        "must_not_cite_generic_loss_as_yolo_loss_evidence": true,
+        "must_not_invent_yolo_loss_formula": true
+      }
+    },
+    {
+      "id": "en_yolo_loss_function_no_direct_source",
+      "language": "en",
+      "category": "contextual_evidence_gap",
+      "given_thread_context": [
+        {
+          "role": "assistant",
+          "summary": "Answered from the YOLO / single-stage detector citation.",
+          "citations": ["Single-stage and transformer detectors: YOLO and DETR"]
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "What about the loss function?"
+        }
+      ],
+      "expected": {
+        "should_expand_query_from_context": "YOLO loss function",
+        "answer_language": "en",
+        "search_query_should_include_all": ["YOLO", "loss"],
+        "generic_loss_units_are_context_mismatch_unless_they_also_support_yolo": true
+      },
+      "forbidden": {
+        "must_not_cite_generic_loss_as_yolo_loss_evidence": true,
+        "must_not_invent_yolo_loss_formula": true
+      }
+    },
+    {
+      "id": "vi_new_topic_cnn_after_yolo",
+      "language": "vi",
+      "category": "new_topic_after_context",
+      "given_thread_context": [
+        {
+          "role": "assistant",
+          "summary": "Answered from the YOLO / single-stage detector citation.",
+          "citations": ["Single-stage and transformer detectors: YOLO and DETR"]
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "thế còn CNN"
+        }
+      ],
+      "expected": {
+        "should_treat_as_new_topic": "CNN",
+        "tool_any_of": ["search_units_by_title", "ask_clarification"],
+        "if_searching_query_should_include_any": ["CNN"],
+        "if_clarifying_should_ask_about_cnn_scope": true,
+        "citations_must_not_include": ["YOLO and DETR"]
+      },
+      "forbidden": {
+        "must_not_reuse_active_yolo_citation": true,
+        "must_not_answer_cnn_from_yolo_source": true
+      }
+    },
+    {
+      "id": "en_new_topic_cnn_after_yolo",
+      "language": "en",
+      "category": "new_topic_after_context",
+      "given_thread_context": [
+        {
+          "role": "assistant",
+          "summary": "Answered from the YOLO / single-stage detector citation.",
+          "citations": ["Single-stage and transformer detectors: YOLO and DETR"]
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "What about CNN?"
+        }
+      ],
+      "expected": {
+        "should_treat_as_new_topic": "CNN",
+        "answer_language": "en",
+        "if_searching_query_should_include_any": ["CNN"],
+        "citations_must_not_include": ["YOLO and DETR"]
+      },
+      "forbidden": {
+        "must_not_reuse_active_yolo_citation": true,
+        "must_not_answer_cnn_from_yolo_source": true
+      }
+    },
+    {
+      "id": "vi_memory_recall_visible_thread",
+      "language": "vi",
+      "category": "thread_memory",
+      "given_thread_context": [
+        {
+          "role": "user",
+          "text": "bạn có thể kiếm cho mình thông tin về YOLO không?"
+        },
+        {
+          "role": "assistant",
+          "summary": "Answered YOLO."
+        },
+        {
+          "role": "user",
+          "text": "loss function đi"
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "bạn có nhớ mấy câu hỏi nãy giờ tôi hỏi không"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["assistant_help", "general_course_question", "clarify"],
+        "answer_should_communicate": [
+          "the visible thread included YOLO and YOLO loss-function follow-up"
+        ],
+        "must_use_visible_thread_memory": true
+      },
+      "forbidden": {
+        "must_not_say_no_context_when_visible_context_exists": true,
+        "must_not_include_hidden_reasoning": true
+      }
+    },
+    {
+      "id": "en_memory_recall_visible_thread",
+      "language": "en",
+      "category": "thread_memory",
+      "given_thread_context": [
+        {
+          "role": "user",
+          "text": "Can you find information about YOLO?"
+        },
+        {
+          "role": "assistant",
+          "summary": "Answered YOLO."
+        },
+        {
+          "role": "user",
+          "text": "What about the loss function?"
+        }
+      ],
+      "turns": [
+        {
+          "role": "user",
+          "text": "Do you remember what I asked so far?"
+        }
+      ],
+      "expected": {
+        "answer_language": "en",
+        "answer_should_communicate": [
+          "the visible thread included YOLO and YOLO loss-function follow-up"
+        ],
+        "must_use_visible_thread_memory": true
+      },
+      "forbidden": {
+        "must_not_say_no_context_when_visible_context_exists": true,
+        "must_not_include_hidden_reasoning": true
+      }
+    },
+    {
+      "id": "vi_current_path_first_no_silent_expansion",
+      "language": "vi",
+      "category": "scope_current_path_first",
+      "context": {
+        "current_path": "nlp",
+        "allowed_paths": ["nlp", "computer_vision"]
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "Tìm giúp mình phần CNN"
+        }
+      ],
+      "expected": {
+        "must_search_current_path_first": true,
+        "if_current_path_has_no_direct_source": "offer_scope_expansion",
+        "must_wait_for_user_approval_before_expanded_search": true
+      },
+      "forbidden": {
+        "must_not_silently_search_all_paths": true,
+        "must_not_mutate_active_path": true
+      }
+    },
+    {
+      "id": "en_current_path_first_no_silent_expansion",
+      "language": "en",
+      "category": "scope_current_path_first",
+      "context": {
+        "current_path": "nlp",
+        "allowed_paths": ["nlp", "computer_vision"]
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "Find CNN content for me"
+        }
+      ],
+      "expected": {
+        "must_search_current_path_first": true,
+        "if_current_path_has_no_direct_source": "offer_scope_expansion",
+        "must_wait_for_user_approval_before_expanded_search": true
+      },
+      "forbidden": {
+        "must_not_silently_search_all_paths": true,
+        "must_not_mutate_active_path": true
+      }
+    },
+    {
+      "id": "vi_scope_expansion_approval_continues_search",
+      "language": "vi",
+      "category": "scope_expansion_approval",
+      "given_pending_clarification": {
+        "type": "search_scope_expansion",
+        "raw_topic": "CNN",
+        "current_path_ids": ["nlp"],
+        "allowed_path_ids": ["nlp", "computer_vision"]
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "ok tìm path khác đi"
+        }
+      ],
+      "expected": {
+        "must_resume_pending_clarification": true,
+        "search_scope": "expanded_paths",
+        "search_query_should_include_any": ["CNN"],
+        "answer_should_disclose_non_current_scope_if_found": true
+      },
+      "forbidden": {
+        "must_not_treat_ok_as_fresh_ambiguous_message": true,
+        "must_not_mutate_active_path": true
+      }
+    },
+    {
+      "id": "en_scope_expansion_approval_continues_search",
+      "language": "en",
+      "category": "scope_expansion_approval",
+      "given_pending_clarification": {
+        "type": "search_scope_expansion",
+        "raw_topic": "CNN",
+        "current_path_ids": ["nlp"],
+        "allowed_path_ids": ["nlp", "computer_vision"]
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "yes, search other paths"
+        }
+      ],
+      "expected": {
+        "must_resume_pending_clarification": true,
+        "search_scope": "expanded_paths",
+        "search_query_should_include_any": ["CNN"],
+        "answer_language": "en"
+      },
+      "forbidden": {
+        "must_not_treat_yes_as_fresh_ambiguous_message": true,
+        "must_not_mutate_active_path": true
+      }
+    },
+    {
+      "id": "vi_many_results_refinement",
+      "language": "vi",
+      "category": "too_many_results",
+      "turns": [
+        {
+          "role": "user",
+          "text": "tìm thông tin về object detection"
+        }
+      ],
+      "expected": {
+        "if_result_count_above_threshold": "ask_refine_or_show_top_results",
+        "must_store_pending_retrieval_query": true,
+        "answer_should_be_natural_not_template_locked": true
+      },
+      "forbidden": {
+        "must_not_dump_large_result_list_without_user_choice": true,
+        "must_not_invent_narrowing_options": true
+      }
+    },
+    {
+      "id": "en_many_results_refinement",
+      "language": "en",
+      "category": "too_many_results",
+      "turns": [
+        {
+          "role": "user",
+          "text": "Find information about object detection"
+        }
+      ],
+      "expected": {
+        "if_result_count_above_threshold": "ask_refine_or_show_top_results",
+        "must_store_pending_retrieval_query": true,
+        "answer_language": "en"
+      },
+      "forbidden": {
+        "must_not_dump_large_result_list_without_user_choice": true,
+        "must_not_invent_narrowing_options": true
+      }
+    },
+    {
+      "id": "vi_show_top_results_after_refinement_offer",
+      "language": "vi",
+      "category": "pending_retrieval_followup",
+      "given_pending_clarification": {
+        "type": "slot_disambiguation",
+        "kind": "retrieval_query",
+        "proposed_raw_topic": "object detection",
+        "show_top_results_allowed": true,
+        "result_count": 30
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "top result đi"
+        }
+      ],
+      "expected": {
+        "must_resume_pending_clarification": true,
+        "must_set_show_top_results_approved": true,
+        "must_return_top_results_or_grounded_answer": true
+      },
+      "forbidden": {
+        "must_not_treat_top_result_as_new_search_topic": true,
+        "must_not_append_top_result_to_query_text": true
+      }
+    },
+    {
+      "id": "en_show_top_results_after_refinement_offer",
+      "language": "en",
+      "category": "pending_retrieval_followup",
+      "given_pending_clarification": {
+        "type": "slot_disambiguation",
+        "kind": "retrieval_query",
+        "proposed_raw_topic": "object detection",
+        "show_top_results_allowed": true,
+        "result_count": 30
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "show the top results"
+        }
+      ],
+      "expected": {
+        "must_resume_pending_clarification": true,
+        "must_set_show_top_results_approved": true,
+        "answer_language": "en"
+      },
+      "forbidden": {
+        "must_not_treat_top_results_as_new_search_topic": true
+      }
+    },
+    {
+      "id": "vi_refine_after_many_results",
+      "language": "vi",
+      "category": "pending_retrieval_followup",
+      "given_pending_clarification": {
+        "type": "slot_disambiguation",
+        "kind": "retrieval_query",
+        "proposed_raw_topic": "U-Net",
+        "result_count": 20
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "U-Net trong segmentation"
+        }
+      ],
+      "expected": {
+        "must_resume_pending_clarification": true,
+        "refined_query_should_include_all": ["U-Net", "segmentation"],
+        "must_not_ask_same_refinement_again_if_results_are_sufficient": true
+      },
+      "forbidden": {
+        "must_not_append_unrelated_previous_short_commands": true,
+        "must_not_loop_on_same_refinement_question": true
+      }
+    },
+    {
+      "id": "en_refine_after_many_results",
+      "language": "en",
+      "category": "pending_retrieval_followup",
+      "given_pending_clarification": {
+        "type": "slot_disambiguation",
+        "kind": "retrieval_query",
+        "proposed_raw_topic": "U-Net",
+        "result_count": 20
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "U-Net for segmentation"
+        }
+      ],
+      "expected": {
+        "must_resume_pending_clarification": true,
+        "refined_query_should_include_all": ["U-Net", "segmentation"],
+        "answer_language": "en"
+      },
+      "forbidden": {
+        "must_not_loop_on_same_refinement_question": true
+      }
+    },
+    {
+      "id": "vi_failed_request_retry",
+      "language": "vi",
+      "category": "failed_request_retry",
+      "given_pending_clarification": {
+        "type": "failed_request_retry",
+        "original_message": "kiếm cho tôi thông tin về U-Net",
+        "error_code": "AGENT_NETWORK_ERROR"
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "thử lại"
+        }
+      ],
+      "expected": {
+        "must_retry_original_message": "kiếm cho tôi thông tin về U-Net",
+        "must_not_ask_what_to_retry": true
+      },
+      "forbidden": {
+        "must_not_treat_retry_as_new_topic": true
+      }
+    },
+    {
+      "id": "en_failed_request_retry",
+      "language": "en",
+      "category": "failed_request_retry",
+      "given_pending_clarification": {
+        "type": "failed_request_retry",
+        "original_message": "find information about U-Net",
+        "error_code": "AGENT_NETWORK_ERROR"
+      },
+      "turns": [
+        {
+          "role": "user",
+          "text": "try again"
+        }
+      ],
+      "expected": {
+        "must_retry_original_message": "find information about U-Net",
+        "answer_language": "en"
+      },
+      "forbidden": {
+        "must_not_treat_retry_as_new_topic": true
+      }
+    },
+    {
+      "id": "vi_lexical_skip_connection_trap",
+      "language": "vi",
+      "category": "routing_lexical_trap",
+      "turns": [
+        {
+          "role": "user",
+          "text": "Giải thích skip connection"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["explain_concept", "general_course_question", "find_content"],
+        "must_not_intent": ["request_replan"],
+        "reason": "skip is part of the concept phrase, not a replan/skip action"
+      },
+      "forbidden": {
+        "must_not_route_by_raw_keyword": true
+      }
+    },
+    {
+      "id": "en_lexical_skip_connection_trap",
+      "language": "en",
+      "category": "routing_lexical_trap",
+      "turns": [
+        {
+          "role": "user",
+          "text": "Explain skip connections"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["explain_concept", "general_course_question", "find_content"],
+        "must_not_intent": ["request_replan"],
+        "answer_language": "en"
+      },
+      "forbidden": {
+        "must_not_route_by_raw_keyword": true
+      }
+    },
+    {
+      "id": "vi_quiz_eligibility_trap",
+      "language": "vi",
+      "category": "routing_lexical_trap",
+      "turns": [
+        {
+          "role": "user",
+          "text": "Quiz eligibility của unit này tính thế nào?"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["general_course_question", "explain_concept"],
+        "must_not_intent": ["assess_knowledge"],
+        "must_not_create_assessment_proposal": true
+      },
+      "forbidden": {
+        "must_not_route_by_raw_keyword": true
+      }
+    },
+    {
+      "id": "en_quiz_eligibility_trap",
+      "language": "en",
+      "category": "routing_lexical_trap",
+      "turns": [
+        {
+          "role": "user",
+          "text": "How is quiz eligibility for this unit calculated?"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["general_course_question", "explain_concept"],
+        "must_not_intent": ["assess_knowledge"],
+        "answer_language": "en"
+      },
+      "forbidden": {
+        "must_not_route_by_raw_keyword": true
+      }
+    },
+    {
+      "id": "vi_assessment_request_real_quiz",
+      "language": "vi",
+      "category": "assessment_intent_boundary",
+      "turns": [
+        {
+          "role": "user",
+          "text": "Cho tôi quiz về attention mechanism"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["assess_knowledge"],
+        "must_use_pending_action_confirmation": true,
+        "must_validate_units_before_proposal": true
+      },
+      "forbidden": {
+        "must_not_start_assessment_without_confirmation": true
+      }
+    },
+    {
+      "id": "en_assessment_request_real_quiz",
+      "language": "en",
+      "category": "assessment_intent_boundary",
+      "turns": [
+        {
+          "role": "user",
+          "text": "Quiz me on attention mechanisms"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["assess_knowledge"],
+        "must_use_pending_action_confirmation": true,
+        "answer_language": "en"
+      },
+      "forbidden": {
+        "must_not_start_assessment_without_confirmation": true
+      }
+    },
+    {
+      "id": "vi_repath_is_planner_mode_future",
+      "language": "vi",
+      "category": "planner_mode_boundary",
+      "turns": [
+        {
+          "role": "user",
+          "text": "Tôi muốn chuyển từ CV sang NLP"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["request_path_switch"],
+        "must_not_treat_as_content_search": true,
+        "must_require_confirmation_or_planner_mode": true,
+        "planner_mode_canvas_future_feature": true
+      },
+      "forbidden": {
+        "must_not_mutate_active_path_from_chat_text_only": true
+      }
+    },
+    {
+      "id": "en_repath_is_planner_mode_future",
+      "language": "en",
+      "category": "planner_mode_boundary",
+      "turns": [
+        {
+          "role": "user",
+          "text": "I want to switch from CV to NLP"
+        }
+      ],
+      "expected": {
+        "intent_any_of": ["request_path_switch"],
+        "must_not_treat_as_content_search": true,
+        "must_require_confirmation_or_planner_mode": true,
+        "answer_language": "en"
+      },
+      "forbidden": {
+        "must_not_mutate_active_path_from_chat_text_only": true
+      }
+    }
+  ]
+}
