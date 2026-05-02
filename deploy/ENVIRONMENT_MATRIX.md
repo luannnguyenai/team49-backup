@@ -7,6 +7,7 @@
 | `DATABASE_URL` | Yes | FastAPI and SQLAlchemy PostgreSQL connection |
 | `REDIS_URL` | Yes | Redis connection for cache and rate-limit/session behavior |
 | `SECRET_KEY` | Yes | JWT and application security secret |
+| `CORS_ORIGINS` | Yes | Explicit list of allowed frontend origins for credentialed browser requests |
 | `MODEL_PROVIDER` | Yes | Active LLM provider |
 | `DEFAULT_MODEL` | Yes | Default tutoring/application model |
 | `FAST_MODEL` | Recommended | Lower-latency model for cheaper paths |
@@ -40,6 +41,7 @@
 ## Important Notes
 
 - `NEXT_PUBLIC_API_URL` is a frontend public variable and must point to the real production API hostname.
+- `CORS_ORIGINS` should be a JSON array or comma-separated string accepted by `src/config.py`.
 - Do not leave production secrets only in a manually edited `.env` on a developer machine.
 - Keep production values separate from local development values.
 - If frontend and backend are deployed from images, rebuild frontend whenever `NEXT_PUBLIC_API_URL` changes.
