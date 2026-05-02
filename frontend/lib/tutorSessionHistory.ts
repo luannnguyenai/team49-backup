@@ -10,10 +10,10 @@ export interface StoredTutorMessage {
 }
 
 export function buildTutorConversationKey(
-  lectureId: string,
+  lessonKey: string,
   contextBindingId?: string,
 ): string {
-  return `${lectureId}::${contextBindingId ?? "__lecture__"}`;
+  return `${lessonKey}::${contextBindingId ?? "__lesson__"}`;
 }
 
 function canUseSessionStorage(): boolean {
