@@ -90,6 +90,61 @@ async def test_get_canonical_quiz_item_for_session_resolves_inline_question_from
 
 
 @pytest.mark.asyncio
+async def test_get_canonical_quiz_item_for_session_falls_back_to_inline_section_scope_when_progress_item_ids_missing(
+    monkeypatch,
+):
+    user_id = uuid4()
+    session = SimpleNamespace(
+        id=uuid4(),
+        canonical_unit_id=uuid4(),
+        canonical_phase="inline_midpoint_quiz",
+    )
+    unit = SimpleNamespace(
+        id=session.canonical_unit_id,
+        canonical_unit_id="canonical-unit-1",
+        section_id=uuid4(),
+    )
+    sibling_item = _item("item-from-inline-scope")
+
+    class FakeDB:
+        async def execute(self, stmt):
+            rendered = str(stmt)
+            if " IN " in rendered:
+                return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [sibling_item]))
+            return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: []))
+
+    async def fake_current_quiz_item_ids(
+        db_arg,
+        *,
+        user_id: object,
+        session_id: object,
+        fallback_unit_canonical_id: str,
+    ):
+        assert user_id == user_id_outer
+        assert session_id == session.id
+        assert fallback_unit_canonical_id == unit.canonical_unit_id
+        return []
+
+    async def fake_inline_quiz_scope(db_arg, actual_unit):
+        assert actual_unit is unit
+        return ["canonical-unit-1", "canonical-unit-2"]
+
+    user_id_outer = user_id
+    monkeypatch.setattr(quiz_service, "_current_quiz_item_ids", fake_current_quiz_item_ids)
+    monkeypatch.setattr(quiz_service, "_inline_quiz_canonical_unit_scope", fake_inline_quiz_scope)
+
+    result = await quiz_service._get_canonical_quiz_item_for_session(
+        FakeDB(),
+        user_id=user_id,
+        session=session,
+        unit=unit,
+        question_id=quiz_service.canonical_question_uuid("item-from-inline-scope"),
+    )
+
+    assert result is sibling_item
+
+
+@pytest.mark.asyncio
 async def test_start_quiz_inline_midpoint_sets_metadata_and_excludes_items(monkeypatch):
     db = FakeDB()
     user_id = uuid4()
