@@ -12,12 +12,59 @@ End-to-end observability stack for A20-App-049 (FastAPI + Next.js).
 
 ---
 
+## ⚡ Quickstart (recommended)
+
+`start.sh` ở repo root đã được tích hợp **observability stack + admin user check**.
+Một lệnh khởi tất cả: app stack (db, redis, backend, frontend) + monitoring stack (Prometheus, Grafana, Loki, Promtail, postgres_exporter, redis_exporter).
+
+```bash
+# Lần đầu (hoặc sau khi đổi pyproject.toml / package.json) → rebuild image
+bash start.sh --rebuild
+
+# Lần kế (image đã có) → chỉ start
+bash start.sh
+
+# Bỏ qua observability nếu chỉ cần app
+bash start.sh --no-observability
+
+# Production build (không hot reload)
+bash start.sh --prod
+```
+
+Sau khi xong, mở:
+
+| Service     | URL                          | Notes                                       |
+| ----------- | ---------------------------- | ------------------------------------------- |
+| Frontend    | http://localhost:3000        |                                             |
+| Admin UI    | http://localhost:3000/admin  | Cần login bằng user `role=admin`            |
+| Backend API | http://localhost:8000        | `/docs`, `/health`, `/metrics`              |
+| Grafana     | http://localhost:3001        | admin/admin · 3 dashboards auto-provisioned |
+| Prometheus  | http://localhost:9090        |                                             |
+| Loki        | http://localhost:3100        | Truy cập qua Grafana → Explore              |
+| LangFuse    | https://cloud.langfuse.com   | Cần `LANGFUSE_*_KEY` trong `.env`           |
+
+**Promote 1 user thành admin (lần đầu, sau khi đăng ký account):**
+
+```bash
+docker compose exec backend uv run python admin-dashboard/scripts/seed_admin.py --email <your_email>
+```
+
+**Stop tất cả:**
+
+```bash
+docker compose stop && docker compose -f admin-dashboard/docker-compose.observability.yml stop
+```
+
+> Phần dưới là hướng dẫn manual / debug nếu không dùng `start.sh`.
+
+---
+
 ## 1. Prerequisites
 
 - Docker Desktop / Docker Engine.
 - Python 3.12, Node.js 18+ (matching repo root).
 - App stack already running: `docker compose up -d db redis`.
-- Backend deps: `pip install -r requirements.txt`.
+- Backend deps managed bởi `uv` qua `pyproject.toml` (Docker tự install). Local dev: `uv sync`.
 - Frontend deps: `cd frontend && npm install`.
 
 ## 2. Apply DB migration & promote first admin
@@ -147,12 +194,32 @@ logs/
 ## 8. Stop everything
 
 ```bash
+# Nếu start bằng start.sh (cả 2 stack)
+docker compose stop && docker compose -f admin-dashboard/docker-compose.observability.yml stop
+
+# Hoặc chỉ tắt observability:
 docker compose -f admin-dashboard/docker-compose.observability.yml down
+
+# Xoá hoàn toàn (giữ data volume):
+docker compose down && docker compose -f admin-dashboard/docker-compose.observability.yml down
 ```
 
-App stack (`db`, `redis`) is independent — leave running or take down separately.
+App stack (`db`, `redis`, `backend`, `frontend`) và observability stack chạy độc lập với nhau — có thể stop từng cái.
 
-## 9. Troubleshooting
+## 9. Khi nào cần rebuild image?
+
+| Thay đổi | Hành động |
+| --- | --- |
+| `pyproject.toml` / `uv.lock` (backend deps) | `bash start.sh --rebuild` |
+| `frontend/package.json` / `package-lock.json` | `bash start.sh` (auto-detect) hoặc `--rebuild` để chắc chắn |
+| File `src/**/*.py` | Không cần — uvicorn `--reload` (dev mode) |
+| File `frontend/**/*.tsx` | Không cần — Next.js HMR (dev mode) |
+| `admin-dashboard/grafana/**` (dashboards, datasources) | `docker compose -f admin-dashboard/docker-compose.observability.yml restart grafana` |
+| `admin-dashboard/prometheus/prometheus.yml` | `docker compose -f admin-dashboard/docker-compose.observability.yml restart prometheus` |
+| `admin-dashboard/promtail/promtail-config.yml` | `docker compose -f admin-dashboard/docker-compose.observability.yml restart promtail` |
+| `admin-dashboard/docker-compose.observability.yml` | `docker compose -f admin-dashboard/docker-compose.observability.yml up -d` (recreate) |
+
+## 10. Troubleshooting
 
 | Symptom                                          | Fix                                                                       |
 | ------------------------------------------------ | ------------------------------------------------------------------------- |
@@ -163,7 +230,7 @@ App stack (`db`, `redis`) is independent — leave running or take down separate
 | LangFuse traces never appear                     | Check backend logs for "LangFuse v3 callback handler initialised". Verify `LANGFUSE_*` env vars.|
 | `logs/access.jsonl` empty                        | The middleware skips `/health` and `/metrics`. Hit any other endpoint.    |
 
-## 10. Out of scope (future work)
+## 11. Out of scope (future work)
 
 - Production deploy (Railway env, secrets, public URLs).
 - Alertmanager / PagerDuty / Slack alerting.
