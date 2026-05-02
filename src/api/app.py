@@ -299,10 +299,24 @@ async def ask_question(req: AskRequest, db: AsyncSession = Depends(get_async_db)
 
 
 @app.get("/api/lectures/qa-history", tags=["Lectures"])
-async def get_qa_history(db: AsyncSession = Depends(get_async_db)):
-    result = await db.execute(
-        select(QAHistory).order_by(QAHistory.created_at.desc()).limit(50)
-    )
+async def get_qa_history(
+    lecture_id: str | None = None,
+    context_binding_id: str | None = None,
+    db: AsyncSession = Depends(get_async_db),
+):
+    query = select(QAHistory)
+
+    if lecture_id:
+        query = query.where(QAHistory.lecture_id == lecture_id)
+    if context_binding_id:
+        query = query.where(QAHistory.context_binding_id == context_binding_id)
+
+    if lecture_id or context_binding_id:
+        query = query.order_by(QAHistory.created_at.asc()).limit(100)
+    else:
+        query = query.order_by(QAHistory.created_at.desc()).limit(50)
+
+    result = await db.execute(query)
     return result.scalars().all()
 
 
