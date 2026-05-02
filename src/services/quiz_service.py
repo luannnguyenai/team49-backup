@@ -576,6 +576,18 @@ async def _get_canonical_quiz_item_for_session(
         if resolved is not None:
             return resolved
 
+    if session.canonical_phase in {"inline_midpoint_quiz", "inline_end_quiz"}:
+        canonical_unit_ids = await _inline_quiz_canonical_unit_scope(db, unit)
+        result = await db.execute(
+            select(QuestionBankItem).where(QuestionBankItem.unit_id.in_(canonical_unit_ids))
+        )
+        items_by_question_id = {
+            canonical_question_uuid(item.item_id): item for item in result.scalars().all()
+        }
+        resolved = items_by_question_id.get(question_id)
+        if resolved is not None:
+            return resolved
+
     return await _get_canonical_quiz_item_by_surrogate(db, unit, question_id)
 
 
