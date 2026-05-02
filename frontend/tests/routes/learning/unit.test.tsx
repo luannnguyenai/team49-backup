@@ -6,6 +6,7 @@ import LearningUnitLoading from "@/app/(protected)/courses/[courseSlug]/learn/[u
 import LearningUnitShell from "@/components/learn/LearningUnitShell";
 import LearningPageScreen from "@/components/learn/LearningPageScreen";
 import TopNav from "@/components/layout/TopNav";
+import { TUTOR_SESSION_HISTORY_STORAGE_KEY } from "@/lib/tutorSessionHistory";
 import {
   COMING_SOON_ITEM,
   CS224N_ITEM,
@@ -276,6 +277,7 @@ const TOC_SUMMARY_2 = {
 describe("learning unit page (US3)", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     const { resetCachedAllCourseCatalog } = await import("@/lib/course-catalog-cache");
     resetCachedAllCourseCatalog();
     apiMock.get.mockResolvedValue({ data: [] });
@@ -477,6 +479,81 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByText("AI Tutor")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Ask about this lecture...")).toBeInTheDocument();
     });
+  });
+
+  it("restores tutor history when switching away from a lesson and returning in the same session", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        const method = init?.method ?? (input instanceof Request ? input.method : "GET");
+
+        if (method === "POST" && url === "/api/lectures/ask") {
+          const encoder = new TextEncoder();
+          const stream = new ReadableStream({
+            start(controller) {
+              controller.enqueue(encoder.encode('{"a":"This should come back when I revisit the lesson."}\n{"qa_id":61}\n'));
+              controller.close();
+            },
+          });
+
+          return new Response(stream, {
+            status: 200,
+            headers: { "Content-Type": "application/x-ndjson" },
+          });
+        }
+
+        return new Response(JSON.stringify(TOC_SUMMARY), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }),
+    );
+
+    const { rerender } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    fireEvent.change(await screen.findByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Remember this for lesson 1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("This should come back when I revisit the lesson.")).toBeInTheDocument();
+    });
+
+    rerender(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-2-linear-classifiers"
+        data={LECTURE_2_UNIT}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText("Remember this for lesson 1")).not.toBeInTheDocument();
+      expect(screen.queryByText("This should come back when I revisit the lesson.")).not.toBeInTheDocument();
+    });
+
+    rerender(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Remember this for lesson 1")).toBeInTheDocument();
+      expect(screen.getByText("This should come back when I revisit the lesson.")).toBeInTheDocument();
+    });
+
+    expect(sessionStorage.getItem(TUTOR_SESSION_HISTORY_STORAGE_KEY)).toContain("Remember this for lesson 1");
   });
 
   it("renders key ideas before timestamps in the desktop shell", async () => {
