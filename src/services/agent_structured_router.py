@@ -171,6 +171,8 @@ class StructuredAgentRouter:
         recent_messages: list[dict],
         observations: list[dict],
     ) -> RagToolCallOutput:
+        # Legacy compatibility seam for older graph tests/bootstrap routers.
+        # Production Agentic RAG uses rag_think/rag_act/rag_observe/rag_respond.
         try:
             slots_dump = slots.model_dump(mode="json") if hasattr(slots, "model_dump") else dict(slots)
             response = self.model.with_structured_output(RagToolCallOutput).invoke(
@@ -409,6 +411,8 @@ class StructuredAgentRouter:
         recent_messages: list[dict],
         observations: list[dict],
     ) -> GroundedAnswerOutput:
+        # Legacy compatibility seam for the pre-stage Agentic RAG graph path.
+        # Keep this source-grounded and non-templated while old tests migrate.
         try:
             result_dump = (
                 tool_result.model_dump(mode="json")
@@ -473,6 +477,8 @@ class StructuredAgentRouter:
         recent_messages: list[dict],
         observations: list[dict],
     ) -> GroundedAnswerOutput:
+        # Legacy compatibility seam for source-limited answers in the old RAG
+        # node chain. The staged pipeline should use rag_respond instead.
         try:
             result_dump = (
                 tool_result.model_dump(mode="json")

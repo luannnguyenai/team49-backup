@@ -118,6 +118,10 @@ class AgentGraphService:
         graph.add_node("canonicalize_slots", self._canonicalize_slots)
         graph.add_node("policy_guard", self._policy_guard)
         graph.add_node("agentic_rag", self._agentic_rag)
+        # Compatibility path for tests/bootstrap routers that have not adopted
+        # the DeepTutor-style Agentic RAG stage contract yet. Production
+        # StructuredAgentRouter implements rag_think/rag_act/rag_observe/rag_respond
+        # and routes to the single agentic_rag node above.
         graph.add_node("rag_decide_tool", self._rag_decide_tool)
         graph.add_node("rag_execute_tool", self._rag_execute_tool)
         graph.add_node("rag_observe", self._rag_observe)
