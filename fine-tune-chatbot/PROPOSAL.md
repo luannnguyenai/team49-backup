@@ -8,7 +8,7 @@ Proposal này đề xuất hướng fine-tune mới cho `fine-tune-chatbot` vớ
 |---|---|
 | Dataset domain chính | Giữ nguyên dataset hiện tại của dự án |
 | Ngôn ngữ | Chuyển sang full tiếng Anh |
-| Base model | `Qwen/Qwen2.5-7B-Instruct` |
+| Base model | `Qwen/Qwen2.5-VL-3B-Instruct` |
 | External dataset | Dùng **ELI5 đã lọc** như dữ liệu phụ trợ, không dùng làm corpus chính |
 
 Luận điểm trung tâm:
@@ -26,7 +26,7 @@ Luận điểm trung tâm:
 | ELI5 có nên là nguồn tri thức chính không? | Không |
 | ELI5 nên dùng để làm gì? | Dạy cách trả lời giải thích dài bằng tiếng Anh |
 | Dataset nào giữ vai trò chính? | Dataset hiện tại của dự án |
-| Model phù hợp? | `Qwen/Qwen2.5-7B-Instruct` |
+| Model phù hợp? | `Qwen/Qwen2.5-VL-3B-Instruct` |
 
 ---
 
@@ -59,9 +59,9 @@ Trong thư mục `fine-tune-chatbot`, hướng cũ chưa đủ thuyết phục v
 
 | Hạng mục | Lựa chọn |
 |---|---|
-| Base model | `Qwen/Qwen2.5-7B-Instruct` |
+| Base model | `Qwen/Qwen2.5-VL-3B-Instruct` |
 | Hình thức fine-tune | QLoRA / LoRA |
-| Loại dữ liệu | Text-only |
+| Loại dữ liệu | Text-first SFT trên vision-capable base, giữ nguyên research dataset hiện tại |
 | Ngôn ngữ mục tiêu | English |
 
 ### Lý do chọn
@@ -313,7 +313,7 @@ Dưới đây là preview rút gọn để minh họa kiểu dữ liệu của E
 
 ### 14.1 Trước fine-tune
 
-Đánh giá base `Qwen/Qwen2.5-7B-Instruct` trên:
+Đánh giá base `Qwen/Qwen2.5-VL-3B-Instruct` trên:
 
 | Bộ đánh giá |
 |---|
@@ -387,7 +387,7 @@ Chạy lại toàn bộ và so sánh delta.
 | Hạng mục | Khuyến nghị cuối cùng |
 |---|---|
 | Dataset chính | Dataset hiện tại của dự án |
-| Base model | `Qwen/Qwen2.5-7B-Instruct` |
+| Base model | `Qwen/Qwen2.5-VL-3B-Instruct` |
 | Ngôn ngữ | Full English |
 | Vai trò của ELI5 | Auxiliary explanation dataset đã lọc |
 | Benchmark chính | Held-out internal AI/ML/NLP/CV set |
@@ -442,5 +442,5 @@ Mà phải là:
 |---|---|
 | ELI5 official repo | https://github.com/facebookresearch/ELI5 |
 | ELI5 dataset explorer | https://facebookresearch.github.io/ELI5/ |
-| Qwen2.5-7B-Instruct model card | https://huggingface.co/Qwen/Qwen2.5-7B-Instruct |
+| Qwen2.5-VL-3B-Instruct model card | https://huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct |
 
