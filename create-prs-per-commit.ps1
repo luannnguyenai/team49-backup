@@ -1,8 +1,7 @@
 $baseBranch = "main"
 $sourceBranch = "deploy-plan"
 $remote = "origin"
-$progressFile = ".pr-cherry-pick-progress.json"
-
+$progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
 + e9052a6d9a00f79ca67847f2a953a4b1e2825bd9 Update LandingPage.tsx
