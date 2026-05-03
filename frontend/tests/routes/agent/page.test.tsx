@@ -41,6 +41,7 @@ describe("agent page", () => {
       value: vi.fn(),
     });
     agentApiMock.listConversations.mockResolvedValue([]);
+    agentApiMock.messages.mockResolvedValue([]);
     agentApiMock.chat.mockResolvedValue({
       conversationId: "conversation-1",
       messageId: "message-1",
@@ -69,6 +70,16 @@ describe("agent page", () => {
     expect(await screen.findAllByRole("heading", { name: "AI Assistant" })).toHaveLength(2);
     expect(screen.getByText(/ask about concepts, prerequisites/i)).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /where should i review cnns/i })).toHaveLength(2);
+  });
+
+  it("keeps the chat workspace focused without the context sidebar or header clear action", async () => {
+    render(<AgentPage />);
+
+    expect(await screen.findAllByRole("heading", { name: "AI Assistant" })).toHaveLength(2);
+    expect(screen.queryByText(/thread memory/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/current path first/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/clear current chat/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/open context panel/i)).not.toBeInTheDocument();
   });
 
   it("sends a chat message and renders answer citations", async () => {

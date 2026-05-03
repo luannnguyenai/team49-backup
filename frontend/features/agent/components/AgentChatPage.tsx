@@ -9,12 +9,10 @@ import {
   ArrowRight,
   BarChart3,
   Bot,
-  Brain,
   CheckCircle2,
   ChevronRight,
   Check,
   ExternalLink,
-  FileText,
   History,
   Info,
   Loader2,
@@ -24,18 +22,14 @@ import {
   MoreVertical,
   PanelLeftClose,
   PanelLeftOpen,
-  PanelRightClose,
-  PanelRightOpen,
   Pencil,
   Plus,
   RotateCcw,
   Search,
   Send,
-  Sparkles,
   Target,
   Trash2,
   User,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
@@ -65,7 +59,6 @@ import {
   type AgentAssessmentWorkflowResponse,
   type AgentChatResponse,
   type AgentCitation,
-  type AgentConversationMemory,
   type AgentConversationMessage,
   type AgentConversationSummary,
   type AgentWarning,
@@ -901,180 +894,6 @@ function SessionSidebar({
   );
 }
 
-function MemoryModal({
-  memory,
-  onClose,
-}: {
-  memory: AgentConversationMemory | null;
-  onClose: () => void;
-}) {
-  const summary = memory?.summary ?? {};
-  const entries = Object.entries(summary).filter(([, value]) =>
-    Array.isArray(value) ? value.length > 0 : Boolean(value),
-  );
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <button
-        type="button"
-        className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
-        onClick={onClose}
-        aria-label="Close memory summary"
-      />
-      <div className="relative max-h-[80vh] w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <header className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white">
-              <Brain className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-black text-slate-950">Session memory</h2>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                {memory?.summaryStatus ?? memory?.summary_status ?? "empty"}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500"
-            aria-label="Close memory summary"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </header>
-        <div className="max-h-[60vh] overflow-y-auto p-5">
-          {entries.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-slate-200 p-6 text-sm text-slate-500">
-              No session summary yet. A new chat starts without previous session memory.
-            </p>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {entries.map(([key, value]) => (
-                <section key={key} className="rounded-2xl border border-slate-200 p-4">
-                  <h3 className="mb-3 text-[11px] font-black uppercase tracking-widest text-slate-400">
-                    {key.replace(/_/g, " ")}
-                  </h3>
-                  {Array.isArray(value) ? (
-                    <div className="flex flex-wrap gap-2">
-                      {value.map((item) => (
-                        <span key={String(item)} className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700">
-                          {String(item)}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm leading-6 text-slate-700">{String(value)}</p>
-                  )}
-                </section>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ContextPanel({
-  memory,
-  isMinimized,
-  onOpenMemory,
-  onClearMemory,
-}: {
-  memory: AgentConversationMemory | null;
-  isMinimized: boolean;
-  onOpenMemory: () => void;
-  onClearMemory: () => Promise<void>;
-}) {
-  const [isClearing, setIsClearing] = useState(false);
-  if (isMinimized) {
-    return (
-      <div className="flex h-full flex-col items-center gap-6 p-4 text-slate-300">
-        <Brain className="h-6 w-6" />
-        <Map className="h-6 w-6" />
-        <FileText className="h-6 w-6" />
-      </div>
-    );
-  }
-
-  const summaryStatus = memory?.summaryStatus ?? memory?.summary_status ?? "empty";
-  const recentWindow = memory?.recentMessageWindow ?? memory?.recent_message_window ?? 0;
-
-  return (
-    <aside className="h-full overflow-y-auto bg-white">
-      <section className="border-b border-slate-200 p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
-            <Brain className="h-4 w-4" />
-            Thread memory
-          </h2>
-          <span className="rounded-full bg-green-50 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-green-700">
-            {summaryStatus}
-          </span>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm font-bold text-slate-900">Current chat only</p>
-          <p className="mt-2 text-xs leading-5 text-slate-500">
-            This summary belongs to the selected chat thread. Clearing it does not change your learner profile,
-            course progress, mastery, or completed assessments.
-          </p>
-          <p className="mt-3 text-xs font-bold text-slate-500">Recent window: {recentWindow || 10} messages</p>
-          <button
-            type="button"
-            onClick={onOpenMemory}
-            className="mt-4 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 text-xs font-black uppercase tracking-widest text-white"
-          >
-            <FileText className="h-4 w-4" />
-            View summary
-          </button>
-          <button
-            type="button"
-            disabled={isClearing || summaryStatus === "empty"}
-            onClick={async () => {
-              setIsClearing(true);
-              try {
-                await onClearMemory();
-              } finally {
-                setIsClearing(false);
-              }
-            }}
-            className="mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-xs font-black uppercase tracking-widest text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isClearing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-            Clear memory
-          </button>
-        </div>
-      </section>
-
-      <section className="border-b border-slate-200 p-5">
-        <h2 className="mb-4 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
-          <Map className="h-4 w-4" />
-          Scope
-        </h2>
-        <div className="rounded-2xl border border-slate-200 p-4">
-          <p className="text-sm font-black text-slate-900">Current path first</p>
-          <p className="mt-2 text-xs leading-5 text-slate-500">
-            Answers are scoped to your selected path first. Catalog answers outside the path are marked with a warning.
-          </p>
-        </div>
-      </section>
-
-      <section className="p-5">
-        <h2 className="mb-4 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
-          <Sparkles className="h-4 w-4" />
-          Useful prompts
-        </h2>
-        <div className="space-y-2 text-sm font-semibold text-slate-600">
-          <p>Find where a concept is taught.</p>
-          <p>Ask which prerequisites to review.</p>
-          <p>Negotiate assessment evidence for replanning.</p>
-        </div>
-      </section>
-    </aside>
-  );
-}
-
 function EmptyState({ onPrompt }: { onPrompt: (prompt: string) => void }) {
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
@@ -1203,18 +1022,15 @@ export default function AgentChatPage() {
   const [sessions, setSessions] = useState<AgentConversationSummary[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<UiMessage[]>([]);
-  const [memory, setMemory] = useState<AgentConversationMemory | null>(null);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [turnProgressIndex, setTurnProgressIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(false);
-  const [rightOpen, setRightOpen] = useState(false);
   const [leftMinimized, setLeftMinimized] = useState(false);
-  const [rightMinimized, setRightMinimized] = useState(false);
-  const [memoryOpen, setMemoryOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const skipNextMessageLoadForSession = useRef<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -1242,16 +1058,20 @@ export default function AgentChatPage() {
   useEffect(() => {
     if (!activeSessionId) {
       setMessages([]);
-      setMemory(null);
+      return;
+    }
+    if (skipNextMessageLoadForSession.current === activeSessionId) {
+      skipNextMessageLoadForSession.current = null;
+      setIsLoadingMessages(false);
       return;
     }
     let active = true;
     setIsLoadingMessages(true);
-    Promise.all([agentApi.messages(activeSessionId), agentApi.memory(activeSessionId)])
-      .then(([loadedMessages, loadedMemory]) => {
+    agentApi
+      .messages(activeSessionId)
+      .then((loadedMessages) => {
         if (!active) return;
         setMessages(toUiMessages(loadedMessages));
-        setMemory(loadedMemory);
       })
       .catch((err) => {
         if (active) setError(err instanceof Error ? err.message : "Could not load this conversation.");
@@ -1303,29 +1123,13 @@ export default function AgentChatPage() {
     if (activeSessionId === id) {
       setActiveSessionId(remaining[0] ? getConversationId(remaining[0]) : null);
       setMessages([]);
-      setMemory(null);
     }
-  };
-
-  const clearCurrentSession = async () => {
-    if (!activeSessionId) return;
-    if (!window.confirm("Clear messages and session memory for this chat? Your learner profile and progress stay unchanged.")) return;
-    const updated = await agentApi.clearConversation(activeSessionId);
-    setSessions((current) => current.map((session) => (getConversationId(session) === activeSessionId ? updated : session)));
-    setMessages([]);
-    setMemory(null);
-    void agentApi.memory(activeSessionId).then(setMemory).catch(() => undefined);
-  };
-
-  const clearCurrentMemory = async () => {
-    if (!activeSessionId) return;
-    const cleared = await agentApi.clearMemory(activeSessionId);
-    setMemory(cleared);
   };
 
   const appendAgentResponse = (response: AgentChatResponse) => {
     const conversationId = getConversationId(response);
     if (conversationId && conversationId !== activeSessionId) {
+      skipNextMessageLoadForSession.current = conversationId;
       setActiveSessionId(conversationId);
     }
     setMessages((current) => [
@@ -1353,7 +1157,6 @@ export default function AgentChatPage() {
       setSessions((current) => [session, ...current.filter((item) => getConversationId(item) !== id)]);
       setActiveSessionId(id);
       setMessages([]);
-      setMemory(null);
       setLeftOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create a new chat.");
@@ -1423,25 +1226,6 @@ export default function AgentChatPage() {
     </div>
   );
 
-  const mobileRight = (
-    <div className="fixed inset-0 z-50 lg:hidden">
-      <button
-        type="button"
-        className="absolute inset-0 bg-slate-950/50"
-        onClick={() => setRightOpen(false)}
-        aria-label="Close context panel"
-      />
-      <div className="absolute bottom-0 right-0 top-0 w-[320px] border-l border-slate-200 bg-white shadow-2xl">
-        <ContextPanel
-          memory={memory}
-          isMinimized={false}
-          onOpenMemory={() => setMemoryOpen(true)}
-          onClearMemory={clearCurrentMemory}
-        />
-      </div>
-    </div>
-  );
-
   return (
     <div className="flex h-full min-h-0 overflow-hidden bg-slate-50">
       <div className={cn("hidden shrink-0 border-r border-slate-200 bg-white transition-all lg:block", leftMinimized ? "w-20" : "w-72")}>
@@ -1484,32 +1268,6 @@ export default function AgentChatPage() {
           </div>
           <div className="flex items-center gap-2">
             {isLoadingSessions ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" /> : null}
-            <button
-              type="button"
-              disabled={!activeSessionId || messages.length === 0 || isThinking}
-              onClick={clearCurrentSession}
-              className="hidden h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 text-xs font-black uppercase tracking-widest text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 md:flex"
-              aria-label="Clear current chat"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={() => setRightOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-blue-600 hover:bg-blue-50 lg:hidden"
-              aria-label="Open context panel"
-            >
-              <Brain className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setRightMinimized((value) => !value)}
-              className="hidden h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 lg:flex"
-              aria-label={rightMinimized ? "Expand context panel" : "Collapse context panel"}
-            >
-              {rightMinimized ? <PanelRightOpen className="h-5 w-5" /> : <PanelRightClose className="h-5 w-5" />}
-            </button>
           </div>
         </header>
 
@@ -1554,18 +1312,7 @@ export default function AgentChatPage() {
         <Composer onSend={sendMessage} disabled={isThinking} />
       </section>
 
-      <div className={cn("hidden shrink-0 border-l border-slate-200 bg-white transition-all lg:block", rightMinimized ? "w-20" : "w-80")}>
-        <ContextPanel
-          memory={memory}
-          isMinimized={rightMinimized}
-          onOpenMemory={() => setMemoryOpen(true)}
-          onClearMemory={clearCurrentMemory}
-        />
-      </div>
-
       {leftOpen ? mobileLeft : null}
-      {rightOpen ? mobileRight : null}
-      {memoryOpen ? <MemoryModal memory={memory} onClose={() => setMemoryOpen(false)} /> : null}
     </div>
   );
 }
