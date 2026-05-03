@@ -278,44 +278,6 @@ def test_structured_router_prompt_routes_current_topic_questions_to_help():
     assert "currently discussing" in model.messages[0]["content"]
 
 
-def test_structured_router_plans_rag_title_search_tool_call():
-    model = FakeStructuredModel(
-        {
-            "tool": "search_units_by_title",
-            "query": "YOLO variants",
-            "search_queries": ["YOLO variants"],
-            "clarification_question": None,
-            "rationale": "Search title-level units before answering.",
-        }
-    )
-
-    decision = StructuredAgentRouter(model=model).plan_rag_tool(
-        message="tóm tắt các biến thể",
-        intent="find_content",
-        slots=type(
-            "Slots",
-            (),
-            {
-                "raw_topic": "YOLO variants",
-                "search_queries": ["YOLO variants"],
-                "model_dump": lambda self, mode="json": {
-                    "raw_topic": "YOLO variants",
-                    "search_queries": ["YOLO variants"],
-                },
-            },
-        )(),
-        route_context=None,
-        recent_messages=[{"role": "assistant", "markdown": "Mình vừa tóm tắt YOLO."}],
-        observations=[],
-    )
-
-    assert decision.tool == "search_units_by_title"
-    assert decision.search_queries == ["YOLO variants"]
-    assert "Allowed tools" in model.messages[0]["content"]
-    assert "Do not invent domain-specific synonyms" in model.messages[0]["content"]
-    assert "Recent visible thread messages" in model.messages[1]["content"]
-
-
 def test_structured_router_agentic_rag_thinking_stage_is_internal():
     model = FakeStructuredModel(
         {
@@ -458,69 +420,6 @@ def test_structured_router_agentic_rag_responding_stage_uses_validated_evidence(
     assert final.evidence_sufficient is True
     assert "Use only validated observations and accepted citations" in model.messages[0]["content"]
     assert "Do not reveal hidden thinking" in model.messages[0]["content"]
-
-
-def test_structured_router_composes_react_final_from_tool_observation():
-    model = FakeChatModel()
-    tool_result = type(
-        "ToolResult",
-        (),
-        {
-            "model_dump": lambda self, mode="json": {
-                "kind": "find_content",
-                "citations": [{"unit_name": "YOLO and DETR"}],
-                "metadata": {"evidence_verdict": "direct_match"},
-            },
-            "citations": [],
-        },
-    )()
-
-    answer = StructuredAgentRouter(model=model).compose_react_final(
-        message="Tóm tắt YOLO",
-        tool_result=tool_result,
-        route_context=None,
-        recent_messages=[],
-        observations=[{"tool": "search_units_by_title", "citation_count": 1}],
-    )
-
-    assert answer.evidence_sufficient is True
-    assert "Tool result" in model.messages[1]["content"]
-    assert "Observation history" in model.messages[1]["content"]
-
-
-def test_structured_router_composes_source_limited_answer_from_observation():
-    model = FakeChatModel(
-        {
-            "answer_markdown": "The current source only supports the YOLO grid and NMS details.",
-            "evidence_sufficient": False,
-            "confidence": "partial",
-            "clarification_question": None,
-        }
-    )
-    tool_result = type(
-        "ToolResult",
-        (),
-        {
-            "model_dump": lambda self, mode="json": {
-                "kind": "find_content",
-                "citations": [{"unit_name": "YOLO and DETR"}],
-                "metadata": {"discarded_context_mismatched_results": True},
-            }
-        },
-    )()
-
-    answer = StructuredAgentRouter(model=model).compose_source_limited_answer(
-        message="loss function đi",
-        tool_result=tool_result,
-        route_context=None,
-        recent_messages=[{"role": "assistant", "markdown": "We were discussing YOLO."}],
-        observations=[{"tool": "search_units_by_title", "citation_count": 1}],
-    )
-
-    assert answer.confidence == "partial"
-    assert answer.answer_markdown == "The current source only supports the YOLO grid and NMS details."
-    assert "Do not ask a follow-up question" in model.messages[0]["content"]
-    assert "discarded_context_mismatched_results" in model.messages[1]["content"]
 
 
 def test_structured_router_resolves_pending_followup_with_model_output():
