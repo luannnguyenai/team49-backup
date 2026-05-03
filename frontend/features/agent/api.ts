@@ -1,5 +1,7 @@
 import { api } from "@/lib/api";
 
+export const AGENT_REQUEST_TIMEOUT_MS = 60_000;
+
 export type AgentWarningType =
   | "outside_current_path"
   | "needs_assessment"
@@ -224,7 +226,12 @@ export const agentApi = {
     conversationId?: string | null;
     routeContext?: Record<string, unknown>;
     traceMode?: "none" | "summary" | "full";
-  }) => api.post<AgentChatResponse>("/api/agent/chat", payload).then((r) => r.data),
+  }) =>
+    api
+      .post<AgentChatResponse>("/api/agent/chat", payload, {
+        timeout: AGENT_REQUEST_TIMEOUT_MS,
+      })
+      .then((r) => r.data),
 
   continueAction: (payload: {
     conversationId: string;
@@ -232,7 +239,12 @@ export const agentApi = {
     decision: "approve" | "reject" | "edit";
     editPayload?: Record<string, unknown> | null;
     incomingMessageId: string;
-  }) => api.post<AgentChatResponse>("/api/agent/actions/continue", payload).then((r) => r.data),
+  }) =>
+    api
+      .post<AgentChatResponse>("/api/agent/actions/continue", payload, {
+        timeout: AGENT_REQUEST_TIMEOUT_MS,
+      })
+      .then((r) => r.data),
 
   startAssessmentWorkflow: (payload: {
     candidateCanonicalUnitIds: string[];

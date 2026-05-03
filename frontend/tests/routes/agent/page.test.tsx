@@ -136,6 +136,20 @@ describe("agent page", () => {
     expect(strong.tagName).toBe("STRONG");
   });
 
+  it("labels client-side agent timeouts separately from network failures", async () => {
+    agentApiMock.chat.mockRejectedValueOnce(
+      Object.assign(new Error("timeout of 15000ms exceeded"), { code: "ECONNABORTED" }),
+    );
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Message AI Assistant...");
+    fireEvent.change(input, { target: { value: "có thể tìm RCNN không" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    expect(await screen.findAllByText(/AGENT_REQUEST_TIMEOUT/)).toHaveLength(2);
+    expect(screen.queryByText(/AGENT_NETWORK_ERROR/)).not.toBeInTheDocument();
+  });
+
   it("continues a pending action with a stable action id", async () => {
     agentApiMock.chat.mockResolvedValueOnce({
       conversationId: "conversation-1",

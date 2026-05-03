@@ -92,15 +92,30 @@ function getFallbackErrorCode(fallback: AgentChatResponse["fallback"] | undefine
   return fallback?.errorCode ?? fallback?.error_code ?? null;
 }
 
-function buildAgentClientErrorMessage(
-  error: unknown,
-  retry: { message: string; incomingMessageId: string },
-): UiMessage {
+function getClientErrorCode(error: unknown) {
   const responseStatus =
     typeof error === "object" && error !== null && "response" in error
       ? (error as { response?: { status?: number } }).response?.status
       : undefined;
-  const errorCode = responseStatus ? `AGENT_HTTP_${responseStatus}` : "AGENT_NETWORK_ERROR";
+  if (responseStatus) return `AGENT_HTTP_${responseStatus}`;
+
+  const transportCode =
+    typeof error === "object" && error !== null && "code" in error
+      ? String((error as { code?: unknown }).code ?? "")
+      : "";
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  if (transportCode === "ECONNABORTED" || transportCode === "ETIMEDOUT" || message.includes("timeout")) {
+    return "AGENT_REQUEST_TIMEOUT";
+  }
+
+  return "AGENT_NETWORK_ERROR";
+}
+
+function buildAgentClientErrorMessage(
+  error: unknown,
+  retry: { message: string; incomingMessageId: string },
+): UiMessage {
+  const errorCode = getClientErrorCode(error);
   return {
     id: `assistant-error-${Date.now()}`,
     role: "assistant",
