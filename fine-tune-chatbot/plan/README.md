@@ -1,281 +1,96 @@
-# Fine-tune Chatbot — Self-hosted AI Tutor
+# Fine-tune Chatbot Plan — English AI/ML Tutor
 
-Replace the current API-based AI Tutor (Gemini/OpenAI/Anthropic via LangChain
-`init_chat_model`) with a **self-hosted fine-tuned VLM** running on local GPU.
+This plan aligns the `fine-tune-chatbot` folder to the current target:
 
-## Decisions (locked)
+- English-only tutor
+- vision-capable base model with text-first fine-tuning in v1
+- project dataset as domain anchor
+- filtered ELI5 as auxiliary explanation-style data
+- `Qwen/Qwen2.5-VL-3B-Instruct` as the base model
+
+## Decisions
 
 | Item | Value |
 |---|---|
-| GPU | RTX 5060 Ti 16GB (Blackwell, sm_120) |
-| Base model | **Qwen2.5-VL-3B-Instruct** (vision-language, native tool calling) |
-| Fine-tune framework | **Unsloth** (QLoRA, 4-bit) |
-| Serving framework | **vLLM** (OpenAI-compatible API + Hermes tool parser) |
-| Quantization for serving | AWQ Int4 |
-| Provider name in code | `self_hosted` |
-| Vision support | Native (Qwen VL handles `image_base64` in current pipeline) |
-| Fallback | Gemini API kept as runtime fallback when vLLM is down |
+| Target tutor | English AI/ML/NLP/CV tutor |
+| Base model | `Qwen/Qwen2.5-VL-3B-Instruct` |
+| Fine-tune method | QLoRA 4-bit |
+| Primary data | Project domain dataset |
+| Auxiliary data | Filtered ELI5 only |
+| Training supervision in v1 | Text-first SFT, no new multimodal research corpus |
+| Main eval gate | Held-out internal domain set |
+| Secondary eval | MMLU selected subjects, MMLU-Pro, TheoremQA |
+| Style eval | Filtered ELI5 dev/test |
 
-## Where to fine-tune
+## What changed from the older plan
 
-**Decision**: fine-tune locally first on the RTX 5060 Ti 16GB. Use Colab only as
-a fallback if Blackwell wheels or vLLM/Unsloth kernels fail locally. Use Kaggle
-only for smoke tests or small data-pipeline experiments, not as the primary
-training environment.
+The earlier plan optimized for a different problem:
 
-As of 2026-04-25, Colab and Kaggle GPU availability/limits are dynamic rather
-than guaranteed. Re-check quotas and assigned GPU type before starting a long
-run.
+- Vietnamese support
+- tool-calling preservation
+- self-hosted runtime as the central design constraint
 
-| Option | Best use | Pros | Cons / risk | Fit for this plan |
-|---|---|---|---|---|
-| **Local PC: RTX 5060 Ti 16GB** | Primary QLoRA training, eval, quantization, and vLLM serving rehearsal | Same GPU class as production serving; no notebook timeout; artifacts stay local; easiest to debug Docker/vLLM integration; no dataset upload/privacy issue | Blackwell stack risk (`sm_120`): PyTorch/Unsloth/bitsandbytes/vLLM may require nightly/source builds; 16GB VRAM leaves little room for larger ctx/batch | **Recommended primary path**. Run P1 smoke tests first, then P2-P7 locally. |
-| **Google Colab** | Fallback training or isolated benchmark when local Blackwell stack fails | Zero local setup; paid plans may access premium GPUs subject to availability; easy notebook iteration | GPU type and limits vary; sessions/timeouts can interrupt runs; compute units can drain quickly on premium GPUs; environment differs from final local serving box | **Good fallback** for P3 training only. Export adapter/merged model back to local for P4-P7. |
-| **Kaggle Notebooks** | Smoke tests, small prototypes, data cleaning notebooks | Free GPU access; convenient dataset/notebook workflow; usually enough for small text-only QLoRA experiments | Weekly accelerator quota and session limits; assigned hardware may be P100/T4 class; less control over CUDA/kernel versions; poor fit for vLLM serving validation | **Not primary**. Use for P2/P3 prototype only if local is blocked. |
-
-Practical rule:
-- If P1 passes locally: stay local end-to-end.
-- If local training fails but data pipeline is ready: run P3 on Colab, then copy
-  `checkpoints/` and `models/` back locally for eval, quantization, serving, and
-  rollout.
-- If both local and Colab are blocked: reduce scope to text-only LoRA, lower
-  `max_seq_length` to 3072, or postpone self-hosting until a more predictable
-  GPU environment is available.
-
-References for current constraints:
-- Colab FAQ: resource limits and GPU types vary over time; paid premium GPUs
-  are subject to availability:
-  <https://research.google.com/colaboratory/intl/en-GB/faq.html>
-- Google Workspace Colab subscriptions: Colab Pro examples use compute units:
-  <https://support.google.com/a/answer/15094583>
-- NVIDIA/Kaggle blog: Kaggle accelerator quota example of 30h/week:
-  <https://developer.nvidia.com/blog/how-kaggle-makes-gpus-accessible-to-5-million-data-scientists/>
-- RTX 5060 Ti 16GB reference specs:
-  <https://www.techpowerup.com/gpu-specs/geforce-rtx-5060-ti-16-gb.c4292>
-
-## Why VL-3B over alternatives
-
-- **vs Qwen2.5-7B text**: keeps vision feature self-hosted (current code path
-  already passes `image_base64` to LLM in `src/services/llm_service.py`).
-- **vs Qwen2.5-VL-7B**: 7B-VL is too tight on 16GB during QLoRA train (OOM
-  risk). 3B-VL leaves headroom for ctx 4K + bs 2 + LoRA r=16.
-- **Trade-off accepted**: weaker reasoning and tool-calling than 7B. Mitigated
-  by oversampling tool-call examples in training data (target 35%) and keeping
-  Gemini fallback for COMPLEX-tool failures.
+That is no longer the active target. The active target is now an English-only tutor pipeline that keeps the existing dataset research intact while switching the serving/model layer to a vision-capable Qwen VL model.
 
 ## Roadmap
 
-Two timeline variants depending on rollout posture:
+### P1. Data audit
 
-### Variant FULL (production rollout, 6–8 working days + 1 week shadow)
+- Document the current domain dataset in detail.
 
-```
-P1  Environment        (0.5d)  Verify Blackwell stack (CUDA 12.8, PT 2.7+)
-P2a Data audit         (0.5d)  Schema/row counts of qa_history
-P2b Domain data        (1d)    Convert course assets → tutor SFT (PRIMARY source)
-P2  Data pipeline      (1d)    Combine organic + domain + external → ChatML
-P3  Fine-tune          (0.5d)  Unsloth QLoRA on VL-3B (incl. tiny overfit smoke)
-P4  Eval               (0.5d)  Deterministic gates + LLM-judge vs Gemini
-P5  Quantize           (0.5d)  AWQ Int4 + feasibility gate (fallback to bnb/fp16)
-P6  Serve              (0.5d)  vLLM docker service + Cloudflare Tunnel
-P7  Codebase changes   (0.5d)  Patch chat_model_factory + config + tests
-P8  Shadow + rollout   (1w)    A/B with 10% → 50% → 100%
-```
+### P2. ELI5 filtering and mixing
 
-Total: ~6–8 working days excluding shadow period. Use this for production
-traffic switch with safety net.
+- Build a filtered ELI5 subset for explanation-style transfer only.
+- Keep ELI5 capped at 30% in v1.
+- Prepare ablation datasets A/B/C/D.
 
-### Variant FAST (research / MVP self-host, 3 days, no shadow)
+### P3. Fine-tuning
 
-For tight deadlines or research builds where the current API path stays
-behind a feature flag and a multi-week canary is unnecessary:
+- Run QLoRA on `Qwen/Qwen2.5-VL-3B-Instruct`.
+- Keep v1 supervision text-first so dataset research remains unchanged.
+- Save adapters per ablation run.
+- Track validation loss, but do not use it as the sole selection criterion.
 
-```
-Day 1 (24h)  P2a + P2b + P2     Data: KG-driven synth + MCQ → ChatML, ≥ 8k samples
-Day 2 (24h)  P1 + P3 + P4       Env smoke + Unsloth QLoRA train + eval gate
-Day 3 (24h)  P5 + P6 + P7       AWQ + vLLM + Cloudflare Tunnel + integration + E2E
-```
+### P4. Evaluation
 
-What is dropped vs FULL:
-- **P8 shadow/canary** — replaced by **single feature flag** `TUTOR_PROVIDER_OVERRIDE`.
-  Default keeps current API. Flip to `self_hosted` to switch instantly. Roll back
-  by unsetting the env var; existing fallback in `_stream_with_fallback` covers
-  pre-stream failures.
-- **Hand-curated fixture sets** — keep deterministic Gate 1 with 50-row seed
-  fixtures only. Defer 500-row LLM-judge eval to post-launch iteration.
-- **Production hardening** — `docker-compose.prod.yml` changes deferred; ship in
-  dev compose first.
+- Evaluate internal domain correctness first.
+- Then run MMLU selected subjects, MMLU-Pro, and TheoremQA.
+- Run style evaluation on filtered ELI5 dev/test.
 
-What MUST stay even in FAST:
-- **NEW: P0.5 tool-call format proof** (see `01-environment.md`) — must pass
-  before any data expansion or full train. This is the highest-value gate
-  because format mismatch invalidates the entire training corpus.
-- P1 Blackwell smoke tests (skipping these wastes more time when train fails)
-- P4 Gate 1 deterministic checks on ≥ 100 samples (tool-call format, citation
-  format, language match) — these catch silent breakage that kills E2E
-- P5 BF16-first feasibility ladder (NOT AWQ-default — see updated `04-eval-quantize.md`)
-- P7 fallback wrapper (`_stream_with_fallback`) — needed for safe deploy
+### P5. Selection and rollout
 
-Decision rule: if user count ≤ 50 / project is academic / current API stays
-behind a flag → FAST. If shipping to ≥ 100 production users without behind-flag
-parallel → FULL.
-
-### FAST auto-escalation rule
-
-FAST is a **happy-path** estimate. Real Blackwell stack risk + Unsloth/vLLM
-kernel compatibility means any single phase blocking on wheel/kernel issues
-can eat half the budget. Hard rule:
-
-- If P1 environment smoke does not fully pass within **8 wall-clock hours**
-  (any of the 4 smoke tests still failing): **FAST is dead**. Switch to
-  FULL schedule, downgrade promise from "3 days" to "8–12 working days +
-  1 week shadow". Notify stakeholder before continuing.
-- If P0.5 tool-call format proof fails (vLLM does not return parseable
-  `tool_calls` from sample adapter): **stop**, do not proceed to P2b/P3.
-  Investigate format converter first. Up to 1 day debug budget; if still
-  failing, escalate.
-- If at any P5 tier the serving smoke fails on vision OR tool-call after
-  AWQ/bnb/GPTQ has been tried, fall back to BF16 unquantized + reduced
-  concurrency (`--max-num-seqs 1`) and document in `eval/v1_quantize_decision.md`.
-
-### Production FULL — realistic estimate revised
-
-The original "6–8 working days excluding shadow" ignored Blackwell
-wheel-build time and feasibility-gate iteration. With #3 tool-call proof
-gate, #5 AWQ feasibility ladder, and realistic data-pipeline implementation
-time:
-
-- **Engineering days (no shadow)**: 8–12 working days
-- **Shadow + canary**: +1 week
-- **Total to 100% rollout**: ~3 weeks calendar time
-
-Budget for FULL accordingly. FAST remains a research/MVP plan, never a
-production-ship plan.
-
-### Deployment topology (both variants)
-
-```
-[Sinh viên] → [VPS frontend + FastAPI backend] → [Cloudflare Tunnel — public HTTPS] → [Home: 5060 Ti + vLLM + Qwen2.5-VL-3B + LoRA]
-                                                                                                      (handles text + image)
-```
-
-The backend connects to vLLM via the tunnel URL configured in
-`SELF_HOSTED_BASE_URL`. vLLM never needs to be exposed directly to the public
-internet. See `05-serving-vllm.md` "Tunnel exposure" section for setup.
-
-File mapping: `01-environment.md` (P1), `02a-data-audit.md` (P2a),
-`02b-domain-data.md` (P2b — course assets), `02-data-pipeline.md` (P2 —
-merge), `03-finetune.md` (P3), `04-eval-quantize.md` (P4+P5),
-`05-serving-vllm.md` (P6), `06-codebase-changes.md` (P7), `07-rollout.md`
-(P8). External datasets catalog: `datasets.md`.
-
-## Data strategy summary
-
-**Primary source = course assets** in `data/courses/CS224n` and `CS231n`:
-- 1634 quality-gated MCQs (310 VN native, ~1300 EN translatable)
-- 41 timestamped transcripts + 44 ToC summaries
-- This solves the domain-alignment problem and dwarfs external datasets.
-
-**Secondary**: ~2.5k function-calling samples from `NousResearch/hermes-function-calling-v1`
-+ `Salesforce/xlam-function-calling-60k` to preserve tool-use behavior (Hermes
-format matches vLLM serving).
-
-**Tertiary**: ~12 USD Gemini Flash spend for VN translation of EN MCQs +
-synthetic refusals + transcript-grounded Q&A.
-
-See `02b-domain-data.md` for full mixing recipe (~14k total samples).
-
-## Repository layout (this folder)
-
-```
-fine-tune-chatbot/
-├── plan/                        # ← you are here
-│   ├── README.md                # overview, decisions, roadmap, governance
-│   ├── 01-environment.md        # P1 Blackwell GPU stack setup
-│   ├── 02a-data-audit.md        # P2a schema/row audit (run BEFORE P2)
-│   ├── 02b-domain-data.md       # P2b course assets → tutor SFT (~8k samples)
-│   ├── 02-data-pipeline.md      # P2 merge organic + domain + external → ChatML
-│   ├── 03-finetune.md           # P3 Unsloth QLoRA + tiny overfit smoke
-│   ├── 04-eval-quantize.md      # P4 eval gates + P5 AWQ quantize
-│   ├── 05-serving-vllm.md       # P6 vLLM docker service
-│   ├── 06-codebase-changes.md   # P7 patches to src/ + tests
-│   ├── 07-rollout.md            # P8 shadow, rollout, risks, runbook
-│   ├── datasets.md              # external dataset catalog for FT
-│   └── gpt_response.md          # GPT review (resolved in this README)
-├── scripts/                     # (created during P2–P5)
-├── data/                        # (gitignored) SFT datasets
-├── checkpoints/                 # (gitignored) training output
-└── models/                      # (gitignored) merged + AWQ weights
-```
-
-## Out of scope (v1)
-
-- Vision fine-tuning data quality (depends on P2 image recovery — see
-  `02-data-pipeline.md` BLOCKER section).
-- Multi-GPU serving.
-- Reward modeling / DPO.
-- Fine-tuning the router LLM (`src/services/router.py`) — keep Gemini for now.
-- Multi-tenant rate limiting on self-hosted endpoint (vLLM handles concurrency
-  via `--max-num-seqs`).
-
-## Reading order
-
-1. Read this README.
-2. **`01-environment.md`** — do P1 first to verify Blackwell wheel availability.
-   This is the riskiest phase and must succeed before investing in data work.
-3. Then P2 → P8 in order.
+- Pick the best run using domain-first decision rules.
+- Prepare the selected adapter for integration.
+- Keep serving and deployment work separate from the training decision.
+- Preserve multimodal serving compatibility at the API layer even though v1 training data remains text-first.
 
 ## Success criteria
 
-- [ ] vLLM serves `tutor-v1` endpoint, OpenAI-compatible, streaming works
-- [ ] Tool calling (`execute_python`) works end-to-end via `--tool-call-parser hermes`
-      (proven in P0.5 BEFORE training, re-verified after train+quantize)
-- [ ] **Deterministic eval gates pass** (see `04-eval-quantize.md` Gate 1)
-- [ ] **Per-category LLM-judge gates pass** vs Gemini baseline:
-  - Refusal: A score ≥ B − 0.1
-  - Tool correctness: A correct rate ≥ B − 10%
-  - Factual QA: A score ≥ B − 0.2
-  - Vision subset (frozen-tower v1, see "Vision scope" below): meets v1 vision targets
-  - Aggregate pairwise A vs B win-rate ≥ 45%
-- [ ] p50 streaming latency ≤ 4s, p95 ≤ 10s on production traffic (measured
-      AFTER baseline established through tunnel — do NOT freeze targets pre-baseline)
-- [ ] Shadow A/B 1 week passes; 100% rollout with Gemini fallback armed
-- [ ] No user-facing API route changes
-- [ ] Router stays on Gemini in v1 (no migration)
-- [ ] LangGraph topology preserved; only LLM provider injection point and
-      fallback wrapper change (see `06-codebase-changes.md`)
+- Internal domain benchmark improves over base model.
+- English explanation quality improves over the domain-only baseline.
+- Regression on secondary academic benchmarks remains acceptable.
+- No selected run is more fluent but less correct.
 
-### Vision scope (v1, frozen-tower posture)
+## Failure criteria
 
-V1 explicitly does **not** promise Gemini-equivalent vision quality. With
-the vision tower frozen and only 200–500 retention samples, success means:
+- Domain correctness drops after adding ELI5.
+- Hallucination rate increases.
+- Answers become verbose without adding substance.
+- Style improves only marginally while training complexity rises materially.
 
-- [ ] **Preserve base ability**: vision smoke tests from P1 still pass after
-      LoRA train (no projector drift)
-- [ ] **No hallucinated visual claims**: model does not invent slide content
-      when no image is provided (deterministic Gate 1 check ≥ 98%)
-- [ ] **Coherent description**: describes a slide/screenshot in tutor voice;
-      OCR on heavy-text slides may be weaker than Gemini, accepted
-- [ ] **No regression on text path** caused by VL pipeline
+## Reading order
 
-What v1 does NOT promise (defer to v2 with full Option B vision FT):
-- ❌ Domain-specific slide VQA at Gemini quality
-- ❌ Diagram/equation interpretation matching API baseline
-- ❌ Multi-image reasoning
+1. `../PROPOSAL.md`
+2. `../PIPELINE.md`
+3. `datasets.md`
+4. `01-environment.md`
+5. `02-data-pipeline.md`
+6. `03-finetune.md`
+7. `04-eval-quantize.md`
+8. `05-serving-vllm.md`
+9. `06-codebase-changes.md`
+10. `07-rollout.md`
 
-## Data governance
+## Scope note
 
-- **Local-only training data**: `qa_history.jsonl`, DB exports, lecture
-  transcripts, and lecture frames stay on the local machine. No upload to
-  Colab, Kaggle, or third-party services.
-- **PII scrub mandatory** before any data leaves the database (see P2 step 03).
-- **Synthetic data labeling**: any sample produced by a teacher model
-  (Gemini Pro / Claude) must carry `source: synthetic_<teacher_model>` in
-  the manifest.
-- **Eval outputs gitignored**: only aggregated reports (`eval/v1_report.md`)
-  are committed; raw per-sample outputs (`eval/runs/`) are local-only.
-- **Lecture content**: copyrighted course material — used internally for
-  training; do not redistribute weights externally without legal review.
-- **Retention**: training datasets and intermediate checkpoints are kept on
-  local disk; merged + quantized model weights are the only artifact mounted
-  into the production container.
+The serving and codebase integration docs remain in this folder because they are part of the active target again. Dataset research and mixing strategy stay domain-first and text-first; the change in this revision is the selected base model and runtime assumptions, not the dataset thesis.

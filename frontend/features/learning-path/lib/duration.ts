@@ -7,9 +7,9 @@ export function formatDurationFromHours(hours: number | null | undefined): strin
   const secondCount = totalSeconds % 60;
   const parts: string[] = [];
 
-  if (hourCount > 0) parts.push(`${hourCount} giờ`);
-  if (minuteCount > 0) parts.push(`${minuteCount} phút`);
-  if (secondCount > 0 && hourCount === 0) parts.push(`${secondCount} giây`);
+  if (hourCount > 0) parts.push(`${hourCount} hr`);
+  if (minuteCount > 0) parts.push(`${minuteCount} min`);
+  if (secondCount > 0 && hourCount === 0) parts.push(`${secondCount} sec`);
 
-  return parts.length > 0 ? parts.join(" ") : "1 giây";
+  return parts.length > 0 ? parts.join(" ") : "1 sec";
 }

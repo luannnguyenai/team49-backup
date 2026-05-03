@@ -35,11 +35,11 @@ export default function LearningUnitCard({
         </p>
         <StatusIcon status={item.status} />
       </div>
-      <p className="mt-1 line-clamp-1 text-xs opacity-80">{item.section_title ?? "Khác"}</p>
+      <p className="mt-1 line-clamp-1 text-xs opacity-80">{item.section_title ?? "Other"}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
         <span>{getStatusLabel(item.status)}</span>
         {item.estimated_hours != null && <span>{formatDurationFromHours(item.estimated_hours)}</span>}
-        {isRecommended && <span className="rounded-full bg-primary-600 px-2 py-0.5 text-white">Tiếp theo</span>}
+        {isRecommended && <span className="rounded-full bg-primary-600 px-2 py-0.5 text-white">Next up</span>}
       </div>
     </button>
   );

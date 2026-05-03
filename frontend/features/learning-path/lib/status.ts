@@ -2,10 +2,10 @@ import type { PathItemResponse, PathStatus } from "@/types";
 
 export function getStatusLabel(status: PathStatus): string {
   return {
-    pending: "Chưa học",
-    in_progress: "Đang học",
-    completed: "Hoàn thành",
-    skipped: "Bỏ qua",
+    pending: "Not started",
+    in_progress: "In progress",
+    completed: "Completed",
+    skipped: "Skipped",
   }[status];
 }
 

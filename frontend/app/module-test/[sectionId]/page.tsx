@@ -43,16 +43,16 @@ import MarkdownRenderer from "@/components/assessment/MarkdownRenderer";
 const OPTIONS: SelectedAnswer[] = ["A", "B", "C", "D"];
 
 const BLOOM_BADGE: Record<string, { label: string; cls: string }> = {
-  remember:   { label: "Nhớ",       cls: "bg-sky-100 text-sky-700" },
-  understand: { label: "Hiểu",      cls: "bg-violet-100 text-violet-700" },
-  apply:      { label: "Áp dụng",   cls: "bg-amber-100 text-amber-700" },
-  analyze:    { label: "Phân tích", cls: "bg-rose-100 text-rose-700" },
+  remember:   { label: "Remember",       cls: "bg-sky-100 text-sky-700" },
+  understand: { label: "Understand",      cls: "bg-violet-100 text-violet-700" },
+  apply:      { label: "Apply",   cls: "bg-amber-100 text-amber-700" },
+  analyze:    { label: "Analyze", cls: "bg-rose-100 text-rose-700" },
 };
 
 const DIFF_BADGE: Record<string, { label: string; cls: string }> = {
-  easy:   { label: "Dễ",        cls: "bg-emerald-100 text-emerald-700" },
-  medium: { label: "Trung bình",cls: "bg-orange-100 text-orange-700" },
-  hard:   { label: "Khó",       cls: "bg-red-100 text-red-700" },
+  easy:   { label: "Easy",        cls: "bg-emerald-100 text-emerald-700" },
+  medium: { label: "Medium",cls: "bg-orange-100 text-orange-700" },
+  hard:   { label: "Hard",       cls: "bg-red-100 text-red-700" },
 };
 
 // ---------------------------------------------------------------------------
@@ -154,28 +154,28 @@ function ConfirmDialog({
         className="relative w-full max-w-sm rounded-2xl p-6 shadow-2xl"
         style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
       >
-        <div className="mb-4 flex items-center gap-3">
+          <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
           </div>
           <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
-            Xác nhận nộp bài
+            Confirm submission
           </h2>
         </div>
 
         <div className="space-y-2 text-sm" style={{ color: "var(--text-secondary)" }}>
           {unansweredCount > 0 && (
             <p className="rounded-lg bg-amber-50 px-3 py-2 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
-              ⚠️ Còn <strong>{unansweredCount}</strong> câu chưa trả lời.
+              ⚠️ <strong>{unansweredCount}</strong> questions are still unanswered.
             </p>
           )}
           {flaggedCount > 0 && (
             <p className="rounded-lg bg-yellow-50 px-3 py-2 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
-              🚩 Còn <strong>{flaggedCount}</strong> câu đã đánh dấu cần xem lại.
+              🚩 <strong>{flaggedCount}</strong> questions are still marked for review.
             </p>
           )}
           {unansweredCount === 0 && flaggedCount === 0 && (
-            <p>Bạn đã trả lời tất cả câu hỏi. Xác nhận nộp bài?</p>
+            <p>You answered every question. Do you want to submit now?</p>
           )}
         </div>
 
@@ -185,7 +185,7 @@ function ConfirmDialog({
             disabled={loading}
             className="btn-secondary flex-1"
           >
-            Xem lại
+            Review answers
           </button>
           <button
             onClick={onConfirm}
@@ -197,7 +197,7 @@ function ConfirmDialog({
             ) : (
               <Send className="h-4 w-4" />
             )}
-            Nộp bài
+            Submit
           </button>
         </div>
       </div>
@@ -253,7 +253,7 @@ export default function ModuleTestPage() {
       })
       .catch((err) => {
         const d = err?.response?.data?.detail;
-        setErrorMsg(typeof d === "string" ? d : "Không thể bắt đầu module test.");
+        setErrorMsg(typeof d === "string" ? d : "Unable to start the module test.");
         setPhase("error");
       });
 
@@ -328,7 +328,7 @@ export default function ModuleTestPage() {
     } catch (err: unknown) {
       const d = (err as { response?: { data?: { detail?: string } } })?.response?.data
         ?.detail;
-      setErrorMsg(typeof d === "string" ? d : "Nộp bài thất bại. Vui lòng thử lại.");
+      setErrorMsg(typeof d === "string" ? d : "Submission failed. Please try again.");
       setPhase("active");
       timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
     }
@@ -347,7 +347,7 @@ export default function ModuleTestPage() {
       <div className="flex min-h-screen items-center justify-center" style={{ background: "var(--bg-primary)" }}>
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Đang tải đề thi...</p>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading test...</p>
         </div>
       </div>
     );
@@ -358,10 +358,10 @@ export default function ModuleTestPage() {
       <div className="flex min-h-screen items-center justify-center p-6" style={{ background: "var(--bg-primary)" }}>
         <div className="max-w-sm text-center space-y-4">
           <AlertCircle className="mx-auto text-red-500" size={40} />
-          <p className="font-semibold" style={{ color: "var(--text-primary)" }}>Không thể bắt đầu</p>
+          <p className="font-semibold" style={{ color: "var(--text-primary)" }}>Unable to start</p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{errorMsg}</p>
           <button onClick={() => router.back()} className="btn-secondary">
-            Quay lại
+            Go back
           </button>
         </div>
       </div>
@@ -403,13 +403,13 @@ export default function ModuleTestPage() {
       {/* Legend */}
       <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-xs" style={{ color: "var(--text-muted)" }}>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-blue-300" />Đã trả lời
+          <span className="inline-block h-3 w-3 rounded bg-blue-300" />Answered
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-yellow-300" />Đánh dấu
+          <span className="inline-block h-3 w-3 rounded bg-yellow-300" />Flagged
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800" />Chưa trả lời
+          <span className="inline-block h-3 w-3 rounded border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800" />Unanswered
         </span>
       </div>
 
@@ -444,7 +444,7 @@ export default function ModuleTestPage() {
       {/* Submit CTA in panel */}
       <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
         <div className="mb-2 text-xs" style={{ color: "var(--text-muted)" }}>
-          Đã trả lời:{" "}
+          Answered:{" "}
           <strong style={{ color: "var(--text-primary)" }}>
             {allQuestions.length - unansweredCount}/{allQuestions.length}
           </strong>
@@ -454,7 +454,7 @@ export default function ModuleTestPage() {
           className="btn-primary flex w-full items-center justify-center gap-2"
         >
           <Send className="h-4 w-4" />
-          Nộp bài
+          Submit
         </button>
       </div>
     </div>
@@ -479,7 +479,7 @@ export default function ModuleTestPage() {
               className="mb-4 flex items-center gap-2 text-sm"
               style={{ color: "var(--text-muted)" }}
             >
-              <X size={16} /> Đóng
+              <X size={16} /> Close
             </button>
             {NavPanel}
           </div>
@@ -541,7 +541,7 @@ export default function ModuleTestPage() {
             className="btn-primary hidden shrink-0 items-center gap-1.5 sm:flex"
           >
             <Send size={14} />
-            Nộp bài
+            Submit
           </button>
         </div>
       </header>
@@ -589,7 +589,7 @@ export default function ModuleTestPage() {
             {/* Meta row */}
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-                Câu {questionNum}
+                Question {questionNum}
               </span>
               {bloom && (
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${bloom.cls}`}>
@@ -613,7 +613,7 @@ export default function ModuleTestPage() {
                 ].join(" ")}
               >
                 <Flag size={12} />
-                {isCurrentFlagged ? "Đã đánh dấu" : "Đánh dấu"}
+                {isCurrentFlagged ? "Flagged" : "Flag"}
               </button>
             </div>
 
@@ -683,7 +683,7 @@ export default function ModuleTestPage() {
               className="btn-secondary flex items-center gap-1.5 disabled:opacity-40"
             >
               <ChevronLeft size={15} />
-              Câu trước
+              Previous
             </button>
 
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -696,14 +696,14 @@ export default function ModuleTestPage() {
                 className="btn-primary flex items-center gap-1.5"
               >
                 <Send size={15} />
-                Nộp bài
+                Submit
               </button>
             ) : (
               <button
                 onClick={goNext}
                 className="btn-primary flex items-center gap-1.5"
               >
-                Câu sau
+                Next
                 <ChevronRight size={15} />
               </button>
             )}

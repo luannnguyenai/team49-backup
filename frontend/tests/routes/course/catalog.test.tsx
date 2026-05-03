@@ -6,38 +6,40 @@ import CourseOverviewInteractive from "@/components/course/CourseOverviewInterac
 import type { CourseOverviewResponse } from "@/types";
 
 describe("landing page route", () => {
-  it("renders a public landing page focused on guided AI learning", () => {
+  it("renders a public landing page focused on a clearer learning path", () => {
     render(<HomePage />);
 
     expect(
       screen.getByRole("heading", {
-        name: "Học AI, ML, CV và NLP theo một lộ trình rõ ràng hơn",
+        name: "A clearer path to learning AI",
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Một nền tảng học tập giúp bạn định hướng, học có hệ thống và tiếp tục tiến lên khi gặp phần khó."),
+      screen.getByText(
+        "Start with a structured path that helps you focus, build momentum, and keep moving without piecing everything together on your own.",
+      ),
     ).toBeInTheDocument();
     expect(
       screen
-        .getAllByRole("link", { name: "Đăng ký ngay" })
+        .getAllByRole("link", { name: "Create your account" })
         .every((link) => link.getAttribute("href") === "/register"),
     ).toBe(true);
     expect(
       screen
-        .getAllByRole("link", { name: "Đăng nhập" })
+        .getAllByRole("link", { name: "Sign in" })
         .every((link) => link.getAttribute("href") === "/login"),
     ).toBe(true);
-    expect(screen.getByRole("link", { name: "Sản phẩm" })).toHaveAttribute("href", "#product");
-    expect(screen.getByRole("link", { name: "Lộ trình học" })).toHaveAttribute("href", "#roadmap");
+    expect(screen.getByRole("link", { name: "Product" })).toHaveAttribute("href", "#product");
+    expect(screen.getByRole("link", { name: "Learning Path" })).toHaveAttribute("href", "#roadmap");
     expect(screen.getByRole("link", { name: "AI Assistant" })).toHaveAttribute("href", "#tutor");
-    expect(screen.getByRole("link", { name: "Liên hệ" })).toHaveAttribute("href", "#contact");
+    expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute("href", "#contact");
     expect(
-      screen.getByRole("heading", { name: "Cá nhân hóa lộ trình học" }),
+      screen.getByRole("heading", { name: "Personalized learning path" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "AI chatbot hỗ trợ ngay trong lúc học" }),
+      screen.getByRole("heading", { name: "Support that keeps you learning" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Đội ngũ phát triển")).toBeInTheDocument();
+    expect(screen.getByText("Product team")).toBeInTheDocument();
   });
 });
 
@@ -77,7 +79,7 @@ describe("course overview routes", () => {
     );
 
     expect(screen.getByText("Build deep intuition for modern vision systems")).toBeInTheDocument();
-    expect(screen.getByText("Những gì bạn sẽ học")).toBeInTheDocument();
+    expect(screen.getByText("What you will learn")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start learning" })).toBeEnabled();
   });
 

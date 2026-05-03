@@ -26,14 +26,14 @@ export default function ProfileChangeBanner({
       <div className="flex gap-3">
         <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
         <div>
-          <p className="text-sm font-semibold">Profile path đã thay đổi</p>
+          <p className="text-sm font-semibold">Your profile path changed</p>
           <p className="mt-1 text-sm">
             {previousProfile
               ? describeProfileChange(previousProfile, currentProfile)
-              : "Path hiện tại khác path đã dùng để sinh lộ trình này."}
+              : "The current path differs from the one used to generate this learning path."}
           </p>
           <p className="mt-1 text-xs text-amber-800">
-            Planner sẽ tạo lại lộ trình theo profile mới và giữ lịch sử tiến độ đã có.
+            The planner will rebuild the path from your new profile while keeping existing progress history.
           </p>
         </div>
       </div>
@@ -44,7 +44,7 @@ export default function ProfileChangeBanner({
         className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-200 px-3 py-2 text-sm font-semibold text-amber-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
       >
         <RefreshCw className={refreshing ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
-        {refreshing ? "Đang tạo lại" : "Tạo lại lộ trình"}
+        {refreshing ? "Rebuilding..." : "Rebuild learning path"}
       </button>
     </div>
   );

@@ -187,7 +187,7 @@ describe("agent page", () => {
     expect(screen.getByTestId("agent-source-sidebar")).toHaveClass("hidden", "md:block");
     expect(screen.getByTestId("agent-source-sidebar")).not.toHaveClass("fixed");
     expect(screen.getByTestId("agent-source-drawer")).toHaveClass("fixed", "md:hidden");
-    expect(screen.getAllByText("Hoàn thành").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Completed").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/This unit explains CNN kernels/i).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: /start learning/i })[0]).toHaveAttribute(
       "href",

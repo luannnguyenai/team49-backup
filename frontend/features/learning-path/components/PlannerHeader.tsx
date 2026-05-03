@@ -56,18 +56,18 @@ export default function PlannerHeader({
             className="rounded-full border px-3 py-1 text-xs font-semibold text-primary-600 transition hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500/40 dark:hover:bg-primary-950/30"
             style={{ borderColor: "var(--border)" }}
           >
-            Đổi
+            Change
           </button>
 
           {switcherOpen ? (
             <div
               role="dialog"
-              aria-label="Đổi lộ trình"
+              aria-label="Change learning path"
               className="absolute left-0 top-full z-30 mt-2 w-72 rounded-2xl border bg-white p-2 shadow-xl dark:bg-slate-950"
               style={{ borderColor: "var(--border)" }}
             >
               <p className="px-3 py-2 text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-                Chọn lộ trình muốn học
+                Choose the learning path you want
               </p>
               {(Object.keys(SUPPORTED_LEARNING_PATHS) as PlannerPathKey[]).map((pathKey) => {
                 const path = SUPPORTED_LEARNING_PATHS[pathKey];
@@ -90,7 +90,7 @@ export default function PlannerHeader({
                     </span>
                     {active ? (
                       <span className="rounded-full bg-primary-50 px-2 py-0.5 text-xs font-semibold text-primary-600 dark:bg-primary-950/40">
-                        Hiện tại
+                        Current
                       </span>
                     ) : null}
                   </button>
@@ -101,12 +101,12 @@ export default function PlannerHeader({
         </div>
         {profile.weeklyHours ? (
           <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-            {profile.weeklyHours} giờ/tuần
+            {profile.weeklyHours} hours/week
           </p>
         ) : null}
         {summary ? (
           <p className="mt-2 text-xs" style={{ color: "var(--text-muted)" }}>
-            {summary.completed_units}/{summary.total_units} bài hoàn thành · {summary.in_progress_units} bài đang học
+            {summary.completed_units}/{summary.total_units} units completed · {summary.in_progress_units} units in progress
           </p>
         ) : null}
       </div>

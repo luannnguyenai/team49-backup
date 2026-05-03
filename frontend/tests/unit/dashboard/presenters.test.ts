@@ -16,14 +16,14 @@ describe("dashboard presenters", () => {
     const model = buildDashboardCourseCardModel(CS231N_ITEM);
 
     expect(model.href).toBe("/courses/cs231n/start");
-    expect(model.ctaLabel).toBe("Bắt đầu học");
+    expect(model.ctaLabel).toBe("Start learning");
   });
 
   it("routes coming-soon courses to their own overview page", () => {
     const model = buildDashboardCourseCardModel(COMING_SOON_ITEM);
 
     expect(model.href).toBe("/courses/upcoming-ai");
-    expect(model.ctaLabel).toBe("Xem tổng quan");
+    expect(model.ctaLabel).toBe("View overview");
   });
 
   it("prefers recommended courses in the for-you tab", () => {

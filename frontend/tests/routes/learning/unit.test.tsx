@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -5,6 +6,7 @@ import LearningUnitLoading from "@/app/(protected)/courses/[courseSlug]/learn/[u
 import LearningUnitShell from "@/components/learn/LearningUnitShell";
 import LearningPageScreen from "@/components/learn/LearningPageScreen";
 import TopNav from "@/components/layout/TopNav";
+import { TUTOR_SESSION_HISTORY_STORAGE_KEY } from "@/lib/tutorSessionHistory";
 import {
   COMING_SOON_ITEM,
   CS224N_ITEM,
@@ -200,6 +202,29 @@ const TOC_SUMMARY = {
   ],
 };
 
+const INLINE_QUIZ_START_RESPONSE = {
+  session_id: "inline-quiz-session-1",
+  learning_unit_id: "unit_lecture_01",
+  total_questions: 1,
+  questions: [
+    {
+      id: "00000000-0000-0000-0000-000000000101",
+      item_id: "item-inline-quiz-1",
+      learning_unit_id: "unit_lecture_01",
+      bloom_level: "understand",
+      difficulty_bucket: "medium",
+      stem_text: "Which option is correct?",
+      option_a: "Option A",
+      option_b: "Option B",
+      option_c: "Option C",
+      option_d: "Option D",
+      time_expected_seconds: 30,
+    },
+  ],
+  source: "inline_video",
+  checkpoint: "midpoint",
+} as const;
+
 const LECTURE_2_UNIT: LearningUnitResponse = {
   course: {
     slug: "cs231n",
@@ -252,6 +277,7 @@ const TOC_SUMMARY_2 = {
 describe("learning unit page (US3)", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    sessionStorage.clear();
     const { resetCachedAllCourseCatalog } = await import("@/lib/course-catalog-cache");
     resetCachedAllCourseCatalog();
     apiMock.get.mockResolvedValue({ data: [] });
@@ -373,7 +399,7 @@ describe("learning unit page (US3)", () => {
     ).toHaveAttribute("href", "/courses/cs231n");
     expect(screen.getAllByText("Lecture 1: Introduction").length).toBeGreaterThan(0);
     await waitFor(() => {
-      expect(screen.getByText("Bài học")).toBeInTheDocument();
+      expect(screen.getByText("Lessons")).toBeInTheDocument();
       expect(screen.getByText("Lecture 01")).toBeInTheDocument();
       expect(screen.getByText("Lecture 02")).toBeInTheDocument();
       expect(screen.getByLabelText("Lecture 01 completed")).toBeInTheDocument();
@@ -381,7 +407,7 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByText("Key ideas at this moment")).toBeInTheDocument();
       expect(screen.getByText("Neural networks learn layered visual features.")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Ask about this lecture...")).toBeInTheDocument();
-      expect(screen.getByText("Giải thích ý chính của đoạn này dễ hiểu hơn")).toBeInTheDocument();
+      expect(screen.getByText("Explain the main idea of this section in simpler terms")).toBeInTheDocument();
       expect(screen.getByLabelText("Video progress rail")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Hide lessons panel" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Close tutor" })).toBeInTheDocument();
@@ -453,6 +479,81 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByText("AI Tutor")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Ask about this lecture...")).toBeInTheDocument();
     });
+  });
+
+  it("restores tutor history when switching away from a lesson and returning in the same session", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        const method = init?.method ?? (input instanceof Request ? input.method : "GET");
+
+        if (method === "POST" && url === "/api/lectures/ask") {
+          const encoder = new TextEncoder();
+          const stream = new ReadableStream({
+            start(controller) {
+              controller.enqueue(encoder.encode('{"a":"This should come back when I revisit the lesson."}\n{"qa_id":61}\n'));
+              controller.close();
+            },
+          });
+
+          return new Response(stream, {
+            status: 200,
+            headers: { "Content-Type": "application/x-ndjson" },
+          });
+        }
+
+        return new Response(JSON.stringify(TOC_SUMMARY), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }),
+    );
+
+    const { rerender } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    fireEvent.change(await screen.findByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Remember this for lesson 1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("This should come back when I revisit the lesson.")).toBeInTheDocument();
+    });
+
+    rerender(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-2-linear-classifiers"
+        data={LECTURE_2_UNIT}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText("Remember this for lesson 1")).not.toBeInTheDocument();
+      expect(screen.queryByText("This should come back when I revisit the lesson.")).not.toBeInTheDocument();
+    });
+
+    rerender(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Remember this for lesson 1")).toBeInTheDocument();
+      expect(screen.getByText("This should come back when I revisit the lesson.")).toBeInTheDocument();
+    });
+
+    expect(sessionStorage.getItem(TUTOR_SESSION_HISTORY_STORAGE_KEY)).toContain("Remember this for lesson 1");
   });
 
   it("renders key ideas before timestamps in the desktop shell", async () => {
@@ -608,7 +709,158 @@ describe("learning unit page (US3)", () => {
     fireEvent(video!, new Event("durationchange"));
     fireEvent(video!, new Event("timeupdate"));
 
-    expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
+    expect(screen.getByTestId("inline-quiz-backdrop")).toBeInTheDocument();
+  });
+
+  it("pauses the video as soon as the mid-video quiz prompt appears", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    const pauseSpy = vi.fn();
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => false,
+    });
+    Object.defineProperty(video, "pause", {
+      configurable: true,
+      writable: true,
+      value: pauseSpy,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
+    expect(pauseSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows an inline quiz error message when answer submission fails", async () => {
+    canonicalQuizApiMock.start.mockResolvedValue(INLINE_QUIZ_START_RESPONSE);
+    quizApiMock.answer.mockRejectedValue({
+      response: {
+        data: {
+          detail: "Quiz answer could not be saved.",
+        },
+      },
+    });
+
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Start quiz" }));
+    fireEvent.click(await screen.findByRole("button", { name: /Option A/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Submit answer" }));
+
+    expect(await screen.findByText("Quiz answer could not be saved.")).toBeInTheDocument();
+    expect(screen.queryByText("You answered correctly.")).not.toBeInTheDocument();
+  });
+
+  it("disables inline quiz submit while the answer request is pending", async () => {
+    canonicalQuizApiMock.start.mockResolvedValue(INLINE_QUIZ_START_RESPONSE);
+
+    let resolveAnswer: ((value: {
+      is_correct: boolean;
+      correct_answer: "A" | "B" | "C" | "D";
+      explanation_text: string | null;
+      questions_answered: number;
+      questions_correct: number;
+    }) => void) | null = null;
+
+    quizApiMock.answer.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveAnswer = resolve;
+        }),
+    );
+
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Start quiz" }));
+    fireEvent.click(await screen.findByRole("button", { name: /Option A/i }));
+
+    const submitButton = screen.getByRole("button", { name: "Submit answer" });
+    fireEvent.click(submitButton);
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(quizApiMock.answer).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByRole("button", { name: "Checking answer..." })).toBeDisabled();
+
+    expect(resolveAnswer).not.toBeNull();
+    resolveAnswer!({
+      is_correct: true,
+      correct_answer: "A",
+      explanation_text: "Because A is correct.",
+      questions_answered: 1,
+      questions_correct: 1,
+    });
+
+    expect(await screen.findByText("You answered correctly.")).toBeInTheDocument();
   });
 
   it("shows the end-of-video quiz overlay when playback finishes", async () => {
@@ -637,7 +889,7 @@ describe("learning unit page (US3)", () => {
     fireEvent(video!, new Event("durationchange"));
     fireEvent(video!, new Event("timeupdate"));
 
-    const dismissButton = await screen.findByRole("button", { name: "Ẩn tạm" });
+    const dismissButton = await screen.findByRole("button", { name: "Dismiss for now" });
     fireEvent.click(dismissButton);
 
     Object.defineProperty(video, "currentTime", {
@@ -649,7 +901,59 @@ describe("learning unit page (US3)", () => {
     fireEvent(video!, new Event("ended"));
 
     expect(await screen.findAllByText("End-of-video quiz")).toHaveLength(2);
-    expect(await screen.findByRole("button", { name: "Bắt đầu quiz" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
+  });
+
+  it("pauses the video as soon as the end-of-video quiz prompt appears", async () => {
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    const pauseSpy = vi.fn();
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 300,
+    });
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => false,
+    });
+    Object.defineProperty(video, "pause", {
+      configurable: true,
+      writable: true,
+      value: pauseSpy,
+    });
+
+    fireEvent(video!, new Event("durationchange"));
+    fireEvent(video!, new Event("timeupdate"));
+
+    const dismissButton = await screen.findByRole("button", { name: "Dismiss for now" });
+    fireEvent.click(dismissButton);
+
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+
+    fireEvent(video!, new Event("ended"));
+
+    expect(await screen.findByRole("button", { name: "Start quiz" })).toBeInTheDocument();
+    expect(await screen.findAllByText("End-of-video quiz")).toHaveLength(2);
+    expect(pauseSpy).toHaveBeenCalledTimes(2);
   });
 
   it("does not show AI Tutor toggle when tutor is disabled", async () => {
@@ -684,10 +988,21 @@ describe("learning unit page (US3)", () => {
     });
   });
 
+  async function renderTopNavAndWaitForCatalog() {
+    render(<TopNav />);
+
+    await waitFor(() => {
+      expect(courseApiMock.catalog).toHaveBeenCalledWith({
+        view: "all",
+        includeUnavailable: true,
+      });
+    });
+  }
+
   it("hides the Courses nav item after login on a nested learning route", async () => {
     navigationMock.pathname = "/courses/cs231n/learn/lecture-1-introduction";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
     expect(screen.queryByRole("link", { name: "Courses" })).not.toBeInTheDocument();
   });
@@ -695,10 +1010,10 @@ describe("learning unit page (US3)", () => {
   it("renders desktop top nav in the order logo, search, then navigation links", async () => {
     navigationMock.pathname = "/dashboard";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
     const brand = screen.getByRole("link", { name: "AI Learning Hub" });
-    const search = screen.getByLabelText("Tìm kiếm khóa học");
+    const search = screen.getByLabelText("Search courses");
     const tutorLink = screen.getByRole("link", { name: "AI Assistant" });
 
     const headerRow = brand.closest("header")?.firstElementChild;
@@ -725,9 +1040,9 @@ describe("learning unit page (US3)", () => {
 
     navigationMock.pathname = "/dashboard";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
-    fireEvent.click(screen.getByRole("button", { name: /đăng xuất/i }));
+    fireEvent.click(screen.getByRole("button", { name: /sign out/i }));
 
     expect(authStoreMock.logout).toHaveBeenCalledTimes(1);
     expect(navigationMock.router.push).not.toHaveBeenCalled();
@@ -742,9 +1057,9 @@ describe("learning unit page (US3)", () => {
   it("shows the search input on non-course routes as a global nav control", async () => {
     navigationMock.pathname = "/history";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
-    expect(screen.getByLabelText("Tìm kiếm khóa học")).toBeInTheDocument();
+    expect(screen.getByLabelText("Search courses")).toBeInTheDocument();
   });
 
   it("loads the course catalog when the dropdown search is activated", async () => {
@@ -752,7 +1067,7 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    fireEvent.focus(screen.getByLabelText("Tìm kiếm khóa học"));
+    fireEvent.focus(screen.getByLabelText("Search courses"));
 
     await waitFor(() => {
       expect(courseApiMock.catalog).toHaveBeenCalledWith({
@@ -762,12 +1077,18 @@ describe("learning unit page (US3)", () => {
     });
   });
 
+  it("preloads the course catalog before the search input is focused", async () => {
+    navigationMock.pathname = "/dashboard";
+
+    await renderTopNavAndWaitForCatalog();
+  });
+
   it("shows matching courses in a dropdown beneath the search input", async () => {
     navigationMock.pathname = "/learn";
 
     render(<TopNav />);
 
-    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    const input = screen.getByLabelText("Search courses");
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "vision" } });
 
@@ -786,10 +1107,10 @@ describe("learning unit page (US3)", () => {
   it("hides the clear button when the search input is empty", async () => {
     navigationMock.pathname = "/dashboard";
 
-    render(<TopNav />);
+    await renderTopNavAndWaitForCatalog();
 
     expect(
-      screen.queryByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+      screen.queryByRole("button", { name: "Clear search query" }),
     ).not.toBeInTheDocument();
   });
 
@@ -798,7 +1119,7 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    fireEvent.change(screen.getByLabelText("Tìm kiếm khóa học"), {
+    fireEvent.change(screen.getByLabelText("Search courses"), {
       target: { value: "cs231n" },
     });
 
@@ -807,7 +1128,7 @@ describe("learning unit page (US3)", () => {
     });
 
     expect(
-      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+      screen.getByRole("button", { name: "Clear search query" }),
     ).toBeInTheDocument();
   });
 
@@ -816,14 +1137,14 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    const input = screen.getByLabelText("Search courses");
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "cs231n" } });
 
     await screen.findByRole("button", { name: /cs231n: deep learning for computer vision/i });
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Xóa từ khóa tìm kiếm" }),
+      screen.getByRole("button", { name: "Clear search query" }),
     );
 
     expect(input).toHaveValue("");
@@ -837,7 +1158,7 @@ describe("learning unit page (US3)", () => {
 
     render(<TopNav />);
 
-    const input = screen.getByLabelText("Tìm kiếm khóa học");
+    const input = screen.getByLabelText("Search courses");
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "language" } });
 
@@ -848,6 +1169,41 @@ describe("learning unit page (US3)", () => {
     );
 
     expect(navigationMock.router.push).toHaveBeenCalledWith("/courses/cs224n");
+  });
+
+  it("routes to the first matching course when Enter is pressed in the search input", async () => {
+    navigationMock.pathname = "/profile";
+
+    render(<TopNav />);
+
+    const input = screen.getByLabelText("Search courses");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "language" } });
+
+    await screen.findByRole("button", {
+      name: /cs224n: natural language processing with deep learning/i,
+    });
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(navigationMock.router.push).toHaveBeenCalledWith("/courses/cs224n");
+  });
+
+  it("exits the loading state in React strict mode after catalog preloading resolves", async () => {
+    navigationMock.pathname = "/dashboard";
+
+    render(
+      <StrictMode>
+        <TopNav />
+      </StrictMode>,
+    );
+
+    const input = screen.getByLabelText("Search courses");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "deep learning" } });
+
+    expect(await screen.findByText("CS231n: Deep Learning for Computer Vision")).toBeInTheDocument();
+    expect(screen.queryByText("Loading courses...")).not.toBeInTheDocument();
   });
 
 });

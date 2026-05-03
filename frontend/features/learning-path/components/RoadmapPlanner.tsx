@@ -93,7 +93,7 @@ function groupItemsByCourseAndLecture(
 
     course.items.push(item);
 
-    const lectureTitle = item.section_title || "Khác";
+    const lectureTitle = item.section_title || "Other";
     const lectureKey = lectureKeyFor(courseKey, lectureTitle);
     let lecture = course.lectures.find(
       (candidate) => candidate.key === lectureKey,

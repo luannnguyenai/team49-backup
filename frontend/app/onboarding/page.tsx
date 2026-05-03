@@ -59,17 +59,17 @@ import {
 
 // Experienced: 5 steps visible
 const STEPS_EXPERIENCED = [
-  { title: "Mục tiêu học tập",   subtitle: "Bạn muốn học gì?" },
-  { title: "Kinh nghiệm",        subtitle: "Bạn đã từng học AI/ML chưa?" },
-  { title: "Nền tảng hiện tại",  subtitle: "Nhập thông tin để AI phân tích" },
-  { title: "Xác nhận kiến thức", subtitle: "Chọn cụm cần placement kiểm chứng" },
-  { title: "Mức kiểm tra",       subtitle: "Chọn độ sâu bài placement" },
+  { title: "Learning goal", subtitle: "What do you want to study?" },
+  { title: "Experience", subtitle: "Have you studied AI/ML before?" },
+  { title: "Current foundation", subtitle: "Enter details for AI analysis" },
+  { title: "Knowledge confirmation", subtitle: "Choose groups for placement verification" },
+  { title: "Assessment depth", subtitle: "Choose the placement depth" },
 ] as const;
 
 // Beginner: 2 visible steps (internal indices 0, 1)
 const STEPS_BEGINNER = [
-  { title: "Mục tiêu học tập",  subtitle: "Bạn muốn học gì?" },
-  { title: "Kinh nghiệm",       subtitle: "Bạn đã từng học AI/ML chưa?" },
+  { title: "Learning goal", subtitle: "What do you want to study?" },
+  { title: "Experience", subtitle: "Have you studied AI/ML before?" },
 ] as const;
 
 // Maps internal step index → beginner display index (-1 = hidden/skipped)
@@ -279,10 +279,10 @@ function OnboardingPageInner() {
           </div>
           <div>
             <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-              Thiết lập lộ trình học
+              Set up your learning path
             </h1>
             <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-              Chỉ mất 2 phút để AI tạo lộ trình cá nhân hóa cho bạn.
+              It only takes 2 minutes for AI to create a personalized path for you.
             </p>
           </div>
         </div>
@@ -358,7 +358,7 @@ function OnboardingPageInner() {
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <LoadingSpinner size="lg" />
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Đang tải nội dung...
+                Loading content...
               </p>
             </div>
           ) : (
@@ -436,7 +436,7 @@ function OnboardingPageInner() {
                     onNext={() => {
                       handleSubmit(submitOnboarding)();
                     }}
-                    nextLabel="Hoàn tất"
+                    nextLabel="Finish"
                   />
                 )}
               </div>
@@ -446,7 +446,7 @@ function OnboardingPageInner() {
         </div>
 
         <p className="mt-4 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-          Bạn có thể cập nhật thông tin này bất cứ lúc nào trong phần Cài đặt.
+          You can update this information at any time in Settings.
         </p>
       </div>
     </div>

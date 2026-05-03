@@ -25,11 +25,11 @@ import { MASTERY_COLORS, BLOOM_COLORS } from "@/lib/ui/skillColors";
 // ---------------------------------------------------------------------------
 
 const MASTERY_LABELS: Record<MasteryLevel, string> = {
-  not_started: "Chưa bắt đầu",
-  novice: "Mới bắt đầu",
-  developing: "Đang phát triển",
-  proficient: "Thành thạo",
-  mastered: "Xuất sắc",
+  not_started: "Not started",
+  novice: "Novice",
+  developing: "Developing",
+  proficient: "Proficient",
+  mastered: "Mastered",
 };
 
 const MASTERY_BG: Record<MasteryLevel, string> = {
@@ -41,10 +41,10 @@ const MASTERY_BG: Record<MasteryLevel, string> = {
 };
 
 const BLOOM_LABELS: Record<string, string> = {
-  remember: "Nhớ",
-  understand: "Hiểu",
-  apply: "Áp dụng",
-  analyze: "Phân tích",
+  remember: "Remember",
+  understand: "Understand",
+  apply: "Apply",
+  analyze: "Analyze",
 };
 
 
@@ -157,13 +157,13 @@ function QuizResultsInner() {
       <div className="flex min-h-screen items-center justify-center p-6" style={{ background: "var(--bg-primary)" }}>
         <div className="text-center">
           <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-            Không tìm thấy kết quả quiz.
+            Quiz results were not found.
           </p>
           <button
             onClick={() => router.push("/dashboard")}
             className="btn-secondary mt-4"
           >
-            Về trang chủ
+            Back to Home
           </button>
         </div>
       </div>
@@ -193,12 +193,12 @@ function QuizResultsInner() {
           onClick={() => router.push(runtimeRef.learnHref)}
           className="rounded-lg p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
           style={{ color: "var(--text-secondary)" }}
-          aria-label="Quay lại"
+          aria-label="Go back"
         >
           <ArrowLeft size={18} />
         </button>
         <h1 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
-          Kết quả Quiz: {result.learning_unit_title}
+          Quiz Results: {result.learning_unit_title}
         </h1>
       </header>
 
@@ -230,13 +230,13 @@ function QuizResultsInner() {
             style={{ color: "var(--text-secondary)" }}
           >
             <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Tổng thời gian</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Total time</p>
               <p className="mt-0.5 font-semibold" style={{ color: "var(--text-primary)" }}>
                 {fmtSeconds(result.time_total_seconds)}
               </p>
             </div>
             <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>TB / câu</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Avg / question</p>
               <p className="mt-0.5 font-semibold" style={{ color: "var(--text-primary)" }}>
                 {fmtSeconds(result.avg_time_per_question)}
               </p>
@@ -246,7 +246,7 @@ function QuizResultsInner() {
           {result.learning_path_updated && (
             <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-emerald-600 font-medium">
               <CheckCircle2 size={14} />
-              Lộ trình học đã được cập nhật tự động
+              Your learning path was updated automatically
             </div>
           )}
         </div>
@@ -259,25 +259,25 @@ function QuizResultsInner() {
           <div className="flex items-center gap-2">
             <TrendingUp size={17} style={{ color: masteryColor }} />
             <h2 className="font-semibold" style={{ color: "var(--text-primary)" }}>
-              Mức độ thành thạo
+              Mastery level
             </h2>
           </div>
 
           <MasteryBar
-            label="Trước quiz"
+            label="Before quiz"
             value={result.mastery_before}
             color="#94a3b8"
             animate={animReady}
           />
           <MasteryBar
-            label="Sau quiz"
+            label="After quiz"
             value={result.mastery_after}
             color={masteryColor}
             animate={animReady}
           />
 
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Thay đổi:{" "}
+            Change:{" "}
             <span
               className="font-semibold"
               style={{ color: result.mastery_after >= result.mastery_before ? MASTERY_COLORS.mastered : MASTERY_COLORS.novice }}
@@ -297,7 +297,7 @@ function QuizResultsInner() {
             <div className="flex items-center gap-2">
               <Brain size={17} style={{ color: "var(--color-primary-500)" }} />
               <h2 className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                Phân tích theo Bloom
+                Bloom breakdown
               </h2>
             </div>
 
@@ -323,7 +323,7 @@ function QuizResultsInner() {
             <div className="mb-3 flex items-center gap-2">
               <BookOpen size={17} className="text-amber-500" />
               <h2 className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                Kiến thức cần ôn lại
+                Knowledge to review
               </h2>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -348,7 +348,7 @@ function QuizResultsInner() {
             <div className="mb-3 flex items-center gap-2">
               <Lightbulb size={17} className="text-yellow-500" />
               <h2 className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                Hiểu nhầm được phát hiện
+                Detected misconceptions
               </h2>
             </div>
             <ul className="space-y-1.5">
@@ -373,7 +373,7 @@ function QuizResultsInner() {
             className="btn-secondary flex items-center justify-center gap-2"
           >
             <RotateCcw size={15} />
-            Làm lại
+            Retry
           </button>
 
           <button
@@ -381,7 +381,7 @@ function QuizResultsInner() {
             className="btn-secondary flex items-center justify-center gap-2"
           >
             <BookOpen size={15} />
-            Ôn lại bài
+            Review lesson
           </button>
 
           <button
@@ -389,7 +389,7 @@ function QuizResultsInner() {
             className="btn-primary flex items-center justify-center gap-2"
           >
             <Home size={15} />
-            Trang chủ
+            Home
           </button>
         </div>
       </div>

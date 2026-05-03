@@ -1,6 +1,6 @@
 "use client";
 // components/onboarding/StepDesiredSections.tsx
-// Step 2 — "Bạn muốn học gì?"
+// Step 2 — "What do you want to study?"
 // Large selectable cards, one per course section.
 
 import { BookOpen, Check, Clock, Code2, Database, Layers } from "lucide-react";
@@ -39,17 +39,17 @@ export default function StepDesiredSections({
   return (
     <div className="space-y-3">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Chọn 1 hoặc nhiều khóa học bạn muốn theo đuổi.
+        Choose one or more courses you want to pursue.
         {selectedIds.length > 0 && (
           <span className="ml-2 font-semibold text-primary-600">
-            ({selectedIds.length} đã chọn)
+            ({selectedIds.length} selected)
           </span>
         )}
       </p>
 
       {courses.length === 0 && (
         <div className="py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-          Không có khóa học nào để hiển thị.
+          No courses available to display.
         </div>
       )}
 
@@ -126,7 +126,7 @@ export default function StepDesiredSections({
                     style={{ color: "var(--text-muted)" }}
                   >
                     <Clock className="h-3.5 w-3.5" />
-                    {course.hero_badge ?? "Đang mở"}
+                    {course.hero_badge ?? "Open now"}
                   </span>
                 </div>
               </div>

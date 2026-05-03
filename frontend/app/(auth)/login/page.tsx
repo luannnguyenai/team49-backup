@@ -2,24 +2,26 @@
 
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import AuthBackLink from "@/components/auth/AuthBackLink";
 import LoginForm from "@/components/auth/LoginForm";
 
-export const metadata: Metadata = { title: "Đăng nhập" };
+export const metadata: Metadata = { title: "Sign In" };
 
 export default function LoginPage() {
   return (
     <>
       <div className="mb-6">
         <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Chào mừng trở lại 👋
+          Welcome back 👋
         </h2>
         <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-          Đăng nhập để tiếp tục hành trình học tập của bạn.
+          Sign in to continue your learning journey.
         </p>
       </div>
       <Suspense>
         <LoginForm />
       </Suspense>
+      <AuthBackLink />
     </>
   );
 }

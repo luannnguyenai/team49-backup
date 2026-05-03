@@ -46,7 +46,7 @@ export default function StepGoalSelection({ onNext }: Props) {
   return (
     <div className="space-y-5">
       <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-        Hướng bạn muốn tập trung là gì?
+        Which direction do you want to focus on?
       </p>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -105,7 +105,7 @@ export default function StepGoalSelection({ onNext }: Props) {
               : "bg-primary-600 text-white hover:bg-primary-700 active:scale-[0.99]",
           )}
         >
-          Tiếp tục
+          Continue
         </button>
       </div>
     </div>

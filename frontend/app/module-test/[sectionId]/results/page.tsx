@@ -5,7 +5,7 @@
 //   PASS ✅ / FAIL ❌ hero section
 //   Total score %
 //   Per-learning-unit breakdown table
-//   FAIL path: weak learning units + review hours + "Ôn lại" CTA
+//   FAIL path: weak learning units + review hours + "Review" CTA
 //   PASS path: confetti animation + next-module card
 //   Wrong answers list with correct answer + explanation
 
@@ -39,10 +39,10 @@ import MarkdownRenderer from "@/components/assessment/MarkdownRenderer";
 // ---------------------------------------------------------------------------
 
 const BLOOM_VI: Record<string, string> = {
-  remember:   "Nhớ",
-  understand: "Hiểu",
-  apply:      "Áp dụng",
-  analyze:    "Phân tích",
+  remember:   "Remember",
+  understand: "Understand",
+  apply:      "Apply",
+  analyze:    "Analyze",
 };
 
 const BLOOM_CLS: Record<string, string> = {
@@ -58,8 +58,8 @@ const VERDICT_CLS: Record<string, string> = {
 };
 
 const VERDICT_VI: Record<string, string> = {
-  pass: "Đạt",
-  fail: "Chưa đạt",
+  pass: "Passed",
+  fail: "Not passed",
 };
 
 function optionText(w: WrongAnswerDetail, opt: SelectedAnswer): string {
@@ -274,10 +274,10 @@ function ModuleTestResultsInner() {
       >
         <div className="text-center space-y-4 p-6">
           <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-            Không tìm thấy kết quả.
+            Results were not found.
           </p>
           <button onClick={() => router.push("/dashboard")} className="btn-secondary">
-            Về trang chủ
+            Back to Home
           </button>
         </div>
       </div>
@@ -312,7 +312,7 @@ function ModuleTestResultsInner() {
           <Home size={18} />
         </button>
         <h1 className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-          Kết quả: {section_title}
+          Results: {section_title}
         </h1>
       </header>
 
@@ -337,10 +337,10 @@ function ModuleTestResultsInner() {
               passed ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400",
             ].join(" ")}
           >
-            {passed ? "ĐẠT" : "CHƯA ĐẠT"}
+            {passed ? "PASSED" : "NOT PASSED"}
           </h2>
           <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-            {passed ? "Chúc mừng! Bạn đã vượt qua module test." : "Bạn cần ôn thêm và thử lại."}
+            {passed ? "You passed the module test." : "You need more review before trying again."}
           </p>
 
           {/* Animated score */}
@@ -356,7 +356,7 @@ function ModuleTestResultsInner() {
           </div>
 
           <p className="mt-2 text-xs" style={{ color: "var(--text-muted)" }}>
-            Yêu cầu: 70% • Đạt được: {total_score_percent.toFixed(1)}%
+            Required: 70% • Achieved: {total_score_percent.toFixed(1)}%
           </p>
         </div>
 
@@ -367,7 +367,7 @@ function ModuleTestResultsInner() {
         >
           <div className="px-5 py-3 border-b" style={{ borderColor: "var(--border)" }}>
             <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-              Phân tích theo learning unit
+              Learning unit breakdown
             </h3>
           </div>
           <div className="overflow-x-auto">
@@ -375,9 +375,9 @@ function ModuleTestResultsInner() {
               <thead>
                 <tr style={{ color: "var(--text-muted)" }}>
                   <th className="px-5 py-2.5 text-left text-xs font-medium">Learning unit</th>
-                  <th className="px-0 py-2.5 text-left text-xs font-medium">Điểm</th>
+                  <th className="px-0 py-2.5 text-left text-xs font-medium">Score</th>
                   <th className="px-0 py-2.5 text-left text-xs font-medium">Bloom max</th>
-                  <th className="px-0 py-2.5 text-left text-xs font-medium">Kết quả</th>
+                  <th className="px-0 py-2.5 text-left text-xs font-medium">Result</th>
                 </tr>
               </thead>
               <tbody className="px-5">
@@ -422,11 +422,11 @@ function ModuleTestResultsInner() {
             <div className="flex items-center justify-between">
               <h3 className="font-semibold flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
                 <BookOpen size={16} className="text-amber-500" />
-                Các learning unit cần ôn lại
+                Learning units to review
               </h3>
               <span className="flex items-center gap-1.5 text-xs rounded-full bg-amber-100 px-2.5 py-1 text-amber-700 font-medium">
                 <Clock size={12} />
-                Ước lượng: {estimated_review_hours}h thêm
+                Estimate: {estimated_review_hours}h more
               </span>
             </div>
 
@@ -454,7 +454,7 @@ function ModuleTestResultsInner() {
                       </div>
                     )}
                     <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                      ~{rt.estimated_review_hours}h ôn lại
+                      ~{rt.estimated_review_hours}h review
                     </p>
                   </div>
                   <button
@@ -462,7 +462,7 @@ function ModuleTestResultsInner() {
                     className="btn-secondary flex shrink-0 items-center gap-1.5 text-xs"
                   >
                     <BookOpen size={13} />
-                    Ôn lại
+                    Review
                   </button>
                 </div>
               ))}
@@ -479,7 +479,7 @@ function ModuleTestResultsInner() {
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={16} className="text-primary-500" />
               <span className="text-xs font-semibold uppercase tracking-wide text-primary-600">
-                Module tiếp theo
+                Next module
               </span>
             </div>
             <p className="text-base font-bold mb-3" style={{ color: "var(--text-primary)" }}>
@@ -489,7 +489,7 @@ function ModuleTestResultsInner() {
               onClick={() => router.push(`/module-test/${next_section.section_id}`)}
               className="btn-primary flex items-center gap-2"
             >
-              Bắt đầu module
+              Start module
               <ArrowRight size={15} />
             </button>
           </div>
@@ -502,10 +502,10 @@ function ModuleTestResultsInner() {
           >
             <Trophy className="mx-auto mb-2 text-yellow-500" size={32} />
             <p className="font-bold text-lg" style={{ color: "var(--text-primary)" }}>
-              Bạn đã hoàn thành tất cả modules! 🎉
+              You completed all modules! 🎉
             </p>
             <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-              Xuất sắc — không còn module nào tiếp theo.
+              Excellent work. There are no more modules after this.
             </p>
           </div>
         )}
@@ -518,7 +518,7 @@ function ModuleTestResultsInner() {
               style={{ color: "var(--text-primary)" }}
             >
               <XCircle size={16} className="text-red-400" />
-              Câu trả lời sai ({wrong_answers.length} câu)
+              Incorrect answers ({wrong_answers.length} questions)
             </h3>
             <div className="space-y-3">
               {wrong_answers.map((w) => (
@@ -536,7 +536,7 @@ function ModuleTestResultsInner() {
               className="btn-secondary flex items-center justify-center gap-2"
             >
               <RotateCcw size={15} />
-              Thi lại
+              Retry
             </button>
           )}
           <button
@@ -544,7 +544,7 @@ function ModuleTestResultsInner() {
             className="btn-primary flex items-center justify-center gap-2"
           >
             <Home size={15} />
-            Về trang chủ
+            Home
           </button>
         </div>
       </div>

@@ -5,7 +5,6 @@ import TutorPage from "@/app/tutor/page";
 
 const navigationMock = vi.hoisted(() => ({
   replace: vi.fn(),
-  push: vi.fn(),
 }));
 
 vi.mock("next/navigation", async () => {

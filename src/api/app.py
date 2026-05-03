@@ -48,6 +48,9 @@ from src.routers.placement_lite import placement_lite_router
 from src.routers.quiz import quiz_router
 from src.routers.review import review_router
 from src.routers.test_support import test_support_router
+from src.routers.admin import admin_router
+from src.middleware.prometheus import setup_prometheus
+from src.middleware.request_logger import AccessLogMiddleware
 from src.config import settings
 
 logger = logging.getLogger(__name__)
@@ -107,6 +110,12 @@ app.add_middleware(
 # Static mounts
 app.mount("/static", StaticFiles(directory="src/api/static"), name="static")
 
+# Prometheus /metrics endpoint (Phase 2 — admin observability)
+setup_prometheus(app)
+
+# JSON access log → logs/access.jsonl (Phase 3 — admin observability)
+app.add_middleware(AccessLogMiddleware)
+
 
 # ---------------------------------------------------------------------------
 # Routers
@@ -128,6 +137,7 @@ app.include_router(placement_lite_router)
 app.include_router(quiz_router)
 app.include_router(review_router)
 app.include_router(test_support_router)
+app.include_router(admin_router)
 
 
 # ---------------------------------------------------------------------------
@@ -293,10 +303,24 @@ async def ask_question(req: AskRequest, db: AsyncSession = Depends(get_async_db)
 
 
 @app.get("/api/lectures/qa-history", tags=["Lectures"])
-async def get_qa_history(db: AsyncSession = Depends(get_async_db)):
-    result = await db.execute(
-        select(QAHistory).order_by(QAHistory.created_at.desc()).limit(50)
-    )
+async def get_qa_history(
+    lecture_id: str | None = None,
+    context_binding_id: str | None = None,
+    db: AsyncSession = Depends(get_async_db),
+):
+    query = select(QAHistory)
+
+    if lecture_id:
+        query = query.where(QAHistory.lecture_id == lecture_id)
+    if context_binding_id:
+        query = query.where(QAHistory.context_binding_id == context_binding_id)
+
+    if lecture_id or context_binding_id:
+        query = query.order_by(QAHistory.created_at.asc()).limit(100)
+    else:
+        query = query.order_by(QAHistory.created_at.desc()).limit(50)
+
+    result = await db.execute(query)
     return result.scalars().all()
 
 

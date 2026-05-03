@@ -31,7 +31,7 @@ export default function TopBar({ title, onMenuClick }: Props) {
       <button
         onClick={onMenuClick}
         className="btn-ghost lg:hidden"
-        aria-label="Mở menu"
+        aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -54,7 +54,7 @@ export default function TopBar({ title, onMenuClick }: Props) {
         <button
           onClick={toggleTheme}
           className="btn-ghost h-9 w-9 p-0"
-          aria-label="Đổi giao diện"
+          aria-label="Toggle theme"
         >
           {theme === "dark" ? (
             <Sun className="h-4 w-4" />
@@ -66,7 +66,7 @@ export default function TopBar({ title, onMenuClick }: Props) {
         {/* Notifications */}
         <button
           className="btn-ghost relative h-9 w-9 p-0"
-          aria-label="Thông báo"
+          aria-label="Notifications"
         >
           <Bell className="h-4 w-4" />
           {/* Badge */}
@@ -77,10 +77,10 @@ export default function TopBar({ title, onMenuClick }: Props) {
         <div
           className={cn(
             "flex h-8 w-8 items-center justify-center rounded-full",
-            "bg-primary-100 dark:bg-primary-900/30 text-primary-600",
+            "bg-surface-accent-soft text-primary-700 dark:text-primary-300",
             "text-sm font-semibold cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all"
           )}
-          aria-label="Hồ sơ"
+          aria-label="Profile"
           title={user?.full_name}
         >
           {user?.full_name?.[0]?.toUpperCase() ?? "?"}

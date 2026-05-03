@@ -20,10 +20,11 @@ describe("legacy tutor route", () => {
     vi.clearAllMocks();
   });
 
-  it("redirects to the AI Assistant route", async () => {
+  it("redirects to the AI Assistant route while keeping the redesigned shell", async () => {
     render(<TutorPage />);
 
-    expect(screen.getByText(/redirecting to ai assistant/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "AI Assistant" })).toBeInTheDocument();
+    expect(screen.getByText(/redirecting to the course-first assistant experience/i)).toBeInTheDocument();
     await waitFor(() => {
       expect(navigationMock.replace).toHaveBeenCalledWith("/agent");
     });

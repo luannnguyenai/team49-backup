@@ -4,14 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { learningUnitApi } from "@/lib/api";
-import { cn } from "@/lib/utils";
-import type { LearningUnitContentById, PathStatus } from "@/types";
+import type { LearningUnitContentById } from "@/types";
 import { formatDurationFromHours } from "../lib/duration";
 import { getStatusLabel } from "../lib/status";
 import { pathToFlow, sortByOrder } from "../presenters";
 import { useLearningPathStore } from "../store";
-
-const STATUSES: PathStatus[] = ["pending", "in_progress", "completed", "skipped"];
 
 function summarizeMarkdown(markdown: string | null | undefined): string | null {
   if (!markdown) return null;
@@ -33,8 +30,6 @@ export default function LearningUnitDrawer() {
   const selectedSectionKey = useLearningPathStore((s) => s.selectedSectionKey);
   const closeDrawer = useLearningPathStore((s) => s.closeDrawer);
   const selectItem = useLearningPathStore((s) => s.selectItem);
-  const updateStatus = useLearningPathStore((s) => s.updateStatus);
-  const updatingStatusById = useLearningPathStore((s) => s.updatingStatusById);
 
   const [content, setContent] = useState<LearningUnitContentById | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
@@ -71,7 +66,6 @@ export default function LearningUnitDrawer() {
       return;
     }
     let active = true;
-    setContent(null);
     setContentError(null);
     learningUnitApi
       .contentById(selectedItem.learning_unit_id)
@@ -79,7 +73,7 @@ export default function LearningUnitDrawer() {
         if (active) setContent(data);
       })
       .catch(() => {
-        if (active) setContentError("Không tải được mô tả chi tiết. Bạn vẫn có thể cập nhật trạng thái hoặc bắt đầu học.");
+        if (active) setContentError("Unable to load the detailed description. You can still update the status or start learning.");
       });
     return () => {
       active = false;
@@ -90,18 +84,18 @@ export default function LearningUnitDrawer() {
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      <button className="absolute inset-0 bg-slate-950/30" aria-label="Đóng bảng chi tiết" onClick={closeDrawer} />
+      <button className="absolute inset-0 bg-slate-950/30" aria-label="Close details panel" onClick={closeDrawer} />
       <aside className="relative h-full w-full max-w-xl overflow-y-auto border-l p-6 shadow-2xl" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}>
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-              {selectedSection ? "Nhóm bài học" : "Bài học"}
+              {selectedSection ? "Lesson group" : "Lesson"}
             </p>
             <h2 className="mt-1 text-xl font-bold" style={{ color: "var(--text-primary)" }}>
               {selectedSection?.title ?? selectedItem?.learning_unit_title}
             </h2>
           </div>
-          <button ref={closeButtonRef} type="button" onClick={closeDrawer} className="rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Đóng">
+          <button ref={closeButtonRef} type="button" onClick={closeDrawer} className="rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -109,7 +103,7 @@ export default function LearningUnitDrawer() {
         {selectedSection ? (
           <div className="space-y-3">
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {selectedSection.items.length} bài học trong nhóm này.
+              {selectedSection.items.length} lessons in this group.
             </p>
             {selectedSection.items.map((item) => (
               <button key={item.id} type="button" onClick={() => selectItem(item.id)} className="w-full rounded-xl border p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-900" style={{ borderColor: "var(--border)" }}>
@@ -122,71 +116,64 @@ export default function LearningUnitDrawer() {
           <div className="space-y-5">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
-                <p style={{ color: "var(--text-muted)" }}>Nhóm</p>
-                <p className="font-medium" style={{ color: "var(--text-primary)" }}>{selectedItem.section_title ?? "Khác"}</p>
+                <p style={{ color: "var(--text-muted)" }}>Group</p>
+                <p className="font-medium" style={{ color: "var(--text-primary)" }}>{selectedItem.section_title ?? "Other"}</p>
               </div>
               <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
-                <p style={{ color: "var(--text-muted)" }}>Tuần / thời lượng</p>
+                <p style={{ color: "var(--text-muted)" }}>Week / duration</p>
                 <p className="font-medium" style={{ color: "var(--text-primary)" }}>
-                  Tuần {selectedItem.week_number ?? 1} · {formatDurationFromHours(selectedItem.estimated_hours) ?? "0 phút"}
+                  Week {selectedItem.week_number ?? 1} · {formatDurationFromHours(selectedItem.estimated_hours) ?? "0 min"}
                 </p>
               </div>
             </div>
 
             <div>
-              <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Trạng thái</p>
-              <div className="flex flex-wrap gap-2">
-                {STATUSES.map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    disabled={updatingStatusById[selectedItem.id]}
-                    onClick={() => updateStatus(selectedItem.id, status)}
-                    className={cn(
-                      "rounded-full border px-3 py-1.5 text-sm font-medium disabled:opacity-60",
-                      selectedItem.status === status ? "border-primary-600 bg-primary-600 text-white" : "hover:bg-slate-50 dark:hover:bg-slate-900",
-                    )}
-                    style={selectedItem.status !== status ? { borderColor: "var(--border)", color: "var(--text-secondary)" } : undefined}
-                  >
-                    {getStatusLabel(status)}
-                  </button>
-                ))}
-              </div>
+              <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Status</p>
+              <span
+                className="inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium"
+                style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+              >
+                {getStatusLabel(selectedItem.status)}
+              </span>
             </div>
 
-            <div>
-              <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Mô tả</p>
+            <div className="min-h-[7rem]">
+              <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Description</p>
               {contentError ? (
                 <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-200">{contentError}</p>
               ) : content ? (
                 <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-                  {summarizeMarkdown(content.content_markdown) ?? "Chưa có mô tả chi tiết."}
+                  {summarizeMarkdown(content.content_markdown) ?? "No detailed description is available yet."}
                 </p>
               ) : (
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>Đang tải mô tả...</p>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading description...</p>
               )}
             </div>
 
-            <div className="flex gap-2">
-              {previous && (
+            <div className="flex items-center justify-between gap-2">
+              {previous ? (
                 <button
                   type="button"
                   className="rounded-lg border px-3 py-2 text-sm"
                   style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
                   onClick={() => selectItem(previous.id)}
                 >
-                  Bài trước
+                  Previous lesson
                 </button>
+              ) : (
+                <span aria-hidden="true" />
               )}
-              {next && (
+              {next ? (
                 <button
                   type="button"
                   className="rounded-lg border px-3 py-2 text-sm"
                   style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
                   onClick={() => selectItem(next.id)}
                 >
-                  Bài tiếp
+                  Next lesson
                 </button>
+              ) : (
+                <span aria-hidden="true" />
               )}
             </div>
 
@@ -194,7 +181,7 @@ export default function LearningUnitDrawer() {
               href={learningPlayerHref(selectedItem)}
               className="flex w-full items-center justify-center rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
             >
-              Bắt đầu học
+              Start learning
             </Link>
           </div>
         ) : null}

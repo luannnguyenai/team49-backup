@@ -19,32 +19,32 @@ import { MOCK_COURSES } from "@/lib/mock-course-catalog";
 
 const audienceCards = [
   {
-    title: "Người mới bắt đầu",
-    description: "Đi từ nền tảng cơ bản đến AI/ML theo một hướng học bớt mù mờ hơn.",
+    title: "Beginners",
+    description: "Start with a learning path that feels clearer, calmer, and easier to follow.",
     icon: Compass,
   },
   {
-    title: "Sinh viên và self-learner",
-    description: "Ghép kiến thức rời rạc thành một lộ trình học có mục tiêu rõ ràng.",
+    title: "Self-paced learners",
+    description: "Turn scattered studying into a more organized path with clear next steps.",
     icon: GraduationCap,
   },
   {
-    title: "Người đi làm kỹ thuật",
-    description: "Nâng cấp năng lực AI/ML/CV/NLP theo hướng thực dụng và có định hướng.",
+    title: "Learners rebuilding foundations",
+    description: "Get back on track with a path that helps you study in the right order.",
     icon: BrainCircuit,
   },
 ] as const;
 
 const roadmapPoints = [
-  "Chọn mục tiêu học phù hợp với AI/ML/CV/NLP",
-  "Xác định mức nền tảng hiện tại để tránh học lại lan man",
-  "Đi theo roadmap rõ ràng thay vì nhảy giữa các course rời rạc",
+  "Choose a learning direction without getting overwhelmed by too many starting points",
+  "Assess your current foundation so you can start at the right level",
+  "Follow a clear path instead of jumping between disconnected lessons and resources",
 ] as const;
 
 const tutorPoints = [
-  "Hỏi ngay khi vướng khái niệm, công thức hoặc ý tưởng kỹ thuật",
-  "Giữ nhịp học liên tục thay vì thoát ra ngoài để tự tìm manh mối",
-  "Nhận hỗ trợ sát với nội dung đang học thay vì chat chung chung",
+  "Ask for help the moment something stops making sense",
+  "Keep your momentum instead of leaving to search through scattered explanations",
+  "Get support that stays connected to the lesson you are already studying",
 ] as const;
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -71,26 +71,26 @@ function BulletList({ items }: { items: readonly string[] }) {
 
 export default function LandingPage() {
   return (
-    <div className="bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-white">
+    <div className="bg-surface-page text-text-strong dark:bg-slate-950 dark:text-white">
       <PublicTopNav />
 
       <main className="landing-scroll-shell md:snap-y md:snap-proximity">
         <section
           id="product"
-          className="landing-panel relative overflow-hidden border-b border-slate-200/70 dark:border-slate-800 md:snap-start"
+          className="landing-panel relative overflow-hidden border-b border-border-subtle dark:border-slate-800 md:snap-start"
         >
           <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_45%,#ecfeff_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.24),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.2),_transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_48%,#082f49_100%)]" />
-          <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl gap-14 px-4 py-16 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-center lg:py-20">
+          <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl gap-14 px-4 pb-16 pt-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-center lg:pb-20 lg:pt-10">
             <ScrollReveal className="space-y-8">
-              <SectionLabel>Sản phẩm học AI có định hướng</SectionLabel>
+              <SectionLabel>Structured learning experience</SectionLabel>
 
               <div className="space-y-5">
                 <h1 className="max-w-4xl text-4xl font-semibold leading-tight text-slate-950 dark:text-white md:text-5xl lg:text-6xl">
-                  Học AI, ML, CV và NLP theo một lộ trình rõ ràng hơn
+                  A clearer path to learning AI
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-200 md:text-lg">
-                  Một nền tảng học tập giúp bạn định hướng, học có hệ thống và tiếp tục tiến lên
-                  khi gặp phần khó.
+                  Start with a structured path that helps you focus, build momentum, and keep
+                  moving without piecing everything together on your own.
                 </p>
               </div>
 
@@ -99,14 +99,14 @@ export default function LandingPage() {
                   href="/register"
                   className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
                 >
-                  Đăng ký ngay
+                  Create your account
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/login"
                   className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-900"
                 >
-                  Đăng nhập
+                  Sign in
                 </Link>
               </div>
 
@@ -134,7 +134,7 @@ export default function LandingPage() {
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">AI Learning Hub</p>
-                    <p className="mt-1 text-sm text-slate-200">Guided skill roadmap</p>
+                    <p className="mt-1 text-sm text-slate-200">A guided learning path</p>
                   </div>
                   <div className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
                     Ready to start
@@ -146,9 +146,9 @@ export default function LandingPage() {
                     <div className="rounded-[calc(1.5rem-1px)] bg-slate-950/90 p-5">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold">Roadmap đang đề xuất</p>
+                          <p className="text-sm font-semibold">Recommended path</p>
                           <p className="mt-1 text-xs text-slate-300">
-                            AI Foundations → Machine Learning → Computer Vision
+                            Foundations → Core concepts → Applied practice
                           </p>
                         </div>
                         <Network className="h-5 w-5 text-cyan-200" />
@@ -162,25 +162,25 @@ export default function LandingPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
                       <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Roadmap</p>
-                      <p className="mt-3 text-lg font-semibold">Cá nhân hóa theo mục tiêu</p>
+                      <p className="mt-3 text-lg font-semibold">Personalized to your starting point</p>
                       <p className="mt-2 text-sm leading-6 text-slate-300">
-                        Gợi ý lộ trình từ nền tảng hiện có thay vì học ngẫu nhiên.
+                        Get a suggested path that helps you begin in the right place instead of studying at random.
                       </p>
                     </div>
                     <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
                       <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">AI Tutor</p>
-                      <p className="mt-3 text-lg font-semibold">Hỗ trợ khi đang học</p>
+                      <p className="mt-3 text-lg font-semibold">Support when you get stuck</p>
                       <p className="mt-2 text-sm leading-6 text-slate-300">
-                        Hỏi ngay trong lúc học để không đứt nhịp suy nghĩ.
+                        Ask questions in the middle of studying so confusion does not break your flow.
                       </p>
                     </div>
                   </div>
 
                   <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                    <p className="text-sm font-semibold">Tập trung vào năng lực thực học</p>
+                    <p className="text-sm font-semibold">Built for clearer learning, not more noise</p>
                     <p className="mt-2 text-sm leading-6 text-slate-300">
-                      Không chỉ hiển thị course. Landing page này dẫn người học tới một cách học
-                      có định hướng, có hỗ trợ, và gắn chặt với AI/ML/CV/NLP.
+                      This experience is designed to make self-study feel more ordered, more manageable,
+                      and easier to continue.
                     </p>
                   </div>
                 </div>
@@ -191,18 +191,18 @@ export default function LandingPage() {
 
         <section
           id="roadmap"
-          className="landing-panel relative border-b border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-950 md:snap-start"
+          className="landing-panel relative border-b border-border-subtle bg-surface-card dark:border-slate-800 dark:bg-slate-950 md:snap-start"
         >
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
             <ScrollReveal className="space-y-6">
-              <SectionLabel>Cá nhân hóa lộ trình học</SectionLabel>
+              <SectionLabel>Personalized learning path</SectionLabel>
               <div className="space-y-4">
                 <h2 className="text-3xl font-semibold leading-tight text-slate-950 dark:text-white md:text-4xl">
-                  Cá nhân hóa lộ trình học
+                  Personalized learning path
                 </h2>
                 <p className="max-w-xl text-base leading-8 text-slate-600 dark:text-slate-200">
-                  Nền tảng giúp bạn biến mục tiêu học AI thành một hành trình cụ thể hơn, thay vì
-                  tự ghép khóa học và tự đoán bước tiếp theo.
+                  Instead of piecing together lessons on your own, follow a path that gives you a
+                  clearer starting point and a more natural next step.
                 </p>
               </div>
               <BulletList items={roadmapPoints} />
@@ -211,12 +211,12 @@ export default function LandingPage() {
             <div className="grid gap-4 md:grid-cols-3">
               <ScrollReveal
                 as="article"
-                className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-[28px] border border-border-subtle bg-surface-card p-5 shadow-card dark:border-slate-800 dark:bg-slate-900"
               >
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">01</p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Mục tiêu</h3>
+                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Direction</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
-                  Chọn hướng học AI/ML/CV/NLP phù hợp với nhu cầu hiện tại.
+                  Start with a learning direction that fits what you need right now.
                 </p>
               </ScrollReveal>
               <ScrollReveal
@@ -225,20 +225,20 @@ export default function LandingPage() {
                 className="rounded-[28px] border border-cyan-200 bg-cyan-50 p-5 shadow-sm dark:border-cyan-500/30 dark:bg-cyan-950/20"
               >
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">02</p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Đánh giá nền tảng</h3>
+                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Baseline assessment</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
-                  Xác định điểm bắt đầu hợp lý để học nhanh hơn và ít vòng vo hơn.
+                  Find a starting point that matches your foundation so you can avoid unnecessary detours.
                 </p>
               </ScrollReveal>
               <ScrollReveal
                 as="article"
                 delayMs={160}
-                className="rounded-[28px] border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-[28px] border border-border-subtle bg-surface-card p-5 shadow-card dark:border-slate-800 dark:bg-slate-900"
               >
                 <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">03</p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Tiến trình rõ ràng</h3>
+                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Clear progression</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
-                  Học theo roadmap có thứ tự thay vì nhảy giữa các chủ đề rời rạc.
+                  Move through an ordered path instead of hopping between disconnected topics.
                 </p>
               </ScrollReveal>
             </div>
@@ -252,14 +252,14 @@ export default function LandingPage() {
           <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),radial-gradient(circle_at_bottom_left,_rgba(99,102,241,0.18),_transparent_32%)]" />
           <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
             <ScrollReveal className="space-y-6">
-              <SectionLabel>AI Tutor đồng hành khi học</SectionLabel>
+              <SectionLabel>Stay in your learning flow</SectionLabel>
               <div className="space-y-4">
                 <h2 className="text-3xl font-semibold leading-tight text-white md:text-4xl">
-                  AI chatbot hỗ trợ ngay trong lúc học
+                  Support that keeps you learning
                 </h2>
                 <p className="max-w-xl text-base leading-8 text-slate-300">
-                  Khi bạn mắc ở một ý tưởng, công thức hay khái niệm, chatbot giúp kéo bạn trở lại
-                  nhịp học thay vì để quá trình tự học bị đứt đoạn.
+                  When you get stuck, the tutor helps you get unstuck without turning one confusing
+                  moment into a lost study session.
                 </p>
               </div>
               <BulletList items={tutorPoints} />
@@ -282,11 +282,11 @@ export default function LandingPage() {
                   </div>
                   <div className="mt-5 space-y-3 text-sm leading-6 text-slate-300">
                     <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                      Embedding và attention khác nhau ở đâu?
+                      What is the difference between embeddings and attention?
                     </div>
                     <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-cyan-100">
-                      Attention giúp mô hình tập trung vào phần thông tin liên quan trong ngữ cảnh
-                      hiện tại, còn embedding là cách biểu diễn token thành vector đầu vào.
+                      Attention helps the model focus on the most relevant information in the
+                      current context, while embeddings represent tokens as input vectors.
                     </div>
                   </div>
                 </div>
@@ -295,7 +295,7 @@ export default function LandingPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Study flow</p>
-                      <p className="mt-2 text-lg font-semibold">Học, hỏi, rồi tiếp tục</p>
+                      <p className="mt-2 text-lg font-semibold">Study, ask, and keep going</p>
                     </div>
                     <MessagesSquare className="h-5 w-5 text-cyan-200" />
                   </div>
@@ -303,19 +303,19 @@ export default function LandingPage() {
                     <div className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3">
                       <p className="text-sm font-medium">Lecture context</p>
                       <p className="mt-1 text-sm text-slate-300">
-                        Tập trung vào đúng phần bài học bạn đang xem.
+                        Stay focused on the exact part of the lesson you are viewing.
                       </p>
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3">
                       <p className="text-sm font-medium">Clarify fast</p>
                       <p className="mt-1 text-sm text-slate-300">
-                        Giải thích nhanh để không bị mất đà tự học.
+                        Get a quick explanation before confusion starts to slow you down.
                       </p>
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3">
                       <p className="text-sm font-medium">Keep moving</p>
                       <p className="mt-1 text-sm text-slate-300">
-                        Trở lại tiến độ học ngay thay vì phải đi tìm tài liệu ngoài luồng.
+                        Return to your progress immediately instead of hunting for outside material.
                       </p>
                     </div>
                   </div>
@@ -325,17 +325,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-panel border-b border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-950 md:snap-start">
+        <section className="landing-panel border-b border-border-subtle bg-surface-card dark:border-slate-800 dark:bg-slate-950 md:snap-start">
           <div className="mx-auto max-w-7xl px-4 py-20 md:px-6">
             <ScrollReveal className="space-y-6">
               <div className="space-y-4 text-center">
-                <SectionLabel>Danh mục đang mở rộng</SectionLabel>
+                <SectionLabel>Catalog in progress</SectionLabel>
                 <h2 className="text-3xl font-semibold leading-tight text-slate-950 dark:text-white md:text-4xl">
-                  Nhiều khóa học hơn đang được chuẩn bị
+                  More learning paths are on the way
                 </h2>
                 <p className="mx-auto max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-200">
-                  Đây là các hướng học sắp được mở thêm trong catalog. Chúng đã hiển thị với trạng
-                  thái coming soon để người học nhìn thấy lộ trình mở rộng của nền tảng.
+                  These upcoming additions show how the platform will keep expanding into new
+                  learning directions while preserving the same guided experience.
                 </p>
               </div>
 
@@ -345,7 +345,7 @@ export default function LandingPage() {
                     as="article"
                     key={course.slug}
                     delayMs={index * 50}
-                    className="rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                    className="rounded-[28px] border border-border-subtle bg-surface-card p-6 shadow-card dark:border-slate-800 dark:bg-slate-900"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -371,29 +371,29 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-panel border-b border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-950 md:snap-start">
+        <section className="landing-panel border-b border-border-subtle bg-surface-card dark:border-slate-800 dark:bg-slate-950 md:snap-start">
           <ScrollReveal className="mx-auto max-w-5xl px-4 py-20 text-center md:px-6">
-            <SectionLabel>Bắt đầu học có định hướng</SectionLabel>
+            <SectionLabel>Start with direction</SectionLabel>
             <h2 className="mt-6 text-3xl font-semibold leading-tight text-slate-950 dark:text-white md:text-4xl">
-              Nếu bạn muốn học AI bài bản hơn, bắt đầu từ đây
+              Start with a path that feels easier to follow
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-200">
-              Dành cho người mới, người tự học, và người đi làm kỹ thuật muốn xây dựng năng lực
-              AI/ML/CV/NLP theo cách có cấu trúc hơn.
+              Built for beginners and self-learners who want to study with more structure, less
+              guesswork, and a clearer sense of what comes next.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href="/register"
                 className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
               >
-                Đăng ký ngay
+                Create your account
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/login"
                 className="inline-flex items-center rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-900"
               >
-                Đăng nhập
+                Sign in
               </Link>
             </div>
           </ScrollReveal>
@@ -404,12 +404,12 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 md:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)] md:px-6">
           <ScrollReveal className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
-              Đội ngũ phát triển
+              Product team
             </p>
-            <h2 className="text-2xl font-semibold">Xây dựng một trải nghiệm học AI có định hướng hơn</h2>
+            <h2 className="text-2xl font-semibold">Building a more structured way to learn AI</h2>
             <p className="max-w-2xl text-sm leading-7 text-slate-300">
-              Landing page này đại diện cho định hướng sản phẩm: giúp người học tiếp cận AI/ML/CV/NLP
-              theo cách có cấu trúc, có hỗ trợ, và bớt phụ thuộc vào việc tự nối các mảnh kiến thức rời rạc.
+              This product direction is centered on making self-study feel clearer, less fragmented,
+              and easier to continue for learners who need structure more than hype.
             </p>
           </ScrollReveal>
 
@@ -417,11 +417,11 @@ export default function LandingPage() {
             delayMs={120}
             className="rounded-[28px] border border-white/10 bg-white/5 p-6"
           >
-            <p className="text-sm font-semibold text-white">Liên hệ</p>
+            <p className="text-sm font-semibold text-white">Contact</p>
             <div className="mt-4 space-y-3 text-sm text-slate-300">
-              <p>Kênh hỗ trợ: đội ngũ phát triển nội bộ của dự án AI Learning Hub</p>
-              <p>Liên hệ kỹ thuật: qua repository dự án và kênh phối hợp nội bộ hiện tại</p>
-              <p>Phạm vi sản phẩm: guided learning, roadmap support, AI tutor for AI/ML/CV/NLP</p>
+              <p>Support channel: the internal product team behind AI Learning Hub</p>
+              <p>Technical contact: through the project repository and the current internal collaboration channel</p>
+              <p>Product scope: guided learning paths, baseline assessment, and in-context study support</p>
             </div>
           </ScrollReveal>
         </div>

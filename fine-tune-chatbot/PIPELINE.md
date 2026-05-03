@@ -1,219 +1,179 @@
-# Fine-tune Pipeline — Qwen2.5-VL-3B-Instruct với Unsloth QLoRA
+# Fine-tune Pipeline — English AI/ML Tutor with Qwen2.5-VL-3B-Instruct
+
+> Source of truth: [PROPOSAL.md](./PROPOSAL.md). This pipeline keeps the current dataset research, but updates the model/runtime choice to a vision-capable Qwen VL stack.
 
 ## Overview
 
-Fine-tune nhẹ Qwen2.5-VL-3B-Instruct trên domain data của 3 khóa học ML (CS224n, CS231n, CS230), sau đó self-host với fallback về gpt-4o-mini.
+Fine-tune `Qwen/Qwen2.5-VL-3B-Instruct` as an English tutor for AI/ML/NLP/CV. In v1, supervision remains text-first so the existing dataset research does not change, while the deployed model still supports vision inputs.
 
 ```mermaid
 flowchart LR
-    A[Raw data\nMCQ + Units] --> B[Data Pipeline]
-    B --> C[SFT Dataset\n~4,200 samples]
-    C --> D[Unsloth QLoRA\nFine-tune]
-    D --> E[LoRA Adapter\n~100MB]
-    E --> F{Deploy}
-    F --> G[vLLM self-hosted\nmerged 16-bit]
-    F --> H[Fallback\ngpt-4o-mini]
+    A[Project domain dataset<br/>MCQ + unit summaries + QA history] --> C[Mixing + Chat formatting]
+    E[Filtered ELI5 subset<br/>style-only] --> C
+    C --> D[Ablation runs<br/>A/B/C/D]
+    D --> F[QLoRA fine-tune<br/>on VL base, text-first supervision]
+    F --> G[Adapter checkpoints]
+    G --> H[Eval gates<br/>domain + style + regression + vision retention smoke]
+    H --> I[Select best run]
 ```
 
----
+## 1. Goal
 
-## 1. Data Sources
+- Preserve and improve domain correctness on AI/ML/NLP/CV course material.
+- Improve long-form English explanation quality.
+- Avoid domain drift from generic external data.
 
-| File | Nội dung | Số lượng |
+## 2. Data roles
+
+| Source | Role | Train use |
 |---|---|---|
-| `question_bank.jsonl` | MCQs có explanation | 1,276 items |
-| `units.jsonl` | Learning unit summaries | 376 units |
-| `qa_history.jsonl` | Production Q&A logs | 58 entries (optional) |
+| Project dataset | Primary domain knowledge anchor | Yes |
+| Filtered ELI5 | Auxiliary long-form explanation style | Yes |
+| Held-out internal split | Main shipping gate | Eval only |
+| MMLU selected / MMLU-Pro / TheoremQA | Regression and academic reporting | Eval only |
+| Filtered ELI5 dev/test | Style-only evaluation | Eval only |
 
----
+## 3. Data preparation
 
-## 2. Data Pipeline
+### 3a. Domain dataset
 
-### 2a. MCQ → ChatML Variants
+Use the existing project dataset as the main source:
 
-Mỗi MCQ được chuyển thành **tối đa 3 variants** tùy theo có `explanation` hay không:
+- `question_bank.jsonl`
+- `units.jsonl`
+- `qa_history.jsonl` if quality-screened
 
-```mermaid
-flowchart TD
-    MCQ["MCQ item\n{question, choices, answer_index, explanation}"]
-    MCQ --> V1
+Recommended metadata to preserve per sample:
 
-    MCQ --> expl{Has\nexplanation?}
-    expl -->|Yes| V2
-    expl -->|Yes| V3
-    expl -->|No| skip[Skip V2, V3]
+- `course_id`
+- `lecture_id`
+- `unit_id`
+- `source_ref`
+- `difficulty`
+- `question_intent`
 
-    V1["V1 — Direct\nUser: question + choices\nAssistant: correct answer + explanation"]
-    V2["V2 — Elaboration\nUser: explain the concept behind...\nAssistant: explanation + summary"]
-    V3["V3 — Distractor\nUser: why is wrong_choice incorrect?\nAssistant: explains why wrong, states correct"]
-```
+### 3b. ELI5 filtering
 
-**System prompt chung:**
-```
-You are an expert AI tutor for graduate-level ML courses
-(CS224n NLP, CS231n Computer Vision, CS230 Deep Learning).
-Answer concisely and educationally.
-```
+Do not use raw ELI5. Keep only a filtered subset that matches explanation-style needs.
 
-### 2b. Unit Summaries
-
-Units có `title` + `summary` dài ≥50 ký tự được convert thành Q&A:
-- User: `Summarize the key concepts in '{title}'`
-- Assistant: `{summary}`
-
-### 2c. Sample counts (ước tính)
-
-| Variant | Samples |
+| Filter group | Rule |
 |---|---|
-| v1 (direct) | ~1,276 |
-| v2 (elaboration) | ~1,200 (items có explanation) |
-| v3 (distractor) | ~1,200 (items có explanation) |
-| unit_summary | ~200-376 |
-| **Total** | **~3,800–4,200** |
+| Question type | Prefer `why`, `how`, `difference`, `what happens`, `how does` |
+| Answer length | ~120-450 words |
+| Topic | science, math, computing, probability, optimization, ML, NLP, CV |
+| Quality | coherent, explanatory, low-noise |
+| Exclude | politics, sports, celebrity, entertainment, anecdotal or sarcasm-heavy answers |
 
----
+## 4. Training format
 
-## 3. Train/Val/Test Split
+Use chat-format SFT so the fine-tuned model matches deployment behavior.
 
-Split theo `lecture_id` (không split random theo sample) để tránh data leakage giữa các variants cùng lecture.
+In v1, keep the training samples text-only unless the project later adds vetted multimodal supervision. This preserves the current dataset thesis instead of inventing a new image corpus requirement.
 
-```mermaid
-flowchart TD
-    ALL["All samples\n~4,200"]
-    ALL --> GROUP["Group by lecture_id\n~50-80 unique lectures"]
-    GROUP --> SHUFFLE["Shuffle lectures\nseed=42"]
-    SHUFFLE --> SPLIT
+Example sample:
 
-    SPLIT --> VAL["Val lectures\n5% lectures"]
-    SPLIT --> TEST["Test lectures\n5% lectures"]
-    SPLIT --> TRAIN["Train lectures\n90% lectures"]
-
-    VAL --> VS["Val samples\n~5% of data"]
-    TEST --> TS["Test samples\n~5% of data"]
-    TRAIN --> TRS["Train samples\n~90% of data"]
+```json
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an AI/ML/NLP/CV tutor. Explain concepts clearly, accurately, and step by step in English."
+    },
+    {
+      "role": "user",
+      "content": "Why does dropout reduce overfitting?"
+    },
+    {
+      "role": "assistant",
+      "content": "Dropout reduces overfitting by randomly disabling a subset of neurons during training..."
+    }
+  ]
+}
 ```
 
-> **Lý do split theo lecture:** 3 variants của cùng 1 MCQ có nội dung rất gần nhau. Nếu split theo sample, cùng MCQ có thể xuất hiện ở cả train và val → eval loss không phản ánh thực tế.
+Training remains single-turn in v1 unless multi-turn domain data is later added explicitly.
 
----
+## 5. Split strategy
 
-## 4. Model & Training Setup
+Split the project dataset by `lecture_id`, not by random sample, to avoid leakage between variants from the same lecture.
 
-### 4a. Model
+- Train: 80%
+- Val: 10%
+- Test: 10%
 
-| Config | Giá trị |
+Keep ELI5 dev/test separate from training.
+
+## 6. Ablation runs
+
+| Run | Mix |
 |---|---|
-| Base model | `unsloth/Qwen2.5-VL-3B-Instruct` |
-| Quantization load | 4-bit (QLoRA) |
-| Vision tower | **Frozen** — chỉ train language layers |
-| Max seq length | 2048 tokens |
+| A | 100% project dataset |
+| B | project dataset + 10% filtered ELI5 |
+| C | project dataset + 20% filtered ELI5 |
+| D | project dataset + 30% filtered ELI5 |
 
-> **Tại sao giữ VLM?** Pipeline production gửi `image_base64` (JPEG video frame) vào model. Giữ `FastVisionModel` đảm bảo image support không bị mất sau fine-tune.
+Decision rule:
 
-### 4b. LoRA Config
+- `30%` is an upper-bound stress test, not the default target.
+- Choose the best run by evaluation, not by lowest training loss.
 
-| Param | Giá trị |
+## 7. Model and QLoRA setup
+
+| Item | Value |
 |---|---|
-| `r` | 16 |
-| `lora_alpha` | 16 |
-| `lora_dropout` | 0.05 |
-| `bias` | none |
-| Target modules | attention + MLP (language layers only) |
-| Gradient checkpointing | unsloth mode |
+| Base model | `Qwen/Qwen2.5-VL-3B-Instruct` |
+| Fine-tune method | QLoRA 4-bit |
+| Target type | Vision-capable model, text-first SFT in v1 |
+| Max sequence length | 2048 or 4096 depending on GPU |
+| Suggested LoRA rank | `r=16` or `r=32` |
+| Suggested target modules | `q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj` |
+| Vision tower policy | Freeze in v1 unless later multimodal data is added deliberately |
 
-### 4c. Training Config
+## 8. Evaluation stack
 
-| Param | Giá trị |
+### Primary
+
+- Held-out internal domain set
+- Manual vision-retention smoke prompts on representative course images, diagrams, or screenshots
+
+### Secondary
+
+- MMLU selected subjects
+- MMLU-Pro
+- TheoremQA
+
+### Style-only
+
+- Filtered ELI5 dev/test
+
+## 9. Success and failure rules
+
+### Accept a run if
+
+- Internal domain correctness improves.
+- Explanation quality in English improves clearly.
+- General benchmark regression is small and acceptable.
+
+### Reject a run if
+
+- Fluency improves but domain correctness drops.
+- Hallucination rate increases materially.
+- Responses become longer but less precise.
+
+## 10. Artifacts
+
+| Path | Purpose |
 |---|---|
-| `per_device_train_batch_size` | 2 |
-| `gradient_accumulation_steps` | 8 |
-| **Effective batch size** | **16** |
-| Epochs | 2 |
-| Learning rate | 2e-4 |
-| LR scheduler | cosine |
-| Warmup ratio | 0.05 |
-| Optimizer | adamw_8bit |
-| Precision | fp16 (T4) / bf16 (A100+) — auto detect |
+| `data/sft/train.jsonl` | Mixed training set |
+| `data/sft/val.jsonl` | Validation set |
+| `data/sft/test.jsonl` | Internal held-out test set |
+| `eval/domain_eval.jsonl` | Internal domain evaluation |
+| `eval/eli5_style_eval.jsonl` | Style evaluation |
+| `checkpoints/` | Adapter checkpoints |
+| `eval/run_summary.md` | Final comparison across runs |
 
-### 4d. Loss masking
+## 11. Current status
 
-Dùng `train_on_responses_only` — chỉ tính loss trên **assistant tokens**, không tính system/user prompt.
-
-```
-<|im_start|>system\n...     ← masked (không tính loss)
-<|im_start|>user\n...       ← masked (không tính loss)
-<|im_start|>assistant\n...  ← tính loss ở đây
-```
-
----
-
-## 5. Training Flow
-
-```mermaid
-flowchart TD
-    A[Load model\nQwen2.5-VL-3B 4-bit] --> B[LoRA setup\nvision frozen]
-    B --> C[Prepare dataset\nChatML format]
-    C --> D{RUN_OVERFIT_GATE\n= False by default}
-    D -->|True| E[Overfit gate\n16 samples × 80 steps\nloss phải < 1.0]
-    D -->|False| F
-    E --> F[FastVisionModel.for_training]
-    F --> G[SFTTrainer\n2 epochs]
-    G --> H[Save checkpoint\nsau mỗi epoch]
-    H --> I[Load best checkpoint\ntheo eval_loss]
-    I --> J[Plot loss chart\ntrain + eval]
-    J --> K[Eval on test set\n5 qualitative samples]
-    K --> L[Save LoRA adapter\n~100MB]
-    L --> M{DO_MERGE\n= False by default}
-    M -->|True| N[Save merged 16-bit\n~6GB — dùng cho vLLM]
-    M -->|False| O[Done\ndownload LoRA only]
-```
-
----
-
-## 6. Output
-
-| File | Size | Dùng cho |
-|---|---|---|
-| `checkpoints/tutor-vl3b-v1/` | ~100MB | Resume training, inference với PEFT |
-| `checkpoints/tutor-vl3b-v1/checkpoint-1/` | ~100MB | Epoch 1 checkpoint |
-| `checkpoints/tutor-vl3b-v1/checkpoint-2/` | ~100MB | Epoch 2 checkpoint (best) |
-| `models/tutor-vl3b-v1-merged/` | ~6GB | vLLM serving (chỉ khi `DO_MERGE=True`) |
-| `loss_curve.png` | <1MB | Visual confirm training OK |
-
----
-
-## 7. Giới hạn của dataset này
-
-| Khía cạnh | Đánh giá |
-|---|---|
-| Giải thích khái niệm ML | ✅ Đủ (~4,200 samples) |
-| Tutor style / ngữ điệu giải thích | ✅ V2/V3 variants |
-| Image/frame support | ✅ Vision tower giữ nguyên |
-| Visual grounding | ⚠️ Không cải thiện — SFT data text-only |
-| Multi-turn conversation | ❌ Không có |
-| Tiếng Việt | ❌ Toàn bộ data là tiếng Anh |
-| Tool calling | ❌ Không có samples |
-
-**Kết luận:** Phù hợp cho **v1** với Gemini/OpenAI fallback. Visual grounding và tool calling cần bổ sung data ở v2.
-
----
-
-## 8. Kaggle Runbook
-
-```
-1. Upload 3 files lên Kaggle Dataset tên "a20-finetune-data"
-   - question_bank.jsonl
-   - units.jsonl
-   - qa_history.jsonl (optional)
-
-2. New Notebook → Import finetune_qwen_unsloth.ipynb
-   → Add Data: a20-finetune-data
-   → Accelerator: GPU T4 x1
-   → Internet: On
-
-3. Run All (~1.5-2h)
-
-4. Output tab → download checkpoints/tutor-vl3b-v1/
-
-5. Nếu cần vLLM: set DO_MERGE=True, chạy lại cell cuối
-```
+- `PROPOSAL.md` is aligned with this pipeline.
+- Vision capability is active again at the model and serving layers, but the dataset research remains unchanged.
+- `FinetuneLoRA-2.ipynb` is a legacy notebook and is not the source of truth for v1 of the English-only plan.

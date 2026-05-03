@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: a20-default
+    orgId: 1
+    folder: A20 Admin
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

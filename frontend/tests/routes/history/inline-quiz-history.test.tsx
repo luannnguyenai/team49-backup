@@ -112,8 +112,31 @@ describe("history page inline quiz rows", () => {
       expect(historyApiMock.detail).toHaveBeenCalledWith("session-inline-1");
     });
 
-    expect(await screen.findByText("Chi tiết từng câu (1 câu)")).toBeInTheDocument();
+    expect(await screen.findByText("Question details (1 questions)")).toBeInTheDocument();
     expect(screen.getByText("Which choice is correct?")).toBeInTheDocument();
+  });
+
+  it("sets the browser tab title for the history route", async () => {
+    historyApiMock.list.mockResolvedValue({
+      summary: {
+        total_sessions: 0,
+        completed_sessions: 0,
+        avg_score: null,
+        total_study_seconds: 0,
+        score_trend: [],
+      },
+      total: 0,
+      page: 1,
+      page_size: 20,
+      items: [],
+    });
+    historyApiMock.detail.mockResolvedValue(null);
+
+    render(<HistoryPage />);
+
+    await waitFor(() => {
+      expect(document.title).toBe("AI Learning Hub - History");
+    });
   });
 
   it("shows a dedicated deep-link review panel when the target session is not in the loaded page", async () => {
@@ -182,7 +205,7 @@ describe("history page inline quiz rows", () => {
       expect(historyApiMock.detail).toHaveBeenCalledWith("session-inline-1");
     });
 
-    expect(await screen.findByText("Review mở từ liên kết")).toBeInTheDocument();
+    expect(await screen.findByText("Review opened from link")).toBeInTheDocument();
     expect(screen.getByText("Mid-video quiz")).toBeInTheDocument();
     expect(screen.getByText("Why is B correct?")).toBeInTheDocument();
   });

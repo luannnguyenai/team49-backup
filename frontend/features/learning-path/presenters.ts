@@ -203,7 +203,7 @@ export function buildCurrentWeekPlan(
       courses.push(course);
     }
 
-    const title = item.section_title || "Khác";
+    const title = item.section_title || "Other";
     const lectureKey = `${key}:${slugify(title)}`;
     let lecture = course.lectures.find((candidate) => candidate.key === lectureKey);
     if (!lecture) {
@@ -236,7 +236,7 @@ export function pathToFlow(items: PathItemResponse[]): FlowModel {
   const sectionByKey = new Map<string, SectionSummary>();
 
   for (const item of ordered) {
-    const title = item.section_title || "Khác";
+    const title = item.section_title || "Other";
     const courseKey = item.course_id || `course-${slugify(item.course_title || "course")}`;
     const sectionKey = `${courseKey}:${slugify(title)}`;
     let section = sectionByKey.get(sectionKey);

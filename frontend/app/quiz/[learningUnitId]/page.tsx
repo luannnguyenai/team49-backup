@@ -28,10 +28,10 @@ import MarkdownRenderer from "@/components/assessment/MarkdownRenderer";
 // ---------------------------------------------------------------------------
 
 const BLOOM_LABELS: Record<string, string> = {
-  remember: "Nhớ",
-  understand: "Hiểu",
-  apply: "Áp dụng",
-  analyze: "Phân tích",
+  remember: "Remember",
+  understand: "Understand",
+  apply: "Apply",
+  analyze: "Analyze",
 };
 
 const BLOOM_COLORS: Record<string, string> = {
@@ -42,9 +42,9 @@ const BLOOM_COLORS: Record<string, string> = {
 };
 
 const DIFF_LABELS: Record<string, string> = {
-  easy: "Dễ",
-  medium: "Trung bình",
-  hard: "Khó",
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
 };
 
 const DIFF_COLORS: Record<string, string> = {
@@ -115,7 +115,7 @@ export default function QuizPage() {
         setErrorMsg(
           typeof detail === "string"
             ? detail
-            : "Không thể bắt đầu quiz. Vui lòng thử lại."
+            : "Unable to start the quiz. Please try again."
         );
         setPhase("error");
       });
@@ -191,7 +191,7 @@ export default function QuizPage() {
         sessionStorage.setItem(runtimeRef.resultStorageKey, JSON.stringify(result));
         router.push(runtimeRef.resultsHref);
       } catch {
-        setErrorMsg("Không thể hoàn thành quiz. Vui lòng thử lại.");
+        setErrorMsg("Unable to complete the quiz. Please try again.");
         setPhase("error");
       }
     } else {
@@ -222,7 +222,7 @@ export default function QuizPage() {
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Đang chuẩn bị quiz...
+            Preparing quiz...
           </p>
         </div>
       </div>
@@ -235,7 +235,7 @@ export default function QuizPage() {
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Đang tính kết quả...
+            Calculating results...
           </p>
         </div>
       </div>
@@ -247,13 +247,13 @@ export default function QuizPage() {
       <div className="flex min-h-screen items-center justify-center p-6" style={{ background: "var(--bg-primary)" }}>
         <div className="max-w-sm text-center">
           <AlertCircle className="mx-auto mb-4 text-red-500" size={40} />
-          <p className="font-semibold" style={{ color: "var(--text-primary)" }}>Đã xảy ra lỗi</p>
+          <p className="font-semibold" style={{ color: "var(--text-primary)" }}>Something went wrong</p>
           <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>{errorMsg}</p>
           <button
             onClick={() => router.back()}
             className="btn-secondary mt-6"
           >
-            Quay lại
+            Go back
           </button>
         </div>
       </div>
@@ -314,7 +314,7 @@ export default function QuizPage() {
           <div className="mx-auto mt-2 flex max-w-2xl items-center gap-3 text-xs">
             <span className="flex items-center gap-1 text-emerald-600">
               <CheckCircle2 size={13} />
-              {correctCount} đúng
+              {correctCount} correct
             </span>
             <div className="flex-1 overflow-hidden rounded-full bg-slate-200 h-1.5">
               <div
@@ -324,7 +324,7 @@ export default function QuizPage() {
             </div>
             <span className="flex items-center gap-1 text-red-500">
               <XCircle size={13} />
-              {answeredCount - correctCount} sai
+              {answeredCount - correctCount} incorrect
             </span>
           </div>
         )}
@@ -421,13 +421,13 @@ export default function QuizPage() {
                 {feedback.is_correct ? (
                   <>
                     <CheckCircle2 className="text-emerald-600" size={18} />
-                    <span className="text-emerald-700">Chính xác!</span>
+                    <span className="text-emerald-700">Correct!</span>
                   </>
                 ) : (
                   <>
                     <XCircle className="text-red-600" size={18} />
                     <span className="text-red-700">
-                      Chưa đúng — Đáp án đúng: <strong>{feedback.correct_answer}</strong>
+                      Not quite right. Correct answer: <strong>{feedback.correct_answer}</strong>
                     </span>
                   </>
                 )}
@@ -451,10 +451,10 @@ export default function QuizPage() {
               className="btn-primary flex w-full items-center justify-center gap-2 py-3"
             >
               {currentIdx >= questions.length - 1 ? (
-                "Xem kết quả"
+                "View results"
               ) : (
                 <>
-                  Câu tiếp theo
+                  Next question
                   <ArrowRight size={16} />
                 </>
               )}
@@ -464,8 +464,8 @@ export default function QuizPage() {
           {/* Keyboard hint */}
           {phase === "quiz" && (
             <p className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
-              Nhấn phím <kbd className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs dark:bg-slate-800">A</kbd>–
-              <kbd className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs dark:bg-slate-800">D</kbd> để chọn
+              Press <kbd className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs dark:bg-slate-800">A</kbd>–
+              <kbd className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs dark:bg-slate-800">D</kbd> to choose
             </p>
           )}
         </div>

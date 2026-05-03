@@ -20,16 +20,16 @@ const OPTIONS: {
   {
     level: "beginner",
     emoji: "🌱",
-    label: "Bạn là người mới học AI",
+    label: "You are new to AI",
     description:
-      "Hệ thống sẽ sinh lộ trình từ đầu, không cần làm test đầu vào.",
+      "The system will generate a path from the beginning without an entrance assessment.",
   },
   {
     level: "experienced",
     emoji: "🎓",
-    label: "Bạn đã có kiến thức về AI",
+    label: "You already have AI knowledge",
     description:
-      "Hệ thống sẽ cho bạn chọn topic đã biết và làm test ngắn để cá nhân hóa lộ trình.",
+      "The system will let you choose known topics and take a short assessment to personalize your path.",
   },
 ];
 
@@ -57,7 +57,7 @@ export default function StepExperienceLevel({ onNext, onBack }: Props) {
   return (
     <div className="space-y-5">
       <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Bạn đã từng học AI/ML chưa? Chọn mức phù hợp để hệ thống cá nhân hóa lộ trình.
+        Have you studied AI/ML before? Choose the level that best fits you so the system can personalize your path.
       </p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -116,7 +116,7 @@ export default function StepExperienceLevel({ onNext, onBack }: Props) {
             backgroundColor: "var(--bg-card)",
           }}
         >
-          Quay lại
+          Back
         </button>
         <button
           type="button"
@@ -129,7 +129,7 @@ export default function StepExperienceLevel({ onNext, onBack }: Props) {
               : "bg-primary-600 text-white hover:bg-primary-700 active:scale-[0.99]",
           )}
         >
-          Tiếp tục
+          Continue
         </button>
       </div>
     </div>

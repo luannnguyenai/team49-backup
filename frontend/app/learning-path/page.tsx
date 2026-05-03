@@ -38,17 +38,17 @@ interface LearningPathResponse {
 
 const STATUS_BADGE: Record<UnitStatus, { label: string; className: string }> = {
   pending: {
-    label: "Chưa học",
+    label: "Not started",
     className:
       "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
   },
   in_progress: {
-    label: "Đang học",
+    label: "In progress",
     className:
       "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   },
   completed: {
-    label: "Hoàn thành",
+    label: "Completed",
     className:
       "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   },
@@ -73,7 +73,7 @@ function UnitCard({ item }: { item: PathItem }) {
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center gap-2">
           {item.is_locked && (
-            <span title="Hoàn thành Phase A trước">
+            <span title="Complete Phase A first">
               <Lock
                 aria-hidden="true"
                 className="h-4 w-4 shrink-0 text-slate-400"
@@ -96,7 +96,7 @@ function UnitCard({ item }: { item: PathItem }) {
           {item.estimated_hours != null && (
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {Math.round(item.estimated_hours * 60)} phút
+              {Math.round(item.estimated_hours * 60)} min
             </span>
           )}
           <span className={`rounded-full px-2 py-0.5 font-medium ${badge.className}`}>
@@ -112,7 +112,7 @@ function UnitCard({ item }: { item: PathItem }) {
           style={{ backgroundColor: "var(--primary-600, #2563eb)" }}
         >
           <Play className="h-3 w-3" />
-          Bắt đầu học
+          Start learning
         </Link>
       )}
     </div>
@@ -132,7 +132,7 @@ export default function LearningPathPage() {
     api
       .get<LearningPathResponse>("/api/learning-path")
       .then((r) => setItems(r.data.items))
-      .catch(() => setError("Không thể tải lộ trình. Vui lòng thử lại."))
+      .catch(() => setError("Unable to load the learning path. Please try again."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -145,10 +145,10 @@ export default function LearningPathPage() {
     <div className="mx-auto max-w-3xl space-y-8 animate-fade-in py-8 px-4">
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Lộ trình học của bạn
+          Your learning path
         </h1>
         <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-          Các units được sắp xếp theo thứ tự phù hợp với trình độ của bạn.
+          Units are ordered to match your current level and progression needs.
         </p>
       </div>
 
@@ -168,7 +168,7 @@ export default function LearningPathPage() {
           className="flex h-40 items-center justify-center rounded-xl border text-sm"
           style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
         >
-          Chưa có lộ trình. Hãy hoàn thành onboarding trước.
+          No learning path is available yet. Complete onboarding first.
         </div>
       ) : !hasPhases ? (
         /* Plain list when no placement data */
@@ -184,7 +184,7 @@ export default function LearningPathPage() {
             <section>
               <div className="mb-4 flex items-center gap-3">
                 <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
-                  Phase A: Ôn tập
+                  Phase A: Review
                 </h2>
                 <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
                   {phaseAItems.length} units
@@ -202,7 +202,7 @@ export default function LearningPathPage() {
             <section>
               <div className="mb-4 flex items-center gap-3">
                 <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
-                  Phase B: Học mới
+                  Phase B: New learning
                 </h2>
                 <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                   {phaseBItems.length} units
@@ -210,7 +210,7 @@ export default function LearningPathPage() {
                 {phaseBLocked && (
                   <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
                     <Lock className="h-3.5 w-3.5" />
-                    Hoàn thành Phase A trước
+                    Complete Phase A first
                   </span>
                 )}
               </div>

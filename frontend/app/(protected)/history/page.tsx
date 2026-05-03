@@ -12,6 +12,7 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   AlertCircle,
+  Award,
   BookOpen,
   Brain,
   CheckCircle2,
@@ -21,12 +22,14 @@ import {
   ChevronUp,
   Clock,
   Filter,
+  History as HistoryIcon,
   Lightbulb,
   RotateCcw,
   TrendingUp,
   XCircle,
 } from "lucide-react";
 import { canonicalSectionApi, historyApi } from "@/lib/api";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import type {
   BloomLevel,
   CourseSectionListItem,
@@ -49,7 +52,7 @@ const TYPE_LABELS: Record<SessionType, string> = {
   assessment: "Assessment",
   quiz: "Quiz",
   module_test: "Module Test",
-  practice: "Luyện tập",
+  practice: "Practice",
 };
 
 const TYPE_COLORS: Record<SessionType, string> = {
@@ -65,10 +68,10 @@ const CHECKPOINT_LABELS: Record<string, string> = {
 };
 
 const BLOOM_VI: Record<string, string> = {
-  remember: "Nhớ",
-  understand: "Hiểu",
-  apply: "Áp dụng",
-  analyze: "Phân tích",
+  remember: "Remember",
+  understand: "Understand",
+  apply: "Apply",
+  analyze: "Analyze",
 };
 
 const BLOOM_BAR_COLOR: Record<string, string> = {
@@ -86,15 +89,15 @@ type SortDir = "asc" | "desc";
 // ---------------------------------------------------------------------------
 
 function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("vi-VN", {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
     day: "2-digit",
-    month: "2-digit",
     year: "numeric",
   });
 }
 
 function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("vi-VN", {
+  return new Date(iso).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -142,8 +145,8 @@ function SparkLine({
 }) {
   if (data.length < 2) {
     return (
-      <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-        Chưa đủ dữ liệu
+      <span className="text-xs text-text-muted">
+        Not enough data
       </span>
     );
   }
@@ -198,7 +201,7 @@ function BloomBar({ breakdown }: { breakdown: Record<string, string> }) {
         const pct = t > 0 ? (c / t) * 100 : 0;
         return (
           <div key={level} className="flex items-center gap-2">
-            <span className="w-20 text-right text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+            <span className="w-20 text-right text-xs font-medium text-text-muted">
               {BLOOM_VI[level] ?? level}
             </span>
             <div className="flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 h-2">
@@ -207,7 +210,7 @@ function BloomBar({ breakdown }: { breakdown: Record<string, string> }) {
                 style={{ width: `${pct}%`, background: BLOOM_BAR_COLOR[level] ?? "#94a3b8" }}
               />
             </div>
-            <span className="w-10 text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
+            <span className="w-10 text-xs tabular-nums text-text-muted">
               {fraction}
             </span>
           </div>
@@ -237,7 +240,7 @@ function ExpandedDetail({
       .then(setDetail)
       .catch((err) => {
         const d = err?.response?.data?.detail;
-        setError(typeof d === "string" ? d : "Không thể tải chi tiết.");
+        setError(typeof d === "string" ? d : "Unable to load details.");
       })
       .finally(() => setLoading(false));
   }, [sessionId]);
@@ -252,7 +255,8 @@ function ExpandedDetail({
 
   if (error || !detail) {
     return (
-      <p className="py-4 text-center text-sm text-red-500">{error || "Không có dữ liệu."}</p>
+      <p className="py-4 text-center text-sm text-red-500">{error || "No data available."}</p>
+      
     );
   }
 
@@ -269,23 +273,17 @@ function ExpandedDetail({
       {/* Bloom + KCs + misconceptions side-by-side */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* Bloom breakdown */}
-        <div
-          className="rounded-xl border p-3"
-          style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
-        >
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+        <div className="rounded-xl border border-border-subtle bg-surface-page p-3">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted">
             <Brain size={12} /> Bloom
           </p>
           <BloomBar breakdown={detail.bloom_breakdown} />
         </div>
 
         {/* Weak KCs */}
-        <div
-          className="rounded-xl border p-3"
-          style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
-        >
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-            <BookOpen size={12} /> Kiến thức yếu
+        <div className="rounded-xl border border-border-subtle bg-surface-page p-3">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted">
+            <BookOpen size={12} /> Weak knowledge
           </p>
           {detail.weak_kcs.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
@@ -299,37 +297,34 @@ function ExpandedDetail({
               ))}
             </div>
           ) : (
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Không có</p>
+            <p className="text-xs text-text-muted">None</p>
           )}
         </div>
 
         {/* Misconceptions */}
-        <div
-          className="rounded-xl border p-3"
-          style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
-        >
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-            <Lightbulb size={12} /> Hiểu nhầm
+        <div className="rounded-xl border border-border-subtle bg-surface-page p-3">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted">
+            <Lightbulb size={12} /> Misconceptions
           </p>
           {detail.misconceptions.length > 0 ? (
             <ul className="space-y-1">
               {detail.misconceptions.map((m) => (
-                <li key={m} className="flex items-start gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+                <li key={m} className="flex items-start gap-1.5 text-xs text-text-body">
                   <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-400" />
                   {m}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Không phát hiện</p>
+            <p className="text-xs text-text-muted">Not detected</p>
           )}
         </div>
       </div>
 
       {/* Per-question list */}
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-          Chi tiết từng câu ({detail.questions.length} câu)
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
+          Question details ({detail.questions.length} questions)
         </p>
         <div className="space-y-1.5">
           {detail.questions.map((q, i) => (
@@ -349,20 +344,17 @@ function ExpandedDetail({
 
 function LinkedReviewPanel({ sessionId }: { sessionId: string }) {
   return (
-    <div
-      className="rounded-2xl border p-4"
-      style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
-    >
+    <div className="rounded-2xl border border-border-subtle bg-surface-elevated p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-          Review mở từ liên kết
+        <p className="text-sm font-semibold text-text-strong">
+          Review opened from link
         </p>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        <span className="rounded-full bg-surface-page px-2 py-0.5 text-xs text-text-body dark:bg-slate-800 dark:text-slate-300">
           Session {sessionId}
         </span>
       </div>
-      <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-        Phiên này không nằm trong trang lịch sử hiện tại, nên nội dung review được tải trực tiếp.
+      <p className="mt-1 text-xs text-text-muted">
+        This session is not on the current history page, so the review content was loaded directly.
       </p>
       <ExpandedDetail sessionId={sessionId} />
     </div>
@@ -393,15 +385,11 @@ function QuestionRow({
   };
 
   return (
-    <div
-      className="overflow-hidden rounded-xl border"
-      style={{ borderColor: "var(--border)" }}
-    >
+    <div className="overflow-hidden rounded-xl border border-border-subtle">
       {/* Header row */}
       <button
         onClick={onToggle}
-        className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-        style={{ background: "var(--bg-elevated)" }}
+        className="flex w-full items-center gap-3 bg-surface-elevated px-3 py-2.5 text-left transition-colors hover:bg-surface-page dark:hover:bg-slate-800/50"
       >
         {/* Correct / Wrong icon */}
         {q.is_correct ? (
@@ -410,42 +398,39 @@ function QuestionRow({
           <XCircle size={14} className="shrink-0 text-red-400" />
         )}
 
-        <span className="shrink-0 text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+        <span className="shrink-0 text-xs font-medium text-text-muted">
           {num}.
         </span>
 
         {/* Stem preview */}
-        <span className="flex-1 truncate text-sm" style={{ color: "var(--text-primary)" }}>
+        <span className="flex-1 truncate text-sm text-text-strong">
           {q.stem_text.replace(/[#*`]/g, "").slice(0, 100)}
         </span>
 
         {/* Bloom badge */}
-        <span className="hidden shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs dark:bg-slate-800 sm:inline" style={{ color: "var(--text-muted)" }}>
+        <span className="hidden shrink-0 rounded-full bg-surface-page px-2 py-0.5 text-xs text-text-muted dark:bg-slate-800 sm:inline">
           {BLOOM_VI[q.bloom_level] ?? q.bloom_level}
         </span>
 
         {/* Time */}
         {q.response_time_ms != null && (
-          <span className="shrink-0 text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
+          <span className="shrink-0 text-xs tabular-nums text-text-muted">
             {(q.response_time_ms / 1000).toFixed(1)}s
           </span>
         )}
 
         {open ? (
-          <ChevronUp size={14} className="shrink-0" style={{ color: "var(--text-muted)" }} />
+          <ChevronUp size={14} className="shrink-0 text-text-muted" />
         ) : (
-          <ChevronDown size={14} className="shrink-0" style={{ color: "var(--text-muted)" }} />
+          <ChevronDown size={14} className="shrink-0 text-text-muted" />
         )}
       </button>
 
       {/* Expanded options + explanation */}
       {open && (
-        <div
-          className="border-t px-3 pb-3 pt-2.5 space-y-2"
-          style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
-        >
+        <div className="space-y-2 border-t border-border-subtle bg-surface-page px-3 pb-3 pt-2.5">
           {/* Full stem */}
-          <div className="mb-3 text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
+          <div className="mb-3 text-sm leading-relaxed text-text-strong">
             <MarkdownRenderer text={q.stem_text} />
           </div>
 
@@ -461,9 +446,8 @@ function QuestionRow({
                     ? "border border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200"
                     : isSel
                     ? "border border-red-300 bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-200"
-                    : "border",
+                    : "border border-border-subtle text-text-body",
                 ].join(" ")}
-                style={!isCorr && !isSel ? { borderColor: "var(--border)", color: "var(--text-secondary)" } : {}}
               >
                 <span
                   className={[
@@ -541,6 +525,7 @@ function Th({
 // ---------------------------------------------------------------------------
 
 export default function HistoryPage() {
+  usePageTitle("AI Learning Hub - History");
   const searchParams = useSearchParams();
   const targetSessionId = searchParams.get("session_id");
 
@@ -582,7 +567,7 @@ export default function HistoryPage() {
       });
       setData(result);
     } catch {
-      setError("Không thể tải lịch sử. Vui lòng thử lại.");
+      setError("Unable to load history. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -642,87 +627,94 @@ export default function HistoryPage() {
   // ---------------------------------------------------------------------------
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="mx-auto max-w-7xl space-y-6 animate-fade-in">
       {/* Page header */}
       <div>
-        <h2 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Lịch sử học tập
+        <h2 className="text-2xl font-bold text-text-strong">
+          Learning history
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-          Xem lại tất cả phiên học, kết quả và phân tích chi tiết.
+        <p className="mt-1 text-sm text-text-body">
+          Review all learning sessions, results, and detailed analysis.
         </p>
       </div>
 
       {/* ── Stats summary ──────────────────────────────────────────────── */}
       {summary && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total sessions */}
-          <div className="card py-3 px-4">
-            <p className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              Tổng phiên học
-            </p>
-            <p className="mt-1 text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <div className="card flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
+              <HistoryIcon className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-body">Total sessions</p>
+              <p className="text-xs text-text-muted">
+                {summary.completed_sessions} completed
+              </p>
+            </div>
+            <p className="shrink-0 text-2xl font-bold text-text-strong">
               {summary.total_sessions}
-            </p>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {summary.completed_sessions} hoàn thành
             </p>
           </div>
 
           {/* Avg score */}
-          <div className="card py-3 px-4">
-            <p className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              Điểm trung bình
-            </p>
+          <div className="card flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
+              <Award className="h-6 w-6 text-amber-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-body">Average score</p>
+              <p className="text-xs text-text-muted">Completed sessions</p>
+            </div>
             <p
-              className="mt-1 text-2xl font-bold"
+              className="shrink-0 text-2xl font-bold"
               style={{ color: summary.avg_score !== null ? scoreColor(summary.avg_score) : "var(--text-muted)" }}
             >
               {summary.avg_score !== null ? `${summary.avg_score.toFixed(1)}%` : "—"}
             </p>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Các phiên hoàn thành
-            </p>
           </div>
 
           {/* Study time */}
-          <div className="card py-3 px-4">
-            <p className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              Tổng thời gian
-            </p>
-            <p className="mt-1 text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <div className="card flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
+              <Clock className="h-6 w-6 text-violet-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-body">Total time</p>
+              <p className="text-xs text-text-muted">Accumulated study time</p>
+            </div>
+            <p className="shrink-0 text-2xl font-bold text-text-strong">
               {fmtStudyTime(summary.total_study_seconds)}
-            </p>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Thời gian học tích lũy
             </p>
           </div>
 
           {/* Score trend sparkline */}
-          <div className="card py-3 px-4">
-            <p className="mb-1 flex items-center gap-1 text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              <TrendingUp size={11} /> Xu hướng điểm
-            </p>
-            <SparkLine data={summary.score_trend} width={140} height={40} />
+          <div className="card flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
+              <TrendingUp className="h-6 w-6 text-emerald-600" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-body">Score trend</p>
+              <p className="text-xs text-text-muted">Across recent sessions</p>
+            </div>
+            <div className="shrink-0">
+              <SparkLine data={summary.score_trend} width={120} height={36} />
+            </div>
           </div>
         </div>
       )}
 
       {/* ── Filters ───────────────────────────────────────────────────── */}
-      <div
-        className="flex flex-wrap items-center gap-3 rounded-xl border p-3"
-        style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
-      >
-        <Filter size={14} style={{ color: "var(--text-muted)" }} className="shrink-0" />
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border-subtle bg-surface-elevated p-3">
+        <Filter size={14} className="shrink-0 text-text-muted" />
 
         {/* Type */}
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value as SessionType | "")}
-          className="rounded-lg border bg-transparent px-2.5 py-1.5 text-sm"
-          style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
+          className="rounded-lg border border-border-subtle bg-transparent px-2.5 py-1.5 text-sm text-text-strong"
         >
-          <option value="">Tất cả loại</option>
+          <option value="">All types</option>
           <option value="assessment">Assessment</option>
           <option value="quiz">Quiz</option>
           <option value="module_test">Module Test</option>
@@ -732,10 +724,9 @@ export default function HistoryPage() {
         <select
           value={moduleFilter}
           onChange={(e) => setModuleFilter(e.target.value)}
-          className="rounded-lg border bg-transparent px-2.5 py-1.5 text-sm"
-          style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
+          className="rounded-lg border border-border-subtle bg-transparent px-2.5 py-1.5 text-sm text-text-strong"
         >
-          <option value="">Tất cả module</option>
+          <option value="">All modules</option>
           {sections.map((section) => (
             <option key={section.id} value={section.id}>
               {section.title}
@@ -749,12 +740,11 @@ export default function HistoryPage() {
           onChange={(e) =>
             setDaysFilter(e.target.value ? Number(e.target.value) : "")
           }
-          className="rounded-lg border bg-transparent px-2.5 py-1.5 text-sm"
-          style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
+          className="rounded-lg border border-border-subtle bg-transparent px-2.5 py-1.5 text-sm text-text-strong"
         >
-          <option value="">Toàn bộ thời gian</option>
-          <option value="7">7 ngày qua</option>
-          <option value="30">30 ngày qua</option>
+          <option value="">All time</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
         </select>
 
         {/* Reset */}
@@ -765,18 +755,17 @@ export default function HistoryPage() {
               setModuleFilter("");
               setDaysFilter("");
             }}
-            className="flex items-center gap-1 text-xs"
-            style={{ color: "var(--text-muted)" }}
+            className="flex items-center gap-1 text-xs text-text-muted"
           >
             <RotateCcw size={11} />
-            Xóa bộ lọc
+            Clear filters
           </button>
         )}
 
         {/* Record count */}
         {data && (
-          <span className="ml-auto text-xs" style={{ color: "var(--text-muted)" }}>
-            {data.total} kết quả
+          <span className="ml-auto text-xs text-text-muted">
+            {data.total} results
           </span>
         )}
       </div>
@@ -784,13 +773,10 @@ export default function HistoryPage() {
       {showLinkedReviewPanel && <LinkedReviewPanel sessionId={targetSessionId} />}
 
       {/* ── Table ─────────────────────────────────────────────────────── */}
-      <div
-        className="overflow-hidden rounded-2xl border"
-        style={{ borderColor: "var(--border)" }}
-      >
+      <div className="overflow-hidden rounded-2xl border border-border-subtle">
         {/* Error */}
         {error && (
-          <div className="flex items-center gap-2 border-b px-4 py-3 text-sm text-red-600" style={{ borderColor: "var(--border)" }}>
+          <div className="flex items-center gap-2 border-b border-border-subtle px-4 py-3 text-sm text-red-600">
             <AlertCircle size={14} />
             {error}
           </div>
@@ -798,15 +784,15 @@ export default function HistoryPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead style={{ background: "var(--bg-secondary)" }}>
+            <thead className="bg-surface-page">
               <tr>
-                <Th label="Thời gian" sortKey="started_at" current={sortKey} dir={sortDir} onSort={handleSort} className="pl-5" />
-                <Th label="Loại" sortKey="session_type" current={sortKey} dir={sortDir} onSort={handleSort} />
+                <Th label="Time" sortKey="started_at" current={sortKey} dir={sortDir} onSort={handleSort} className="pl-5" />
+                <Th label="Type" sortKey="session_type" current={sortKey} dir={sortDir} onSort={handleSort} />
                 <Th label="Topic / Module" sortKey="subject" current={sortKey} dir={sortDir} onSort={handleSort} />
-                <Th label="Điểm" sortKey="score_percent" current={sortKey} dir={sortDir} onSort={handleSort} />
-                <Th label="Thời lượng" sortKey="duration_seconds" current={sortKey} dir={sortDir} onSort={handleSort} />
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-                  Chi tiết
+                <Th label="Score" sortKey="score_percent" current={sortKey} dir={sortDir} onSort={handleSort} />
+                <Th label="Duration" sortKey="duration_seconds" current={sortKey} dir={sortDir} onSort={handleSort} />
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
+                  Details
                 </th>
               </tr>
             </thead>
@@ -815,7 +801,7 @@ export default function HistoryPage() {
               {loading ? (
                 /* Loading skeleton rows */
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-t" style={{ borderColor: "var(--border)" }}>
+                  <tr key={i} className="border-t border-border-subtle">
                     {Array.from({ length: 6 }).map((__, j) => (
                       <td key={j} className="px-4 py-3">
                         <div className="h-4 animate-pulse rounded bg-slate-200 dark:bg-slate-700" style={{ width: j === 0 ? 80 : j === 2 ? 120 : 60 }} />
@@ -825,8 +811,8 @@ export default function HistoryPage() {
                 ))
               ) : sortedItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-16 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-                    Chưa có phiên học nào phù hợp với bộ lọc.
+                  <td colSpan={6} className="py-16 text-center text-sm text-text-muted">
+                    No learning sessions match the current filters.
                   </td>
                 </tr>
               ) : (
@@ -835,18 +821,17 @@ export default function HistoryPage() {
                   return (
                     <Fragment key={item.session_id}>
                       <tr
-                        className="border-t transition-colors"
-                        style={{
-                          borderColor: "var(--border)",
-                          background: isExpanded ? "var(--bg-secondary)" : "var(--bg-elevated)",
-                        }}
+                        className={[
+                          "border-t border-border-subtle transition-colors",
+                          isExpanded ? "bg-surface-page" : "bg-surface-elevated",
+                        ].join(" ")}
                       >
                         {/* Date / time */}
                         <td className="pl-5 pr-4 py-3">
-                          <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                          <p className="text-sm font-medium text-text-strong">
                             {fmtDate(item.started_at)}
                           </p>
-                          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                          <p className="text-xs text-text-muted">
                             {fmtTime(item.started_at)}
                           </p>
                         </td>
@@ -864,8 +849,7 @@ export default function HistoryPage() {
                         <td className="px-4 py-3">
                           <div className="flex flex-wrap items-center gap-2">
                             <p
-                              className="max-w-[180px] truncate text-sm"
-                              style={{ color: "var(--text-primary)" }}
+                              className="max-w-[180px] truncate text-sm text-text-strong"
                               title={item.subject}
                             >
                               {item.subject}
@@ -888,20 +872,20 @@ export default function HistoryPage() {
                               >
                                 {item.score_percent.toFixed(1)}%
                               </span>
-                              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                              <span className="text-xs text-text-muted">
                                 {item.correct_count}/{item.total_questions}
                               </span>
                             </div>
                           ) : (
-                            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                              {item.completed_at ? "—" : "Đang học"}
+                            <span className="text-sm text-text-muted">
+                              {item.completed_at ? "—" : "In progress"}
                             </span>
                           )}
                         </td>
 
                         {/* Duration */}
                         <td className="px-4 py-3">
-                          <span className="flex items-center gap-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+                          <span className="flex items-center gap-1 text-sm text-text-body">
                             <Clock size={12} />
                             {fmtDuration(item.duration_seconds)}
                           </span>
@@ -919,28 +903,25 @@ export default function HistoryPage() {
                               className={[
                                 "flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors",
                                 isExpanded
-                                  ? "bg-primary-100 text-primary-700"
-                                  : "bg-slate-100 text-slate-600 hover:bg-primary-50 hover:text-primary-600 dark:bg-slate-800 dark:text-slate-400",
+                                  ? "bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
+                                  : "bg-surface-page text-text-body hover:bg-surface-accent-soft hover:text-primary-700 dark:bg-slate-800 dark:text-slate-400",
                               ].join(" ")}
                             >
                               {isExpanded ? (
-                                <><ChevronUp size={12} /> Thu gọn</>
+                                <><ChevronUp size={12} /> Collapse</>
                               ) : (
-                                <><ChevronDown size={12} /> Chi tiết</>
+                                <><ChevronDown size={12} /> Details</>
                               )}
                             </button>
                           ) : (
-                            <span className="text-xs" style={{ color: "var(--text-muted)" }}>—</span>
+                            <span className="text-xs text-text-muted">—</span>
                           )}
                         </td>
                       </tr>
 
                       {/* Expanded detail row */}
                       {isExpanded && (
-                        <tr
-                          className="border-t"
-                          style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
-                        >
+                        <tr className="border-t border-border-subtle bg-surface-page">
                           <td colSpan={6} className="px-5 pb-4">
                             <ExpandedDetail sessionId={item.session_id} />
                           </td>
@@ -956,20 +937,16 @@ export default function HistoryPage() {
 
         {/* ── Pagination ──────────────────────────────────────────────── */}
         {data && totalPages > 1 && (
-          <div
-            className="flex items-center justify-between border-t px-5 py-3"
-            style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
-          >
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Trang {page} / {totalPages} — {data.total} kết quả
+          <div className="flex items-center justify-between border-t border-border-subtle bg-surface-elevated px-5 py-3">
+            <p className="text-xs text-text-muted">
+              Page {page} / {totalPages} — {data.total} results
             </p>
 
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="flex h-7 w-7 items-center justify-center rounded-lg border disabled:opacity-40"
-                style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-border-subtle text-text-body disabled:opacity-40"
               >
                 <ChevronLeft size={14} />
               </button>
@@ -984,19 +961,19 @@ export default function HistoryPage() {
                 }, [])
                 .map((p, i) =>
                   p === "…" ? (
-                    <span key={`ellipsis-${i}`} className="px-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                    <span key={`ellipsis-${i}`} className="px-1 text-xs text-text-muted">
                       …
                     </span>
                   ) : (
                     <button
                       key={p}
                       onClick={() => setPage(p as number)}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg border text-xs font-medium transition-colors"
-                      style={{
-                        borderColor: p === page ? "var(--color-primary-500, #6366f1)" : "var(--border)",
-                        background: p === page ? "var(--color-primary-500, #6366f1)" : undefined,
-                        color: p === page ? "white" : "var(--text-secondary)",
-                      }}
+                      className={[
+                        "flex h-7 w-7 items-center justify-center rounded-lg border text-xs font-medium transition-colors",
+                        p === page
+                          ? "border-primary-500 bg-primary-500 text-white"
+                          : "border-border-subtle text-text-body",
+                      ].join(" ")}
                     >
                       {p}
                     </button>
@@ -1006,8 +983,7 @@ export default function HistoryPage() {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="flex h-7 w-7 items-center justify-center rounded-lg border disabled:opacity-40"
-                style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-border-subtle text-text-body disabled:opacity-40"
               >
                 <ChevronRight size={14} />
               </button>

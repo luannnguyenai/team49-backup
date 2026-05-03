@@ -19,25 +19,25 @@ const DEPTH_OPTIONS: Array<{
 }> = [
   {
     value: "quick",
-    label: "Nhanh",
-    questionCopy: "tối đa 15 câu",
+    label: "Quick",
+    questionCopy: "up to 15 questions",
     levelCopy: "easy/medium",
   },
   {
     value: "standard",
-    label: "Vừa",
-    questionCopy: "tối đa 30 câu",
+    label: "Standard",
+    questionCopy: "up to 30 questions",
     levelCopy: "easy/medium/hard",
   },
   {
     value: "deep",
-    label: "Kỹ",
-    questionCopy: "tối đa 50 câu",
+    label: "Deep",
+    questionCopy: "up to 50 questions",
     levelCopy: "easy/medium/hard/application",
   },
 ];
 
-export default function StepAssessmentDepth({ onBack, onNext, nextLabel = "Tiếp tục" }: Props) {
+export default function StepAssessmentDepth({ onBack, onNext, nextLabel = "Continue" }: Props) {
   const assessmentDepth = useOnboardingStore((s) => s.assessmentDepth);
   const setAssessmentDepth = useOnboardingStore((s) => s.setAssessmentDepth);
 
@@ -45,10 +45,10 @@ export default function StepAssessmentDepth({ onBack, onNext, nextLabel = "Tiế
     <div className="space-y-5">
       <div>
         <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-          Mức kiểm tra
+          Assessment depth
         </p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-          Chọn độ sâu placement. Số câu sẽ scale theo số cụm bạn chọn, nhưng không vượt quá giới hạn của từng mức.
+          Choose the placement depth. The number of questions scales with the clusters you selected, but it will not exceed the limit for each level.
         </p>
       </div>
 
@@ -99,7 +99,7 @@ export default function StepAssessmentDepth({ onBack, onNext, nextLabel = "Tiế
             backgroundColor: "var(--bg-card)",
           }}
         >
-          Quay lại
+          Back
         </button>
         <button
           type="button"

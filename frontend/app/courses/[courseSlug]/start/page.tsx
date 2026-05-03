@@ -49,7 +49,7 @@ export default function CourseStartPage({ params }: CourseStartPageProps) {
             <>
               <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
               <p className="mt-4 text-sm" style={{ color: "var(--text-secondary)" }}>
-                Đang chuẩn bị bài học...
+                Preparing your lesson...
               </p>
             </>
           )}

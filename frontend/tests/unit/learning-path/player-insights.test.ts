@@ -43,7 +43,7 @@ describe("derivePlayerInsight", () => {
       ),
     ).toMatchObject({
       tone: "quiz_ready",
-      label: "End quiz đã mở",
+      label: "End quiz unlocked",
       hrefSuffix: "#end-quiz",
     });
   });

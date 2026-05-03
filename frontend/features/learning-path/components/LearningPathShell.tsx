@@ -105,7 +105,7 @@ export default function LearningPathShell() {
           <AlertCircle className="h-10 w-10 text-red-500" />
           <p className="mt-3 text-sm" style={{ color: "var(--text-secondary)" }}>{error}</p>
           <button type="button" onClick={loadPath} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white">
-            <RefreshCw className="h-4 w-4" /> Thử lại
+            <RefreshCw className="h-4 w-4" /> Retry
           </button>
         </div>
       ) : view === "graph" ? (

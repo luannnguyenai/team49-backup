@@ -57,6 +57,14 @@ class User(UUIDPrimaryKeyMixin, Base):
         server_default="false",
         comment="True once the user has completed the onboarding flow",
     )
+    role: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="user",
+        server_default="user",
+        index=True,
+        comment="RBAC role: 'user' (default) or 'admin' (admin dashboard access)",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

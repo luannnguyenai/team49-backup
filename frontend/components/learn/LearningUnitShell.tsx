@@ -70,6 +70,8 @@ interface InlineQuizSessionState {
   questions: QuestionForQuiz[];
   currentIndex: number;
   selectedAnswer: SelectedAnswer | null;
+  submitError: string | null;
+  isSubmittingAnswer: boolean;
   feedback: QuizAnswerResponse | null;
   result: QuizCompleteResponse | null;
   phase: InlineQuizOverlayPhase;
@@ -135,19 +137,30 @@ function buildTutorSuggestions(unitTitle: string, activeChapter: ChapterView | n
 
   if (firstTakeaway) {
     return [
-      "Giải thích ý chính của đoạn này dễ hiểu hơn",
-      `Tại sao "${chapterTitle}" lại quan trọng trong bài này?`,
+      "Explain the main idea of this section in simpler terms",
+      `Why is "${chapterTitle}" important in this lecture?`,
     ];
   }
 
   return [
-    `Tóm tắt nhanh phần "${chapterTitle}" cho tôi`,
-    "Điểm quan trọng nhất ở đoạn này là gì?",
+    `Give me a quick summary of "${chapterTitle}"`,
+    "What is the most important point in this section?",
   ];
 }
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+function getInlineQuizSubmitErrorMessage(error: unknown): string {
+  const detail =
+    typeof error === "object" && error !== null && "response" in error
+      ? (error as { response?: { data?: { detail?: unknown } } }).response?.data?.detail
+      : null;
+  if (typeof detail === "string" && detail.trim()) {
+    return detail;
+  }
+  return "Unable to check that answer right now. Please try again.";
 }
 
 function readPanelPreference(storageKey: string, defaultWidth: number) {
@@ -234,10 +247,10 @@ function getCheckpointButtonLabel(
   checkpoint: InlineQuizCheckpointKey,
   status: "locked" | "ready" | "active" | "completed",
 ) {
-  if (status === "active") return "Tiếp tục";
-  if (status === "completed") return "Xem lại";
-  if (status === "ready") return "Mở quiz";
-  return `Mở ở ${Math.round(checkpointThreshold(checkpoint) * 100)}%`;
+  if (status === "active") return "Continue";
+  if (status === "completed") return "Review";
+  if (status === "ready") return "Open quiz";
+  return `Unlocks at ${Math.round(checkpointThreshold(checkpoint) * 100)}%`;
 }
 
 function getQuestionRowTone(isSelected: boolean, isCorrect: boolean | null) {
@@ -396,9 +409,14 @@ function InlineQuizOverlay({
   const result = session?.result ?? null;
 
   return (
-    <div className="pointer-events-none absolute inset-4 flex items-end justify-end">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex aspect-video items-center justify-center p-4 sm:p-6">
       <div
-        className="pointer-events-auto w-full max-w-md rounded-3xl border p-4 shadow-2xl backdrop-blur"
+        aria-hidden="true"
+        className="absolute inset-0 rounded-t-3xl bg-slate-950/35 backdrop-blur-[2px]"
+        data-testid="inline-quiz-backdrop"
+      />
+      <div
+        className="pointer-events-auto relative z-10 w-full max-w-xl rounded-2xl border p-5 shadow-2xl backdrop-blur"
         style={{
           borderColor: "rgba(255,255,255,0.32)",
           background:
@@ -413,8 +431,8 @@ function InlineQuizOverlay({
             </p>
             <p className="mt-1 text-sm text-slate-600">
               {session
-                ? "Kiểm tra nhanh ngay trong lúc xem để khóa lại ý chính của bài."
-                : `Review ${checkpointQuestionCount(checkpoint)} câu hỏi liên quan đến đoạn video hiện tại.`}
+                ? "Take a quick check-in while watching to lock in the main ideas."
+                : `Review ${checkpointQuestionCount(checkpoint)} questions tied to the current part of the video.`}
             </p>
           </div>
           <button
@@ -430,7 +448,7 @@ function InlineQuizOverlay({
         {!session && (
           <div className="space-y-3">
             <div className="rounded-2xl border border-amber-200 bg-white/72 px-4 py-3 text-sm text-slate-700">
-              Quiz này sẽ chèn ngay trên video, không đẩy bạn sang màn hình khác.
+              This quiz appears directly over the video, so you can stay in the lesson.
             </div>
             <div className="flex items-center justify-end gap-2">
               <button
@@ -438,14 +456,14 @@ function InlineQuizOverlay({
                 onClick={onDismiss}
                 type="button"
               >
-                Ẩn tạm
+                Dismiss for now
               </button>
               <button
                 className="rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 transition-transform hover:scale-[1.02]"
                 onClick={onStart}
                 type="button"
               >
-                Bắt đầu quiz
+                Start quiz
               </button>
             </div>
           </div>
@@ -455,14 +473,14 @@ function InlineQuizOverlay({
           <div className="space-y-4">
             <div className="flex items-center justify-between text-xs text-slate-500">
               <span>
-                Câu {session.currentIndex + 1} / {session.questions.length}
+                Question {session.currentIndex + 1} / {session.questions.length}
               </span>
               <button
                 className="rounded-full border border-slate-200 px-3 py-1 font-medium transition-colors hover:bg-white/80"
                 onClick={onMinimize}
                 type="button"
               >
-                Thu nhỏ
+                Minimize
               </button>
             </div>
 
@@ -486,7 +504,7 @@ function InlineQuizOverlay({
                       "flex w-full items-start gap-3 rounded-2xl border px-4 py-3 text-left transition-colors",
                       getQuestionRowTone(isSelected, isCorrect),
                     ].join(" ")}
-                    disabled={session.phase !== "quiz"}
+                    disabled={session.phase !== "quiz" || session.isSubmittingAnswer}
                     onClick={() => onSelectAnswer(optionKey)}
                     type="button"
                   >
@@ -502,7 +520,7 @@ function InlineQuizOverlay({
             {session.phase === "feedback" && session.feedback ? (
               <div className="rounded-2xl border border-sky-100 bg-white/82 px-4 py-3 text-sm text-slate-700 shadow-sm">
                 <p className="font-semibold text-amber-700">
-                  {session.feedback.is_correct ? "Bạn trả lời đúng." : "Cần xem lại ý này."}
+                  {session.feedback.is_correct ? "You answered correctly." : "This concept needs another look."}
                 </p>
                 {session.feedback.explanation_text ? (
                   <p className="mt-1 text-slate-600">{session.feedback.explanation_text}</p>
@@ -510,15 +528,24 @@ function InlineQuizOverlay({
               </div>
             ) : null}
 
+            {session.phase === "quiz" && session.submitError ? (
+              <div
+                className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm"
+                role="alert"
+              >
+                {session.submitError}
+              </div>
+            ) : null}
+
             <div className="flex items-center justify-end gap-2">
               {session.phase === "quiz" ? (
                 <button
                   className="rounded-full bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
-                  disabled={session.selectedAnswer === null}
+                  disabled={session.selectedAnswer === null || session.isSubmittingAnswer}
                   onClick={onSubmitAnswer}
                   type="button"
                 >
-                  Trả lời
+                  {session.isSubmittingAnswer ? "Checking answer..." : "Submit answer"}
                 </button>
               ) : (
                 <button
@@ -526,7 +553,7 @@ function InlineQuizOverlay({
                   onClick={onAdvance}
                   type="button"
                 >
-                  {session.currentIndex >= session.questions.length - 1 ? "Hoàn thành quiz" : "Câu tiếp theo"}
+                  {session.currentIndex >= session.questions.length - 1 ? "Finish quiz" : "Next question"}
                 </button>
               )}
             </div>
@@ -541,7 +568,7 @@ function InlineQuizOverlay({
               </p>
               <h3 className="mt-1 text-xl font-semibold text-white">{result.score}</h3>
               <p className="mt-1 text-sm text-slate-600">
-                {result.percent.toFixed(1)}% đúng trong {CHECKPOINT_LABELS[checkpoint].toLowerCase()}.
+                {result.percent.toFixed(1)}% correct in the {CHECKPOINT_LABELS[checkpoint].toLowerCase()}.
               </p>
             </div>
 
@@ -550,14 +577,14 @@ function InlineQuizOverlay({
                 className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-white/80"
                 href={`/history?session_id=${session.sessionId}`}
               >
-                Xem lại bài đã làm
+                Review your attempt
               </Link>
               <button
                 className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950"
                 onClick={onCloseResult}
                 type="button"
               >
-                Tiếp tục học
+                Continue learning
               </button>
             </div>
           </div>
@@ -591,6 +618,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   );
   const quizProgressRef = useRef<InlineQuizProgress>({});
   const lastWatchSyncRef = useRef(0);
+  const inlineQuizSubmitPendingRef = useRef(false);
   const handledCheckpointHashRef = useRef<string | null>(null);
   const handledUnitSeekRef = useRef<string | null>(null);
 
@@ -824,6 +852,8 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
         questions: response.questions,
         currentIndex: Math.min(answeredCount, Math.max(response.questions.length - 1, 0)),
         selectedAnswer: null,
+        submitError: null,
+        isSubmittingAnswer: false,
         feedback: null,
         result: null,
         phase: "quiz",
@@ -882,6 +912,13 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
 
   const activeQuizQuestion = quizSession ? quizSession.questions[quizSession.currentIndex] : null;
 
+  useEffect(() => {
+    if (!currentPromptCheckpoint) return;
+    if (videoRef.current && !videoRef.current.paused) {
+      videoRef.current.pause();
+    }
+  }, [currentPromptCheckpoint]);
+
   const startCheckpointQuiz = useCallback(
     async (checkpoint: InlineQuizCheckpointKey) => {
       if (videoRef.current && !videoRef.current.paused) {
@@ -925,7 +962,24 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   }, [checkpointStatus, startCheckpointQuiz]);
 
   const submitInlineQuizAnswer = useCallback(async () => {
-    if (!quizSession || !activeQuizQuestion || quizSession.selectedAnswer === null) return;
+    if (
+      !quizSession ||
+      !activeQuizQuestion ||
+      quizSession.selectedAnswer === null ||
+      inlineQuizSubmitPendingRef.current
+    ) {
+      return;
+    }
+    inlineQuizSubmitPendingRef.current = true;
+    setQuizSession((previous) =>
+      previous
+        ? {
+            ...previous,
+            submitError: null,
+            isSubmittingAnswer: true,
+          }
+        : previous,
+    );
     try {
       const feedback = await quizApi.answer(quizSession.sessionId, {
         question_id: activeQuizQuestion.id,
@@ -951,12 +1005,26 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
         previous
           ? {
               ...previous,
+              submitError: null,
+              isSubmittingAnswer: false,
               feedback,
               phase: "feedback",
             }
           : previous,
       );
-    } catch {}
+    } catch (error) {
+      setQuizSession((previous) =>
+        previous
+          ? {
+              ...previous,
+              submitError: getInlineQuizSubmitErrorMessage(error),
+              isSubmittingAnswer: false,
+            }
+          : previous,
+      );
+    } finally {
+      inlineQuizSubmitPendingRef.current = false;
+    }
   }, [activeQuizQuestion, quizSession, syncInlineQuizProgress]);
 
   const advanceInlineQuiz = useCallback(async () => {
@@ -970,6 +1038,8 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
               ...previous,
               currentIndex: previous.currentIndex + 1,
               selectedAnswer: null,
+              submitError: null,
+              isSubmittingAnswer: false,
               feedback: null,
               phase: "quiz",
               questionStartedAt: Date.now(),
@@ -1153,7 +1223,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
           >
             <div className="flex items-center justify-between gap-3 border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
               <p className="text-xs font-semibold uppercase tracking-widest-sm" style={{ color: "var(--text-muted)" }}>
-                Bài học
+                Lessons
               </p>
               <button
                 aria-label="Hide lessons panel"
@@ -1316,12 +1386,12 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                         </p>
                         <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
                           {entry.status === "completed"
-                            ? "Đã hoàn thành review cho checkpoint này."
+                            ? "You have completed the review for this checkpoint."
                             : entry.status === "active"
-                              ? "Bạn đang có một quiz dở dang ở checkpoint này."
+                              ? "You have an unfinished quiz at this checkpoint."
                               : entry.status === "ready"
-                                ? "Checkpoint đã mở. Bạn có thể làm quiz ngay bây giờ."
-                                : `Checkpoint sẽ mở sau khi xem ${Math.round(entry.threshold * 100)}% video.`}
+                                ? "This checkpoint is unlocked. You can take the quiz now."
+                                : `This checkpoint unlocks after you watch ${Math.round(entry.threshold * 100)}% of the video.`}
                         </p>
                       </div>
 
@@ -1391,6 +1461,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                         ? {
                             ...previous,
                             selectedAnswer: answer,
+                            submitError: null,
                           }
                         : previous,
                     )
@@ -1408,7 +1479,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                   type="button"
                 >
                   <Sparkles className="h-4 w-4 text-amber-300" />
-                  Tiếp tục {CHECKPOINT_LABELS[quizSession.checkpoint].toLowerCase()}
+                  Continue {CHECKPOINT_LABELS[quizSession.checkpoint].toLowerCase()}
                 </button>
               ) : null}
 
@@ -1421,7 +1492,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                   type="button"
                 >
                   <Sparkles className="h-4 w-4 text-amber-300" />
-                  Mở lại mid-video quiz
+                  Reopen mid-video quiz
                 </button>
               ) : null}
             </div>
@@ -1469,7 +1540,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                       Timestamps
                     </p>
                     <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-                      Chuyển nhanh theo từng phần của video
+                      Jump quickly between sections of the video
                     </p>
                   </div>
                   <span className="text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
@@ -1535,6 +1606,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
             {tutor.enabled ? (
               <div className="min-h-0 flex-1">
                 <InContextTutor
+                  lessonKey={unit.id}
                   lectureId={tutor.legacy_lecture_id ?? ""}
                   currentTime={currentTime}
                   captureFrame={captureFrame}

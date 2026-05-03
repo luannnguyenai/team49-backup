@@ -8,26 +8,49 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import { Send, X, ThumbsUp, ThumbsDown, Loader2, Check } from "lucide-react";
 import { api } from "@/lib/api";
+import {
+  buildTutorConversationKey,
+  loadTutorConversation,
+  saveTutorConversation,
+  type StoredTutorMessage,
+} from "@/lib/tutorSessionHistory";
+import { useAuthStore } from "@/stores/authStore";
 
 // ── Types ──────────────────────────────────────────────────────────────────
-
-const DEFAULT_TUTOR_STATUS = "Đang suy nghĩ...";
 
 interface ChatMessage {
   localId: string;
   id?: number;
   role: "user" | "ai" | "error";
   content: string;
+  senderName: string;
+  sentAt: string;
   rating?: number | null;
   isPending?: boolean;
   statusText?: string | null;
   statusSteps?: string[];
 }
 
+function formatMessageTime(date: Date): string {
+  return new Intl.DateTimeFormat("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function waitForNextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, 0);
+  });
+}
+
+const MIN_STATUS_VISIBLE_MS = 450;
+
 function appendStatusStep(steps: string[] | undefined, nextStatus: string): string[] {
   const normalizedStatus = nextStatus.trim();
   if (!normalizedStatus) {
-    return steps ?? [DEFAULT_TUTOR_STATUS];
+    return steps ?? [];
   }
 
   const previousSteps = steps ?? [];
@@ -43,6 +66,7 @@ function appendStatusStep(steps: string[] | undefined, nextStatus: string): stri
 }
 
 interface InContextTutorProps {
+  lessonKey?: string;
   lectureId: string;
   currentTime: number;
   captureFrame: () => string | null;
@@ -55,6 +79,7 @@ interface InContextTutorProps {
 // ── Component ───────────────────────────────────────────────────────────────
 
 export default function InContextTutor({
+  lessonKey,
   lectureId,
   currentTime,
   captureFrame,
@@ -66,15 +91,60 @@ export default function InContextTutor({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const userFullName = useAuthStore((state) => state.user?.full_name?.trim() || "You");
+  const resolvedLessonKey = lessonKey?.trim() || lectureId.trim();
+  const conversationKey = resolvedLessonKey
+    ? buildTutorConversationKey(resolvedLessonKey, contextBindingId)
+    : null;
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messageIdRef = useRef(0);
+  const loadedConversationKeyRef = useRef<string | null>(null);
 
   const nextMessageId = useCallback(() => {
     messageIdRef.current += 1;
     return `chat-msg-${messageIdRef.current}`;
   }, []);
+
+  useEffect(() => {
+    if (!conversationKey || loadedConversationKeyRef.current !== conversationKey) {
+      return;
+    }
+
+    const persistedMessages: StoredTutorMessage[] = messages
+      .filter((message) => !message.isPending)
+      .map(({ id, role, content, senderName, sentAt, rating }) => ({
+        id,
+        role,
+        content,
+        senderName,
+        sentAt,
+        rating,
+      }));
+
+    saveTutorConversation(conversationKey, persistedMessages);
+  }, [conversationKey, messages]);
+
+  useEffect(() => {
+    if (!conversationKey) {
+      loadedConversationKeyRef.current = null;
+      setMessages([]);
+      return;
+    }
+
+    const storedMessages = loadTutorConversation(conversationKey);
+    const hydratedMessages = storedMessages.map((message) => ({
+      ...message,
+      localId: nextMessageId(),
+      isPending: false,
+      statusText: null,
+      statusSteps: [],
+    }));
+
+    loadedConversationKeyRef.current = conversationKey;
+    setMessages(hydratedMessages);
+  }, [conversationKey, nextMessageId]);
 
   // Auto-scroll
   useEffect(() => {
@@ -103,19 +173,24 @@ export default function InContextTutor({
     setInput("");
     setStreaming(true);
     const img = captureFrame();
+    const sentAt = formatMessageTime(new Date());
 
     const userMsg: ChatMessage = {
       localId: nextMessageId(),
       role: "user",
       content: q,
+      senderName: userFullName,
+      sentAt,
     };
     const aiPlaceholder: ChatMessage = {
       localId: nextMessageId(),
       role: "ai",
       content: "",
+      senderName: "AI Tutor",
+      sentAt,
       isPending: true,
-      statusText: DEFAULT_TUTOR_STATUS,
-      statusSteps: [DEFAULT_TUTOR_STATUS],
+      statusText: null,
+      statusSteps: [],
     };
 
     setMessages((prev) => [...prev, userMsg, aiPlaceholder]);
@@ -160,6 +235,8 @@ export default function InContextTutor({
       let qaId: number | undefined;
       let hasError = false;
       let buffer = "";
+      let pendingStatusNeedsPaint = false;
+      let lastPendingStatusAt = 0;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -217,8 +294,20 @@ export default function InContextTutor({
                     : m,
                 ),
               );
+              if (!fullText) {
+                pendingStatusNeedsPaint = true;
+                lastPendingStatusAt = Date.now();
+              }
             }
             if (data.a) {
+              if (!fullText && pendingStatusNeedsPaint) {
+                await waitForNextPaint();
+                const remainingStatusTime = MIN_STATUS_VISIBLE_MS - (Date.now() - lastPendingStatusAt);
+                if (remainingStatusTime > 0) {
+                  await new Promise((resolve) => window.setTimeout(resolve, remainingStatusTime));
+                }
+                pendingStatusNeedsPaint = false;
+              }
               fullText += data.a;
               setMessages((prev) =>
                 prev.map((m, i) =>
@@ -279,8 +368,20 @@ export default function InContextTutor({
                         : m,
                     ),
                   );
+                  if (!fullText) {
+                    pendingStatusNeedsPaint = true;
+                    lastPendingStatusAt = Date.now();
+                  }
                 }
                 if (data.a) {
+                  if (!fullText && pendingStatusNeedsPaint) {
+                    await waitForNextPaint();
+                    const remainingStatusTime = MIN_STATUS_VISIBLE_MS - (Date.now() - lastPendingStatusAt);
+                    if (remainingStatusTime > 0) {
+                      await new Promise((resolve) => window.setTimeout(resolve, remainingStatusTime));
+                    }
+                    pendingStatusNeedsPaint = false;
+                  }
                   fullText += data.a;
                   setMessages((prev) =>
                     prev.map((m, i) =>
@@ -313,7 +414,7 @@ export default function InContextTutor({
       const msg = err instanceof Error ? err.message : "Connection error";
       setMessages((prev) =>
         prev.map((m, i) =>
-          i === aiIdx ? { ...m, role: "error", content: msg, isPending: false } : m,
+          i === aiIdx ? { ...m, role: "error", content: msg, senderName: "AI Tutor", isPending: false } : m,
         ),
       );
     } finally {
@@ -393,8 +494,18 @@ export default function InContextTutor({
         {messages.map((msg, idx) => (
           <div
             key={msg.localId}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
           >
+            <div
+              className={`mb-1 flex items-center gap-2 px-1 text-[11px] font-medium ${
+                msg.role === "user" ? "justify-end text-slate-400" : "justify-start text-slate-500"
+              }`}
+            >
+              <span>{msg.senderName}</span>
+              <span aria-hidden="true">•</span>
+              <time dateTime={msg.sentAt}>{msg.sentAt}</time>
+            </div>
+
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                 msg.role === "user"
@@ -419,7 +530,7 @@ export default function InContextTutor({
                     className="space-y-2 italic"
                     style={{ color: "var(--text-secondary)" }}
                   >
-                    {(msg.statusSteps?.length ? msg.statusSteps : [msg.statusText || DEFAULT_TUTOR_STATUS]).map(
+                    {(msg.statusSteps?.length ? msg.statusSteps : msg.statusText ? [msg.statusText] : []).map(
                       (step, stepIdx, allSteps) => {
                         const isCurrentStep = stepIdx === allSteps.length - 1;
 
@@ -492,9 +603,9 @@ export default function InContextTutor({
         className="border-t p-3 shrink-0"
         style={{ borderColor: "var(--border)" }}
       >
-        {suggestions.length > 0 ? (
+        {!hasMessages && suggestions.length > 0 ? (
           <div className="mb-3 flex flex-wrap gap-2">
-            {suggestions.slice(0, 2).map((suggestion) => (
+            {suggestions.slice(0, 1).map((suggestion) => (
               <button
                 key={suggestion}
                 type="button"

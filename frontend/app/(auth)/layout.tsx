@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { Brain } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Xác thực",
+  title: "Authentication",
 };
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -34,7 +34,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               AI Learning Platform
             </h1>
             <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
-              Học thông minh hơn mỗi ngày
+              Learn smarter every day
             </p>
           </div>
         </div>

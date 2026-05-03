@@ -53,8 +53,8 @@ describe("TimelineBoard", () => {
 
     render(<TimelineBoard />);
 
-    expect(screen.getByRole("heading", { name: "Việc cần học tiếp theo" })).toBeInTheDocument();
-    expect(screen.getAllByText("1 giờ 15 phút").length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "What to learn next" })).toBeInTheDocument();
+    expect(screen.getAllByText("1 hr 15 min").length).toBeGreaterThan(0);
     expect(screen.getByText("Next unit")).toBeInTheDocument();
     expect(screen.getByText("Second unit")).toBeInTheDocument();
     expect(screen.queryByText("Course intro")).not.toBeInTheDocument();

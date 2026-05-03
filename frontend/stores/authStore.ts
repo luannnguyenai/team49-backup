@@ -4,6 +4,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { authApi, tokenStorage } from "@/lib/api";
+import { clearTutorSessionHistory } from "@/lib/tutorSessionHistory";
 import type {
   LoginPayload,
   OnboardingPayload,
@@ -124,6 +125,7 @@ export const useAuthStore = create<AuthState>()(
           // Best-effort revoke; local cleanup must still happen.
         } finally {
           tokenStorage.clear();
+          clearTutorSessionHistory();
           set({ user: null, error: null, _refreshTimer: null });
         }
       },

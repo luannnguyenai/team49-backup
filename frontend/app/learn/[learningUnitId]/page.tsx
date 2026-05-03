@@ -2,7 +2,7 @@
 
 // app/learn/[learningUnitId]/page.tsx
 // Learning content page: markdown render, auto-TOC, reading time tracker,
-// "Bắt đầu Quiz" CTA.
+// "Start Quiz" CTA.
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -59,7 +59,7 @@ export default function LearnTopicPage() {
           setHeadings(extractHeadings(data.content_markdown));
         }
       })
-      .catch(() => setError("Không thể tải nội dung. Vui lòng thử lại."))
+      .catch(() => setError("Unable to load the content. Please try again."))
       .finally(() => setLoading(false));
   }, [learningUnitId]);
 
@@ -101,7 +101,7 @@ export default function LearnTopicPage() {
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Đang tải nội dung...
+            Loading content...
           </p>
         </div>
       </div>
@@ -112,13 +112,13 @@ export default function LearnTopicPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
-          <p className="text-sm font-medium text-red-600">{error ?? "Không tìm thấy nội dung."}</p>
+          <p className="text-sm font-medium text-red-600">{error ?? "Content not found."}</p>
           <button
             onClick={() => router.back()}
             className="mt-4 text-sm underline"
             style={{ color: "var(--text-secondary)" }}
           >
-            Quay lại
+            Go back
           </button>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function LearnTopicPage() {
               style={{ color: "var(--text-muted)" }}
             >
               <ListOrdered size={14} />
-              Mục lục
+              Table of contents
             </p>
             {headings.map((h) => (
               <a
@@ -187,17 +187,17 @@ export default function LearnTopicPage() {
             {estMinutes > 0 && (
               <span className="flex items-center gap-1.5">
                 <Clock size={14} />
-                {estMinutes} phút đọc ước tính
+                {estMinutes} min estimated reading time
               </span>
             )}
             <span className="flex items-center gap-1.5">
               <BookOpen size={14} />
-              Đã đọc {fmtTime(readSeconds)}
+              Read for {fmtTime(readSeconds)}
             </span>
             {content.video_url && (
               <span className="flex items-center gap-1.5">
                 <Video size={14} />
-                Có video
+                Includes video
               </span>
             )}
           </div>
@@ -205,7 +205,7 @@ export default function LearnTopicPage() {
           {estMinutes > 0 && (
             <div className="mt-4">
               <div className="mb-1 flex justify-between text-xs" style={{ color: "var(--text-muted)" }}>
-                <span>Tiến độ đọc</span>
+                <span>Reading progress</span>
                 <span>{readPct}%</span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
@@ -230,7 +230,7 @@ export default function LearnTopicPage() {
             >
               <span className="flex items-center gap-2">
                 <ListOrdered size={15} />
-                Mục lục
+                Table of contents
               </span>
               <ChevronRight
                 size={15}
@@ -268,7 +268,7 @@ export default function LearnTopicPage() {
               className="w-full"
               src={content.video_url}
             >
-              Trình duyệt không hỗ trợ video.
+              Your browser does not support video playback.
             </video>
           </div>
         )}
@@ -283,7 +283,7 @@ export default function LearnTopicPage() {
         ) : (
           <div className="card flex min-h-40 items-center justify-center">
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              Nội dung đang được cập nhật.
+              This content is being updated.
             </p>
           </div>
         )}
@@ -291,10 +291,10 @@ export default function LearnTopicPage() {
         <div className="mt-8 flex items-center justify-between rounded-2xl border p-5" style={{ borderColor: "var(--border)" }}>
           <div>
             <p className="font-semibold" style={{ color: "var(--text-primary)" }}>
-              Sẵn sàng kiểm tra kiến thức?
+              Ready to check your understanding?
             </p>
             <p className="mt-0.5 text-sm" style={{ color: "var(--text-muted)" }}>
-              Làm bài quiz 10 câu để củng cố và đo lường mức độ thành thạo.
+              Take a 10-question quiz to reinforce the lesson and measure your mastery.
             </p>
           </div>
           <button
@@ -302,7 +302,7 @@ export default function LearnTopicPage() {
             className="btn-primary flex shrink-0 items-center gap-2 ml-4"
           >
             <Play size={16} />
-            Bắt đầu Quiz
+            Start Quiz
           </button>
         </div>
       </div>

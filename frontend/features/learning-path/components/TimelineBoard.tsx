@@ -53,7 +53,7 @@ export default function TimelineBoard() {
           backgroundColor: "var(--bg-card)",
         }}
       >
-        Không còn bài mới trong tuần này. Các bài đã skip, đã hoàn thành và intro optional không được đưa vào lịch tuần.
+        There are no new lessons for this week. Skipped, completed, and optional intro items are excluded from the weekly plan.
       </div>
     );
   }
@@ -72,23 +72,23 @@ export default function TimelineBoard() {
         <div className="relative z-10 mb-8 flex flex-col justify-between gap-4 rounded-2xl border border-white/70 bg-white/75 p-5 shadow-sm backdrop-blur sm:flex-row sm:items-end">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary-600">
-              Tuần {weekPlan.week}
+              Week {weekPlan.week}
             </p>
             <h3 className="mt-1 text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-              Việc cần học tiếp theo
+              What to learn next
             </h3>
             <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-              Đã ẩn phần skip, đã hoàn thành và intro optional.
+              Skipped, completed, and optional intro items are hidden.
             </p>
           </div>
           <div className="text-sm sm:text-right" style={{ color: "var(--text-secondary)" }}>
             <p>
               <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                {formatDurationFromHours(weekPlan.total_hours) ?? "0 phút"}
+                {formatDurationFromHours(weekPlan.total_hours) ?? "0 min"}
               </span>{" "}
-              / {formatDurationFromHours(profile?.weeklyHours ?? 5) ?? "5 giờ"}
+              / {formatDurationFromHours(profile?.weeklyHours ?? 5) ?? "5 hours"}
             </p>
-            <p>{weekPlan.learning_units.length} bài trong tuần này</p>
+            <p>{weekPlan.learning_units.length} lessons this week</p>
           </div>
         </div>
 
@@ -109,8 +109,8 @@ export default function TimelineBoard() {
                     </h4>
                   </div>
                   <div className="shrink-0 text-right text-sm font-semibold text-slate-500">
-                    <p>{formatDurationFromHours(course.total_hours) ?? "0 phút"}</p>
-                    <p className="mt-1">{course.lectures.length} lecture</p>
+                    <p>{formatDurationFromHours(course.total_hours) ?? "0 min"}</p>
+                    <p className="mt-1">{course.lectures.length} lectures</p>
                   </div>
                 </div>
 
@@ -146,7 +146,7 @@ export default function TimelineBoard() {
                                 {lecture.title}
                               </p>
                               <p className="mt-1 text-sm font-semibold text-slate-500">
-                                {lecture.learning_units.length} bài · {formatDurationFromHours(lecture.total_hours) ?? "0 phút"}
+                                {lecture.learning_units.length} lessons · {formatDurationFromHours(lecture.total_hours) ?? "0 min"}
                               </p>
                             </div>
                             <span

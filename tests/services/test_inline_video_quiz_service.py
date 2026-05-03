@@ -2,10 +2,12 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
+from sqlalchemy.sql.elements import BinaryExpression
 
 from src.exceptions import ConflictError, ValidationError
 from src.models.course import LearningProgressStatus
-from src.models.learning import SessionType
+from src.models.learning import SelectedAnswer, SessionType
+from src.schemas.quiz import QuizAnswerRequest
 from src.services import quiz_service
 
 
@@ -35,6 +37,260 @@ def _item(item_id: str, difficulty: str = "medium"):
         answer_index=0,
         explanation=None,
     )
+
+
+def test_quiz_item_ids_from_progress_reads_active_quiz_answered_and_remaining():
+    session_id = uuid4()
+
+    result = quiz_service._quiz_item_ids_from_progress(
+        {
+            "quiz_id": str(session_id),
+            "items_answered": ["item-a"],
+            "items_remaining": ["item-b", "item-a", "item-c"],
+        },
+        session_id,
+    )
+
+    assert result == ["item-a", "item-b", "item-c"]
+
+
+def test_quiz_item_ids_from_progress_reads_inline_checkpoint_state():
+    session_id = uuid4()
+
+    result = quiz_service._quiz_item_ids_from_progress(
+        {
+            "inline_quiz": {
+                "midpoint": {
+                    "active_session_id": str(session_id),
+                    "item_ids": ["item-b", "item-c"],
+                    "answered_item_ids": ["item-a", "item-b"],
+                }
+            }
+        },
+        session_id,
+    )
+
+    assert result == ["item-a", "item-b", "item-c"]
+
+
+@pytest.mark.asyncio
+async def test_get_canonical_quiz_item_for_session_resolves_inline_question_from_session_item_ids(
+    monkeypatch,
+):
+    user_id = uuid4()
+    user_id_outer = user_id
+    session_id = uuid4()
+    learning_unit_id = uuid4()
+    session = SimpleNamespace(
+        id=session_id,
+        canonical_unit_id=learning_unit_id,
+        canonical_phase="inline_midpoint_quiz",
+    )
+    unit = SimpleNamespace(id=learning_unit_id, canonical_unit_id="canonical-unit-1")
+    sibling_item = _item("item-from-sibling-unit")
+
+    class FakeDB:
+        async def execute(self, stmt):
+            where_clauses = list(getattr(stmt, "_where_criteria", ()))
+            assert any(
+                isinstance(clause, BinaryExpression)
+                and getattr(getattr(clause, "left", None), "name", None) == "item_id"
+                for clause in where_clauses
+            )
+            return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [sibling_item]))
+
+    async def fake_current_quiz_item_ids(
+        db_arg,
+        *,
+        user_id: object,
+        session_id: object,
+        fallback_unit_canonical_id: str,
+    ):
+        assert user_id == user_id_outer
+        assert session_id == session.id
+        assert fallback_unit_canonical_id == unit.canonical_unit_id
+        return ["item-from-sibling-unit"]
+
+    monkeypatch.setattr(quiz_service, "_current_quiz_item_ids", fake_current_quiz_item_ids)
+
+    result = await quiz_service._get_canonical_quiz_item_for_session(
+        FakeDB(),
+        user_id=user_id,
+        session=session,
+        unit=unit,
+        question_id=quiz_service.canonical_question_uuid("item-from-sibling-unit"),
+    )
+
+    assert result is sibling_item
+
+
+@pytest.mark.asyncio
+async def test_get_canonical_quiz_item_for_session_falls_back_to_inline_section_scope_when_progress_item_ids_missing(
+    monkeypatch,
+):
+    user_id = uuid4()
+    session = SimpleNamespace(
+        id=uuid4(),
+        canonical_unit_id=uuid4(),
+        canonical_phase="inline_midpoint_quiz",
+    )
+    unit = SimpleNamespace(
+        id=session.canonical_unit_id,
+        canonical_unit_id="canonical-unit-1",
+        section_id=uuid4(),
+    )
+    sibling_item = _item("item-from-inline-scope")
+
+    class FakeDB:
+        async def execute(self, stmt):
+            rendered = str(stmt)
+            if " IN " in rendered:
+                return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [sibling_item]))
+            return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: []))
+
+    async def fake_current_quiz_item_ids(
+        db_arg,
+        *,
+        user_id: object,
+        session_id: object,
+        fallback_unit_canonical_id: str,
+    ):
+        assert user_id == user_id_outer
+        assert session_id == session.id
+        assert fallback_unit_canonical_id == unit.canonical_unit_id
+        return []
+
+    async def fake_inline_quiz_scope(db_arg, actual_unit):
+        assert actual_unit is unit
+        return ["canonical-unit-1", "canonical-unit-2"]
+
+    user_id_outer = user_id
+    monkeypatch.setattr(quiz_service, "_current_quiz_item_ids", fake_current_quiz_item_ids)
+    monkeypatch.setattr(quiz_service, "_inline_quiz_canonical_unit_scope", fake_inline_quiz_scope)
+
+    result = await quiz_service._get_canonical_quiz_item_for_session(
+        FakeDB(),
+        user_id=user_id,
+        session=session,
+        unit=unit,
+        question_id=quiz_service.canonical_question_uuid("item-from-inline-scope"),
+    )
+
+    assert result is sibling_item
+
+
+@pytest.mark.asyncio
+async def test_fallback_quiz_item_ids_for_session_uses_inline_section_scope(monkeypatch):
+    session = SimpleNamespace(canonical_phase="inline_midpoint_quiz")
+    unit = SimpleNamespace(canonical_unit_id="canonical-unit-1", section_id=uuid4())
+
+    class FakeDB:
+        async def execute(self, stmt):
+            rendered = str(stmt)
+            assert " IN " in rendered
+            return SimpleNamespace(
+                scalars=lambda: SimpleNamespace(all=lambda: ["item-a", "item-b", "item-c"])
+            )
+
+    async def fake_inline_quiz_scope(db_arg, actual_unit):
+        assert actual_unit is unit
+        return ["canonical-unit-1", "canonical-unit-2"]
+
+    monkeypatch.setattr(quiz_service, "_inline_quiz_canonical_unit_scope", fake_inline_quiz_scope)
+
+    result = await quiz_service._fallback_quiz_item_ids_for_session(FakeDB(), session=session, unit=unit)
+
+    assert result == ["item-a", "item-b", "item-c"]
+
+
+@pytest.mark.asyncio
+async def test_answer_canonical_quiz_question_reuses_existing_feedback_for_duplicate_submit(
+    monkeypatch,
+):
+    user_id = uuid4()
+    learning_unit_id = uuid4()
+    session = SimpleNamespace(
+        id=uuid4(),
+        canonical_unit_id=learning_unit_id,
+        canonical_phase="inline_midpoint_quiz",
+        completed_at=None,
+    )
+    unit = SimpleNamespace(id=learning_unit_id, canonical_unit_id="canonical-unit-1")
+    item = _item("item-a")
+    existing_interaction = SimpleNamespace(is_correct=True)
+
+    class FakeDB:
+        def __init__(self):
+            self.added = []
+            self.execute_calls = 0
+
+        async def execute(self, stmt):
+            self.execute_calls += 1
+            if self.execute_calls == 1:
+                return SimpleNamespace(scalar_one_or_none=lambda: existing_interaction)
+            if self.execute_calls == 2:
+                return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: [True, False]))
+            raise AssertionError("Unexpected execute call")
+
+        def add(self, obj):
+            self.added.append(obj)
+
+        async def flush(self):
+            raise AssertionError("Duplicate submit should not write a new interaction")
+
+    db = FakeDB()
+
+    async def fake_get_learning_unit_or_404(db_arg, actual_learning_unit_id):
+        assert db_arg is db
+        assert actual_learning_unit_id == learning_unit_id
+        return unit
+
+    async def fake_get_canonical_quiz_item_for_session(
+        db_arg,
+        *,
+        user_id: object,
+        session: object,
+        unit: object,
+        question_id: object,
+        candidate_item_ids=None,
+    ):
+        assert db_arg is db
+        return item
+
+    monkeypatch.setattr(quiz_service, "_get_learning_unit_or_404", fake_get_learning_unit_or_404)
+    monkeypatch.setattr(
+        quiz_service,
+        "_get_canonical_quiz_item_for_session",
+        fake_get_canonical_quiz_item_for_session,
+    )
+
+    async def fake_current_quiz_progress_state(db_arg, actual_user_id):
+        assert db_arg is db
+        assert actual_user_id == user_id
+        return {}
+
+    monkeypatch.setattr(
+        quiz_service,
+        "_current_quiz_progress_state",
+        fake_current_quiz_progress_state,
+    )
+
+    result = await quiz_service._answer_canonical_quiz_question(
+        db,
+        user_id,
+        session,
+        QuizAnswerRequest(
+            question_id=quiz_service.canonical_question_uuid("item-a"),
+            selected_answer=SelectedAnswer.A,
+            response_time_ms=1200,
+        ),
+    )
+
+    assert result.is_correct is True
+    assert result.correct_answer == "A"
+    assert result.questions_answered == 2
+    assert result.questions_correct == 1
+    assert not db.added
 
 
 @pytest.mark.asyncio

@@ -33,6 +33,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
   const [hasLoadedCourses, setHasLoadedCourses] = useState(false);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
       mountedRef.current = false;
     };
@@ -68,6 +69,12 @@ function TopNavSearch({ pathname }: { pathname: string }) {
     setIsDropdownOpen(false);
   };
 
+  const routeToCourse = (courseSlug: string) => {
+    setIsDropdownOpen(false);
+    setDraftQuery("");
+    router.push(getCourseHref(courseSlug));
+  };
+
   const ensureCatalogLoaded = () => {
     if (hasLoadedCourses || isLoadingCourses) {
       return;
@@ -94,6 +101,10 @@ function TopNavSearch({ pathname }: { pathname: string }) {
       });
   };
 
+  useEffect(() => {
+    ensureCatalogLoaded();
+  }, []);
+
   const hasDraftQuery = draftQuery.length > 0;
 
   return (
@@ -105,8 +116,8 @@ function TopNavSearch({ pathname }: { pathname: string }) {
         >
           <Search className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
           <input
-            aria-label="Tìm kiếm khóa học"
-            placeholder="Tìm theo tên khóa học, mô tả..."
+            aria-label="Search courses"
+            placeholder="Search by course title, description..."
             value={draftQuery}
             onFocus={() => {
               setIsDropdownOpen(true);
@@ -121,6 +132,12 @@ function TopNavSearch({ pathname }: { pathname: string }) {
               if (event.key === "Escape") {
                 event.preventDefault();
                 setIsDropdownOpen(false);
+                return;
+              }
+
+              if (event.key === "Enter" && matchingCourses.length > 0) {
+                event.preventDefault();
+                routeToCourse(matchingCourses[0].slug);
               }
             }}
             className="w-full bg-transparent text-sm outline-none placeholder:text-[color:var(--text-muted)]"
@@ -129,7 +146,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
           {hasDraftQuery && (
             <button
               type="button"
-              aria-label="Xóa từ khóa tìm kiếm"
+              aria-label="Clear search query"
               onClick={clearQuery}
               className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
               style={{ color: "var(--text-muted)" }}
@@ -150,11 +167,11 @@ function TopNavSearch({ pathname }: { pathname: string }) {
         >
           {isLoadingCourses ? (
             <div className="px-4 py-3 text-sm" style={{ color: "var(--text-muted)" }}>
-              Đang tải khóa học...
+              Loading courses...
             </div>
           ) : matchingCourses.length === 0 ? (
             <div className="px-4 py-3 text-sm" style={{ color: "var(--text-muted)" }}>
-              Không tìm thấy khóa học phù hợp.
+              No matching courses found.
             </div>
           ) : (
             <ul className="py-2">
@@ -162,11 +179,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
                 <li key={course.id}>
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      setDraftQuery("");
-                      router.push(getCourseHref(course.slug));
-                    }}
+                    onClick={() => routeToCourse(course.slug)}
                     className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     <span className="min-w-0">
@@ -192,14 +205,14 @@ function TopNavSearch({ pathname }: { pathname: string }) {
                             color: "rgb(37, 99, 235)",
                           }}
                         >
-                          Dành cho bạn
+                          For you
                         </span>
                       )}
                       <span
                         className="block text-[11px] uppercase tracking-[0.08em]"
                         style={{ color: "var(--text-muted)" }}
                       >
-                        {course.status === "coming_soon" ? "Sắp ra mắt" : "Sẵn sàng"}
+                        {course.status === "coming_soon" ? "Coming soon" : "Ready"}
                       </span>
                     </span>
                   </button>
@@ -308,10 +321,9 @@ function TopNavContent() {
                   className={cn(
                     "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     active
-                      ? "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-                      : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                      ? "bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
+                      : "text-text-body hover:bg-surface-page dark:hover:bg-slate-800"
                   )}
-                  style={active ? {} : { color: "var(--text-secondary)" }}
                 >
                   <Icon className="h-4 w-4" />
                   {label}
@@ -327,7 +339,7 @@ function TopNavContent() {
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
               className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               style={{ color: "var(--text-secondary)" }}
-              aria-label="Chuyển giao diện"
+              aria-label="Toggle theme"
             >
               {resolvedTheme === "dark" ? (
                 <Sun className="h-4 w-4" />
@@ -340,11 +352,11 @@ function TopNavContent() {
             <button
               className="relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               style={{ color: "var(--text-secondary)" }}
-              aria-label="Thông báo"
+              aria-label="Notifications"
             >
               <Bell className="h-4 w-4" />
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
-              <span className="sr-only">Có thông báo chưa đọc</span>
+              <span className="sr-only">Unread notifications</span>
             </button>
 
             {isAuthenticated ? (
@@ -352,7 +364,7 @@ function TopNavContent() {
                 {/* Avatar */}
                 <Link
                   href="/profile"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 text-sm font-semibold transition-opacity hover:opacity-80"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300 text-sm font-semibold transition-opacity hover:opacity-80"
                 >
                   {initials}
                 </Link>
@@ -364,7 +376,7 @@ function TopNavContent() {
                   style={{ color: "var(--text-secondary)" }}
                 >
                   <LogOut className="h-4 w-4" />
-                  <span className="hidden lg:block">Đăng xuất</span>
+                  <span className="hidden lg:block">Sign out</span>
                 </button>
               </>
             ) : (
@@ -372,7 +384,7 @@ function TopNavContent() {
                 href="/login"
                 className="hidden sm:inline-flex h-9 items-center rounded-full bg-slate-950 px-4 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
               >
-                Đăng nhập
+                Sign in
               </Link>
             )}
 
@@ -406,10 +418,9 @@ function TopNavContent() {
                   className={cn(
                     "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     active
-                      ? "bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-                      : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                      ? "bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
+                      : "text-text-body hover:bg-surface-page dark:hover:bg-slate-800"
                   )}
-                  style={active ? {} : { color: "var(--text-secondary)" }}
                 >
                   <Icon className="h-4 w-4" />
                   {label}
@@ -423,7 +434,7 @@ function TopNavContent() {
                 style={{ color: "var(--text-secondary)" }}
               >
                 <LogOut className="h-4 w-4" />
-                Đăng xuất
+                Sign out
               </button>
             ) : (
               <Link
@@ -431,7 +442,7 @@ function TopNavContent() {
                 onClick={() => setMobileOpen(false)}
                 className="flex w-full items-center justify-center rounded-lg bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
               >
-                Đăng nhập
+                Sign in
               </Link>
             )}
           </div>
