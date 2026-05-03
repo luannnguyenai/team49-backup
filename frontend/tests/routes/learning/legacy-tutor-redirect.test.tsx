@@ -5,7 +5,6 @@ import TutorPage from "@/app/tutor/page";
 
 const navigationMock = vi.hoisted(() => ({
   replace: vi.fn(),
-  push: vi.fn(),
 }));
 
 vi.mock("next/navigation", async () => {
@@ -22,7 +21,7 @@ describe("legacy tutor redirect", () => {
     window.sessionStorage.clear();
   });
 
-  it("redirects to the active learning unit when context exists", async () => {
+  it("redirects legacy /tutor to /agent even when old active context exists", async () => {
     window.sessionStorage.setItem(
       "al_active_learning_unit",
       JSON.stringify({
@@ -34,17 +33,15 @@ describe("legacy tutor redirect", () => {
     render(<TutorPage />);
 
     await waitFor(() => {
-      expect(navigationMock.replace).toHaveBeenCalledWith(
-        "/courses/cs231n/learn/lecture-1-introduction",
-      );
+      expect(navigationMock.replace).toHaveBeenCalledWith("/agent");
     });
   });
 
-  it("redirects to a default course overview when no active context exists", async () => {
+  it("redirects legacy /tutor to /agent when no active context exists", async () => {
     render(<TutorPage />);
 
     await waitFor(() => {
-      expect(navigationMock.replace).toHaveBeenCalledWith("/courses/cs231n");
+      expect(navigationMock.replace).toHaveBeenCalledWith("/agent");
     });
   });
 });

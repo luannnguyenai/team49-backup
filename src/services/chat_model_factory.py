@@ -27,6 +27,8 @@ def build_chat_model_kwargs(
     temperature: float,
     max_tokens: int | None = None,
     model_provider: str | None = None,
+    reasoning_effort: str | None = None,
+    extra_kwargs: dict | None = None,
 ) -> dict:
     provider = model_provider or settings.model_provider
     kwargs = {
@@ -37,6 +39,16 @@ def build_chat_model_kwargs(
 
     if max_tokens is not None:
         kwargs["max_tokens"] = max_tokens
+
+    effort = reasoning_effort if reasoning_effort is not None else settings.model_reasoning_effort
+    if provider.lower() == "openai" and effort and effort != "off":
+        kwargs["reasoning"] = {"effort": effort}
+
+    configured_extra = dict(getattr(settings, "model_extra_kwargs", {}) or {})
+    if configured_extra:
+        kwargs.update(configured_extra)
+    if extra_kwargs:
+        kwargs.update(extra_kwargs)
 
     api_key = _resolve_api_key(provider)
     if api_key:

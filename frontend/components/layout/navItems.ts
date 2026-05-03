@@ -18,7 +18,7 @@ export interface NavItem {
 
 export const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/tutor", label: "AI Tutor", icon: MessageSquareText },
+  { href: "/agent", label: "AI Assistant", icon: MessageSquareText },
   { href: "/learn", label: "Learn", icon: BookOpen },
   {
     href: "/",

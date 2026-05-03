@@ -1,0 +1,337 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from types import SimpleNamespace
+from uuid import UUID, uuid4
+
+from sqlalchemy import select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.models.agent_graph import AgentGraphRun, AgentPendingAction, AgentResponsePayload
+from src.schemas.agent import AgentChatResponse
+
+
+ACTIVE_RUN_STATUSES = {"created", "running", "interrupted"}
+
+
+class AgentGraphRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def get_run_by_incoming_message(
+        self,
+        conversation_id: str,
+        thread_id: str,
+        incoming_message_id: str,
+    ) -> AgentGraphRun | None:
+        result = await self.session.execute(
+            select(AgentGraphRun).where(
+                AgentGraphRun.conversation_id == UUID(str(conversation_id)),
+                AgentGraphRun.thread_id == thread_id,
+                AgentGraphRun.incoming_message_id == incoming_message_id,
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def get_completed_response_by_incoming_message(
+        self,
+        *,
+        conversation_id: str,
+        thread_id: str,
+        incoming_message_id: str,
+    ) -> AgentChatResponse | None:
+        run = await self.get_run_by_incoming_message(
+            conversation_id,
+            thread_id,
+            incoming_message_id,
+        )
+        if run is None or run.status != "succeeded" or not run.response_ref:
+            return None
+        return await self.load_response_payload(run.response_ref)
+
+    async def get_active_run(self, *, thread_id: str) -> SimpleNamespace | None:
+        result = await self.session.execute(
+            select(AgentGraphRun)
+            .where(AgentGraphRun.thread_id == thread_id, AgentGraphRun.status.in_(ACTIVE_RUN_STATUSES))
+            .order_by(AgentGraphRun.created_at.desc())
+            .limit(1)
+        )
+        row = result.scalar_one_or_none()
+        if row is None:
+            return None
+        return SimpleNamespace(graph_run_id=str(row.id), status=row.status)
+
+    async def get_active_non_interrupted_run(self, *, thread_id: str) -> SimpleNamespace | None:
+        result = await self.session.execute(
+            select(AgentGraphRun)
+            .where(AgentGraphRun.thread_id == thread_id, AgentGraphRun.status.in_({"created", "running"}))
+            .order_by(AgentGraphRun.created_at.desc())
+            .limit(1)
+        )
+        row = result.scalar_one_or_none()
+        if row is None:
+            return None
+        return SimpleNamespace(graph_run_id=str(row.id), status=row.status)
+
+    async def create_run(
+        self,
+        *,
+        conversation_id: str,
+        thread_id: str,
+        incoming_message_id: str,
+    ) -> SimpleNamespace:
+        conversation_uuid = UUID(str(conversation_id))
+        stmt = (
+            pg_insert(AgentGraphRun)
+            .values(
+                conversation_id=conversation_uuid,
+                thread_id=thread_id,
+                incoming_message_id=incoming_message_id,
+                status="created",
+            )
+            .on_conflict_do_nothing(
+                index_elements=[
+                    AgentGraphRun.conversation_id,
+                    AgentGraphRun.thread_id,
+                    AgentGraphRun.incoming_message_id,
+                ]
+            )
+            .returning(AgentGraphRun.id, AgentGraphRun.status, AgentGraphRun.response_ref)
+        )
+        inserted = (await self.session.execute(stmt)).one_or_none()
+        await self.session.flush()
+        if inserted is not None:
+            run_id, status, response_ref = inserted
+            return SimpleNamespace(
+                graph_run_id=str(run_id),
+                status=status,
+                response_ref=response_ref,
+                existing=False,
+            )
+
+        existing = await self.get_run_by_incoming_message(
+            conversation_id=str(conversation_uuid),
+            thread_id=thread_id,
+            incoming_message_id=incoming_message_id,
+        )
+        if existing is None:
+            raise RuntimeError("agent_graph_run_insert_conflict_without_existing_row")
+        return SimpleNamespace(
+            graph_run_id=str(existing.id),
+            status=existing.status,
+            response_ref=existing.response_ref,
+            existing=True,
+        )
+
+    async def mark_run_running(self, graph_run_id: str) -> None:
+        await self._mark_run_status(graph_run_id, "running")
+
+    async def mark_run_succeeded(
+        self,
+        graph_run_id: str,
+        *,
+        response_ref: str,
+        checkpoint_id: str | None = None,
+    ) -> None:
+        await self.session.execute(
+            update(AgentGraphRun)
+            .where(AgentGraphRun.id == UUID(str(graph_run_id)))
+            .values(
+                status="succeeded",
+                response_ref=response_ref,
+                checkpoint_id=checkpoint_id,
+                updated_at=datetime.now(UTC),
+            )
+        )
+        await self.session.flush()
+
+    async def mark_run_interrupted(
+        self,
+        graph_run_id: str,
+        *,
+        response_ref: str | None = None,
+        checkpoint_id: str | None = None,
+    ) -> None:
+        await self.session.execute(
+            update(AgentGraphRun)
+            .where(AgentGraphRun.id == UUID(str(graph_run_id)))
+            .values(
+                status="interrupted",
+                response_ref=response_ref,
+                checkpoint_id=checkpoint_id,
+                updated_at=datetime.now(UTC),
+            )
+        )
+        await self.session.flush()
+
+    async def mark_run_failed(self, graph_run_id: str, *, error: str, retryable: bool) -> None:
+        status = "failed_retryable" if retryable else "failed_terminal"
+        await self.session.execute(
+            update(AgentGraphRun)
+            .where(AgentGraphRun.id == UUID(str(graph_run_id)))
+            .values(status=status, error=error, updated_at=datetime.now(UTC))
+        )
+        await self.session.flush()
+
+    async def mark_latest_interrupted_run_final(
+        self,
+        *,
+        thread_id: str,
+        status: str,
+    ) -> None:
+        result = await self.session.execute(
+            select(AgentGraphRun.id)
+            .where(AgentGraphRun.thread_id == thread_id, AgentGraphRun.status == "interrupted")
+            .order_by(AgentGraphRun.updated_at.desc(), AgentGraphRun.created_at.desc())
+            .limit(1)
+        )
+        run_id = result.scalar_one_or_none()
+        if run_id is None:
+            return
+        await self.session.execute(
+            update(AgentGraphRun)
+            .where(AgentGraphRun.id == run_id)
+            .values(status=status, updated_at=datetime.now(UTC))
+        )
+        await self.session.flush()
+
+    async def _mark_run_status(self, graph_run_id: str, status: str) -> None:
+        await self.session.execute(
+            update(AgentGraphRun)
+            .where(AgentGraphRun.id == UUID(str(graph_run_id)))
+            .values(status=status, updated_at=datetime.now(UTC))
+        )
+        await self.session.flush()
+
+    async def store_response_payload(
+        self,
+        *,
+        graph_run_id: str,
+        response: AgentChatResponse,
+        deterministic_key: str,
+    ) -> str:
+        response_ref = f"agent_response:{deterministic_key}"
+        payload = response.model_dump(mode="json", by_alias=True)
+        stmt = (
+            pg_insert(AgentResponsePayload)
+            .values(
+                response_ref=response_ref,
+                graph_run_id=UUID(str(graph_run_id)),
+                payload_json=payload,
+            )
+            .on_conflict_do_update(
+                index_elements=[AgentResponsePayload.response_ref],
+                set_={
+                    "graph_run_id": UUID(str(graph_run_id)),
+                    "payload_json": payload,
+                    "updated_at": datetime.now(UTC),
+                },
+            )
+        )
+        await self.session.execute(stmt)
+        await self.session.flush()
+        return response_ref
+
+    async def load_response_payload(self, response_ref: str) -> AgentChatResponse | None:
+        result = await self.session.execute(
+            select(AgentResponsePayload).where(AgentResponsePayload.response_ref == response_ref)
+        )
+        row = result.scalar_one_or_none()
+        if row is None:
+            return None
+        return AgentChatResponse.model_validate(row.payload_json)
+
+    async def create_pending_action(
+        self,
+        *,
+        conversation_id: str,
+        thread_id: str,
+        user_id: str,
+        action_type: str,
+        payload: dict,
+        payload_version: int,
+        idempotency_key: str,
+        expires_at: datetime,
+    ) -> AgentPendingAction:
+        existing = await self.get_pending_action_by_idempotency_key(idempotency_key)
+        if existing is not None:
+            return existing
+        action_id = f"act_{uuid4()}"
+        row = AgentPendingAction(
+            action_id=action_id,
+            conversation_id=UUID(str(conversation_id)),
+            thread_id=thread_id,
+            user_id=UUID(str(user_id)),
+            type=action_type,
+            status="awaiting_confirmation",
+            payload_json=payload,
+            payload_version=payload_version,
+            idempotency_key=idempotency_key,
+            expires_at=expires_at,
+        )
+        self.session.add(row)
+        await self.session.flush()
+        return row
+
+    async def get_pending_action_by_idempotency_key(
+        self,
+        idempotency_key: str,
+    ) -> AgentPendingAction | None:
+        result = await self.session.execute(
+            select(AgentPendingAction).where(AgentPendingAction.idempotency_key == idempotency_key)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_pending_action(self, *, action_id: str) -> AgentPendingAction | None:
+        result = await self.session.execute(
+            select(AgentPendingAction).where(AgentPendingAction.action_id == action_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_committed_action_result(self, action_id: str) -> dict | None:
+        action = await self.get_pending_action(action_id=action_id)
+        if action is None or action.status != "committed":
+            return None
+        return action.result_json
+
+    async def mark_action_committed(self, action_id: str, *, result: dict) -> None:
+        await self.session.execute(
+            update(AgentPendingAction)
+            .where(AgentPendingAction.action_id == action_id)
+            .values(
+                status="committed",
+                result_json=result,
+                committed_at=datetime.now(UTC),
+                updated_at=datetime.now(UTC),
+            )
+        )
+        await self.session.flush()
+
+    async def mark_action_cancelled(self, action_id: str) -> None:
+        await self.session.execute(
+            update(AgentPendingAction)
+            .where(AgentPendingAction.action_id == action_id)
+            .values(status="cancelled", updated_at=datetime.now(UTC))
+        )
+        await self.session.flush()
+
+    async def mark_action_expired(self, action_id: str) -> None:
+        await self.session.execute(
+            update(AgentPendingAction)
+            .where(AgentPendingAction.action_id == action_id)
+            .values(status="expired", updated_at=datetime.now(UTC))
+        )
+        await self.session.flush()
+
+    async def expire_pending_actions(self, now: datetime) -> int:
+        result = await self.session.execute(
+            update(AgentPendingAction)
+            .where(
+                AgentPendingAction.status == "awaiting_confirmation",
+                AgentPendingAction.expires_at <= now,
+            )
+            .values(status="expired", updated_at=now)
+        )
+        await self.session.flush()
+        return int(result.rowcount or 0)

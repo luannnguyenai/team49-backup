@@ -46,7 +46,19 @@ def test_settings_default_tutor_models(monkeypatch: pytest.MonkeyPatch):
     assert settings.default_model == "gpt-5.4-mini"
     assert settings.fast_model == "gpt-5.4-nano"
     assert settings.model_provider == "openai"
+    assert settings.model_reasoning_effort == "medium"
+    assert settings.model_extra_kwargs == {}
     assert settings.gemini_requests_per_minute == 15
+
+
+def test_settings_parses_model_extra_kwargs(monkeypatch: pytest.MonkeyPatch):
+    from src.config import Settings
+
+    monkeypatch.setenv("MODEL_EXTRA_KWARGS", '{"thinking_budget": 1024}')
+
+    settings = Settings(_env_file=None)
+
+    assert settings.model_extra_kwargs == {"thinking_budget": 1024}
 
 
 def test_settings_default_cutover_flags_are_production_canonical(monkeypatch: pytest.MonkeyPatch):

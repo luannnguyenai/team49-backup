@@ -13,7 +13,7 @@ from datetime import datetime
 import uuid
 from typing import Optional
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -420,7 +420,9 @@ class ItemCalibrationHistory(Base):
     synthetic_response_count: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default="0"
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=func.now(), server_default=func.now()
+    )
 
 
 class ItemExposureStat(Base):

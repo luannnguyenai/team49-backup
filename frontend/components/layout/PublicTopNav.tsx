@@ -6,7 +6,7 @@ import BrandLogo from "@/components/layout/BrandLogo";
 const NAV_ITEMS = [
   { href: "#product", label: "Product" },
   { href: "#roadmap", label: "Learning Path" },
-  { href: "#tutor", label: "AI Tutor" },
+  { href: "#tutor", label: "AI Assistant" },
   { href: "#contact", label: "Contact" },
 ] as const;
 

@@ -1,0 +1,147 @@
+from datetime import UTC, datetime, timedelta
+
+from src.services.agent_assessment_workflow import AgentAssessmentWorkflowService
+
+
+def test_assessment_workflow_starts_with_negotiable_proposal():
+    service = AgentAssessmentWorkflowService()
+
+    response = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a", "unit-b"],
+        question_budget=58,
+        phase="skip_verification",
+    )
+
+    assert response.status == "waiting_user_approval"
+    assert response.interrupt
+    assert response.interrupt["estimatedQuestions"] == 58
+    assert response.interrupt["reductionOptions"][0]["id"] == "minimum-evidence"
+
+
+def test_assessment_workflow_reduce_then_approve_enables_start_action():
+    service = AgentAssessmentWorkflowService()
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a", "unit-b"],
+        question_budget=58,
+        phase="skip_verification",
+    )
+
+    reduced = service.resume(
+        workflow_id=started.workflow_id,
+        user_id="user-1",
+        decision={"action": "reduce", "reductionId": "minimum-evidence"},
+    )
+    assert reduced.status == "waiting_user_approval"
+    assert reduced.interrupt
+    assert reduced.interrupt["estimatedQuestions"] == 29
+
+    approved = service.resume(
+        workflow_id=started.workflow_id,
+        user_id="user-1",
+        decision={"action": "approve"},
+    )
+    assert approved.status == "assessment_ready"
+    assert approved.actions[0].eligible is True
+    assert approved.actions[0].disabled_reason is None
+    assert approved.actions[0].question_budget == 29
+
+
+def test_assessment_workflow_rejects_bad_decision_without_500():
+    service = AgentAssessmentWorkflowService()
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a"],
+        question_budget=20,
+        phase="skip_verification",
+    )
+
+    response = service.resume(
+        workflow_id=started.workflow_id,
+        user_id="user-1",
+        decision={"action": "reduce", "questionBudget": "abc"},
+    )
+
+    assert response.status == "rejected"
+
+
+def test_assessment_workflow_is_user_scoped():
+    service = AgentAssessmentWorkflowService()
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a"],
+        question_budget=20,
+        phase="skip_verification",
+    )
+
+    try:
+        service.resume(
+            workflow_id=started.workflow_id,
+            user_id="user-2",
+            decision={"action": "approve"},
+        )
+    except PermissionError as exc:
+        assert "workflow_out_of_scope" in str(exc)
+    else:
+        raise AssertionError("wrong user must not resume workflow")
+
+
+def test_assessment_workflow_expires_stale_in_memory_state():
+    now = datetime(2026, 5, 3, tzinfo=UTC)
+    service = AgentAssessmentWorkflowService(
+        state_ttl_seconds=60,
+        now=lambda: now,
+    )
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a"],
+        question_budget=20,
+        phase="skip_verification",
+    )
+
+    now = now + timedelta(seconds=61)
+
+    try:
+        service.resume(
+            workflow_id=started.workflow_id,
+            user_id="user-1",
+            decision={"action": "approve"},
+        )
+    except ValueError as exc:
+        assert "workflow_not_found" in str(exc)
+    else:
+        raise AssertionError("expired workflow must not resume")
+    assert started.workflow_id not in service._states
+
+
+def test_assessment_workflow_removes_terminal_states():
+    service = AgentAssessmentWorkflowService()
+    approved_start = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a"],
+        question_budget=20,
+        phase="skip_verification",
+    )
+    rejected_start = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-b"],
+        question_budget=20,
+        phase="skip_verification",
+    )
+
+    approved = service.resume(
+        workflow_id=approved_start.workflow_id,
+        user_id="user-1",
+        decision={"action": "approve"},
+    )
+    rejected = service.resume(
+        workflow_id=rejected_start.workflow_id,
+        user_id="user-1",
+        decision={"action": "reject"},
+    )
+
+    assert approved.status == "assessment_ready"
+    assert rejected.status == "rejected"
+    assert approved_start.workflow_id not in service._states
+    assert rejected_start.workflow_id not in service._states

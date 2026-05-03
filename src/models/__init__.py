@@ -6,6 +6,17 @@ package to discover all tables.
 """
 
 from src.models.base import Base  # noqa: F401
+from src.models.agent_conversation import (  # noqa: F401
+    AgentConversation,
+    AgentConversationMemory,
+    AgentConversationMessage,
+)
+from src.models.agent_graph import (  # noqa: F401
+    AgentGraphRun,
+    AgentPendingAction,
+    AgentResponsePayload,
+    AgentTraceEvent,
+)
 from src.models.canonical import (  # noqa: F401
     CanonicalUnit,
     ConceptKP,
@@ -49,6 +60,14 @@ from src.models.user import User  # noqa: F401
 
 __all__ = [
     "Base",
+    # Agent conversations
+    "AgentConversation",
+    "AgentConversationMessage",
+    "AgentConversationMemory",
+    "AgentGraphRun",
+    "AgentResponsePayload",
+    "AgentPendingAction",
+    "AgentTraceEvent",
     # Lecture models
     "Lecture",
     "Chapter",

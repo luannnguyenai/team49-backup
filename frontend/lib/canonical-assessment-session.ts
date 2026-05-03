@@ -1,4 +1,5 @@
 import type {
+  AssessmentStartResponse,
   CanonicalAssessmentStartPayload,
   AnswerInput,
   CourseSectionDetail,
@@ -10,6 +11,7 @@ export const ASSESSMENT_STORAGE_KEYS = {
   canonicalUnitIds: "al_pending_canonical_unit_ids",
   unitNames: "al_pending_canonical_unit_names",
   assessmentDepth: "al_pending_assessment_depth",
+  startedAssessment: "al_started_assessment",
 } as const;
 
 interface BuildCanonicalAssessmentContextInput {
@@ -23,6 +25,13 @@ export interface CanonicalAssessmentContext {
   canonicalUnitIds: string[];
   unitNameMap: Record<string, string>;
   assessmentDepth?: CanonicalAssessmentStartPayload["assessment_depth"];
+}
+
+export interface StartedCanonicalAssessmentContext {
+  sessionId: string;
+  questions: AssessmentStartResponse["questions"];
+  canonicalUnitIds: string[];
+  unitNameMap: Record<string, string>;
 }
 
 function unique<T>(values: T[]): T[] {
@@ -127,6 +136,21 @@ export function readPendingCanonicalAssessment(): CanonicalAssessmentContext {
   };
 }
 
+export function readStartedCanonicalAssessment(): StartedCanonicalAssessmentContext | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = window.sessionStorage.getItem(ASSESSMENT_STORAGE_KEYS.startedAssessment);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as StartedCanonicalAssessmentContext;
+    if (!parsed.sessionId || !Array.isArray(parsed.questions)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 export function writePendingCanonicalAssessment(
   context: CanonicalAssessmentContext,
 ): void {
@@ -146,6 +170,17 @@ export function writePendingCanonicalAssessment(
       context.assessmentDepth,
     );
   }
+}
+
+export function writeStartedCanonicalAssessment(
+  context: StartedCanonicalAssessmentContext,
+): void {
+  if (typeof window === "undefined") return;
+
+  window.sessionStorage.setItem(
+    ASSESSMENT_STORAGE_KEYS.startedAssessment,
+    JSON.stringify(context),
+  );
 }
 
 export function clearPendingAssessmentContext(): void {

@@ -23,6 +23,7 @@ import {
   clearPendingAssessmentContext,
   getAssessmentQuestionKey,
   readPendingCanonicalAssessment,
+  readStartedCanonicalAssessment,
 } from "@/lib/canonical-assessment-session";
 import { cn } from "@/lib/utils";
 import type {
@@ -99,6 +100,18 @@ function AssessmentPageInner() {
 
     async function bootstrap() {
       try {
+        const startedAssessment = readStartedCanonicalAssessment();
+        if (startedAssessment) {
+          if (!cancelled) {
+            setLearningUnitNames(startedAssessment.unitNameMap);
+            setSessionId(startedAssessment.sessionId);
+            setQuestions(startedAssessment.questions);
+            questionStart.current = Date.now();
+            setPhase("active");
+          }
+          return;
+        }
+
         const { canonicalUnitIds, unitNameMap, assessmentDepth } = readPendingCanonicalAssessment();
         if (canonicalUnitIds.length === 0) {
           if (!cancelled) {

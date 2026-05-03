@@ -16,11 +16,13 @@ langchain>=1.2.15
 langchain-openai>=0.1.0
 langchain-core>=0.1.0
 langgraph>=0.1.0
+langgraph-checkpoint-postgres>=3.0.2
 langchain-google-genai
 # ── New: AI Personalized ──
 pydantic-settings>=2.0.0
 pydantic[email]
 asyncpg>=0.29.0
+psycopg[binary,pool]>=3.3.2
 alembic>=1.13.0
 redis[asyncio]>=5.0
 passlib[bcrypt]>=1.7.0

@@ -1014,7 +1014,7 @@ describe("learning unit page (US3)", () => {
 
     const brand = screen.getByRole("link", { name: "AI Learning Hub" });
     const search = screen.getByLabelText("Search courses");
-    const tutorLink = screen.getByRole("link", { name: "AI Tutor" });
+    const tutorLink = screen.getByRole("link", { name: "AI Assistant" });
 
     const headerRow = brand.closest("header")?.firstElementChild;
     expect(headerRow).not.toBeNull();

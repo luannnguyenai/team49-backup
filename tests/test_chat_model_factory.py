@@ -49,6 +49,51 @@ class ChatModelFactoryTests(unittest.TestCase):
 
         self.assertNotIn("api_key", kwargs)
 
+    def test_openai_provider_includes_reasoning_effort_when_configured(self):
+        with patch("src.services.chat_model_factory.settings.model_provider", "openai"), patch(
+            "src.services.chat_model_factory.settings.model_reasoning_effort",
+            "medium",
+        ), patch(
+            "src.services.chat_model_factory.settings.openai_api_key",
+            "",
+        ):
+            kwargs = build_chat_model_kwargs(
+                model="gpt-5.4-mini",
+                temperature=0.2,
+            )
+
+        self.assertEqual(kwargs["reasoning"], {"effort": "medium"})
+
+    def test_non_openai_provider_does_not_get_openai_reasoning_shape(self):
+        with patch("src.services.chat_model_factory.settings.model_provider", "google_genai"), patch(
+            "src.services.chat_model_factory.settings.model_reasoning_effort",
+            "medium",
+        ), patch(
+            "src.services.chat_model_factory.settings.gemini_api_key",
+            "",
+        ):
+            kwargs = build_chat_model_kwargs(
+                model="gemini-3-flash-preview",
+                temperature=0,
+            )
+
+        self.assertNotIn("reasoning", kwargs)
+
+    def test_model_extra_kwargs_are_provider_neutral(self):
+        with patch("src.services.chat_model_factory.settings.model_provider", "google_genai"), patch(
+            "src.services.chat_model_factory.settings.model_extra_kwargs",
+            {"thinking_budget": 1024},
+        ), patch(
+            "src.services.chat_model_factory.settings.gemini_api_key",
+            "",
+        ):
+            kwargs = build_chat_model_kwargs(
+                model="gemini-3-flash-preview",
+                temperature=0,
+            )
+
+        self.assertEqual(kwargs["thinking_budget"], 1024)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -7,9 +7,8 @@ from datetime import datetime, timezone
 import math
 
 from src.models.calibration import CalibrationRun, ItemCalibrationHistory
-from src.models.canonical import ItemCalibration, QuestionBankItem
+from src.models.canonical import ItemCalibration, ItemPhaseMap, QuestionBankItem
 from src.models.learning import Interaction, Session
-from src.services.learning.interaction_service import record_interaction
 
 
 @pytest.mark.asyncio
@@ -43,9 +42,12 @@ async def test_calibration_run_creation_and_status(db_session: AsyncSession):
 async def test_item_calibration_history_insertion(db_session: AsyncSession):
     """Test inserting calibration history records."""
     # Get or create a placement item
-    stmt = select(QuestionBankItem).where(
-        QuestionBankItem.phase == "placement"
-    ).limit(1)
+    stmt = (
+        select(QuestionBankItem)
+        .join(ItemPhaseMap, ItemPhaseMap.item_id == QuestionBankItem.item_id)
+        .where(ItemPhaseMap.phase == "placement")
+        .limit(1)
+    )
     result = await db_session.execute(stmt)
     item = result.scalar_one_or_none()
 
@@ -100,9 +102,12 @@ async def test_item_calibration_history_insertion(db_session: AsyncSession):
 async def test_item_calibration_update_from_history(db_session: AsyncSession):
     """Test updating item_calibration with parameters from history."""
     # Get or create a placement item
-    stmt = select(QuestionBankItem).where(
-        QuestionBankItem.phase == "placement"
-    ).limit(1)
+    stmt = (
+        select(QuestionBankItem)
+        .join(ItemPhaseMap, ItemPhaseMap.item_id == QuestionBankItem.item_id)
+        .where(ItemPhaseMap.phase == "placement")
+        .limit(1)
+    )
     result = await db_session.execute(stmt)
     item = result.scalar_one_or_none()
 

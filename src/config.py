@@ -34,6 +34,14 @@ class Settings(BaseSettings):
         description="Fast model for minor tasks",
     )
     model_provider: str = Field(default ="openai", description="LLM provider")
+    model_reasoning_effort: Literal["off", "low", "medium", "high", "xhigh"] = Field(
+        default="medium",
+        description="Optional reasoning effort for providers that support it.",
+    )
+    model_extra_kwargs: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Provider-specific chat model kwargs, parsed from JSON.",
+    )
     gemini_requests_per_minute: int = Field(
         default=15,
         ge=1,
@@ -45,6 +53,14 @@ class Settings(BaseSettings):
     database_url: str = Field(
         default="postgresql+asyncpg://postgres:change_me_strong_password@localhost:5432/ai_learning",
         description="Full asyncpg-compatible connection URL",
+    )
+    agent_graph_checkpointer_backend: Literal["memory", "postgres"] = Field(
+        default="postgres",
+        description="LangGraph checkpointer backend for /agent graph state.",
+    )
+    agent_graph_checkpointer_setup: bool = Field(
+        default=True,
+        description="Run LangGraph checkpointer setup before graph use. Disable after schema is managed separately.",
     )
     db_echo: bool = Field(default=False, description="Log all SQL statements")
     db_pool_size: int = Field(default=10)
@@ -189,6 +205,17 @@ class Settings(BaseSettings):
         if not isinstance(value, Mapping):
             raise ValueError("value must be a mapping or JSON object string")
         return {str(key): float(item) for key, item in value.items()}
+
+    @field_validator("model_extra_kwargs", mode="before")
+    @classmethod
+    def parse_any_mapping(cls, value: Any) -> dict[str, Any]:
+        if value is None or value == "":
+            return {}
+        if isinstance(value, str):
+            value = json.loads(value)
+        if not isinstance(value, Mapping):
+            raise ValueError("value must be a mapping or JSON object string")
+        return dict(value)
 
 
 settings = Settings()

@@ -25,7 +25,7 @@ def test_calibration_run_model_fields():
     assert run.real_response_count == 1000
     assert run.synthetic_response_count == 0
     assert run.status == "passed"
-    assert run.active is False
+    assert CalibrationRun.__table__.c.active.default.arg is False
     assert run.metrics_json is None
 
 
