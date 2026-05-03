@@ -37,6 +37,27 @@ class NoopThreadLock:
         return NoopLock()
 
 
+class RecordingLock:
+    def __init__(self, events: list[str]):
+        self.events = events
+
+    async def __aenter__(self):
+        self.events.append("lock_acquired")
+        return None
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return None
+
+
+class RecordingThreadLock:
+    def __init__(self, events: list[str]):
+        self.events = events
+
+    def acquire(self, **kwargs):
+        self.events.append("lock_requested")
+        return RecordingLock(self.events)
+
+
 class PendingDecisionRouter:
     def __init__(
         self,
@@ -2788,6 +2809,51 @@ async def test_graph_chat_duplicate_create_race_returns_in_progress_for_existing
 
     assert exc_info.value.graph_run_id == "run-existing-active"
     repo.mark_run_running.assert_not_called()
+
+
+async def test_graph_chat_acquires_thread_lock_before_active_run_check_and_create():
+    events: list[str] = []
+
+    class Repo:
+        async def get_completed_response_by_incoming_message(self, **kwargs):
+            events.append("completed_check")
+            return None
+
+        async def get_run_by_incoming_message(self, *args, **kwargs):
+            events.append("incoming_run_check")
+            return None
+
+        async def get_active_run(self, **kwargs):
+            events.append("active_run_check")
+            return SimpleNamespace(graph_run_id="run-active")
+
+        async def create_run(self, **kwargs):
+            events.append("create_run")
+            return SimpleNamespace(graph_run_id="run-new")
+
+        async def mark_run_running(self, graph_run_id):
+            events.append("mark_running")
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=Repo(),
+        thread_lock=RecordingThreadLock(events),
+    )
+
+    with pytest.raises(AgentInProgressError):
+        await service.chat(
+            request=AgentChatRequest(message="race", incomingMessageId="msg-race"),
+            conversation_id="conv-1",
+            thread_id="thread-1",
+            user_id=str(uuid4()),
+            allowed_course_ids=["CS231n"],
+        )
+
+    assert events.index("lock_acquired") < events.index("active_run_check")
+    assert "create_run" not in events
+    assert "mark_running" not in events
 
 
 async def test_graph_persists_failed_request_retry_context_when_router_model_fails():

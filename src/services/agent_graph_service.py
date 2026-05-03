@@ -220,7 +220,6 @@ class AgentGraphService:
         if completed is not None:
             return completed
 
-        retrying_failed_run = False
         existing_run = None
         get_run = getattr(self.graph_repo, "get_run_by_incoming_message", None)
         if get_run is not None:
@@ -229,36 +228,42 @@ class AgentGraphService:
                 thread_id=thread_id,
                 incoming_message_id=request.incoming_message_id,
             )
-        if existing_run is not None and getattr(existing_run, "status", None) == "failed_retryable":
-            active_run = await self.graph_repo.get_active_run(thread_id=thread_id)
-            if active_run is not None and active_run.graph_run_id != str(existing_run.id):
-                raise AgentInProgressError(conversation_id, thread_id, active_run.graph_run_id)
-            run = SimpleNamespace(graph_run_id=str(existing_run.id))
-            retrying_failed_run = True
-        else:
-            active_run = await self.graph_repo.get_active_run(thread_id=thread_id)
-            if active_run is not None:
-                raise AgentInProgressError(conversation_id, thread_id, active_run.graph_run_id)
-
-            run = await self.graph_repo.create_run(
-                conversation_id=conversation_id,
-                thread_id=thread_id,
-                incoming_message_id=request.incoming_message_id,
-            )
-            if getattr(run, "existing", False):
-                if getattr(run, "status", None) == "succeeded" and getattr(run, "response_ref", None):
-                    completed_after_race = await self.graph_repo.load_response_payload(run.response_ref)
-                    if completed_after_race is not None:
-                        return completed_after_race
-                if getattr(run, "status", None) == "failed_retryable":
-                    retrying_failed_run = True
-                else:
-                    raise AgentInProgressError(conversation_id, thread_id, run.graph_run_id)
+        lock_graph_run_id = (
+            str(existing_run.id)
+            if existing_run is not None and getattr(existing_run, "id", None) is not None
+            else f"pending:{request.incoming_message_id}"
+        )
         async with self.thread_lock.acquire(
             conversation_id=conversation_id,
             thread_id=thread_id,
-            graph_run_id=run.graph_run_id,
+            graph_run_id=lock_graph_run_id,
         ):
+            retrying_failed_run = False
+            if existing_run is not None and getattr(existing_run, "status", None) == "failed_retryable":
+                active_run = await self.graph_repo.get_active_run(thread_id=thread_id)
+                if active_run is not None and active_run.graph_run_id != str(existing_run.id):
+                    raise AgentInProgressError(conversation_id, thread_id, active_run.graph_run_id)
+                run = SimpleNamespace(graph_run_id=str(existing_run.id))
+                retrying_failed_run = True
+            else:
+                active_run = await self.graph_repo.get_active_run(thread_id=thread_id)
+                if active_run is not None:
+                    raise AgentInProgressError(conversation_id, thread_id, active_run.graph_run_id)
+
+                run = await self.graph_repo.create_run(
+                    conversation_id=conversation_id,
+                    thread_id=thread_id,
+                    incoming_message_id=request.incoming_message_id,
+                )
+                if getattr(run, "existing", False):
+                    if getattr(run, "status", None) == "succeeded" and getattr(run, "response_ref", None):
+                        completed_after_race = await self.graph_repo.load_response_payload(run.response_ref)
+                        if completed_after_race is not None:
+                            return completed_after_race
+                    if getattr(run, "status", None) == "failed_retryable":
+                        retrying_failed_run = True
+                    else:
+                        raise AgentInProgressError(conversation_id, thread_id, run.graph_run_id)
             await self.graph_repo.mark_run_running(run.graph_run_id)
             try:
                 if self.conversation_repo is not None and not retrying_failed_run:
