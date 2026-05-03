@@ -28,32 +28,6 @@ $commitLines = @"
 "@
 
 
-# + 198b861b23e02b5d3e85bd21532baa2f09525545 Update test_inline_video_quiz_service.py
-# + 262338cd1f36f2559ac15e0990ad08567dcb7d6e ship admin dashboard
-# + c5949df16c0ab81a19b936763dfa351f2f6885cb Update README.md
-# + 1861a20b650ecae100e9b0362ae2c370250c0367 Update InContextTutor.tsx
-# + c4163f3d914d363409b0814774a3172c2533ded0 Create tutorSessionHistory.ts
-# + f4100a1c4d1f40cc8c67e9c3ccf6846ec63642fa Update authStore.ts
-# + 772d500518755bf4196f62f789771f80176d5c25 Update store-logout.test.ts
-# + 34272f208cfc16e5788f1e03f02fc1f76006cb27 Update in-context-tutor.test.tsx
-# + 2226b30ca11442b057c82149199bc8c324646546 Update pyproject.toml
-# + 4c025f63311bbf7b7b73c8eb133ec27881606376 Update app.py
-# + 262338cd1f36f2559ac15e0990ad08567dcb7d6e ship admin dashboard
-# + c5949df16c0ab81a19b936763dfa351f2f6885cb Update README.md
-# + 1861a20b650ecae100e9b0362ae2c370250c0367 Update InContextTutor.tsx
-# + c4163f3d914d363409b0814774a3172c2533ded0 Create tutorSessionHistory.ts
-# + f4100a1c4d1f40cc8c67e9c3ccf6846ec63642fa Update authStore.ts
-# + 772d500518755bf4196f62f789771f80176d5c25 Update store-logout.test.ts
-# + 34272f208cfc16e5788f1e03f02fc1f76006cb27 Update in-context-tutor.test.tsx
-# + 2226b30ca11442b057c82149199bc8c324646546 Update pyproject.toml
-# + 4c025f63311bbf7b7b73c8eb133ec27881606376 Update app.py
-# + 1861a20b650ecae100e9b0362ae2c370250c0367 Update InContextTutor.tsx
-# + c4163f3d914d363409b0814774a3172c2533ded0 Create tutorSessionHistory.ts
-# + f4100a1c4d1f40cc8c67e9c3ccf6846ec63642fa Update authStore.ts
-# + 772d500518755bf4196f62f789771f80176d5c25 Update store-logout.test.ts
-# + 34272f208cfc16e5788f1e03f02fc1f76006cb27 Update in-context-tutor.test.tsx
-# + 2226b30ca11442b057c82149199bc8c324646546 Update pyproject.toml
-# + 4c025f63311bbf7b7b73c8eb133ec27881606376 Update app.py
 # + f4100a1c4d1f40cc8c67e9c3ccf6846ec63642fa Update authStore.ts
 # + 772d500518755bf4196f62f789771f80176d5c25 Update store-logout.test.ts
 # + 34272f208cfc16e5788f1e03f02fc1f76006cb27 Update in-context-tutor.test.tsx
