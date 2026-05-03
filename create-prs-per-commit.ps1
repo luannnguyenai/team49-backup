@@ -4,41 +4,21 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ 262338cd1f36f2559ac15e0990ad08567dcb7d6e ship admin dashboard
-+ c5949df16c0ab81a19b936763dfa351f2f6885cb Update README.md
-+ 1861a20b650ecae100e9b0362ae2c370250c0367 Update InContextTutor.tsx
-+ c4163f3d914d363409b0814774a3172c2533ded0 Create tutorSessionHistory.ts
-+ f4100a1c4d1f40cc8c67e9c3ccf6846ec63642fa Update authStore.ts
-+ 772d500518755bf4196f62f789771f80176d5c25 Update store-logout.test.ts
-+ 2dbe7f92be336c609b134b134231a2c41510e1fb Update test_inline_video_quiz_service.py
-+ b5d8aee0426a54042b5aaeed3b2b0d6159231e5d Update quiz_service.py
-+ 55c56a22e11db7263c2781989e5243cf9641ffc3 Update test_inline_video_quiz_service.py
-+ 6df3583b38d1860d41abefa46e9a840227bb797a Update quiz_service.py
-+ d420b11745d2d739a6a29bc8756ff505d7c86781 Update quiz_service.py
-+ 198b861b23e02b5d3e85bd21532baa2f09525545 Update test_inline_video_quiz_service.py
-+ 262338cd1f36f2559ac15e0990ad08567dcb7d6e ship admin dashboard
-+ c5949df16c0ab81a19b936763dfa351f2f6885cb Update README.md
-+ 1861a20b650ecae100e9b0362ae2c370250c0367 Update InContextTutor.tsx
-+ c4163f3d914d363409b0814774a3172c2533ded0 Create tutorSessionHistory.ts
-+ f4100a1c4d1f40cc8c67e9c3ccf6846ec63642fa Update authStore.ts
-+ 772d500518755bf4196f62f789771f80176d5c25 Update store-logout.test.ts
-+ 34272f208cfc16e5788f1e03f02fc1f76006cb27 Update in-context-tutor.test.tsx
-+ 2226b30ca11442b057c82149199bc8c324646546 Update pyproject.toml
-+ 4c025f63311bbf7b7b73c8eb133ec27881606376 Update app.py
++ 887168eea021d7eeac866acb648c7227a0c519b1 Update start.sh
++ dd266d5e152945435a4812a074c9573c90555358 Update uv.lock
++ 715696b4588a39bfc69e37257a9e69fa5a44c5fb Update InContextTutor.tsx
++ bf79d3f6fbbbdabbafcfe0a8cd2a35bb88a20026 Update LearningUnitShell.tsx
++ 887168eea021d7eeac866acb648c7227a0c519b1 Update start.sh
++ dd266d5e152945435a4812a074c9573c90555358 Update uv.lock
++ 715696b4588a39bfc69e37257a9e69fa5a44c5fb Update InContextTutor.tsx
++ bf79d3f6fbbbdabbafcfe0a8cd2a35bb88a20026 Update LearningUnitShell.tsx
++ 95ebefc3771ed459647777dd38e12494e9e42cbf Update tutorSessionHistory.ts
++ b5f5cf5f985d21c6df9a65753191092544bcf83b Update unit.test.tsx
++ 9e44c8aa4ffe3fa0f13810c75da28295474e3e97 Create Eval-Qwen25VL-Adapters.ipynb
 "@
 
 
-# + 887168eea021d7eeac866acb648c7227a0c519b1 Update start.sh
-# + dd266d5e152945435a4812a074c9573c90555358 Update uv.lock
-# + 715696b4588a39bfc69e37257a9e69fa5a44c5fb Update InContextTutor.tsx
-# + bf79d3f6fbbbdabbafcfe0a8cd2a35bb88a20026 Update LearningUnitShell.tsx
-# + 887168eea021d7eeac866acb648c7227a0c519b1 Update start.sh
-# + dd266d5e152945435a4812a074c9573c90555358 Update uv.lock
-# + 715696b4588a39bfc69e37257a9e69fa5a44c5fb Update InContextTutor.tsx
-# + bf79d3f6fbbbdabbafcfe0a8cd2a35bb88a20026 Update LearningUnitShell.tsx
-# + 95ebefc3771ed459647777dd38e12494e9e42cbf Update tutorSessionHistory.ts
-# + b5f5cf5f985d21c6df9a65753191092544bcf83b Update unit.test.tsx
-# + 9e44c8aa4ffe3fa0f13810c75da28295474e3e97 Create Eval-Qwen25VL-Adapters.ipynb
+
 # + 715696b4588a39bfc69e37257a9e69fa5a44c5fb Update InContextTutor.tsx
 # + bf79d3f6fbbbdabbafcfe0a8cd2a35bb88a20026 Update LearningUnitShell.tsx
 # + 95ebefc3771ed459647777dd38e12494e9e42cbf Update tutorSessionHistory.ts
