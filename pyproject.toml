@@ -38,7 +38,7 @@ dependencies = [
     # Admin dashboard observability (Phase 2-4)
     "prometheus-fastapi-instrumentator>=7.1.0",
     "python-json-logger>=2.0.7",
-    "langfuse>=3.0.0",
+    "langfuse>=4.0.0",
     "psutil>=6.0.0",
     "httpx>=0.27.0",
 ]
