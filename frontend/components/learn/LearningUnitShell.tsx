@@ -1606,6 +1606,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
             {tutor.enabled ? (
               <div className="min-h-0 flex-1">
                 <InContextTutor
+                  lessonKey={unit.id}
                   lectureId={tutor.legacy_lecture_id ?? ""}
                   currentTime={currentTime}
                   captureFrame={captureFrame}
