@@ -43,6 +43,7 @@ async def test_get_canonical_quiz_item_for_session_resolves_inline_question_from
     monkeypatch,
 ):
     user_id = uuid4()
+    user_id_outer = user_id
     session_id = uuid4()
     learning_unit_id = uuid4()
     session = SimpleNamespace(
@@ -66,11 +67,11 @@ async def test_get_canonical_quiz_item_for_session_resolves_inline_question_from
     async def fake_current_quiz_item_ids(
         db_arg,
         *,
-        user_id: uuid4,
-        session_id: uuid4,
+        user_id: object,
+        session_id: object,
         fallback_unit_canonical_id: str,
     ):
-        assert user_id == session.id or user_id != session.id  # satisfy lintless placeholder? nope
+        assert user_id == user_id_outer
         assert session_id == session.id
         assert fallback_unit_canonical_id == unit.canonical_unit_id
         return ["item-from-sibling-unit"]
