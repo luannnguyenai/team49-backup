@@ -1,0 +1,6 @@
+account_type,email,full_name,role,password,admin_dashboard_access
+admin,admin1@vinuni.edu.vn,admin1,admin,AdminTest123!,yes
+admin,admin2@vinuni.edu.vn,admin2,admin,AdminTest123!,yes
+admin,admin3@vinuni.edu.vn,admin3,admin,AdminTest123!,yes
+demo,demo1@vinuni.edu.vn,demo1,user,AdminTest123!,no
+demo,demo2@vinuni.edu.vn,demo2,user,AdminTest123!,no
