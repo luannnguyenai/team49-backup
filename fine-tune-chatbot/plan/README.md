@@ -34,11 +34,9 @@ That is no longer the active target. The active target is now an English-only tu
 
 ## Roadmap
 
-### P1. Data audit and normalization
+### P1. Data audit
 
 - Document the current domain dataset in detail.
-- Normalize all trainable samples to English.
-- Remove or quarantine Vietnamese-specific training paths.
 
 ### P2. ELI5 filtering and mixing
 
