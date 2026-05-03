@@ -379,3 +379,29 @@ Project A20-App-049 (FastAPI + Next.js, localhost-first). Mục tiêu: build adm
 - OpenTelemetry distributed tracing.
 - Audit log table riêng (Loki đủ).
 - Auth cho Grafana (anonymous local).
+
+---
+
+## Phase 16 — User Feedback Observability ✅ DONE (2026-05-03)
+
+**Task:** observe user thumbs-up/down feedback từ AI Tutor mà không thay đổi schema/UX.
+
+**Backend:**
+- `src/routers/admin.py` — thêm 2 endpoint:
+  - `GET /api/admin/feedback/stats?days=14` → `{total_ratings, positive, negative, positive_ratio, unrated_24h, trend[]}`.
+  - `GET /api/admin/feedback/recent-negative?limit=20` → list answers bị 👎 (truncate 500 chars).
+- `src/api/app.py` — patch `rate_answer`: best-effort forward `langfuse.client.score(name="user_thumb", value=rating)` (fail-safe).
+
+**Frontend:**
+- `frontend/lib/admin-api.ts` — thêm `FeedbackStats`, `NegativeFeedbackRow`, `feedbackStats()`, `feedbackNegative()`.
+- `frontend/app/admin/llm/page.tsx` — extend với:
+  - 4 KPI: Positive · Negative · Positive ratio · Unrated 24h.
+  - Stacked bar chart "Feedback trend (14 days)" (emerald/rose).
+  - Panel "Recent negative feedback" liệt kê 20 Q/A bị thumbs-down gần nhất.
+
+**Verify (e2e):**
+- `GET /api/admin/feedback/stats` → 200, schema khớp (test thực: `total_ratings:1, positive:1, positive_ratio:1.0, unrated_24h:22`).
+- `GET /api/admin/feedback/recent-negative` → 200, array.
+- Non-admin → 401/403.
+- Type-check toàn frontend pass.
+- LLM page route compile + serve 200.
