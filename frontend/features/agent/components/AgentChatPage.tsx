@@ -14,7 +14,6 @@ import {
   ChevronRight,
   Check,
   Clock,
-  ExternalLink,
   History,
   Info,
   Loader2,
@@ -245,7 +244,6 @@ function CitationCard({
   isSelected: boolean;
   onSelect: (citation: AgentCitation) => void;
 }) {
-  const href = getCitationHref(citation);
   return (
     <button
       type="button"
@@ -262,11 +260,6 @@ function CitationCard({
             <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-600">
               {getCitationCourseId(citation)}
             </span>
-            {citation.source ? (
-              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                {citation.source}
-              </span>
-            ) : null}
           </div>
           <h4 className="line-clamp-2 text-sm font-black leading-snug text-slate-900 group-hover:text-blue-600">
             {getCitationUnitName(citation)}
@@ -278,7 +271,7 @@ function CitationCard({
           ) : null}
         </div>
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-400 transition group-hover:bg-blue-600 group-hover:text-white">
-          {href ? <ExternalLink className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          <ChevronRight className="h-4 w-4" />
         </div>
       </div>
     </button>
@@ -1556,27 +1549,14 @@ export default function AgentChatPage() {
       </section>
 
       {selectedCitation ? (
-        <div className="hidden h-full shrink-0 md:block">
-          <SourceDetailPanel
-            citation={selectedCitation}
-            unitContext={selectedUnitContext}
-            pathItem={selectedPathItem}
-            isLoading={isLoadingSourceDetail}
-            error={sourceDetailError}
-            onClose={() => setSelectedCitation(null)}
-          />
-        </div>
-      ) : null}
-
-      {selectedCitation ? (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 md:static md:z-auto md:h-full md:w-[360px] md:shrink-0 xl:w-[390px]">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-950/50"
+            className="absolute inset-0 bg-slate-950/50 md:hidden"
             onClick={() => setSelectedCitation(null)}
             aria-label="Close source detail"
           />
-          <div className="absolute bottom-0 right-0 top-0 w-full max-w-[390px] bg-white shadow-2xl">
+          <div className="absolute bottom-0 right-0 top-0 w-full max-w-[390px] bg-white shadow-2xl md:static md:h-full md:w-full md:max-w-none md:shadow-none">
             <SourceDetailPanel
               citation={selectedCitation}
               unitContext={selectedUnitContext}
