@@ -1,0 +1,39 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: access
+    static_configs:
+      - targets: [localhost]
+        labels:
+          app: a20-app-049
+          job: fastapi
+          source: access
+          __path__: /var/log/app/access.jsonl
+    pipeline_stages:
+      - json:
+          expressions:
+            level: level
+            method: method
+            path: path
+            status: status
+            user_id: user_id
+      - labels:
+          method:
+          status:
+
+  - job_name: qa_history
+    static_configs:
+      - targets: [localhost]
+        labels:
+          app: a20-app-049
+          job: llm
+          source: qa_history
+          __path__: /var/log/app/qa_history.jsonl

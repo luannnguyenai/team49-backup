@@ -9,6 +9,7 @@ export interface User {
   target_deadline: string | null; // ISO date string YYYY-MM-DD
   preferred_method: "reading" | "video" | null;
   is_onboarded: boolean;
+  role?: "user" | "admin";
   created_at: string;
 }
 

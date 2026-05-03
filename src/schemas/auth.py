@@ -159,6 +159,7 @@ class UserProfile(BaseModel):
     target_deadline: date | None
     preferred_method: PreferredMethod | None
     is_onboarded: bool
+    role: str = "user"
     created_at: datetime
 
 

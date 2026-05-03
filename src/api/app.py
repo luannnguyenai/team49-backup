@@ -46,6 +46,9 @@ from src.routers.placement_lite import placement_lite_router
 from src.routers.quiz import quiz_router
 from src.routers.review import review_router
 from src.routers.test_support import test_support_router
+from src.routers.admin import admin_router
+from src.middleware.prometheus import setup_prometheus
+from src.middleware.request_logger import AccessLogMiddleware
 from src.config import settings
 
 logger = logging.getLogger(__name__)
@@ -105,6 +108,12 @@ app.add_middleware(
 # Static mounts
 app.mount("/static", StaticFiles(directory="src/api/static"), name="static")
 
+# Prometheus /metrics endpoint (Phase 2 — admin observability)
+setup_prometheus(app)
+
+# JSON access log → logs/access.jsonl (Phase 3 — admin observability)
+app.add_middleware(AccessLogMiddleware)
+
 
 # ---------------------------------------------------------------------------
 # Routers
@@ -124,6 +133,7 @@ app.include_router(placement_lite_router)
 app.include_router(quiz_router)
 app.include_router(review_router)
 app.include_router(test_support_router)
+app.include_router(admin_router)
 
 
 # ---------------------------------------------------------------------------

@@ -28,6 +28,7 @@
     "react-hook-form": "^7.51.5",
     "react-markdown": "^8.0.7",
     "reactflow": "^11.11.4",
+    "recharts": "^3.8.1",
     "tailwind-merge": "^2.3.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.2"

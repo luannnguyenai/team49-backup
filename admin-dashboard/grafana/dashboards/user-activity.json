@@ -1,0 +1,113 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "title": "User Activity",
+  "uid": "a20-user-activity",
+  "tags": ["a20", "users"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {"from": "now-30d", "to": "now"},
+  "refresh": "5m",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total users",
+      "id": 1,
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0},
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "Postgres"},
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*)::bigint AS value FROM users",
+          "refId": "A"
+        }
+      ],
+      "options": {"colorMode": "value", "reduceOptions": {"calcs": ["lastNotNull"]}},
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0}}
+    },
+    {
+      "type": "stat",
+      "title": "Onboarded users",
+      "id": 2,
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0},
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "Postgres"},
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*)::bigint AS value FROM users WHERE is_onboarded = true",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0}}
+    },
+    {
+      "type": "stat",
+      "title": "Admins",
+      "id": 3,
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 0},
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "Postgres"},
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*)::bigint AS value FROM users WHERE role = 'admin'",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0}}
+    },
+    {
+      "type": "stat",
+      "title": "Signups (7d)",
+      "id": 4,
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 0},
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "Postgres"},
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*)::bigint AS value FROM users WHERE created_at >= NOW() - INTERVAL '7 days'",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0}}
+    },
+    {
+      "type": "timeseries",
+      "title": "Daily signups (last 30 days)",
+      "id": 5,
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 5},
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "Postgres"},
+      "targets": [
+        {
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT date_trunc('day', created_at) AS time, COUNT(*)::bigint AS signups FROM users WHERE created_at >= NOW() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short", "custom": {"drawStyle": "bars", "fillOpacity": 80}}}
+    },
+    {
+      "type": "table",
+      "title": "Most recent signups",
+      "id": 6,
+      "gridPos": {"h": 9, "w": 24, "x": 0, "y": 14},
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "Postgres"},
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT created_at, email, full_name, role, is_onboarded FROM users ORDER BY created_at DESC LIMIT 20",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
