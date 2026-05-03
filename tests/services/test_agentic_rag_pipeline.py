@@ -38,6 +38,17 @@ def test_agent_rag_tool_registry_lists_policy_metadata():
     assert registry.resolve("unsupported_tool") is None
 
 
+def test_agent_rag_tool_registry_builds_llm_visible_prompt_text():
+    registry = AgentRAGToolRegistry()
+
+    prompt_text = registry.build_prompt_text()
+
+    assert "search_current_path_units" in prompt_text
+    assert "offer_scope_expansion" in prompt_text
+    assert "requires evidence" in prompt_text
+    assert "current path first" in prompt_text.lower()
+
+
 class FakeToolNodes:
     def __init__(self):
         self.calls = []
@@ -54,6 +65,11 @@ class FakeToolNodes:
             citations=[],
             metadata={"search_queries": slots.search_queries},
         )
+
+
+class FailingToolNodes(FakeToolNodes):
+    async def find_content(self, message, intent, slots, allowed_course_ids):
+        raise RuntimeError("BM25 index timeout while searching units")
 
 
 @pytest.mark.asyncio
@@ -98,6 +114,29 @@ async def test_tool_executor_blocks_expanded_search_without_approval():
 
     assert observation.evidence_status == "scope_expansion_required"
     assert observation.result.kind == "clarification"
+
+
+@pytest.mark.asyncio
+async def test_tool_executor_normalizes_retrieval_errors():
+    executor = AgenticRAGToolExecutor(FailingToolNodes())
+
+    observation = await executor.execute(
+        AgenticRAGToolCall(
+            tool="search_current_path_units",
+            arguments={"query": "RCNN"},
+            rationale="Search current path.",
+        ),
+        message="find RCNN",
+        intent="find_content",
+        slots=AgentSlots(raw_topic="RCNN"),
+        allowed_course_ids=["CS231N"],
+    )
+
+    assert observation.success is False
+    assert observation.evidence_status == "no_source"
+    assert observation.result.fallback is not None
+    assert observation.result.fallback.error_code == "RAG_TIMEOUT"
+    assert "BM25 index timeout" not in observation.result.answer_markdown
 
 
 class FakePipelineRouter:

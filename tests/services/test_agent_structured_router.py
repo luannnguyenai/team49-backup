@@ -360,9 +360,35 @@ def test_structured_router_agentic_rag_acting_stage_uses_allowed_tools():
 
     assert call.tool == "search_current_path_units"
     system_prompt = model.messages[0]["content"]
-    assert "Allowed tools" in system_prompt
+    assert "search_current_path_units" in system_prompt
+    assert "offer_scope_expansion" in system_prompt
     assert "Do not invent domain-specific synonyms" in system_prompt
     assert "Do not answer directly" in system_prompt
+
+
+def test_structured_router_agentic_rag_acting_prompt_uses_dynamic_tool_text():
+    model = FakeStructuredModel(
+        {
+            "tool": "search_current_path_units",
+            "arguments": {"query": "YOLO"},
+            "rationale": "Search current path first.",
+        }
+    )
+
+    StructuredAgentRouter(model=model).rag_act(
+        message="Tìm thông tin YOLO",
+        thought={"active_topic": "YOLO"},
+        slots={"raw_topic": "YOLO"},
+        route_context=None,
+        recent_messages=[],
+        observations=[],
+    )
+
+    system_prompt = model.messages[0]["content"]
+    assert "{tool_list}" not in system_prompt
+    assert "Current-path search must be preferred" in system_prompt
+    assert "search_current_path_units" in system_prompt
+    assert "Search title-level course units" in system_prompt
 
 
 def test_structured_router_agentic_rag_observing_stage_judges_evidence():
