@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 from src.services.agent_assessment_workflow import AgentAssessmentWorkflowService
 
 
@@ -83,3 +85,63 @@ def test_assessment_workflow_is_user_scoped():
         assert "workflow_out_of_scope" in str(exc)
     else:
         raise AssertionError("wrong user must not resume workflow")
+
+
+def test_assessment_workflow_expires_stale_in_memory_state():
+    now = datetime(2026, 5, 3, tzinfo=UTC)
+    service = AgentAssessmentWorkflowService(
+        state_ttl_seconds=60,
+        now=lambda: now,
+    )
+    started = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a"],
+        question_budget=20,
+        phase="skip_verification",
+    )
+
+    now = now + timedelta(seconds=61)
+
+    try:
+        service.resume(
+            workflow_id=started.workflow_id,
+            user_id="user-1",
+            decision={"action": "approve"},
+        )
+    except ValueError as exc:
+        assert "workflow_not_found" in str(exc)
+    else:
+        raise AssertionError("expired workflow must not resume")
+    assert started.workflow_id not in service._states
+
+
+def test_assessment_workflow_removes_terminal_states():
+    service = AgentAssessmentWorkflowService()
+    approved_start = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-a"],
+        question_budget=20,
+        phase="skip_verification",
+    )
+    rejected_start = service.start(
+        user_id="user-1",
+        candidate_canonical_unit_ids=["unit-b"],
+        question_budget=20,
+        phase="skip_verification",
+    )
+
+    approved = service.resume(
+        workflow_id=approved_start.workflow_id,
+        user_id="user-1",
+        decision={"action": "approve"},
+    )
+    rejected = service.resume(
+        workflow_id=rejected_start.workflow_id,
+        user_id="user-1",
+        decision={"action": "reject"},
+    )
+
+    assert approved.status == "assessment_ready"
+    assert rejected.status == "rejected"
+    assert approved_start.workflow_id not in service._states
+    assert rejected_start.workflow_id not in service._states
