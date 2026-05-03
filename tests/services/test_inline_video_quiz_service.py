@@ -38,6 +38,40 @@ def _item(item_id: str, difficulty: str = "medium"):
     )
 
 
+def test_quiz_item_ids_from_progress_reads_active_quiz_answered_and_remaining():
+    session_id = uuid4()
+
+    result = quiz_service._quiz_item_ids_from_progress(
+        {
+            "quiz_id": str(session_id),
+            "items_answered": ["item-a"],
+            "items_remaining": ["item-b", "item-a", "item-c"],
+        },
+        session_id,
+    )
+
+    assert result == ["item-a", "item-b", "item-c"]
+
+
+def test_quiz_item_ids_from_progress_reads_inline_checkpoint_state():
+    session_id = uuid4()
+
+    result = quiz_service._quiz_item_ids_from_progress(
+        {
+            "inline_quiz": {
+                "midpoint": {
+                    "active_session_id": str(session_id),
+                    "item_ids": ["item-b", "item-c"],
+                    "answered_item_ids": ["item-a", "item-b"],
+                }
+            }
+        },
+        session_id,
+    )
+
+    assert result == ["item-a", "item-b", "item-c"]
+
+
 @pytest.mark.asyncio
 async def test_get_canonical_quiz_item_for_session_resolves_inline_question_from_session_item_ids(
     monkeypatch,
@@ -142,6 +176,30 @@ async def test_get_canonical_quiz_item_for_session_falls_back_to_inline_section_
     )
 
     assert result is sibling_item
+
+
+@pytest.mark.asyncio
+async def test_fallback_quiz_item_ids_for_session_uses_inline_section_scope(monkeypatch):
+    session = SimpleNamespace(canonical_phase="inline_midpoint_quiz")
+    unit = SimpleNamespace(canonical_unit_id="canonical-unit-1", section_id=uuid4())
+
+    class FakeDB:
+        async def execute(self, stmt):
+            rendered = str(stmt)
+            assert " IN " in rendered
+            return SimpleNamespace(
+                scalars=lambda: SimpleNamespace(all=lambda: ["item-a", "item-b", "item-c"])
+            )
+
+    async def fake_inline_quiz_scope(db_arg, actual_unit):
+        assert actual_unit is unit
+        return ["canonical-unit-1", "canonical-unit-2"]
+
+    monkeypatch.setattr(quiz_service, "_inline_quiz_canonical_unit_scope", fake_inline_quiz_scope)
+
+    result = await quiz_service._fallback_quiz_item_ids_for_session(FakeDB(), session=session, unit=unit)
+
+    assert result == ["item-a", "item-b", "item-c"]
 
 
 @pytest.mark.asyncio
