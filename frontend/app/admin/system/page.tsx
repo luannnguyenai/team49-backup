@@ -14,6 +14,7 @@ import {
 } from "recharts";
 
 import KpiCard from "@/components/admin/KpiCard";
+import KpiGroup from "@/components/admin/KpiGroup";
 import ChartCard from "@/components/admin/ChartCard";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { adminApi, SystemHealth } from "@/lib/admin-api";
@@ -73,23 +74,23 @@ export default function AdminSystemPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+      <KpiGroup title="Tài nguyên" cols={3}>
         <KpiCard label="CPU usage" value={fmtPct(data?.cpu_pct)} loading={loading} />
         <KpiCard label="RAM usage" value={fmtPct(data?.ram_pct)} loading={loading} />
         <KpiCard label="Disk usage" value={fmtPct(data?.disk_pct)} loading={loading} />
+      </KpiGroup>
+
+      <KpiGroup title="Hạ tầng" cols={3}>
         <KpiCard
           label="DB connections"
           value={data?.db_connections ?? "—"}
+          hint="pg_stat_activity"
           loading={loading}
         />
         <KpiCard
           label="Redis hit rate"
           value={data?.redis_hit_rate != null ? `${(data.redis_hit_rate * 100).toFixed(1)}%` : "—"}
-          loading={loading}
-        />
-        <KpiCard
-          label="Service uptime"
-          value={fmtUptime(data?.uptime_seconds)}
+          hint="keyspace_hits / total"
           loading={loading}
         />
         <KpiCard
@@ -97,8 +98,16 @@ export default function AdminSystemPage() {
           value={`${data?.services.filter((s) => s.status === "healthy").length ?? 0}/${data?.services.length ?? 0}`}
           loading={loading}
         />
+      </KpiGroup>
+
+      <KpiGroup title="Trạng thái" cols={2}>
+        <KpiCard
+          label="Service uptime"
+          value={fmtUptime(data?.uptime_seconds)}
+          loading={loading}
+        />
         <KpiCard label="Auto-refresh" value="10s" hint="psutil + Postgres + Redis INFO" />
-      </div>
+      </KpiGroup>
 
       {err && (
         <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">{err}</p>
