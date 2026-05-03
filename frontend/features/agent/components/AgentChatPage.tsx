@@ -1549,14 +1549,27 @@ export default function AgentChatPage() {
       </section>
 
       {selectedCitation ? (
-        <div className="fixed inset-0 z-50 md:static md:z-auto md:h-full md:w-[360px] md:shrink-0 xl:w-[390px]">
+        <div className="hidden h-full w-[360px] shrink-0 md:block xl:w-[390px]" data-testid="agent-source-sidebar">
+          <SourceDetailPanel
+            citation={selectedCitation}
+            unitContext={selectedUnitContext}
+            pathItem={selectedPathItem}
+            isLoading={isLoadingSourceDetail}
+            error={sourceDetailError}
+            onClose={() => setSelectedCitation(null)}
+          />
+        </div>
+      ) : null}
+
+      {selectedCitation ? (
+        <div className="fixed inset-0 z-50 md:hidden" data-testid="agent-source-drawer">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-950/50 md:hidden"
+            className="absolute inset-0 bg-slate-950/50"
             onClick={() => setSelectedCitation(null)}
             aria-label="Close source detail"
           />
-          <div className="absolute bottom-0 right-0 top-0 w-full max-w-[390px] bg-white shadow-2xl md:static md:h-full md:w-full md:max-w-none md:shadow-none">
+          <div className="absolute bottom-0 right-0 top-0 w-full max-w-[390px] bg-white shadow-2xl">
             <SourceDetailPanel
               citation={selectedCitation}
               unitContext={selectedUnitContext}

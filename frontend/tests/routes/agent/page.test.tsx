@@ -183,10 +183,13 @@ describe("agent page", () => {
       expect(agentApiMock.unitContext).toHaveBeenCalledWith("unit-rf");
       expect(learningPathApiMock.getLearningPath).toHaveBeenCalled();
     });
-    expect(await screen.findByText("Source detail")).toBeInTheDocument();
-    expect(screen.getByText("Hoàn thành")).toBeInTheDocument();
-    expect(screen.getByText(/This unit explains CNN kernels/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /start learning/i })).toHaveAttribute(
+    expect(await screen.findAllByText("Source detail")).toHaveLength(2);
+    expect(screen.getByTestId("agent-source-sidebar")).toHaveClass("hidden", "md:block");
+    expect(screen.getByTestId("agent-source-sidebar")).not.toHaveClass("fixed");
+    expect(screen.getByTestId("agent-source-drawer")).toHaveClass("fixed", "md:hidden");
+    expect(screen.getAllByText("Hoàn thành").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/This unit explains CNN kernels/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: /start learning/i })[0]).toHaveAttribute(
       "href",
       "/courses/cs231n/learn/lecture-03-seg4?t=740",
     );
