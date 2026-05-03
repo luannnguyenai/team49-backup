@@ -13,6 +13,11 @@ const agentApiMock = vi.hoisted(() => ({
   startAssessmentWorkflow: vi.fn(),
   resumeAssessmentWorkflow: vi.fn(),
   startAssessmentAction: vi.fn(),
+  unitContext: vi.fn(),
+}));
+
+const learningPathApiMock = vi.hoisted(() => ({
+  getLearningPath: vi.fn(),
 }));
 
 vi.mock("@/features/agent/api", async () => {
@@ -22,6 +27,10 @@ vi.mock("@/features/agent/api", async () => {
     agentApi: agentApiMock,
   };
 });
+
+vi.mock("@/features/learning-path/api", () => ({
+  learningPathApi: learningPathApiMock,
+}));
 
 vi.mock("@/stores/authStore", () => ({
   useAuthStore: () => ({
@@ -62,6 +71,36 @@ describe("agent page", () => {
       actions: [],
       warning: null,
     });
+    agentApiMock.unitContext.mockResolvedValue({
+      canonical_unit_id: "unit-rf",
+      course_id: "CS231n",
+      unit_name: "Kernels, stride, pooling, and receptive fields",
+      summary: "This unit explains CNN kernels, stride, pooling, and receptive fields.",
+      quiz_available: true,
+      learn_href: "/courses/cs231n/learn/lecture-03-seg4?t=740",
+    });
+    learningPathApiMock.getLearningPath.mockResolvedValue({
+      total_units: 1,
+      completed_units: 1,
+      in_progress_units: 0,
+      items: [
+        {
+          id: "path-item-1",
+          learning_unit_id: "learning-unit-1",
+          learning_unit_title: "Kernels, stride, pooling, and receptive fields",
+          section_title: "CNN-based Image Classification",
+          course_id: "CS231n",
+          course_title: "CS231n",
+          learn_href: "/courses/cs231n/learn/lecture-03-seg4?t=740",
+          action: "standard_learn",
+          estimated_hours: 0.25,
+          order_index: 1,
+          week_number: 3,
+          status: "completed",
+          canonical_unit_id: "unit-rf",
+        },
+      ],
+    });
   });
 
   it("renders empty assistant state when there is no active conversation", async () => {
@@ -99,6 +138,58 @@ describe("agent page", () => {
 
     expect(await screen.findByText("Receptive fields are covered in CS231n.")).toBeInTheDocument();
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
+  });
+
+  it("opens source details from the citation card and hides duplicate open-unit actions", async () => {
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-source",
+      answer: {
+        markdown: "I found a source for receptive fields.",
+        confidence: "grounded",
+      },
+      citations: [
+        {
+          canonical_unit_id: "unit-rf",
+          course_id: "CS231n",
+          unit_name: "Kernels, stride, pooling, and receptive fields",
+          lecture_title: "CNN-based Image Classification",
+          learn_href: "/courses/cs231n/learn/lecture-03-seg4?t=740",
+          source: "summary",
+        },
+      ],
+      actions: [
+        {
+          type: "open_unit",
+          label: "Open duplicate unit action",
+          canonical_unit_id: "unit-rf",
+          learn_href: "/courses/cs231n/learn/lecture-03-seg4?t=740",
+        },
+      ],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
+    fireEvent.click(promptButtons[0]);
+
+    const source = await screen.findByRole("button", {
+      name: /view source details: kernels, stride, pooling, and receptive fields/i,
+    });
+    expect(screen.queryByText("Open duplicate unit action")).not.toBeInTheDocument();
+    fireEvent.click(source);
+
+    await waitFor(() => {
+      expect(agentApiMock.unitContext).toHaveBeenCalledWith("unit-rf");
+      expect(learningPathApiMock.getLearningPath).toHaveBeenCalled();
+    });
+    expect(await screen.findByText("Source detail")).toBeInTheDocument();
+    expect(screen.getByText("Hoàn thành")).toBeInTheDocument();
+    expect(screen.getByText(/This unit explains CNN kernels/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /start learning/i })).toHaveAttribute(
+      "href",
+      "/courses/cs231n/learn/lecture-03-seg4?t=740",
+    );
   });
 
   it("renders assistant markdown and retries a failed request with the same message id", async () => {

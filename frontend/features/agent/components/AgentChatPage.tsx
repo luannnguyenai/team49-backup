@@ -8,10 +8,12 @@ import {
   AlertTriangle,
   ArrowRight,
   BarChart3,
+  BookOpen,
   Bot,
   CheckCircle2,
   ChevronRight,
   Check,
+  Clock,
   ExternalLink,
   History,
   Info,
@@ -30,11 +32,13 @@ import {
   Target,
   Trash2,
   User,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import {
   agentApi,
+  getActionCanonicalId,
   getActionCanonicalIds,
   getActionDisabledReason,
   getActionId,
@@ -53,6 +57,10 @@ import {
   getProposalReductionOptions,
   getReductionQuestionCount,
   getScopeUnitCount,
+  getUnitContextCourseId,
+  getUnitContextHref,
+  getUnitContextQuizAvailable,
+  getUnitContextUnitName,
   getUpdatedAt,
   getWorkflowId,
   type AgentAction,
@@ -61,11 +69,14 @@ import {
   type AgentCitation,
   type AgentConversationMessage,
   type AgentConversationSummary,
+  type AgentUnitContext,
   type AgentWarning,
   type AssessmentProposal,
 } from "@/features/agent/api";
+import { learningPathApi } from "@/features/learning-path/api";
+import { getStatusLabel } from "@/features/learning-path/lib/status";
 import { writeStartedCanonicalAssessment } from "@/lib/canonical-assessment-session";
-import type { QuestionForAssessment } from "@/types";
+import type { PathItemResponse, QuestionForAssessment } from "@/types";
 
 type UiMessage = {
   id: string;
@@ -197,10 +208,54 @@ function isDuplicateWarning(message: UiMessage) {
   );
 }
 
-function CitationCard({ citation }: { citation: AgentCitation }) {
+function citationKey(citation: AgentCitation) {
+  return getCitationCanonicalId(citation) || getCitationHref(citation) || getCitationUnitName(citation);
+}
+
+function isDuplicateOpenUnitAction(action: AgentAction, citations: AgentCitation[]) {
+  if (action.type !== "open_unit") return false;
+  const actionCanonicalId = getActionCanonicalId(action);
+  const actionHref = getCitationHref(action);
+  return citations.some((citation) => {
+    const citationCanonicalId = getCitationCanonicalId(citation);
+    const citationHref = getCitationHref(citation);
+    return (
+      (actionCanonicalId && citationCanonicalId && actionCanonicalId === citationCanonicalId) ||
+      (actionHref && citationHref && actionHref === citationHref)
+    );
+  });
+}
+
+function findPathItemForCitation(citation: AgentCitation, items: PathItemResponse[]) {
+  const canonicalId = getCitationCanonicalId(citation);
   const href = getCitationHref(citation);
-  const content = (
-    <div className="group rounded-2xl border border-slate-200 bg-white p-3 transition hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10">
+  return (
+    items.find((item) => canonicalId && item.canonical_unit_id === canonicalId) ??
+    items.find((item) => href && item.learn_href === href) ??
+    null
+  );
+}
+
+function CitationCard({
+  citation,
+  isSelected,
+  onSelect,
+}: {
+  citation: AgentCitation;
+  isSelected: boolean;
+  onSelect: (citation: AgentCitation) => void;
+}) {
+  const href = getCitationHref(citation);
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(citation)}
+      className={cn(
+        "group block w-full rounded-2xl border bg-white p-3 text-left transition hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+        isSelected ? "border-blue-300 shadow-lg shadow-blue-500/10" : "border-slate-200",
+      )}
+      aria-label={`View source details: ${getCitationUnitName(citation)}`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -224,17 +279,134 @@ function CitationCard({ citation }: { citation: AgentCitation }) {
           {citation.quote ? <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">{citation.quote}</p> : null}
         </div>
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-400 transition group-hover:bg-blue-600 group-hover:text-white">
-          <ExternalLink className="h-4 w-4" />
+          {href ? <ExternalLink className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </div>
       </div>
-    </div>
+    </button>
   );
+}
 
-  if (!href) return content;
+function SourceDetailPanel({
+  citation,
+  unitContext,
+  pathItem,
+  isLoading,
+  error,
+  onClose,
+}: {
+  citation: AgentCitation | null;
+  unitContext: AgentUnitContext | null;
+  pathItem: PathItemResponse | null;
+  isLoading: boolean;
+  error: string | null;
+  onClose: () => void;
+}) {
+  if (!citation) return null;
+  const title = getUnitContextUnitName(unitContext) || getCitationUnitName(citation);
+  const courseId = getUnitContextCourseId(unitContext) || getCitationCourseId(citation);
+  const href = getUnitContextHref(unitContext) || getCitationHref(citation);
+  const summary = unitContext?.summary ?? citation.quote ?? "";
+  const sectionTitle = pathItem?.section_title ?? getCitationLectureTitle(citation);
+  const statusLabel = pathItem ? getStatusLabel(pathItem.status) : "Not in current plan";
+  const duration =
+    pathItem?.estimated_hours != null
+      ? `${Math.max(1, Math.round(pathItem.estimated_hours * 60))} min`
+      : null;
+
   return (
-    <Link href={href} className="block">
-      {content}
-    </Link>
+    <aside className="flex h-full w-full shrink-0 flex-col border-l border-slate-200 bg-white lg:w-[360px] xl:w-[390px]">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Source detail</p>
+          <h2 className="truncate text-sm font-black text-slate-950">{courseId}</h2>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100"
+          aria-label="Close source detail"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        <div>
+          <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-slate-400">Learning unit</p>
+          <h3 className="text-xl font-black leading-tight text-slate-950">{title}</h3>
+          {sectionTitle ? <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">{sectionTitle}</p> : null}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <div className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Status
+            </div>
+            <p className="text-sm font-black text-slate-900">{statusLabel}</p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <div className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
+              <Clock className="h-3.5 w-3.5" />
+              Duration
+            </div>
+            <p className="text-sm font-black text-slate-900">{duration ?? "Unknown"}</p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
+            <BookOpen className="h-3.5 w-3.5" />
+            Summary
+          </div>
+          {isLoading ? (
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+              Loading source context
+            </div>
+          ) : error ? (
+            <p className="text-sm leading-6 text-amber-700">{error}</p>
+          ) : summary ? (
+            <p className="text-sm leading-6 text-slate-600">{summary}</p>
+          ) : (
+            <p className="text-sm leading-6 text-slate-500">No summary is available for this source yet.</p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-slate-400">Quiz</p>
+            <p className="text-sm font-black text-slate-900">
+              {getUnitContextQuizAvailable(unitContext) || pathItem?.has_quiz_items ? "Available" : "Not available"}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-slate-400">Course</p>
+            <p className="truncate text-sm font-black text-slate-900">{courseId}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-slate-200 p-4">
+        {href ? (
+          <Link
+            href={href}
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 text-sm font-black text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700"
+          >
+            Start learning
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="min-h-12 w-full rounded-2xl bg-slate-100 px-4 text-sm font-black text-slate-400"
+          >
+            Learning link unavailable
+          </button>
+        )}
+      </div>
+    </aside>
   );
 }
 
@@ -634,11 +806,15 @@ function ChatMessageItem({
   conversationId,
   onActionResponse,
   onRetry,
+  onSelectCitation,
+  selectedCitationKey,
 }: {
   message: UiMessage;
   conversationId: string | null;
   onActionResponse: (response: AgentChatResponse) => void;
   onRetry: (message: string, incomingMessageId: string) => void;
+  onSelectCitation: (citation: AgentCitation) => void;
+  selectedCitationKey: string | null;
 }) {
   const isUser = message.role === "user";
   const prereqAction = message.actions.find((action) => action.type === "review_prerequisite_path");
@@ -646,7 +822,10 @@ function ChatMessageItem({
     (action) => action.type === "start_assessment_workflow" || action.type === "continue_assessment_workflow",
   );
   const simpleActions = message.actions.filter(
-    (action) => action.type !== "review_prerequisite_path" && !workflowActions.includes(action),
+    (action) =>
+      action.type !== "review_prerequisite_path" &&
+      !workflowActions.includes(action) &&
+      !isDuplicateOpenUnitAction(action, message.citations),
   );
 
   return (
@@ -700,7 +879,12 @@ function ChatMessageItem({
               Sources
             </div>
             {message.citations.map((citation, index) => (
-              <CitationCard key={getCitationCanonicalId(citation) || index} citation={citation} />
+              <CitationCard
+                key={citationKey(citation) || index}
+                citation={citation}
+                isSelected={citationKey(citation) === selectedCitationKey}
+                onSelect={onSelectCitation}
+              />
             ))}
           </div>
         ) : null}
@@ -1044,6 +1228,11 @@ export default function AgentChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(false);
   const [leftMinimized, setLeftMinimized] = useState(false);
+  const [selectedCitation, setSelectedCitation] = useState<AgentCitation | null>(null);
+  const [selectedUnitContext, setSelectedUnitContext] = useState<AgentUnitContext | null>(null);
+  const [selectedPathItem, setSelectedPathItem] = useState<PathItemResponse | null>(null);
+  const [isLoadingSourceDetail, setIsLoadingSourceDetail] = useState(false);
+  const [sourceDetailError, setSourceDetailError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const skipNextMessageLoadForSession = useRef<string | null>(null);
 
@@ -1073,8 +1262,14 @@ export default function AgentChatPage() {
   useEffect(() => {
     if (!activeSessionId) {
       setMessages([]);
+      setSelectedCitation(null);
+      setSelectedUnitContext(null);
+      setSelectedPathItem(null);
       return;
     }
+    setSelectedCitation(null);
+    setSelectedUnitContext(null);
+    setSelectedPathItem(null);
     if (skipNextMessageLoadForSession.current === activeSessionId) {
       skipNextMessageLoadForSession.current = null;
       setIsLoadingMessages(false);
@@ -1138,7 +1333,36 @@ export default function AgentChatPage() {
     if (activeSessionId === id) {
       setActiveSessionId(remaining[0] ? getConversationId(remaining[0]) : null);
       setMessages([]);
+      setSelectedCitation(null);
+      setSelectedUnitContext(null);
+      setSelectedPathItem(null);
     }
+  };
+
+  const selectCitation = async (citation: AgentCitation) => {
+    const canonicalId = getCitationCanonicalId(citation);
+    setSelectedCitation(citation);
+    setSelectedUnitContext(null);
+    setSelectedPathItem(null);
+    setSourceDetailError(null);
+    if (!canonicalId) {
+      setSourceDetailError("This source does not expose a unit id yet.");
+      return;
+    }
+    setIsLoadingSourceDetail(true);
+    const [contextResult, pathResult] = await Promise.allSettled([
+      agentApi.unitContext(canonicalId),
+      learningPathApi.getLearningPath(),
+    ]);
+    if (contextResult.status === "fulfilled") {
+      setSelectedUnitContext(contextResult.value);
+    } else {
+      setSourceDetailError("Could not load the full source context.");
+    }
+    if (pathResult.status === "fulfilled") {
+      setSelectedPathItem(findPathItemForCitation(citation, pathResult.value.items));
+    }
+    setIsLoadingSourceDetail(false);
   };
 
   const appendAgentResponse = (response: AgentChatResponse) => {
@@ -1172,6 +1396,9 @@ export default function AgentChatPage() {
       setSessions((current) => [session, ...current.filter((item) => getConversationId(item) !== id)]);
       setActiveSessionId(id);
       setMessages([]);
+      setSelectedCitation(null);
+      setSelectedUnitContext(null);
+      setSelectedPathItem(null);
       setLeftOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create a new chat.");
@@ -1308,6 +1535,8 @@ export default function AgentChatPage() {
                     message={message}
                     conversationId={activeSessionId}
                     onActionResponse={appendAgentResponse}
+                    onSelectCitation={selectCitation}
+                    selectedCitationKey={selectedCitation ? citationKey(selectedCitation) : null}
                     onRetry={(retryMessage, retryIncomingMessageId) =>
                       sendMessage(retryMessage, {
                         incomingMessageId: retryIncomingMessageId,
@@ -1326,6 +1555,27 @@ export default function AgentChatPage() {
 
         <Composer onSend={sendMessage} disabled={isThinking} />
       </section>
+
+      {selectedCitation ? (
+        <div className="fixed inset-0 z-50 lg:static lg:z-auto lg:h-full lg:shrink-0">
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-950/50 lg:hidden"
+            onClick={() => setSelectedCitation(null)}
+            aria-label="Close source detail"
+          />
+          <div className="absolute bottom-0 right-0 top-0 w-full max-w-[390px] bg-white shadow-2xl lg:static lg:h-full lg:w-auto lg:max-w-none lg:shadow-none">
+            <SourceDetailPanel
+              citation={selectedCitation}
+              unitContext={selectedUnitContext}
+              pathItem={selectedPathItem}
+              isLoading={isLoadingSourceDetail}
+              error={sourceDetailError}
+              onClose={() => setSelectedCitation(null)}
+            />
+          </div>
+        </div>
+      ) : null}
 
       {leftOpen ? mobileLeft : null}
     </div>

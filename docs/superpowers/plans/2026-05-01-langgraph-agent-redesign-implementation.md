@@ -119,6 +119,7 @@ Done-temporary or partial:
 - If the assistant asks a follow-up question that expects a short user reply, the expected continuation must be represented by a persisted pending clarification/action or be answerable from visible thread context.
 - Assistant memory for `/agent` is scoped to the current chat thread and contains only user-visible messages, assistant final answers, citations, actions, and active pending state. Hidden model reasoning, prompts, traces, raw tool dumps, and internal planner state must not be written into memory.
 - New chat creates a new `thread_id` and resets thread memory. Cross-thread learner profile, mastery, completed assessments, and committed planner state remain outside thread memory.
+- Future task after Planner Mode: implement prerequisite-aware source sequencing. When a user asks about a not-yet-completed target unit, the agent should answer the target content from evidence, then use the canonical prerequisite graph to suggest prerequisite units first without blocking the user. The source area should render an ordered chain with arrows, highlight the user-mentioned target unit, and keep all items clickable; this is advisory only and must not mutate progress or planner state by itself.
 
 ---
 

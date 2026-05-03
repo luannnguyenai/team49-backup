@@ -137,6 +137,26 @@ export interface AgentConversationMemory {
   summary: Record<string, unknown>;
 }
 
+export interface AgentUnitContext {
+  canonical_unit_id?: string;
+  canonicalUnitId?: string;
+  course_id?: string;
+  courseId?: string;
+  unit_name?: string;
+  unitName?: string;
+  summary?: string | null;
+  key_points?: unknown[];
+  keyPoints?: unknown[];
+  kp_ids?: string[];
+  kpIds?: string[];
+  quiz_available?: boolean;
+  quizAvailable?: boolean;
+  learn_href?: string | null;
+  learnHref?: string | null;
+  transcript_snippets?: Array<Record<string, unknown>>;
+  transcriptSnippets?: Array<Record<string, unknown>>;
+}
+
 export interface AgentMutationResponse {
   ok: boolean;
 }
@@ -228,6 +248,11 @@ export const agentApi = {
   clearMemory: (conversationId: string) =>
     api
       .post<AgentConversationMemory>(`/api/agent/conversations/${conversationId}/memory/clear`)
+      .then((r) => r.data),
+
+  unitContext: (canonicalUnitId: string) =>
+    api
+      .get<AgentUnitContext>(`/api/agent/unit-context/${encodeURIComponent(canonicalUnitId)}`)
       .then((r) => r.data),
 
   chat: (payload: {
@@ -337,6 +362,30 @@ export function getCitationLectureTitle(value: AgentCitation) {
 
 export function getCitationHref(value: AgentCitation | AgentAction) {
   return value.learnHref ?? value.learn_href ?? null;
+}
+
+export function getActionCanonicalId(value: AgentAction) {
+  return value.canonicalUnitId ?? value.canonical_unit_id ?? null;
+}
+
+export function getUnitContextCanonicalId(value: AgentUnitContext | null | undefined) {
+  return value?.canonicalUnitId ?? value?.canonical_unit_id ?? "";
+}
+
+export function getUnitContextCourseId(value: AgentUnitContext | null | undefined) {
+  return value?.courseId ?? value?.course_id ?? "";
+}
+
+export function getUnitContextUnitName(value: AgentUnitContext | null | undefined) {
+  return value?.unitName ?? value?.unit_name ?? "";
+}
+
+export function getUnitContextHref(value: AgentUnitContext | null | undefined) {
+  return value?.learnHref ?? value?.learn_href ?? null;
+}
+
+export function getUnitContextQuizAvailable(value: AgentUnitContext | null | undefined) {
+  return value?.quizAvailable ?? value?.quiz_available ?? false;
 }
 
 export function getActionCanonicalIds(value: AgentAction) {
