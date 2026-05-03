@@ -337,12 +337,15 @@ async def _answer_canonical_quiz_question(
 
     unit = await _get_learning_unit_or_404(db, session.canonical_unit_id)
     unit_loaded_at = perf_counter()
+    existing_progress = await _current_quiz_progress_state(db, user_id)
+    item_ids_for_session = _quiz_item_ids_from_progress(existing_progress, session.id)
     item = await _get_canonical_quiz_item_for_session(
         db,
         user_id=user_id,
         session=session,
         unit=unit,
         question_id=req.question_id,
+        candidate_item_ids=item_ids_for_session,
     )
     item_loaded_at = perf_counter()
     if item is None:
@@ -394,12 +397,8 @@ async def _answer_canonical_quiz_question(
     answered_item_ids = [
         str(item_id) for item_id in answered_result.scalars().all() if item_id is not None
     ]
-    item_ids_for_session = await _current_quiz_item_ids(
-        db,
-        user_id=user_id,
-        session_id=session.id,
-        fallback_unit_canonical_id=unit.canonical_unit_id,
-    )
+    if not item_ids_for_session:
+        item_ids_for_session = await _fallback_quiz_item_ids_for_session(db, session=session, unit=unit)
     await _sync_quiz_progress_state(
         db,
         user_id=user_id,
@@ -411,6 +410,7 @@ async def _answer_canonical_quiz_question(
         source=_quiz_source_for_session(session),
         checkpoint=_quiz_checkpoint_for_session(session),
         quiz_phase=session.canonical_phase or "mini_quiz",
+        existing_progress=existing_progress,
     )
     progress_synced_at = perf_counter()
 
@@ -557,14 +557,17 @@ async def _get_canonical_quiz_item_for_session(
     session: Session,
     unit: LearningUnit,
     question_id: uuid.UUID,
+    candidate_item_ids: list[str] | None = None,
 ) -> QuestionBankItem | None:
-    candidate_item_ids = await _current_quiz_item_ids(
-        db,
-        user_id=user_id,
-        session_id=session.id,
-        fallback_unit_canonical_id=unit.canonical_unit_id,
-    )
-    normalized_item_ids = [str(item_id) for item_id in candidate_item_ids if item_id]
+    normalized_item_ids = [str(item_id) for item_id in (candidate_item_ids or []) if item_id]
+    if not normalized_item_ids:
+        candidate_item_ids = await _current_quiz_item_ids(
+            db,
+            user_id=user_id,
+            session_id=session.id,
+            fallback_unit_canonical_id=unit.canonical_unit_id,
+        )
+        normalized_item_ids = [str(item_id) for item_id in candidate_item_ids if item_id]
     if normalized_item_ids:
         result = await db.execute(
             select(QuestionBankItem).where(QuestionBankItem.item_id.in_(normalized_item_ids))
@@ -647,29 +650,67 @@ async def _current_quiz_item_ids(
     session_id: uuid.UUID,
     fallback_unit_canonical_id: str,
 ) -> list[str]:
-    state = await PlannerAuditRepository(db).get_session_state(user_id, CANONICAL_SESSION_ID)
-    progress = state.current_progress if state is not None else None
-    if isinstance(progress, dict) and progress.get("quiz_id") == str(session_id):
-        answered = [str(item_id) for item_id in progress.get("items_answered") or []]
-        remaining = [str(item_id) for item_id in progress.get("items_remaining") or []]
-        return list(dict.fromkeys(answered + remaining))
-    inline_quiz = progress.get("inline_quiz") if isinstance(progress, dict) else None
-    if isinstance(inline_quiz, dict):
-        for checkpoint_state in inline_quiz.values():
-            if not isinstance(checkpoint_state, dict):
-                continue
-            if str(checkpoint_state.get("active_session_id") or "") != str(session_id) and str(
-                checkpoint_state.get("completed_session_id") or ""
-            ) != str(session_id):
-                continue
-            answered = [str(item_id) for item_id in checkpoint_state.get("answered_item_ids") or []]
-            item_ids = [str(item_id) for item_id in checkpoint_state.get("item_ids") or []]
-            return list(dict.fromkeys(answered + item_ids))
-
+    progress = await _current_quiz_progress_state(db, user_id)
+    item_ids = _quiz_item_ids_from_progress(progress, session_id)
+    if item_ids:
+        return item_ids
     unit_item_result = await db.execute(
         select(QuestionBankItem.item_id).where(QuestionBankItem.unit_id == fallback_unit_canonical_id)
     )
     return [str(item_id) for item_id in unit_item_result.scalars().all()]
+
+
+async def _current_quiz_progress_state(
+    db: AsyncSession,
+    user_id: uuid.UUID,
+) -> dict:
+    state = await PlannerAuditRepository(db).get_session_state(user_id, CANONICAL_SESSION_ID)
+    if state is not None and isinstance(state.current_progress, dict):
+        return dict(state.current_progress)
+    return {}
+
+
+def _quiz_item_ids_from_progress(progress: dict | None, session_id: uuid.UUID) -> list[str]:
+    if not isinstance(progress, dict):
+        return []
+    if progress.get("quiz_id") == str(session_id):
+        answered = [str(item_id) for item_id in progress.get("items_answered") or []]
+        remaining = [str(item_id) for item_id in progress.get("items_remaining") or []]
+        return list(dict.fromkeys(answered + remaining))
+
+    inline_quiz = progress.get("inline_quiz")
+    if not isinstance(inline_quiz, dict):
+        return []
+    for checkpoint_state in inline_quiz.values():
+        if not isinstance(checkpoint_state, dict):
+            continue
+        if str(checkpoint_state.get("active_session_id") or "") != str(session_id) and str(
+            checkpoint_state.get("completed_session_id") or ""
+        ) != str(session_id):
+            continue
+        answered = [str(item_id) for item_id in checkpoint_state.get("answered_item_ids") or []]
+        item_ids = [str(item_id) for item_id in checkpoint_state.get("item_ids") or []]
+        return list(dict.fromkeys(answered + item_ids))
+    return []
+
+
+async def _fallback_quiz_item_ids_for_session(
+    db: AsyncSession,
+    *,
+    session: Session,
+    unit: LearningUnit,
+) -> list[str]:
+    if session.canonical_phase in {"inline_midpoint_quiz", "inline_end_quiz"}:
+        canonical_unit_ids = await _inline_quiz_canonical_unit_scope(db, unit)
+        result = await db.execute(
+            select(QuestionBankItem.item_id).where(QuestionBankItem.unit_id.in_(canonical_unit_ids))
+        )
+        return [str(item_id) for item_id in result.scalars().all() if item_id]
+
+    result = await db.execute(
+        select(QuestionBankItem.item_id).where(QuestionBankItem.unit_id == unit.canonical_unit_id)
+    )
+    return [str(item_id) for item_id in result.scalars().all() if item_id]
 
 
 async def _sync_quiz_progress_state(
@@ -686,17 +727,17 @@ async def _sync_quiz_progress_state(
     quiz_phase: str = "mini_quiz",
     excluded_item_ids: list[str] | None = None,
     extra_progress: dict | None = None,
+    existing_progress: dict | None = None,
 ) -> None:
     answered = list(dict.fromkeys(answered_item_ids))
     normalized_item_ids = [str(item_id) for item_id in item_ids]
     answered_set = set(answered)
     remaining = [item_id for item_id in normalized_item_ids if item_id not in answered_set]
     planner_repo = PlannerAuditRepository(db)
-    state = await planner_repo.get_session_state(user_id, CANONICAL_SESSION_ID)
     existing_progress = (
-        dict(state.current_progress)
-        if state is not None and isinstance(state.current_progress, dict)
-        else {}
+        dict(existing_progress)
+        if isinstance(existing_progress, dict)
+        else dict((await _current_quiz_progress_state(db, user_id)))
     )
     progress = {
         **existing_progress,
