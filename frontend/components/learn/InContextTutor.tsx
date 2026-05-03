@@ -66,6 +66,7 @@ function appendStatusStep(steps: string[] | undefined, nextStatus: string): stri
 }
 
 interface InContextTutorProps {
+  lessonKey?: string;
   lectureId: string;
   currentTime: number;
   captureFrame: () => string | null;
@@ -78,6 +79,7 @@ interface InContextTutorProps {
 // ── Component ───────────────────────────────────────────────────────────────
 
 export default function InContextTutor({
+  lessonKey,
   lectureId,
   currentTime,
   captureFrame,
@@ -90,8 +92,9 @@ export default function InContextTutor({
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const userFullName = useAuthStore((state) => state.user?.full_name?.trim() || "You");
-  const conversationKey = lectureId
-    ? buildTutorConversationKey(lectureId, contextBindingId)
+  const resolvedLessonKey = lessonKey?.trim() || lectureId.trim();
+  const conversationKey = resolvedLessonKey
+    ? buildTutorConversationKey(resolvedLessonKey, contextBindingId)
     : null;
 
   const chatEndRef = useRef<HTMLDivElement>(null);
