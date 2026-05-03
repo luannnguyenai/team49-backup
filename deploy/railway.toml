@@ -1,0 +1,17 @@
+# Railway service config (backend mặc định).
+# Đặt file này ở repo root nếu muốn Railway pickup tự động,
+# hoặc giữ ở deploy/ làm reference và copy lên dashboard.
+#
+# Frontend service: set Root Directory = "frontend" trong dashboard,
+# Railway sẽ dùng frontend/Dockerfile.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "uv run uvicorn main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
