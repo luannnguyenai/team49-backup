@@ -52,6 +52,7 @@ from src.routers.admin import admin_router
 from src.middleware.prometheus import setup_prometheus
 from src.middleware.request_logger import AccessLogMiddleware
 from src.config import settings
+from src.core.observability import score_trace
 
 logger = logging.getLogger(__name__)
 DATA_ROOT = Path("data").resolve()
@@ -276,13 +277,25 @@ async def get_toc(lecture_id: str, db: AsyncSession = Depends(get_async_db)):
 
 
 @app.post("/api/lectures/ask", tags=["Lectures"])
-async def ask_question(req: AskRequest, db: AsyncSession = Depends(get_async_db)):
+async def ask_question(
+    req: AskRequest,
+    request: Request = None,
+    db: AsyncSession = Depends(get_async_db),
+):
     """
     Sync route — runs in FastAPI threadpool.
     llm_service uses asyncio.run() internally for DB access.
     LangGraph streaming remains sync (no async streaming support yet).
     """
     try:
+        user_id: str | None = None
+        if request is not None:
+            try:
+                current_user = await get_current_user_from_request(request, db)
+                user_id = str(current_user.id)
+            except HTTPException:
+                user_id = None
+
         await _ensure_lecture_exists(
             req.lecture_id,
             context_binding_id=req.context_binding_id,
@@ -294,6 +307,7 @@ async def ask_question(req: AskRequest, db: AsyncSession = Depends(get_async_db)
             req.question,
             image_base64=req.image_base64,
             context_binding_id=req.context_binding_id,
+            user_id=user_id,
         )
         return StreamingResponse(
             generator,
@@ -344,15 +358,14 @@ async def rate_answer(qa_id: int, req: RateRequest, db: AsyncSession = Depends(g
     if not qa:
         raise HTTPException(status_code=404, detail="QA entry not found")
     qa.rating = req.rating
+    await db.commit()
 
     # Forward as LangFuse score (best-effort, fail-safe). Phase 16.
     try:
-        from src.core.observability import get_langfuse_handler
-
-        handler = get_langfuse_handler()
-        client = getattr(handler, "client", None) if handler is not None else None
-        if client is not None and hasattr(client, "score"):
-            client.score(
+        trace_id = getattr(qa, "langfuse_trace_id", None)
+        if trace_id:
+            score_trace(
+                trace_id=trace_id,
                 name="user_thumb",
                 value=float(req.rating),
                 comment=f"qa_id={qa_id}",

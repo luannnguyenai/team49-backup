@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import unittest
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
 
@@ -33,6 +34,7 @@ from src.services.onboarding_service import (
     _run_prior_analysis_with_retry,
     save_user_goals,
     save_known_topics,
+    analyze_prior_profile,
 )
 from src.config.goal_course_map import GOAL_COURSE_MAP, VALID_GOAL_IDS
 
@@ -252,6 +254,77 @@ class TestPriorAnalysisRetry(unittest.IsolatedAsyncioTestCase):
                 max_attempts=2,
                 sleep_fn=AsyncMock(),
             )
+
+
+class TestPriorAnalysisTracing(unittest.IsolatedAsyncioTestCase):
+    async def test_prior_analysis_langchain_branch_uses_langfuse_callbacks(self):
+        fake_llm = MagicMock()
+        fake_llm.invoke.return_value = SimpleNamespace(
+            content=json.dumps({"topics": [{"id": "cnn", "level": "confident"}]})
+        )
+        body = SimpleNamespace(
+            goal_id="computer_vision",
+            prior_knowledge_text="I know CNN basics",
+            coding_experience_text="PyTorch and CNN projects",
+            candidates=[
+                SimpleNamespace(
+                    id="cnn",
+                    display_label="CNN",
+                    raw_title="CNN basics",
+                    unit_titles=["Convolution", "Pooling"],
+                )
+            ],
+        )
+
+        with (
+            patch("src.services.onboarding_service.settings") as fake_settings,
+            patch("src.services.onboarding_service.enforce_llm_rate_limit"),
+            patch("src.services.onboarding_service.init_chat_model", return_value=fake_llm),
+            patch("src.services.onboarding_service.llm_callbacks", return_value=["cb"], create=True),
+            patch("src.services.onboarding_service.start_langfuse_root_span", return_value=MagicMock(__enter__=lambda s: None, __exit__=lambda s, exc_type, exc, tb: False), create=True),
+            patch("src.services.onboarding_service.propagate_langfuse_attributes", return_value=MagicMock(__enter__=lambda s: None, __exit__=lambda s, exc_type, exc, tb: False), create=True),
+        ):
+            fake_settings.model_provider = "anthropic"
+            fake_settings.openai_api_key = ""
+            response = await analyze_prior_profile(body)
+
+        self.assertEqual(response.shortlisted_topic_ids, ["cnn"])
+        _, kwargs = fake_llm.invoke.call_args
+        self.assertEqual(kwargs["config"]["callbacks"], ["cb"])
+        self.assertEqual(kwargs["config"]["metadata"]["langfuse_tags"], ["onboarding", "prior-analysis"])
+
+    async def test_prior_analysis_openai_branch_wraps_langfuse_root_span(self):
+        body = SimpleNamespace(
+            goal_id="computer_vision",
+            prior_knowledge_text="I know CNN basics",
+            coding_experience_text="PyTorch and CNN projects",
+            candidates=[
+                SimpleNamespace(
+                    id="cnn",
+                    display_label="CNN",
+                    raw_title="CNN basics",
+                    unit_titles=["Convolution", "Pooling"],
+                )
+            ],
+        )
+
+        with (
+            patch("src.services.onboarding_service.settings") as fake_settings,
+            patch("src.services.onboarding_service.enforce_llm_rate_limit"),
+            patch(
+                "src.services.onboarding_service._invoke_openai_responses",
+                return_value=json.dumps({"topics": [{"id": "cnn", "level": "confident"}]}),
+            ) as mock_openai,
+            patch("src.services.onboarding_service.start_langfuse_root_span", return_value=MagicMock(__enter__=lambda s: None, __exit__=lambda s, exc_type, exc, tb: False), create=True) as mock_root,
+            patch("src.services.onboarding_service.propagate_langfuse_attributes", return_value=MagicMock(__enter__=lambda s: None, __exit__=lambda s, exc_type, exc, tb: False), create=True),
+        ):
+            fake_settings.model_provider = "openai"
+            fake_settings.openai_api_key = "sk-test"
+            response = await analyze_prior_profile(body)
+
+        self.assertEqual(response.shortlisted_topic_ids, ["cnn"])
+        mock_openai.assert_called_once()
+        mock_root.assert_called_once()
 
 # ---------------------------------------------------------------------------
 # Service async tests (mocked DB)
