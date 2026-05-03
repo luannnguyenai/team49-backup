@@ -8,9 +8,8 @@ Fine-tune `Qwen/Qwen2.5-VL-3B-Instruct` as an English tutor for AI/ML/NLP/CV. In
 
 ```mermaid
 flowchart LR
-    A[Project domain dataset<br/>MCQ + unit summaries + QA history] --> B[English normalization]
-    E[Filtered ELI5 subset<br/>style-only] --> C[Mixing + Chat formatting]
-    B --> C
+    A[Project domain dataset<br/>MCQ + unit summaries + QA history] --> C[Mixing + Chat formatting]
+    E[Filtered ELI5 subset<br/>style-only] --> C
     C --> D[Ablation runs<br/>A/B/C/D]
     D --> F[QLoRA fine-tune<br/>on VL base, text-first supervision]
     F --> G[Adapter checkpoints]
@@ -53,18 +52,7 @@ Recommended metadata to preserve per sample:
 - `difficulty`
 - `question_intent`
 
-### 3b. English normalization
-
-All training samples must be English-only before mixing.
-
-Normalization rules:
-
-- Convert any Vietnamese or mixed-language content to English.
-- Preserve technical terms such as `gradient descent`, `backpropagation`, `attention`, `batch normalization`.
-- Reject translated samples that lose technical meaning or context.
-- Keep tutor tone academic, clear, and step-by-step.
-
-### 3c. ELI5 filtering
+### 3b. ELI5 filtering
 
 Do not use raw ELI5. Keep only a filtered subset that matches explanation-style needs.
 
@@ -187,6 +175,5 @@ Decision rule:
 ## 11. Current status
 
 - `PROPOSAL.md` is aligned with this pipeline.
-- Older Vietnamese-specific assumptions should be considered deprecated.
 - Vision capability is active again at the model and serving layers, but the dataset research remains unchanged.
 - `FinetuneLoRA-2.ipynb` is a legacy notebook and is not the source of truth for v1 of the English-only plan.
