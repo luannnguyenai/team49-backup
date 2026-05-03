@@ -73,9 +73,30 @@ class AgenticRAGPipeline:
                 observation = AgenticRAGObservation.model_validate(observation)
             else:
                 observation = AgenticRAGObservation.model_validate(observation.model_dump())
-        if observation.evidence_status == "grounded" and not observation.result.citations:
-            return fallback_observation.model_copy(update={"evidence_status": "no_source"})
-        return observation
+        # The retrieval tool result is authoritative. The observing model may judge
+        # evidence quality, but it must not mutate citations/actions/trace returned
+        # from database-backed tools.
+        return fallback_observation.model_copy(
+            update={
+                "success": fallback_observation.success,
+                "evidence_status": self._validated_evidence_status(
+                    observation.evidence_status,
+                    fallback_observation,
+                ),
+                "result": fallback_observation.result,
+            }
+        )
+
+    def _validated_evidence_status(
+        self,
+        observed_status: str,
+        fallback_observation: AgenticRAGObservation,
+    ) -> str:
+        if fallback_observation.result.citations:
+            return fallback_observation.evidence_status
+        if observed_status == "grounded":
+            return "no_source"
+        return observed_status
 
     def _result_from_final(
         self,

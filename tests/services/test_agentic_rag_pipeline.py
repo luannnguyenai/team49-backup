@@ -223,6 +223,43 @@ async def test_agentic_rag_pipeline_runs_stages_in_order_and_returns_tool_result
 
 
 @pytest.mark.asyncio
+async def test_agentic_rag_pipeline_does_not_let_observer_replace_tool_result():
+    class MutatingObserverRouter(FakePipelineRouter):
+        def rag_observe(self, **kwargs):
+            self.calls.append(("observe", kwargs))
+            return AgenticRAGObservation(
+                tool="ask_clarification",
+                success=True,
+                evidence_status="needs_clarification",
+                result=ToolResult(
+                    kind="clarification",
+                    answer_markdown="Which variant do you mean?",
+                    citations=[],
+                    actions=[],
+                ),
+            )
+
+    pipeline = AgenticRAGPipeline(
+        router=MutatingObserverRouter(),
+        tool_executor=AgenticRAGToolExecutor(GroundedToolNodes()),
+    )
+
+    result = await pipeline.run(
+        message="Tìm thông tin YOLO",
+        intent="find_content",
+        slots=AgentSlots(raw_topic="YOLO"),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS231N"],
+    )
+
+    assert result.answer_markdown == "YOLO is covered as a single-stage detector."
+    assert result.citations[0].canonical_unit_id == "u-yolo"
+    assert result.actions[0].learn_href == "/courses/cs231n/learn/lecture-9-seg4"
+    assert result.metadata["agentic_rag_evidence_status"] == "grounded"
+
+
+@pytest.mark.asyncio
 async def test_agentic_rag_pipeline_does_not_emit_hidden_thinking():
     class LeakyRouter(FakePipelineRouter):
         def rag_respond(self, **kwargs):

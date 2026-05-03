@@ -1,6 +1,16 @@
 import { api } from "@/lib/api";
 
 export const AGENT_REQUEST_TIMEOUT_MS = 60_000;
+const AGENT_CHAT_PATH = "/api/agent/chat";
+const AGENT_ACTION_CONTINUE_PATH = "/api/agent/actions/continue";
+
+function agentRuntimeEndpoint(path: string) {
+  const publicApiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  if (typeof window !== "undefined" && publicApiUrl) {
+    return `${publicApiUrl}${path}`;
+  }
+  return path;
+}
 
 export type AgentWarningType =
   | "outside_current_path"
@@ -228,7 +238,7 @@ export const agentApi = {
     traceMode?: "none" | "summary" | "full";
   }) =>
     api
-      .post<AgentChatResponse>("/api/agent/chat", payload, {
+      .post<AgentChatResponse>(agentRuntimeEndpoint(AGENT_CHAT_PATH), payload, {
         timeout: AGENT_REQUEST_TIMEOUT_MS,
       })
       .then((r) => r.data),
@@ -241,7 +251,7 @@ export const agentApi = {
     incomingMessageId: string;
   }) =>
     api
-      .post<AgentChatResponse>("/api/agent/actions/continue", payload, {
+      .post<AgentChatResponse>(agentRuntimeEndpoint(AGENT_ACTION_CONTINUE_PATH), payload, {
         timeout: AGENT_REQUEST_TIMEOUT_MS,
       })
       .then((r) => r.data),

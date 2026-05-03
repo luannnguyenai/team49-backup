@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const postMock = vi.hoisted(() => vi.fn());
 
@@ -9,6 +9,12 @@ vi.mock("@/lib/api", () => ({
 }));
 
 describe("agent api", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    postMock.mockReset();
+  });
+
   it("uses an agent-specific timeout for chat requests", async () => {
     const { AGENT_REQUEST_TIMEOUT_MS, agentApi } = await import("@/features/agent/api");
     postMock.mockResolvedValueOnce({ data: { ok: true } });
@@ -24,6 +30,28 @@ describe("agent api", () => {
       {
         message: "find RCNN",
         incomingMessageId: "msg-1",
+        traceMode: "summary",
+      },
+      { timeout: AGENT_REQUEST_TIMEOUT_MS },
+    );
+  });
+
+  it("uses the public backend URL for browser chat requests when configured", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://localhost:8000/");
+    const { AGENT_REQUEST_TIMEOUT_MS, agentApi } = await import("@/features/agent/api");
+    postMock.mockResolvedValueOnce({ data: { ok: true } });
+
+    await agentApi.chat({
+      message: "find RCNN",
+      incomingMessageId: "msg-3",
+      traceMode: "summary",
+    });
+
+    expect(postMock).toHaveBeenCalledWith(
+      "http://localhost:8000/api/agent/chat",
+      {
+        message: "find RCNN",
+        incomingMessageId: "msg-3",
         traceMode: "summary",
       },
       { timeout: AGENT_REQUEST_TIMEOUT_MS },
