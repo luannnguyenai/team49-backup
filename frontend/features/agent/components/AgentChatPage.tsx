@@ -1229,6 +1229,7 @@ function TurnProgress({ stepIndex }: { stepIndex: number }) {
 
 export default function AgentChatPage() {
   const { user } = useAuthStore();
+  const userId = user?.id ?? null;
   const [sessions, setSessions] = useState<AgentConversationSummary[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<UiMessage[]>([]);
@@ -1248,6 +1249,17 @@ export default function AgentChatPage() {
   const skipNextMessageLoadForSession = useRef<string | null>(null);
 
   useEffect(() => {
+    setSessions([]);
+    setActiveSessionId(null);
+    setMessages([]);
+    setSelectedCitation(null);
+    setSelectedUnitContext(null);
+    setSelectedPathItem(null);
+    skipNextMessageLoadForSession.current = null;
+    if (!userId) {
+      setIsLoadingSessions(false);
+      return;
+    }
     let active = true;
     setIsLoadingSessions(true);
     agentApi
@@ -1255,7 +1267,7 @@ export default function AgentChatPage() {
       .then((items: AgentConversationSummary[]) => {
         if (!active) return;
         setSessions(items);
-        if (!activeSessionId && items.length > 0) {
+        if (items.length > 0) {
           setActiveSessionId(getConversationId(items[0]));
         }
       })
@@ -1268,7 +1280,7 @@ export default function AgentChatPage() {
     return () => {
       active = false;
     };
-  }, [activeSessionId]);
+  }, [userId]);
 
   useEffect(() => {
     if (!activeSessionId) {

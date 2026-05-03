@@ -20,6 +20,14 @@ const learningPathApiMock = vi.hoisted(() => ({
   getLearningPath: vi.fn(),
 }));
 
+const authStoreMock = vi.hoisted(() => ({
+  user: {
+    id: "user-1",
+    full_name: "Test Learner",
+    is_onboarded: true,
+  } as { id: string; full_name: string; is_onboarded: boolean } | null,
+}));
+
 vi.mock("@/features/agent/api", async () => {
   const actual = await vi.importActual<typeof import("@/features/agent/api")>("@/features/agent/api");
   return {
@@ -34,17 +42,18 @@ vi.mock("@/features/learning-path/api", () => ({
 
 vi.mock("@/stores/authStore", () => ({
   useAuthStore: () => ({
-    user: {
-      id: "user-1",
-      full_name: "Test Learner",
-      is_onboarded: true,
-    },
+    user: authStoreMock.user,
   }),
 }));
 
 describe("agent page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    authStoreMock.user = {
+      id: "user-1",
+      full_name: "Test Learner",
+      is_onboarded: true,
+    };
     Object.defineProperty(window.HTMLElement.prototype, "scrollTo", {
       configurable: true,
       value: vi.fn(),
@@ -119,6 +128,50 @@ describe("agent page", () => {
     expect(screen.queryByText(/current path first/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/clear current chat/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/open context panel/i)).not.toBeInTheDocument();
+  });
+
+  it("clears selected agent history and reloads conversations when the authenticated user changes", async () => {
+    agentApiMock.listConversations
+      .mockResolvedValueOnce([
+        {
+          conversationId: "conversation-user-1",
+          title: "Old user chat",
+          preview: "Should not stay visible",
+          messageCount: 1,
+          updatedAt: "2026-05-01T00:00:00Z",
+        },
+      ])
+      .mockResolvedValueOnce([]);
+    agentApiMock.messages.mockResolvedValueOnce([
+      {
+        id: "message-old-user",
+        role: "assistant",
+        markdown: "This belongs to user one.",
+        createdAt: "2026-05-01T00:00:00Z",
+        citations: [],
+        actions: [],
+        warning: null,
+      },
+    ]);
+
+    const { rerender } = render(<AgentPage />);
+
+    expect(await screen.findByText("Old user chat")).toBeInTheDocument();
+    expect(await screen.findByText("This belongs to user one.")).toBeInTheDocument();
+
+    authStoreMock.user = {
+      id: "user-2",
+      full_name: "Second Learner",
+      is_onboarded: true,
+    };
+    rerender(<AgentPage />);
+
+    await waitFor(() => {
+      expect(agentApiMock.listConversations).toHaveBeenCalledTimes(2);
+    });
+    expect(screen.queryByText("Old user chat")).not.toBeInTheDocument();
+    expect(screen.queryByText("This belongs to user one.")).not.toBeInTheDocument();
+    expect(screen.getByText("No chat history yet.")).toBeInTheDocument();
   });
 
   it("sends a chat message and renders answer citations", async () => {
