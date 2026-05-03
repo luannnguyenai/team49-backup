@@ -16,10 +16,12 @@ import {
 } from "recharts";
 
 import KpiCard from "@/components/admin/KpiCard";
+import KpiGroup from "@/components/admin/KpiGroup";
 import ChartCard from "@/components/admin/ChartCard";
 import {
   adminApi,
   AdminOverview,
+  CurrentModel,
   LlmStats,
   SignupPoint,
   SystemHealth,
@@ -46,6 +48,7 @@ export default function AdminOverviewPage() {
   const [system, setSystem] = useState<SystemHealth | null>(null);
   const [signups, setSignups] = useState<SignupPoint[]>([]);
   const [llm, setLlm] = useState<LlmStats | null>(null);
+  const [model, setModel] = useState<CurrentModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -53,17 +56,19 @@ export default function AdminOverviewPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const [o, s, sg, l] = await Promise.all([
+        const [o, s, sg, l, m] = await Promise.all([
           adminApi.overview(),
           adminApi.systemHealth(),
           adminApi.signups(30),
           adminApi.llmStats(24),
+          adminApi.currentModel().catch(() => null),
         ]);
         if (cancelled) return;
         setOverview(o);
         setSystem(s);
         setSignups(sg);
         setLlm(l);
+        setModel(m);
         setErr(null);
       } catch (e) {
         if (!cancelled) setErr(String((e as Error).message ?? e));
@@ -98,7 +103,7 @@ export default function AdminOverviewPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+      <KpiGroup title="Người dùng" cols={5}>
         <KpiCard
           label="Total users"
           value={overview?.total_users ?? "—"}
@@ -112,8 +117,31 @@ export default function AdminOverviewPage() {
           loading={loading}
         />
         <KpiCard
+          label="Online now"
+          value={overview?.active_now ?? "—"}
+          hint="Active ≤ 15m"
+          loading={loading}
+        />
+      </KpiGroup>
+
+      <KpiGroup title="AI Service" cols={4}>
+        <KpiCard
           label="LLM calls (24h)"
           value={overview?.llm_calls_24h ?? "—"}
+          loading={loading}
+        />
+        <KpiCard
+          label="Model đang dùng"
+          value={
+            model ? (
+              <span title={`${model.provider}/${model.name}`} className="block truncate">
+                {model.name}
+              </span>
+            ) : (
+              "—"
+            )
+          }
+          hint={model ? `${model.provider} · fast: ${model.fast_model}` : "Loading…"}
           loading={loading}
         />
         <KpiCard
@@ -132,13 +160,16 @@ export default function AdminOverviewPage() {
           hint="5xx / total (5m)"
           loading={loading}
         />
+      </KpiGroup>
+
+      <KpiGroup title="Hệ thống" cols={2}>
         <KpiCard
           label="System uptime"
           value={fmtUptime(system?.uptime_seconds)}
           hint={`${system?.services.filter((x) => x.status === "healthy").length ?? 0}/${system?.services.length ?? 0} healthy`}
           loading={loading}
         />
-      </div>
+      </KpiGroup>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <ChartCard title="Signups (last 30 days)" subtitle="users.created_at">
