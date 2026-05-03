@@ -276,7 +276,6 @@ function CitationCard({
               {getCitationLectureTitle(citation)}
             </p>
           ) : null}
-          {citation.quote ? <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">{citation.quote}</p> : null}
         </div>
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-400 transition group-hover:bg-blue-600 group-hover:text-white">
           {href ? <ExternalLink className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -1557,14 +1556,27 @@ export default function AgentChatPage() {
       </section>
 
       {selectedCitation ? (
-        <div className="fixed inset-0 z-50 lg:static lg:z-auto lg:h-full lg:shrink-0">
+        <div className="hidden h-full shrink-0 md:block">
+          <SourceDetailPanel
+            citation={selectedCitation}
+            unitContext={selectedUnitContext}
+            pathItem={selectedPathItem}
+            isLoading={isLoadingSourceDetail}
+            error={sourceDetailError}
+            onClose={() => setSelectedCitation(null)}
+          />
+        </div>
+      ) : null}
+
+      {selectedCitation ? (
+        <div className="fixed inset-0 z-50 md:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-950/50 lg:hidden"
+            className="absolute inset-0 bg-slate-950/50"
             onClick={() => setSelectedCitation(null)}
             aria-label="Close source detail"
           />
-          <div className="absolute bottom-0 right-0 top-0 w-full max-w-[390px] bg-white shadow-2xl lg:static lg:h-full lg:w-auto lg:max-w-none lg:shadow-none">
+          <div className="absolute bottom-0 right-0 top-0 w-full max-w-[390px] bg-white shadow-2xl">
             <SourceDetailPanel
               citation={selectedCitation}
               unitContext={selectedUnitContext}
