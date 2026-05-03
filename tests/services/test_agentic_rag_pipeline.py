@@ -1,6 +1,6 @@
 import pytest
 
-from src.services.agent_graph_contracts import AgentSlots, ToolResult
+from src.services.agent_graph_contracts import AgentRouterUnavailableError, AgentSlots, ToolResult
 from src.services.agentic_rag_contracts import AgenticRAGObservation, AgenticRAGToolCall
 from src.services.agentic_rag_pipeline import AgenticRAGPipeline
 from src.services.agentic_rag_tools import AgenticRAGToolExecutor, AgentRAGToolRegistry
@@ -256,6 +256,37 @@ async def test_agentic_rag_pipeline_does_not_let_observer_replace_tool_result():
     assert result.answer_markdown == "YOLO is covered as a single-stage detector."
     assert result.citations[0].canonical_unit_id == "u-yolo"
     assert result.actions[0].learn_href == "/courses/cs231n/learn/lecture-9-seg4"
+    assert result.metadata["agentic_rag_evidence_status"] == "grounded"
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_pipeline_continues_when_observer_model_is_unavailable():
+    class UnavailableObserverRouter(FakePipelineRouter):
+        def rag_observe(self, **kwargs):
+            self.calls.append(("observe", kwargs))
+            raise AgentRouterUnavailableError(
+                "agentic_rag_observing_model_error",
+                "AGENT_LLM_UNAVAILABLE",
+            )
+
+    router = UnavailableObserverRouter()
+    pipeline = AgenticRAGPipeline(
+        router=router,
+        tool_executor=AgenticRAGToolExecutor(GroundedToolNodes()),
+    )
+
+    result = await pipeline.run(
+        message="Tìm thông tin YOLO",
+        intent="find_content",
+        slots=AgentSlots(raw_topic="YOLO"),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS231N"],
+    )
+
+    assert [name for name, _ in router.calls] == ["think", "act", "observe", "respond"]
+    assert result.answer_markdown == "YOLO is covered as a single-stage detector."
+    assert result.citations[0].canonical_unit_id == "u-yolo"
     assert result.metadata["agentic_rag_evidence_status"] == "grounded"
 
 

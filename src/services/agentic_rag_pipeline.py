@@ -4,7 +4,7 @@ import re
 from typing import Any
 
 from src.schemas.agent import RouteContext
-from src.services.agent_graph_contracts import AgentSlots, ToolResult
+from src.services.agent_graph_contracts import AgentRouterUnavailableError, AgentSlots, ToolResult
 from src.services.agentic_rag_contracts import AgenticRAGFinal, AgenticRAGObservation
 
 
@@ -45,14 +45,17 @@ class AgenticRAGPipeline:
             slots=slots,
             allowed_course_ids=allowed_course_ids,
         )
-        observation = self.router.rag_observe(
-            message=message,
-            thought=thought,
-            tool_call=tool_call,
-            tool_observation=tool_observation,
-            route_context=route_context,
-            recent_messages=recent_messages,
-        )
+        try:
+            observation = self.router.rag_observe(
+                message=message,
+                thought=thought,
+                tool_call=tool_call,
+                tool_observation=tool_observation,
+                route_context=route_context,
+                recent_messages=recent_messages,
+            )
+        except AgentRouterUnavailableError:
+            observation = tool_observation
         observation = self._validated_observation(observation, tool_observation)
         final = self.router.rag_respond(
             message=message,

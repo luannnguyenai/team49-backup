@@ -195,6 +195,54 @@ describe("agent page", () => {
     );
   });
 
+  it("cleans timestamp markers from source detail summaries", async () => {
+    agentApiMock.unitContext.mockResolvedValueOnce({
+      canonical_unit_id: "unit-rf",
+      course_id: "CS231n",
+      unit_name: "Kernels, stride, pooling, and receptive fields",
+      summary: "CNNs are introduced as image models [ts=1397s] and trained end-to-end [ts=1420s].",
+      quiz_available: true,
+      learn_href: "/courses/cs231n/learn/lecture-03-seg4?t=740",
+    });
+    render(<AgentPage />);
+
+    const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
+    fireEvent.click(promptButtons[0]);
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: /view source details: kernels, stride, pooling, and receptive fields/i,
+      }),
+    );
+
+    expect(await screen.findAllByText(/CNNs are introduced as image models and trained end-to-end/i)).toHaveLength(2);
+    expect(screen.queryByText(/\[ts=\d+s\]/)).not.toBeInTheDocument();
+  });
+
+  it("does not render model-generated markdown links as navigation", async () => {
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-external-link",
+      answer: {
+        markdown:
+          "See [Lecture 5](https://www.coursera.org/learn/example) or [source](/courses/cs231n/learn/lecture-5-seg3) for CNN details.",
+        confidence: "grounded",
+      },
+      citations: [],
+      actions: [],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Message AI Assistant...");
+    fireEvent.change(input, { target: { value: "nền tảng CNN" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    expect(await screen.findByText("Lecture 5")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /lecture 5/i })).not.toBeInTheDocument();
+    expect(screen.getByText("source")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /source/i })).not.toBeInTheDocument();
+  });
+
   it("renders assistant markdown and retries a failed request with the same message id", async () => {
     agentApiMock.chat
       .mockRejectedValueOnce(new Error("network down"))
@@ -228,6 +276,59 @@ describe("agent page", () => {
     });
     const strong = await screen.findByText("U-Net");
     expect(strong.tagName).toBe("STRONG");
+  });
+
+  it("retries server-side agent fallback responses with the same message id", async () => {
+    agentApiMock.chat
+      .mockResolvedValueOnce({
+        conversationId: "conversation-1",
+        messageId: "message-server-fallback",
+        answer: {
+          markdown:
+            "The AI assistant is temporarily unavailable due to a system incident. Please try again later. Error code: AGENT_LLM_UNAVAILABLE.",
+          confidence: "fallback",
+        },
+        citations: [],
+        actions: [],
+        warning: {
+          type: "agent_unavailable",
+          message: "AGENT_LLM_UNAVAILABLE",
+        },
+        fallback: {
+          reason: "agent_unavailable",
+          message: "The agent request failed before a safe answer could be produced.",
+          errorCode: "AGENT_LLM_UNAVAILABLE",
+        },
+      })
+      .mockResolvedValueOnce({
+        conversationId: "conversation-1",
+        messageId: "message-server-retry",
+        answer: {
+          markdown: "Retry found CNN application content.",
+          confidence: "grounded",
+        },
+        citations: [],
+        actions: [],
+        warning: null,
+      });
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Message AI Assistant...");
+    fireEvent.change(input, { target: { value: "thế còn CNN ứng dụng thì sao" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    const retry = await screen.findByRole("button", { name: /retry/i });
+    const firstCall = agentApiMock.chat.mock.calls[0][0];
+    fireEvent.click(retry);
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenCalledTimes(2);
+    });
+    expect(agentApiMock.chat.mock.calls[1][0]).toMatchObject({
+      message: "thế còn CNN ứng dụng thì sao",
+      incomingMessageId: firstCall.incomingMessageId,
+    });
+    expect(await screen.findByText("Retry found CNN application content.")).toBeInTheDocument();
   });
 
   it("labels client-side agent timeouts separately from network failures", async () => {

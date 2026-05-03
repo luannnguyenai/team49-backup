@@ -502,6 +502,8 @@ class StructuredAgentRouter:
                             "when appropriate. "
                             "Use clean markdown with short paragraphs or bullets when helpful, and write math "
                             "with standard LaTeX delimiters only when the answer needs formulas. "
+                            "Do not include raw URLs, course hrefs, or source links in the answer text; "
+                            "navigation is provided by citations/source cards. "
                             "Do not invent missing course facts. If the retrieved units do not directly support "
                             "the user's requested topic, set evidence_sufficient=false, choose no_source or partial "
                             "confidence, and ask one concise clarifying question or say that no direct grounded "

@@ -102,6 +102,25 @@ function getFallbackErrorCode(fallback: AgentChatResponse["fallback"] | undefine
   return fallback?.errorCode ?? fallback?.error_code ?? null;
 }
 
+function cleanSourceSummary(value: string) {
+  return value
+    .replace(/\s*\[ts=\d+(?:\.\d+)?s?\]/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function AssistantMarkdown({ markdown }: { markdown: string }) {
+  return (
+    <ReactMarkdown
+      components={{
+        a: ({ children }) => <span>{children}</span>,
+      }}
+    >
+      {markdown}
+    </ReactMarkdown>
+  );
+}
+
 function getClientErrorCode(error: unknown) {
   const responseStatus =
     typeof error === "object" && error !== null && "response" in error
@@ -297,7 +316,7 @@ function SourceDetailPanel({
   const title = getUnitContextUnitName(unitContext) || getCitationUnitName(citation);
   const courseId = getUnitContextCourseId(unitContext) || getCitationCourseId(citation);
   const href = getUnitContextHref(unitContext) || getCitationHref(citation);
-  const summary = unitContext?.summary ?? citation.quote ?? "";
+  const summary = cleanSourceSummary(unitContext?.summary ?? citation.quote ?? "");
   const sectionTitle = pathItem?.section_title ?? getCitationLectureTitle(citation);
   const statusLabel = pathItem ? getStatusLabel(pathItem.status) : "Not in current plan";
   const duration =
@@ -840,7 +859,7 @@ function ChatMessageItem({
             <p className="whitespace-pre-wrap">{message.markdown}</p>
           ) : (
             <div className="prose prose-sm prose-slate max-w-none leading-7">
-              <ReactMarkdown>{message.markdown}</ReactMarkdown>
+              <AssistantMarkdown markdown={message.markdown} />
             </div>
           )}
           {!isUser && message.warning && !isDuplicateWarning(message) ? <WarningBlock warning={message.warning} /> : null}
@@ -1357,7 +1376,10 @@ export default function AgentChatPage() {
     setIsLoadingSourceDetail(false);
   };
 
-  const appendAgentResponse = (response: AgentChatResponse) => {
+  const appendAgentResponse = (
+    response: AgentChatResponse,
+    retry?: { message: string; incomingMessageId: string },
+  ) => {
     const conversationId = getConversationId(response);
     if (conversationId && conversationId !== activeSessionId) {
       skipNextMessageLoadForSession.current = conversationId;
@@ -1375,6 +1397,8 @@ export default function AgentChatPage() {
         actions: response.actions ?? [],
         warning: response.warning,
         fallback: response.fallback,
+        retryMessage: getFallbackErrorCode(response.fallback) ? retry?.message : undefined,
+        retryIncomingMessageId: getFallbackErrorCode(response.fallback) ? retry?.incomingMessageId : undefined,
       },
     ]);
     refreshSessions();
@@ -1424,7 +1448,7 @@ export default function AgentChatPage() {
         conversationId: activeSessionId,
         traceMode: "summary",
       });
-      appendAgentResponse(response);
+      appendAgentResponse(response, { message, incomingMessageId });
     } catch (err) {
       setMessages((current) => [
         ...current,

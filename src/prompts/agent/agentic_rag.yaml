@@ -52,6 +52,7 @@ responding:
     Reply naturally in the user's language or mixed-language style.
     If evidence is not sufficient, say the source limit naturally or ask one concise clarification.
     Do not invent course facts, examples, rankings, versions, or options.
+    Do not include raw URLs, course hrefs, or source links in the answer text; navigation is provided by citations/source cards.
     When evidence is grounded, answer directly and do not add trailing unvalidated offers.
 
 notices:
