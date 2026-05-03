@@ -28,18 +28,6 @@ $commitLines = @"
 "@
 
 
-# + f4100a1c4d1f40cc8c67e9c3ccf6846ec63642fa Update authStore.ts
-# + 772d500518755bf4196f62f789771f80176d5c25 Update store-logout.test.ts
-# + 34272f208cfc16e5788f1e03f02fc1f76006cb27 Update in-context-tutor.test.tsx
-# + 2226b30ca11442b057c82149199bc8c324646546 Update pyproject.toml
-# + 4c025f63311bbf7b7b73c8eb133ec27881606376 Update app.py
-# + 887168eea021d7eeac866acb648c7227a0c519b1 Update start.sh
-# + dd266d5e152945435a4812a074c9573c90555358 Update uv.lock
-# + 715696b4588a39bfc69e37257a9e69fa5a44c5fb Update InContextTutor.tsx
-# + bf79d3f6fbbbdabbafcfe0a8cd2a35bb88a20026 Update LearningUnitShell.tsx
-# + 34272f208cfc16e5788f1e03f02fc1f76006cb27 Update in-context-tutor.test.tsx
-# + 2226b30ca11442b057c82149199bc8c324646546 Update pyproject.toml
-# + 4c025f63311bbf7b7b73c8eb133ec27881606376 Update app.py
 # + 887168eea021d7eeac866acb648c7227a0c519b1 Update start.sh
 # + dd266d5e152945435a4812a074c9573c90555358 Update uv.lock
 # + 715696b4588a39bfc69e37257a9e69fa5a44c5fb Update InContextTutor.tsx
