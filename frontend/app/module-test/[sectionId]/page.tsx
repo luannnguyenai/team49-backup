@@ -43,16 +43,16 @@ import MarkdownRenderer from "@/components/assessment/MarkdownRenderer";
 const OPTIONS: SelectedAnswer[] = ["A", "B", "C", "D"];
 
 const BLOOM_BADGE: Record<string, { label: string; cls: string }> = {
-  remember:   { label: "Remember",       cls: "bg-sky-100 text-sky-700" },
-  understand: { label: "Understand",      cls: "bg-violet-100 text-violet-700" },
-  apply:      { label: "Apply",   cls: "bg-amber-100 text-amber-700" },
-  analyze:    { label: "Analyze", cls: "bg-rose-100 text-rose-700" },
+  remember:   { label: "Remember",       cls: "bg-bloom-remember-soft text-bloom-remember" },
+  understand: { label: "Understand",      cls: "bg-bloom-understand-soft text-bloom-understand" },
+  apply:      { label: "Apply",   cls: "bg-bloom-apply-soft text-bloom-apply" },
+  analyze:    { label: "Analyze", cls: "bg-bloom-analyze-soft text-bloom-analyze" },
 };
 
 const DIFF_BADGE: Record<string, { label: string; cls: string }> = {
-  easy:   { label: "Easy",        cls: "bg-emerald-100 text-emerald-700" },
-  medium: { label: "Medium",cls: "bg-orange-100 text-orange-700" },
-  hard:   { label: "Hard",       cls: "bg-red-100 text-red-700" },
+  easy:   { label: "Easy",        cls: "bg-state-success-bg text-state-success-fg" },
+  medium: { label: "Medium", cls: "bg-state-warning-bg text-state-warning-fg" },
+  hard:   { label: "Hard",       cls: "bg-state-error-bg text-state-error-fg" },
 };
 
 // ---------------------------------------------------------------------------
@@ -111,9 +111,9 @@ function NavQBtn({
   if (active) {
     cls += "border-primary-500 bg-primary-500 text-white shadow-sm";
   } else if (flagged) {
-    cls += "border-yellow-400 bg-yellow-100 text-yellow-800";
+    cls += "border-state-warning-border bg-state-warning-bg text-state-warning-fg";
   } else if (answered) {
-    cls += "border-blue-400 bg-blue-100 text-blue-800";
+    cls += "border-state-success-border bg-state-success-bg text-state-success-fg";
   } else {
     cls += "border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400";
   }
@@ -155,7 +155,7 @@ function ConfirmDialog({
         style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
       >
           <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-state-warning-bg">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
           </div>
           <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
@@ -165,12 +165,12 @@ function ConfirmDialog({
 
         <div className="space-y-2 text-sm" style={{ color: "var(--text-secondary)" }}>
           {unansweredCount > 0 && (
-            <p className="rounded-lg bg-amber-50 px-3 py-2 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
+            <p className="state-warning rounded-lg px-3 py-2">
               ⚠️ <strong>{unansweredCount}</strong> questions are still unanswered.
             </p>
           )}
           {flaggedCount > 0 && (
-            <p className="rounded-lg bg-yellow-50 px-3 py-2 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
+            <p className="state-warning rounded-lg px-3 py-2">
               🚩 <strong>{flaggedCount}</strong> questions are still marked for review.
             </p>
           )}
@@ -403,10 +403,10 @@ export default function ModuleTestPage() {
       {/* Legend */}
       <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 text-xs" style={{ color: "var(--text-muted)" }}>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-blue-300" />Answered
+          <span className="inline-block h-3 w-3 rounded bg-state-success-fg" />Answered
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-yellow-300" />Flagged
+          <span className="inline-block h-3 w-3 rounded bg-state-warning-fg" />Flagged
         </span>
         <span className="flex items-center gap-1">
           <span className="inline-block h-3 w-3 rounded border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800" />Unanswered
@@ -562,7 +562,7 @@ export default function ModuleTestPage() {
 
           {/* Error banner */}
           {errorMsg && phase === "active" && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="state-error rounded-xl border px-4 py-3 text-sm">
               {errorMsg}
             </div>
           )}
@@ -608,8 +608,8 @@ export default function ModuleTestPage() {
                 className={[
                   "ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors",
                   isCurrentFlagged
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-slate-100 text-slate-500 hover:bg-yellow-50 hover:text-yellow-600 dark:bg-slate-800 dark:text-slate-400",
+                    ? "bg-state-warning-bg text-state-warning-fg"
+                    : "bg-surface-page text-text-muted hover:bg-state-warning-bg hover:text-state-warning-fg",
                 ].join(" ")}
               >
                 <Flag size={12} />
