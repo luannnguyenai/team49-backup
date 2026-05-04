@@ -303,13 +303,19 @@ async def _generate_canonical_learning_path(
     audit_repo = PlannerAuditRepository(db)
     goal_repo = GoalPreferenceRepository(db)
     goal = await goal_repo.get_by_user_id(user.id)
-    selected_course_ids = list(goal.selected_course_ids) if goal and goal.selected_course_ids else []
-    if not selected_course_ids:
-        selected_course_ids = [
-            str(course_id).strip()
-            for course_id in request.selected_course_ids
-            if str(course_id).strip()
-        ]
+    requested_course_ids = [
+        str(course_id).strip()
+        for course_id in request.selected_course_ids
+        if str(course_id).strip()
+    ]
+    if requested_course_ids:
+        selected_course_ids = requested_course_ids
+        goal = await goal_repo.upsert_for_user(
+            user.id,
+            selected_course_ids=selected_course_ids,
+        )
+    else:
+        selected_course_ids = list(goal.selected_course_ids) if goal and goal.selected_course_ids else []
     if not selected_course_ids:
         raise ValidationError(
             "Canonical planner requires selected_course_ids or goal_preferences.selected_course_ids."
