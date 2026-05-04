@@ -13,6 +13,7 @@ class ReplanUnitCandidate(BaseModel):
     path_order: int = Field(alias="pathOrder")
     question_counts: dict[str, int] = Field(alias="questionCounts")
     in_current_path: bool = Field(default=True, alias="inCurrentPath")
+    already_handled: bool = Field(default=False, alias="alreadyHandled")
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -59,6 +60,14 @@ class ReplanCurrentPathUnitDiscovery:
                     ReplanExcludedUnit(
                         canonical_unit_id=candidate.canonical_unit_id,
                         reason="No assessment questions available.",
+                    ),
+                )
+                continue
+            if candidate.already_handled:
+                result.dropped_units.append(
+                    ReplanExcludedUnit(
+                        canonical_unit_id=candidate.canonical_unit_id,
+                        reason="Unit is already mastered or skipped.",
                     ),
                 )
                 continue

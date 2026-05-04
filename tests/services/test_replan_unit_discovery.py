@@ -82,6 +82,27 @@ def test_current_path_discovery_drops_units_without_questions():
     assert result.dropped_units[0].reason == "No assessment questions available."
 
 
+def test_current_path_discovery_filters_already_handled_units_by_default():
+    discovery = ReplanCurrentPathUnitDiscovery()
+    candidates = [
+        ReplanUnitCandidate(
+            canonical_unit_id="unit_faster_rcnn",
+            title="Faster R-CNN",
+            summary="Two-stage object detection.",
+            key_points=[],
+            path_order=12,
+            question_counts={"easy": 3, "medium": 0, "hard": 0, "application": 0},
+            in_current_path=True,
+            already_handled=True,
+        ),
+    ]
+
+    result = discovery.discover(_plan(), candidates)
+
+    assert result.selected_units == []
+    assert result.dropped_units[0].reason == "Unit is already mastered or skipped."
+
+
 def _plan() -> ReplanKeywordPlan:
     return ReplanKeywordPlan(
         primaryKeywords=[

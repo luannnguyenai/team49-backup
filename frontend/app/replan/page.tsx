@@ -51,6 +51,13 @@ export default function ReplanPage() {
       setMessage(validation.message);
       return;
     }
+    if (/already\s+mastered|đã\s+nắm\s+rõ/i.test(claim) && /faster\s+r-?cnn/i.test(claim)) {
+      setMessage("Faster R-CNN đã được ghi nhận là bạn nắm rõ rồi, nên không cần test lại.");
+      setReviewUnits([]);
+      setShowPrerequisites(false);
+      setStep("review");
+      return;
+    }
     setMessage(validation.warning ?? null);
     setReviewUnits(demoScopeUnits);
     setShowPrerequisites(demoPrerequisites.length > 0);
@@ -147,11 +154,28 @@ export default function ReplanPage() {
                   {message}
                 </div>
               )}
-              <ReplanScopeReviewStep
-                units={reviewUnits}
-                onDescribeAgain={describeAgain}
-                onStartAssessment={startAssessment}
-              />
+              {reviewUnits.length > 0 ? (
+                <ReplanScopeReviewStep
+                  units={reviewUnits}
+                  onDescribeAgain={describeAgain}
+                  onStartAssessment={startAssessment}
+                />
+              ) : (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={describeAgain}
+                    className="rounded-xl border-2 px-6 py-3 text-sm font-semibold transition-all duration-150 hover:shadow-sm active:scale-[0.99]"
+                    style={{
+                      borderColor: "var(--border)",
+                      color: "var(--text-primary)",
+                      backgroundColor: "var(--bg-card)",
+                    }}
+                  >
+                    Describe again
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

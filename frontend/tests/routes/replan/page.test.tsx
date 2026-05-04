@@ -83,4 +83,16 @@ describe("replan page", () => {
     expect(screen.getByRole("checkbox", { name: "Include R-CNN" })).toBeChecked();
     expect(screen.getByText("Source: Suggested prerequisite for Faster R-CNN")).toBeInTheDocument();
   });
+
+  it("notifies when the claim only matches already handled units", () => {
+    render(<ReplanPage />);
+
+    fireEvent.change(screen.getByLabelText("Bạn đã biết phần nào rồi?"), {
+      target: { value: "I already mastered Faster R-CNN" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(screen.getByText(/Faster R-CNN đã được ghi nhận là bạn nắm rõ rồi/i)).toBeInTheDocument();
+    expect(screen.queryByText("Review verification scope")).not.toBeInTheDocument();
+  });
 });
