@@ -57,6 +57,12 @@ export default function ReplanPage() {
         return;
       }
 
+      if (response.guardrailFlags.includes("internal_error")) {
+        setAnalyzeError("Có lỗi xảy ra khi phân tích. Vui lòng thử lại sau.");
+        setIsAnalyzing(false);
+        return;
+      }
+
       // Map backend response to component types
       const mappedUnits: ReplanReviewUnit[] = response.units.map((u) => ({
         canonicalUnitId: u.canonicalUnitId,
