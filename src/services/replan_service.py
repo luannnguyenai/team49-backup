@@ -78,199 +78,199 @@ async def analyze_replan(
     try:
         # 1. Load the user's current learning path from planner audit
         path_items = await _load_current_path_items(db, user_id)
-    if not path_items:
-        return ReplanAnalyzeResponse(
-            units=[],
-            prerequisites=[],
-            keywordPlanSpecificity="specific",
-            guardrailFlags=["no_active_path"],
-        )
+        if not path_items:
+            return ReplanAnalyzeResponse(
+                units=[],
+                prerequisites=[],
+                keywordPlanSpecificity="specific",
+                guardrailFlags=["no_active_path"],
+            )
 
-    # 2. Build keyword plan
-    planner = ReplanKeywordPlanner()
-    keyword_plan = planner.plan(claim)
+        # 2. Build keyword plan
+        planner = ReplanKeywordPlanner()
+        keyword_plan = await planner.plan(claim)
 
-    # 3. Build unit candidates from real path data
-    canonical_unit_ids = [
+        # 3. Build unit candidates from real path data
+        canonical_unit_ids = [
         item["canonical_unit_id"]
         for item in path_items
         if item.get("canonical_unit_id")
     ]
 
-    content_repo = CanonicalContentRepository(db)
-    canonical_units = await content_repo.get_canonical_units_by_ids(canonical_unit_ids)
+        content_repo = CanonicalContentRepository(db)
+        canonical_units = await content_repo.get_canonical_units_by_ids(canonical_unit_ids)
 
-    # Get question counts by difficulty for each unit
-    question_counts_by_unit = await _get_question_counts_by_difficulty(
-        db, canonical_unit_ids
-    )
-
-    # Get handled state (placement decisions)
-    placement_repo = PlacementAssessmentRepository(db)
-    placement_results = await placement_repo.get_by_user_id(user_id)
-    handled_unit_ids = {
-        str(row.topic_unit_id)
-        for row in placement_results
-        if row.decision in ("skip",)
-    }
-
-    # Build learning_unit_id -> canonical_unit_id mapping
-    lu_by_canonical = {}
-    for item in path_items:
-        cuid = item.get("canonical_unit_id")
-        luid = item.get("learning_unit_id")
-        if cuid and luid:
-            lu_by_canonical[cuid] = luid
-
-    candidates: list[ReplanUnitCandidate] = []
-    for order_index, item in enumerate(path_items):
-        cuid = item.get("canonical_unit_id")
-        if not cuid:
-            continue
-        canonical_unit = canonical_units.get(cuid)
-        q_counts = question_counts_by_unit.get(cuid, {})
-        luid = item.get("learning_unit_id", "")
-
-        candidates.append(
-            ReplanUnitCandidate(
-                canonicalUnitId=cuid,
-                title=canonical_unit.unit_name if canonical_unit else cuid,
-                summary=canonical_unit.summary or "" if canonical_unit else "",
-                keyPoints=(
-                    list(canonical_unit.key_points)
-                    if canonical_unit and canonical_unit.key_points
-                    else []
-                ),
-                pathOrder=order_index,
-                questionCounts=q_counts,
-                inCurrentPath=True,
-                alreadyHandled=str(luid) in handled_unit_ids,
-            )
+        # Get question counts by difficulty for each unit
+        question_counts_by_unit = await _get_question_counts_by_difficulty(
+            db, canonical_unit_ids
         )
 
-    # 4. Unit discovery — match keywords against candidates
-    discovery = ReplanCurrentPathUnitDiscovery()
-    discovery_result = discovery.discover(keyword_plan, candidates)
+        # Get handled state (placement decisions)
+        placement_repo = PlacementAssessmentRepository(db)
+        placement_results = await placement_repo.get_by_user_id(user_id)
+        handled_unit_ids = {
+            str(row.topic_unit_id)
+            for row in placement_results
+            if row.decision in ("skip",)
+        }
 
-    # 5. Build selected units for question scope
-    selected_ids = [u.canonical_unit_id for u in discovery_result.selected_units]
-    candidate_by_id = {c.canonical_unit_id: c for c in candidates}
+        # Build learning_unit_id -> canonical_unit_id mapping
+        lu_by_canonical = {}
+        for item in path_items:
+            cuid = item.get("canonical_unit_id")
+            luid = item.get("learning_unit_id")
+            if cuid and luid:
+                lu_by_canonical[cuid] = luid
 
-    # 6. Get KP data for selected units
-    unit_kp_rows = await content_repo.get_unit_kp_rows(selected_ids)
-    unit_kp_map: dict[str, list[str]] = defaultdict(list)
-    for row in unit_kp_rows:
-        kp_name = row.kp_id  # We'll resolve names below
-        unit_kp_map[row.unit_id].append(kp_name)
+        candidates: list[ReplanUnitCandidate] = []
+        for order_index, item in enumerate(path_items):
+            cuid = item.get("canonical_unit_id")
+            if not cuid:
+                continue
+            canonical_unit = canonical_units.get(cuid)
+            q_counts = question_counts_by_unit.get(cuid, {})
+            luid = item.get("learning_unit_id", "")
 
-    # Resolve KP names
-    kp_ids = sorted({row.kp_id for row in unit_kp_rows})
-    kp_by_id = await content_repo.get_concepts_by_ids(kp_ids)
-    unit_kp_names_map: dict[str, list[str]] = {}
-    for uid, kp_id_list in unit_kp_map.items():
-        unit_kp_names_map[uid] = [
-            kp_by_id[kp_id].name
-            for kp_id in kp_id_list
-            if kp_id in kp_by_id and kp_by_id[kp_id].name
+            candidates.append(
+                ReplanUnitCandidate(
+                    canonicalUnitId=cuid,
+                    title=canonical_unit.unit_name if canonical_unit else cuid,
+                    summary=canonical_unit.summary or "" if canonical_unit else "",
+                    keyPoints=(
+                        list(canonical_unit.key_points)
+                        if canonical_unit and canonical_unit.key_points
+                        else []
+                    ),
+                    pathOrder=order_index,
+                    questionCounts=q_counts,
+                    inCurrentPath=True,
+                    alreadyHandled=str(luid) in handled_unit_ids,
+                )
+            )
+
+        # 4. Unit discovery — match keywords against candidates
+        discovery = ReplanCurrentPathUnitDiscovery()
+        discovery_result = discovery.discover(keyword_plan, candidates)
+
+        # 5. Build selected units for question scope
+        selected_ids = [u.canonical_unit_id for u in discovery_result.selected_units]
+        candidate_by_id = {c.canonical_unit_id: c for c in candidates}
+
+        # 6. Get KP data for selected units
+        unit_kp_rows = await content_repo.get_unit_kp_rows(selected_ids)
+        unit_kp_map: dict[str, list[str]] = defaultdict(list)
+        for row in unit_kp_rows:
+            kp_name = row.kp_id  # We'll resolve names below
+            unit_kp_map[row.unit_id].append(kp_name)
+
+        # Resolve KP names
+        kp_ids = sorted({row.kp_id for row in unit_kp_rows})
+        kp_by_id = await content_repo.get_concepts_by_ids(kp_ids)
+        unit_kp_names_map: dict[str, list[str]] = {}
+        for uid, kp_id_list in unit_kp_map.items():
+            unit_kp_names_map[uid] = [
+                kp_by_id[kp_id].name
+                for kp_id in kp_id_list
+                if kp_id in kp_by_id and kp_by_id[kp_id].name
+            ]
+
+        # 7. Build question metadata for scope builder
+        questions: list[ReplanQuestion] = []
+        for uid in selected_ids:
+            q_counts = question_counts_by_unit.get(uid, {})
+            kps = unit_kp_names_map.get(uid, [])
+            for difficulty, count in q_counts.items():
+                for _ in range(count):
+                    questions.append(
+                        ReplanQuestion(
+                            unitId=uid,
+                            difficulty=difficulty,
+                            knowledgePoints=kps[:3],  # Top 3 KPs per question
+                        )
+                    )
+
+        scope_builder = ReplanQuestionScopeBuilder()
+        scope_units_input = [
+            ReplanScopeUnit(
+                canonicalUnitId=uid,
+                title=candidate_by_id[uid].title if uid in candidate_by_id else uid,
+                source="matched_from_description",
+                keyPoints=candidate_by_id[uid].key_points if uid in candidate_by_id else [],
+            )
+            for uid in selected_ids
+        ]
+        review_scope = scope_builder.build(scope_units_input, questions, unit_kp_names_map)
+
+        # 8. Build response units
+        response_units: list[ReplanAnalyzeUnit] = [
+            ReplanAnalyzeUnit(
+                canonicalUnitId=scope_unit.canonical_unit_id,
+                title=scope_unit.title,
+                source=scope_unit.source,
+                suggestedForTitle=scope_unit.suggested_for_title,
+                knowledgePoints=scope_unit.knowledge_points,
+                questionCounts=scope_unit.question_counts,
+            )
+            for scope_unit in review_scope
         ]
 
-    # 7. Build question metadata for scope builder
-    questions: list[ReplanQuestion] = []
-    for uid in selected_ids:
-        q_counts = question_counts_by_unit.get(uid, {})
-        kps = unit_kp_names_map.get(uid, [])
-        for difficulty, count in q_counts.items():
-            for _ in range(count):
-                questions.append(
-                    ReplanQuestion(
-                        unitId=uid,
-                        difficulty=difficulty,
-                        knowledgePoints=kps[:3],  # Top 3 KPs per question
-                    )
-                )
+        # 9. Prerequisite suggestions
+        prereq_units_by_id: dict[str, ReplanPrerequisiteUnit] = {}
+        for c in candidates:
+            q_total = sum(c.question_counts.values())
+            prereq_units_by_id[c.canonical_unit_id] = ReplanPrerequisiteUnit(
+                canonicalUnitId=c.canonical_unit_id,
+                title=c.title,
+                pathOrder=c.path_order,
+                inCurrentPath=c.in_current_path,
+                alreadyHandled=c.already_handled,
+                questionCount=q_total,
+            )
 
-    scope_builder = ReplanQuestionScopeBuilder()
-    scope_units_input = [
-        ReplanScopeUnit(
-            canonicalUnitId=uid,
-            title=candidate_by_id[uid].title if uid in candidate_by_id else uid,
-            source="matched_from_description",
-            keyPoints=candidate_by_id[uid].key_points if uid in candidate_by_id else [],
-        )
-        for uid in selected_ids
-    ]
-    review_scope = scope_builder.build(scope_units_input, questions, unit_kp_names_map)
-
-    # 8. Build response units
-    response_units: list[ReplanAnalyzeUnit] = [
-        ReplanAnalyzeUnit(
-            canonicalUnitId=scope_unit.canonical_unit_id,
-            title=scope_unit.title,
-            source=scope_unit.source,
-            suggestedForTitle=scope_unit.suggested_for_title,
-            knowledgePoints=scope_unit.knowledge_points,
-            questionCounts=scope_unit.question_counts,
-        )
-        for scope_unit in review_scope
-    ]
-
-    # 9. Prerequisite suggestions
-    prereq_units_by_id: dict[str, ReplanPrerequisiteUnit] = {}
-    for c in candidates:
-        q_total = sum(c.question_counts.values())
-        prereq_units_by_id[c.canonical_unit_id] = ReplanPrerequisiteUnit(
-            canonicalUnitId=c.canonical_unit_id,
-            title=c.title,
-            pathOrder=c.path_order,
-            inCurrentPath=c.in_current_path,
-            alreadyHandled=c.already_handled,
-            questionCount=q_total,
+        # Build prerequisite edges from KP graph (unit-level)
+        unit_prereq_edges = await _build_unit_prerequisite_edges(
+            db, content_repo, canonical_unit_ids
         )
 
-    # Build prerequisite edges from KP graph (unit-level)
-    unit_prereq_edges = await _build_unit_prerequisite_edges(
-        db, content_repo, canonical_unit_ids
-    )
+        suggester = ReplanPrerequisiteSuggester(unit_prereq_edges)
+        suggestions = suggester.suggest(selected_ids, prereq_units_by_id)
 
-    suggester = ReplanPrerequisiteSuggester(unit_prereq_edges)
-    suggestions = suggester.suggest(selected_ids, prereq_units_by_id)
+        # Build prerequisite response with review units
+        prerequisite_responses: list[ReplanPrerequisiteSuggestionResponse] = []
+        for s in suggestions:
+            prereq_candidate = candidate_by_id.get(s.canonical_unit_id)
+            if not prereq_candidate:
+                continue
+            prereq_q_counts = question_counts_by_unit.get(s.canonical_unit_id, {})
+            prereq_kps = unit_kp_names_map.get(s.canonical_unit_id, [])
 
-    # Build prerequisite response with review units
-    prerequisite_responses: list[ReplanPrerequisiteSuggestionResponse] = []
-    for s in suggestions:
-        prereq_candidate = candidate_by_id.get(s.canonical_unit_id)
-        if not prereq_candidate:
-            continue
-        prereq_q_counts = question_counts_by_unit.get(s.canonical_unit_id, {})
-        prereq_kps = unit_kp_names_map.get(s.canonical_unit_id, [])
+            # Find the title of the unit this is a prerequisite for
+            suggested_for_candidate = candidate_by_id.get(
+                s.suggested_for_canonical_unit_id
+            )
+            suggested_for_title = (
+                suggested_for_candidate.title if suggested_for_candidate else None
+            )
 
-        # Find the title of the unit this is a prerequisite for
-        suggested_for_candidate = candidate_by_id.get(
-            s.suggested_for_canonical_unit_id
-        )
-        suggested_for_title = (
-            suggested_for_candidate.title if suggested_for_candidate else None
-        )
-
-        prerequisite_responses.append(
-            ReplanPrerequisiteSuggestionResponse(
-                canonicalUnitId=s.canonical_unit_id,
-                title=s.title,
-                reason=s.reason,
-                depth=s.depth,
-                reviewUnit=ReplanAnalyzeUnit(
+            prerequisite_responses.append(
+                ReplanPrerequisiteSuggestionResponse(
                     canonicalUnitId=s.canonical_unit_id,
                     title=s.title,
-                    source="suggested_prerequisite",
-                    suggestedForTitle=suggested_for_title,
-                    knowledgePoints=prereq_kps,
-                    questionCounts=prereq_q_counts,
-                ),
+                    reason=s.reason,
+                    depth=s.depth,
+                    reviewUnit=ReplanAnalyzeUnit(
+                        canonicalUnitId=s.canonical_unit_id,
+                        title=s.title,
+                        source="suggested_prerequisite",
+                        suggestedForTitle=suggested_for_title,
+                        knowledgePoints=prereq_kps,
+                        questionCounts=prereq_q_counts,
+                    ),
+                )
             )
-        )
 
-        return ReplanAnalyzeResponse(
-            units=response_units,
+            return ReplanAnalyzeResponse(
+                units=response_units,
             prerequisites=prerequisite_responses,
             keywordPlanSpecificity=keyword_plan.specificity,
             guardrailFlags=keyword_plan.guardrail_flags,

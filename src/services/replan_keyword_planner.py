@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import logging
+import os
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+log = logging.getLogger(__name__)
+
+# Environment toggle for LLM integration
+USE_LLM_FOR_REPLAN = os.getenv("USE_LLM_FOR_REPLAN", "true").lower() == "true"
 
 
 class ReplanKeyword(BaseModel):
@@ -34,7 +41,32 @@ class ReplanKeywordPlan(BaseModel):
 
 
 class ReplanKeywordPlanner:
-    def plan(self, claim: str) -> ReplanKeywordPlan:
+    """Keyword planner with LLM-based extraction or rule-based fallback."""
+
+    def __init__(self, use_llm: bool = USE_LLM_FOR_REPLAN):
+        self.use_llm = use_llm
+        self._llm_extractor = None
+
+    async def plan(self, claim: str) -> ReplanKeywordPlan:
+        """Plan keywords from a knowledge claim.
+
+        Uses LLM if enabled, otherwise falls back to rule-based extraction.
+        """
+        if self.use_llm:
+            return await self._plan_with_llm(claim)
+        return self._plan_rule_based(claim)
+
+    async def _plan_with_llm(self, claim: str) -> ReplanKeywordPlan:
+        """Use LLM for keyword extraction."""
+        if self._llm_extractor is None:
+            from src.services.replan_llm_extractor import get_llm_extractor
+
+            self._llm_extractor = get_llm_extractor()
+
+        return await self._llm_extractor.extract(claim)
+
+    def _plan_rule_based(self, claim: str) -> ReplanKeywordPlan:
+        """Rule-based keyword extraction (fallback)."""
         normalized = " ".join(claim.split())
         lower = normalized.lower()
         if "faster rcnn" in lower or "faster r-cnn" in lower:

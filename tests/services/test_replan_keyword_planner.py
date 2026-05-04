@@ -1,8 +1,12 @@
+import pytest
+
 from src.services.replan_keyword_planner import ReplanKeywordPlanner
 
 
-def test_faster_rcnn_keyword_plan_keeps_phrase_without_generic_expansion():
-    plan = ReplanKeywordPlanner().plan("Tôi biết Faster RCNN")
+@pytest.mark.asyncio
+async def test_faster_rcnn_keyword_plan_keeps_phrase_without_generic_expansion():
+    planner = ReplanKeywordPlanner(use_llm=False)  # Use rule-based for tests
+    plan = await planner.plan("Tôi biết Faster RCNN")
 
     assert "Faster R-CNN" in plan.search_queries
     assert "Faster RCNN" in plan.search_queries
@@ -11,15 +15,19 @@ def test_faster_rcnn_keyword_plan_keeps_phrase_without_generic_expansion():
     assert [keyword.text for keyword in plan.primary_keywords] == ["Faster R-CNN"]
 
 
-def test_yolo_uncertain_is_not_selected_as_known_keyword():
-    plan = ReplanKeywordPlanner().plan("Tôi biết Faster RCNN nhưng YOLO chưa chắc")
+@pytest.mark.asyncio
+async def test_yolo_uncertain_is_not_selected_as_known_keyword():
+    planner = ReplanKeywordPlanner(use_llm=False)
+    plan = await planner.plan("Tôi biết Faster RCNN nhưng YOLO chưa chắc")
 
     assert [keyword.text for keyword in plan.primary_keywords] == ["Faster R-CNN"]
     assert [keyword.text for keyword in plan.negative_or_uncertain_keywords] == ["YOLO"]
 
 
-def test_broad_claim_is_marked_broad_not_blocked():
-    plan = ReplanKeywordPlanner().plan("Tôi biết object detection cơ bản")
+@pytest.mark.asyncio
+async def test_broad_claim_is_marked_broad_not_blocked():
+    planner = ReplanKeywordPlanner(use_llm=False)
+    plan = await planner.plan("Tôi biết object detection cơ bản")
 
     assert plan.specificity == "broad"
     assert plan.guardrail_flags == []
