@@ -115,15 +115,15 @@ describe("agent page", () => {
   it("renders empty assistant state when there is no active conversation", async () => {
     render(<AgentPage />);
 
-    expect(await screen.findAllByRole("heading", { name: "AI Assistant" })).toHaveLength(2);
-    expect(screen.getByText(/ask about concepts, prerequisites/i)).toBeInTheDocument();
+    expect(await screen.findAllByRole("heading", { name: "AI Learning Copilot" })).toHaveLength(2);
+    expect(screen.getByText(/ask about prerequisites, weak areas/i)).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /where should i review cnns/i })).toHaveLength(2);
   });
 
   it("keeps the chat workspace focused without the context sidebar or header clear action", async () => {
     render(<AgentPage />);
 
-    expect(await screen.findAllByRole("heading", { name: "AI Assistant" })).toHaveLength(2);
+    expect(await screen.findAllByRole("heading", { name: "AI Learning Copilot" })).toHaveLength(2);
     expect(screen.queryByText(/thread memory/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/current path first/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/clear current chat/i)).not.toBeInTheDocument();
@@ -193,6 +193,53 @@ describe("agent page", () => {
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
   });
 
+  it("shows a compact expandable thinking progress indicator while the assistant responds", async () => {
+    let resolveChat!: (value: {
+      conversationId: string;
+      messageId: string;
+      answer: { markdown: string; confidence: "grounded" };
+      citations: never[];
+      actions: never[];
+      warning: null;
+    }) => void;
+    agentApiMock.chat.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveChat = resolve;
+      }),
+    );
+    render(<AgentPage />);
+
+    const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
+    fireEvent.click(promptButtons[0]);
+
+    const thinkingToggle = await screen.findByRole("button", { name: /ai is thinking/i });
+    expect(thinkingToggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("Routing learning intent")).not.toBeInTheDocument();
+
+    fireEvent.click(thinkingToggle);
+    expect(thinkingToggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Routing learning intent")).toBeInTheDocument();
+    expect(screen.getByText("Reading source evidence")).toBeInTheDocument();
+    expect(screen.getByText("Composing grounded answer")).toBeInTheDocument();
+
+    resolveChat({
+      conversationId: "conversation-1",
+      messageId: "message-thinking",
+      answer: {
+        markdown: "Here is the grounded answer.",
+        confidence: "grounded",
+      },
+      citations: [],
+      actions: [],
+      warning: null,
+    });
+
+    expect(await screen.findByText("Here is the grounded answer.")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: /ai is thinking/i })).not.toBeInTheDocument();
+    });
+  });
+
   it("opens source details from the citation card and hides duplicate open-unit actions", async () => {
     agentApiMock.chat.mockResolvedValueOnce({
       conversationId: "conversation-1",
@@ -236,7 +283,7 @@ describe("agent page", () => {
       expect(agentApiMock.unitContext).toHaveBeenCalledWith("unit-rf");
       expect(learningPathApiMock.getLearningPath).toHaveBeenCalled();
     });
-    expect(await screen.findAllByText("Source detail")).toHaveLength(2);
+    expect(await screen.findAllByText("Evidence")).toHaveLength(2);
     expect(screen.getByTestId("agent-source-sidebar")).toHaveClass("hidden", "md:block");
     expect(screen.getByTestId("agent-source-sidebar")).not.toHaveClass("fixed");
     expect(screen.getByTestId("agent-source-drawer")).toHaveClass("fixed", "md:hidden");
@@ -286,7 +333,7 @@ describe("agent page", () => {
     });
     render(<AgentPage />);
 
-    const input = await screen.findByPlaceholderText("Message AI Assistant...");
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
     fireEvent.change(input, { target: { value: "nền tảng CNN" } });
     fireEvent.click(screen.getByRole("button", { name: /send message/i }));
 
@@ -312,7 +359,7 @@ describe("agent page", () => {
       });
     render(<AgentPage />);
 
-    const input = await screen.findByPlaceholderText("Message AI Assistant...");
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
     fireEvent.change(input, { target: { value: "kiểm cho tôi thông tin về UNet" } });
     fireEvent.click(screen.getByRole("button", { name: /send message/i }));
 
@@ -366,7 +413,7 @@ describe("agent page", () => {
       });
     render(<AgentPage />);
 
-    const input = await screen.findByPlaceholderText("Message AI Assistant...");
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
     fireEvent.change(input, { target: { value: "thế còn CNN ứng dụng thì sao" } });
     fireEvent.click(screen.getByRole("button", { name: /send message/i }));
 
@@ -390,7 +437,7 @@ describe("agent page", () => {
     );
     render(<AgentPage />);
 
-    const input = await screen.findByPlaceholderText("Message AI Assistant...");
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
     fireEvent.change(input, { target: { value: "có thể tìm RCNN không" } });
     fireEvent.click(screen.getByRole("button", { name: /send message/i }));
 
