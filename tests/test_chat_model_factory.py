@@ -1,7 +1,9 @@
 import unittest
 from unittest.mock import patch
 
-from src.services.chat_model_factory import build_chat_model_kwargs
+import pytest
+
+from src.services.chat_model_factory import MissingModelCredentialError, build_chat_model_kwargs
 
 
 class ChatModelFactoryTests(unittest.TestCase):
@@ -20,6 +22,8 @@ class ChatModelFactoryTests(unittest.TestCase):
         self.assertEqual(kwargs["model_provider"], "openai")
         self.assertEqual(kwargs["api_key"], "openai-key")
         self.assertEqual(kwargs["max_tokens"], 1200)
+        self.assertEqual(kwargs["timeout"], 30)
+        self.assertEqual(kwargs["max_retries"], 1)
 
     def test_google_provider_uses_gemini_key(self):
         with patch(
@@ -37,16 +41,28 @@ class ChatModelFactoryTests(unittest.TestCase):
         self.assertEqual(kwargs["model_provider"], "google_genai")
         self.assertEqual(kwargs["api_key"], "gemini-key")
 
-    def test_missing_key_leaves_api_key_unset(self):
+    def test_missing_known_provider_key_raises(self):
         with patch("src.services.chat_model_factory.settings.model_provider", "openai"), patch(
             "src.services.chat_model_factory.settings.openai_api_key",
             "",
         ):
+            with pytest.raises(MissingModelCredentialError):
+                build_chat_model_kwargs(
+                    model="gpt-5.4-mini",
+                    temperature=0.2,
+                )
+
+    def test_unknown_provider_does_not_require_cloud_key(self):
+        with patch("src.services.chat_model_factory.settings.model_provider", "ollama"), patch(
+            "src.services.chat_model_factory.settings.openai_api_key",
+            "",
+        ):
             kwargs = build_chat_model_kwargs(
-                model="gpt-5.4-mini",
+                model="llama3.1",
                 temperature=0.2,
             )
 
+        self.assertEqual(kwargs["model_provider"], "ollama")
         self.assertNotIn("api_key", kwargs)
 
     def test_openai_provider_includes_reasoning_effort_when_configured(self):
@@ -55,7 +71,7 @@ class ChatModelFactoryTests(unittest.TestCase):
             "medium",
         ), patch(
             "src.services.chat_model_factory.settings.openai_api_key",
-            "",
+            "openai-key",
         ):
             kwargs = build_chat_model_kwargs(
                 model="gpt-5.4-mini",
@@ -70,7 +86,7 @@ class ChatModelFactoryTests(unittest.TestCase):
             "medium",
         ), patch(
             "src.services.chat_model_factory.settings.gemini_api_key",
-            "",
+            "gemini-key",
         ):
             kwargs = build_chat_model_kwargs(
                 model="gemini-3-flash-preview",
@@ -85,7 +101,7 @@ class ChatModelFactoryTests(unittest.TestCase):
             {"thinking_budget": 1024},
         ), patch(
             "src.services.chat_model_factory.settings.gemini_api_key",
-            "",
+            "gemini-key",
         ):
             kwargs = build_chat_model_kwargs(
                 model="gemini-3-flash-preview",

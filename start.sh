@@ -69,14 +69,44 @@ if [ ! -f ".env" ]; then
   exit 1
 fi
 
-# Kiểm tra GEMINI_API_KEY
-GEMINI_KEY=$(grep -E '^GEMINI_API_KEY=' .env | cut -d= -f2 | tr -d '"' | tr -d "'")
-if [ -z "$GEMINI_KEY" ] || [[ "$GEMINI_KEY" == AIza... ]] || [[ "$GEMINI_KEY" == sk-* ]]; then
-  log_error "GEMINI_API_KEY chưa được cấu hình trong .env"
-  log_error "Hãy điền giá trị thực: GEMINI_API_KEY=AIza..."
-  exit 1
-fi
-log_ok "GEMINI_API_KEY đã cấu hình"
+env_value() {
+  local key="$1"
+  grep -E "^${key}=" .env | head -n1 | cut -d= -f2- | tr -d '"' | tr -d "'"
+}
+
+MODEL_PROVIDER_VALUE=$(env_value MODEL_PROVIDER)
+MODEL_PROVIDER_VALUE=${MODEL_PROVIDER_VALUE:-google_genai}
+
+case "$MODEL_PROVIDER_VALUE" in
+  google_genai|google|gemini)
+    GEMINI_KEY=$(env_value GEMINI_API_KEY)
+    if [ -z "$GEMINI_KEY" ] || [[ "$GEMINI_KEY" == "your_gemini_api_key" ]] || [[ "$GEMINI_KEY" == AIza... ]] || [[ "$GEMINI_KEY" == sk-* ]]; then
+      log_error "MODEL_PROVIDER=${MODEL_PROVIDER_VALUE} nhưng GEMINI_API_KEY chưa được cấu hình trong .env"
+      log_error "Hãy điền giá trị thực: GEMINI_API_KEY=AIza..."
+      exit 1
+    fi
+    log_ok "GEMINI_API_KEY đã cấu hình cho MODEL_PROVIDER=${MODEL_PROVIDER_VALUE}"
+    ;;
+  openai)
+    OPENAI_KEY=$(env_value OPENAI_API_KEY)
+    if [ -z "$OPENAI_KEY" ] || [[ "$OPENAI_KEY" == "sk-..." ]] || [[ "$OPENAI_KEY" == "sk-proj-..." ]]; then
+      log_error "MODEL_PROVIDER=openai nhưng OPENAI_API_KEY chưa được cấu hình trong .env"
+      exit 1
+    fi
+    log_ok "OPENAI_API_KEY đã cấu hình cho MODEL_PROVIDER=openai"
+    ;;
+  anthropic)
+    ANTHROPIC_KEY=$(env_value ANTHROPIC_API_KEY)
+    if [ -z "$ANTHROPIC_KEY" ] || [[ "$ANTHROPIC_KEY" == "sk-ant-..." ]]; then
+      log_error "MODEL_PROVIDER=anthropic nhưng ANTHROPIC_API_KEY chưa được cấu hình trong .env"
+      exit 1
+    fi
+    log_ok "ANTHROPIC_API_KEY đã cấu hình cho MODEL_PROVIDER=anthropic"
+    ;;
+  *)
+    log_warn "MODEL_PROVIDER=${MODEL_PROVIDER_VALUE}; bỏ qua kiểm tra API key vì có thể là provider self-host/custom."
+    ;;
+esac
 
 # Kiểm tra data course assets
 for COURSE_ID in CS230 CS231n CS224n; do

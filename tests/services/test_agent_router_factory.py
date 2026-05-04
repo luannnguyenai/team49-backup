@@ -16,7 +16,9 @@ class FakeChatModel:
         return self
 
 
-def test_production_router_factory_builds_structured_router():
+def test_production_router_factory_builds_structured_router(monkeypatch):
+    monkeypatch.setattr("src.services.chat_model_factory.settings.openai_api_key", "openai-key")
+
     router = build_production_agent_router(
         app_settings=Settings(),
         init_model=lambda **kwargs: FakeChatModel(),
@@ -50,7 +52,9 @@ def test_production_router_factory_fails_safe_without_model():
         )
 
 
-def test_production_router_factory_does_not_return_deterministic_router_on_model_error():
+def test_production_router_factory_does_not_return_deterministic_router_on_model_error(monkeypatch):
+    monkeypatch.setattr("src.services.chat_model_factory.settings.openai_api_key", "openai-key")
+
     def fail_model(**kwargs):
         raise RuntimeError("provider unavailable")
 

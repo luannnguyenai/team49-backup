@@ -26,14 +26,14 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(default="", description="OpenAI API key")
     gemini_api_key: str = Field(default="", description="Google Gemini API key")
     default_model: str = Field(
-        default="gpt-5.4-mini",
+        default="gemini-2.0-flash",
         description="Default LLM model",
     )
     fast_model: str = Field(
-        default="gpt-5.4-nano",
+        default="gemini-2.0-flash",
         description="Fast model for minor tasks",
     )
-    model_provider: str = Field(default ="openai", description="LLM provider")
+    model_provider: str = Field(default="google_genai", description="LLM provider")
     model_reasoning_effort: Literal["off", "low", "medium", "high", "xhigh"] = Field(
         default="medium",
         description="Optional reasoning effort for providers that support it.",
@@ -41,6 +41,16 @@ class Settings(BaseSettings):
     model_extra_kwargs: dict[str, Any] = Field(
         default_factory=dict,
         description="Provider-specific chat model kwargs, parsed from JSON.",
+    )
+    llm_request_timeout_seconds: int = Field(
+        default=30,
+        ge=1,
+        description="Per-provider LLM request timeout in seconds.",
+    )
+    llm_max_retries: int = Field(
+        default=1,
+        ge=0,
+        description="Maximum provider retry attempts for LLM requests.",
     )
     gemini_requests_per_minute: int = Field(
         default=15,
