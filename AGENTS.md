@@ -62,12 +62,7 @@ If you are an AI coding agent (Claude Code, Cursor, Copilot, Codex, Gemini, etc.
 ## Recent Changes
 - 001-course-first-refactor: Added Python 3.12 backend, TypeScript 5 frontend + FastAPI, SQLAlchemy, Pydantic, Next.js 14 App Router, React 18, Zustand, Axios
 
-<!-- gitnexus:start -->
-# GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **A20-App-049** (8381 symbols, 13390 relationships, 277 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
-
-> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
 ## Always Do
 
@@ -102,6 +97,6 @@ This project is indexed by GitNexus as **A20-App-049** (8381 symbols, 13390 rela
 | Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+
 
 <!-- gitnexus:end -->
