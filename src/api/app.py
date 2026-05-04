@@ -295,7 +295,14 @@ async def ask_question(req: AskRequest, db: AsyncSession = Depends(get_async_db)
             image_base64=req.image_base64,
             context_binding_id=req.context_binding_id,
         )
-        return StreamingResponse(generator, media_type="text/event-stream")
+        return StreamingResponse(
+            generator,
+            media_type="application/x-ndjson",
+            headers={
+                "Cache-Control": "no-cache, no-transform",
+                "X-Accel-Buffering": "no",
+            },
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -337,6 +344,22 @@ async def rate_answer(qa_id: int, req: RateRequest, db: AsyncSession = Depends(g
     if not qa:
         raise HTTPException(status_code=404, detail="QA entry not found")
     qa.rating = req.rating
+
+    # Forward as LangFuse score (best-effort, fail-safe). Phase 16.
+    try:
+        from src.core.observability import get_langfuse_handler
+
+        handler = get_langfuse_handler()
+        client = getattr(handler, "client", None) if handler is not None else None
+        if client is not None and hasattr(client, "score"):
+            client.score(
+                name="user_thumb",
+                value=float(req.rating),
+                comment=f"qa_id={qa_id}",
+            )
+    except Exception:
+        pass
+
     return {"status": "ok", "qa_id": qa_id, "rating": req.rating}
 
 
