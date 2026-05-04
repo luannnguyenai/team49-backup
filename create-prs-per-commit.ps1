@@ -4,29 +4,6 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ 53e68f094f334bef540aaa8e3ccd1093b31cac63 Update page.tsx
-+ 29cf9a529ba4bd76cb86c0a541dac59e4f7fd5e9 Update page.tsx
-+ cfff12b1ff03fc2c0d41e4f6f2fafca183c44705 Update page.tsx
-+ b669b914fc7e9819c529d2698702396b0842fcea Update page.tsx
-+ 0f5b47121d0d7fd51df2b7959a1208433637af20 Update KpiCard.tsx
-+ 8fb4c906f285a95f94caa785414a8429233717cf Update InContextTutor.tsx
-+ 5f9c3ecf26223793aba821fc142a6b0cfc0d75b2 Update admin-api.ts
-+ 1b1330252830282c1b9303af504122cb8fcf1445 Update tutorSessionHistory.ts
-+ 94238aa86376aa139c9a1fea983feeb16ae96966 Create llm.test.tsx
-+ cba31f1a0f28c2e9143fb929589dda3f6ad187ce Update unit.test.tsx
-+ f337bd5e4007bccbfd022a1b938f7e1025d74f58 Update in-context-tutor.test.tsx
-+ 1e4e54896b298b023237e907d56f46b3868e19e8 Update app.py
-+ 9e94e275e7a9f2a0625d97ee2dfce2af37ffa742 Update observability.py
-+ 0cbfb6708567120e3340d4a5a26fa7c70b63121b Update admin.py
-+ 39d0f3c652c8be1cbdcfd296c164dd830c71c37f Update llm_service.py
-+ e5d29482dec8803f6bf9272c4a6303086440c326 Create test_admin_routes.py
-+ 32368fd451d35bd95602e0c13af77dac0a74ff7e Update test_lecture_routes.py
-+ 0121980a35cf5de9bff7be4abc016729433a7587 Create test_tutor_observability.py
-"@
-
-
-
-
 # + 41d2b12cf426f765aa1f6fee041c501a84a386d5 Update plan.md
 # + 81b3ab77b005ab2a4c627d84aa830bd9913194c9 Update page.tsx
 # + 674d539468ff09c21055fc32c3a5a9231192e3df update .env
@@ -38,6 +15,12 @@ $commitLines = @"
 # + 9fc4f91b55bcea378b3c62615cb463fe48bc2604 Update .env.production.example
 # + 02a0bbcb3aaa3e770c26b70a9fbcfa487b4f6e5b Update docker-compose.yml
 # + 89522913fff452a3236e885a61b4728893da2204 Create 2026-05-03-langfuse-tracing-hardening.md
+"@
+
+
+
+
+
 # + bdb31e696eadc809a2e2e849bc14b54dc9a4e5b6 Update .env.example
 # + 7ec3ed2e3a972c507aa093785b074ffc67b18436 Create page.tsx
 # + 44d528fd48093a6749d0094cfa4087e4fa204244 Update page.tsx
