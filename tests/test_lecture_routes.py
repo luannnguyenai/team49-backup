@@ -90,6 +90,9 @@ class LectureRouteTests(unittest.IsolatedAsyncioTestCase):
             image_base64=None,
             context_binding_id="ctx_unit_lecture_01",
         )
+        self.assertEqual(response.headers["content-type"], "application/x-ndjson")
+        self.assertEqual(response.headers["cache-control"], "no-cache, no-transform")
+        self.assertEqual(response.headers["x-accel-buffering"], "no")
 
 
 if __name__ == "__main__":
