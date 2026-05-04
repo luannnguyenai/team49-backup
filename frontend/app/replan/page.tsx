@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Brain, Loader2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Brain, Loader2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import ReplanKnowledgeClaimStep from "@/components/replan/ReplanKnowledgeClaimStep";
@@ -167,6 +167,17 @@ export default function ReplanPage() {
       </div>
 
       <div className="relative mx-auto w-full max-w-2xl">
+        {/* Back button */}
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="mb-4 flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary-600"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Quay lại
+        </button>
+
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-600 shadow-lg shadow-primary-600/30">
             <Brain className="h-6 w-6 text-white" />
