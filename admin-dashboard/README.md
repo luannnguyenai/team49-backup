@@ -88,10 +88,20 @@ python admin-dashboard/scripts/seed_admin.py --list
    LANGFUSE_PUBLIC_KEY=pk-lf-...
    LANGFUSE_SECRET_KEY=sk-lf-...
    LANGFUSE_BASE_URL=https://cloud.langfuse.com
+   NEXT_PUBLIC_LANGFUSE_HOST=https://cloud.langfuse.com
    ```
 3. Restart backend.
 4. Trigger any LLM endpoint — trace appears in LangFuse.
    _LangFuse is fail-safe: leaving keys blank disables tracing without breaking calls._
+
+Notes:
+
+- `LANGFUSE_BASE_URL` is the preferred backend variable from current LangFuse docs.
+- `LANGFUSE_HOST` remains accepted in this repo only as a backward-compatible alias.
+- `NEXT_PUBLIC_LANGFUSE_HOST` is only for the admin UI link/open action.
+- Root traces currently exist for tutor requests, onboarding prior-analysis, and assessment AI summary generation.
+- Tutor thumbs-up/down feedback is forwarded to LangFuse as score name `user_thumb` when the stored QA row has a linked trace ID.
+- LangFuse Cloud does not allow third-party iframe embedding (`X-Frame-Options: SAMEORIGIN`, `frame-ancestors 'none'`), so the admin UI opens it in a new tab instead of rendering an inline embed.
 
 ## 4. Start the observability stack
 
@@ -227,10 +237,14 @@ App stack (`db`, `redis`, `backend`, `frontend`) và observability stack chạy 
 | Grafana iframe blank in `/admin/traffic`         | Open `http://localhost:3001` once and accept the anonymous viewer cookie. |
 | `/admin` redirects you to `/tutor`               | Your account is `role=user`. Run `seed_admin.py --email <e>`.             |
 | Postgres datasource health "ERROR" in Grafana    | Ensure `al_db` exposes 5433 on host (already true in `docker-compose.yml`). |
-| LangFuse traces never appear                     | Check backend logs for "LangFuse v3 callback handler initialised". Verify `LANGFUSE_*` env vars.|
+| LangFuse traces never appear                     | Check backend logs for `LangFuse callback handler initialised` or `LangFuse v2 callback handler initialised`. Verify `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL`, then restart backend and hit a traced LLM endpoint. |
 | `logs/access.jsonl` empty                        | The middleware skips `/health` and `/metrics`. Hit any other endpoint.    |
 
-## 11. Out of scope (future work)
+## 11. LangFuse skill note
+
+The `github.com/langfuse/skills` repository is an agent-side coding aid for tools like Codex or Claude Code. This app does not require that skill at runtime. The runtime integration in this repo is implemented directly in Python via the LangFuse SDK and LangChain callback handler.
+
+## 12. Out of scope (future work)
 
 - Production deploy (Railway env, secrets, public URLs).
 - Alertmanager / PagerDuty / Slack alerting.
