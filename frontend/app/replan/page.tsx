@@ -12,15 +12,8 @@ import ReplanScopeReviewStep, {
 } from "@/components/replan/ReplanScopeReviewStep";
 import { writeReplanAssessmentContext } from "@/lib/replan-assessment-context";
 import { validateReplanKnowledgeClaim } from "@/lib/replan-claim-guardrails";
-import {
-  replanApi,
-  type ReplanAnalyzeResponse,
-  type ReplanPrerequisiteSuggestion,
-} from "@/lib/replan-api";
-import {
-  writeStartedCanonicalAssessment,
-  writePendingCanonicalAssessment,
-} from "@/lib/canonical-assessment-session";
+import { replanApi, type ReplanAnalyzeResponse } from "@/lib/replan-api";
+import { writePendingCanonicalAssessment } from "@/lib/canonical-assessment-session";
 
 export default function ReplanPage() {
   const router = useRouter();
@@ -35,7 +28,7 @@ export default function ReplanPage() {
 
   // Store backend prerequisites for the dialog
   const [backendPrerequisites, setBackendPrerequisites] = useState<
-    (ReplanPrerequisiteSuggestion & { reviewUnit: ReplanReviewUnit })[]
+    (PrerequisiteSuggestion & { reviewUnit: ReplanReviewUnit })[]
   >([]);
   // Store the first matched unit title for the prerequisite dialog
   const [targetTitle, setTargetTitle] = useState("");
@@ -75,7 +68,7 @@ export default function ReplanPage() {
       }));
 
       // Map prerequisites with their review units
-      const mappedPrereqs = response.prerequisites.map((p) => ({
+      const mappedPrereqs: (PrerequisiteSuggestion & { reviewUnit: ReplanReviewUnit })[] = response.prerequisites.map((p) => ({
         canonicalUnitId: p.canonicalUnitId,
         title: p.title,
         reason: p.reason,
