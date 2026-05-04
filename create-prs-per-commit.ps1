@@ -4,39 +4,29 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ 41d2b12cf426f765aa1f6fee041c501a84a386d5 Update plan.md
-+ 81b3ab77b005ab2a4c627d84aa830bd9913194c9 Update page.tsx
-+ 674d539468ff09c21055fc32c3a5a9231192e3df update .env
-+ 6ced11c8435a9c728438239d1828e1bf41b8f1fa update uv
-+ 5c3799a83b94e71d756a4ab771bdfdf54935e1f9 langfuse env
-+ fe7976dea9743d0699e6c149e07deff5eac35c58 setup langfuse success
-+ ede5cedbabc931c050b5010b4cf5a8bcf9df6379 Update README.md
-+ a659558044115ca603cf4f597ae48fba19675ccc Create 20260503_add_langfuse_trace_fields.py
-+ 9fc4f91b55bcea378b3c62615cb463fe48bc2604 Update .env.production.example
-+ 02a0bbcb3aaa3e770c26b70a9fbcfa487b4f6e5b Update docker-compose.yml
-+ 89522913fff452a3236e885a61b4728893da2204 Create 2026-05-03-langfuse-tracing-hardening.md
++ bdb31e696eadc809a2e2e849bc14b54dc9a4e5b6 Update .env.example
++ 7ec3ed2e3a972c507aa093785b074ffc67b18436 Create page.tsx
++ 44d528fd48093a6749d0094cfa4087e4fa204244 Update page.tsx
++ 8b4ea4e953a5cd2cdd158ae1379bcc63516b000c Update page.tsx
++ c7ea89bda7e2b738f29407bc5dd487f33cc574c3 Update page.tsx
++ 8c266bfbdb0b457c8871adfc2a2a349085cb286d Update page.tsx
++ cd79a9e62437da71ec1c787f002536f65e2e1b44 Update AdminSidebar.tsx
++ 766434eda3c624f35b76f0ee96e6181c1596e8b6 update langfuse
++ b0e0faef5f337fb9f5a6a3507c5946dc818c5fd8 Create PLATFORM_ANALYSIS.md
++ e757025a56f51de0fb2f7ffb743c0d875e0c653e Create admin_test_accounts.csv
++ 49bc55c9edde6a8fe975a4b9c346d4552ec76afd Create create_seed_accounts.py
++ a88dc38b26d61bbf47e504c712b41f9853012be7 Create current-state.md
++ da9ec3022ab0c185710ff825388f22029b177102 Create create_seed_accounts.py
++ 907bc0302a494e87fb9db5f7079c083ca05d444a update plan reset password
++ b62d0d2331866ab47f39ab58e381578944599aac Create Eval-Resume-Adapters.ipynb
++ ceb8f354fdeb4a3bd4b46800bb9b40ef60e83e83 learning path improvement ux
 "@
 
 
 
 
 
-# + bdb31e696eadc809a2e2e849bc14b54dc9a4e5b6 Update .env.example
-# + 7ec3ed2e3a972c507aa093785b074ffc67b18436 Create page.tsx
-# + 44d528fd48093a6749d0094cfa4087e4fa204244 Update page.tsx
-# + 8b4ea4e953a5cd2cdd158ae1379bcc63516b000c Update page.tsx
-# + c7ea89bda7e2b738f29407bc5dd487f33cc574c3 Update page.tsx
-# + 8c266bfbdb0b457c8871adfc2a2a349085cb286d Update page.tsx
-# + cd79a9e62437da71ec1c787f002536f65e2e1b44 Update AdminSidebar.tsx
-# + 766434eda3c624f35b76f0ee96e6181c1596e8b6 update langfuse
-# + b0e0faef5f337fb9f5a6a3507c5946dc818c5fd8 Create PLATFORM_ANALYSIS.md
-# + e757025a56f51de0fb2f7ffb743c0d875e0c653e Create admin_test_accounts.csv
-# + 49bc55c9edde6a8fe975a4b9c346d4552ec76afd Create create_seed_accounts.py
-# + a88dc38b26d61bbf47e504c712b41f9853012be7 Create current-state.md
-# + da9ec3022ab0c185710ff825388f22029b177102 Create create_seed_accounts.py
-# + 907bc0302a494e87fb9db5f7079c083ca05d444a update plan reset password
-# + b62d0d2331866ab47f39ab58e381578944599aac Create Eval-Resume-Adapters.ipynb
-# + ceb8f354fdeb4a3bd4b46800bb9b40ef60e83e83 learning path improvement ux
+
 
 function Save-Progress {
   param(
