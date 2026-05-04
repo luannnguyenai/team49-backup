@@ -57,6 +57,34 @@ export type LlmStats = {
   errors: number;
   calls_per_hour: { hour: string; count: number }[];
   top_users: { user_id: string; count: number }[];
+  tutor_latency_per_hour: {
+    hour: string;
+    first_status_p50_ms: number | null;
+    first_status_p95_ms: number | null;
+    first_answer_p50_ms: number | null;
+    first_answer_p95_ms: number | null;
+    sample_count: number | null;
+  }[];
+};
+
+export type FeedbackTrendPoint = { date: string; positive: number; negative: number };
+
+export type FeedbackStats = {
+  total_ratings: number;
+  positive: number;
+  negative: number;
+  positive_ratio: number | null;
+  unrated_24h: number;
+  trend: FeedbackTrendPoint[];
+};
+
+export type NegativeFeedbackRow = {
+  id: number;
+  lecture_id: string;
+  question: string;
+  answer: string;
+  context_binding_id: string | null;
+  created_at: string | null;
 };
 
 export const adminApi = {
@@ -75,4 +103,10 @@ export const adminApi = {
     api.get<LlmStats>("/api/admin/llm/stats", { params: { hours } }).then((r) => r.data),
   systemHealth: () => api.get<SystemHealth>("/api/admin/system/health").then((r) => r.data),
   trafficSummary: () => api.get<TrafficSummary>("/api/admin/traffic/summary").then((r) => r.data),
+  feedbackStats: (days = 14) =>
+    api.get<FeedbackStats>("/api/admin/feedback/stats", { params: { days } }).then((r) => r.data),
+  feedbackNegative: (limit = 20) =>
+    api
+      .get<NegativeFeedbackRow[]>("/api/admin/feedback/recent-negative", { params: { limit } })
+      .then((r) => r.data),
 };
