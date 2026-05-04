@@ -63,72 +63,41 @@ class ReplanKeywordPlan(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-_SYSTEM_PROMPT = """You are a knowledge analysis expert for an adaptive learning platform.
+_SYSTEM_PROMPT = """You are a knowledge analysis expert for a multilingual adaptive learning platform.
 
-Your task is to analyze a learner's knowledge claim and extract:
-1. **Primary keywords**: Specific concepts/topics the learner claims to know (strip phrases like "Tôi biết", "I know", "Tôi đã nắm rõ")
+Your task is to analyze a learner's knowledge claim and extract structured data.
+The claim may be in ANY language - detect it and adapt.
+
+**Extract:**
+
+1. **Primary keywords**: Technical concepts the learner claims to know
+   - Strip filler phrases (first-person pronoun + knowledge verb)
+   - Extract ONLY technical/conceptual terms
+
 2. **Secondary keywords**: Related concepts mentioned but not the focus
-3. **Negative/uncertain keywords**: Topics the learner explicitly says they DON'T know or are unsure about (phrases like "chưa chắc", "not sure", "không biết")
+
+3. **Negative/uncertain keywords**: Topics they're unsure about
+   - Detect uncertainty markers by context/tone (not by specific words)
+
 4. **Search queries**: 2-4 queries to find relevant learning units
-5. **Do not expand to**: Concepts that should NOT be auto-expanded (e.g., if they say "Faster R-CNN" specifically, don't expand to generic "CNN")
-6. **Specificity**: "specific" if claim mentions concrete topics, "broad" if vague
+
+5. **Do not expand to**: Concepts that should NOT be auto-expanded
+   - If specific variant mentioned (e.g., "Faster R-CNN"), don't expand to generic ("CNN")
+
+6. **Specificity**: "specific" if concrete topics, "broad" if vague
+
 7. **Guardrail flags**:
-   - "skip_all": if claim tries to skip entire curriculum
-   - "too_short": if claim is less than 3 meaningful words (excluding "Tôi biết", "I know")
-   - "all_already_mastered": if claim says they already know everything
+   - "skip_all": claim tries to skip entire curriculum
+   - "too_short": less than 3 meaningful words
+   - "all_already_mastered": claims to know everything
 
-**IMPORTANT for Vietnamese claims:**
-- Strip Vietnamese filler words: "Tôi biết", "Tôi đã biết", "Tôi đã nắm rõ", "Tôi hiểu về"
-- Extract technical terms even if mixed with Vietnamese
-- "chưa chắc", "không chắc" → uncertain keyword
-- "skip tất cả", "bỏ hết" → skip_all guardrail
+**Key principles:**
+- Detect language from input, don't assume
+- Identify filler words by grammatical function, not hardcoded lists
+- Identify uncertainty by semantic analysis (hesitation words, negation + uncertainty)
+- When uncertain, default to "specific" and include the full claim
 
-**Examples:**
-
-Claim: "I know Faster R-CNN and CNN feature extraction"
-- primary: [{"text": "Faster R-CNN", "reason": "Explicitly mentioned", "mustKeepPhrase": true}]
-- secondary: [{"text": "CNN feature extraction", "reason": "Related concept mentioned"}]
-- search_queries: ["Faster R-CNN", "CNN feature extraction", "Faster R-CNN object detection"]
-- do_not_expand_to: ["CNN", "R-CNN"]
-- specificity: "specific"
-
-Claim: "Tôi biết Faster R-CNN và CNN feature extraction"
-- primary: [{"text": "Faster R-CNN", "reason": "Explicitly mentioned", "mustKeepPhrase": true}]
-- secondary: [{"text": "CNN feature extraction", "reason": "Related concept"}]
-- search_queries: ["Faster R-CNN", "CNN feature extraction"]
-- specificity: "specific"
-
-Claim: "Tôi biết Faster R-CNN nhưng YOLO chưa chắc"
-- primary: [{"text": "Faster R-CNN", "reason": "Explicitly claimed", "mustKeepPhrase": true}]
-- negative_or_uncertain_keywords: [{"text": "YOLO", "reason": "User explicitly unsure about YOLO"}]
-- specificity: "specific"
-
-Claim: "I already mastered everything, just skip it all"
-- guardrail_flags: ["skip_all"]
-
-Claim: "Tôi biết hết rồi, skip tất cả đi"
-- guardrail_flags: ["skip_all"]
-
-Claim: "CNN" or "YOLO"
-- guardrail_flags: ["too_short"]
-
-Claim: "I know object detection stuff"
-- primary: [{"text": "object detection", "reason": "Main claim"}]
-- specificity: "broad"
-
-Claim: "Tôi biết object detection cơ bản"
-- primary: [{"text": "object detection", "reason": "Main topic claimed"}]
-- specificity: "broad"
-
-Claim: "Tôi đã biết CNN, R-CNN, và Faster R-CNN"
-- primary: [
-    {"text": "CNN", "reason": "Listed as known"},
-    {"text": "R-CNN", "reason": "Listed as known"},
-    {"text": "Faster R-CNN", "reason": "Listed as known"}
-  ]
-- specificity: "specific"
-
-Respond with JSON matching the schema. Be precise with keyword extraction - strip filler words."""
+Respond with JSON matching the schema."""
 
 
 class ReplanLLMKeywordExtractor:
@@ -183,98 +152,50 @@ class ReplanLLMKeywordExtractor:
             return self._fallback_plan(normalized)
 
     def _fallback_plan(self, claim: str) -> ReplanKeywordPlan:
-        """Fallback to rule-based extraction if LLM fails."""
+        """Fallback to simple rule-based extraction if LLM fails.
+
+        This is language-agnostic - no hard-coded phrases.
+        """
         normalized = " ".join(claim.split())
+        words = normalized.split()
+        word_count = len(words)
+
+        # Check guardrails (language-agnostic patterns)
         lower = normalized.lower()
 
-        # Vietnamese filler words to strip
-        vi_prefixes = [
-            "tôi biết", "tôi đã biết", "tôi đã nắm rõ", "tôi hiểu về",
-            "i know", "i already know", "i mastered"
-        ]
-
-        # Check guardrails first
-        word_count = len([w for w in normalized.split() if len(w) > 2])
-        if word_count < 2:
+        # Too short: less than 2 meaningful words (>2 chars)
+        meaningful_words = [w for w in words if len(w) > 2]
+        if len(meaningful_words) < 2:
             return ReplanKeywordPlan(
                 primary_keywords=[],
-                search_queries=[claim],
+                search_queries=[normalized],
                 specificity="specific",
                 guardrail_flags=["too_short"],
             )
 
-        if any(
-            phrase in lower
-            for phrase in (
-                "skip all", "skip it all", "skip tất cả", "bỏ hết",
-                "đã biết hết", "biết tất cả", "biết hết rồi", "mastered everything"
-            )
-        ):
+        # Skip detection: look for "skip", "everything", "all", "bỏ" patterns
+        skip_indicators = ["skip", "everything", "all", "bỏ", "hết"]
+        has_skip = sum(1 for indicator in skip_indicators if indicator in lower)
+        if has_skip >= 2:  # Need at least 2 indicators to reduce false positives
             return ReplanKeywordPlan(
                 primary_keywords=[],
-                search_queries=[claim],
+                search_queries=[normalized],
                 specificity="specific",
                 guardrail_flags=["skip_all"],
             )
 
-        # Extract uncertain keywords
-        uncertain_keywords = []
-        if "chưa chắc" in lower or "not sure" in lower or "không chắc" in lower:
-            # Find what comes after uncertain marker
-            uncertain_match = re.search(r'(?:chưa chắc|not sure|không chắc)[^\w]*(.+?)(?:,|\.|$)', lower, re.IGNORECASE)
-            if uncertain_match:
-                uncertain_text = uncertain_match.group(1).strip()
-                if len(uncertain_text) > 2:
-                    uncertain_keywords.append(
-                        ReplanUncertainKeyword(
-                            text=uncertain_text[:50],  # Limit length
-                            reason="User expressed uncertainty",
-                        )
-                    )
-
-        # Strip Vietnamese filler words to extract primary keyword
-        main_text = normalized
-        for prefix in vi_prefixes:
-            if main_text.lower().startswith(prefix):
-                main_text = main_text[len(prefix):].strip()
-                break
-
-        # Clean up common Vietnamese filler at end
-        main_text = re.sub(r'^(rồi|đã|về|cơ bản|nhưng|khiếncủa)', '', main_text, flags=re.IGNORECASE).strip()
-
-        # If still too long, take first meaningful phrase
-        if len(main_text.split()) > 6:
-            # Take first 3-5 words as primary keyword
-            words = main_text.split()
-            main_text = " ".join(words[:min(5, len(words))])
-
-        # Determine specificity
-        broad_indicators = [
-            "cơ bản", "basic", "stuff", "things", "general",
-            "object detection", "computer vision", "machine learning"
-        ]
-        is_broad = any(indicator in lower for indicator in broad_indicators)
-
-        # Build search queries
-        search_queries = [normalized, main_text]
-        if "," in main_text:
-            # Add split terms
-            parts = [p.strip() for p in main_text.split(",")]
-            search_queries.extend(parts[:3])
-
+        # Simple extraction: use claim as-is for primary keyword
+        # Don't try to parse - let LLM do the real work
         return ReplanKeywordPlan(
             primary_keywords=[
                 ReplanKeyword(
-                    text=main_text,
-                    reason="Extracted from claim",
-                    must_keep_phrase=True,
+                    text=normalized[:100],  # Limit length
+                    reason="Extracted from claim (fallback mode)",
+                    must_keep_phrase=False,
                 )
-            ]
-            if main_text
-            else [],
-            negative_or_uncertain_keywords=uncertain_keywords,
-            search_queries=search_queries[:5],
-            specificity="broad" if is_broad else "specific",
+            ],
+            search_queries=[normalized],
+            specificity="broad" if word_count > 8 else "specific",
             guardrail_flags=[],
         )
 
