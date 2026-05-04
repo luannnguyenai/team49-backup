@@ -749,6 +749,10 @@ function ActionButton({
     );
   }
 
+  if (action.type === "request_replan") {
+    return <Link href="/replan?source=agent&returnTo=%2Fagent">{content}</Link>;
+  }
+
   if (!href || disabled) return <button type="button">{content}</button>;
   return <Link href={href}>{content}</Link>;
 }

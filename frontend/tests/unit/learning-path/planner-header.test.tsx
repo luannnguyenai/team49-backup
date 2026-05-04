@@ -39,4 +39,25 @@ describe("PlannerHeader", () => {
       }),
     );
   });
+
+  it("links to replan from learning path controls", () => {
+    const profile = createLearningProfileForPath("computer_vision", {
+      weeklyHours: 5,
+      source: "manual",
+    });
+
+    render(
+      <PlannerHeader
+        profile={profile}
+        summary={{ total_units: 12, completed_units: 2, in_progress_units: 1 }}
+        view="graph"
+        onViewChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "Optimize plan" })).toHaveAttribute(
+      "href",
+      "/replan?source=learn&returnTo=%2Flearn",
+    );
+  });
 });

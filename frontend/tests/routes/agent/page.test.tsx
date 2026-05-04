@@ -446,6 +446,38 @@ describe("agent page", () => {
     expect(await screen.findByText("I recalculated your learning plan from the latest assessment evidence.")).toBeInTheDocument();
   });
 
+  it("links replan requests to the dedicated scope builder instead of continuing a chat wizard", async () => {
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-replan",
+      answer: {
+        markdown: "I can help you optimize your plan by verifying what you already know.",
+        confidence: "partial",
+      },
+      citations: [],
+      actions: [
+        {
+          type: "request_replan",
+          label: "Optimize plan",
+        },
+        {
+          type: "request_path_switch",
+          label: "Change path",
+          learn_href: "/learn",
+        },
+      ],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
+    fireEvent.click(promptButtons[0]);
+
+    const optimizePlan = await screen.findByRole("link", { name: /optimize plan/i });
+    expect(optimizePlan).toHaveAttribute("href", "/replan?source=agent&returnTo=%2Fagent");
+    expect(screen.queryByRole("button", { name: /optimize plan/i })).not.toBeInTheDocument();
+  });
+
   it("chooses a target path card through the active conversation", async () => {
     agentApiMock.chat
       .mockResolvedValueOnce({

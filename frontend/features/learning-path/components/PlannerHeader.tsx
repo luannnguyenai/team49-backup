@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { LearningPathResponse } from "@/types";
 import {
   createLearningProfileForPath,
@@ -110,7 +111,16 @@ export default function PlannerHeader({
           </p>
         ) : null}
       </div>
-      <ViewToggle view={view} onChange={onViewChange} />
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          href="/replan?source=learn&returnTo=%2Flearn"
+          className="rounded-xl border px-4 py-2 text-sm font-semibold text-primary-600 transition hover:bg-primary-50 dark:hover:bg-primary-950/30"
+          style={{ borderColor: "var(--border)" }}
+        >
+          Optimize plan
+        </Link>
+        <ViewToggle view={view} onChange={onViewChange} />
+      </div>
     </div>
   );
 }
