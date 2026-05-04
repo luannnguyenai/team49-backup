@@ -18,20 +18,20 @@ export function getOptionStyle(opts: {
 
   if (isFeedback && isCorrect) {
     return {
-      borderColor: "#22c55e", // green-500
-      background:  "#f0fdf4", // green-50
-      textColor:   "#15803d", // green-700
-      badgeBg:     "#22c55e",
+      borderColor: "var(--state-success-border)",
+      background:  "var(--state-success-bg)",
+      textColor:   "var(--state-success-fg)",
+      badgeBg:     "var(--state-success-fg)",
       badgeColor:  "white",
     };
   }
 
   if (isFeedback && isWrong) {
     return {
-      borderColor: "#ef4444", // red-500
-      background:  "#fef2f2", // red-50
-      textColor:   "#b91c1c", // red-700
-      badgeBg:     "#ef4444",
+      borderColor: "var(--state-error-border)",
+      background:  "var(--state-error-bg)",
+      textColor:   "var(--state-error-fg)",
+      badgeBg:     "var(--state-error-fg)",
       badgeColor:  "white",
     };
   }
