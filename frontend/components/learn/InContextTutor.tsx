@@ -6,7 +6,22 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { Send, X, ThumbsUp, ThumbsDown, Loader2, Check } from "lucide-react";
+import {
+  Send,
+  X,
+  ThumbsUp,
+  ThumbsDown,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  BookOpenText,
+  Search,
+  Brain,
+  Calculator,
+  RefreshCw,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import {
   buildTutorConversationKey,
@@ -45,10 +60,78 @@ function waitForNextPaint(): Promise<void> {
   });
 }
 
+function getTutorAskUrl(): string {
+  if (typeof window === "undefined") {
+    return "/api/lectures/ask";
+  }
+
+  const configuredApiBase = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (!configuredApiBase) {
+    return "/api/lectures/ask";
+  }
+
+  try {
+    const normalizedBase = configuredApiBase.endsWith("/")
+      ? configuredApiBase
+      : `${configuredApiBase}/`;
+    const directUrl = new URL("api/lectures/ask", normalizedBase);
+
+    if (directUrl.origin === window.location.origin) {
+      return directUrl.pathname;
+    }
+
+    return directUrl.toString();
+  } catch {
+    return "/api/lectures/ask";
+  }
+}
+
 const MIN_STATUS_VISIBLE_MS = 450;
 
+const LEGACY_STATUS_LABELS: Record<string, string> = {
+  "Đang đọc ngữ cảnh bài giảng...": "Reading lecture context...",
+  "Đang tìm phần nội dung liên quan...": "Finding the most relevant section...",
+  "Đang suy nghĩ câu trả lời...": "Thinking through the answer...",
+  "Đang kiểm tra phép tính...": "Checking the calculation...",
+  "Đang thử lại phép tính...": "Retrying the calculation...",
+  "Đang hoàn thiện câu trả lời...": "Finalizing the answer...",
+};
+
+function normalizeTutorStatusLabel(status: string): string {
+  const trimmed = status.trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  return LEGACY_STATUS_LABELS[trimmed] ?? trimmed;
+}
+
+function getStatusStepMeta(status: string): {
+  icon: LucideIcon;
+  accentClassName: string;
+} {
+  const normalizedStatus = normalizeTutorStatusLabel(status);
+
+  switch (normalizedStatus) {
+    case "Reading lecture context...":
+      return { icon: BookOpenText, accentClassName: "text-sky-500" };
+    case "Finding the most relevant section...":
+      return { icon: Search, accentClassName: "text-indigo-500" };
+    case "Thinking through the answer...":
+      return { icon: Brain, accentClassName: "text-fuchsia-500" };
+    case "Checking the calculation...":
+      return { icon: Calculator, accentClassName: "text-emerald-500" };
+    case "Retrying the calculation...":
+      return { icon: RefreshCw, accentClassName: "text-amber-500" };
+    case "Finalizing the answer...":
+      return { icon: Sparkles, accentClassName: "text-rose-500" };
+    default:
+      return { icon: Sparkles, accentClassName: "text-blue-500" };
+  }
+}
+
 function appendStatusStep(steps: string[] | undefined, nextStatus: string): string[] {
-  const normalizedStatus = nextStatus.trim();
+  const normalizedStatus = normalizeTutorStatusLabel(nextStatus);
   if (!normalizedStatus) {
     return steps ?? [];
   }
@@ -63,6 +146,18 @@ function appendStatusStep(steps: string[] | undefined, nextStatus: string): stri
   }
 
   return [...previousSteps, normalizedStatus];
+}
+
+function getDisplayStatusSteps(message: ChatMessage): string[] {
+  if (message.statusSteps?.length) {
+    return message.statusSteps.map(normalizeTutorStatusLabel);
+  }
+
+  if (message.statusText) {
+    return [normalizeTutorStatusLabel(message.statusText)];
+  }
+
+  return [];
 }
 
 interface InContextTutorProps {
@@ -91,6 +186,7 @@ export default function InContextTutor({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [expandedStepMessageIds, setExpandedStepMessageIds] = useState<Record<string, boolean>>({});
   const userFullName = useAuthStore((state) => state.user?.full_name?.trim() || "You");
   const resolvedLessonKey = lessonKey?.trim() || lectureId.trim();
   const conversationKey = resolvedLessonKey
@@ -114,7 +210,8 @@ export default function InContextTutor({
 
     const persistedMessages: StoredTutorMessage[] = messages
       .filter((message) => !message.isPending)
-      .map(({ id, role, content, senderName, sentAt, rating }) => ({
+      .map(({ id, role, content, senderName, sentAt, rating, statusSteps }) => ({
+        statusSteps: role === "ai" ? statusSteps ?? [] : [],
         id,
         role,
         content,
@@ -139,7 +236,7 @@ export default function InContextTutor({
       localId: nextMessageId(),
       isPending: false,
       statusText: null,
-      statusSteps: [],
+      statusSteps: message.statusSteps ?? [],
     }));
 
     loadedConversationKeyRef.current = conversationKey;
@@ -197,7 +294,7 @@ export default function InContextTutor({
     const aiIdx = messages.length + 1;
 
     try {
-      const resp = await fetch("/api/lectures/ask", {
+      const resp = await fetch(getTutorAskUrl(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -287,7 +384,7 @@ export default function InContextTutor({
                   i === aiIdx
                     ? {
                         ...m,
-                        isPending: !fullText,
+                        isPending: true,
                         statusText: String(data.status),
                         statusSteps: appendStatusStep(m.statusSteps, String(data.status)),
                       }
@@ -315,9 +412,7 @@ export default function InContextTutor({
                     ? {
                         ...m,
                         content: fullText,
-                        isPending: false,
-                        statusText: null,
-                        statusSteps: [],
+                        isPending: true,
                       }
                     : m,
                 ),
@@ -361,7 +456,7 @@ export default function InContextTutor({
                       i === aiIdx
                         ? {
                             ...m,
-                            isPending: !fullText,
+                            isPending: true,
                             statusText: String(data.status),
                             statusSteps: appendStatusStep(m.statusSteps, String(data.status)),
                           }
@@ -389,9 +484,7 @@ export default function InContextTutor({
                         ? {
                             ...m,
                             content: fullText,
-                            isPending: false,
-                            statusText: null,
-                            statusSteps: [],
+                            isPending: true,
                           }
                         : m,
                     ),
@@ -407,7 +500,28 @@ export default function InContextTutor({
 
       if (qaId) {
         setMessages((prev) =>
-          prev.map((m, i) => (i === aiIdx ? { ...m, id: qaId } : m)),
+          prev.map((m, i) =>
+            i === aiIdx
+              ? {
+                  ...m,
+                  id: qaId,
+                  isPending: false,
+                  statusText: null,
+                }
+              : m,
+          ),
+        );
+      } else {
+        setMessages((prev) =>
+          prev.map((m, i) =>
+            i === aiIdx
+              ? {
+                  ...m,
+                  isPending: false,
+                  statusText: null,
+                }
+              : m,
+          ),
         );
       }
     } catch (err: unknown) {
@@ -426,6 +540,13 @@ export default function InContextTutor({
   }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId]);
 
   const hasMessages = messages.length > 0;
+
+  const toggleStepVisibility = useCallback((localId: string) => {
+    setExpandedStepMessageIds((prev) => ({
+      ...prev,
+      [localId]: !prev[localId],
+    }));
+  }, []);
 
   return (
     <div className="flex flex-col h-full">
@@ -496,6 +617,14 @@ export default function InContextTutor({
             key={msg.localId}
             className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
           >
+            {(() => {
+              const displayStatusSteps = getDisplayStatusSteps(msg);
+              const hasStepHistory = displayStatusSteps.length > 0;
+              const isStepListExpanded = Boolean(expandedStepMessageIds[msg.localId]);
+              const latestStep = hasStepHistory ? displayStatusSteps[displayStatusSteps.length - 1] : null;
+
+              return (
+                <>
             <div
               className={`mb-1 flex items-center gap-2 px-1 text-[11px] font-medium ${
                 msg.role === "user" ? "justify-end text-slate-400" : "justify-start text-slate-500"
@@ -524,15 +653,67 @@ export default function InContextTutor({
               }
             >
               {msg.role === "ai" ? (
-                msg.isPending ? (
-                  <div
-                    aria-live="polite"
-                    className="space-y-2 italic"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    {(msg.statusSteps?.length ? msg.statusSteps : msg.statusText ? [msg.statusText] : []).map(
-                      (step, stepIdx, allSteps) => {
-                        const isCurrentStep = stepIdx === allSteps.length - 1;
+                <>
+                  {(msg.isPending || hasStepHistory) ? (
+                    <div
+                      aria-live="polite"
+                      className="mb-3 space-y-2"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      {latestStep ? (
+                        <div className="rounded-xl border px-3 py-2" style={{ borderColor: "var(--border)" }}>
+                          <div className="flex items-start gap-2 italic">
+                            {(() => {
+                              const { icon: StepIcon, accentClassName } = getStatusStepMeta(latestStep);
+                              return msg.isPending ? (
+                                <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center ${accentClassName}`}>
+                                  <StepIcon className="h-4 w-4" />
+                                </span>
+                              ) : (
+                                <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center ${accentClassName}`}>
+                                  <StepIcon className="h-4 w-4" />
+                                </span>
+                              );
+                            })()}
+                            <span>{latestStep}</span>
+                          </div>
+                          {hasStepHistory ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleStepVisibility(msg.localId)}
+                              className="mt-2 inline-flex items-center gap-1 text-xs font-medium transition-colors hover:text-blue-600"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              {isStepListExpanded ? (
+                                <>
+                                  <ChevronUp className="h-3.5 w-3.5" />
+                                  Hide progress
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                  View progress
+                                </>
+                              )}
+                            </button>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+                          <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+
+                  {hasStepHistory && isStepListExpanded ? (
+                    <div
+                      className="mb-3 space-y-2 rounded-xl border px-3 py-3 italic"
+                      style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+                    >
+                      {displayStatusSteps.map((step, stepIdx) => {
+                        const isCurrentStep = msg.isPending && stepIdx === displayStatusSteps.length - 1;
+                        const { icon: StepIcon, accentClassName } = getStatusStepMeta(step);
 
                         return (
                           <div
@@ -542,22 +723,30 @@ export default function InContextTutor({
                               color: isCurrentStep ? "var(--text-secondary)" : "var(--text-muted)",
                             }}
                           >
-                            {isCurrentStep ? (
-                              <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin" />
-                            ) : (
-                              <Check className="mt-0.5 h-4 w-4 shrink-0" />
-                            )}
+                            <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center ${accentClassName}`}>
+                              {isCurrentStep ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <StepIcon className="h-4 w-4" />
+                              )}
+                            </span>
                             <span>{step}</span>
                           </div>
                         );
-                      },
-                    )}
-                  </div>
-                ) : (
-                  <div aria-live="polite" className="prose prose-sm prose-slate max-w-none">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
-                )
+                      })}
+                    </div>
+                  ) : null}
+
+                  {msg.content ? (
+                    <div aria-live="polite" className="prose prose-sm prose-slate max-w-none">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : msg.isPending ? null : (
+                    <div aria-live="polite" className="prose prose-sm prose-slate max-w-none">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  )}
+                </>
               ) : (
                 msg.content
               )}
@@ -593,6 +782,9 @@ export default function InContextTutor({
                 </div>
               )}
             </div>
+                </>
+              );
+            })()}
           </div>
         ))}
         <div ref={chatEndRef} />
