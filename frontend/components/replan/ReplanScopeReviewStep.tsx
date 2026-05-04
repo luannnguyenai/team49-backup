@@ -20,7 +20,7 @@ export interface ReplanReviewUnit {
 
 interface Props {
   units: ReplanReviewUnit[];
-  onStartAssessment: () => void;
+  onStartAssessment: (selectedUnits: ReplanReviewUnit[]) => void;
   onDescribeAgain: () => void;
 }
 
@@ -66,6 +66,10 @@ export default function ReplanScopeReviewStep({
         return total + countForFilter(unit, filters[unit.canonicalUnitId] ?? "all");
       }, 0),
     [filters, selectedUnitIds, units],
+  );
+  const selectedUnits = useMemo(
+    () => units.filter((unit) => selectedUnitIds.has(unit.canonicalUnitId)),
+    [selectedUnitIds, units],
   );
   const estimatedMinutes = Math.ceil((selectedQuestions * 10) / 60);
 
@@ -181,7 +185,7 @@ export default function ReplanScopeReviewStep({
         </button>
         <button
           type="button"
-          onClick={onStartAssessment}
+          onClick={() => onStartAssessment(selectedUnits)}
           className="ml-auto rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99]"
         >
           Start assessment

@@ -54,7 +54,7 @@ describe("ReplanScopeReviewStep", () => {
     expect(screen.getByText("Estimated time: ~2 minutes")).toBeInTheDocument();
   });
 
-  it("calls navigation handlers", () => {
+  it("calls navigation handlers with the selected units", () => {
     const onStartAssessment = vi.fn();
     const onDescribeAgain = vi.fn();
 
@@ -67,9 +67,10 @@ describe("ReplanScopeReviewStep", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Describe again" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Include R-CNN" }));
     fireEvent.click(screen.getByRole("button", { name: "Start assessment" }));
 
     expect(onDescribeAgain).toHaveBeenCalledOnce();
-    expect(onStartAssessment).toHaveBeenCalledOnce();
+    expect(onStartAssessment).toHaveBeenCalledWith([units[0]]);
   });
 });

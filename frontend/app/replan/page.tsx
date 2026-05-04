@@ -2,12 +2,27 @@
 
 import { useState } from "react";
 import { Brain } from "lucide-react";
+import { useRouter } from "next/navigation";
 
+import ReplanScopeReviewStep, { type ReplanReviewUnit } from "@/components/replan/ReplanScopeReviewStep";
+import { buildReplanAssessmentHref, writeReplanAssessmentContext } from "@/lib/replan-assessment-context";
 import { validateReplanKnowledgeClaim } from "@/lib/replan-claim-guardrails";
 
+const demoScopeUnits: ReplanReviewUnit[] = [
+  {
+    canonicalUnitId: "unit_faster_rcnn",
+    title: "Faster R-CNN",
+    source: "matched_from_description",
+    knowledgePoints: ["Region Proposal Network", "Anchor boxes", "Two-stage detection", "RoI pooling / feature extraction"],
+    questionCounts: { easy: 3, medium: 4, hard: 2, application: 1 },
+  },
+];
+
 export default function ReplanPage() {
+  const router = useRouter();
   const [claim, setClaim] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [step, setStep] = useState<"describe" | "review">("describe");
 
   function continueToAnalysis() {
     const validation = validateReplanKnowledgeClaim(claim);
@@ -16,6 +31,21 @@ export default function ReplanPage() {
       return;
     }
     setMessage(validation.warning ?? null);
+    setStep("review");
+  }
+
+  function describeAgain() {
+    setStep("describe");
+  }
+
+  function startAssessment(selectedUnits: ReplanReviewUnit[]) {
+    writeReplanAssessmentContext({
+      units: selectedUnits.map((unit) => ({
+        canonicalUnitId: unit.canonicalUnitId,
+        title: unit.title,
+      })),
+    });
+    router.push(buildReplanAssessmentHref());
   }
 
   return (
@@ -44,69 +74,86 @@ export default function ReplanPage() {
           <div className="mb-2 flex items-center justify-between">
             <div>
               <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                Describe
+                {step === "describe" ? "Describe" : "Review"}
               </span>
               <span className="ml-2 text-xs" style={{ color: "var(--text-muted)" }}>
-                · Knowledge claim
+                {step === "describe" ? "· Knowledge claim" : "· Verification scope"}
               </span>
             </div>
             <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-              1 / 3
+              {step === "describe" ? "1 / 3" : "3 / 3"}
             </span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-            <div className="h-full w-1/3 rounded-full bg-primary-600 transition-all duration-500 ease-out" />
+            <div className={`h-full rounded-full bg-primary-600 transition-all duration-500 ease-out ${step === "describe" ? "w-1/3" : "w-full"}`} />
           </div>
         </div>
 
         <div className="card space-y-5">
-          <div>
-            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-              Bạn đã biết phần nào rồi?
-            </p>
-            <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-              Mô tả cụ thể những phần bạn đã nắm để hệ thống tạo bài kiểm tra xác nhận. Mô tả này không tự động bỏ qua bài học. Kết quả assessment mới được dùng để cập nhật lộ trình.
-            </p>
-          </div>
+          {step === "describe" ? (
+            <>
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  Bạn đã biết phần nào rồi?
+                </p>
+                <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                  Mô tả cụ thể những phần bạn đã nắm để hệ thống tạo bài kiểm tra xác nhận. Mô tả này không tự động bỏ qua bài học. Kết quả assessment mới được dùng để cập nhật lộ trình.
+                </p>
+              </div>
 
-          {message && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
-              {message}
-            </div>
+              {message && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
+                  {message}
+                </div>
+              )}
+
+              <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)" }}>
+                <label
+                  htmlFor="replan-knowledge-claim"
+                  className="text-sm font-semibold"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Bạn đã biết phần nào rồi?
+                </label>
+                <textarea
+                  id="replan-knowledge-claim"
+                  aria-label="Bạn đã biết phần nào rồi?"
+                  value={claim}
+                  onChange={(event) => setClaim(event.target.value)}
+                  className="mt-3 min-h-28 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-primary-500"
+                  style={{
+                    borderColor: "var(--border)",
+                    backgroundColor: "var(--bg-card)",
+                    color: "var(--text-primary)",
+                  }}
+                  placeholder={"Ví dụ:\n- Tôi đã nắm CNN, convolution, pooling.\n- Tôi biết Faster R-CNN nhưng chưa chắc YOLO.\n- Tôi hiểu object detection cơ bản, muốn kiểm tra để bỏ bớt phần nền tảng."}
+                />
+              </div>
+
+              <div className="flex items-center justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={continueToAnalysis}
+                  className="rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99]"
+                >
+                  Continue
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {message && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
+                  {message}
+                </div>
+              )}
+              <ReplanScopeReviewStep
+                units={demoScopeUnits}
+                onDescribeAgain={describeAgain}
+                onStartAssessment={startAssessment}
+              />
+            </>
           )}
-
-          <div className="rounded-xl border p-4" style={{ borderColor: "var(--border)" }}>
-            <label
-              htmlFor="replan-knowledge-claim"
-              className="text-sm font-semibold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Bạn đã biết phần nào rồi?
-            </label>
-            <textarea
-              id="replan-knowledge-claim"
-              aria-label="Bạn đã biết phần nào rồi?"
-              value={claim}
-              onChange={(event) => setClaim(event.target.value)}
-              className="mt-3 min-h-28 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-primary-500"
-              style={{
-                borderColor: "var(--border)",
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-primary)",
-              }}
-              placeholder={"Ví dụ:\n- Tôi đã nắm CNN, convolution, pooling.\n- Tôi biết Faster R-CNN nhưng chưa chắc YOLO.\n- Tôi hiểu object detection cơ bản, muốn kiểm tra để bỏ bớt phần nền tảng."}
-            />
-          </div>
-
-          <div className="flex items-center justify-end pt-2">
-            <button
-              type="button"
-              onClick={continueToAnalysis}
-              className="rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99]"
-            >
-              Continue
-            </button>
-          </div>
         </div>
       </div>
     </div>
