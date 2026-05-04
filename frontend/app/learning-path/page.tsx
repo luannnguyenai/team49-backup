@@ -45,12 +45,12 @@ const STATUS_BADGE: Record<UnitStatus, { label: string; className: string }> = {
   in_progress: {
     label: "In progress",
     className:
-      "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+      "bg-surface-accent-soft text-primary-700 dark:text-primary-300",
   },
   completed: {
     label: "Completed",
     className:
-      "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+      "bg-state-success-bg text-state-success-fg",
   },
 };
 
@@ -108,8 +108,7 @@ function UnitCard({ item }: { item: PathItem }) {
       {!item.is_locked && (
         <Link
           href={`/learn/${item.learning_unit_id}`}
-          className="shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "var(--primary-600, #2563eb)" }}
+          className="btn-primary shrink-0 px-3 py-1.5 text-xs"
         >
           <Play className="h-3 w-3" />
           Start learning
@@ -186,7 +185,7 @@ export default function LearningPathPage() {
                 <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
                   Phase A: Review
                 </h2>
-                <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                <span className="rounded-full bg-state-warning-bg px-2.5 py-0.5 text-xs font-semibold text-state-warning-fg">
                   {phaseAItems.length} units
                 </span>
               </div>
@@ -204,7 +203,7 @@ export default function LearningPathPage() {
                 <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
                   Phase B: New learning
                 </h2>
-                <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                <span className="rounded-full bg-surface-accent-soft px-2.5 py-0.5 text-xs font-semibold text-primary-700 dark:text-primary-300">
                   {phaseBItems.length} units
                 </span>
                 {phaseBLocked && (
