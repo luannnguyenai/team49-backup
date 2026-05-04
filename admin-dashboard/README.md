@@ -87,7 +87,7 @@ python admin-dashboard/scripts/seed_admin.py --list
    ```env
    LANGFUSE_PUBLIC_KEY=pk-lf-...
    LANGFUSE_SECRET_KEY=sk-lf-...
-   LANGFUSE_HOST=https://cloud.langfuse.com
+   LANGFUSE_BASE_URL=https://cloud.langfuse.com
    ```
 3. Restart backend.
 4. Trigger any LLM endpoint — trace appears in LangFuse.

@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git -C /d/VSCODE/VINAI/A20-App-049 log --oneline)",
-      "Bash(python *)"
+      "Bash(python *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\VSCODE\\\\VINAI\\\\A20-App-049\")",
+      "Bash(Select-Object -Property Name, PSIsContainer)"
     ]
   },
   "disabledMcpjsonServers": [
