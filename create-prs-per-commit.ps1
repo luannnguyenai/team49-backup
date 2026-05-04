@@ -4,17 +4,17 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-# + 41d2b12cf426f765aa1f6fee041c501a84a386d5 Update plan.md
-# + 81b3ab77b005ab2a4c627d84aa830bd9913194c9 Update page.tsx
-# + 674d539468ff09c21055fc32c3a5a9231192e3df update .env
-# + 6ced11c8435a9c728438239d1828e1bf41b8f1fa update uv
-# + 5c3799a83b94e71d756a4ab771bdfdf54935e1f9 langfuse env
-# + fe7976dea9743d0699e6c149e07deff5eac35c58 setup langfuse success
-# + ede5cedbabc931c050b5010b4cf5a8bcf9df6379 Update README.md
-# + a659558044115ca603cf4f597ae48fba19675ccc Create 20260503_add_langfuse_trace_fields.py
-# + 9fc4f91b55bcea378b3c62615cb463fe48bc2604 Update .env.production.example
-# + 02a0bbcb3aaa3e770c26b70a9fbcfa487b4f6e5b Update docker-compose.yml
-# + 89522913fff452a3236e885a61b4728893da2204 Create 2026-05-03-langfuse-tracing-hardening.md
++ 41d2b12cf426f765aa1f6fee041c501a84a386d5 Update plan.md
++ 81b3ab77b005ab2a4c627d84aa830bd9913194c9 Update page.tsx
++ 674d539468ff09c21055fc32c3a5a9231192e3df update .env
++ 6ced11c8435a9c728438239d1828e1bf41b8f1fa update uv
++ 5c3799a83b94e71d756a4ab771bdfdf54935e1f9 langfuse env
++ fe7976dea9743d0699e6c149e07deff5eac35c58 setup langfuse success
++ ede5cedbabc931c050b5010b4cf5a8bcf9df6379 Update README.md
++ a659558044115ca603cf4f597ae48fba19675ccc Create 20260503_add_langfuse_trace_fields.py
++ 9fc4f91b55bcea378b3c62615cb463fe48bc2604 Update .env.production.example
++ 02a0bbcb3aaa3e770c26b70a9fbcfa487b4f6e5b Update docker-compose.yml
++ 89522913fff452a3236e885a61b4728893da2204 Create 2026-05-03-langfuse-tracing-hardening.md
 "@
 
 
