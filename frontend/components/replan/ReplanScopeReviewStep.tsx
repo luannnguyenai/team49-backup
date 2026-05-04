@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type DifficultyFilter = "easy" | "easy_medium" | "easy_medium_hard" | "all";
 
@@ -58,6 +58,16 @@ export default function ReplanScopeReviewStep({
       return acc;
     }, {}),
   );
+
+  useEffect(() => {
+    setSelectedUnitIds(new Set(units.map((unit) => unit.canonicalUnitId)));
+    setFilters(
+      units.reduce<Record<string, DifficultyFilter>>((acc, unit) => {
+        acc[unit.canonicalUnitId] = "all";
+        return acc;
+      }, {}),
+    );
+  }, [units]);
 
   const selectedQuestions = useMemo(
     () =>

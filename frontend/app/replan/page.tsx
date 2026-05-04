@@ -5,6 +5,7 @@ import { Brain } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import ReplanKnowledgeClaimStep from "@/components/replan/ReplanKnowledgeClaimStep";
+import PrerequisiteSuggestionDialog, { type PrerequisiteSuggestion } from "@/components/replan/PrerequisiteSuggestionDialog";
 import ReplanScopeReviewStep, { type ReplanReviewUnit } from "@/components/replan/ReplanScopeReviewStep";
 import { buildReplanAssessmentHref, writeReplanAssessmentContext } from "@/lib/replan-assessment-context";
 import { validateReplanKnowledgeClaim } from "@/lib/replan-claim-guardrails";
@@ -19,11 +20,30 @@ const demoScopeUnits: ReplanReviewUnit[] = [
   },
 ];
 
+const demoPrerequisites: (PrerequisiteSuggestion & { reviewUnit: ReplanReviewUnit })[] = [
+  {
+    canonicalUnitId: "unit_rcnn",
+    title: "R-CNN",
+    reason: "R-CNN is a foundation for Faster R-CNN in the current path.",
+    depth: 1,
+    reviewUnit: {
+      canonicalUnitId: "unit_rcnn",
+      title: "R-CNN",
+      source: "suggested_prerequisite",
+      suggestedForTitle: "Faster R-CNN",
+      knowledgePoints: ["Region proposals", "Selective search"],
+      questionCounts: { easy: 2, medium: 3, hard: 1, application: 0 },
+    },
+  },
+];
+
 export default function ReplanPage() {
   const router = useRouter();
   const [claim, setClaim] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [step, setStep] = useState<"describe" | "review">("describe");
+  const [reviewUnits, setReviewUnits] = useState<ReplanReviewUnit[]>(demoScopeUnits);
+  const [showPrerequisites, setShowPrerequisites] = useState(false);
 
   function continueToAnalysis() {
     const validation = validateReplanKnowledgeClaim(claim);
@@ -32,11 +52,25 @@ export default function ReplanPage() {
       return;
     }
     setMessage(validation.warning ?? null);
+    setReviewUnits(demoScopeUnits);
+    setShowPrerequisites(demoPrerequisites.length > 0);
     setStep("review");
   }
 
   function describeAgain() {
     setStep("describe");
+    setShowPrerequisites(false);
+  }
+
+  function includePrerequisites(suggestions: PrerequisiteSuggestion[]) {
+    const suggestionIds = new Set(suggestions.map((suggestion) => suggestion.canonicalUnitId));
+    setReviewUnits([
+      ...demoScopeUnits,
+      ...demoPrerequisites
+        .filter((suggestion) => suggestionIds.has(suggestion.canonicalUnitId))
+        .map((suggestion) => suggestion.reviewUnit),
+    ]);
+    setShowPrerequisites(false);
   }
 
   function startAssessment(selectedUnits: ReplanReviewUnit[]) {
@@ -100,13 +134,21 @@ export default function ReplanPage() {
             />
           ) : (
             <>
+              {showPrerequisites ? (
+                <PrerequisiteSuggestionDialog
+                  targetTitle="Faster R-CNN"
+                  suggestions={demoPrerequisites}
+                  onInclude={includePrerequisites}
+                  onSkip={() => setShowPrerequisites(false)}
+                />
+              ) : null}
               {message && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
                   {message}
                 </div>
               )}
               <ReplanScopeReviewStep
-                units={demoScopeUnits}
+                units={reviewUnits}
                 onDescribeAgain={describeAgain}
                 onStartAssessment={startAssessment}
               />

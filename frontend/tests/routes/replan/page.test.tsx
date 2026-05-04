@@ -66,4 +66,21 @@ describe("replan page", () => {
     });
     expect(navigationMock.push).toHaveBeenCalledWith("/assessment?next=%2Flearn");
   });
+
+  it("adds prerequisite suggestions only after the learner accepts the popup", () => {
+    render(<ReplanPage />);
+
+    fireEvent.change(screen.getByLabelText("Bạn đã biết phần nào rồi?"), {
+      target: { value: "I know Faster R-CNN and CNN feature extraction" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(screen.getByRole("dialog", { name: /Mình tìm thấy một vài phần nền tảng liên quan/i })).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "Include R-CNN" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Thêm vào bài kiểm tra" }));
+
+    expect(screen.getByRole("checkbox", { name: "Include R-CNN" })).toBeChecked();
+    expect(screen.getByText("Source: Suggested prerequisite for Faster R-CNN")).toBeInTheDocument();
+  });
 });
