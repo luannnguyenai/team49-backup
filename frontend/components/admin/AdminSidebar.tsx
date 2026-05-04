@@ -10,6 +10,7 @@ const ITEMS: { href: string; label: string; icon: string }[] = [
   { href: "/admin", label: "Overview", icon: "◆" },
   { href: "/admin/users", label: "Users", icon: "◉" },
   { href: "/admin/llm", label: "LLM", icon: "✦" },
+  { href: "/admin/langfuse", label: "Langfuse", icon: "❖" },
   { href: "/admin/traffic", label: "Traffic", icon: "↯" },
   { href: "/admin/system", label: "System", icon: "⌬" },
   { href: "/admin/logs", label: "Logs", icon: "≡" },
