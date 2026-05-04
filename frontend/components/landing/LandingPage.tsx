@@ -97,14 +97,14 @@ export default function LandingPage() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                  className="btn-primary px-6 py-3"
                 >
                   Create your account
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-900"
+                  className="btn-secondary px-6 py-3"
                 >
                   Sign in
                 </Link>
@@ -118,7 +118,7 @@ export default function LandingPage() {
                     delayMs={80}
                     className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.35)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/75"
                   >
-                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-cyan-500 to-teal-400 text-white">
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl hero-gradient text-white">
                       <Icon className="h-5 w-5" />
                     </div>
                     <h2 className="text-base font-semibold text-slate-950 dark:text-white">{title}</h2>
@@ -142,7 +142,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="mt-6 space-y-4">
-                  <div className="rounded-3xl bg-gradient-to-br from-indigo-600 via-cyan-500 to-teal-400 p-[1px]">
+                  <div className="rounded-3xl hero-gradient p-[1px]">
                     <div className="rounded-[calc(1.5rem-1px)] bg-slate-950/90 p-5">
                       <div className="flex items-center justify-between">
                         <div>
@@ -272,7 +272,7 @@ export default function LandingPage() {
               <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
                 <div className="rounded-[28px] border border-white/10 bg-slate-900/80 p-5">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 via-cyan-500 to-teal-400">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl hero-gradient">
                       <Bot className="h-5 w-5 text-white" />
                     </div>
                     <div>
@@ -384,14 +384,14 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                className="btn-primary px-6 py-3"
               >
                 Create your account
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/login"
-                className="inline-flex items-center rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-900"
+                className="btn-secondary px-6 py-3"
               >
                 Sign in
               </Link>
