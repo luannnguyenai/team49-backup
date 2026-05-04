@@ -37,9 +37,7 @@ Tick song song khi thực thi `DEPLOYMENT_PLAN.md`.
 - [ ] 1 quiz start + submit
 - [ ] Tutor endpoint trả về response từ LLM
 
-### A.3. Secrets
-- [ ] `SECRET_KEY` generate xong (`openssl rand -hex 32`)
-- [ ] Postgres password generate xong (`openssl rand -base64 24`)
+## Smoke Test
 
 - [ ] Note 2 public domain để share demo
 - [ ] Note git commit SHA đang chạy
