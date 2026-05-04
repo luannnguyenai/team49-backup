@@ -22,7 +22,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import async_session
 from src.models.canonical import ItemKPMap, ItemPhaseMap, QuestionBankItem, UnitKPMap
-from src.models.course import Course, LearningProgressRecord, LearningProgressStatus, LearningUnit
+from src.models.course import (
+    Course,
+    CourseSection,
+    LearningProgressRecord,
+    LearningProgressStatus,
+    LearningUnit,
+)
 from src.models.learning import (
     GoalPreference,
     Interaction,
@@ -53,6 +59,8 @@ SCENARIO_FILES = {
     COHORT_DATASET: DEFAULT_OUTPUT_DIR / COHORT_DATASET / "scenarios.json",
 }
 NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, "a20-app-049/synthetic-demo-users/v1")
+FOUNDATION_COURSE_SCOPE = "cs230"
+SPECIALIZATION_COURSE_SCOPES = frozenset({"cs224n", "cs231n"})
 
 ProficiencyBand = Literal["beginner", "developing", "proficient", "advanced"]
 ALLOWED_PROFICIENCY_BANDS = {"beginner", "developing", "proficient", "advanced"}
@@ -211,12 +219,16 @@ def _validate_spec(spec: SyntheticUserSpec) -> None:
 
 async def load_catalog(session: AsyncSession) -> SyntheticCatalog:
     course_rows = (
-        await session.execute(select(Course).order_by(Course.slug))
+        await session.execute(select(Course).order_by(Course.sort_order, Course.slug))
     ).scalars().all()
     unit_rows = (
         await session.execute(
-            select(LearningUnit).order_by(
-                LearningUnit.course_id,
+            select(LearningUnit)
+            .join(Course, LearningUnit.course_id == Course.id)
+            .join(CourseSection, LearningUnit.section_id == CourseSection.id)
+            .order_by(
+                Course.sort_order,
+                CourseSection.sort_order,
                 LearningUnit.sort_order,
                 LearningUnit.slug,
             )
@@ -400,12 +412,21 @@ def _select_courses(catalog: SyntheticCatalog, course_scope: tuple[str, ...]) ->
     scope_values = {value.lower() for value in course_scope}
     if "all" in scope_values:
         return list(catalog.courses)
+    if scope_values & SPECIALIZATION_COURSE_SCOPES:
+        scope_values.add(FOUNDATION_COURSE_SCOPE)
     matched = [
         course
         for course in catalog.courses
-        if any(scope_value in course.slug.lower() for scope_value in scope_values)
+        if _course_in_scope(course, scope_values)
     ]
     return matched or list(catalog.courses[:1])
+
+
+def _course_in_scope(course: CourseRef, scope_values: set[str]) -> bool:
+    identifiers = {course.slug.lower()}
+    if course.canonical_course_id:
+        identifiers.add(course.canonical_course_id.lower())
+    return bool(identifiers & scope_values)
 
 
 def _select_units(

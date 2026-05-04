@@ -11,6 +11,7 @@ from src.scripts.pipeline.generate_synthetic_demo_users import (
     build_synthetic_rows,
     build_user_specs,
     load_user_specs,
+    _select_courses,
     write_jsonl_snapshots,
 )
 import json
@@ -97,6 +98,26 @@ def test_build_synthetic_rows_preserves_case_and_proficiency_metadata():
     assert any("synthetic_fixture:demo_accounts_v1:advanced" in row["updated_by"] for row in rows["learner_mastery_kp"])
     assert any(row["state_json"]["synthetic_case"] == "abandon_mid_video" for row in rows["planner_session_state"])
     assert any(row["state_json"]["proficiency_band"] == "beginner" for row in rows["planner_session_state"])
+
+
+def test_select_courses_includes_deep_learning_foundation_for_specializations():
+    cs230_course_id = uuid.uuid5(uuid.NAMESPACE_URL, "test-course-cs230")
+    cs224n_course_id = uuid.uuid5(uuid.NAMESPACE_URL, "test-course-cs224n")
+    cs231n_course_id = uuid.uuid5(uuid.NAMESPACE_URL, "test-course-cs231n")
+    catalog = SyntheticCatalog(
+        courses=(
+            CourseRef(id=cs230_course_id, slug="cs230", canonical_course_id="CS230"),
+            CourseRef(id=cs231n_course_id, slug="cs231n", canonical_course_id="CS231n"),
+            CourseRef(id=cs224n_course_id, slug="cs224n", canonical_course_id="CS224n"),
+        ),
+        units=(),
+        items=(),
+        unit_kp_ids={},
+    )
+
+    selected = _select_courses(catalog, ("cs224n", "cs231n"))
+
+    assert [course.slug for course in selected] == ["cs230", "cs231n", "cs224n"]
 
 
 def test_write_jsonl_snapshots_keeps_demo_and_cohort_directories_separate(tmp_path):
