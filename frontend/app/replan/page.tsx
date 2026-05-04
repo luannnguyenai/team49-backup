@@ -10,6 +10,7 @@ import ReplanScopeReviewStep, {
   type ReplanReviewUnit,
   type ReplanSelectedAssessmentUnit,
 } from "@/components/replan/ReplanScopeReviewStep";
+import ErrorModal from "@/components/replan/ErrorModal";
 import { writeReplanAssessmentContext } from "@/lib/replan-assessment-context";
 import { validateReplanKnowledgeClaim } from "@/lib/replan-claim-guardrails";
 import { replanApi, type ReplanAnalyzeResponse } from "@/lib/replan-api";
@@ -100,8 +101,31 @@ export default function ReplanPage() {
 
       setStep("review");
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Lỗi khi phân tích. Vui lòng thử lại.";
+      let errorMessage = "Error analyzing your claim. Please try again.";
+
+      if (err instanceof Error) {
+        // Network errors
+        if (err.message.includes("fetch") || err.message.includes("network")) {
+          errorMessage = "Cannot connect to server. Check your network connection and try again.";
+        }
+        // Timeout errors
+        else if (err.message.includes("timeout") || err.message.includes("aborted")) {
+          errorMessage = "Request timed out. Please try again.";
+        }
+        // 500 errors from backend
+        else if (err.message.includes("500") || err.message.includes("503")) {
+          errorMessage = "Server is experiencing issues. Please try again in a few minutes.";
+        }
+        // 401 unauthorized
+        else if (err.message.includes("401")) {
+          errorMessage = "Your session has expired. Please log in again.";
+        }
+        // Use error message if it's user-friendly
+        else if (err.message.length < 100) {
+          errorMessage = err.message;
+        }
+      }
+
       setAnalyzeError(errorMessage);
     } finally {
       setIsAnalyzing(false);
@@ -158,8 +182,22 @@ export default function ReplanPage() {
       // Navigate to the assessment page
       router.push(response.assessmentHref);
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Lỗi khi tạo bài assessment. Vui lòng thử lại.";
+      let errorMessage = "Error creating assessment. Please try again.";
+
+      if (err instanceof Error) {
+        if (err.message.includes("fetch") || err.message.includes("network")) {
+          errorMessage = "Cannot connect to server. Check your network connection and try again.";
+        } else if (err.message.includes("timeout") || err.message.includes("aborted")) {
+          errorMessage = "Request timed out. Please try again.";
+        } else if (err.message.includes("500") || err.message.includes("503")) {
+          errorMessage = "Server is experiencing issues. Please try again in a few minutes.";
+        } else if (err.message.includes("401")) {
+          errorMessage = "Your session has expired. Please log in again.";
+        } else if (err.message.length < 100) {
+          errorMessage = err.message;
+        }
+      }
+
       setAnalyzeError(errorMessage);
       setIsStarting(false);
     }
@@ -234,12 +272,6 @@ export default function ReplanPage() {
                   </span>
                 </div>
               )}
-              {analyzeError && (
-                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                  <span>{analyzeError}</span>
-                </div>
-              )}
             </>
           ) : (
             <>
@@ -254,12 +286,6 @@ export default function ReplanPage() {
               {message && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
                   {message}
-                </div>
-              )}
-              {analyzeError && (
-                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                  <span>{analyzeError}</span>
                 </div>
               )}
               {isStarting && (
@@ -296,6 +322,14 @@ export default function ReplanPage() {
           )}
         </div>
       </div>
+
+      {/* Error Modal - popup for all errors */}
+      {analyzeError && (
+        <ErrorModal
+          message={analyzeError}
+          onDismiss={() => setAnalyzeError(null)}
+        />
+      )}
     </div>
   );
 }
