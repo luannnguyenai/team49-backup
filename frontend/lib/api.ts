@@ -223,7 +223,9 @@ export const assessmentApi = {
 
   summary: (sessionId: string) =>
     api
-      .get<AssessmentAISummaryResponse>(`/api/assessment/${sessionId}/summary`)
+      .get<AssessmentAISummaryResponse>(`/api/assessment/${sessionId}/summary`, {
+        timeout: 60_000,
+      })
       .then((r) => r.data),
 
   updateTopicDecision: (sessionId: string, topicUnitId: string, userChoice: string) =>

@@ -32,13 +32,13 @@ x-backend-env: &backend-env
   GEMINI_API_KEY: ${GEMINI_API_KEY:-}
   ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
   OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-  DEFAULT_MODEL: ${DEFAULT_MODEL:-gpt-4o-mini}
-  FAST_MODEL: ${FAST_MODEL:-gpt-4o-mini}
-  MODEL_PROVIDER: ${MODEL_PROVIDER:-openai}
-  LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
-  LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
-  LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-https://cloud.langfuse.com}
-  LANGFUSE_HOST: ${LANGFUSE_HOST:-}
+  DEFAULT_MODEL: ${DEFAULT_MODEL:-gemini-3.1-flash-lite-preview}
+  FAST_MODEL: ${FAST_MODEL:-gemini-3.1-flash-lite-preview}
+  MODEL_PROVIDER: ${MODEL_PROVIDER:-google_genai}
+  MODEL_REASONING_EFFORT: ${MODEL_REASONING_EFFORT:-medium}
+  MODEL_EXTRA_KWARGS: ${MODEL_EXTRA_KWARGS:-{}}
+  LLM_REQUEST_TIMEOUT_SECONDS: ${LLM_REQUEST_TIMEOUT_SECONDS:-30}
+  LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-1}
   DB_ECHO: ${DB_ECHO:-false}
   DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
   DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-10}
@@ -62,7 +62,7 @@ services:
       - al_db_data:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/00_init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ai_learning}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ai_learning}" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -87,7 +87,7 @@ services:
     volumes:
       - al_redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis123secure}", "ping"]
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis123secure}", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -138,10 +138,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: deps          # dev: chỉ install dependencies, không build
+      target: deps # dev: chỉ install dependencies, không build
     container_name: al_frontend
     restart: unless-stopped
-    command: npm run dev    # dev: Next.js dev server với hot reload
+    command: npm run dev # dev: Next.js dev server với hot reload
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
@@ -150,11 +150,11 @@ services:
       API_INTERNAL_URL: http://backend:8000
       NEXT_PUBLIC_GRAFANA_HOST: ${NEXT_PUBLIC_GRAFANA_HOST:-http://localhost:3001}
       NEXT_PUBLIC_LANGFUSE_HOST: ${NEXT_PUBLIC_LANGFUSE_HOST:-https://cloud.langfuse.com}
-      WATCHPACK_POLLING: "true"   # bắt buộc cho hot reload trên Windows/WSL
+      WATCHPACK_POLLING: "true" # bắt buộc cho hot reload trên Windows/WSL
     volumes:
-      - ./frontend:/app           # mount code từ host → hot reload
-      - /app/node_modules         # giữ node_modules trong container
-      - /app/.next                # giữ .next build cache trong container
+      - ./frontend:/app # mount code từ host → hot reload
+      - /app/node_modules # giữ node_modules trong container
+      - /app/.next # giữ .next build cache trong container
     depends_on:
       backend:
         condition: service_healthy
