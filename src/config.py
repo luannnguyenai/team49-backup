@@ -26,14 +26,14 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(default="", description="OpenAI API key")
     gemini_api_key: str = Field(default="", description="Google Gemini API key")
     default_model: str = Field(
-        default="gemini-2.0-flash",
+        default="gpt-5.4-mini",
         description="Default LLM model",
     )
     fast_model: str = Field(
-        default="gemini-2.0-flash",
+        default="gpt-5.4-nano",
         description="Fast model for minor tasks",
     )
-    model_provider: str = Field(default="google_genai", description="LLM provider")
+    model_provider: str = Field(default="openai", description="LLM provider")
     model_reasoning_effort: Literal["off", "low", "medium", "high", "xhigh"] = Field(
         default="medium",
         description="Optional reasoning effort for providers that support it.",
