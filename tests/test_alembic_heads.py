@@ -1,7 +1,8 @@
+import ast
 import subprocess
+import sys
 import unittest
 from pathlib import Path
-import ast
 
 
 def _read_revision_ids() -> list[str]:
@@ -18,7 +19,7 @@ def _read_revision_ids() -> list[str]:
 class AlembicHeadTests(unittest.TestCase):
     def test_alembic_has_single_head(self):
         result = subprocess.run(
-            [".venv/bin/alembic", "heads"],
+            [sys.executable, "-m", "alembic", "heads"],
             check=True,
             capture_output=True,
             text=True,
