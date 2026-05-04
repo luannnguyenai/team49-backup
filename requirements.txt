@@ -33,7 +33,7 @@ python-multipart>=0.0.6
 # ── Observability / admin dashboard ──
 prometheus-fastapi-instrumentator>=7.1.0
 python-json-logger>=2.0.7
-langfuse>=3.0.0
+langfuse>=4.0.0
 psutil>=6.0.0
 
 # Dev / testing

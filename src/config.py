@@ -58,6 +58,16 @@ class Settings(BaseSettings):
         description="Client-side throttle for Gemini API requests per minute.",
     )
     log_level: str = Field(default="INFO", description="Logging level")
+    langfuse_public_key: str = Field(default="", description="Langfuse public key")
+    langfuse_secret_key: str = Field(default="", description="Langfuse secret key")
+    langfuse_base_url: str = Field(
+        default="https://cloud.langfuse.com",
+        description="Preferred Langfuse base URL",
+    )
+    langfuse_host: str = Field(
+        default="",
+        description="Backward-compatible Langfuse host alias",
+    )
 
     # ---- Database (PostgreSQL async) ----
     database_url: str = Field(

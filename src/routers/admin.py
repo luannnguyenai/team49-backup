@@ -25,6 +25,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import require_admin
 from src.models.user import User
@@ -89,6 +90,108 @@ async def _prom_query(client: httpx.AsyncClient, query: str) -> float | None:
         return None
 
 
+async def _prom_query_range(
+    client: httpx.AsyncClient,
+    query: str,
+    *,
+    start: datetime,
+    end: datetime,
+    step_seconds: int,
+) -> list[tuple[datetime, float]]:
+    try:
+        r = await client.get(
+            f"{PROMETHEUS_URL}/api/v1/query_range",
+            params={
+                "query": query,
+                "start": start.timestamp(),
+                "end": end.timestamp(),
+                "step": step_seconds,
+            },
+            timeout=3.0,
+        )
+        if r.status_code != 200:
+            return []
+        result = r.json().get("data", {}).get("result", [])
+        if not result:
+            return []
+        values = result[0].get("values", [])
+        series: list[tuple[datetime, float]] = []
+        for ts_raw, value_raw in values:
+            try:
+                point_ts = datetime.fromtimestamp(float(ts_raw), tz=timezone.utc)
+                point_value = float(value_raw)
+            except Exception:
+                continue
+            series.append((point_ts, point_value))
+        return series
+    except Exception:
+        return []
+
+
+def _merge_tutor_latency_series(
+    metric_series: dict[str, list[tuple[datetime, float]]],
+) -> list[dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    for field, points in metric_series.items():
+        for point_ts, value in points:
+            bucket = point_ts.replace(minute=0, second=0, microsecond=0).isoformat()
+            row = rows.setdefault(bucket, {"hour": bucket})
+            row[field] = round(value, 2)
+
+    ordered_rows = [rows[key] for key in sorted(rows.keys())]
+    for row in ordered_rows:
+        row.setdefault("first_status_p50_ms", None)
+        row.setdefault("first_status_p95_ms", None)
+        row.setdefault("first_answer_p50_ms", None)
+        row.setdefault("first_answer_p95_ms", None)
+        row.setdefault("sample_count", None)
+    return ordered_rows
+
+
+async def _load_tutor_latency_timeseries(
+    client: httpx.AsyncClient,
+    *,
+    hours: int,
+) -> list[dict[str, Any]]:
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(hours=hours)
+    step_seconds = 3600
+
+    metric_queries = {
+        "first_status_p50_ms": (
+            '1000 * histogram_quantile(0.50, '
+            'sum by (le) (rate(tutor_stream_first_status_seconds_bucket[1h])))'
+        ),
+        "first_status_p95_ms": (
+            '1000 * histogram_quantile(0.95, '
+            'sum by (le) (rate(tutor_stream_first_status_seconds_bucket[1h])))'
+        ),
+        "first_answer_p50_ms": (
+            '1000 * histogram_quantile(0.50, '
+            'sum by (le) (rate(tutor_stream_first_answer_seconds_bucket[1h])))'
+        ),
+        "first_answer_p95_ms": (
+            '1000 * histogram_quantile(0.95, '
+            'sum by (le) (rate(tutor_stream_first_answer_seconds_bucket[1h])))'
+        ),
+        "sample_count": (
+            'sum(increase(tutor_stream_total_seconds_count[1h]))'
+        ),
+    }
+
+    metric_series: dict[str, list[tuple[datetime, float]]] = {}
+    for field, query in metric_queries.items():
+        metric_series[field] = await _prom_query_range(
+            client,
+            query,
+            start=start,
+            end=end,
+            step_seconds=step_seconds,
+        )
+
+    return _merge_tutor_latency_series(metric_series)
+
+
 # ---------------------------------------------------------------------------
 # Stats
 # ---------------------------------------------------------------------------
@@ -108,7 +211,9 @@ async def stats_overview(
     ).scalar_one()
 
     # DAU/MAU best-effort via sessions table; fallback to access log for active users.
-    dau = mau = 0
+    dau = mau = active_now = 0
+    fifteen_min_ago = now - timedelta(minutes=15)
+    one_hour_ago = now - timedelta(hours=1)
     try:
         dau = (
             await db.execute(
@@ -124,6 +229,18 @@ async def stats_overview(
                     "SELECT COUNT(DISTINCT user_id) FROM sessions WHERE started_at >= :since"
                 ),
                 {"since": month_ago},
+            )
+        ).scalar_one() or 0
+        active_now = (
+            await db.execute(
+                text(
+                    """
+                    SELECT COUNT(DISTINCT user_id) FROM sessions
+                    WHERE started_at >= :recent
+                       OR (completed_at IS NULL AND started_at >= :open_since)
+                    """
+                ),
+                {"recent": fifteen_min_ago, "open_since": one_hour_ago},
             )
         ).scalar_one() or 0
     except Exception:
@@ -164,11 +281,21 @@ async def stats_overview(
         "total_users": int(total_users),
         "dau": int(dau),
         "mau": int(mau),
+        "active_now": int(active_now),
         "signups_7d": int(signups_7d),
         "llm_calls_24h": int(llm_calls_24h),
         "avg_latency_ms": avg_latency_ms,
         "error_rate": error_rate,
         "uptime_seconds": int(uptime_seconds),
+    }
+
+
+@admin_router.get("/model/current")
+async def current_model(_admin: User = Depends(require_admin)) -> dict[str, Any]:
+    return {
+        "name": settings.default_model,
+        "provider": settings.model_provider,
+        "fast_model": settings.fast_model,
     }
 
 
@@ -270,6 +397,12 @@ async def llm_stats(
         if e.get("error") or e.get("status") == "error":
             errors += 1
 
+    async with httpx.AsyncClient() as client:
+        tutor_latency_per_hour = await _load_tutor_latency_timeseries(
+            client,
+            hours=hours,
+        )
+
     return {
         "window_hours": hours,
         "total_calls": total,
@@ -280,7 +413,113 @@ async def llm_stats(
         "top_users": [
             {"user_id": u, "count": c} for u, c in user_calls.most_common(5)
         ],
+        "tutor_latency_per_hour": tutor_latency_per_hour,
     }
+
+
+# ---------------------------------------------------------------------------
+# Feedback (Phase 16) — aggregations over qa_history.rating
+# ---------------------------------------------------------------------------
+@admin_router.get("/feedback/stats")
+async def feedback_stats(
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_async_db),
+    days: int = Query(14, ge=1, le=180),
+) -> dict[str, Any]:
+    since_naive = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
+    rollup = (
+        await db.execute(
+            text(
+                """
+                SELECT
+                    COUNT(*) FILTER (WHERE rating = 1)::int  AS positive,
+                    COUNT(*) FILTER (WHERE rating = -1)::int AS negative,
+                    COUNT(*) FILTER (WHERE rating IS NOT NULL)::int AS total
+                FROM qa_history
+                WHERE created_at >= :since
+                """
+            ),
+            {"since": since_naive},
+        )
+    ).one()
+    positive, negative, total = int(rollup[0]), int(rollup[1]), int(rollup[2])
+
+    unrated_24h = (
+        await db.execute(
+            text(
+                """
+                SELECT COUNT(*)::int FROM qa_history
+                WHERE rating IS NULL AND created_at >= :since
+                """
+            ),
+            {"since": since_naive + timedelta(days=days - 1)},
+        )
+    ).scalar_one() or 0
+
+    trend_rows = (
+        await db.execute(
+            text(
+                """
+                SELECT
+                    date_trunc('day', created_at)::date AS day,
+                    COUNT(*) FILTER (WHERE rating = 1)::int  AS positive,
+                    COUNT(*) FILTER (WHERE rating = -1)::int AS negative
+                FROM qa_history
+                WHERE created_at >= :since AND rating IS NOT NULL
+                GROUP BY 1
+                ORDER BY 1
+                """
+            ),
+            {"since": since_naive},
+        )
+    ).all()
+
+    return {
+        "total_ratings": total,
+        "positive": positive,
+        "negative": negative,
+        "positive_ratio": (positive / total) if total > 0 else None,
+        "unrated_24h": int(unrated_24h),
+        "trend": [
+            {"date": r[0].isoformat(), "positive": int(r[1]), "negative": int(r[2])}
+            for r in trend_rows
+        ],
+    }
+
+
+@admin_router.get("/feedback/recent-negative")
+async def feedback_recent_negative(
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_async_db),
+    limit: int = Query(20, ge=1, le=100),
+) -> list[dict[str, Any]]:
+    rows = (
+        await db.execute(
+            text(
+                """
+                SELECT id, lecture_id, question, answer, context_binding_id, created_at
+                FROM qa_history
+                WHERE rating = -1
+                ORDER BY created_at DESC
+                LIMIT :lim
+                """
+            ),
+            {"lim": limit},
+        )
+    ).all()
+    out: list[dict[str, Any]] = []
+    for r in rows:
+        out.append(
+            {
+                "id": int(r[0]),
+                "lecture_id": r[1],
+                "question": (r[2] or "")[:500],
+                "answer": (r[3] or "")[:500],
+                "context_binding_id": r[4],
+                "created_at": r[5].isoformat() if r[5] else None,
+            }
+        )
+    return out
 
 
 # ---------------------------------------------------------------------------

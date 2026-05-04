@@ -100,7 +100,7 @@ describe("InContextTutor", () => {
         );
       }
 
-      if (method === "POST" && url === "/api/lectures/ask" && options.askResponse) {
+      if (method === "POST" && url.endsWith("/api/lectures/ask") && options.askResponse) {
         return Promise.resolve(options.askResponse);
       }
 
@@ -155,6 +155,47 @@ describe("InContextTutor", () => {
       expect(screen.getByText("Lecture not found")).toBeInTheDocument();
     });
     expect(screen.queryByText("...")).not.toBeInTheDocument();
+  });
+
+  it("uses the direct backend tutor stream URL when NEXT_PUBLIC_API_URL is configured", async () => {
+    const originalApiUrl = process.env.NEXT_PUBLIC_API_URL;
+    process.env.NEXT_PUBLIC_API_URL = "http://localhost:8000";
+
+    try {
+      mockTutorFetch({
+        askResponse: buildChunkedNdjsonResponse(200, ['{"a":"Direct stream response."}\n{"qa_id":88}\n']),
+      });
+
+      render(
+        <InContextTutor
+          lectureId="cs231n-lecture-1"
+          currentTime={840}
+          captureFrame={() => null}
+          unitTitle="Lecture 1: Introduction"
+          onClose={() => {}}
+        />,
+      );
+
+      fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+        target: { value: "Explain the main idea." },
+      });
+      fireEvent.click(screen.getAllByRole("button")[1]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Direct stream response.")).toBeInTheDocument();
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "http://localhost:8000/api/lectures/ask",
+        expect.objectContaining({ method: "POST" }),
+      );
+    } finally {
+      if (originalApiUrl === undefined) {
+        delete process.env.NEXT_PUBLIC_API_URL;
+      } else {
+        process.env.NEXT_PUBLIC_API_URL = originalApiUrl;
+      }
+    }
   });
 
   it("hydrates saved chat history from session storage on mount", async () => {
@@ -317,7 +358,7 @@ describe("InContextTutor", () => {
     await waitFor(() => {
       expect(screen.getByText("Immediate answer.")).toBeInTheDocument();
     });
-    expect(screen.queryByText("Reading lecture context...")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View progress" })).toBeInTheDocument();
   });
 
   it("shows starter suggestions before the first message and hides them after chat begins", async () => {
@@ -448,8 +489,7 @@ describe("InContextTutor", () => {
     await waitFor(() => {
       expect(screen.getByText("Answer starts here.")).toBeInTheDocument();
     });
-    expect(screen.queryByText("Reading lecture context...")).not.toBeInTheDocument();
-    expect(screen.queryByText("Finding the most relevant section...")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View progress" })).toBeInTheDocument();
   });
 
   it("includes context_binding_id in tutor requests when provided", async () => {
@@ -526,7 +566,7 @@ describe("InContextTutor", () => {
       askResponse: buildDelayedNdjsonResponse(200, [
         { chunk: '{"status":"Reading lecture context..."}\n' },
         { chunk: '{"status":"Finding the most relevant section..."}\n', delayMs: 20 },
-        { chunk: '{"status":"Composing the answer..."}\n', delayMs: 20 },
+        { chunk: '{"status":"Thinking through the answer..."}\n', delayMs: 20 },
         { chunk: '{"a":"I have finished summarizing it."}\n{"qa_id":18}\n', delayMs: 100 },
       ]),
     });
@@ -548,19 +588,23 @@ describe("InContextTutor", () => {
 
     expect(await screen.findByText("Reading lecture context...")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText("Finding the most relevant section...")).toBeInTheDocument();
-      expect(screen.getByText("Composing the answer...")).toBeInTheDocument();
+      expect(screen.getByText("Thinking through the answer...")).toBeInTheDocument();
     });
 
     await waitFor(() => {
       expect(screen.getByText("I have finished summarizing it.")).toBeInTheDocument();
     });
+
+    fireEvent.click(screen.getByRole("button", { name: "View progress" }));
+    expect(screen.getByText("Reading lecture context...")).toBeInTheDocument();
+    expect(screen.getByText("Finding the most relevant section...")).toBeInTheDocument();
+    expect(screen.getAllByText("Thinking through the answer...").length).toBeGreaterThanOrEqual(1);
   });
 
   it("shows a tool-specific step only when the backend actually uses a tool", async () => {
     mockTutorFetch({
       askResponse: buildDelayedNdjsonResponse(200, [
-        { chunk: '{"status":"Composing the answer..."}\n' },
+        { chunk: '{"status":"Thinking through the answer..."}\n' },
         { chunk: '{"status":"Checking the calculation..."}\n', delayMs: 20 },
         { chunk: '{"status":"Finalizing the answer..."}\n', delayMs: 20 },
         { chunk: '{"a":"The result has been checked."}\n{"qa_id":22}\n', delayMs: 100 },
@@ -590,5 +634,50 @@ describe("InContextTutor", () => {
     await waitFor(() => {
       expect(screen.getByText("The result has been checked.")).toBeInTheDocument();
     });
+
+    fireEvent.click(screen.getByRole("button", { name: "View progress" }));
+    expect(screen.getByText("Checking the calculation...")).toBeInTheDocument();
+    expect(screen.getAllByText("Finalizing the answer...").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("keeps tutor progress available after completion and restores it from session storage", async () => {
+    sessionStorage.setItem(
+      TUTOR_SESSION_HISTORY_STORAGE_KEY,
+      JSON.stringify({
+        [buildTutorConversationKey("lesson-1")]: [
+          {
+            id: 81,
+            role: "ai",
+            content: "Stored answer.",
+            senderName: "AI Tutor",
+            sentAt: "21:15",
+            rating: 1,
+            statusSteps: [
+              "Đang đọc ngữ cảnh bài giảng...",
+              "Đang suy nghĩ câu trả lời...",
+            ],
+          },
+        ],
+      }),
+    );
+
+    render(
+      <InContextTutor
+        lessonKey="lesson-1"
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Stored answer.")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "View progress" }));
+    expect(screen.getByText("Reading lecture context...")).toBeInTheDocument();
+    expect(screen.getAllByText("Thinking through the answer...").length).toBeGreaterThanOrEqual(1);
   });
 });

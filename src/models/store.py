@@ -70,6 +70,8 @@ class QAHistory(Base):
     current_timestamp = Column(Float)
     context_binding_id = Column(String(255), nullable=True)
     image_base64 = Column(Text, nullable=True)
+    langfuse_trace_id = Column(String(64), nullable=True)
+    langfuse_observation_id = Column(String(64), nullable=True)
     rating = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 

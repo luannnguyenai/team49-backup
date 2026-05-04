@@ -15,7 +15,10 @@ import {
   YAxis,
 } from "recharts";
 
+import Link from "next/link";
+
 import KpiCard from "@/components/admin/KpiCard";
+import KpiGroup from "@/components/admin/KpiGroup";
 import ChartCard from "@/components/admin/ChartCard";
 import {
   adminApi,
@@ -25,7 +28,7 @@ import {
   type NegativeFeedbackRow,
 } from "@/lib/admin-api";
 
-const LANGFUSE_HOST = process.env.NEXT_PUBLIC_LANGFUSE_HOST || "https://cloud.langfuse.com";
+const LANGFUSE_HOST = process.env.NEXT_PUBLIC_LANGFUSE_HOST || "";
 
 function fmtPct(p: number | null | undefined): string {
   if (p === null || p === undefined) return "—";
@@ -93,15 +96,10 @@ export default function AdminLlmPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+      <KpiGroup title="Volume" cols={3}>
         <KpiCard
           label="LLM calls (24h)"
           value={overview?.llm_calls_24h ?? "—"}
-          loading={loading}
-        />
-        <KpiCard
-          label="Avg p95 latency"
-          value={overview?.avg_latency_ms != null ? `${overview.avg_latency_ms} ms` : "—"}
           loading={loading}
         />
         <KpiCard
@@ -116,15 +114,18 @@ export default function AdminLlmPage() {
           hint="qa_history.jsonl"
           loading={loading}
         />
+      </KpiGroup>
+
+      <KpiGroup title="Latency" cols={5}>
         <KpiCard
-          label="First status p95"
-          value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_status_p95_ms)}
-          hint="Latest hourly bucket"
+          label="Avg p95 latency"
+          value={overview?.avg_latency_ms != null ? `${overview.avg_latency_ms} ms` : "—"}
+          hint="Prometheus 5m"
           loading={loading}
         />
         <KpiCard
-          label="First answer p95"
-          value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_answer_p95_ms)}
+          label="First status p95"
+          value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_status_p95_ms)}
           hint="Latest hourly bucket"
           loading={loading}
         />
@@ -135,28 +136,30 @@ export default function AdminLlmPage() {
           loading={loading}
         />
         <KpiCard
+          label="First answer p95"
+          value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_answer_p95_ms)}
+          hint="Latest hourly bucket"
+          loading={loading}
+        />
+        <KpiCard
           label="First answer p50"
           value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_answer_p50_ms)}
           hint="Latest hourly bucket"
           loading={loading}
         />
-      </div>
+      </KpiGroup>
 
-      {err && (
-        <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">{err}</p>
-      )}
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+      <KpiGroup title="Feedback (14d)" cols={4}>
         <KpiCard
           label="Positive ratings"
           value={feedback?.positive ?? "—"}
-          hint="14d window · 👍"
+          hint="👍"
           loading={loading}
         />
         <KpiCard
           label="Negative ratings"
           value={feedback?.negative ?? "—"}
-          hint="14d window · 👎"
+          hint="👎"
           loading={loading}
         />
         <KpiCard
@@ -171,7 +174,11 @@ export default function AdminLlmPage() {
           hint="LLM calls without thumb"
           loading={loading}
         />
-      </div>
+      </KpiGroup>
+
+      {err && (
+        <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">{err}</p>
+      )}
 
       <ChartCard
         title="Feedback trend (14 days)"
@@ -264,9 +271,15 @@ export default function AdminLlmPage() {
               tickFormatter={(v) => `${Math.round(Number(v))}`}
             />
             <Tooltip
-              formatter={(value: number | string | null | undefined) => fmtMs(
-                typeof value === "number" ? value : value == null ? null : Number(value),
-              )}
+              formatter={(value) =>
+                fmtMs(
+                  typeof value === "number"
+                    ? value
+                    : value == null
+                      ? null
+                      : Number(value),
+                )
+              }
               labelFormatter={(value) => `Hour ${String(value).slice(11, 16)}`}
               contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }}
             />
@@ -312,33 +325,51 @@ export default function AdminLlmPage() {
         </ResponsiveContainer>
       </ChartCard>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white">LangFuse</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Full traces, costs, and prompt history.
-              </p>
-            </div>
-            <a
-              href={LANGFUSE_HOST}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-            >
-              Open LangFuse →
-            </a>
+      <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+              Langfuse trace explorer
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Open Langfuse in a separate tab for full traces, prompts, latency, token usage, and scores.
+            </p>
           </div>
-          <div className="overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/80">
-            <iframe
-              src={LANGFUSE_HOST}
-              title="LangFuse"
-              className="h-[360px] w-full"
-              loading="lazy"
-            />
-          </div>
+          <Link
+            href="/admin/langfuse"
+            className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-600"
+          >
+            Mở trang đầy đủ →
+          </Link>
         </div>
+        {!LANGFUSE_HOST.trim() ? (
+          <p className="rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+            Thiếu <code className="rounded bg-amber-100 px-1 dark:bg-amber-900/60">NEXT_PUBLIC_LANGFUSE_HOST</code> trong runtime frontend nên chưa thể mở Langfuse từ admin dashboard.
+          </p>
+        ) : (
+          <div className="rounded-[18px] border border-slate-200/80 bg-slate-50/90 p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-300">
+            Langfuse Cloud currently blocks third-party iframe embedding via security headers, so the admin dashboard links out to the hosted UI instead of rendering it inline.
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+        <Link
+          href="/admin/langfuse"
+          className="group flex h-full items-center justify-between gap-4 rounded-[24px] border border-slate-200/70 bg-gradient-to-br from-indigo-50/60 via-white/70 to-cyan-50/60 p-5 backdrop-blur-md transition hover:border-cyan-400 dark:border-slate-800 dark:from-slate-900/70 dark:via-slate-900/60 dark:to-slate-900/70"
+        >
+          <div>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+              Langfuse tracing
+            </h3>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Xem chi tiết trace, prompt, cost tại trang riêng.
+            </p>
+          </div>
+          <span className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition group-hover:bg-cyan-600">
+            Mở Langfuse →
+          </span>
+        </Link>
 
         <div className="space-y-5">
           <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">

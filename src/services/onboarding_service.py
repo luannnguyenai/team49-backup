@@ -36,6 +36,12 @@ from src.schemas.onboarding import (
 )
 from src.services.chat_model_factory import build_chat_model_kwargs
 from src.services.llm_rate_limiter import enforce_llm_rate_limit
+from src.core.observability import (
+    build_langfuse_metadata,
+    llm_callbacks,
+    propagate_langfuse_attributes,
+    start_langfuse_root_span,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -270,16 +276,37 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
         f"Coding/tools: {body.coding_experience_text or '(empty)'}\n"
         f"Candidate topics JSON:\n{candidates_json}"
     )
+    trace_metadata = build_langfuse_metadata(
+        tags=["onboarding", "prior-analysis"],
+        feature="onboarding",
+        route="prior-analysis",
+        goal_id=body.goal_id,
+        candidate_count=len(body.candidates),
+    )
 
     try:
         enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
         if settings.model_provider.lower() == "openai":
             async def call_model() -> str:
-                return await asyncio.to_thread(
-                    _invoke_openai_responses,
-                    _PRIOR_ANALYSIS_SYSTEM,
-                    user_text,
-                )
+                with start_langfuse_root_span(
+                    name="onboarding-prior-analysis",
+                    input={"goal_id": body.goal_id, "candidate_count": len(body.candidates)},
+                    metadata=trace_metadata,
+                ):
+                    with propagate_langfuse_attributes(
+                        tags=["onboarding", "prior-analysis"],
+                        metadata={
+                            "feature": "onboarding",
+                            "route": "prior-analysis",
+                            "goal_id": body.goal_id,
+                        },
+                        trace_name="onboarding-prior-analysis",
+                    ):
+                        return await asyncio.to_thread(
+                            _invoke_openai_responses,
+                            _PRIOR_ANALYSIS_SYSTEM,
+                            user_text,
+                        )
         else:
             llm = init_chat_model(
                 **build_chat_model_kwargs(
@@ -290,14 +317,33 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
             )
 
             async def call_model() -> str:
-                response = await asyncio.to_thread(
-                    llm.invoke,
-                    [
-                        SystemMessage(content=_PRIOR_ANALYSIS_SYSTEM),
-                        HumanMessage(content=user_text),
-                    ],
-                )
-                return str(response.content)
+                with start_langfuse_root_span(
+                    name="onboarding-prior-analysis",
+                    input={"goal_id": body.goal_id, "candidate_count": len(body.candidates)},
+                    metadata=trace_metadata,
+                ):
+                    with propagate_langfuse_attributes(
+                        tags=["onboarding", "prior-analysis"],
+                        metadata={
+                            "feature": "onboarding",
+                            "route": "prior-analysis",
+                            "goal_id": body.goal_id,
+                        },
+                        trace_name="onboarding-prior-analysis",
+                    ):
+                        response = await asyncio.to_thread(
+                            lambda: llm.invoke(
+                                [
+                                    SystemMessage(content=_PRIOR_ANALYSIS_SYSTEM),
+                                    HumanMessage(content=user_text),
+                                ],
+                                config={
+                                    "callbacks": llm_callbacks(),
+                                    "metadata": trace_metadata,
+                                },
+                            )
+                        )
+                        return str(response.content)
 
         shortlisted, summary_map = await _run_prior_analysis_with_retry(call_model, valid_ids)
         fallback = False
