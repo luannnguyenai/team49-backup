@@ -9,10 +9,10 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <div className="mb-6">
-        <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+        <h2 className="text-xl font-bold text-text-strong">
           Reset your password
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+        <p className="mt-1 text-sm text-text-body">
           Enter your email and a new password to sign in again.
         </p>
       </div>
