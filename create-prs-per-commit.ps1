@@ -4,22 +4,16 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ bdb31e696eadc809a2e2e849bc14b54dc9a4e5b6 Update .env.example
-+ 7ec3ed2e3a972c507aa093785b074ffc67b18436 Create page.tsx
-+ 44d528fd48093a6749d0094cfa4087e4fa204244 Update page.tsx
-+ 8b4ea4e953a5cd2cdd158ae1379bcc63516b000c Update page.tsx
-+ c7ea89bda7e2b738f29407bc5dd487f33cc574c3 Update page.tsx
-+ 8c266bfbdb0b457c8871adfc2a2a349085cb286d Update page.tsx
-+ cd79a9e62437da71ec1c787f002536f65e2e1b44 Update AdminSidebar.tsx
-+ 766434eda3c624f35b76f0ee96e6181c1596e8b6 update langfuse
-+ b0e0faef5f337fb9f5a6a3507c5946dc818c5fd8 Create PLATFORM_ANALYSIS.md
-+ e757025a56f51de0fb2f7ffb743c0d875e0c653e Create admin_test_accounts.csv
-+ 49bc55c9edde6a8fe975a4b9c346d4552ec76afd Create create_seed_accounts.py
-+ a88dc38b26d61bbf47e504c712b41f9853012be7 Create current-state.md
-+ da9ec3022ab0c185710ff825388f22029b177102 Create create_seed_accounts.py
-+ 907bc0302a494e87fb9db5f7079c083ca05d444a update plan reset password
-+ b62d0d2331866ab47f39ab58e381578944599aac Create Eval-Resume-Adapters.ipynb
-+ ceb8f354fdeb4a3bd4b46800bb9b40ef60e83e83 learning path improvement ux
++ 679b6d92bc8eb87a57f4bd612c8abe9f50bf1e28 Delete Caddyfile
++ 416155e2a1a7e3d729eabe72d2a8c076cb60001a Delete deploy.sh
++ bbca047f82e6bf5bf1bc3c0c07240d20e3f74ca9 Update DEPLOYMENT_PLAN.md
++ ac2f804b49202e27795a34d938a1e516682f34c7 Update ENVIRONMENT_MATRIX.md
++ 7711ef8a6a3f6b39b7742a484ffc2f52b5c1369e Delete nginx.conf
++ f4b56155e1e8650ed3f16c70b8c74da7ea04c1c9 Update PRODUCTION_CHECKLIST.md
++ d84a8ad222a7322cf666549a91ca4ba0a589f48d Update README.md
++ 674d539468ff09c21055fc32c3a5a9231192e3df update .env
++ 6ced11c8435a9c728438239d1828e1bf41b8f1fa update uv
++ 02a0bbcb3aaa3e770c26b70a9fbcfa487b4f6e5b Update docker-compose.yml
 "@
 
 
