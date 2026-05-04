@@ -494,6 +494,7 @@ export interface LearningPathResponse {
 export interface GeneratePathRequest {
   desired_section_ids?: string[];
   selected_course_ids?: string[];
+  persist_selected_course_ids?: boolean;
 }
 
 export interface GeneratePathResponse {

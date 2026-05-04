@@ -49,6 +49,7 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
         content.get_concepts_by_ids = AsyncMock(return_value={})
 
         MockGoal.return_value.get_by_user_id = AsyncMock(return_value=None)
+        MockGoal.return_value.upsert_for_user = AsyncMock()
         MockMastery.return_value.bulk_get_for_user = AsyncMock(return_value={})
         MockPlacement.return_value.get_by_user_id = AsyncMock(return_value=[])
         MockProgress.return_value.list_for_user_units = AsyncMock(return_value={})
@@ -65,11 +66,94 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
             GeneratePathRequest(selected_course_ids=["CS230", "CS231n"]),
         )
 
+    MockGoal.return_value.upsert_for_user.assert_not_awaited()
     content.get_linked_learning_units.assert_awaited_once_with(["CS230", "CS231n"])
     assert response.total_units == 1
     assert response.items[0].course_slug == "cs230"
     assert response.items[0].unit_slug == "lecture-01-seg1"
     assert response.items[0].learn_href == "/courses/cs230/learn/lecture-01-seg1"
+
+
+@pytest.mark.asyncio
+async def test_generate_learning_path_request_selected_course_ids_override_saved_goal_and_persist():
+    from src.schemas.learning_path import GeneratePathRequest
+    from src.services.recommendation_engine import _generate_canonical_learning_path
+
+    section_id = uuid.uuid4()
+    unit_id = uuid.uuid4()
+    user = SimpleNamespace(id=uuid.uuid4())
+    unit = SimpleNamespace(
+        id=unit_id,
+        slug="lecture-01-seg1",
+        title="NLP Unit",
+        section_id=section_id,
+        canonical_unit_id=str(uuid.uuid4()),
+        estimated_minutes=30,
+        course_id=uuid.uuid4(),
+    )
+    section = SimpleNamespace(id=section_id, title="Natural Language Processing")
+    course = SimpleNamespace(id=unit.course_id, slug="cs224n", title="CS224n: NLP")
+    plan = SimpleNamespace(id=uuid.uuid4())
+    db = MagicMock()
+    db.execute = AsyncMock()
+
+    with (
+        patch("src.services.recommendation_engine.CanonicalContentRepository") as MockContent,
+        patch("src.services.recommendation_engine.GoalPreferenceRepository") as MockGoal,
+        patch("src.services.recommendation_engine.LearnerMasteryKPRepository") as MockMastery,
+        patch("src.services.recommendation_engine.PlacementAssessmentRepository") as MockPlacement,
+        patch("src.services.recommendation_engine.PlannerAuditRepository") as MockAudit,
+        patch("src.services.recommendation_engine.LearningProgressRepository") as MockProgress,
+        patch("src.services.recommendation_engine.WaivedUnitRepository") as MockWaived,
+    ):
+        content = MockContent.return_value
+        content.get_linked_learning_units = AsyncMock(return_value=[unit])
+        content.get_courses_by_ids = AsyncMock(return_value={unit.course_id: course})
+        content.get_sections_by_ids = AsyncMock(return_value={section_id: section})
+        content.get_unit_kp_rows = AsyncMock(return_value=[])
+        content.get_canonical_units_by_ids = AsyncMock(return_value={})
+        content.get_quiz_item_counts_by_unit_ids = AsyncMock(return_value={})
+        content.get_concepts_by_ids = AsyncMock(return_value={})
+
+        saved_goal = SimpleNamespace(
+            selected_course_ids=["CS230", "CS231n"],
+            placement_status=None,
+            derived_from_course_set_hash="old-cv-scope",
+        )
+        updated_goal = SimpleNamespace(
+            selected_course_ids=["CS230", "CS224n"],
+            placement_status=None,
+            derived_from_course_set_hash="old-cv-scope",
+        )
+        MockGoal.return_value.get_by_user_id = AsyncMock(return_value=saved_goal)
+        MockGoal.return_value.upsert_for_user = AsyncMock(return_value=updated_goal)
+        MockMastery.return_value.bulk_get_for_user = AsyncMock(return_value={})
+        MockPlacement.return_value.get_by_user_id = AsyncMock(return_value=[])
+        MockProgress.return_value.list_for_user_units = AsyncMock(return_value={})
+        MockWaived.return_value.list_for_user_units = AsyncMock(return_value={})
+
+        audit = MockAudit.return_value
+        audit.create_plan = AsyncMock(return_value=plan)
+        audit.add_rationale = AsyncMock()
+        audit.upsert_session_state = AsyncMock()
+
+        response = await _generate_canonical_learning_path(
+            db,
+            user,
+            GeneratePathRequest(
+                selected_course_ids=["CS230", "CS224n"],
+                persist_selected_course_ids=True,
+            ),
+        )
+
+    MockGoal.return_value.upsert_for_user.assert_awaited_once_with(
+        user.id,
+        selected_course_ids=["CS230", "CS224n"],
+    )
+    content.get_linked_learning_units.assert_awaited_once_with(["CS230", "CS224n"])
+    assert response.total_units == 1
+    assert response.items[0].course_slug == "cs224n"
+    assert response.items[0].learn_href == "/courses/cs224n/learn/lecture-01-seg1"
 
 
 @pytest.mark.asyncio
@@ -135,6 +219,9 @@ async def test_generate_learning_path_uses_placement_decision_for_action():
         MockGoal.return_value.get_by_user_id = AsyncMock(
             return_value=SimpleNamespace(selected_course_ids=["CS230"], placement_status=None),
         )
+        MockGoal.return_value.upsert_for_user = AsyncMock(
+            return_value=SimpleNamespace(selected_course_ids=["CS230"], placement_status=None),
+        )
         MockMastery.return_value.bulk_get_for_user = AsyncMock(return_value={})
         MockPlacement.return_value.get_by_user_id = AsyncMock(
             return_value=[
@@ -166,8 +253,8 @@ async def test_generate_learning_path_uses_placement_decision_for_action():
     assert by_title["Needs Practice"].phase_tag == "phase_a"
     assert by_title["Later Unit"].action == PathAction.deep_practice
     assert by_title["Later Unit"].estimated_hours == 1.0
-    assert by_title["Later Unit"].phase_tag == "phase_b"
-    assert by_title["Later Unit"].is_locked is True
+    assert by_title["Later Unit"].phase_tag == "phase_a"
+    assert by_title["Later Unit"].is_locked is False
 
     saved_path = audit.create_plan.await_args.kwargs["recommended_path_json"]
     assert [item["learning_unit_id"] for item in saved_path] == [

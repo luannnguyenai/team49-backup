@@ -39,11 +39,12 @@ class CanonicalContentRepository:
         result = await self.session.execute(
             select(LearningUnit)
             .join(Course, LearningUnit.course_id == Course.id)
+            .join(CourseSection, LearningUnit.section_id == CourseSection.id)
             .where(
                 or_(*filters),
                 LearningUnit.canonical_unit_id.isnot(None),
             )
-            .order_by(Course.sort_order, LearningUnit.sort_order)
+            .order_by(Course.sort_order, CourseSection.sort_order, LearningUnit.sort_order)
         )
         return list(result.scalars().all())
 

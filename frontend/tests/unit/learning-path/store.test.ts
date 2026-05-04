@@ -112,6 +112,7 @@ describe("learning path store", () => {
     expect(learningPathApi.generatePath).toHaveBeenCalledWith({
       desired_section_ids: [],
       selected_course_ids: ["CS230", "CS231n"],
+      persist_selected_course_ids: true,
     });
     expect(useLearningPathStore.getState()).toMatchObject({
       items: [generatedItem],
@@ -148,6 +149,7 @@ describe("learning path store", () => {
     expect(learningPathApi.generatePath).toHaveBeenCalledWith({
       desired_section_ids: [],
       selected_course_ids: ["CS230", "CS231n"],
+      persist_selected_course_ids: true,
     });
     expect(useLearningPathStore.getState()).toMatchObject({
       items: [generatedItem],
@@ -185,6 +187,7 @@ describe("learning path store", () => {
     expect(learningPathApi.generatePath).toHaveBeenCalledWith({
       desired_section_ids: [],
       selected_course_ids: ["CS230", "CS224n"],
+      persist_selected_course_ids: true,
     });
     expect(useLearningPathStore.getState()).toMatchObject({
       items: [generatedItem],
