@@ -264,9 +264,15 @@ export default function AdminLlmPage() {
               tickFormatter={(v) => `${Math.round(Number(v))}`}
             />
             <Tooltip
-              formatter={(value: number | string | null | undefined) => fmtMs(
-                typeof value === "number" ? value : value == null ? null : Number(value),
-              )}
+              formatter={(value) =>
+                fmtMs(
+                  typeof value === "number"
+                    ? value
+                    : value == null
+                      ? null
+                      : Number(value),
+                )
+              }
               labelFormatter={(value) => `Hour ${String(value).slice(11, 16)}`}
               contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }}
             />
