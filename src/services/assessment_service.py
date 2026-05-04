@@ -40,6 +40,12 @@ from src.services.assessment_strategies import UnitPools
 from src.services.canonical_mastery_service import update_kp_mastery_from_item
 from src.services.mastery_evaluator import classify_mastery
 from src.services.strategy_router import pick_strategy
+from src.core.observability import (
+    build_langfuse_metadata,
+    llm_callbacks,
+    propagate_langfuse_attributes,
+    start_langfuse_root_span,
+)
 
 log = logging.getLogger(__name__)
 
@@ -597,12 +603,41 @@ async def generate_assessment_ai_summary(
                 max_tokens=500,
             )
         )
-        response = llm.invoke(
-            [
-                SystemMessage(content=_ASSESSMENT_SUMMARY_SYSTEM),
-                HumanMessage(content=_assessment_summary_input(result)),
-            ]
+        trace_metadata = build_langfuse_metadata(
+            user_id=str(user_id),
+            session_id=str(session_id),
+            tags=["assessment", "summary"],
+            feature="assessment",
+            route="summary",
+            assessment_session_id=str(session_id),
+            overall_score_percent=result.overall_score_percent,
         )
+        with start_langfuse_root_span(
+            name="assessment-summary",
+            input={"session_id": str(session_id)},
+            metadata=trace_metadata,
+        ):
+            with propagate_langfuse_attributes(
+                user_id=str(user_id),
+                session_id=str(session_id),
+                tags=["assessment", "summary"],
+                metadata={
+                    "feature": "assessment",
+                    "route": "summary",
+                    "assessment_session_id": str(session_id),
+                },
+                trace_name="assessment-summary",
+            ):
+                response = llm.invoke(
+                    [
+                        SystemMessage(content=_ASSESSMENT_SUMMARY_SYSTEM),
+                        HumanMessage(content=_assessment_summary_input(result)),
+                    ],
+                    config={
+                        "callbacks": llm_callbacks(),
+                        "metadata": trace_metadata,
+                    },
+                )
         parsed = _parse_assessment_ai_summary(str(response.content))
         return parsed
     except Exception as exc:

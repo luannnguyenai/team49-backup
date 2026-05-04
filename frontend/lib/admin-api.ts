@@ -8,11 +8,18 @@ export type AdminOverview = {
   total_users: number;
   dau: number;
   mau: number;
+  active_now: number;
   signups_7d: number;
   llm_calls_24h: number;
   avg_latency_ms: number | null;
   error_rate: number | null;
   uptime_seconds: number;
+};
+
+export type CurrentModel = {
+  name: string;
+  provider: string;
+  fast_model: string;
 };
 
 export type AdminUserRow = {
@@ -89,6 +96,7 @@ export type NegativeFeedbackRow = {
 
 export const adminApi = {
   overview: () => api.get<AdminOverview>("/api/admin/stats/overview").then((r) => r.data),
+  currentModel: () => api.get<CurrentModel>("/api/admin/model/current").then((r) => r.data),
   users: (page = 1, size = 20, q?: string) =>
     api
       .get<AdminUsersPage>("/api/admin/users", { params: { page, size, q } })

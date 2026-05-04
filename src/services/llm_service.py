@@ -28,10 +28,15 @@ from src.services.llm_rate_limiter import enforce_llm_rate_limit
 from src.services.sandbox import run_python_code
 from src.services.router import route_question
 from src.core.observability import (
+    build_langfuse_metadata,
+    get_langfuse_client,
     llm_callbacks,
     observe_tutor_stream_first_answer,
     observe_tutor_stream_first_status,
     observe_tutor_stream_total,
+    propagate_langfuse_attributes,
+    start_langfuse_observation,
+    start_langfuse_root_span,
 )
 
 # Configure File Logging
@@ -291,6 +296,8 @@ async def _save_qa_history(
     current_timestamp: float,
     context_binding_id: str | None,
     image_base64: str | None,
+    langfuse_trace_id: str | None = None,
+    langfuse_observation_id: str | None = None,
 ) -> int:
     async with tutor_thread_async_session_factory() as db:
         history = QAHistory(
@@ -301,6 +308,8 @@ async def _save_qa_history(
             current_timestamp=current_timestamp,
             context_binding_id=context_binding_id,
             image_base64=image_base64[:500] if image_base64 else None,
+            langfuse_trace_id=langfuse_trace_id,
+            langfuse_observation_id=langfuse_observation_id,
         )
         db.add(history)
         await db.flush()
@@ -423,6 +432,7 @@ def get_context_and_stream_langgraph(
     user_question: str,
     image_base64: str | None = None,
     context_binding_id: str | None = None,
+    user_id: str | None = None,
 ):
     """
     Main tutor streaming function.
@@ -442,6 +452,8 @@ def get_context_and_stream_langgraph(
     route = "unknown"
     has_image = bool(image_base64)
     did_error = False
+    langfuse_trace_id: str | None = None
+    langfuse_observation_id: str | None = None
 
     def emit_status(message: str) -> str:
         nonlocal first_status_at
@@ -449,241 +461,356 @@ def get_context_and_stream_langgraph(
             first_status_at = time.perf_counter()
         return _status_event(message)
 
-    try:
-        yield emit_status(STATUS_READING_CONTEXT)
+    trace_metadata = build_langfuse_metadata(
+        user_id=user_id,
+        session_id=context_binding_id,
+        tags=["tutor", "streaming"],
+        feature="tutor",
+        lecture_id=str(lecture_id) if lecture_id else None,
+        context_binding_id=context_binding_id,
+        has_image=has_image,
+    )
 
-        # Fetch all DB data upfront (asyncio.run is safe in FastAPI threadpool)
-        lecture, chapters, past_qas = asyncio.run(_fetch_lecture_context(lecture_id))
-        persisted_lecture_id: str | None = lecture_id if lecture else None
-        lecture_scope = get_lecture_scope_metadata(lecture_id)
-        transcript_line_dicts: list[dict] | None = None
+    with start_langfuse_root_span(
+        name="tutor-request",
+        input={
+            "lecture_id": lecture_id,
+            "current_timestamp": current_timestamp,
+            "question": user_question,
+            "context_binding_id": context_binding_id,
+            "has_image": has_image,
+        },
+        metadata=trace_metadata,
+    ):
+        client = get_langfuse_client()
+        if client is not None:
+            try:
+                langfuse_trace_id = client.get_current_trace_id()
+                langfuse_observation_id = client.get_current_observation_id()
+            except Exception:
+                langfuse_trace_id = None
+                langfuse_observation_id = None
 
-        if lecture is None:
-            canonical_context = asyncio.run(
-                _fetch_canonical_tutor_context(lecture_id, context_binding_id)
-            )
-            if canonical_context is None:
-                raise ValueError("Lecture not found")
+        try:
+            with propagate_langfuse_attributes(
+                user_id=user_id,
+                session_id=context_binding_id,
+                tags=["tutor", "streaming"],
+                metadata={
+                    "feature": "tutor",
+                    "lecture_id": str(lecture_id) if lecture_id else "",
+                    "context_binding_id": context_binding_id or "",
+                },
+                trace_name="tutor-request",
+            ):
+                yield emit_status(STATUS_READING_CONTEXT)
 
-            lecture_title = canonical_context["lecture_title"]
-            chapters = canonical_context["chapters"]
-            past_qas = canonical_context["past_qas"]
-            lecture_scope = canonical_context["lecture_scope"]
-            transcript_line_dicts = canonical_context["transcript_lines"]
-        else:
-            lecture_title = lecture.title
+                # Fetch all DB data upfront (asyncio.run is safe in FastAPI threadpool)
+                with start_langfuse_observation(
+                    name="tutor-fetch-context",
+                    input={
+                        "lecture_id": lecture_id,
+                        "context_binding_id": context_binding_id,
+                    },
+                    metadata={
+                        "feature": "tutor",
+                        "step": "fetch-context",
+                        "has_image": has_image,
+                    },
+                ):
+                    lecture, chapters, past_qas = asyncio.run(_fetch_lecture_context(lecture_id))
+                    persisted_lecture_id: str | None = lecture_id if lecture else None
+                    lecture_scope = get_lecture_scope_metadata(lecture_id)
+                    transcript_line_dicts: list[dict] | None = None
 
-        toc_context = "TABLE OF CONTENTS:\n"
-        context_summary = ""
-        for chap in chapters:
-            start_ts = format_timestamp(float(_chapter_field(chap, "start_time", 0) or 0))
-            end_ts = format_timestamp(float(_chapter_field(chap, "end_time", 0) or 0))
-            title = str(_chapter_field(chap, "title", "") or "")
-            summary = str(_chapter_field(chap, "summary", "") or "")
-            toc_context += f"- [{start_ts} - {end_ts}] {title}: {summary}\n"
-            context_summary += f"- {title}: {summary}\n"
+                    if lecture is None:
+                        canonical_context = asyncio.run(
+                            _fetch_canonical_tutor_context(lecture_id, context_binding_id)
+                        )
+                        if canonical_context is None:
+                            raise ValueError("Lecture not found")
 
-        current_chapter = next(
-            (
-                str(_chapter_field(ch, "title", "") or "")
-                for ch in chapters
-                if float(_chapter_field(ch, "start_time", 0) or 0)
-                <= current_timestamp
-                < float(_chapter_field(ch, "end_time", 0) or 0)
-            ),
-            "",
-        )
-        routing = route_question(
-            user_question, lecture_title, context_summary,
-            current_timestamp=current_timestamp,
-            current_chapter=current_chapter,
-            lecture_scope=lecture_scope,
-        )
-        route = routing.get("route", "COMPLEX")
+                        lecture_title = canonical_context["lecture_title"]
+                        chapters = canonical_context["chapters"]
+                        past_qas = canonical_context["past_qas"]
+                        lecture_scope = canonical_context["lecture_scope"]
+                        transcript_line_dicts = canonical_context["transcript_lines"]
+                    else:
+                        lecture_title = lecture.title
 
-        if route == "BLOCKED":
-            yield json.dumps({"blocked": True, "message": routing.get("message", "Câu hỏi ngoài phạm vi.")}) + "\n"
-            qa_logger.info(
-                f"\n{'='*60}\n[BLOCKED] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-                f"[Lecture] : {lecture_id}\n[Question]: {user_question}\n"
-                f"[Reason]  : {routing.get('reason')}\n{'='*60}"
-            )
-            return
+                toc_context = "TABLE OF CONTENTS:\n"
+                context_summary = ""
+                for chap in chapters:
+                    start_ts = format_timestamp(float(_chapter_field(chap, "start_time", 0) or 0))
+                    end_ts = format_timestamp(float(_chapter_field(chap, "end_time", 0) or 0))
+                    title = str(_chapter_field(chap, "title", "") or "")
+                    summary = str(_chapter_field(chap, "summary", "") or "")
+                    toc_context += f"- [{start_ts} - {end_ts}] {title}: {summary}\n"
+                    context_summary += f"- {title}: {summary}\n"
 
-        if route == "SIMPLE" and not image_base64:
-            direct_answer = routing.get("direct_answer", "")
-            if first_answer_at is None:
-                first_answer_at = time.perf_counter()
-            yield json.dumps({"a": direct_answer}) + "\n"
-            thoughts = f"[SIMPLE] {routing.get('reason', '')}"
-            _log_qa(lecture_id, current_timestamp, user_question, direct_answer, thoughts)
-            qa_id = asyncio.run(_save_qa_history(
-                persisted_lecture_id,
-                user_question,
-                direct_answer,
-                thoughts,
-                current_timestamp,
-                context_binding_id,
-                image_base64,
-            ))
-            yield json.dumps({"qa_id": qa_id}) + "\n"
-            return
-
-        # COMPLEX path — fetch transcript window
-        yield emit_status(STATUS_FINDING_RELEVANT)
-
-        start_window = max(0, current_timestamp - 300)
-        end_window = current_timestamp + 300
-        if transcript_line_dicts is None:
-            lines = asyncio.run(_fetch_transcript_window(lecture_id, start_window, end_window))
-            transcript_line_dicts = [
-                {"start_time": line.start_time, "content": line.content}
-                for line in lines
-            ]
-        lines = [
-            line
-            for line in transcript_line_dicts
-            if start_window <= float(line.get("start_time") or 0) <= end_window
-        ]
-
-        transcript_context = "TRANSCRIPT WINDOW:\n"
-        for line in lines:
-            ts = format_timestamp(float(line.get("start_time") or 0))
-            transcript_context += f"[{ts}] {line.get('content', '')}\n"
-
-        lecture_scope_context = ""
-        if lecture_scope:
-            lecture_scope_context = (
-                f"LECTURE SCOPE:\n"
-                f"- Lecture title: {lecture_scope.get('lecture_title', lecture_title)}\n"
-                f"- Course phase: {lecture_scope.get('course_phase', '')}\n"
-                f"- Core topics: {', '.join(lecture_scope.get('core_topics', []))}\n"
-                f"- Scope keywords: {', '.join(lecture_scope.get('scope_keywords', []))}\n"
-            )
-
-        curr_ts_str = format_timestamp(current_timestamp)
-        system_instruction = _build_tutor_system_instruction(has_image=bool(image_base64))
-
-        user_prompt = (
-            f"[INPUT]\n"
-            f"Lecture Content:\n{lecture_scope_context}{toc_context}\n\n"
-            f"Current Time Window ({curr_ts_str}):\n{transcript_context}\n\n"
-            f"Current Chapter: {current_chapter or 'Unknown'}\n\n"
-            f"Student Question: \"{user_question}\""
-        )
-
-        content_list = [{"type": "text", "text": user_prompt}]
-        if image_base64:
-            content_list.append({
-                "type": "image_url",
-                "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
-            })
-
-        history_messages = []
-        for qa in past_qas:
-            if qa.question:
-                history_messages.append(HumanMessage(content=qa.question))
-            if qa.answer:
-                history_messages.append(AIMessage(content=qa.answer))
-
-        sys_msg = SystemMessage(content=system_instruction)
-        human_msg = HumanMessage(content=content_list)
-
-        full_answer = ""
-        sandbox_output = ""
-        attempt_count = 0
-        in_tool_call = False
-        has_streamed_answer = False
-
-        inputs = {"messages": [sys_msg] + history_messages + [human_msg]}
-
-        yield emit_status(STATUS_THINKING_ANSWER)
-
-        stream_config = {
-            "callbacks": llm_callbacks(),
-            "metadata": {
-                "lecture_id": str(lecture_id) if lecture_id else None,
-                "context_binding_id": context_binding_id,
-                "route": "tutor.stream",
-            },
-        }
-        for chunk, metadata in compiled_graph.stream(inputs, stream_mode="messages", config=stream_config):
-            if hasattr(chunk, "tool_calls") and chunk.tool_calls:
-                if not in_tool_call:
-                    in_tool_call = True
-                    status = STATUS_TOOL_RUNNING if attempt_count == 0 else STATUS_TOOL_RETRY
-                    yield emit_status(status)
-                    attempt_count += 1
-
-            if isinstance(chunk, ToolMessage):
-                in_tool_call = False
-                tool_content = str(chunk.content)
-                sandbox_output += tool_content[:2000]
-                if "ExitCode:0" in tool_content:
-                    yield emit_status(STATUS_FINALIZING_ANSWER)
-
-            if isinstance(chunk, BaseMessageChunk) and not getattr(chunk, "tool_calls", None):
-                raw = chunk.content
-                if isinstance(raw, str):
-                    text_chunk = raw
-                elif isinstance(raw, list):
-                    text_chunk = "".join(
-                        b.get("text", "") for b in raw
-                        if isinstance(b, dict) and b.get("type") == "text"
+                current_chapter = next(
+                    (
+                        str(_chapter_field(ch, "title", "") or "")
+                        for ch in chapters
+                        if float(_chapter_field(ch, "start_time", 0) or 0)
+                        <= current_timestamp
+                        < float(_chapter_field(ch, "end_time", 0) or 0)
+                    ),
+                    "",
+                )
+                with start_langfuse_observation(
+                    name="tutor-route-question",
+                    input={
+                        "question": user_question,
+                        "lecture_title": lecture_title,
+                        "current_timestamp": current_timestamp,
+                        "current_chapter": current_chapter,
+                    },
+                    metadata={
+                        "feature": "tutor",
+                        "step": "route-question",
+                        "has_image": has_image,
+                    },
+                ):
+                    routing = route_question(
+                        user_question, lecture_title, context_summary,
+                        current_timestamp=current_timestamp,
+                        current_chapter=current_chapter,
+                        lecture_scope=lecture_scope,
                     )
-                else:
-                    text_chunk = ""
-                if text_chunk:
-                    if not has_streamed_answer and not sandbox_output:
-                        yield emit_status(STATUS_FINALIZING_ANSWER)
+                route = routing.get("route", "COMPLEX")
+
+                if route == "BLOCKED":
+                    yield json.dumps({"blocked": True, "message": routing.get("message", "Câu hỏi ngoài phạm vi.")}) + "\n"
+                    qa_logger.info(
+                        f"\n{'='*60}\n[BLOCKED] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"[Lecture] : {lecture_id}\n[Question]: {user_question}\n"
+                        f"[Reason]  : {routing.get('reason')}\n{'='*60}"
+                    )
+                    return
+
+                if route == "SIMPLE" and not image_base64:
+                    direct_answer = routing.get("direct_answer", "")
                     if first_answer_at is None:
                         first_answer_at = time.perf_counter()
-                    has_streamed_answer = True
-                    full_answer += text_chunk
-                    yield json.dumps({"a": text_chunk}) + "\n"
+                    yield json.dumps({"a": direct_answer}) + "\n"
+                    thoughts = f"[SIMPLE] {routing.get('reason', '')}"
+                    _log_qa(lecture_id, current_timestamp, user_question, direct_answer, thoughts)
+                    with start_langfuse_observation(
+                        name="tutor-persist-qa",
+                        input={
+                            "lecture_id": persisted_lecture_id,
+                            "context_binding_id": context_binding_id,
+                            "route": route,
+                        },
+                        metadata={
+                            "feature": "tutor",
+                            "step": "persist-qa",
+                            "has_image": has_image,
+                            "route": route,
+                        },
+                    ):
+                        qa_id = asyncio.run(_save_qa_history(
+                            persisted_lecture_id,
+                            user_question,
+                            direct_answer,
+                            thoughts,
+                            current_timestamp,
+                            context_binding_id,
+                            image_base64,
+                            langfuse_trace_id=langfuse_trace_id,
+                            langfuse_observation_id=langfuse_observation_id,
+                        ))
+                    yield json.dumps({"qa_id": qa_id}) + "\n"
+                    return
 
-            if isinstance(chunk, AIMessage) and chunk.content == "Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy.":
-                if not has_streamed_answer:
-                    yield emit_status(STATUS_FINALIZING_ANSWER)
-                    if first_answer_at is None:
-                        first_answer_at = time.perf_counter()
-                    yield json.dumps({"a": chunk.content}, ensure_ascii=False) + "\n"
-                    has_streamed_answer = True
-                full_answer += chunk.content
+                # COMPLEX path — fetch transcript window
+                yield emit_status(STATUS_FINDING_RELEVANT)
 
-        thoughts = f"[COMPLEX] [SANDBOX]\n{sandbox_output}" if sandbox_output else "[COMPLEX]"
-        _log_qa(lecture_id, current_timestamp, user_question, full_answer, thoughts)
-        qa_id = asyncio.run(_save_qa_history(
-            persisted_lecture_id,
-            user_question,
-            full_answer,
-            thoughts,
-            current_timestamp,
-            context_binding_id,
-            image_base64,
-        ))
-        yield json.dumps({"qa_id": qa_id}) + "\n"
+                start_window = max(0, current_timestamp - 300)
+                end_window = current_timestamp + 300
+                with start_langfuse_observation(
+                    name="tutor-fetch-transcript-window",
+                    input={
+                        "lecture_id": lecture_id,
+                        "start_window": start_window,
+                        "end_window": end_window,
+                    },
+                    metadata={
+                        "feature": "tutor",
+                        "step": "fetch-transcript-window",
+                        "has_image": has_image,
+                    },
+                ):
+                    if transcript_line_dicts is None:
+                        lines = asyncio.run(_fetch_transcript_window(lecture_id, start_window, end_window))
+                        transcript_line_dicts = [
+                            {"start_time": line.start_time, "content": line.content}
+                            for line in lines
+                        ]
+                lines = [
+                    line
+                    for line in transcript_line_dicts
+                    if start_window <= float(line.get("start_time") or 0) <= end_window
+                ]
 
-    except Exception as e:
-        did_error = True
-        qa_logger.error(f"Error: {e}")
-        yield json.dumps({"e": str(e)}) + "\n"
-    finally:
-        final_route = "error" if did_error and route == "unknown" else route
-        if first_status_at is not None:
-            observe_tutor_stream_first_status(
-                first_status_at - request_started_at,
+                transcript_context = "TRANSCRIPT WINDOW:\n"
+                for line in lines:
+                    ts = format_timestamp(float(line.get("start_time") or 0))
+                    transcript_context += f"[{ts}] {line.get('content', '')}\n"
+
+                lecture_scope_context = ""
+                if lecture_scope:
+                    lecture_scope_context = (
+                        f"LECTURE SCOPE:\n"
+                        f"- Lecture title: {lecture_scope.get('lecture_title', lecture_title)}\n"
+                        f"- Course phase: {lecture_scope.get('course_phase', '')}\n"
+                        f"- Core topics: {', '.join(lecture_scope.get('core_topics', []))}\n"
+                        f"- Scope keywords: {', '.join(lecture_scope.get('scope_keywords', []))}\n"
+                    )
+
+                curr_ts_str = format_timestamp(current_timestamp)
+                system_instruction = _build_tutor_system_instruction(has_image=bool(image_base64))
+
+                user_prompt = (
+                    f"[INPUT]\n"
+                    f"Lecture Content:\n{lecture_scope_context}{toc_context}\n\n"
+                    f"Current Time Window ({curr_ts_str}):\n{transcript_context}\n\n"
+                    f"Current Chapter: {current_chapter or 'Unknown'}\n\n"
+                    f"Student Question: \"{user_question}\""
+                )
+
+                content_list = [{"type": "text", "text": user_prompt}]
+                if image_base64:
+                    content_list.append({
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
+                    })
+
+                history_messages = []
+                for qa in past_qas:
+                    if qa.question:
+                        history_messages.append(HumanMessage(content=qa.question))
+                    if qa.answer:
+                        history_messages.append(AIMessage(content=qa.answer))
+
+                sys_msg = SystemMessage(content=system_instruction)
+                human_msg = HumanMessage(content=content_list)
+
+                full_answer = ""
+                sandbox_output = ""
+                attempt_count = 0
+                in_tool_call = False
+                has_streamed_answer = False
+
+                inputs = {"messages": [sys_msg] + history_messages + [human_msg]}
+
+                yield emit_status(STATUS_THINKING_ANSWER)
+
+                stream_config = {
+                    "callbacks": llm_callbacks(),
+                    "metadata": build_langfuse_metadata(
+                        user_id=user_id,
+                        session_id=context_binding_id,
+                        tags=["tutor", "streaming"],
+                        lecture_id=str(lecture_id) if lecture_id else None,
+                        context_binding_id=context_binding_id,
+                        route="tutor.stream",
+                    ),
+                }
+                for chunk, metadata in compiled_graph.stream(inputs, stream_mode="messages", config=stream_config):
+                    if hasattr(chunk, "tool_calls") and chunk.tool_calls:
+                        if not in_tool_call:
+                            in_tool_call = True
+                            status = STATUS_TOOL_RUNNING if attempt_count == 0 else STATUS_TOOL_RETRY
+                            yield emit_status(status)
+                            attempt_count += 1
+
+                    if isinstance(chunk, ToolMessage):
+                        in_tool_call = False
+                        tool_content = str(chunk.content)
+                        sandbox_output += tool_content[:2000]
+                        if "ExitCode:0" in tool_content:
+                            yield emit_status(STATUS_FINALIZING_ANSWER)
+
+                    if isinstance(chunk, BaseMessageChunk) and not getattr(chunk, "tool_calls", None):
+                        raw = chunk.content
+                        if isinstance(raw, str):
+                            text_chunk = raw
+                        elif isinstance(raw, list):
+                            text_chunk = "".join(
+                                b.get("text", "") for b in raw
+                                if isinstance(b, dict) and b.get("type") == "text"
+                            )
+                        else:
+                            text_chunk = ""
+                        if text_chunk:
+                            if not has_streamed_answer and not sandbox_output:
+                                yield emit_status(STATUS_FINALIZING_ANSWER)
+                            if first_answer_at is None:
+                                first_answer_at = time.perf_counter()
+                            has_streamed_answer = True
+                            full_answer += text_chunk
+                            yield json.dumps({"a": text_chunk}) + "\n"
+
+                    if isinstance(chunk, AIMessage) and chunk.content == "Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy.":
+                        if not has_streamed_answer:
+                            yield emit_status(STATUS_FINALIZING_ANSWER)
+                            if first_answer_at is None:
+                                first_answer_at = time.perf_counter()
+                            yield json.dumps({"a": chunk.content}, ensure_ascii=False) + "\n"
+                            has_streamed_answer = True
+                        full_answer += chunk.content
+
+                thoughts = f"[COMPLEX] [SANDBOX]\n{sandbox_output}" if sandbox_output else "[COMPLEX]"
+                _log_qa(lecture_id, current_timestamp, user_question, full_answer, thoughts)
+                with start_langfuse_observation(
+                    name="tutor-persist-qa",
+                    input={
+                        "lecture_id": persisted_lecture_id,
+                        "context_binding_id": context_binding_id,
+                        "route": route,
+                    },
+                    metadata={
+                        "feature": "tutor",
+                        "step": "persist-qa",
+                        "has_image": has_image,
+                        "route": route,
+                    },
+                ):
+                    qa_id = asyncio.run(_save_qa_history(
+                        persisted_lecture_id,
+                        user_question,
+                        full_answer,
+                        thoughts,
+                        current_timestamp,
+                        context_binding_id,
+                        image_base64,
+                        langfuse_trace_id=langfuse_trace_id,
+                        langfuse_observation_id=langfuse_observation_id,
+                    ))
+                yield json.dumps({"qa_id": qa_id}) + "\n"
+
+        except Exception as e:
+            did_error = True
+            qa_logger.error(f"Error: {e}")
+            yield json.dumps({"e": str(e)}) + "\n"
+        finally:
+            final_route = "error" if did_error and route == "unknown" else route
+            if first_status_at is not None:
+                observe_tutor_stream_first_status(
+                    first_status_at - request_started_at,
+                    route_type=final_route,
+                    has_image=has_image,
+                )
+            if first_answer_at is not None:
+                observe_tutor_stream_first_answer(
+                    first_answer_at - request_started_at,
+                    route_type=final_route,
+                    has_image=has_image,
+                )
+            observe_tutor_stream_total(
+                time.perf_counter() - request_started_at,
                 route_type=final_route,
                 has_image=has_image,
             )
-        if first_answer_at is not None:
-            observe_tutor_stream_first_answer(
-                first_answer_at - request_started_at,
-                route_type=final_route,
-                has_image=has_image,
-            )
-        observe_tutor_stream_total(
-            time.perf_counter() - request_started_at,
-            route_type=final_route,
-            has_image=has_image,
-        )

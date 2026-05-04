@@ -129,6 +129,24 @@ GEMINI_API_KEY=...
 
 Use the external SQL Server connection fields only if the integration layer explicitly supports that backend. The current application ORM path is PostgreSQL.
 
+LangFuse tracing is optional and fail-safe. The `.env.example` files already match the current LangFuse SDK naming:
+
+```env
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
+# Optional backward-compatible alias for older local configs
+LANGFUSE_HOST=https://cloud.langfuse.com
+NEXT_PUBLIC_LANGFUSE_HOST=https://cloud.langfuse.com
+```
+
+Notes:
+
+- `LANGFUSE_BASE_URL` is the preferred backend variable from current LangFuse docs.
+- `LANGFUSE_HOST` is kept only as a compatibility alias for older repo/local setups.
+- `NEXT_PUBLIC_LANGFUSE_HOST` is frontend UI/embed configuration only; it does not enable backend tracing.
+- For non-EU Cloud or self-hosted LangFuse, change `LANGFUSE_BASE_URL` to the correct region/host.
+
 ### Run With Docker
 
 ```bash
@@ -193,6 +211,39 @@ npm run dev
 | History | `/api/history`, `/api/history/{session_id}/detail` | Canonical interactions link via `interactions.canonical_item_id -> question_bank.item_id`. |
 | Tutor | `/api/lectures/*` | Lecture transcript/slide Q&A path; separate from canonical planner content. |
 
+## LLM Tracing
+
+The app uses a LangFuse root-span-first pattern for traced AI flows:
+
+- create one LangFuse SDK root observation per user-visible AI task
+- propagate stable attributes such as `langfuse_user_id`, `langfuse_session_id`, and `langfuse_tags`
+- run LangChain/LangGraph callbacks inside that active context
+- persist tutor `trace_id` on `qa_history` so thumbs-up/down feedback can be attached back to the same trace
+
+Current traced flows:
+
+- Tutor streaming: `/api/lectures/ask`
+- Tutor rating to LangFuse score linkage: `/api/lectures/{qa_id}/rate`
+- Assessment AI summary generation
+- Onboarding prior-analysis across both LangChain-backed and direct OpenAI branches
+
+Tutor traces also expose internal child observations for:
+
+- context fetch
+- route selection
+- transcript-window retrieval
+- QA persistence
+
+Local smoke check:
+
+1. Fill `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` in root `.env`.
+2. Restart backend.
+3. Call one tutor request, one onboarding prior-analysis request, and one assessment summary request.
+4. Rate a tutor answer.
+5. Confirm traces and the `user_thumb` score appear in LangFuse.
+
+The `langfuse/skills` GitHub repo is an agent-environment helper for coding assistants. It is not an application runtime dependency for this repo.
+
 ## Validation
 
 Useful checks before handing work to another teammate:
@@ -238,6 +289,7 @@ Active references:
 | Quiz/assessment has no questions | Missing `item_phase_map` or `item_kp_map` rows for selected unit/phase | Validate canonical artifacts and inspect `question_bank` joins. |
 | Planner recommendations look flat | Sparse prerequisite graph, missing KP mastery, or only neutral calibration priors | Check `prerequisite_edges`, `unit_kp_map`, `item_calibration`, and current `learner_mastery_kp` distribution. |
 | Tutor cannot answer lecture-specific questions | Missing `data/courses/<course>/transcripts` or lecture seed | Restore course assets and run `scripts.seed_lectures`. |
+| LangFuse UI link works but no backend traces appear | Missing LangFuse keys, wrong `LANGFUSE_BASE_URL`, or backend was not restarted | Fill root `.env`, prefer `LANGFUSE_BASE_URL`, restart backend, then hit a traced LLM endpoint. |
 | Docs mention `modules/topics/questions` as active | Historical doc, not current contract | Use the active references above. |
 
 ## Contribution Notes

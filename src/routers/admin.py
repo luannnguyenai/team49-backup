@@ -25,6 +25,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import require_admin
 from src.models.user import User
@@ -210,7 +211,9 @@ async def stats_overview(
     ).scalar_one()
 
     # DAU/MAU best-effort via sessions table; fallback to access log for active users.
-    dau = mau = 0
+    dau = mau = active_now = 0
+    fifteen_min_ago = now - timedelta(minutes=15)
+    one_hour_ago = now - timedelta(hours=1)
     try:
         dau = (
             await db.execute(
@@ -226,6 +229,18 @@ async def stats_overview(
                     "SELECT COUNT(DISTINCT user_id) FROM sessions WHERE started_at >= :since"
                 ),
                 {"since": month_ago},
+            )
+        ).scalar_one() or 0
+        active_now = (
+            await db.execute(
+                text(
+                    """
+                    SELECT COUNT(DISTINCT user_id) FROM sessions
+                    WHERE started_at >= :recent
+                       OR (completed_at IS NULL AND started_at >= :open_since)
+                    """
+                ),
+                {"recent": fifteen_min_ago, "open_since": one_hour_ago},
             )
         ).scalar_one() or 0
     except Exception:
@@ -266,11 +281,21 @@ async def stats_overview(
         "total_users": int(total_users),
         "dau": int(dau),
         "mau": int(mau),
+        "active_now": int(active_now),
         "signups_7d": int(signups_7d),
         "llm_calls_24h": int(llm_calls_24h),
         "avg_latency_ms": avg_latency_ms,
         "error_rate": error_rate,
         "uptime_seconds": int(uptime_seconds),
+    }
+
+
+@admin_router.get("/model/current")
+async def current_model(_admin: User = Depends(require_admin)) -> dict[str, Any]:
+    return {
+        "name": settings.default_model,
+        "provider": settings.model_provider,
+        "fast_model": settings.fast_model,
     }
 
 
