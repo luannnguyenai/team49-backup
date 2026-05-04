@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Brain } from "lucide-react";
+import { Brain, Loader2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import ReplanKnowledgeClaimStep from "@/components/replan/ReplanKnowledgeClaimStep";
@@ -10,89 +10,160 @@ import ReplanScopeReviewStep, {
   type ReplanReviewUnit,
   type ReplanSelectedAssessmentUnit,
 } from "@/components/replan/ReplanScopeReviewStep";
-import { buildReplanAssessmentHref, writeReplanAssessmentContext } from "@/lib/replan-assessment-context";
+import { writeReplanAssessmentContext } from "@/lib/replan-assessment-context";
 import { validateReplanKnowledgeClaim } from "@/lib/replan-claim-guardrails";
-
-const demoScopeUnits: ReplanReviewUnit[] = [
-  {
-    canonicalUnitId: "unit_faster_rcnn",
-    title: "Faster R-CNN",
-    source: "matched_from_description",
-    knowledgePoints: ["Region Proposal Network", "Anchor boxes", "Two-stage detection", "RoI pooling / feature extraction"],
-    questionCounts: { easy: 3, medium: 4, hard: 2, application: 1 },
-  },
-];
-
-const demoPrerequisites: (PrerequisiteSuggestion & { reviewUnit: ReplanReviewUnit })[] = [
-  {
-    canonicalUnitId: "unit_rcnn",
-    title: "R-CNN",
-    reason: "R-CNN is a foundation for Faster R-CNN in the current path.",
-    depth: 1,
-    reviewUnit: {
-      canonicalUnitId: "unit_rcnn",
-      title: "R-CNN",
-      source: "suggested_prerequisite",
-      suggestedForTitle: "Faster R-CNN",
-      knowledgePoints: ["Region proposals", "Selective search"],
-      questionCounts: { easy: 2, medium: 3, hard: 1, application: 0 },
-    },
-  },
-];
+import {
+  replanApi,
+  type ReplanAnalyzeResponse,
+  type ReplanPrerequisiteSuggestion,
+} from "@/lib/replan-api";
+import {
+  writeStartedCanonicalAssessment,
+  writePendingCanonicalAssessment,
+} from "@/lib/canonical-assessment-session";
 
 export default function ReplanPage() {
   const router = useRouter();
   const [claim, setClaim] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [step, setStep] = useState<"describe" | "review">("describe");
-  const [reviewUnits, setReviewUnits] = useState<ReplanReviewUnit[]>(demoScopeUnits);
+  const [reviewUnits, setReviewUnits] = useState<ReplanReviewUnit[]>([]);
   const [showPrerequisites, setShowPrerequisites] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
 
-  function continueToAnalysis() {
+  // Store backend prerequisites for the dialog
+  const [backendPrerequisites, setBackendPrerequisites] = useState<
+    (ReplanPrerequisiteSuggestion & { reviewUnit: ReplanReviewUnit })[]
+  >([]);
+  // Store the first matched unit title for the prerequisite dialog
+  const [targetTitle, setTargetTitle] = useState("");
+
+  async function continueToAnalysis() {
     const validation = validateReplanKnowledgeClaim(claim);
     if (!validation.ok) {
       setMessage(validation.message);
       return;
     }
-    if (/already\s+mastered|đã\s+nắm\s+rõ/i.test(claim) && /faster\s+r-?cnn/i.test(claim)) {
-      setMessage("Faster R-CNN đã được ghi nhận là bạn nắm rõ rồi, nên không cần test lại.");
-      setReviewUnits([]);
-      setShowPrerequisites(false);
-      setStep("review");
-      return;
-    }
+
     setMessage(validation.warning ?? null);
-    setReviewUnits(demoScopeUnits);
-    setShowPrerequisites(demoPrerequisites.length > 0);
-    setStep("review");
+    setAnalyzeError(null);
+    setIsAnalyzing(true);
+
+    try {
+      const response: ReplanAnalyzeResponse = await replanApi.analyze(claim);
+
+      // Check guardrail flags
+      if (response.guardrailFlags.includes("no_active_path")) {
+        setMessage("Bạn chưa có lộ trình học. Hãy chọn khoá học và tạo lộ trình trước khi tối ưu.");
+        setReviewUnits([]);
+        setShowPrerequisites(false);
+        setStep("review");
+        setIsAnalyzing(false);
+        return;
+      }
+
+      // Map backend response to component types
+      const mappedUnits: ReplanReviewUnit[] = response.units.map((u) => ({
+        canonicalUnitId: u.canonicalUnitId,
+        title: u.title,
+        source: u.source,
+        suggestedForTitle: u.suggestedForTitle ?? undefined,
+        knowledgePoints: u.knowledgePoints,
+        questionCounts: u.questionCounts,
+      }));
+
+      // Map prerequisites with their review units
+      const mappedPrereqs = response.prerequisites.map((p) => ({
+        canonicalUnitId: p.canonicalUnitId,
+        title: p.title,
+        reason: p.reason,
+        depth: p.depth,
+        reviewUnit: {
+          canonicalUnitId: p.reviewUnit.canonicalUnitId,
+          title: p.reviewUnit.title,
+          source: p.reviewUnit.source as "matched_from_description" | "suggested_prerequisite",
+          suggestedForTitle: p.reviewUnit.suggestedForTitle ?? undefined,
+          knowledgePoints: p.reviewUnit.knowledgePoints,
+          questionCounts: p.reviewUnit.questionCounts,
+        },
+      }));
+
+      setReviewUnits(mappedUnits);
+      setBackendPrerequisites(mappedPrereqs);
+      setTargetTitle(mappedUnits[0]?.title ?? "selected unit");
+      setShowPrerequisites(mappedPrereqs.length > 0);
+
+      if (mappedUnits.length === 0) {
+        setMessage("Không tìm thấy unit nào trong lộ trình khớp với mô tả. Hãy thử mô tả cụ thể hơn.");
+      }
+
+      setStep("review");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Lỗi khi phân tích. Vui lòng thử lại.";
+      setAnalyzeError(errorMessage);
+    } finally {
+      setIsAnalyzing(false);
+    }
   }
 
   function describeAgain() {
     setStep("describe");
     setShowPrerequisites(false);
+    setAnalyzeError(null);
   }
 
   function includePrerequisites(suggestions: PrerequisiteSuggestion[]) {
-    const suggestionIds = new Set(suggestions.map((suggestion) => suggestion.canonicalUnitId));
+    const suggestionIds = new Set(suggestions.map((s) => s.canonicalUnitId));
     setReviewUnits([
-      ...demoScopeUnits,
-      ...demoPrerequisites
-        .filter((suggestion) => suggestionIds.has(suggestion.canonicalUnitId))
-        .map((suggestion) => suggestion.reviewUnit),
+      ...reviewUnits,
+      ...backendPrerequisites
+        .filter((p) => suggestionIds.has(p.canonicalUnitId))
+        .map((p) => p.reviewUnit),
     ]);
     setShowPrerequisites(false);
   }
 
-  function startAssessment(selectedUnits: ReplanSelectedAssessmentUnit[]) {
-    writeReplanAssessmentContext({
-      units: selectedUnits.map((unit) => ({
-        canonicalUnitId: unit.canonicalUnitId,
-        title: unit.title,
-        difficultyFilter: unit.difficultyFilter,
-        selectedQuestionCount: unit.selectedQuestionCount,
-      })),
-    });
-    router.push(buildReplanAssessmentHref());
+  async function startAssessment(selectedUnits: ReplanSelectedAssessmentUnit[]) {
+    setIsStarting(true);
+    setAnalyzeError(null);
+
+    try {
+      // Call backend to start assessment with exact unit + difficulty filters
+      const response = await replanApi.startAssessment(
+        selectedUnits.map((u) => ({
+          canonicalUnitId: u.canonicalUnitId,
+          difficultyFilter: u.difficultyFilter,
+        })),
+      );
+
+      // Write canonical assessment context for the /assessment page
+      writePendingCanonicalAssessment({
+        canonicalUnitIds: response.canonicalUnitIds,
+        unitNameMap: response.unitNameMap,
+        assessmentDepth: "deep",
+      });
+
+      // Also write replan-specific scope metadata
+      writeReplanAssessmentContext({
+        units: selectedUnits.map((u) => ({
+          canonicalUnitId: u.canonicalUnitId,
+          title: u.title,
+          difficultyFilter: u.difficultyFilter,
+          selectedQuestionCount: u.selectedQuestionCount,
+        })),
+      });
+
+      // Navigate to the assessment page
+      router.push(response.assessmentHref);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Lỗi khi tạo bài assessment. Vui lòng thử lại.";
+      setAnalyzeError(errorMessage);
+      setIsStarting(false);
+    }
   }
 
   return (
@@ -138,18 +209,34 @@ export default function ReplanPage() {
 
         <div className="card space-y-5">
           {step === "describe" ? (
-            <ReplanKnowledgeClaimStep
-              claim={claim}
-              message={message}
-              onClaimChange={setClaim}
-              onContinue={continueToAnalysis}
-            />
+            <>
+              <ReplanKnowledgeClaimStep
+                claim={claim}
+                message={message}
+                onClaimChange={setClaim}
+                onContinue={continueToAnalysis}
+              />
+              {isAnalyzing && (
+                <div className="flex items-center justify-center gap-2 py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary-600" />
+                  <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
+                    Đang phân tích lộ trình của bạn...
+                  </span>
+                </div>
+              )}
+              {analyzeError && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                  <span>{analyzeError}</span>
+                </div>
+              )}
+            </>
           ) : (
             <>
               {showPrerequisites ? (
                 <PrerequisiteSuggestionDialog
-                  targetTitle="Faster R-CNN"
-                  suggestions={demoPrerequisites}
+                  targetTitle={targetTitle}
+                  suggestions={backendPrerequisites}
                   onInclude={includePrerequisites}
                   onSkip={() => setShowPrerequisites(false)}
                 />
@@ -157,6 +244,20 @@ export default function ReplanPage() {
               {message && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
                   {message}
+                </div>
+              )}
+              {analyzeError && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                  <span>{analyzeError}</span>
+                </div>
+              )}
+              {isStarting && (
+                <div className="flex items-center justify-center gap-2 py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary-600" />
+                  <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
+                    Đang tạo bài assessment...
+                  </span>
                 </div>
               )}
               {reviewUnits.length > 0 ? (
