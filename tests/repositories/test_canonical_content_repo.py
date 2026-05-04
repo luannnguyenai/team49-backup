@@ -88,3 +88,20 @@ async def test_search_canonical_units_title_only_excludes_body_fields():
     assert "units.lecture_title" in compiled
     assert "lower(coalesce(units.summary" not in compiled
     assert "lower(coalesce(units.description" not in compiled
+
+
+@pytest.mark.asyncio
+async def test_get_linked_learning_units_orders_by_course_section_then_unit():
+    session = AsyncMock()
+    result = Mock()
+    result.scalars.return_value.all.return_value = []
+    session.execute.return_value = result
+    repo = CanonicalContentRepository(session)
+
+    await repo.get_linked_learning_units(["CS224n"])
+
+    statement = session.execute.await_args.args[0]
+    compiled = str(statement.compile(dialect=postgresql.dialect()))
+
+    assert "JOIN course_sections" in compiled
+    assert "ORDER BY courses.sort_order, course_sections.sort_order, learning_units.sort_order" in compiled

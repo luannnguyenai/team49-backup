@@ -134,6 +134,7 @@ export const useLearningPathStore = create<LearningPathState>()(
             const generated = await learningPathApi.generatePath({
               desired_section_ids: [],
               selected_course_ids: toCanonicalCourseIds(profile.selectedCourseIds),
+              persist_selected_course_ids: true,
             });
             path = {
               total_units: generated.total_units,
