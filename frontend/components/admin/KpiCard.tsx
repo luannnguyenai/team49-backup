@@ -24,7 +24,7 @@ export default function KpiCard({
   children,
 }: KpiCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-slate-700">
+    <div className="card p-0 transition-colors hover:border-slate-300 dark:hover:border-slate-700">
       <div className="flex h-full flex-col gap-2 p-3.5">
         <div className="flex items-center justify-between">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
