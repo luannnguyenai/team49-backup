@@ -20,6 +20,10 @@ describe("validateReplanKnowledgeClaim", () => {
       reason: "skip_all",
       message: "Mình không thể tạo bài kiểm tra để bỏ toàn bộ lộ trình từ một mô tả quá chung. Hãy nêu cụ thể những concept hoặc unit bạn đã biết.",
     });
+    expect(validateReplanKnowledgeClaim("skip all")).toMatchObject({
+      ok: false,
+      reason: "skip_all",
+    });
   });
 
   it("allows broad but usable claims with a warning flag", () => {

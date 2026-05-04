@@ -36,12 +36,12 @@ const BROAD_PATTERNS = [
 
 export function validateReplanKnowledgeClaim(value: string): ReplanClaimValidation {
   const claim = value.trim();
+  if (SKIP_ALL_PATTERNS.some((pattern) => pattern.test(claim))) {
+    return { ok: false, reason: "skip_all", message: SKIP_ALL_MESSAGE };
+  }
   const meaningfulTokens = claim.split(/\s+/).filter(Boolean);
   if (meaningfulTokens.length < 3) {
     return { ok: false, reason: "too_short", message: TOO_SHORT_MESSAGE };
-  }
-  if (SKIP_ALL_PATTERNS.some((pattern) => pattern.test(claim))) {
-    return { ok: false, reason: "skip_all", message: SKIP_ALL_MESSAGE };
   }
   if (BROAD_PATTERNS.some((pattern) => pattern.test(claim))) {
     return { ok: true, specificity: "broad", warning: BROAD_WARNING };
