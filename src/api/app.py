@@ -46,6 +46,7 @@ from src.routers.module_test import module_test_router
 from src.routers.onboarding import onboarding_router
 from src.routers.placement_lite import placement_lite_router
 from src.routers.quiz import quiz_router
+from src.routers.replan import replan_router
 from src.routers.review import review_router
 from src.routers.test_support import test_support_router
 from src.routers.admin import admin_router
@@ -136,6 +137,7 @@ app.include_router(onboarding_router)
 app.include_router(placement_deprecated_router)
 app.include_router(placement_lite_router)
 app.include_router(quiz_router)
+app.include_router(replan_router)
 app.include_router(review_router)
 app.include_router(test_support_router)
 app.include_router(admin_router)
