@@ -310,10 +310,11 @@ async def _generate_canonical_learning_path(
     ]
     if requested_course_ids:
         selected_course_ids = requested_course_ids
-        goal = await goal_repo.upsert_for_user(
-            user.id,
-            selected_course_ids=selected_course_ids,
-        )
+        if request.persist_selected_course_ids:
+            goal = await goal_repo.upsert_for_user(
+                user.id,
+                selected_course_ids=selected_course_ids,
+            )
     else:
         selected_course_ids = list(goal.selected_course_ids) if goal and goal.selected_course_ids else []
     if not selected_course_ids:

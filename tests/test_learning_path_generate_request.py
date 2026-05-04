@@ -49,9 +49,7 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
         content.get_concepts_by_ids = AsyncMock(return_value={})
 
         MockGoal.return_value.get_by_user_id = AsyncMock(return_value=None)
-        MockGoal.return_value.upsert_for_user = AsyncMock(
-            return_value=SimpleNamespace(selected_course_ids=["CS230", "CS231n"], placement_status=None),
-        )
+        MockGoal.return_value.upsert_for_user = AsyncMock()
         MockMastery.return_value.bulk_get_for_user = AsyncMock(return_value={})
         MockPlacement.return_value.get_by_user_id = AsyncMock(return_value=[])
         MockProgress.return_value.list_for_user_units = AsyncMock(return_value={})
@@ -68,10 +66,7 @@ async def test_generate_learning_path_falls_back_to_request_selected_course_ids(
             GeneratePathRequest(selected_course_ids=["CS230", "CS231n"]),
         )
 
-    MockGoal.return_value.upsert_for_user.assert_awaited_once_with(
-        user.id,
-        selected_course_ids=["CS230", "CS231n"],
-    )
+    MockGoal.return_value.upsert_for_user.assert_not_awaited()
     content.get_linked_learning_units.assert_awaited_once_with(["CS230", "CS231n"])
     assert response.total_units == 1
     assert response.items[0].course_slug == "cs230"
@@ -145,7 +140,10 @@ async def test_generate_learning_path_request_selected_course_ids_override_saved
         response = await _generate_canonical_learning_path(
             db,
             user,
-            GeneratePathRequest(selected_course_ids=["CS230", "CS224n"]),
+            GeneratePathRequest(
+                selected_course_ids=["CS230", "CS224n"],
+                persist_selected_course_ids=True,
+            ),
         )
 
     MockGoal.return_value.upsert_for_user.assert_awaited_once_with(
