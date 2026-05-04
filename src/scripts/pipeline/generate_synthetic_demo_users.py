@@ -61,6 +61,7 @@ SCENARIO_FILES = {
 NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, "a20-app-049/synthetic-demo-users/v1")
 FOUNDATION_COURSE_SCOPE = "cs230"
 SPECIALIZATION_COURSE_SCOPES = frozenset({"cs224n", "cs231n"})
+DEFAULT_SPECIALIZATION_COURSE_SCOPE = "cs231n"
 
 ProficiencyBand = Literal["beginner", "developing", "proficient", "advanced"]
 ALLOWED_PROFICIENCY_BANDS = {"beginner", "developing", "proficient", "advanced"}
@@ -413,6 +414,9 @@ def _select_courses(catalog: SyntheticCatalog, course_scope: tuple[str, ...]) ->
     if "all" in scope_values:
         return list(catalog.courses)
     if scope_values & SPECIALIZATION_COURSE_SCOPES:
+        if len(scope_values & SPECIALIZATION_COURSE_SCOPES) > 1:
+            scope_values.difference_update(SPECIALIZATION_COURSE_SCOPES)
+            scope_values.add(DEFAULT_SPECIALIZATION_COURSE_SCOPE)
         scope_values.add(FOUNDATION_COURSE_SCOPE)
     matched = [
         course
