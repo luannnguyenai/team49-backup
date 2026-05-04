@@ -18,9 +18,14 @@ export interface ReplanReviewUnit {
   };
 }
 
+export type ReplanSelectedAssessmentUnit = ReplanReviewUnit & {
+  difficultyFilter: DifficultyFilter;
+  selectedQuestionCount: number;
+};
+
 interface Props {
   units: ReplanReviewUnit[];
-  onStartAssessment: (selectedUnits: ReplanReviewUnit[]) => void;
+  onStartAssessment: (selectedUnits: ReplanSelectedAssessmentUnit[]) => void;
   onDescribeAgain: () => void;
 }
 
@@ -78,8 +83,18 @@ export default function ReplanScopeReviewStep({
     [filters, selectedUnitIds, units],
   );
   const selectedUnits = useMemo(
-    () => units.filter((unit) => selectedUnitIds.has(unit.canonicalUnitId)),
-    [selectedUnitIds, units],
+    () =>
+      units
+        .filter((unit) => selectedUnitIds.has(unit.canonicalUnitId))
+        .map((unit) => {
+          const difficultyFilter = filters[unit.canonicalUnitId] ?? "all";
+          return {
+            ...unit,
+            difficultyFilter,
+            selectedQuestionCount: countForFilter(unit, difficultyFilter),
+          };
+        }),
+    [filters, selectedUnitIds, units],
   );
   const estimatedMinutes = Math.ceil((selectedQuestions * 10) / 60);
 

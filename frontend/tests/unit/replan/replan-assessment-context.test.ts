@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { readPendingCanonicalAssessment } from "@/lib/canonical-assessment-session";
-import { buildReplanAssessmentHref, writeReplanAssessmentContext } from "@/lib/replan-assessment-context";
+import {
+  buildReplanAssessmentHref,
+  readReplanAssessmentScope,
+  writeReplanAssessmentContext,
+} from "@/lib/replan-assessment-context";
 
 describe("replan assessment context", () => {
   beforeEach(() => {
@@ -11,8 +15,18 @@ describe("replan assessment context", () => {
   it("writes selected canonical units for the existing assessment page", () => {
     writeReplanAssessmentContext({
       units: [
-        { canonicalUnitId: "unit_faster_rcnn", title: "Faster R-CNN" },
-        { canonicalUnitId: "unit_rcnn", title: "R-CNN" },
+        {
+          canonicalUnitId: "unit_faster_rcnn",
+          title: "Faster R-CNN",
+          difficultyFilter: "all",
+          selectedQuestionCount: 10,
+        },
+        {
+          canonicalUnitId: "unit_rcnn",
+          title: "R-CNN",
+          difficultyFilter: "easy_medium_hard",
+          selectedQuestionCount: 6,
+        },
       ],
     });
 
@@ -23,6 +37,25 @@ describe("replan assessment context", () => {
         unit_rcnn: "R-CNN",
       },
       assessmentDepth: "deep",
+    });
+    expect(readReplanAssessmentScope()).toEqual({
+      selectedUnits: [
+        {
+          canonicalUnitId: "unit_faster_rcnn",
+          title: "Faster R-CNN",
+          difficultyFilter: "all",
+          selectedQuestionCount: 10,
+        },
+        {
+          canonicalUnitId: "unit_rcnn",
+          title: "R-CNN",
+          difficultyFilter: "easy_medium_hard",
+          selectedQuestionCount: 6,
+        },
+      ],
+      questionTotal: 16,
+      estimatedSeconds: 160,
+      scope: "current_path_only",
     });
   });
 

@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 
 import ReplanKnowledgeClaimStep from "@/components/replan/ReplanKnowledgeClaimStep";
 import PrerequisiteSuggestionDialog, { type PrerequisiteSuggestion } from "@/components/replan/PrerequisiteSuggestionDialog";
-import ReplanScopeReviewStep, { type ReplanReviewUnit } from "@/components/replan/ReplanScopeReviewStep";
+import ReplanScopeReviewStep, {
+  type ReplanReviewUnit,
+  type ReplanSelectedAssessmentUnit,
+} from "@/components/replan/ReplanScopeReviewStep";
 import { buildReplanAssessmentHref, writeReplanAssessmentContext } from "@/lib/replan-assessment-context";
 import { validateReplanKnowledgeClaim } from "@/lib/replan-claim-guardrails";
 
@@ -80,11 +83,13 @@ export default function ReplanPage() {
     setShowPrerequisites(false);
   }
 
-  function startAssessment(selectedUnits: ReplanReviewUnit[]) {
+  function startAssessment(selectedUnits: ReplanSelectedAssessmentUnit[]) {
     writeReplanAssessmentContext({
       units: selectedUnits.map((unit) => ({
         canonicalUnitId: unit.canonicalUnitId,
         title: unit.title,
+        difficultyFilter: unit.difficultyFilter,
+        selectedQuestionCount: unit.selectedQuestionCount,
       })),
     });
     router.push(buildReplanAssessmentHref());

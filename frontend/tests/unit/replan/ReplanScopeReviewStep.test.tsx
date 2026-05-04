@@ -68,9 +68,18 @@ describe("ReplanScopeReviewStep", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Describe again" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Include R-CNN" }));
+    fireEvent.change(screen.getByLabelText("Difficulty filter for Faster R-CNN"), {
+      target: { value: "easy_medium_hard" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Start assessment" }));
 
     expect(onDescribeAgain).toHaveBeenCalledOnce();
-    expect(onStartAssessment).toHaveBeenCalledWith([units[0]]);
+    expect(onStartAssessment).toHaveBeenCalledWith([
+      expect.objectContaining({
+        canonicalUnitId: "unit_faster_rcnn",
+        difficultyFilter: "easy_medium_hard",
+        selectedQuestionCount: 9,
+      }),
+    ]);
   });
 });
