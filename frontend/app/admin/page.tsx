@@ -98,7 +98,7 @@ export default function AdminOverviewPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
         <KpiCard
           label="Total users"
           value={overview?.total_users ?? "—"}
