@@ -100,7 +100,7 @@ export default function LoginForm() {
         Sign in
       </Button>
 
-      <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
+      <p className="text-center text-sm text-text-body">
         Don&apos;t have an account?{" "}
         <Link href={registerHref} className="link">
           Sign up now
