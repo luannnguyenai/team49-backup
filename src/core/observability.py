@@ -23,7 +23,92 @@ import os
 from functools import lru_cache
 from typing import Any
 
+from prometheus_client import Histogram
+
 logger = logging.getLogger(__name__)
+
+_TUTOR_METRIC_LABELS = ("route_type", "has_image")
+_TUTOR_STREAM_BUCKETS = (
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    1.0,
+    2.5,
+    5.0,
+    10.0,
+    20.0,
+    30.0,
+    60.0,
+)
+
+TUTOR_STREAM_FIRST_STATUS_SECONDS = Histogram(
+    "tutor_stream_first_status_seconds",
+    "Time from tutor request start to the first streamed status event.",
+    _TUTOR_METRIC_LABELS,
+    buckets=_TUTOR_STREAM_BUCKETS,
+)
+
+TUTOR_STREAM_FIRST_ANSWER_SECONDS = Histogram(
+    "tutor_stream_first_answer_seconds",
+    "Time from tutor request start to the first streamed answer chunk.",
+    _TUTOR_METRIC_LABELS,
+    buckets=_TUTOR_STREAM_BUCKETS,
+)
+
+TUTOR_STREAM_TOTAL_SECONDS = Histogram(
+    "tutor_stream_total_seconds",
+    "Total elapsed time for a tutor streaming request.",
+    _TUTOR_METRIC_LABELS,
+    buckets=_TUTOR_STREAM_BUCKETS,
+)
+
+
+def _normalize_tutor_route_type(route_type: str | None) -> str:
+    normalized = (route_type or "unknown").strip().lower()
+    if normalized in {"simple", "complex", "blocked", "error", "unknown"}:
+        return normalized
+    return "unknown"
+
+
+def _tutor_metric_labels(route_type: str | None, has_image: bool) -> dict[str, str]:
+    return {
+        "route_type": _normalize_tutor_route_type(route_type),
+        "has_image": "true" if has_image else "false",
+    }
+
+
+def observe_tutor_stream_first_status(
+    duration_seconds: float,
+    *,
+    route_type: str | None,
+    has_image: bool,
+) -> None:
+    TUTOR_STREAM_FIRST_STATUS_SECONDS.labels(
+        **_tutor_metric_labels(route_type, has_image)
+    ).observe(max(duration_seconds, 0.0))
+
+
+def observe_tutor_stream_first_answer(
+    duration_seconds: float,
+    *,
+    route_type: str | None,
+    has_image: bool,
+) -> None:
+    TUTOR_STREAM_FIRST_ANSWER_SECONDS.labels(
+        **_tutor_metric_labels(route_type, has_image)
+    ).observe(max(duration_seconds, 0.0))
+
+
+def observe_tutor_stream_total(
+    duration_seconds: float,
+    *,
+    route_type: str | None,
+    has_image: bool,
+) -> None:
+    TUTOR_STREAM_TOTAL_SECONDS.labels(
+        **_tutor_metric_labels(route_type, has_image)
+    ).observe(max(duration_seconds, 0.0))
 
 
 @lru_cache(maxsize=1)
