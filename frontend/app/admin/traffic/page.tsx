@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 
 import KpiCard from "@/components/admin/KpiCard";
+import KpiGroup from "@/components/admin/KpiGroup";
 import { adminApi, TrafficSummary } from "@/lib/admin-api";
 
 const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST || "http://localhost:3001";
@@ -51,18 +52,25 @@ export default function AdminTrafficPage() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+      <KpiGroup title="Volume" cols={2}>
         <KpiCard
           label="Req / sec (1m)"
           value={summary?.rps_1m != null ? summary.rps_1m.toFixed(2) : "—"}
+          hint="Prometheus rate"
           loading={loading}
         />
+      </KpiGroup>
+
+      <KpiGroup title="Latency" cols={3}>
         <KpiCard label="p50 latency" value={fmtSec(summary?.latency_seconds.p50)} loading={loading} />
         <KpiCard label="p95 latency" value={fmtSec(summary?.latency_seconds.p95)} loading={loading} />
         <KpiCard label="p99 latency" value={fmtSec(summary?.latency_seconds.p99)} loading={loading} />
-        <KpiCard label="4xx rate" value={fmtPct(summary?.rate_4xx)} loading={loading} />
-        <KpiCard label="5xx rate" value={fmtPct(summary?.rate_5xx)} loading={loading} />
-      </div>
+      </KpiGroup>
+
+      <KpiGroup title="Errors" cols={2}>
+        <KpiCard label="4xx rate" value={fmtPct(summary?.rate_4xx)} hint="5m window" loading={loading} />
+        <KpiCard label="5xx rate" value={fmtPct(summary?.rate_5xx)} hint="5m window" loading={loading} />
+      </KpiGroup>
 
       {err && (
         <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">{err}</p>
