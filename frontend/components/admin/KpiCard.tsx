@@ -24,15 +24,15 @@ export default function KpiCard({
   children,
 }: KpiCardProps) {
   return (
-    <div className="relative rounded-[28px] bg-gradient-to-br from-indigo-600 via-cyan-500 to-teal-400 p-[1px] shadow-card transition-shadow hover:shadow-card-hover">
-      <div className="flex h-full flex-col gap-3 rounded-[27px] bg-white/80 p-5 backdrop-blur-md dark:bg-slate-900/70">
+    <div className="rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-slate-700">
+      <div className="flex h-full flex-col gap-2 p-3.5">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
             {label}
           </p>
           {trend && (
             <span
-              className={`text-xs font-semibold ${
+              className={`text-[10px] font-semibold ${
                 trend === "up"
                   ? "text-emerald-600"
                   : trend === "down"
@@ -45,13 +45,13 @@ export default function KpiCard({
             </span>
           )}
         </div>
-        <div className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl">
-          {loading ? <span className="inline-block h-9 w-20 animate-pulse rounded bg-slate-200 dark:bg-slate-700" /> : value}
+        <div className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-2xl">
+          {loading ? <span className="inline-block h-7 w-14 animate-pulse rounded-md bg-slate-200 dark:bg-slate-700" /> : value}
         </div>
         {hint && (
-          <p className="text-xs text-slate-500 dark:text-slate-400">{hint}</p>
+          <p className="text-[10px] leading-4 text-slate-500 dark:text-slate-400">{hint}</p>
         )}
-        {children && <div className="mt-2 h-12">{children}</div>}
+        {children && <div className="mt-1 h-8">{children}</div>}
       </div>
     </div>
   );
