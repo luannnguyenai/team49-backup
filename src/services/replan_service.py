@@ -75,8 +75,9 @@ async def analyze_replan(
 ) -> ReplanAnalyzeResponse:
     """Analyze a knowledge claim against the user's real current learning path."""
 
-    # 1. Load the user's current learning path from planner audit
-    path_items = await _load_current_path_items(db, user_id)
+    try:
+        # 1. Load the user's current learning path from planner audit
+        path_items = await _load_current_path_items(db, user_id)
     if not path_items:
         return ReplanAnalyzeResponse(
             units=[],
@@ -268,12 +269,21 @@ async def analyze_replan(
             )
         )
 
-    return ReplanAnalyzeResponse(
-        units=response_units,
-        prerequisites=prerequisite_responses,
-        keywordPlanSpecificity=keyword_plan.specificity,
-        guardrailFlags=keyword_plan.guardrail_flags,
-    )
+        return ReplanAnalyzeResponse(
+            units=response_units,
+            prerequisites=prerequisite_responses,
+            keywordPlanSpecificity=keyword_plan.specificity,
+            guardrailFlags=keyword_plan.guardrail_flags,
+        )
+    except Exception as e:
+        log.error(f"Error in analyze_replan for user {user_id}: {e}", exc_info=True)
+        # Return safe fallback response
+        return ReplanAnalyzeResponse(
+            units=[],
+            prerequisites=[],
+            keywordPlanSpecificity="specific",
+            guardrailFlags=["internal_error"],
+        )
 
 
 # ---------------------------------------------------------------------------
