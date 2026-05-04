@@ -91,10 +91,12 @@ describe("replan page", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Start assessment" }));
 
-    // Verify startAssessment API was called
-    expect(replanApi.startAssessment).toHaveBeenCalledWith([
-      { canonicalUnitId: "unit_faster_rcnn", difficultyFilter: "all" },
-    ]);
+    // Wait for async operations to complete
+    await vi.waitFor(() => {
+      expect(replanApi.startAssessment).toHaveBeenCalledWith([
+        { canonicalUnitId: "unit_faster_rcnn", difficultyFilter: "all" },
+      ]);
+    });
 
     expect(readPendingCanonicalAssessment()).toMatchObject({
       canonicalUnitIds: ["unit_faster_rcnn"],
