@@ -27,6 +27,7 @@ import {
   type LlmStats,
   type NegativeFeedbackRow,
 } from "@/lib/admin-api";
+import { CHART_GRID, CHART_PALETTE, CHART_STATUS } from "@/lib/admin/chart-theme";
 
 const LANGFUSE_HOST = process.env.NEXT_PUBLIC_LANGFUSE_HOST || "";
 
@@ -191,26 +192,26 @@ export default function AdminLlmPage() {
             margin={{ left: 0, right: 8, top: 8, bottom: 0 }}
             stackOffset="sign"
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID.stroke} vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 11, fill: "#64748b" }}
+              tick={{ fontSize: 11, fill: CHART_GRID.tick }}
               tickLine={false}
               axisLine={false}
               tickFormatter={(v) => String(v).slice(5)}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "#64748b" }}
+              tick={{ fontSize: 11, fill: CHART_GRID.tick }}
               tickLine={false}
               axisLine={false}
               width={32}
               allowDecimals={false}
             />
             <Tooltip
-              contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }}
+              contentStyle={{ borderRadius: 12, border: `1px solid ${CHART_GRID.tooltipBorder}`, fontSize: 12 }}
             />
-            <Bar dataKey="positive" stackId="ratings" fill="#10b981" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="negative" stackId="ratings" fill="#f43f5e" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="positive" stackId="ratings" fill={CHART_STATUS.success} radius={[6, 6, 0, 0]} />
+            <Bar dataKey="negative" stackId="ratings" fill={CHART_STATUS.error} radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -219,11 +220,11 @@ export default function AdminLlmPage() {
         <ChartCard title="LLM calls per hour" subtitle="aggregated from qa_history.jsonl" height={240}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={stats?.calls_per_hour ?? []} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-              <XAxis dataKey="hour" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} tickFormatter={(v) => String(v).slice(11, 16)} />
-              <YAxis tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} width={32} allowDecimals={false} />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }} />
-              <Line type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={2} dot={{ r: 3 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID.stroke} vertical={false} />
+              <XAxis dataKey="hour" tick={{ fontSize: 11, fill: CHART_GRID.tick }} tickLine={false} axisLine={false} tickFormatter={(v) => String(v).slice(11, 16)} />
+              <YAxis tick={{ fontSize: 11, fill: CHART_GRID.tick }} tickLine={false} axisLine={false} width={32} allowDecimals={false} />
+              <Tooltip contentStyle={{ borderRadius: 12, border: `1px solid ${CHART_GRID.tooltipBorder}`, fontSize: 12 }} />
+              <Line type="monotone" dataKey="count" stroke={CHART_PALETTE.primary} strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -235,11 +236,11 @@ export default function AdminLlmPage() {
               data={(stats?.top_users ?? []).map((t) => ({ ...t, label: t.user_id.slice(0, 8) }))}
               margin={{ left: 16, right: 8, top: 8, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} allowDecimals={false} />
-              <YAxis type="category" dataKey="label" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} width={70} />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }} />
-              <Bar dataKey="count" fill="#0891b2" radius={[0, 6, 6, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID.stroke} horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: CHART_GRID.tick }} tickLine={false} axisLine={false} allowDecimals={false} />
+              <YAxis type="category" dataKey="label" tick={{ fontSize: 11, fill: CHART_GRID.tick }} tickLine={false} axisLine={false} width={70} />
+              <Tooltip contentStyle={{ borderRadius: 12, border: `1px solid ${CHART_GRID.tooltipBorder}`, fontSize: 12 }} />
+              <Bar dataKey="count" fill={CHART_PALETTE.primary} radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -255,16 +256,16 @@ export default function AdminLlmPage() {
             data={stats?.tutor_latency_per_hour ?? []}
             margin={{ left: 0, right: 8, top: 8, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID.stroke} vertical={false} />
             <XAxis
               dataKey="hour"
-              tick={{ fontSize: 11, fill: "#64748b" }}
+              tick={{ fontSize: 11, fill: CHART_GRID.tick }}
               tickLine={false}
               axisLine={false}
               tickFormatter={(v) => String(v).slice(11, 16)}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "#64748b" }}
+              tick={{ fontSize: 11, fill: CHART_GRID.tick }}
               tickLine={false}
               axisLine={false}
               width={48}
@@ -281,13 +282,13 @@ export default function AdminLlmPage() {
                 )
               }
               labelFormatter={(value) => `Hour ${String(value).slice(11, 16)}`}
-              contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }}
+              contentStyle={{ borderRadius: 12, border: `1px solid ${CHART_GRID.tooltipBorder}`, fontSize: 12 }}
             />
             <Line
               type="monotone"
               dataKey="first_status_p95_ms"
               name="First status p95"
-              stroke="#0f766e"
+              stroke={CHART_PALETTE.primary}
               strokeWidth={2.5}
               dot={{ r: 2 }}
               connectNulls
@@ -296,7 +297,7 @@ export default function AdminLlmPage() {
               type="monotone"
               dataKey="first_answer_p95_ms"
               name="First answer p95"
-              stroke="#7c3aed"
+              stroke={CHART_PALETTE.secondary}
               strokeWidth={2.5}
               dot={{ r: 2 }}
               connectNulls
@@ -305,7 +306,7 @@ export default function AdminLlmPage() {
               type="monotone"
               dataKey="first_status_p50_ms"
               name="First status p50"
-              stroke="#14b8a6"
+              stroke={CHART_PALETTE.tertiary}
               strokeWidth={1.75}
               strokeDasharray="6 4"
               dot={false}
@@ -315,7 +316,7 @@ export default function AdminLlmPage() {
               type="monotone"
               dataKey="first_answer_p50_ms"
               name="First answer p50"
-              stroke="#a855f7"
+              stroke={CHART_PALETTE.quinary}
               strokeWidth={1.75}
               strokeDasharray="6 4"
               dot={false}
@@ -337,7 +338,7 @@ export default function AdminLlmPage() {
           </div>
           <Link
             href="/admin/langfuse"
-            className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-600"
+            className="btn-primary px-4 py-2 text-xs"
           >
             Mở trang đầy đủ →
           </Link>
