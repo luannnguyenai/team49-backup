@@ -51,6 +51,7 @@ from src.models.learning import (  # noqa: F401
     WaivedUnit,
 )
 from src.models.placement import PlacementAssessmentResult  # noqa: F401
+from src.models.password_reset import PasswordResetToken  # noqa: F401
 
 # Original lecture models
 from src.models.store import Chapter, Lecture, QAHistory, TranscriptLine  # noqa: F401
@@ -75,6 +76,7 @@ __all__ = [
     "QAHistory",
     # User
     "User",
+    "PasswordResetToken",
     # Canonical content artifact tables
     "ConceptKP",
     "CanonicalUnit",
