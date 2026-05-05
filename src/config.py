@@ -92,7 +92,12 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=30)
     refresh_token_expire_days: int = Field(default=7)
     rate_limit_login_per_minute: int = Field(default=5)
+    rate_limit_forgot_password_per_hour: int = Field(default=5)
     asset_url_expire_seconds: int = Field(default=900)
+    gmail_app_password: str = Field(default="")
+    email_from: str = Field(default="")
+    frontend_base_url: str = Field(default="http://localhost:3000")
+    password_reset_token_ttl_minutes: int = Field(default=30, ge=1)
 
     # ---- Redis ----
     redis_url: str = Field(

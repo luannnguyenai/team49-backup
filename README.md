@@ -129,6 +129,18 @@ GEMINI_API_KEY=...
 
 Use the external SQL Server connection fields only if the integration layer explicitly supports that backend. The current application ORM path is PostgreSQL.
 
+Forgot-password email delivery uses Resend. For local or production setup, configure:
+
+```env
+RESEND_API_KEY=re_...
+EMAIL_FROM=noreply@your-verified-domain.com
+FRONTEND_BASE_URL=http://localhost:3000
+PASSWORD_RESET_TOKEN_TTL_MINUTES=30
+RATE_LIMIT_FORGOT_PASSWORD_PER_HOUR=5
+```
+
+See [Forgot Password + Resend Setup Guide](docs/forgot-password-resend.md) for Resend setup and the full reset flow.
+
 LangFuse tracing is optional and fail-safe. The `.env.example` files already match the current LangFuse SDK naming:
 
 ```env
@@ -200,7 +212,7 @@ npm run dev
 
 | Area | Endpoints | Data contract |
 | --- | --- | --- |
-| Auth/onboarding | `/api/auth/*`, `/api/users/me/onboarding` | Onboarding sends `known_unit_ids`, `desired_section_ids`, `selected_course_ids`; backend writes `goal_preferences`. |
+| Auth/onboarding | `/api/auth/*`, `/api/users/me/onboarding` | Onboarding writes `goal_preferences`; forgot password uses Resend-backed `/api/auth/forgot-password/request` and `/api/auth/forgot-password/confirm`. |
 | Content | `/api/course-sections`, `/api/course-sections/{id}`, `/api/learning-units/{id}/content` | Product shell reads `course_sections` and `learning_units` linked to canonical unit IDs. |
 | Quiz | `/api/quiz/start`, `/api/quiz/{session_id}/answer`, `/api/quiz/{session_id}/complete` | Uses canonical learning unit IDs and `question_bank` phase `mini_quiz`. |
 | Assessment | `/api/assessment/start`, `/api/assessment/{session_id}/submit`, `/api/assessment/{session_id}/results` | Uses `learning_unit_ids`; results return `learning_unit_results`. |
