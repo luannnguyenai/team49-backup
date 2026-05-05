@@ -125,7 +125,7 @@ export default function ForgotPasswordForm() {
         Reset password
       </Button>
 
-      <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
+      <p className="text-center text-sm text-text-body">
         Remembered your password?{" "}
         <Link href={loginHref} className="link">
           Back to sign in
