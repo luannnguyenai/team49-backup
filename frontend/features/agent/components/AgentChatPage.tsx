@@ -36,6 +36,12 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import {
+  createLearningProfileForPath,
+  SUPPORTED_LEARNING_PATHS,
+  type PlannerPathKey,
+} from "@/features/learning-path/profile";
+import { useLearningPathStore } from "@/features/learning-path/store";
+import {
   agentApi,
   getActionCanonicalId,
   getActionCanonicalIds,
@@ -710,6 +716,14 @@ function ActionButton({
     </span>
   );
 
+  if (action.type === "request_replan") {
+    return <Link href="/replan?source=agent&returnTo=%2Fagent">{content}</Link>;
+  }
+
+  if (action.type === "request_path_switch") {
+    return <PathSwitchAction action={action} />;
+  }
+
   if (isPendingConfirmation) {
     return (
       <div className="space-y-2">
@@ -749,12 +763,130 @@ function ActionButton({
     );
   }
 
-  if (action.type === "request_replan") {
-    return <Link href="/replan?source=agent&returnTo=%2Fagent">{content}</Link>;
-  }
-
   if (!href || disabled) return <button type="button">{content}</button>;
   return <Link href={href}>{content}</Link>;
+}
+
+function isPlannerPathKey(value: string | null | undefined): value is PlannerPathKey {
+  return Boolean(value && value in SUPPORTED_LEARNING_PATHS);
+}
+
+function firstAlternativePath(currentPathKey: PlannerPathKey | null | undefined): PlannerPathKey {
+  return ((Object.keys(SUPPORTED_LEARNING_PATHS) as PlannerPathKey[]).find((pathKey) => pathKey !== currentPathKey) ??
+    "computer_vision");
+}
+
+function PathSwitchAction({ action }: { action: AgentAction }) {
+  const profile = useLearningPathStore((s) => s.profile);
+  const setProfile = useLearningPathStore((s) => s.setProfile);
+  const requestedPath = getWorkflowId(action);
+  const initialPath = isPlannerPathKey(requestedPath)
+    ? requestedPath
+    : firstAlternativePath(profile?.pathKey);
+  const [selectedPath, setSelectedPath] = useState<PlannerPathKey>(initialPath);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [switchedTo, setSwitchedTo] = useState<PlannerPathKey | null>(null);
+  const target = SUPPORTED_LEARNING_PATHS[selectedPath];
+  const isCurrent = profile?.pathKey === selectedPath;
+
+  const applyPathChange = () => {
+    setProfile(
+      createLearningProfileForPath(selectedPath, {
+        weeklyHours: profile?.weeklyHours,
+        source: "manual",
+      }),
+    );
+    setSwitchedTo(selectedPath);
+    setShowConfirm(false);
+  };
+
+  return (
+    <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <Map className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-black text-slate-900">{action.label || "Change path"}</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Select a target path. The change is applied only after confirmation.
+          </p>
+        </div>
+      </div>
+
+      <label className="mt-3 block text-xs font-black uppercase tracking-wider text-slate-500" htmlFor={`path-switch-${action.label}`}>
+        Target learning path
+      </label>
+      <select
+        id={`path-switch-${action.label}`}
+        aria-label="Target learning path"
+        value={selectedPath}
+        onChange={(event) => {
+          setSelectedPath(event.target.value as PlannerPathKey);
+          setSwitchedTo(null);
+        }}
+        className="mt-1 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+      >
+        {(Object.keys(SUPPORTED_LEARNING_PATHS) as PlannerPathKey[]).map((pathKey) => {
+          const path = SUPPORTED_LEARNING_PATHS[pathKey];
+          return (
+            <option key={pathKey} value={pathKey}>
+              {path.label}{pathKey === profile?.pathKey ? " (current)" : ""}
+            </option>
+          );
+        })}
+      </select>
+      <p className="mt-1 text-xs text-slate-500">{target.selectedCourseIds.join(" -> ")}</p>
+
+      <button
+        type="button"
+        disabled={isCurrent}
+        onClick={() => setShowConfirm(true)}
+        className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-black text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+      >
+        <ArrowRight className="h-4 w-4" />
+        Repath
+      </button>
+      {isCurrent ? <p className="mt-2 text-xs font-medium text-slate-500">This is already your active path.</p> : null}
+      {switchedTo ? (
+        <p className="mt-2 text-xs font-bold text-emerald-700">
+          Active path changed to {SUPPORTED_LEARNING_PATHS[switchedTo].label}.
+        </p>
+      ) : null}
+
+      {showConfirm ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Confirm path change"
+            className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+          >
+            <p className="text-base font-black text-slate-900">Confirm path change</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Are you sure you want to switch to {target.label}? Your planner will rebuild around this path.
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setShowConfirm(false)}
+                className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={applyPathChange}
+                className="min-h-11 rounded-xl bg-blue-600 px-4 text-sm font-black text-white transition hover:bg-blue-700"
+              >
+                Change path
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function WorkflowAction({ action }: { action: AgentAction }) {

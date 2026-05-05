@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import AgentPage from "@/app/agent/page";
+import { createLearningProfileForPath } from "@/features/learning-path/profile";
+import { useLearningPathStore } from "@/features/learning-path/store";
 
 const agentApiMock = vi.hoisted(() => ({
   listConversations: vi.fn(),
@@ -109,6 +111,14 @@ describe("agent page", () => {
           canonical_unit_id: "unit-rf",
         },
       ],
+    });
+    useLearningPathStore.setState({
+      profile: createLearningProfileForPath("computer_vision", {
+        weeklyHours: 5,
+        source: "manual",
+      }),
+      previousProfile: null,
+      generatedTopologyHash: null,
     });
   });
 
@@ -398,19 +408,19 @@ describe("agent page", () => {
     expect(screen.queryByText(/AGENT_NETWORK_ERROR/)).not.toBeInTheDocument();
   });
 
-  it("continues a pending action with a stable action id", async () => {
+  it("continues a pending assessment action with a stable action id", async () => {
     agentApiMock.chat.mockResolvedValueOnce({
       conversationId: "conversation-1",
       messageId: "message-action",
       answer: {
-        markdown: "I can replan after you confirm.",
+        markdown: "I can prepare an assessment after you confirm.",
         confidence: "partial",
       },
       citations: [],
       actions: [
         {
-          type: "request_replan",
-          label: "Confirm replan",
+          type: "start_assessment",
+          label: "Confirm assessment",
           actionId: "act-1",
           status: "awaiting_confirmation",
         },
@@ -432,7 +442,7 @@ describe("agent page", () => {
 
     const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
     fireEvent.click(promptButtons[0]);
-    const confirm = await screen.findByRole("button", { name: /confirm replan/i });
+    const confirm = await screen.findByRole("button", { name: /confirm assessment/i });
     fireEvent.click(confirm);
 
     await waitFor(() => {
@@ -446,7 +456,7 @@ describe("agent page", () => {
     expect(await screen.findByText("I recalculated your learning plan from the latest assessment evidence.")).toBeInTheDocument();
   });
 
-  it("links replan requests to the dedicated scope builder instead of continuing a chat wizard", async () => {
+  it("links replan requests to the dedicated scope builder even when the action is pending", async () => {
     agentApiMock.chat.mockResolvedValueOnce({
       conversationId: "conversation-1",
       messageId: "message-replan",
@@ -458,7 +468,9 @@ describe("agent page", () => {
       actions: [
         {
           type: "request_replan",
-          label: "Optimize plan",
+          label: "Confirm replan",
+          actionId: "act-replan",
+          status: "awaiting_confirmation",
         },
         {
           type: "request_path_switch",
@@ -473,9 +485,53 @@ describe("agent page", () => {
     const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
     fireEvent.click(promptButtons[0]);
 
-    const optimizePlan = await screen.findByRole("link", { name: /optimize plan/i });
+    const optimizePlan = await screen.findByRole("link", { name: /confirm replan/i });
     expect(optimizePlan).toHaveAttribute("href", "/replan?source=agent&returnTo=%2Fagent");
-    expect(screen.queryByRole("button", { name: /optimize plan/i })).not.toBeInTheDocument();
+    expect(agentApiMock.continueAction).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: /confirm replan/i })).not.toBeInTheDocument();
+  });
+
+  it("renders path-switch requests as a dropdown with confirmation before changing profile", async () => {
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-path-switch",
+      answer: {
+        markdown: "I can help you change your active path.",
+        confidence: "partial",
+      },
+      citations: [],
+      actions: [
+        {
+          type: "request_path_switch",
+          label: "Change path",
+        },
+      ],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
+    fireEvent.click(promptButtons[0]);
+
+    expect(await screen.findByRole("combobox", { name: /target learning path/i })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("combobox", { name: /target learning path/i }), {
+      target: { value: "nlp" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Repath" }));
+
+    expect(await screen.findByRole("dialog", { name: /confirm path change/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(useLearningPathStore.getState().profile?.pathKey).toBe("computer_vision");
+
+    fireEvent.click(screen.getByRole("button", { name: "Repath" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Change path" }));
+
+    expect(useLearningPathStore.getState().profile).toMatchObject({
+      pathKey: "nlp",
+      selectedCourseIds: ["CS230", "CS224n"],
+      weeklyHours: 5,
+      source: "manual",
+    });
   });
 
   it("chooses a target path card through the active conversation", async () => {
