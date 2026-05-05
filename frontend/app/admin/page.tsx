@@ -26,6 +26,7 @@ import {
   SignupPoint,
   SystemHealth,
 } from "@/lib/admin-api";
+import { CHART_GRID, CHART_PALETTE } from "@/lib/admin/chart-theme";
 
 function fmtUptime(seconds: number | null | undefined): string {
   if (!seconds && seconds !== 0) return "—";
@@ -177,20 +178,20 @@ export default function AdminOverviewPage() {
             <AreaChart data={signups} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
               <defs>
                 <linearGradient id="signupsFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
+                  <stop offset="0%" stopColor={CHART_PALETTE.primary} stopOpacity={0.4} />
+                  <stop offset="100%" stopColor={CHART_PALETTE.primary} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID.stroke} vertical={false} />
               <XAxis
                 dataKey="date"
                 tickFormatter={(v) => String(v).slice(5)}
-                tick={{ fontSize: 11, fill: "#64748b" }}
+                tick={{ fontSize: 11, fill: CHART_GRID.tick }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                tick={{ fontSize: 11, fill: "#64748b" }}
+                tick={{ fontSize: 11, fill: CHART_GRID.tick }}
                 tickLine={false}
                 axisLine={false}
                 width={32}
@@ -199,15 +200,15 @@ export default function AdminOverviewPage() {
               <Tooltip
                 contentStyle={{
                   borderRadius: 12,
-                  border: "1px solid #e2e8f0",
-                  background: "rgba(255,255,255,0.95)",
+                  border: `1px solid ${CHART_GRID.tooltipBorder}`,
+                  background: CHART_GRID.tooltipBackground,
                   fontSize: 12,
                 }}
               />
               <Area
                 type="monotone"
                 dataKey="count"
-                stroke="#0891b2"
+                stroke={CHART_PALETTE.primary}
                 strokeWidth={2}
                 fill="url(#signupsFill)"
               />
@@ -221,16 +222,16 @@ export default function AdminOverviewPage() {
               data={llm?.calls_per_hour ?? []}
               margin={{ left: 0, right: 8, top: 8, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID.stroke} vertical={false} />
               <XAxis
                 dataKey="hour"
                 tickFormatter={(v) => String(v).slice(11, 16)}
-                tick={{ fontSize: 11, fill: "#64748b" }}
+                tick={{ fontSize: 11, fill: CHART_GRID.tick }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                tick={{ fontSize: 11, fill: "#64748b" }}
+                tick={{ fontSize: 11, fill: CHART_GRID.tick }}
                 tickLine={false}
                 axisLine={false}
                 width={32}
@@ -239,12 +240,12 @@ export default function AdminOverviewPage() {
               <Tooltip
                 contentStyle={{
                   borderRadius: 12,
-                  border: "1px solid #e2e8f0",
-                  background: "rgba(255,255,255,0.95)",
+                  border: `1px solid ${CHART_GRID.tooltipBorder}`,
+                  background: CHART_GRID.tooltipBackground,
                   fontSize: 12,
                 }}
               />
-              <Bar dataKey="count" fill="#4f46e5" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="count" fill={CHART_PALETTE.secondary} radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>

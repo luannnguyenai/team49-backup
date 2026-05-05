@@ -7,7 +7,7 @@ Pydantic v2 schemas for all authentication endpoints.
 import uuid
 from datetime import date, datetime
 
-from pydantic import AliasChoices, BaseModel, EmailStr, Field, field_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from src.config.goal_course_map import VALID_GOAL_IDS
 from src.models.learning import MasteryLevel
@@ -49,9 +49,16 @@ class RefreshRequest(BaseModel):
 
 
 class ForgotPasswordRequest(BaseModel):
-    """POST /api/auth/forgot-password"""
+    """POST /api/auth/forgot-password/request"""
 
+    model_config = ConfigDict(extra="forbid")
     email: EmailStr
+
+
+class ForgotPasswordConfirmRequest(BaseModel):
+    """POST /api/auth/forgot-password/confirm"""
+
+    token: str = Field(min_length=16, max_length=512)
     new_password: str = Field(min_length=8, max_length=128)
 
     @field_validator("new_password")
@@ -96,6 +103,7 @@ class TokenPayload(BaseModel):
     type: str  # "access" | "refresh"
     exp: int  # unix timestamp
     jti: str
+    iat: int = 0
 
 
 # ---------------------------------------------------------------------------

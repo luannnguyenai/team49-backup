@@ -65,6 +65,10 @@ class User(UUIDPrimaryKeyMixin, Base):
         index=True,
         comment="RBAC role: 'user' (default) or 'admin' (admin dashboard access)",
     )
+    password_changed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

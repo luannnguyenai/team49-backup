@@ -9,11 +9,11 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <div className="mb-6">
-        <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-          Reset your password
+        <h2 className="text-xl font-bold text-text-strong">
+          Forgot your password?
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-          Enter your email and a new password to sign in again.
+        <p className="mt-1 text-sm text-text-body">
+          Enter your email and we will send you a reset link.
         </p>
       </div>
       <Suspense>

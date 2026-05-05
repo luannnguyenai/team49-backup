@@ -22,9 +22,6 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAuthStore } from "@/stores/authStore";
 import type { CourseCatalogItem, HistorySummary } from "@/types";
 
-const HERO_GRADIENT =
-  "from-indigo-600 via-cyan-500 to-teal-400";
-
 const TABS: { key: DashboardCourseTab; label: string }[] = [
   { key: "for-you", label: "For you" },
   { key: "all", label: "All" },
@@ -62,7 +59,7 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
   return (
     <div className="card flex flex-col overflow-hidden p-0 transition-shadow group hover:shadow-brand-soft">
       <div
-        className={`relative flex h-36 items-center justify-center bg-gradient-to-br ${HERO_GRADIENT}`}
+        className={`relative flex h-36 items-center justify-center hero-gradient`}
       >
         <BookOpen className="h-12 w-12 text-white opacity-30" />
         <div className="absolute right-3 top-3">
@@ -157,20 +154,20 @@ export default function DashboardPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <StatCard
-            icon={<BookOpen className="h-6 w-6 text-blue-600" />}
-            iconBg="bg-blue-100 dark:bg-blue-900/30"
+            icon={<BookOpen className="h-6 w-6 text-stat-courses" />}
+            iconBg="bg-stat-courses-soft"
             value={String(courses.length)}
             label="Courses in catalog"
           />
           <StatCard
-            icon={<TrendingUp className="h-6 w-6 text-emerald-600" />}
-            iconBg="bg-emerald-100 dark:bg-emerald-900/30"
+            icon={<TrendingUp className="h-6 w-6 text-stat-progress" />}
+            iconBg="bg-stat-progress-soft"
             value={`${avgScore}%`}
             label="Average progress"
           />
           <StatCard
-            icon={<Clock className="h-6 w-6 text-violet-600" />}
-            iconBg="bg-violet-100 dark:bg-violet-900/30"
+            icon={<Clock className="h-6 w-6 text-stat-time" />}
+            iconBg="bg-stat-time-soft"
             value={`${totalHours}h`}
             label="Total study time"
           />

@@ -21,7 +21,7 @@ export default function ChartCard({
   children,
 }: ChartCardProps) {
   return (
-    <div className="rounded-[28px] border border-slate-200/80 bg-white/70 p-6 shadow-card backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+    <div className="card-glass">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <h3 className="text-base font-semibold text-slate-900 dark:text-white">

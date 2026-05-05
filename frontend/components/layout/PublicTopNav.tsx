@@ -31,13 +31,13 @@ export default function PublicTopNav() {
         <div className="ml-auto flex items-center gap-2 md:ml-6">
           <Link
             href="/login"
-            className="inline-flex items-center rounded-full border border-border-subtle px-4 py-2 text-sm font-semibold text-text-body transition-colors hover:border-slate-300 hover:bg-surface-page dark:border-slate-700 dark:text-white dark:hover:border-slate-600 dark:hover:bg-slate-900"
+            className="btn-secondary px-4 py-2"
           >
             Sign in
           </Link>
           <Link
             href="/register"
-            className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+            className="btn-primary px-4 py-2"
           >
             Sign up
             <ArrowRight className="h-4 w-4" />

@@ -59,49 +59,93 @@ If you are an AI coding agent (Claude Code, Cursor, Copilot, Codex, Gemini, etc.
 - Python 3.12 backend, TypeScript 5 frontend + FastAPI, SQLAlchemy, Pydantic, Next.js 14 App Router, React 18, Zustand, Axios (001-course-first-refactor)
 - PostgreSQL for authoritative application data, server-managed object storage for binary course assets, repository `data/` files for bootstrap/import only (001-course-first-refactor)
 
-## Recent Changes
-- 001-course-first-refactor: Added Python 3.12 backend, TypeScript 5 frontend + FastAPI, SQLAlchemy, Pydantic, Next.js 14 App Router, React 18, Zustand, Axios
+# Skill: Maintainable & Debuggable AI Prompt Design
 
-<!-- gitnexus:start -->
-# GitNexus — Code Intelligence
+## Mục tiêu
+Thiết kế prompt AI theo hướng:
+- Dễ bảo trì (maintainable)
+- Dễ cập nhật (updatable)
+- Dễ debug (debuggable)
+- Có cấu trúc rõ ràng, dễ mở rộng
 
-This project is indexed by GitNexus as **A20-App-049** (8381 symbols, 13390 relationships, 277 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+---
 
-> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
+## Keyword cốt lõi
 
-## Always Do
+### 1. Kiến trúc prompt
+- modular prompt
+- structured prompt
+- prompt decomposition
+- prompt pipeline
+- component-based prompt
 
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
-- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
-- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
+### 2. Nguyên tắc thiết kế
+- separation of concerns
+- single responsibility principle (SRP)
+- low coupling
+- high cohesion
+- config-driven design
+- template-based design
 
-## Never Do
+### 3. Khả năng vận hành
+- versioned prompt
+- reproducible output
+- observable prompt
+- prompt traceability
+- prompt logging
 
-- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
-- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
-- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
-- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
+### 4. Debug & testing
+- step-by-step reasoning
+- intermediate outputs
+- evaluation-friendly prompt
+- testable prompt design
+- A/B prompt testing
 
-## Resources
+---
 
-| Resource | Use for |
-|----------|---------|
-| `gitnexus://repo/A20-App-049/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/A20-App-049/clusters` | All functional areas |
-| `gitnexus://repo/A20-App-049/processes` | All execution flows |
-| `gitnexus://repo/A20-App-049/process/{name}` | Step-by-step execution trace |
+## Best Practices
 
-## CLI
+### 1. Tách prompt thành module
+- System instruction
+- Context layer
+- Task layer
+- Output format layer
 
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+---
 
-<!-- gitnexus:end -->
+### 2. Ưu tiên cấu trúc hơn tự do
+❌ Prompt dài, lẫn lộn nhiều nhiệm vụ  
+✅ Prompt chia rõ từng phần có trách nhiệm riêng
+
+---
+
+### 3. Luôn có khả năng debug
+- Log intermediate steps
+- Có chế độ “explain mode”
+- Có output structured (JSON / YAML khi cần)
+
+---
+
+### 4. Version hóa prompt
+- prompt_v1, v2, v3
+- ghi rõ changelog
+
+---
+
+## Output Pattern gợi ý
+
+```text
+[INPUT]
+...
+
+[CONTEXT]
+...
+
+[TASK]
+...
+
+[RULES]
+...
+
+[OUTPUT FORMAT]
+...

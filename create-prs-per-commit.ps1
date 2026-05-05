@@ -1,19 +1,10 @@
 $baseBranch = "main"
-$sourceBranch = "deploy-plan"
+$sourceBranch = "deploy-3"
 $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ 679b6d92bc8eb87a57f4bd612c8abe9f50bf1e28 Delete Caddyfile
-+ 416155e2a1a7e3d729eabe72d2a8c076cb60001a Delete deploy.sh
-+ bbca047f82e6bf5bf1bc3c0c07240d20e3f74ca9 Update DEPLOYMENT_PLAN.md
-+ ac2f804b49202e27795a34d938a1e516682f34c7 Update ENVIRONMENT_MATRIX.md
-+ 7711ef8a6a3f6b39b7742a484ffc2f52b5c1369e Delete nginx.conf
-+ f4b56155e1e8650ed3f16c70b8c74da7ea04c1c9 Update PRODUCTION_CHECKLIST.md
-+ d84a8ad222a7322cf666549a91ca4ba0a589f48d Update README.md
-+ 674d539468ff09c21055fc32c3a5a9231192e3df update .env
-+ 6ced11c8435a9c728438239d1828e1bf41b8f1fa update uv
-+ 02a0bbcb3aaa3e770c26b70a9fbcfa487b4f6e5b Update docker-compose.yml
+
 "@
 
 

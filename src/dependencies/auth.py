@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_db
 from src.models.user import User
 from src.services.auth_service import decode_token, get_user_by_id
+from src.services.password_reset_service import is_token_stale_for_user
 from src.services.token_guard import is_payload_revoked
 
 # OAuth2 bearer extractor — returns 401 automatically when header is absent
@@ -63,6 +64,8 @@ async def _resolve_user_from_token(
 
     user = await get_user_by_id(db, user_id)
     if user is None:
+        raise credentials_exception
+    if is_token_stale_for_user(payload.iat, user):
         raise credentials_exception
 
     return user

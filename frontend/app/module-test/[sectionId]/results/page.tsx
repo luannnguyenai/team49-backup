@@ -46,15 +46,15 @@ const BLOOM_VI: Record<string, string> = {
 };
 
 const BLOOM_CLS: Record<string, string> = {
-  remember:   "bg-sky-100 text-sky-700",
-  understand: "bg-violet-100 text-violet-700",
-  apply:      "bg-amber-100 text-amber-700",
-  analyze:    "bg-rose-100 text-rose-700",
+  remember:   "bg-bloom-remember-soft text-bloom-remember",
+  understand: "bg-bloom-understand-soft text-bloom-understand",
+  apply:      "bg-bloom-apply-soft text-bloom-apply",
+  analyze:    "bg-bloom-analyze-soft text-bloom-analyze",
 };
 
 const VERDICT_CLS: Record<string, string> = {
-  pass: "bg-emerald-100 text-emerald-700",
-  fail: "bg-red-100 text-red-700",
+  pass: "bg-state-success-bg text-state-success-fg",
+  fail: "bg-state-error-bg text-state-error-fg",
 };
 
 const VERDICT_VI: Record<string, string> = {
@@ -189,9 +189,9 @@ function WrongAnswerCard({ item }: { item: WrongAnswerDetail }) {
                   className={[
                     "flex items-start gap-2.5 rounded-lg px-3 py-2 text-sm",
                     isCorrect
-                      ? "bg-emerald-50 border border-emerald-300 text-emerald-800"
+                      ? "state-success border"
                       : isSelected
-                      ? "bg-red-50 border border-red-300 text-red-800"
+                      ? "state-error border"
                       : "border text-sm",
                   ].join(" ")}
                   style={!isCorrect && !isSelected ? { borderColor: "var(--border)", color: "var(--text-secondary)" } : {}}
@@ -199,8 +199,8 @@ function WrongAnswerCard({ item }: { item: WrongAnswerDetail }) {
                   <span
                     className={[
                       "flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-bold",
-                      isCorrect ? "bg-emerald-500 text-white"
-                        : isSelected ? "bg-red-500 text-white"
+                      isCorrect ? "bg-state-success-fg text-white"
+                        : isSelected ? "bg-state-error-fg text-white"
                         : "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
                     ].join(" ")}
                   >
@@ -218,8 +218,8 @@ function WrongAnswerCard({ item }: { item: WrongAnswerDetail }) {
 
           {/* Explanation */}
           {item.explanation_text && (
-            <div className="flex items-start gap-2 rounded-lg bg-blue-50 px-3 py-2.5 dark:bg-blue-900/20">
-              <Lightbulb size={14} className="mt-0.5 shrink-0 text-blue-500" />
+            <div className="insight-card flex items-start gap-2">
+              <Lightbulb size={14} className="mt-0.5 shrink-0 text-insight" />
               <div className="text-sm leading-relaxed text-blue-800 dark:text-blue-200">
                 <MarkdownRenderer text={item.explanation_text} />
               </div>
@@ -348,8 +348,8 @@ function ModuleTestResultsInner() {
             className={[
               "mx-auto mt-4 flex h-24 w-24 items-center justify-center rounded-full text-2xl font-black",
               passed
-                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30"
-                : "bg-red-100 text-red-700 dark:bg-red-900/30",
+                ? "bg-state-success-bg text-state-success-fg"
+                : "bg-state-error-bg text-state-error-fg",
             ].join(" ")}
           >
             {animReady ? <AnimatedScore target={total_score_percent} /> : "0%"}
@@ -394,7 +394,7 @@ function ModuleTestResultsInner() {
                     </td>
                     <td className="py-3 pr-4">
                       {t.bloom_max ? (
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${BLOOM_CLS[t.bloom_max] ?? "bg-slate-100 text-slate-600"}`}>
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${BLOOM_CLS[t.bloom_max] ?? "bg-session-practice-soft text-session-practice"}`}>
                           {BLOOM_VI[t.bloom_max] ?? t.bloom_max}
                         </span>
                       ) : (
@@ -424,7 +424,7 @@ function ModuleTestResultsInner() {
                 <BookOpen size={16} className="text-amber-500" />
                 Learning units to review
               </h3>
-              <span className="flex items-center gap-1.5 text-xs rounded-full bg-amber-100 px-2.5 py-1 text-amber-700 font-medium">
+              <span className="flex items-center gap-1.5 text-xs rounded-full bg-state-warning-bg px-2.5 py-1 text-state-warning-fg font-medium">
                 <Clock size={12} />
                 Estimate: {estimated_review_hours}h more
               </span>

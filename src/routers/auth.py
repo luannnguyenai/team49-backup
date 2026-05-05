@@ -30,6 +30,7 @@ from src.models.user import User
 from src.redis_client import get_redis
 from src.schemas.auth import (
     AccessToken,
+    ForgotPasswordConfirmRequest,
     ForgotPasswordRequest,
     LoginRequest,
     OnboardingRequest,
@@ -47,10 +48,18 @@ from src.services.auth_service import (
     create_access_token,
     create_refresh_token,
     decode_token,
+    get_user_by_email,
     get_user_by_id,
     register_user,
-    reset_password_for_email,
     update_onboarding,
+)
+from src.services.email_service import send_password_reset_email
+from src.services.password_reset_service import (
+    PasswordResetError,
+    confirm_password_reset,
+    create_password_reset_token,
+    is_token_stale_for_user,
+    normalize_email,
 )
 from src.services.token_guard import is_payload_revoked, revoke_payload
 
@@ -84,6 +93,14 @@ class _SlidingWindowRateLimiter:
 _login_limiter = _SlidingWindowRateLimiter(
     max_calls=settings.rate_limit_login_per_minute,
     window_seconds=60,
+)
+_forgot_ip_limiter = _SlidingWindowRateLimiter(
+    max_calls=settings.rate_limit_forgot_password_per_hour,
+    window_seconds=3600,
+)
+_forgot_email_limiter = _SlidingWindowRateLimiter(
+    max_calls=settings.rate_limit_forgot_password_per_hour,
+    window_seconds=3600,
 )
 
 # ---------------------------------------------------------------------------
@@ -194,6 +211,27 @@ async def _is_login_allowed(client_ip: str) -> bool:
     )
 
 
+async def _is_forgot_password_allowed(client_ip: str, email: str) -> bool:
+    try:
+        redis = get_redis()
+    except RuntimeError:
+        return _forgot_ip_limiter.is_allowed(client_ip) and _forgot_email_limiter.is_allowed(email)
+
+    ip_allowed = await check_rate_limit(
+        redis,
+        f"rl:forgot-password:ip:{client_ip}",
+        limit=settings.rate_limit_forgot_password_per_hour,
+        window_sec=3600,
+    )
+    email_allowed = await check_rate_limit(
+        redis,
+        f"rl:forgot-password:email:{email}",
+        limit=settings.rate_limit_forgot_password_per_hour,
+        window_sec=3600,
+    )
+    return ip_allowed and email_allowed
+
+
 # ---------------------------------------------------------------------------
 # POST /api/auth/register
 # ---------------------------------------------------------------------------
@@ -255,20 +293,47 @@ async def login(
 
 
 @auth_router.post(
-    "/forgot-password",
-    summary="Reset password directly with email + new password",
+    "/forgot-password/request",
+    summary="Request a password reset email",
 )
-async def forgot_password(
+async def request_password_reset(
     body: ForgotPasswordRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_async_db),
+) -> dict[str, str]:
+    email = normalize_email(str(body.email))
+    client_ip = request.client.host if request.client else "unknown"
+    if not await _is_forgot_password_allowed(client_ip, email):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many password reset requests. Please try again later.",
+            headers={"Retry-After": "3600"},
+        )
+
+    user = await get_user_by_email(db, email)
+    if user is not None:
+        token = await create_password_reset_token(db, user, client_ip)
+        await send_password_reset_email(user.email, token)
+    return {"status": "ok"}
+
+
+@auth_router.post(
+    "/forgot-password/confirm",
+    summary="Reset password using an emailed reset token",
+)
+async def confirm_forgot_password(
+    body: ForgotPasswordConfirmRequest,
     db: AsyncSession = Depends(get_async_db),
 ) -> dict[str, str]:
     try:
-        await reset_password_for_email(db, body.email, body.new_password)
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        )
+        await confirm_password_reset(db, body.token, body.new_password)
+    except PasswordResetError as exc:
+        detail = {
+            "invalid": "Invalid reset link.",
+            "expired": "Reset link has expired.",
+            "used": "Reset link has already been used.",
+        }.get(exc.reason, "Invalid reset link.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
     return {"status": "ok"}
 
 
@@ -310,6 +375,8 @@ async def refresh_token(
 
     user = await get_user_by_id(db, user_id)
     if user is None:
+        raise invalid_exc
+    if is_token_stale_for_user(payload.iat, user):
         raise invalid_exc
 
     access_token, expires_in = create_access_token(user.id)

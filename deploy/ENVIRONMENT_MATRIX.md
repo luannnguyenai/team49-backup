@@ -13,6 +13,11 @@ Set qua Railway dashboard (**Service → Variables**), không commit `.env` th�
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | `7` | |
 | `RATE_LIMIT_LOGIN_PER_MINUTE` | `5` | |
+| `RATE_LIMIT_FORGOT_PASSWORD_PER_HOUR` | `5` | Per IP and normalized email |
+| `RESEND_API_KEY` | `re_...` | Secret from Resend |
+| `EMAIL_FROM` | `noreply@<verified-domain>` | Must be allowed by Resend sender/domain |
+| `FRONTEND_BASE_URL` | `https://<frontend>.up.railway.app` | Used to build `/reset-password?token=...` links |
+| `PASSWORD_RESET_TOKEN_TTL_MINUTES` | `30` | Reset link TTL |
 | `CORS_ORIGINS` | `["https://<frontend>.up.railway.app"]` | JSON array |
 | `MODEL_PROVIDER` | `openai` / `anthropic` / `gemini` | |
 | `DEFAULT_MODEL` | `gpt-4o-mini` | |
@@ -54,5 +59,7 @@ Railway cấp sẵn:
 
 - `DATABASE_URL` Railway cấp dạng `postgresql://...`. SQLAlchemy async cần `postgresql+asyncpg://...`. Sửa bằng cách set `DATABASE_URL` thủ công, copy giá trị từ Postgres plugin và đổi prefix.
 - `CORS_ORIGINS` phải JSON array hợp lệ, parse bởi `src/config.py`.
+- `EMAIL_FROM` phải thuộc sender identity/domain đã verify trong Resend.
+- `FRONTEND_BASE_URL` phải là domain frontend public để link reset password mở đúng trang.
 - Đổi `NEXT_PUBLIC_API_URL` → frontend phải rebuild (Railway tự trigger khi env đổi).
 - Không cần `POSTGRES_*`, `REDIS_PASSWORD` riêng vì plugin tự quản lý credential qua `DATABASE_URL` / `REDIS_URL`.

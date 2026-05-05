@@ -307,7 +307,7 @@ function QuizResultsInner() {
                   key={level}
                   label={BLOOM_LABELS[level] ?? level}
                   value={val}
-                  color={BLOOM_COLORS[level] ?? "#94a3b8"}
+                  color={BLOOM_COLORS[level] ?? "var(--text-muted-2)"}
                 />
               ))}
             </div>
@@ -330,7 +330,7 @@ function QuizResultsInner() {
               {result.weak_kcs.map((kc) => (
                 <span
                   key={kc}
-                  className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800"
+                  className="rounded-full bg-state-warning-bg px-3 py-1 text-xs font-medium text-state-warning-fg"
                 >
                   {kc}
                 </span>
@@ -346,7 +346,7 @@ function QuizResultsInner() {
             style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
           >
             <div className="mb-3 flex items-center gap-2">
-              <Lightbulb size={17} className="text-yellow-500" />
+              <Lightbulb size={17} className="text-state-warning-fg" />
               <h2 className="font-semibold" style={{ color: "var(--text-primary)" }}>
                 Detected misconceptions
               </h2>
@@ -358,7 +358,7 @@ function QuizResultsInner() {
                   className="flex items-start gap-2 text-sm"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-400" />
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-state-warning-fg" />
                   {m}
                 </li>
               ))}

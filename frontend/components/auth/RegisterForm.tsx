@@ -142,7 +142,7 @@ export default function RegisterForm() {
                 />
               ))}
             </div>
-            <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+            <p className="mt-1 text-xs text-text-muted">
               Strength: <span className="font-medium">{strengthLabel}</span>
             </p>
           </div>
@@ -173,7 +173,7 @@ export default function RegisterForm() {
         Create account
       </Button>
 
-      <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
+      <p className="text-center text-sm text-text-body">
         Already have an account?{" "}
         <Link href={loginHref} className="link">
           Sign in

@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Routes that don't require authentication
-const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/"];
+const PUBLIC_PATHS = ["/login", "/register", "/forgot-password", "/reset-password", "/"];
 const REDIRECT_AUTHENTICATED_AUTH_PATHS = ["/login", "/register"];
 
 // Routes that require auth but NOT onboarding

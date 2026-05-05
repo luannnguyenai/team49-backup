@@ -41,10 +41,10 @@ type Phase = "loading" | "active" | "submitting" | "error";
 const OPTIONS: SelectedAnswer[] = ["A", "B", "C", "D"];
 
 const BLOOM_BADGE: Record<string, { label: string; color: string }> = {
-  remember: { label: "Remember", color: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300" },
-  understand: { label: "Understand", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300" },
-  apply: { label: "Apply", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" },
-  analyze: { label: "Analyze", color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300" },
+  remember: { label: "Remember", color: "bg-bloom-remember-soft text-bloom-remember" },
+  understand: { label: "Understand", color: "bg-bloom-understand-soft text-bloom-understand" },
+  apply: { label: "Apply", color: "bg-bloom-apply-soft text-bloom-apply" },
+  analyze: { label: "Analyze", color: "bg-bloom-analyze-soft text-bloom-analyze" },
 };
 
 // ---------------------------------------------------------------------------
@@ -408,9 +408,9 @@ function AssessmentPageInner() {
                       isCur
                         ? "scale-105 bg-primary-600 text-white shadow-sm"
                         : isSkipped
-                        ? "bg-amber-100 text-amber-700 hover:brightness-95 dark:bg-amber-900/30 dark:text-amber-400"
+                        ? "bg-state-warning-bg text-state-warning-fg hover:brightness-95"
                         : isAns
-                        ? "bg-emerald-100 text-emerald-700 hover:brightness-95 dark:bg-emerald-900/30 dark:text-emerald-400"
+                        ? "bg-state-success-bg text-state-success-fg hover:brightness-95"
                         : "hover:bg-slate-100 dark:hover:bg-slate-800"
                     )}
                     style={
@@ -421,7 +421,7 @@ function AssessmentPageInner() {
                   >
                     {idx + 1}
                     {isQFlagged && (
-                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-yellow-400 ring-1 ring-white dark:ring-slate-900" />
+                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-state-warning-fg ring-1 ring-white dark:ring-slate-900" />
                     )}
                   </button>
                 );
@@ -437,15 +437,15 @@ function AssessmentPageInner() {
                 <span>Current</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 shrink-0 rounded border border-emerald-300 bg-emerald-100" />
+                <div className="h-3 w-3 shrink-0 rounded border border-state-success-border bg-state-success-bg" />
                 <span>Answered</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-3 w-3 shrink-0 rounded border border-amber-300 bg-amber-100" />
+                <div className="h-3 w-3 shrink-0 rounded border border-state-warning-border bg-state-warning-bg" />
                 <span>Skipped</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="ml-0.5 h-2 w-2 shrink-0 rounded-full bg-yellow-400" />
+                <div className="ml-0.5 h-2 w-2 shrink-0 rounded-full bg-state-warning-fg" />
                 <span>Marked for review</span>
               </div>
             </div>
@@ -453,7 +453,7 @@ function AssessmentPageInner() {
 
           <main className="min-w-0 flex flex-1 flex-col gap-6">
           {errorMsg && phase === "active" && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-400">
+            <div className="state-error rounded-lg border px-4 py-3 text-sm">
               {errorMsg}
             </div>
           )}
@@ -487,7 +487,7 @@ function AssessmentPageInner() {
                   className={cn(
                     "ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all duration-150",
                     isFlagged
-                      ? "bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400"
+                      ? "bg-state-warning-bg text-state-warning-fg"
                       : "hover:bg-slate-100 dark:hover:bg-slate-800"
                   )}
                   style={!isFlagged ? { color: "var(--text-muted)" } : undefined}

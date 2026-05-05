@@ -398,14 +398,18 @@ fi
 # =============================================================================
 log_section "Bước 6 — Admin user setup"
 
-ADMIN_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM users WHERE role='admin';" 2>/dev/null | tr -d '[:space:]' || echo "0")
-if [ "$ADMIN_COUNT" = "0" ]; then
-  log_warn "Chưa có admin user nào."
-  log_warn "Để promote 1 user thành admin, đăng ký account trên frontend trước, sau đó chạy:"
-  echo -e "    ${YELLOW}docker compose exec backend uv run python admin-dashboard/scripts/seed_admin.py --email <your_email>${NC}"
+log_info "Inject admin/demo accounts..."
+if docker compose exec -T backend uv run python -m src.scripts.create_seed_accounts 2>&1; then
+  log_ok "Admin/demo accounts đã sẵn sàng"
 else
-  log_ok "Đã có ${ADMIN_COUNT} admin user(s)"
+  log_error "Inject admin/demo accounts thất bại"
+  docker compose logs backend | tail -20
+  exit 1
 fi
+
+ADMIN_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM users WHERE role='admin';" 2>/dev/null | tr -d '[:space:]' || echo "0")
+DEMO_COUNT=$(docker compose exec -T db psql -U postgres -d ai_learning -tAc "SELECT COUNT(*) FROM users WHERE email LIKE 'demo%@vinuni.edu.vn';" 2>/dev/null | tr -d '[:space:]' || echo "0")
+log_ok "Đã có ${ADMIN_COUNT} admin user(s), ${DEMO_COUNT} demo user(s)"
 
 # =============================================================================
 # HOÀN TẤT

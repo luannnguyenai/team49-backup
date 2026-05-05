@@ -56,10 +56,10 @@ const TYPE_LABELS: Record<SessionType, string> = {
 };
 
 const TYPE_COLORS: Record<SessionType, string> = {
-  assessment: "bg-violet-100 text-violet-700",
-  quiz: "bg-blue-100 text-blue-700",
-  module_test: "bg-amber-100 text-amber-700",
-  practice: "bg-slate-100 text-slate-600",
+  assessment: "bg-session-assessment-soft text-session-assessment",
+  quiz: "bg-session-quiz-soft text-session-quiz",
+  module_test: "bg-session-module-test-soft text-session-module-test",
+  practice: "bg-session-practice-soft text-session-practice",
 };
 
 const CHECKPOINT_LABELS: Record<string, string> = {
@@ -75,10 +75,10 @@ const BLOOM_VI: Record<string, string> = {
 };
 
 const BLOOM_BAR_COLOR: Record<string, string> = {
-  remember: "#38bdf8",
-  understand: "#a78bfa",
-  apply: "#fbbf24",
-  analyze: "#f87171",
+  remember: "var(--bloom-remember)",
+  understand: "var(--bloom-understand)",
+  apply: "var(--bloom-apply)",
+  analyze: "var(--bloom-analyze)",
 };
 
 type SortKey = "started_at" | "session_type" | "subject" | "score_percent" | "duration_seconds";
@@ -121,9 +121,9 @@ function fmtStudyTime(secs: number) {
 
 function scoreColor(pct: number | null) {
   if (pct === null) return "var(--text-muted)";
-  if (pct >= 70) return "#10b981";
-  if (pct >= 50) return "#f59e0b";
-  return "#ef4444";
+  if (pct >= 70) return "var(--state-success-fg)";
+  if (pct >= 50) return "var(--state-warning-fg)";
+  return "var(--state-error-fg)";
 }
 
 function questionRowKey(q: QuestionInteractionDetail, index: number) {
@@ -171,7 +171,7 @@ function SparkLine({
     <svg width={width} height={height} className="overflow-visible">
       <polyline
         fill="none"
-        stroke="#6366f1"
+        stroke="var(--chart-2)"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -181,7 +181,7 @@ function SparkLine({
         cx={lastPt[0]}
         cy={lastPt[1]}
         r="3"
-        fill="#6366f1"
+        fill="var(--chart-2)"
       />
     </svg>
   );
@@ -207,7 +207,7 @@ function BloomBar({ breakdown }: { breakdown: Record<string, string> }) {
             <div className="flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 h-2">
               <div
                 className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${pct}%`, background: BLOOM_BAR_COLOR[level] ?? "#94a3b8" }}
+                style={{ width: `${pct}%`, background: BLOOM_BAR_COLOR[level] ?? "var(--text-muted-2)" }}
               />
             </div>
             <span className="w-10 text-xs tabular-nums text-text-muted">
@@ -264,7 +264,7 @@ function ExpandedDetail({
     <div className="space-y-5 px-1 py-3">
       {detail.source === "inline_video" && detail.checkpoint ? (
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
+          <span className="rounded-full bg-session-quiz-soft px-2 py-0.5 text-xs font-medium text-session-quiz">
             {CHECKPOINT_LABELS[detail.checkpoint] ?? detail.checkpoint}
           </span>
         </div>
@@ -290,7 +290,7 @@ function ExpandedDetail({
               {detail.weak_kcs.map((kc) => (
                 <span
                   key={kc}
-                  className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700"
+                  className="rounded-full bg-state-warning-bg px-2 py-0.5 text-xs text-state-warning-fg"
                 >
                   {kc}
                 </span>
@@ -310,7 +310,7 @@ function ExpandedDetail({
             <ul className="space-y-1">
               {detail.misconceptions.map((m) => (
                 <li key={m} className="flex items-start gap-1.5 text-xs text-text-body">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-400" />
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-state-warning-fg" />
                   {m}
                 </li>
               ))}
@@ -393,9 +393,9 @@ function QuestionRow({
       >
         {/* Correct / Wrong icon */}
         {q.is_correct ? (
-          <CheckCircle2 size={14} className="shrink-0 text-emerald-500" />
+          <CheckCircle2 size={14} className="shrink-0 text-state-success-fg" />
         ) : (
-          <XCircle size={14} className="shrink-0 text-red-400" />
+          <XCircle size={14} className="shrink-0 text-state-error-fg" />
         )}
 
         <span className="shrink-0 text-xs font-medium text-text-muted">
@@ -443,33 +443,33 @@ function QuestionRow({
                 className={[
                   "flex items-start gap-2 rounded-lg px-3 py-2 text-sm",
                   isCorr
-                    ? "border border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200"
+                    ? "state-success border"
                     : isSel
-                    ? "border border-red-300 bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-200"
+                    ? "state-error border"
                     : "border border-border-subtle text-text-body",
                 ].join(" ")}
               >
                 <span
                   className={[
                     "flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-bold",
-                    isCorr ? "bg-emerald-500 text-white"
-                      : isSel ? "bg-red-500 text-white"
+                    isCorr ? "bg-state-success-fg text-white"
+                      : isSel ? "bg-state-error-fg text-white"
                       : "bg-slate-200 text-slate-500 dark:bg-slate-700",
                   ].join(" ")}
                 >
                   {opt}
                 </span>
                 <span className="flex-1">{optText[opt]}</span>
-                {isCorr && <CheckCircle2 size={13} className="mt-0.5 shrink-0 text-emerald-500" />}
-                {isSel && !isCorr && <XCircle size={13} className="mt-0.5 shrink-0 text-red-400" />}
+                {isCorr && <CheckCircle2 size={13} className="mt-0.5 shrink-0 text-state-success-fg" />}
+                {isSel && !isCorr && <XCircle size={13} className="mt-0.5 shrink-0 text-state-error-fg" />}
               </div>
             );
           })}
 
           {q.explanation_text && (
-            <div className="flex items-start gap-2 rounded-lg bg-blue-50 px-3 py-2 dark:bg-blue-900/20">
-              <Lightbulb size={13} className="mt-0.5 shrink-0 text-blue-500" />
-              <div className="text-xs leading-relaxed text-blue-800 dark:text-blue-200">
+            <div className="insight-card flex items-start gap-2">
+              <Lightbulb size={13} className="mt-0.5 shrink-0 text-insight" />
+              <div className="text-xs leading-relaxed text-insight">
                 <MarkdownRenderer text={q.explanation_text} />
               </div>
             </div>
@@ -503,7 +503,7 @@ function Th({
   return (
     <th
       className={`cursor-pointer select-none whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide ${className}`}
-      style={{ color: active ? "var(--color-primary-600, #6366f1)" : "var(--text-muted)" }}
+      style={{ color: active ? "var(--brand-primary)" : "var(--text-muted)" }}
       onClick={() => onSort(sortKey)}
     >
       <span className="flex items-center gap-1">
@@ -643,8 +643,8 @@ export default function HistoryPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total sessions */}
           <div className="card flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
-              <HistoryIcon className="h-6 w-6 text-blue-600" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-stat-courses-soft">
+              <HistoryIcon className="h-6 w-6 text-stat-courses" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-text-body">Total sessions</p>
@@ -659,8 +659,8 @@ export default function HistoryPage() {
 
           {/* Avg score */}
           <div className="card flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
-              <Award className="h-6 w-6 text-amber-600" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-stat-completed-soft">
+              <Award className="h-6 w-6 text-stat-completed" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-text-body">Average score</p>
@@ -676,8 +676,8 @@ export default function HistoryPage() {
 
           {/* Study time */}
           <div className="card flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
-              <Clock className="h-6 w-6 text-violet-600" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-stat-time-soft">
+              <Clock className="h-6 w-6 text-stat-time" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-text-body">Total time</p>
@@ -690,8 +690,8 @@ export default function HistoryPage() {
 
           {/* Score trend sparkline */}
           <div className="card flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
-              <TrendingUp className="h-6 w-6 text-emerald-600" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-stat-progress-soft">
+              <TrendingUp className="h-6 w-6 text-stat-progress" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-text-body">Score trend</p>
@@ -839,7 +839,7 @@ export default function HistoryPage() {
                         {/* Type badge */}
                         <td className="px-4 py-3">
                           <span
-                            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${TYPE_COLORS[item.session_type] ?? "bg-slate-100 text-slate-600"}`}
+                            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${TYPE_COLORS[item.session_type] ?? "bg-session-practice-soft text-session-practice"}`}
                           >
                             {TYPE_LABELS[item.session_type] ?? item.session_type}
                           </span>
@@ -855,7 +855,7 @@ export default function HistoryPage() {
                               {item.subject}
                             </p>
                             {item.source === "inline_video" && item.checkpoint ? (
-                              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-700">
+                              <span className="rounded-full bg-session-quiz-soft px-2 py-0.5 text-xs font-medium text-session-quiz">
                                 {CHECKPOINT_LABELS[item.checkpoint] ?? item.checkpoint}
                               </span>
                             ) : null}

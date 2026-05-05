@@ -44,12 +44,19 @@ export default function LoginForm() {
   };
 
   const next = searchParams.get("next") ?? searchParams.get("from");
+  const resetSuccess = searchParams.get("reset") === "success";
   const registerHref = next ? `/register?next=${encodeURIComponent(next)}` : "/register";
   const forgotPasswordHref = next ? `/forgot-password?next=${encodeURIComponent(next)}` : "/forgot-password";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
       {/* Global API error */}
+      {resetSuccess && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 animate-fade-in">
+          Password reset successfully. Please sign in again.
+        </div>
+      )}
+
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400 animate-fade-in">
           {error}
@@ -100,7 +107,7 @@ export default function LoginForm() {
         Sign in
       </Button>
 
-      <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
+      <p className="text-center text-sm text-text-body">
         Don&apos;t have an account?{" "}
         <Link href={registerHref} className="link">
           Sign up now

@@ -81,6 +81,23 @@ def test_structured_router_returns_explicit_path_route():
     assert route.extracted_slots.search_scope == "explicit_path"
 
 
+def test_structured_router_accepts_serialized_route_context():
+    model = FakeStructuredModel(
+        {
+            "intent": "assistant_help",
+            "confidence": 0.93,
+            "raw_topic": None,
+            "target_path": None,
+            "rationale": "User asked for help.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(message="hi", route_context={"route": "/agent"})
+
+    assert route.intent == "assistant_help"
+    assert "Route context: {'route': '/agent'}" in model.messages[1]["content"]
+
+
 def test_structured_router_low_confidence_clarifies():
     model = FakeStructuredModel(
         {

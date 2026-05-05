@@ -9,6 +9,7 @@ def test_access_token_decodes_with_jti():
 
     assert payload.type == "access"
     assert payload.jti
+    assert payload.iat > 0
     assert expires_in > 0
 
 
@@ -20,6 +21,7 @@ def test_refresh_token_decodes_with_jti():
 
     assert payload.type == "refresh"
     assert payload.jti
+    assert payload.iat > 0
 
 
 def test_token_remaining_seconds_is_never_negative():

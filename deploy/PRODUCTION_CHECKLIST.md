@@ -6,6 +6,7 @@ Tick song song khi thực thi `DEPLOYMENT_PLAN.md`.
 - [ ] `Dockerfile` (backend) và `frontend/Dockerfile` build được standalone
 - [ ] Backend bind `0.0.0.0:$PORT` (Railway inject `PORT` runtime)
 - [ ] Có tài khoản Railway + đã link GitHub
+- [ ] Có tài khoản Resend + sender/domain đã verify
 - [ ] Đã chọn LLM provider, có API key còn quota (OpenAI / Anthropic / Gemini)
 - [ ] `SECRET_KEY` random 64 hex đã generate (`openssl rand -hex 32`)
 
@@ -18,7 +19,7 @@ Tick song song khi thực thi `DEPLOYMENT_PLAN.md`.
 - [ ] Add Redis plugin
 - [ ] Generate public domain cho `backend` và `frontend`
 - [ ] Bật `CREATE EXTENSION vector;` trên Postgres
-- [ ] Set env vars `backend` (DATABASE_URL prefix `postgresql+asyncpg://`, REDIS_URL, SECRET_KEY, CORS_ORIGINS, LLM key, DEBUG=false)
+- [ ] Set env vars `backend` (DATABASE_URL prefix `postgresql+asyncpg://`, REDIS_URL, SECRET_KEY, CORS_ORIGINS, LLM key, Resend vars, DEBUG=false)
 - [ ] Set env vars `frontend` (NEXT_PUBLIC_API_URL = backend domain, NODE_ENV=production)
 - [ ] Trigger redeploy frontend sau khi `NEXT_PUBLIC_API_URL` đúng
 - [ ] Chạy `alembic upgrade head` trên backend shell
@@ -32,6 +33,8 @@ Tick song song khi thực thi `DEPLOYMENT_PLAN.md`.
 - [ ] Frontend `/api/health` → 200
 - [ ] Frontend home load
 - [ ] Register + login OK
+- [ ] Forgot password sends Resend email and reset link opens `/reset-password?token=...`
+- [ ] Reset password succeeds, old password fails, new password logs in
 - [ ] Course catalog load
 - [ ] 1 learning unit load
 - [ ] 1 quiz start + submit

@@ -190,6 +190,7 @@ import type {
   QuizStartResponse,
   RegisterPayload,
   ResumeStateResponse,
+  ResetPasswordPayload,
   SelectedAnswer,
   SessionDetailResponse,
   SessionType,
@@ -442,8 +443,11 @@ export const authApi = {
   login: (data: LoginPayload) =>
     api.post<TokenPair>("/api/auth/login", data).then((r) => r.data),
 
-  forgotPassword: (data: ForgotPasswordPayload) =>
-    api.post<{ status: string }>("/api/auth/forgot-password", data).then((r) => r.data),
+  requestPasswordReset: (data: ForgotPasswordPayload) =>
+    api.post<{ status: string }>("/api/auth/forgot-password/request", data).then((r) => r.data),
+
+  confirmPasswordReset: (data: ResetPasswordPayload) =>
+    api.post<{ status: string }>("/api/auth/forgot-password/confirm", data).then((r) => r.data),
 
   refresh: (refreshToken: string) =>
     api

@@ -89,7 +89,7 @@ class StructuredAgentRouter:
                     {
                         "role": "user",
                         "content": (
-                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Route context: {self._dump_route_context(route_context)}\n"
                             f"Recent thread messages: {recent_messages or []}\n"
                             f"Message: {message}"
                         ),
@@ -153,7 +153,7 @@ class StructuredAgentRouter:
                         "role": "user",
                         "content": (
                             f"Intent: {intent}\n"
-                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Route context: {self._dump_route_context(route_context)}\n"
                             f"Slots: {slots_dump}\n"
                             f"Recent visible thread messages: {recent_messages}\n"
                             f"User message: {message}"
@@ -191,7 +191,7 @@ class StructuredAgentRouter:
                     {
                         "role": "user",
                         "content": (
-                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Route context: {self._dump_route_context(route_context)}\n"
                             f"Slots: {self._dump_like(slots)}\n"
                             f"Recent visible thread messages: {recent_messages}\n"
                             f"Thought: {self._dump_like(thought)}\n"
@@ -231,7 +231,7 @@ class StructuredAgentRouter:
                     {
                         "role": "user",
                         "content": (
-                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Route context: {self._dump_route_context(route_context)}\n"
                             f"Recent visible thread messages: {recent_messages}\n"
                             f"Thought: {self._dump_like(thought)}\n"
                             f"Tool call: {tool_call.model_dump(mode='json')}\n"
@@ -267,7 +267,7 @@ class StructuredAgentRouter:
                     {
                         "role": "user",
                         "content": (
-                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Route context: {self._dump_route_context(route_context)}\n"
                             f"Recent visible thread messages: {recent_messages}\n"
                             f"Thought summary: {self._dump_like(thought)}\n"
                             f"Validated observations: {observations}\n"
@@ -326,7 +326,7 @@ class StructuredAgentRouter:
                     {
                         "role": "user",
                         "content": (
-                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Route context: {self._dump_route_context(route_context)}\n"
                             f"Recent visible thread messages: {recent_messages or []}\n"
                             f"Pending payload: {pending_payload}\n"
                             f"User reply: {message}"
@@ -374,7 +374,7 @@ class StructuredAgentRouter:
                     {
                         "role": "user",
                         "content": (
-                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Route context: {self._dump_route_context(route_context)}\n"
                             f"User message: {message}\n"
                             f"Raw topic: {raw_topic or ''}\n"
                             f"Result count: {result_count}"
@@ -399,6 +399,16 @@ class StructuredAgentRouter:
         if hasattr(value, "model_dump"):
             return value.model_dump(mode="json")
         return value
+
+    @staticmethod
+    def _dump_route_context(route_context: RouteContext | dict | None) -> dict:
+        if route_context is None:
+            return {}
+        if hasattr(route_context, "model_dump"):
+            return route_context.model_dump()
+        if isinstance(route_context, dict):
+            return route_context
+        return {}
 
     @staticmethod
     def _validate_structured(value: Any, schema):
@@ -474,7 +484,7 @@ class StructuredAgentRouter:
                     {
                         "role": "user",
                         "content": (
-                            f"Route context: {route_context.model_dump() if route_context else {}}\n"
+                            f"Route context: {self._dump_route_context(route_context)}\n"
                             f"Recent visible thread messages: {recent_messages or []}\n"
                             f"Message: {message}"
                         ),
