@@ -1,5 +1,5 @@
 $baseBranch = "main"
-$sourceBranch = "deploy-plan"
+$sourceBranch = "deploy-3"
 $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
