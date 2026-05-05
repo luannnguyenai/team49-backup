@@ -35,7 +35,7 @@ async def test_broad_claim_is_marked_broad_not_blocked():
 
 
 @pytest.mark.asyncio
-async def test_single_technical_token_is_not_blocked_when_llm_marks_too_short(monkeypatch):
+async def test_compact_claim_is_not_blocked_when_llm_marks_too_short(monkeypatch):
     planner = ReplanKeywordPlanner(use_llm=True)
 
     async def fake_llm_plan(claim: str) -> ReplanKeywordPlan:
@@ -48,8 +48,28 @@ async def test_single_technical_token_is_not_blocked_when_llm_marks_too_short(mo
 
     monkeypatch.setattr(planner, "_plan_with_llm", fake_llm_plan)
 
-    plan = await planner.plan("Word2vec")
+    plan = await planner.plan("bert")
 
     assert plan.guardrail_flags == []
-    assert [keyword.text for keyword in plan.primary_keywords] == ["Word2vec"]
-    assert plan.search_queries == ["Word2vec"]
+    assert [keyword.text for keyword in plan.primary_keywords] == ["bert"]
+    assert plan.search_queries == ["bert"]
+
+
+@pytest.mark.asyncio
+async def test_one_character_claim_stays_too_short_when_llm_marks_too_short(monkeypatch):
+    planner = ReplanKeywordPlanner(use_llm=True)
+
+    async def fake_llm_plan(claim: str) -> ReplanKeywordPlan:
+        return ReplanKeywordPlan(
+            primaryKeywords=[],
+            searchQueries=[claim],
+            specificity="specific",
+            guardrailFlags=["too_short"],
+        )
+
+    monkeypatch.setattr(planner, "_plan_with_llm", fake_llm_plan)
+
+    plan = await planner.plan("r")
+
+    assert plan.guardrail_flags == ["too_short"]
+    assert plan.primary_keywords == []

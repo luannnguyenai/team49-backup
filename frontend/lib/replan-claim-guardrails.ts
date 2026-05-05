@@ -39,8 +39,7 @@ export function validateReplanKnowledgeClaim(value: string): ReplanClaimValidati
   if (SKIP_ALL_PATTERNS.some((pattern) => pattern.test(claim))) {
     return { ok: false, reason: "skip_all", message: SKIP_ALL_MESSAGE };
   }
-  const meaningfulTokens = claim.split(/\s+/).filter(Boolean);
-  if (meaningfulTokens.length < 3 && !looksLikeTechnicalConcept(claim)) {
+  if (isTooShortForSearch(claim)) {
     return { ok: false, reason: "too_short", message: TOO_SHORT_MESSAGE };
   }
   if (BROAD_PATTERNS.some((pattern) => pattern.test(claim))) {
@@ -49,12 +48,7 @@ export function validateReplanKnowledgeClaim(value: string): ReplanClaimValidati
   return { ok: true, specificity: "specific" };
 }
 
-function looksLikeTechnicalConcept(claim: string): boolean {
+function isTooShortForSearch(claim: string): boolean {
   const compact = claim.replace(/\s+/g, "");
-  if (compact.length < 2) return false;
-  return (
-    /[a-zA-Z]+\d+[a-zA-Z]*/.test(compact) ||
-    /[A-Z]{2,}/.test(compact) ||
-    /[a-zA-Z]+-[a-zA-Z0-9]+/.test(claim)
-  );
+  return compact.length < 2;
 }

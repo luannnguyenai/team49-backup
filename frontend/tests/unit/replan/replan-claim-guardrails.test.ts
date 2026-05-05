@@ -8,18 +8,30 @@ describe("validateReplanKnowledgeClaim", () => {
       reason: "too_short",
       message: 'Please describe specific concepts or units you know, e.g., "CNN, R-CNN, Faster R-CNN".',
     });
-    expect(validateReplanKnowledgeClaim("know")).toMatchObject({
+    expect(validateReplanKnowledgeClaim("I")).toMatchObject({
+      ok: false,
+      reason: "too_short",
+    });
+    expect(validateReplanKnowledgeClaim("1")).toMatchObject({
       ok: false,
       reason: "too_short",
     });
   });
 
-  it("allows a single technical concept token", () => {
+  it("allows compact single-token claims to continue into search and LLM unit selection", () => {
+    expect(validateReplanKnowledgeClaim("know")).toEqual({
+      ok: true,
+      specificity: "specific",
+    });
+    expect(validateReplanKnowledgeClaim("bert")).toEqual({
+      ok: true,
+      specificity: "specific",
+    });
     expect(validateReplanKnowledgeClaim("Word2vec")).toEqual({
       ok: true,
       specificity: "specific",
     });
-    expect(validateReplanKnowledgeClaim("CNN")).toEqual({
+    expect(validateReplanKnowledgeClaim("cnn")).toEqual({
       ok: true,
       specificity: "specific",
     });

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -54,12 +53,12 @@ class ReplanKeywordPlanner:
         Uses LLM if enabled, otherwise falls back to rule-based extraction.
         """
         if self.use_llm:
-            return self._allow_single_technical_token(claim, await self._plan_with_llm(claim))
-        return self._allow_single_technical_token(claim, self._plan_rule_based(claim))
+            return self._allow_compact_claim(claim, await self._plan_with_llm(claim))
+        return self._allow_compact_claim(claim, self._plan_rule_based(claim))
 
-    def _allow_single_technical_token(self, claim: str, plan: ReplanKeywordPlan) -> ReplanKeywordPlan:
-        """Keep compact technical terms like Word2vec or CNN from being rejected as too short."""
-        if "too_short" not in plan.guardrail_flags or not _looks_like_technical_concept(claim):
+    def _allow_compact_claim(self, claim: str, plan: ReplanKeywordPlan) -> ReplanKeywordPlan:
+        """Let searchable compact claims reach unit search and LLM unit selection."""
+        if "too_short" not in plan.guardrail_flags or _is_too_short_for_search(claim):
             return plan
 
         normalized = " ".join(claim.split())
@@ -145,12 +144,6 @@ class ReplanKeywordPlanner:
         )
 
 
-def _looks_like_technical_concept(claim: str) -> bool:
-    compact = re.sub(r"\s+", "", claim)
-    if len(compact) < 2:
-        return False
-    return bool(
-        re.search(r"[A-Za-z]+\d+[A-Za-z]*", compact)
-        or re.search(r"[A-Z]{2,}", compact)
-        or re.search(r"[A-Za-z]+-[A-Za-z0-9]+", claim)
-    )
+def _is_too_short_for_search(claim: str) -> bool:
+    compact = "".join(claim.split())
+    return len(compact) < 2
