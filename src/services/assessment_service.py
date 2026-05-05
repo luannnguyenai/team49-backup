@@ -13,7 +13,6 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from ast import literal_eval
 from dataclasses import dataclass
 from collections import defaultdict
 from datetime import UTC, datetime
@@ -510,7 +509,11 @@ def _parse_assessment_ai_summary(raw: str) -> AssessmentAISummaryResponse:
     try:
         payload = json.loads(text)
     except json.JSONDecodeError:
-        payload = literal_eval(text)
+        return AssessmentAISummaryResponse(
+            available=False,
+            model_used=DEFAULT_MODEL,
+            provider=settings.model_provider,
+        )
     if not isinstance(payload, dict):
         return AssessmentAISummaryResponse(
             available=False,

@@ -148,10 +148,6 @@ class ReplanLLMKeywordExtractor:
             log.warning(f"LLM structured extraction failed: {e}, using fallback")
             return self._fallback_plan(normalized)
 
-        except Exception as e:
-            log.error(f"LLM extraction failed for claim '{claim[:50]}...': {e}")
-            return self._fallback_plan(normalized)
-
     def _fallback_plan(self, claim: str) -> ReplanKeywordPlan:
         """Fallback to simple rule-based extraction if LLM fails.
 
