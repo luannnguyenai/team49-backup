@@ -35,10 +35,10 @@ const BLOOM_LABELS: Record<string, string> = {
 };
 
 const BLOOM_COLORS: Record<string, string> = {
-  remember: "bg-red-100 text-red-700",
-  understand: "bg-orange-100 text-orange-700",
-  apply: "bg-blue-100 text-blue-700",
-  analyze: "bg-purple-100 text-purple-700",
+  remember: "bg-bloom-remember-soft text-bloom-remember",
+  understand: "bg-bloom-understand-soft text-bloom-understand",
+  apply: "bg-bloom-apply-soft text-bloom-apply",
+  analyze: "bg-bloom-analyze-soft text-bloom-analyze",
 };
 
 const DIFF_LABELS: Record<string, string> = {
@@ -48,9 +48,9 @@ const DIFF_LABELS: Record<string, string> = {
 };
 
 const DIFF_COLORS: Record<string, string> = {
-  easy: "bg-emerald-100 text-emerald-700",
-  medium: "bg-amber-100 text-amber-700",
-  hard: "bg-red-100 text-red-700",
+  easy: "bg-state-success-bg text-state-success-fg",
+  medium: "bg-state-warning-bg text-state-warning-fg",
+  hard: "bg-state-error-bg text-state-error-fg",
 };
 
 const OPTION_KEYS: SelectedAnswer[] = ["A", "B", "C", "D"];
@@ -246,7 +246,7 @@ export default function QuizPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-6" style={{ background: "var(--bg-primary)" }}>
         <div className="max-w-sm text-center">
-          <AlertCircle className="mx-auto mb-4 text-red-500" size={40} />
+          <AlertCircle className="mx-auto mb-4 text-state-error-fg" size={40} />
           <p className="font-semibold" style={{ color: "var(--text-primary)" }}>Something went wrong</p>
           <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>{errorMsg}</p>
           <button
@@ -312,17 +312,17 @@ export default function QuizPage() {
         {/* Correct / Wrong tally bar */}
         {phase === "feedback" && answeredCount > 0 && (
           <div className="mx-auto mt-2 flex max-w-2xl items-center gap-3 text-xs">
-            <span className="flex items-center gap-1 text-emerald-600">
+            <span className="flex items-center gap-1 text-state-success-fg">
               <CheckCircle2 size={13} />
               {correctCount} correct
             </span>
             <div className="flex-1 overflow-hidden rounded-full bg-slate-200 h-1.5">
               <div
-                className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                className="h-full rounded-full bg-state-success-fg transition-all duration-300"
                 style={{ width: `${(correctCount / answeredCount) * 100}%` }}
               />
             </div>
-            <span className="flex items-center gap-1 text-red-500">
+            <span className="flex items-center gap-1 text-state-error-fg">
               <XCircle size={13} />
               {answeredCount - correctCount} incorrect
             </span>
@@ -400,7 +400,7 @@ export default function QuizPage() {
                     <CheckCircle2 className="mt-0.5 shrink-0 text-emerald-500" size={18} />
                   )}
                   {isFeedback && isWrong && (
-                    <XCircle className="mt-0.5 shrink-0 text-red-500" size={18} />
+                    <XCircle className="mt-0.5 shrink-0 text-state-error-fg" size={18} />
                   )}
                 </button>
               );
@@ -413,20 +413,20 @@ export default function QuizPage() {
               className={[
                 "rounded-2xl border p-4 text-sm",
                 feedback.is_correct
-                  ? "border-emerald-300 bg-emerald-50"
-                  : "border-red-300 bg-red-50",
+                  ? "state-success border"
+                  : "state-error border",
               ].join(" ")}
             >
               <div className="flex items-center gap-2 font-semibold">
                 {feedback.is_correct ? (
                   <>
-                    <CheckCircle2 className="text-emerald-600" size={18} />
-                    <span className="text-emerald-700">Correct!</span>
+                    <CheckCircle2 className="text-state-success-fg" size={18} />
+                    <span className="text-state-success-fg">Correct!</span>
                   </>
                 ) : (
                   <>
                     <XCircle className="text-red-600" size={18} />
-                    <span className="text-red-700">
+                    <span className="text-state-error-fg">
                       Not quite right. Correct answer: <strong>{feedback.correct_answer}</strong>
                     </span>
                   </>
@@ -435,8 +435,7 @@ export default function QuizPage() {
 
               {feedback.explanation_text && (
                 <div
-                  className="mt-2 pl-6 leading-relaxed"
-                  style={{ color: feedback.is_correct ? "#15803d" : "#b91c1c" }}
+                  className={`mt-2 pl-6 leading-relaxed ${feedback.is_correct ? "text-state-success-fg" : "text-state-error-fg"}`}
                 >
                   <MarkdownRenderer text={feedback.explanation_text} />
                 </div>
