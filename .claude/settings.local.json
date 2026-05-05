@@ -7,7 +7,12 @@
       "Bash(Select-Object -Property Name, PSIsContainer)",
       "Bash(rtk gh *)",
       "Bash(rtk git *)",
-      "Bash(rtk grep *)"
+      "Bash(rtk grep *)",
+      "Bash(rtk curl *)",
+      "Bash(rtk ps *)",
+      "Bash(rtk docker *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk find *)"
     ]
   },
   "disabledMcpjsonServers": [

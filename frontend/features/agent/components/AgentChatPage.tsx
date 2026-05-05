@@ -29,6 +29,7 @@ import {
   RotateCcw,
   Search,
   Send,
+  Sparkles,
   Target,
   Trash2,
   User,
@@ -742,7 +743,34 @@ function ActionButton({
   );
 
   if (action.type === "request_replan") {
-    return <Link href="/replan?source=agent&returnTo=%2Fagent">{content}</Link>;
+    return (
+      <Link
+        href="/replan?source=agent&returnTo=%2Fagent"
+        className="group relative mt-3 flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-cyan-200/70 bg-gradient-to-br from-cyan-50 via-white to-indigo-50 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-300/20 blur-2xl transition group-hover:bg-cyan-300/30"
+        />
+        <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-500 text-white shadow-sm">
+          <Sparkles className="h-5 w-5" />
+        </span>
+        <span className="relative flex min-w-0 flex-1 flex-col">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-700">
+            AI Action
+          </span>
+          <span className="truncate text-sm font-bold text-slate-900">
+            {action.label}
+          </span>
+          <span className="mt-0.5 text-xs text-slate-600">
+            Tell me what you already know — I'll re-optimize your learning path.
+          </span>
+        </span>
+        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-cyan-700 shadow-sm transition group-hover:bg-cyan-600 group-hover:text-white">
+          <ArrowRight className="h-4 w-4" />
+        </span>
+      </Link>
+    );
   }
 
   if (action.type === "request_path_switch") {
