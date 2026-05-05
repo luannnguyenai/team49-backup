@@ -39,6 +39,8 @@ from src.schemas.course import (
     LearningUnitSummary,
     TutorContextPayload,
 )
+from src.config import settings
+from src.services.asset_delivery import AssetDeliveryConfigError, build_cloudfront_url
 from src.services.asset_signing import build_signed_asset_url
 from src.services.legacy_lecture_adapter import (
     build_course_runtime_lecture_id,
@@ -46,6 +48,53 @@ from src.services.legacy_lecture_adapter import (
     normalize_legacy_lecture_id,
 )
 from src.services.course_bootstrap_service import get_bootstrap_course
+
+# ---------------------------------------------------------------------------
+# Asset URL resolution (local /data signed URL vs AWS CloudFront URL)
+# ---------------------------------------------------------------------------
+
+
+def _resolve_course_asset_url(
+    storage_key: str,
+    *,
+    local_disk_path: Path | None = None,
+) -> str | None:
+    """
+    Resolve a course asset URL based on `settings.asset_storage_provider`.
+
+    - 's3': always returns a CloudFront URL. The local disk does not need the
+      file (Render image ships without `data/courses/...`). Returns None if
+      CloudFront domain is not configured.
+    - 'local' (default): returns a `/data/...` signed URL. If `local_disk_path`
+      is provided and missing, returns None to preserve current behavior of
+      hiding the video when the file is absent from disk.
+    """
+    if settings.asset_storage_provider == "s3":
+        try:
+            return build_cloudfront_url(storage_key)
+        except AssetDeliveryConfigError:
+            return None
+    if local_disk_path is not None and not local_disk_path.exists():
+        return None
+    return build_signed_asset_url(storage_key)
+
+
+def _resolve_transcript_available(transcript_path: str | None) -> bool:
+    """
+    Decide whether a transcript should be marked available.
+
+    - 's3': trust DB metadata. If `transcript_path` is non-empty, treat as
+      available (file lives in S3 / canonical store, not on the local disk
+      that the Render container can see).
+    - 'local': require the file to exist on disk to preserve current dev
+      behavior.
+    """
+    if not transcript_path:
+        return False
+    if settings.asset_storage_provider == "s3":
+        return True
+    return Path(transcript_path).exists()
+
 
 # ---------------------------------------------------------------------------
 # Bootstrap unit data
@@ -226,21 +275,25 @@ async def get_learning_unit_payload(
     if unit_row is None:
         return None
 
-    # Build video URL from the filename
+    # Build video URL from the filename. Provider switch:
+    # - local: /data signed URL only when the file exists on disk.
+    # - s3:    CloudFront URL based on storage key (no disk check).
     video_filename = unit_row.get("video_filename")
     video_url: str | None = None
+    fallback_video_filename: str | None = None
     if video_filename:
-        # Protected course assets are exposed via short-lived signed URLs.
-        video_path = CS231N_DIR / "videos" / video_filename
-        if video_path.exists():
-            video_url = build_signed_asset_url(f"courses/CS231n/videos/{video_filename}")
+        video_url = _resolve_course_asset_url(
+            f"courses/CS231n/videos/{video_filename}",
+            local_disk_path=CS231N_DIR / "videos" / video_filename,
+        )
     if video_url is None:
         fallback_video_filename = _find_course_video_filename(course_slug, unit_row.get("order_index"))
         if fallback_video_filename:
             course_dir = _course_dir_for_slug(course_slug)
             if course_dir is not None:
-                video_url = build_signed_asset_url(
-                    f"courses/{course_dir.name}/videos/{fallback_video_filename}"
+                video_url = _resolve_course_asset_url(
+                    f"courses/{course_dir.name}/videos/{fallback_video_filename}",
+                    local_disk_path=course_dir / "videos" / fallback_video_filename,
                 )
 
     # Check transcript and slides availability
@@ -428,12 +481,13 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
             video_filename = _find_course_video_filename(course_slug, lecture_num)
             course_dir = _course_dir_for_slug(course_slug)
             if video_filename and course_dir is not None:
-                video_url = build_signed_asset_url(f"courses/{course_dir.name}/videos/{video_filename}")
+                video_url = _resolve_course_asset_url(
+                    f"courses/{course_dir.name}/videos/{video_filename}",
+                    local_disk_path=course_dir / "videos" / video_filename,
+                )
 
-            transcript_available = bool(
-                canonical_unit is not None
-                and canonical_unit.transcript_path
-                and Path(canonical_unit.transcript_path).exists()
+            transcript_available = canonical_unit is not None and _resolve_transcript_available(
+                canonical_unit.transcript_path
             )
             slides_available = bool(
                 lecture_num and lecture_num in _available_slide_lectures_for(course_slug)

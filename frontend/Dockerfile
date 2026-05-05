@@ -55,7 +55,9 @@ USER nextjs
 
 EXPOSE 3000
 
+# Healthcheck respects $PORT (Render injects PORT at runtime, e.g. 10000).
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget -qO- http://localhost:3000/api/health 2>/dev/null || exit 1
+    CMD wget -qO- "http://localhost:${PORT:-3000}/api/health" 2>/dev/null || exit 1
 
+# Next.js standalone server.js reads process.env.PORT automatically.
 CMD ["node", "server.js"]
