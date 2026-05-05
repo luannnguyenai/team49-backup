@@ -19,6 +19,7 @@ import {
   type AdminUsersPage,
   type SignupPoint,
 } from "@/lib/admin-api";
+import { CHART_GRID, CHART_PALETTE } from "@/lib/admin/chart-theme";
 
 export default function AdminUsersPage() {
   const [data, setData] = useState<AdminUsersPage | null>(null);
@@ -66,15 +67,15 @@ export default function AdminUsersPage() {
           <AreaChart data={signups} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
             <defs>
               <linearGradient id="usersFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.4} />
-                <stop offset="100%" stopColor="#4f46e5" stopOpacity={0} />
+                <stop offset="0%" stopColor={CHART_PALETTE.secondary} stopOpacity={0.4} />
+                <stop offset="100%" stopColor={CHART_PALETTE.secondary} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} tickFormatter={(v) => String(v).slice(5)} />
-            <YAxis tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} width={32} allowDecimals={false} />
-            <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }} />
-            <Area type="monotone" dataKey="count" stroke="#4f46e5" strokeWidth={2} fill="url(#usersFill)" />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID.stroke} vertical={false} />
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: CHART_GRID.tick }} tickLine={false} axisLine={false} tickFormatter={(v) => String(v).slice(5)} />
+            <YAxis tick={{ fontSize: 11, fill: CHART_GRID.tick }} tickLine={false} axisLine={false} width={32} allowDecimals={false} />
+            <Tooltip contentStyle={{ borderRadius: 12, border: `1px solid ${CHART_GRID.tooltipBorder}`, fontSize: 12 }} />
+            <Area type="monotone" dataKey="count" stroke={CHART_PALETTE.secondary} strokeWidth={2} fill="url(#usersFill)" />
           </AreaChart>
         </ResponsiveContainer>
       </ChartCard>
