@@ -18,6 +18,7 @@ import KpiGroup from "@/components/admin/KpiGroup";
 import ChartCard from "@/components/admin/ChartCard";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { adminApi, SystemHealth } from "@/lib/admin-api";
+import { CHART_GRID, CHART_PALETTE } from "@/lib/admin/chart-theme";
 
 type SeriesPoint = { t: number; cpu: number | null; ram: number | null };
 
@@ -136,24 +137,24 @@ export default function AdminSystemPage() {
       <ChartCard title="CPU & RAM (live)" subtitle={`${series.length} samples · 10s interval`}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={series} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID.stroke} vertical={false} />
             <XAxis
               dataKey="t"
               tickFormatter={(v) => `${v}s`}
-              tick={{ fontSize: 11, fill: "#64748b" }}
+              tick={{ fontSize: 11, fill: CHART_GRID.tick }}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "#64748b" }}
+              tick={{ fontSize: 11, fill: CHART_GRID.tick }}
               tickLine={false}
               axisLine={false}
               width={32}
               domain={[0, 100]}
             />
-            <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }} />
-            <Line type="monotone" dataKey="cpu" stroke="#06b6d4" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="ram" stroke="#4f46e5" strokeWidth={2} dot={false} />
+            <Tooltip contentStyle={{ borderRadius: 12, border: `1px solid ${CHART_GRID.tooltipBorder}`, fontSize: 12 }} />
+            <Line type="monotone" dataKey="cpu" stroke={CHART_PALETTE.primary} strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="ram" stroke={CHART_PALETTE.secondary} strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>
