@@ -1173,6 +1173,26 @@ function SessionSidebar({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [menuId, setMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!menuId) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (menuRef.current.contains(event.target as Node)) return;
+      setMenuId(null);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuId(null);
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuId]);
+
   const filtered = sessions.filter((session) => {
     const query = filter.trim().toLowerCase();
     if (!query) return true;
@@ -1281,7 +1301,7 @@ function SessionSidebar({
                   <p className="mt-1 truncate text-xs font-medium text-text-muted">{session.preview || "No messages yet"}</p>
                 </div>
                 {!isEditing ? (
-                  <div className="absolute right-2 top-2">
+                  <div className="absolute right-2 top-2" ref={menuId === id ? menuRef : undefined}>
                     <button
                       type="button"
                       onClick={(event) => {
