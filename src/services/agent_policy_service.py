@@ -21,10 +21,4 @@ class AgentPolicyService:
                     user_safe_message="That content is outside your allowed course scope.",
                     audit_context={"blockedCourseIds": blocked},
                 )
-        if intent == "request_path_switch" and not slots.target_path:
-            return PolicyDecision(
-                allow=False,
-                codes=["TARGET_PATH_MISSING"],
-                user_safe_message="Which path should I switch you to?",
-            )
         return PolicyDecision(allow=True)

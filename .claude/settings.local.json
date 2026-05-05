@@ -4,7 +4,10 @@
       "Bash(git -C /d/VSCODE/VINAI/A20-App-049 log --oneline)",
       "Bash(python *)",
       "Bash(Get-ChildItem -Path \"D:\\\\VSCODE\\\\VINAI\\\\A20-App-049\")",
-      "Bash(Select-Object -Property Name, PSIsContainer)"
+      "Bash(Select-Object -Property Name, PSIsContainer)",
+      "Bash(rtk gh *)",
+      "Bash(rtk git *)",
+      "Bash(rtk grep *)"
     ]
   },
   "disabledMcpjsonServers": [

@@ -27,7 +27,12 @@ class DeterministicAgentRouter:
             intent = "find_content"
         elif "explain" in text or "giải thích" in text:
             intent = "explain_concept"
-        elif "replan" in text or "tính lại lộ trình" in text:
+        elif (
+            "replan" in text
+            or "tính lại lộ trình" in text
+            or "tối ưu" in text and "lộ trình" in text
+            or "optimize" in text and ("path" in text or "plan" in text)
+        ):
             intent = "request_replan"
 
         if "nlp" in text or "cs224n" in text:

@@ -89,10 +89,39 @@ class AgentPendingActionDecisionService:
                     answer_markdown="That action can no longer be completed.",
                     fallback={"reason": "action_error", "message": "missing_path_switch_service"},
                 )
+            edit_payload = decision.get("edit_payload") or {}
+            target_path_id = (
+                pending.payload_json.get("target_path_id")
+                or edit_payload.get("targetPathId")
+                or edit_payload.get("target_path_id")
+            )
+            if not target_path_id:
+                return ToolResult(
+                    kind="clarification",
+                    answer_markdown="Choose a target learning path first.",
+                    fallback={"reason": "action_error", "message": "missing_target_path"},
+                )
+            validate_request = getattr(self.path_switch_service, "validate_request", None)
+            if validate_request is not None:
+                decision_result = await validate_request(
+                    self.action_user.id,
+                    pending.payload_json.get("current_course_ids") or [],
+                    target_path_id,
+                    pending.payload_json.get("allowed_course_ids") or [],
+                )
+                if not decision_result.allow:
+                    return ToolResult(
+                        kind="clarification",
+                        answer_markdown=decision_result.user_safe_message or "That learning path is not available.",
+                        fallback={
+                            "reason": "action_error",
+                            "message": ",".join(decision_result.codes) or "path_switch_rejected",
+                        },
+                    )
             result = await self.path_switch_service.commit(
                 self.action_db,
                 self.action_user,
-                pending.payload_json["target_path_id"],
+                target_path_id,
                 pending.idempotency_key,
             )
             message = (

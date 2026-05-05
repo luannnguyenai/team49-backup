@@ -12,7 +12,8 @@ from src.models.agent_graph import AgentGraphRun, AgentPendingAction, AgentRespo
 from src.schemas.agent import AgentChatResponse
 
 
-ACTIVE_RUN_STATUSES = {"created", "running", "interrupted"}
+ACTIVE_RUN_STATUSES = {"created", "running"}
+REPLAYABLE_RESPONSE_STATUSES = {"succeeded", "interrupted"}
 
 
 class AgentGraphRepository:
@@ -46,7 +47,7 @@ class AgentGraphRepository:
             thread_id,
             incoming_message_id,
         )
-        if run is None or run.status != "succeeded" or not run.response_ref:
+        if run is None or run.status not in REPLAYABLE_RESPONSE_STATUSES or not run.response_ref:
             return None
         return await self.load_response_payload(run.response_ref)
 

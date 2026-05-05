@@ -81,6 +81,9 @@ describe("RoadmapPlanner", () => {
     expect(screen.getByText("Core Unit")).toBeInTheDocument();
     expect(screen.getByText("Already Mastered")).toBeInTheDocument();
     expect(screen.getByText("User Skipped")).toBeInTheDocument();
+    expect(screen.getByText("Already Mastered")).toHaveClass("line-through");
+    expect(screen.getByText("User Skipped")).toHaveClass("line-through");
+    expect(screen.getAllByLabelText("Skipped")).toHaveLength(2);
     expect(screen.getAllByText("Skip")).toHaveLength(2);
     expect(screen.queryByText("Reference Only")).not.toBeInTheDocument();
     expect(screen.queryByText("Hidden Logistics")).not.toBeInTheDocument();

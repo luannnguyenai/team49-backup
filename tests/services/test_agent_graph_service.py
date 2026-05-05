@@ -3404,6 +3404,131 @@ async def test_graph_persists_pending_path_switch_action():
     assert events == ["interrupted"]
 
 
+async def test_dispatch_persists_path_switch_picker_action_without_target_path():
+    repo = SimpleNamespace(
+        create_pending_action=AsyncMock(return_value=SimpleNamespace(action_id="act-1")),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=SimpleNamespace(),
+        graph_repo=repo,
+        path_switch_service=SimpleNamespace(validate_request=AsyncMock()),
+    )
+
+    state = await service._dispatch(
+        {
+            "conversation_id": str(uuid4()),
+            "thread_id": "thread-path-picker",
+            "user_id": str(uuid4()),
+            "incoming_message_id": "msg-path-picker",
+            "message": "tôi muốn đổi qua lộ trình khác",
+            "intent": "request_path_switch",
+            "intent_confidence": 0.95,
+            "slots": AgentSlots(target_path=None),
+            "policy": SimpleNamespace(allow=True),
+            "allowed_course_ids": ["CS230", "CS224n", "CS231n"],
+            "current_path_course_ids": ["CS231n"],
+        }
+    )
+
+    repo.create_pending_action.assert_awaited_once()
+    service.path_switch_service.validate_request.assert_not_awaited()
+    result = state["tool_result"]
+    assert result.answer_markdown.startswith("Sure. Choose the learning path below")
+    assert result.actions[0].type == "request_path_switch"
+    assert result.actions[0].action_id == "act-1"
+    assert repo.create_pending_action.await_args.kwargs["payload"] == {
+        "payload_version": 1,
+        "intent": "request_path_switch",
+        "reason": "tôi muốn đổi qua lộ trình khác",
+        "current_course_ids": ["CS231n"],
+        "allowed_course_ids": ["CS230", "CS224n", "CS231n"],
+        "target_path_id": None,
+    }
+
+
+async def test_resume_path_switch_uses_selected_target_from_card_edit_payload():
+    conversation_id = str(uuid4())
+    user_id = uuid4()
+    pending = SimpleNamespace(
+        action_id="act-path-switch",
+        conversation_id=conversation_id,
+        thread_id="thread-path-switch",
+        user_id=user_id,
+        status="awaiting_confirmation",
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+        type="request_path_switch",
+        payload_json={
+            "target_path_id": None,
+            "current_course_ids": ["CS231n"],
+            "allowed_course_ids": ["CS230", "CS224n", "CS231n"],
+        },
+        idempotency_key="idem-path-switch",
+    )
+    path_switch_service = SimpleNamespace(
+        validate_request=AsyncMock(return_value=SimpleNamespace(allow=True)),
+        commit=AsyncMock(
+            return_value={
+                "targetPathId": "nlp",
+                "targetCourseIds": ["CS230", "CS224n"],
+                "totalUnits": 10,
+                "totalHours": 2,
+                "warnings": [],
+            }
+        ),
+    )
+    repo = SimpleNamespace(
+        get_pending_action=AsyncMock(return_value=pending),
+        get_completed_response_by_incoming_message=AsyncMock(return_value=None),
+        get_active_non_interrupted_run=AsyncMock(return_value=None),
+        create_run=AsyncMock(return_value=SimpleNamespace(graph_run_id="resume-path-switch")),
+        mark_run_running=AsyncMock(),
+        get_committed_action_result=AsyncMock(return_value=None),
+        mark_action_committed=AsyncMock(),
+        mark_latest_interrupted_run_final=AsyncMock(),
+        store_response_payload=AsyncMock(return_value="resp-path-switch"),
+        mark_run_succeeded=AsyncMock(),
+        mark_run_failed=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        graph_repo=repo,
+        thread_lock=NoopThreadLock(),
+        path_switch_service=path_switch_service,
+        action_db=object(),
+        action_user=SimpleNamespace(id=user_id),
+    )
+    service._graph = None
+
+    response = await service.resume_action(
+        AgentActionResumeRequest(
+            conversationId=conversation_id,
+            actionId="act-path-switch",
+            decision="approve",
+            editPayload={"targetPathId": "nlp"},
+        ),
+        user_id=str(user_id),
+    )
+
+    path_switch_service.validate_request.assert_awaited_once_with(
+        user_id,
+        ["CS231n"],
+        "nlp",
+        ["CS230", "CS224n", "CS231n"],
+    )
+    path_switch_service.commit.assert_awaited_once_with(
+        service.action_db,
+        service.action_user,
+        "nlp",
+        "idem-path-switch",
+    )
+    assert response.answer.markdown.startswith("I switched your active path")
+    repo.mark_action_committed.assert_awaited_once()
+
+
 async def test_resume_reject_closes_interrupted_run_as_cancelled():
     conversation_id = str(uuid4())
     user_id = str(uuid4())

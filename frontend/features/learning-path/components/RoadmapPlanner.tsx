@@ -4,7 +4,6 @@ import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   AlertTriangle,
-  ArrowRight,
   CheckCircle2,
   ChevronDown,
   Circle,
@@ -152,7 +151,7 @@ function statusIcon(status: PathStatus) {
       <Circle className="h-5 w-5 shrink-0 fill-blue-500/20 text-blue-600" />
     );
   if (status === "skipped")
-    return <ArrowRight className="h-5 w-5 shrink-0 text-slate-400" />;
+    return <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />;
   return <Circle className="h-5 w-5 shrink-0 text-slate-300" />;
 }
 
@@ -303,7 +302,7 @@ function UnitCard({
           <h4
             className={cn(
               "text-sm font-bold leading-tight text-slate-800 md:text-base",
-              item.status === "completed" &&
+              (item.status === "completed" || isSkipped) &&
               "text-slate-500 line-through decoration-slate-300",
             )}
           >
@@ -334,12 +333,11 @@ function UnitCard({
             ) : null}
           </div>
         </div>
-        <div className="mt-0.5 shrink-0">
-          {isSkipped ? (
-            <ArrowRight className="h-5 w-5 shrink-0 text-slate-400" />
-          ) : (
-            statusIcon(item.status)
-          )}
+        <div
+          aria-label={isSkipped ? "Skipped" : undefined}
+          className="mt-0.5 shrink-0"
+        >
+          {isSkipped ? statusIcon("skipped") : statusIcon(item.status)}
         </div>
       </div>
 

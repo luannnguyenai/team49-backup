@@ -45,20 +45,24 @@ _logger.setLevel(logging.INFO)
 _logger.propagate = False
 
 if not _logger.handlers:
-    _handler = RotatingFileHandler(
-        LOG_FILE,
-        maxBytes=20 * 1024 * 1024,   # 20 MB
-        backupCount=5,
-        encoding="utf-8",
-    )
-    _handler.setFormatter(
-        jsonlogger.JsonFormatter(
-            "%(ts)s %(level)s %(message)s",
-            rename_fields={"levelname": "level"},
-            timestamp="ts",
+    try:
+        _handler = RotatingFileHandler(
+            LOG_FILE,
+            maxBytes=20 * 1024 * 1024,   # 20 MB
+            backupCount=5,
+            encoding="utf-8",
         )
-    )
-    _logger.addHandler(_handler)
+        _handler.setFormatter(
+            jsonlogger.JsonFormatter(
+                "%(ts)s %(level)s %(message)s",
+                rename_fields={"levelname": "level"},
+                timestamp="ts",
+            )
+        )
+        _logger.addHandler(_handler)
+    except (PermissionError, OSError):
+        # Fail gracefully in test/read-only environments
+        pass
 
 
 def _resolve_user_id(request: Request) -> str | None:

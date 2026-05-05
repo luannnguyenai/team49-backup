@@ -50,7 +50,7 @@ from src.core.observability import (
 log = logging.getLogger(__name__)
 
 _ASSESSMENT_SUMMARY_SYSTEM = """\
-You write concise Vietnamese feedback for an AI learning assessment result.
+You write concise English feedback for an AI learning assessment result.
 
 Return JSON only:
 {
@@ -63,7 +63,7 @@ Rules:
 - Base the feedback only on the provided scores and decisions.
 - Do not list every unit.
 - Do not over-praise if there are relearn/review items.
-- Mention skip/review/relearn in learner-friendly Vietnamese.
+- Mention skip/review/relearn in learner-friendly English.
 - Keep the tone direct, calm, and useful.
 """
 
@@ -506,7 +506,20 @@ def _parse_assessment_ai_summary(raw: str) -> AssessmentAISummaryResponse:
             text = text[4:]
         text = text.strip()
 
-    payload = json.loads(text)
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return AssessmentAISummaryResponse(
+            available=False,
+            model_used=DEFAULT_MODEL,
+            provider=settings.model_provider,
+        )
+    if not isinstance(payload, dict):
+        return AssessmentAISummaryResponse(
+            available=False,
+            model_used=DEFAULT_MODEL,
+            provider=settings.model_provider,
+        )
     summary = payload.get("summary")
     next_step = payload.get("next_step")
     highlights_payload = payload.get("highlights", [])
