@@ -11,8 +11,7 @@ export const metadata: Metadata = {
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: "var(--bg-page)" }}
+      className="min-h-screen flex items-center justify-center bg-surface-page p-4"
     >
       {/* Decorative blobs */}
       <div
@@ -26,21 +25,21 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="relative w-full max-w-md">
         {/* Brand mark */}
         <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-600 shadow-lg shadow-primary-600/30">
+          <div className="hero-gradient flex h-12 w-12 items-center justify-center rounded-2xl shadow-lg shadow-primary-600/30">
             <Brain className="h-6 w-6 text-white" />
           </div>
           <div className="text-center">
-            <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <h1 className="text-xl font-bold text-text-strong">
               AI Learning Platform
             </h1>
-            <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
+            <p className="mt-0.5 text-sm text-text-muted">
               Learn smarter every day
             </p>
           </div>
         </div>
 
         {/* Card */}
-        <div className="card animate-fade-in">{children}</div>
+        <div className="card-glass animate-fade-in">{children}</div>
       </div>
     </div>
   );
