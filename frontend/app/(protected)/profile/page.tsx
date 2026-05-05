@@ -94,7 +94,7 @@ function buildAchievements(
       title: "Skill profile unlocked",
       desc: "Completed the assessment to record your current ability",
       icon: "🧠",
-      color: "border-blue-400 bg-blue-50 dark:bg-blue-900/20",
+      color: "border-tier-bronze bg-tier-bronze-soft",
     });
   }
   if (completedSessions >= 1) {
@@ -102,7 +102,7 @@ function buildAchievements(
       title: "First learning session",
       desc: "Completed at least 1 learning session or assessment",
       icon: "✨",
-      color: "border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20",
+      color: "border-tier-silver bg-tier-silver-soft",
     });
   }
   if (completedSessions >= 5) {
@@ -110,7 +110,7 @@ function buildAchievements(
       title: "Consistent learner",
       desc: "Completed 5 or more learning sessions",
       icon: "🏆",
-      color: "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20",
+      color: "border-tier-gold bg-tier-gold-soft",
     });
   }
   if (totalHours >= 10) {
@@ -118,7 +118,7 @@ function buildAchievements(
       title: "Persistent",
       desc: "Reached 10 or more total study hours",
       icon: "⏱️",
-      color: "border-violet-400 bg-violet-50 dark:bg-violet-900/20",
+      color: "border-tier-platinum bg-tier-platinum-soft",
     });
   }
 
@@ -219,7 +219,7 @@ export default function ProfilePage() {
             <div className="card space-y-4">
               {/* Avatar + name */}
               <div className="flex flex-col items-center text-center gap-3 pb-4 border-b border-border-subtle">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white text-2xl font-bold shadow-lg">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full hero-gradient text-white text-2xl font-bold shadow-lg">
                   {initials}
                 </div>
                 <div>
@@ -235,26 +235,26 @@ export default function ProfilePage() {
               {/* Stats list */}
               <div className="space-y-2">
                 <StatRow
-                  icon={<BookOpen className="h-4 w-4 text-blue-600" />}
-                  iconBg="bg-blue-100 dark:bg-blue-900/30"
+                  icon={<BookOpen className="h-4 w-4 text-stat-courses" />}
+                  iconBg="bg-stat-courses-soft"
                   label="Courses"
                   value={String(joinedCourseCount)}
                 />
                 <StatRow
-                  icon={<Trophy className="h-4 w-4 text-emerald-600" />}
-                  iconBg="bg-emerald-100 dark:bg-emerald-900/30"
+                  icon={<Trophy className="h-4 w-4 text-stat-progress" />}
+                  iconBg="bg-stat-progress-soft"
                   label="Completed sessions"
                   value={String(completedSessions)}
                 />
                 <StatRow
-                  icon={<Clock className="h-4 w-4 text-violet-600" />}
-                  iconBg="bg-violet-100 dark:bg-violet-900/30"
+                  icon={<Clock className="h-4 w-4 text-stat-time" />}
+                  iconBg="bg-stat-time-soft"
                   label="Total time"
                   value={`${totalHours}h`}
                 />
                 <StatRow
-                  icon={<TrendingUp className="h-4 w-4 text-orange-500" />}
-                  iconBg="bg-orange-100 dark:bg-orange-900/30"
+                  icon={<TrendingUp className="h-4 w-4 text-stat-completed" />}
+                  iconBg="bg-stat-completed-soft"
                   label="Streak"
                   value={`${streakDays} days`}
                 />
