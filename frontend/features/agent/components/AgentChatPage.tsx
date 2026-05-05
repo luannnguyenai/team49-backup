@@ -792,7 +792,7 @@ function PathSwitchAction({ action }: { action: AgentAction }) {
   const applyPathChange = () => {
     setProfile(
       createLearningProfileForPath(selectedPath, {
-        weeklyHours: profile?.weeklyHours,
+        weeklyHours: profile?.weeklyHours ?? null,
         source: "manual",
       }),
     );
