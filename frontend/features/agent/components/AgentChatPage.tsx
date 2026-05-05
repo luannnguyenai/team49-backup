@@ -721,7 +721,13 @@ function ActionButton({
   }
 
   if (action.type === "request_path_switch") {
-    return <PathSwitchAction action={action} />;
+    return (
+      <PathSwitchAction
+        action={action}
+        conversationId={conversationId}
+        onActionResponse={onActionResponse}
+      />
+    );
   }
 
   if (isPendingConfirmation) {
@@ -771,33 +777,60 @@ function isPlannerPathKey(value: string | null | undefined): value is PlannerPat
   return Boolean(value && value in SUPPORTED_LEARNING_PATHS);
 }
 
-function firstAlternativePath(currentPathKey: PlannerPathKey | null | undefined): PlannerPathKey {
-  return ((Object.keys(SUPPORTED_LEARNING_PATHS) as PlannerPathKey[]).find((pathKey) => pathKey !== currentPathKey) ??
-    "computer_vision");
-}
-
-function PathSwitchAction({ action }: { action: AgentAction }) {
+function PathSwitchAction({
+  action,
+  conversationId,
+  onActionResponse,
+}: {
+  action: AgentAction;
+  conversationId?: string | null;
+  onActionResponse?: (response: AgentChatResponse) => void;
+}) {
   const profile = useLearningPathStore((s) => s.profile);
   const setProfile = useLearningPathStore((s) => s.setProfile);
   const requestedPath = getWorkflowId(action);
+  const actionId = getActionId(action);
   const initialPath = isPlannerPathKey(requestedPath)
     ? requestedPath
-    : firstAlternativePath(profile?.pathKey);
+    : profile?.pathKey ?? "computer_vision";
   const [selectedPath, setSelectedPath] = useState<PlannerPathKey>(initialPath);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isCommitting, setIsCommitting] = useState(false);
+  const [commitError, setCommitError] = useState<string | null>(null);
   const [switchedTo, setSwitchedTo] = useState<PlannerPathKey | null>(null);
   const target = SUPPORTED_LEARNING_PATHS[selectedPath];
   const isCurrent = profile?.pathKey === selectedPath;
 
-  const applyPathChange = () => {
-    setProfile(
-      createLearningProfileForPath(selectedPath, {
-        weeklyHours: profile?.weeklyHours ?? null,
-        source: "manual",
-      }),
-    );
-    setSwitchedTo(selectedPath);
-    setShowConfirm(false);
+  const applyPathChange = async () => {
+    if (!conversationId || !actionId || !onActionResponse) {
+      setCommitError("Path change could not be completed from this card.");
+      setShowConfirm(false);
+      return;
+    }
+    setIsCommitting(true);
+    setCommitError(null);
+    try {
+      const response = await agentApi.continueAction({
+        conversationId,
+        actionId,
+        decision: "approve",
+        editPayload: { targetPathId: selectedPath },
+        incomingMessageId: createIncomingMessageId(),
+      });
+      setProfile(
+        createLearningProfileForPath(selectedPath, {
+          weeklyHours: profile?.weeklyHours ?? null,
+          source: "manual",
+        }),
+      );
+      setSwitchedTo(selectedPath);
+      setShowConfirm(false);
+      onActionResponse(response);
+    } catch (err) {
+      setCommitError(err instanceof Error ? err.message : "Path change could not be completed.");
+    } finally {
+      setIsCommitting(false);
+    }
   };
 
   return (
@@ -848,6 +881,7 @@ function PathSwitchAction({ action }: { action: AgentAction }) {
         Repath
       </button>
       {isCurrent ? <p className="mt-2 text-xs font-medium text-slate-500">This is already your active path.</p> : null}
+      {commitError ? <p className="mt-2 text-xs font-bold text-red-600">{commitError}</p> : null}
       {switchedTo ? (
         <p className="mt-2 text-xs font-bold text-emerald-700">
           Active path changed to {SUPPORTED_LEARNING_PATHS[switchedTo].label}.
@@ -869,6 +903,7 @@ function PathSwitchAction({ action }: { action: AgentAction }) {
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
                 type="button"
+                disabled={isCommitting}
                 onClick={() => setShowConfirm(false)}
                 className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
               >
@@ -876,9 +911,11 @@ function PathSwitchAction({ action }: { action: AgentAction }) {
               </button>
               <button
                 type="button"
+                disabled={isCommitting}
                 onClick={applyPathChange}
-                className="min-h-11 rounded-xl bg-blue-600 px-4 text-sm font-black text-white transition hover:bg-blue-700"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-60"
               >
+                {isCommitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Change path
               </button>
             </div>

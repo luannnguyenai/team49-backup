@@ -6,7 +6,11 @@ from sqlalchemy import text
 
 from src.models.agent_conversation import AgentConversation
 from src.models.user import User
-from src.repositories.agent_graph_repo import AgentGraphRepository
+from src.repositories.agent_graph_repo import (
+    ACTIVE_RUN_STATUSES,
+    REPLAYABLE_RESPONSE_STATUSES,
+    AgentGraphRepository,
+)
 from src.schemas.agent import AgentAnswer, AgentChatResponse
 
 pytestmark = pytest.mark.asyncio
@@ -67,6 +71,11 @@ async def test_graph_repo_run_response_and_dedupe_round_trip(db_session):
     )
 
     assert completed == response
+
+
+async def test_interrupted_runs_are_replayable_but_not_active():
+    assert "interrupted" not in ACTIVE_RUN_STATUSES
+    assert "interrupted" in REPLAYABLE_RESPONSE_STATUSES
 
 
 async def test_graph_repo_create_run_is_idempotent_for_duplicate_incoming_message(db_session):

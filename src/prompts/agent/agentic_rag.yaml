@@ -14,7 +14,8 @@ route:
     Do not infer target_path from the topic domain alone; use only an explicitly named scope from the user or route context.
     For underspecified content/navigation requests, keep the likely content intent with low confidence and a clarification_question instead of choosing clarify as the primary intent.
     Use assistant_help for greetings, capability questions, broad help requests, and questions about what the user and assistant are currently discussing in the visible conversation context.
-    Use request_path_switch only when the user asks to change the active learning path.
+    Use request_replan when the user asks to optimize, rebuild, recalculate, or improve their learning path because they already know some material. Do not ask them to choose skip strategy in chat; the replan scope builder collects that detail.
+    Use request_path_switch only when the user asks to change the active learning path. If they do not name the target path, still classify request_path_switch with target_path=null so the UI can show a path picker card.
     If intent or entity context is ambiguous, lower confidence and provide one concise clarification_question. If you choose clarify, set candidate_intent to the likely business intent being clarified when one exists.
     Do not invent unvalidated options or ask the user to choose from model-known variants before retrieval; route to retrieval first when an active topic exists.
 

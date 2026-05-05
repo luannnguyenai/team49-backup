@@ -1588,7 +1588,7 @@ class AgentGraphService:
             result = await self._persist_pending_action_for_result(state, result, "request_replan")
             return {**state, "tool_result": result}
         if state["intent"] == "request_path_switch":
-            if self.path_switch_service is not None:
+            if self.path_switch_service is not None and slots.target_path:
                 decision = await self.path_switch_service.validate_request(
                     UUID(str(state["user_id"])),
                     state.get("current_path_course_ids") or [],
@@ -1755,6 +1755,8 @@ class AgentGraphService:
                 }
             )
         elif action_type == "request_path_switch":
+            payload["current_course_ids"] = state.get("current_path_course_ids") or []
+            payload["allowed_course_ids"] = state.get("allowed_course_ids") or []
             if self.path_switch_service is not None and slots.target_path:
                 payload.update(
                     self.path_switch_service.build_proposal(
@@ -1893,7 +1895,7 @@ class AgentGraphService:
                     "role": getattr(message, "role", "unknown"),
                     "markdown": markdown[:1200],
                     "citations": getattr(message, "citations_json", None) or [],
-                    "actions": getattr(message, "actions_json", None) or [],
+                    "actions": [],
                 }
             )
         return context

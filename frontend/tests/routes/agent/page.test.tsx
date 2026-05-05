@@ -504,8 +504,21 @@ describe("agent page", () => {
         {
           type: "request_path_switch",
           label: "Change path",
+          actionId: "act-path-switch",
+          status: "awaiting_confirmation",
         },
       ],
+      warning: null,
+    });
+    agentApiMock.continueAction.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-path-switch-committed",
+      answer: {
+        markdown: "I switched your active path and recalculated the learning plan.",
+        confidence: "partial",
+      },
+      citations: [],
+      actions: [],
       warning: null,
     });
     render(<AgentPage />);
@@ -514,7 +527,11 @@ describe("agent page", () => {
     fireEvent.click(promptButtons[0]);
 
     expect(await screen.findByRole("combobox", { name: /target learning path/i })).toBeInTheDocument();
-    fireEvent.change(screen.getByRole("combobox", { name: /target learning path/i }), {
+    const pathSelect = screen.getByRole("combobox", { name: /target learning path/i });
+    expect(pathSelect).toHaveValue("computer_vision");
+    expect(screen.getByRole("button", { name: "Repath" })).toBeDisabled();
+
+    fireEvent.change(pathSelect, {
       target: { value: "nlp" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Repath" }));
@@ -526,6 +543,15 @@ describe("agent page", () => {
     fireEvent.click(screen.getByRole("button", { name: "Repath" }));
     fireEvent.click(await screen.findByRole("button", { name: "Change path" }));
 
+    await waitFor(() => {
+      expect(agentApiMock.continueAction).toHaveBeenCalledWith({
+        conversationId: "conversation-1",
+        actionId: "act-path-switch",
+        decision: "approve",
+        editPayload: { targetPathId: "nlp" },
+        incomingMessageId: expect.any(String),
+      });
+    });
     expect(useLearningPathStore.getState().profile).toMatchObject({
       pathKey: "nlp",
       selectedCourseIds: ["CS230", "CS224n"],

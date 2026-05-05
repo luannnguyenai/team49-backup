@@ -18,3 +18,12 @@ def test_deterministic_router_path_switch_is_separate_intent():
 
     assert route.intent == "request_path_switch"
     assert route.extracted_slots.target_path == "nlp"
+
+
+def test_deterministic_router_routes_path_optimization_to_replan():
+    route = DeterministicAgentRouter().route(
+        "tôi đã biết về CNN nên tôi muốn tối ưu hoá lộ trình hơn",
+        None,
+    )
+
+    assert route.intent == "request_replan"

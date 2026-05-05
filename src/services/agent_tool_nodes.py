@@ -380,11 +380,11 @@ class AgentToolNodes:
         expires_at = datetime.now(UTC) + timedelta(minutes=30)
         return ToolResult(
             kind="replan_proposal",
-            answer_markdown="I can propose a replan after you confirm.",
+            answer_markdown="Sure. Open the scope builder below, describe what you already know, and I will use that assessment to optimize your learning path.",
             actions=[
                 AgentAction(
                     type="request_replan",
-                    label="Confirm replan",
+                    label="Open scope builder",
                     actionId=f"act_{uuid4()}",
                     status="awaiting_confirmation",
                     expiresAt=expires_at,
@@ -397,11 +397,11 @@ class AgentToolNodes:
         expires_at = datetime.now(UTC) + timedelta(minutes=30)
         return ToolResult(
             kind="path_switch_proposal",
-            answer_markdown="I can switch your active learning path after you confirm.",
+            answer_markdown="Sure. Choose the learning path below, then confirm the change when you are ready.",
             actions=[
                 AgentAction(
                     type="request_path_switch",
-                    label="Confirm path switch",
+                    label="Choose learning path",
                     actionId=f"act_{uuid4()}",
                     status="awaiting_confirmation",
                     expiresAt=expires_at,
