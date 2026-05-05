@@ -12,6 +12,7 @@ import {
   Bot,
   CheckCircle2,
   ChevronRight,
+  ChevronDown,
   Check,
   Clock,
   History,
@@ -174,12 +175,34 @@ const QUICK_PROMPTS = [
   "Which DL parts are required for NLP?",
 ];
 
+const COPILOT_BENEFITS = ["Path-aware", "Source-backed", "Actionable next steps"];
+
 const TURN_PROGRESS_STEPS = [
-  "Preparing request",
-  "Routing intent",
-  "Searching current path",
-  "Reading sources",
-  "Composing answer",
+  {
+    label: "Preparing request",
+    detail: "Securing the chat context before the model starts.",
+    icon: Clock,
+  },
+  {
+    label: "Routing learning intent",
+    detail: "Classifying whether this needs path search, source reading, or an action.",
+    icon: ArrowRight,
+  },
+  {
+    label: "Searching current path",
+    detail: "Prioritizing units from your active learning path.",
+    icon: Search,
+  },
+  {
+    label: "Reading source evidence",
+    detail: "Checking course material before drafting the answer.",
+    icon: BookOpen,
+  },
+  {
+    label: "Composing grounded answer",
+    detail: "Writing the response with citations and next-step actions.",
+    icon: MessageSquare,
+  },
 ];
 
 function formatDateLabel(value: string) {
@@ -205,10 +228,12 @@ function toUiMessages(messages: AgentConversationMessage[]): UiMessage[] {
 function WarningBlock({ warning }: { warning: AgentWarning }) {
   const tone =
     warning.type === "outside_current_path"
-      ? "border-amber-200 bg-amber-50 text-amber-900"
+      ? "state-warning border"
       : warning.type === "ambiguous_target"
-        ? "border-slate-200 bg-slate-50 text-slate-800"
-        : "border-blue-200 bg-blue-50 text-blue-900";
+        ? "border-border-subtle bg-surface-page text-text-body"
+        : warning.type === "agent_unavailable"
+          ? "state-error border"
+          : "insight-card";
   const Icon = warning.type === "ambiguous_target" ? AlertTriangle : warning.type === "needs_assessment" ? ArrowRight : Info;
 
   return (
@@ -268,28 +293,28 @@ function CitationCard({
       type="button"
       onClick={() => onSelect(citation)}
       className={cn(
-        "group block w-full rounded-2xl border bg-white p-3 text-left transition hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
-        isSelected ? "border-blue-300 shadow-lg shadow-blue-500/10" : "border-slate-200",
+        "group block w-full rounded-2xl border bg-surface-card p-3 text-left transition hover:border-primary-200 hover:bg-surface-accent-soft/40 hover:shadow-brand-soft focus:outline-none focus:ring-2 focus:ring-primary-600/20",
+        isSelected ? "border-primary-200 shadow-brand-soft" : "border-border-subtle",
       )}
       aria-label={`View source details: ${getCitationUnitName(citation)}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-600">
+            <span className="rounded-md bg-surface-accent-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-700 dark:text-primary-300">
               {getCitationCourseId(citation)}
             </span>
           </div>
-          <h4 className="line-clamp-2 text-sm font-black leading-snug text-slate-900 group-hover:text-blue-600">
+          <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-text-strong group-hover:text-primary-700 dark:group-hover:text-primary-300">
             {getCitationUnitName(citation)}
           </h4>
           {getCitationLectureTitle(citation) ? (
-            <p className="mt-1 line-clamp-1 text-xs font-medium text-slate-500">
+            <p className="mt-1 line-clamp-1 text-xs font-medium text-text-muted">
               {getCitationLectureTitle(citation)}
             </p>
           ) : null}
         </div>
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-400 transition group-hover:bg-blue-600 group-hover:text-white">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-page text-text-muted transition group-hover:bg-surface-accent-soft group-hover:text-primary-700">
           <ChevronRight className="h-4 w-4" />
         </div>
       </div>
@@ -325,16 +350,16 @@ function SourceDetailPanel({
       : null;
 
   return (
-    <aside className="flex h-full w-full shrink-0 flex-col border-l border-slate-200 bg-white lg:w-[360px] xl:w-[390px]">
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-4">
+    <aside className="flex h-full w-full shrink-0 flex-col border-l border-border-subtle bg-surface-card lg:w-[360px] xl:w-[390px]">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-border-subtle px-4">
         <div className="min-w-0">
-          <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">Source detail</p>
-          <h2 className="truncate text-sm font-black text-slate-950">{courseId}</h2>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary-700 dark:text-primary-300">Evidence</p>
+          <h2 className="truncate text-sm font-semibold text-text-strong">{courseId}</h2>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100"
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-text-muted transition hover:bg-surface-page"
           aria-label="Close source detail"
         >
           <X className="h-5 w-5" />
@@ -343,66 +368,66 @@ function SourceDetailPanel({
 
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
         <div>
-          <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-slate-400">Learning unit</p>
-          <h3 className="text-xl font-black leading-tight text-slate-950">{title}</h3>
-          {sectionTitle ? <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">{sectionTitle}</p> : null}
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-text-muted">Learning unit</p>
+          <h3 className="text-xl font-semibold leading-tight text-text-strong">{title}</h3>
+          {sectionTitle ? <p className="mt-2 text-sm font-medium leading-6 text-text-body">{sectionTitle}</p> : null}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-            <div className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-border-subtle bg-surface-page p-3">
+            <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-text-muted">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Status
             </div>
-            <p className="text-sm font-black text-slate-900">{statusLabel}</p>
+            <p className="text-sm font-semibold text-text-strong">{statusLabel}</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-            <div className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-border-subtle bg-surface-page p-3">
+            <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-text-muted">
               <Clock className="h-3.5 w-3.5" />
               Duration
             </div>
-            <p className="text-sm font-black text-slate-900">{duration ?? "Unknown"}</p>
+            <p className="text-sm font-semibold text-text-strong">{duration ?? "Unknown"}</p>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
+        <div className="insight-card p-4">
+          <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
             <BookOpen className="h-3.5 w-3.5" />
             Summary
           </div>
           {isLoading ? (
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
-              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <Loader2 className="h-4 w-4 animate-spin" />
               Loading source context
             </div>
           ) : error ? (
-            <p className="text-sm leading-6 text-amber-700">{error}</p>
+            <p className="text-sm leading-6">{error}</p>
           ) : summary ? (
-            <p className="text-sm leading-6 text-slate-600">{summary}</p>
+            <p className="text-sm leading-6">{summary}</p>
           ) : (
-            <p className="text-sm leading-6 text-slate-500">No summary is available for this source yet.</p>
+            <p className="text-sm leading-6">No summary is available for this source yet.</p>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-            <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-slate-400">Quiz</p>
-            <p className="text-sm font-black text-slate-900">
+          <div className="rounded-2xl border border-border-subtle bg-surface-page p-3">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-text-muted">Quiz</p>
+            <p className="text-sm font-semibold text-text-strong">
               {getUnitContextQuizAvailable(unitContext) || pathItem?.has_quiz_items ? "Available" : "Not available"}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-            <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-slate-400">Course</p>
-            <p className="truncate text-sm font-black text-slate-900">{courseId}</p>
+          <div className="rounded-2xl border border-border-subtle bg-surface-page p-3">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-text-muted">Course</p>
+            <p className="truncate text-sm font-semibold text-text-strong">{courseId}</p>
           </div>
         </div>
       </div>
 
-      <div className="border-t border-slate-200 p-4">
+      <div className="border-t border-border-subtle p-4">
         {href ? (
           <Link
             href={href}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 text-sm font-black text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700"
+            className="btn-primary min-h-12 w-full px-4"
           >
             Start learning
             <ArrowRight className="h-4 w-4" />
@@ -411,7 +436,7 @@ function SourceDetailPanel({
           <button
             type="button"
             disabled
-            className="min-h-12 w-full rounded-2xl bg-slate-100 px-4 text-sm font-black text-slate-400"
+            className="min-h-12 w-full rounded-2xl bg-surface-page px-4 text-sm font-semibold text-text-muted"
           >
             Learning link unavailable
           </button>
@@ -424,21 +449,21 @@ function SourceDetailPanel({
 function PrerequisitePath({ unitIds }: { unitIds: string[] }) {
   if (unitIds.length === 0) return null;
   return (
-    <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <div className="mb-4 flex items-center gap-2 text-sm font-black text-slate-900">
-        <Map className="h-4 w-4 text-blue-600" />
+    <div className="mt-3 rounded-2xl border border-border-subtle bg-surface-page p-4">
+      <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-text-strong">
+        <Map className="h-4 w-4 text-primary-700" />
         Suggested prerequisite order
       </div>
       <div className="space-y-4">
         {unitIds.map((unitId, index) => (
           <div key={unitId} className="relative flex gap-3">
             {index < unitIds.length - 1 ? (
-              <div className="absolute left-[7px] top-6 h-8 border-l-2 border-dotted border-slate-300" />
+              <div className="absolute left-[7px] top-6 h-8 border-l-2 border-dotted border-border-subtle" />
             ) : null}
-            <span className="relative z-10 mt-1 h-4 w-4 rounded-full border-2 border-blue-500 bg-white" />
+            <span className="relative z-10 mt-1 h-4 w-4 rounded-full border-2 border-primary-500 bg-surface-card" />
             <div>
-              <p className="text-sm font-bold text-slate-800">Review {unitId}</p>
-              <p className="text-xs text-slate-500">Grounded prerequisite candidate from the path graph.</p>
+              <p className="text-sm font-semibold text-text-strong">Review {unitId}</p>
+              <p className="text-xs text-text-muted">Grounded prerequisite candidate from the path graph.</p>
             </div>
           </div>
         ))}
@@ -460,8 +485,8 @@ function AssessmentProposalCard({
 
   if (!proposal) {
     return (
-      <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-4">
-        <p className="text-sm font-semibold text-slate-900">Assessment workflow: {workflow.status}</p>
+      <div className="mt-3 rounded-2xl border border-border-subtle bg-surface-card p-4">
+        <p className="text-sm font-semibold text-text-strong">Assessment workflow: {workflow.status}</p>
         {workflow.actions.map((action) => (
           <ActionButton key={`${action.type}-${action.label}`} action={action} />
         ))}
@@ -486,40 +511,40 @@ function AssessmentProposalCard({
   };
 
   return (
-    <div className="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
-      <div className="border-b border-slate-100 bg-slate-50/80 p-5">
-        <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-blue-700">
+    <div className="card-glass mt-4 overflow-hidden p-0">
+      <div className="border-b border-border-subtle bg-surface-page/80 p-5">
+        <span className="rounded-full bg-surface-accent-soft px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary-700 dark:text-primary-300">
           Assessment proposal
         </span>
-        <h3 className="mt-4 text-xl font-black tracking-tight text-slate-950">{proposal.title}</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{proposal.purpose}</p>
+        <h3 className="mt-4 text-xl font-semibold tracking-tight text-text-strong">{proposal.title}</h3>
+        <p className="mt-2 text-sm leading-6 text-text-body">{proposal.purpose}</p>
       </div>
       <div className="space-y-6 p-5">
         <div className="flex gap-10">
           <div>
-            <p className="text-4xl font-black tracking-tighter text-slate-950">{questionCount}</p>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">questions</p>
+            <p className="text-4xl font-semibold tracking-tighter text-text-strong">{questionCount}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">questions</p>
           </div>
           <div>
-            <p className="text-2xl font-black tracking-tight text-slate-950">{minutes} min</p>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">estimated</p>
+            <p className="text-2xl font-semibold tracking-tight text-text-strong">{minutes} min</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">estimated</p>
           </div>
         </div>
 
         <div>
-          <h4 className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
+          <h4 className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-text-muted">
             <Target className="h-4 w-4" />
             Scope
           </h4>
           <div className="space-y-3">
             {proposal.scope.map((scope) => (
               <div key={scope.label} className="flex gap-3">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-black text-slate-600">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-surface-accent-soft text-xs font-bold text-primary-700">
                   {getScopeUnitCount(scope)}
                 </span>
                 <div>
-                  <p className="text-sm font-bold text-slate-900">{scope.label}</p>
-                  <p className="text-xs leading-5 text-slate-500">{scope.reason}</p>
+                  <p className="text-sm font-semibold text-text-strong">{scope.label}</p>
+                  <p className="text-xs leading-5 text-text-muted">{scope.reason}</p>
                 </div>
               </div>
             ))}
@@ -527,23 +552,23 @@ function AssessmentProposalCard({
         </div>
 
         <div>
-          <h4 className="mb-3 text-[11px] font-black uppercase tracking-widest text-slate-400">Difficulty mix</h4>
-          <div className="flex h-2 overflow-hidden rounded-full bg-slate-100">
+          <h4 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-text-muted">Difficulty mix</h4>
+          <div className="flex h-2 overflow-hidden rounded-full bg-surface-page">
             {Object.entries(mix).map(([level, count]) => (
               <div
                 key={level}
                 className={cn(
                   "h-full",
-                  level === "easy" && "bg-green-400",
-                  level === "medium" && "bg-blue-400",
-                  level === "hard" && "bg-orange-400",
-                  level === "application" && "bg-purple-400",
+                  level === "easy" && "bg-state-success-fg",
+                  level === "medium" && "bg-state-warning-fg",
+                  level === "hard" && "bg-state-error-fg",
+                  level === "application" && "bg-bloom-apply",
                 )}
                 style={{ width: `${(Number(count) / totalMix) * 100}%` }}
               />
             ))}
           </div>
-          <div className="mt-2 flex flex-wrap gap-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="mt-2 flex flex-wrap gap-3 text-[10px] font-bold uppercase tracking-wider text-text-muted">
             {Object.entries(mix).map(([level, count]) => (
               <span key={level}>
                 {level}: {count}
@@ -560,10 +585,10 @@ function AssessmentProposalCard({
                 type="button"
                 disabled={isBusy}
                 onClick={() => runDecision({ action: "reduce", reductionId: option.id })}
-                className="rounded-2xl border border-slate-200 p-3 text-left transition hover:border-blue-300 hover:bg-blue-50 disabled:opacity-60"
+                className="rounded-2xl border border-border-subtle bg-surface-card p-3 text-left transition hover:border-primary-200 hover:bg-surface-accent-soft/40 disabled:opacity-60"
               >
-                <span className="block text-sm font-black text-slate-900">{option.label}</span>
-                <span className="mt-1 block text-xs leading-5 text-slate-500">
+                <span className="block text-sm font-semibold text-text-strong">{option.label}</span>
+                <span className="mt-1 block text-xs leading-5 text-text-muted">
                   {option.effect} New estimate: {getReductionQuestionCount(option)} questions.
                 </span>
               </button>
@@ -576,7 +601,7 @@ function AssessmentProposalCard({
             type="button"
             disabled={isBusy}
             onClick={() => runDecision({ action: "approve" })}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 disabled:opacity-60"
+            className="btn-primary min-h-12 px-5 text-sm uppercase tracking-widest disabled:opacity-60"
           >
             {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <BarChart3 className="h-4 w-4" />}
             Approve assessment
@@ -585,7 +610,7 @@ function AssessmentProposalCard({
             type="button"
             disabled={isBusy}
             onClick={() => runDecision({ action: "reject" })}
-            className="min-h-12 rounded-2xl border border-slate-200 px-5 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+            className="btn-secondary min-h-12 px-5 text-sm disabled:opacity-60"
           >
             Not now
           </button>
@@ -695,16 +720,16 @@ function ActionButton({
   const content = (
     <span
       className={cn(
-        "mt-2 flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl border p-3 text-left text-sm font-bold transition",
+        "mt-2 flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl border p-3 text-left text-sm font-semibold transition",
         disabled
-          ? "cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400"
-          : "border-slate-200 bg-white text-slate-900 hover:border-blue-300 hover:bg-blue-50",
+          ? "cursor-not-allowed border-border-subtle bg-surface-page text-text-muted"
+          : "border-border-subtle bg-surface-card text-text-strong hover:border-primary-200 hover:bg-surface-accent-soft/40",
       )}
     >
       <span>
         <span className="block">{action.label}</span>
         {disabledReason ? <span className="mt-0.5 block text-xs font-medium">Disabled: {disabledReason}</span> : null}
-        {startError ? <span className="mt-0.5 block text-xs font-medium text-red-600">{startError}</span> : null}
+        {startError ? <span className="mt-0.5 block text-xs font-medium text-state-error-fg">{startError}</span> : null}
       </span>
       {isStarting ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
     </span>
@@ -725,7 +750,7 @@ function ActionButton({
           type="button"
           disabled={disabled || isStarting}
           onClick={() => continuePendingAction("reject")}
-          className="min-h-10 w-full rounded-2xl border border-slate-200 px-4 text-sm font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+          className="btn-secondary min-h-10 w-full px-4 text-sm disabled:opacity-60"
         >
           Not now
         </button>
@@ -794,10 +819,10 @@ function WorkflowAction({ action }: { action: AgentAction }) {
           type="button"
           disabled={disabled || isLoading}
           onClick={start}
-          className="flex min-h-14 w-full items-center justify-between rounded-2xl bg-blue-600 px-4 text-left text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+          className="btn-primary flex min-h-14 w-full justify-between px-4 text-left disabled:cursor-not-allowed disabled:opacity-60"
         >
           <span>
-            <span className="block text-sm font-black">{action.label}</span>
+            <span className="block text-sm font-semibold">{action.label}</span>
             <span className="mt-0.5 block text-xs opacity-80">
               {disabledReason ?? `${canonicalIds.length} candidate units`}
             </span>
@@ -807,7 +832,7 @@ function WorkflowAction({ action }: { action: AgentAction }) {
       ) : (
         <AssessmentProposalCard workflow={workflow} onResume={resume} />
       )}
-      {error ? <p className="mt-2 text-sm font-medium text-red-600">{error}</p> : null}
+      {error ? <p className="mt-2 text-sm font-medium text-state-error-fg">{error}</p> : null}
     </div>
   );
 }
@@ -842,7 +867,7 @@ function ChatMessageItem({
   return (
     <div className={cn("flex w-full gap-3", isUser && "justify-end")}>
       {!isUser ? (
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
+        <div className="hero-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-sm">
           <Bot className="h-5 w-5" />
         </div>
       ) : null}
@@ -851,14 +876,14 @@ function ChatMessageItem({
           className={cn(
             "rounded-3xl px-4 py-3 text-[15px] leading-7 shadow-sm",
             isUser
-              ? "rounded-tr-md bg-slate-950 text-white"
-              : "rounded-tl-md border border-slate-200 bg-white text-slate-800",
+              ? "rounded-tr-md bg-brand-ink text-brand-ink-fg"
+              : "rounded-tl-md border border-border-subtle bg-surface-card text-text-body",
           )}
         >
           {isUser ? (
             <p className="whitespace-pre-wrap">{message.markdown}</p>
           ) : (
-            <div className="prose prose-sm prose-slate max-w-none leading-7">
+            <div className="prose prose-sm prose-slate max-w-none leading-7 dark:prose-invert">
               <AssistantMarkdown markdown={message.markdown} />
             </div>
           )}
@@ -875,7 +900,7 @@ function ChatMessageItem({
             <button
               type="button"
               onClick={() => onRetry(message.retryMessage!, message.retryIncomingMessageId!)}
-              className="mt-3 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wider text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-600"
+              className="btn-secondary mt-3 px-3 py-1.5 text-xs uppercase tracking-wider"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Retry
@@ -885,7 +910,7 @@ function ChatMessageItem({
 
         {!isUser && message.citations.length > 0 ? (
           <div className="mt-3 space-y-2">
-            <div className="flex items-center gap-2 px-1 text-[11px] font-black uppercase tracking-widest text-slate-400">
+            <div className="flex items-center gap-2 px-1 text-[11px] font-bold uppercase tracking-widest text-text-muted">
               <Search className="h-3 w-3" />
               Sources
             </div>
@@ -918,7 +943,7 @@ function ChatMessageItem({
         ) : null}
       </div>
       {isUser ? (
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border-subtle bg-surface-card text-text-muted">
           <User className="h-4 w-4" />
         </div>
       ) : null}
@@ -959,40 +984,40 @@ function SessionSidebar({
         <button
           type="button"
           onClick={onNewChat}
-          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200"
+          className="btn-primary h-12 w-12 p-0"
           aria-label="New chat"
         >
           <Plus className="h-5 w-5" />
         </button>
-        <History className="h-5 w-5 text-slate-300" />
+        <History className="h-5 w-5 text-text-muted" />
       </div>
     );
   }
 
   return (
-    <aside className="flex h-full flex-col overflow-hidden bg-white">
-      <div className="space-y-3 border-b border-slate-200 p-4">
+    <aside className="flex h-full flex-col overflow-hidden bg-surface-card">
+      <div className="space-y-3 border-b border-border-subtle p-4">
         <button
           type="button"
           onClick={onNewChat}
-          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 text-sm font-black text-white transition hover:bg-blue-700"
+          className="btn-primary min-h-11 w-full text-sm"
         >
           <Plus className="h-4 w-4" />
           New chat
         </button>
-        <label className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-          <Search className="h-4 w-4 text-slate-400" />
+        <label className="flex items-center gap-2 rounded-2xl border border-border-subtle bg-surface-page px-3 py-2">
+          <Search className="h-4 w-4 text-text-muted" />
           <input
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
             placeholder="Search chats"
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
+            className="min-w-0 flex-1 bg-transparent text-sm text-text-strong outline-none placeholder:text-text-muted"
           />
         </label>
       </div>
       <div className="flex-1 overflow-y-auto p-3">
         {filtered.length === 0 ? (
-          <div className="py-10 text-center text-sm font-medium text-slate-400">No chat history yet.</div>
+          <div className="py-10 text-center text-sm font-medium text-text-muted">No chat history yet.</div>
         ) : (
           filtered.map((session) => {
             const id = getConversationId(session);
@@ -1003,7 +1028,7 @@ function SessionSidebar({
                 key={id}
                 className={cn(
                   "group relative mb-2 rounded-2xl border p-3 transition",
-                  isActive ? "border-blue-100 bg-blue-50 shadow-sm" : "border-transparent hover:bg-slate-50",
+                  isActive ? "border-primary-200 bg-surface-accent-soft shadow-sm" : "border-transparent hover:bg-surface-page",
                 )}
               >
                 <div
@@ -1017,7 +1042,7 @@ function SessionSidebar({
                   }}
                   className="w-full cursor-pointer pr-9 text-left"
                 >
-                  <div className="mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <div className="mb-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
                     <span>{formatDateLabel(getUpdatedAt(session))}</span>
                     <span>{session.messageCount ?? session.message_count ?? 0} messages</span>
                   </div>
@@ -1037,22 +1062,22 @@ function SessionSidebar({
                         onChange={(event) => setEditingTitle(event.target.value)}
                         onClick={(event) => event.stopPropagation()}
                         autoFocus
-                        className="min-w-0 flex-1 rounded-lg border border-blue-200 bg-white px-2 py-1 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20"
+                        className="min-w-0 flex-1 rounded-lg border border-primary-200 bg-surface-card px-2 py-1 text-sm font-semibold text-text-strong outline-none focus:ring-2 focus:ring-primary-600/20"
                       />
                       <button
                         type="submit"
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white"
+                        className="btn-primary h-8 w-8 rounded-lg p-0"
                         aria-label="Save chat title"
                       >
                         <Check className="h-4 w-4" />
                       </button>
                     </form>
                   ) : (
-                    <p className={cn("truncate text-sm font-black", isActive ? "text-blue-700" : "text-slate-900")}>
+                    <p className={cn("truncate text-sm font-semibold", isActive ? "text-primary-700 dark:text-primary-300" : "text-text-strong")}>
                       {session.title || "New chat"}
                     </p>
                   )}
-                  <p className="mt-1 truncate text-xs font-medium text-slate-500">{session.preview || "No messages yet"}</p>
+                  <p className="mt-1 truncate text-xs font-medium text-text-muted">{session.preview || "No messages yet"}</p>
                 </div>
                 {!isEditing ? (
                   <div className="absolute right-2 top-2">
@@ -1062,20 +1087,20 @@ function SessionSidebar({
                         event.stopPropagation();
                         setMenuId((current) => (current === id ? null : id));
                       }}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 opacity-100 transition hover:bg-white hover:text-slate-700 lg:opacity-0 lg:group-hover:opacity-100"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted opacity-100 transition hover:bg-surface-card hover:text-text-strong lg:opacity-0 lg:group-hover:opacity-100"
                       aria-label="Chat actions"
                     >
                       <MoreVertical className="h-4 w-4" />
                     </button>
                     {menuId === id ? (
-                      <div className="absolute right-0 z-20 mt-1 w-36 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 text-sm font-semibold text-slate-700 shadow-xl">
+                      <div className="absolute right-0 z-20 mt-1 w-36 overflow-hidden rounded-xl border border-border-subtle bg-surface-card py-1 text-sm font-semibold text-text-body shadow-xl">
                         <button
                           type="button"
                           onClick={() => {
                             setEditingId(id);
                             setEditingTitle(session.title || "New chat");
                           }}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-slate-50"
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-surface-page"
                         >
                           <Pencil className="h-4 w-4" />
                           Rename
@@ -1086,7 +1111,7 @@ function SessionSidebar({
                             setMenuId(null);
                             await onDelete(id);
                           }}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-red-600 hover:bg-red-50"
+                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-state-error-fg hover:bg-state-error-bg"
                         >
                           <Trash2 className="h-4 w-4" />
                           Delete
@@ -1106,25 +1131,34 @@ function SessionSidebar({
 
 function EmptyState({ onPrompt }: { onPrompt: (prompt: string) => void }) {
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center px-4 text-center">
-      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-blue-100 bg-blue-50 text-blue-600 shadow-sm">
-        <Bot className="h-10 w-10" />
-      </div>
-      <h1 className="text-3xl font-black tracking-tight text-slate-950">AI Assistant</h1>
-      <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">
-        Ask about concepts, prerequisites, where to review something, or whether an assessment can shorten your plan.
-      </p>
-      <div className="mt-8 grid w-full max-w-xl gap-3 sm:grid-cols-2">
-        {QUICK_PROMPTS.map((prompt) => (
-          <button
-            key={prompt}
-            type="button"
-            onClick={() => onPrompt(prompt)}
-            className="rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm font-bold text-slate-800 shadow-sm transition hover:border-blue-300 hover:bg-blue-50"
-          >
-            {prompt}
-          </button>
-        ))}
+    <div className="flex min-h-[58vh] flex-col items-center justify-center px-4 text-center">
+      <div className="card-glass w-full max-w-3xl">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl hero-gradient text-white shadow-brand-soft">
+          <Bot className="h-10 w-10" />
+        </div>
+        <h1 className="text-3xl font-semibold tracking-tight text-text-strong">AI Learning Copilot</h1>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-text-body">
+          Get grounded help from your current learning path. Ask about prerequisites, weak areas, or the next best step.
+        </p>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          {COPILOT_BENEFITS.map((benefit) => (
+            <span key={benefit} className="rounded-full bg-surface-accent-soft px-3 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300">
+              {benefit}
+            </span>
+          ))}
+        </div>
+        <div className="mt-8 grid w-full gap-3 sm:grid-cols-2">
+          {QUICK_PROMPTS.map((prompt) => (
+            <button
+              key={prompt}
+              type="button"
+              onClick={() => onPrompt(prompt)}
+              className="rounded-2xl border border-border-subtle bg-white/80 p-4 text-left text-sm font-semibold text-text-strong shadow-sm transition hover:border-primary-200 hover:bg-surface-accent-soft"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -1141,7 +1175,7 @@ function Composer({ onSend, disabled }: { onSend: (message: string) => void; dis
   };
 
   return (
-    <div className="border-t border-slate-200 bg-white/95 p-4 backdrop-blur">
+    <div className="border-t border-border-subtle bg-white/80 p-4 backdrop-blur">
       <div className="mx-auto max-w-3xl">
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
           {QUICK_PROMPTS.map((prompt) => (
@@ -1150,7 +1184,7 @@ function Composer({ onSend, disabled }: { onSend: (message: string) => void; dis
               type="button"
               disabled={disabled}
               onClick={() => onSend(prompt)}
-              className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:opacity-60"
+              className="btn-secondary shrink-0 px-3 py-2 text-xs disabled:opacity-60"
             >
               {prompt}
             </button>
@@ -1160,7 +1194,7 @@ function Composer({ onSend, disabled }: { onSend: (message: string) => void; dis
           <label htmlFor="agent-message" className="sr-only">
             Message AI Assistant
           </label>
-          <div className="relative flex-1 flex items-center w-full">
+          <div className="relative flex w-full flex-1 items-center">
             <textarea
               id="agent-message"
               value={text}
@@ -1171,14 +1205,14 @@ function Composer({ onSend, disabled }: { onSend: (message: string) => void; dis
                   send(event);
                 }
               }}
-              placeholder="Message AI Assistant..."
+              placeholder="Ask about your learning path..."
               rows={1}
-              className="max-h-32 min-h-[48px] w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-4 pr-14 text-[15px] leading-relaxed shadow-inner outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="input-base max-h-32 min-h-[52px] resize-none rounded-2xl py-3 pl-4 pr-14 text-[15px] leading-relaxed"
             />
             <button
               type="submit"
               disabled={disabled || !text.trim()}
-              className="absolute right-1.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-200/50 transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-300 disabled:shadow-none"
+              className="btn-primary absolute right-1.5 z-10 h-10 w-10 p-0 disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Send message"
             >
               <Send className="h-[18px] w-[18px]" />
@@ -1191,37 +1225,66 @@ function Composer({ onSend, disabled }: { onSend: (message: string) => void; dis
 }
 
 function TurnProgress({ stepIndex }: { stepIndex: number }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const activeIndex = Math.min(stepIndex, TURN_PROGRESS_STEPS.length - 1);
+  const activeStep = TURN_PROGRESS_STEPS[activeIndex];
+  const ActiveIcon = activeStep.icon;
+
   return (
     <div className="flex gap-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+      <div className="hero-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white">
         <Bot className="h-5 w-5" />
       </div>
-      <div className="min-w-[260px] rounded-3xl rounded-tl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
-        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600">
-          <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-          {TURN_PROGRESS_STEPS[Math.min(stepIndex, TURN_PROGRESS_STEPS.length - 1)]}
-        </div>
-        <div className="space-y-2">
-          {TURN_PROGRESS_STEPS.map((step, index) => {
-            const state =
-              index < stepIndex ? "done" : index === Math.min(stepIndex, TURN_PROGRESS_STEPS.length - 1) ? "active" : "pending";
-            return (
-              <div key={step} className="flex items-center gap-2 text-xs font-semibold">
-                <span
-                  className={cn(
-                    "flex h-4 w-4 items-center justify-center rounded-full border",
-                    state === "done" && "border-blue-600 bg-blue-600 text-white",
-                    state === "active" && "border-blue-600 bg-blue-50 text-blue-600",
-                    state === "pending" && "border-slate-200 bg-slate-50 text-slate-300",
-                  )}
-                >
-                  {state === "done" ? <Check className="h-3 w-3" /> : null}
-                </span>
-                <span className={cn(state === "pending" ? "text-slate-400" : "text-slate-700")}>{step}</span>
-              </div>
-            );
-          })}
-        </div>
+      <div className="min-w-[280px] max-w-xl rounded-3xl rounded-tl-md border border-border-subtle bg-surface-card px-4 py-3 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setIsExpanded((current) => !current)}
+          className="flex w-full items-center justify-between gap-3 text-left"
+          aria-expanded={isExpanded}
+          aria-controls="agent-thinking-steps"
+        >
+          <span className="flex min-w-0 items-center gap-3">
+            <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-surface-accent-soft text-primary-700 dark:text-primary-300">
+              <ActiveIcon className="h-4 w-4" />
+              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-surface-card">
+                <Loader2 className="h-3 w-3 animate-spin text-primary-700" />
+              </span>
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-text-strong">{activeStep.label}</span>
+              <span className="block truncate text-xs font-medium text-text-muted">AI is thinking · view progress</span>
+            </span>
+          </span>
+          <ChevronDown className={cn("h-4 w-4 shrink-0 text-text-muted transition-transform", isExpanded && "rotate-180")} />
+        </button>
+        {isExpanded ? (
+          <div id="agent-thinking-steps" className="mt-4">
+            <div className="space-y-2 border-t border-border-subtle pt-3">
+              {TURN_PROGRESS_STEPS.map((step, index) => {
+                const state = index < stepIndex ? "done" : index === activeIndex ? "active" : "pending";
+                const StepIcon = step.icon;
+                return (
+                  <div key={step.label} className="flex gap-3 text-xs">
+                    <span
+                      className={cn(
+                        "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-xl border",
+                        state === "done" && "state-success border",
+                        state === "active" && "border-primary-200 bg-surface-accent-soft text-primary-700",
+                        state === "pending" && "border-border-subtle bg-surface-page text-text-muted",
+                      )}
+                    >
+                      {state === "done" ? <Check className="h-3.5 w-3.5" /> : <StepIcon className="h-3.5 w-3.5" />}
+                    </span>
+                    <span className="min-w-0">
+                      <span className={cn("block font-semibold", state === "pending" ? "text-text-muted" : "text-text-body")}>{step.label}</span>
+                      <span className="block leading-5 text-text-muted">{step.detail}</span>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -1479,7 +1542,7 @@ export default function AgentChatPage() {
         onClick={() => setLeftOpen(false)}
         aria-label="Close chat history"
       />
-      <div className="absolute bottom-0 left-0 top-0 w-[290px] border-r border-slate-200 bg-white shadow-2xl">
+      <div className="absolute bottom-0 left-0 top-0 w-[290px] border-r border-border-subtle bg-surface-card shadow-2xl">
         <SessionSidebar
           sessions={sessions}
           activeId={activeSessionId}
@@ -1497,8 +1560,9 @@ export default function AgentChatPage() {
   );
 
   return (
-    <div className="flex h-full min-h-0 overflow-hidden bg-slate-50">
-      <div className={cn("hidden shrink-0 border-r border-slate-200 bg-white transition-all lg:block", leftMinimized ? "w-20" : "w-72")}>
+    <div className="relative flex h-full min-h-0 overflow-hidden bg-surface-page text-text-strong">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.12),_transparent_30%)]" />
+      <div className={cn("relative hidden shrink-0 border-r border-border-subtle bg-surface-card transition-all lg:block", leftMinimized ? "w-20" : "w-72")}>
         <SessionSidebar
           sessions={sessions}
           activeId={activeSessionId}
@@ -1511,12 +1575,12 @@ export default function AgentChatPage() {
       </div>
 
       <section className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4">
+        <header className="relative flex h-20 shrink-0 items-center justify-between border-b border-border-subtle bg-white/80 px-4 backdrop-blur">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setLeftOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 lg:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-text-muted hover:bg-surface-page lg:hidden"
               aria-label="Open chat history"
             >
               <Menu className="h-5 w-5" />
@@ -1524,25 +1588,33 @@ export default function AgentChatPage() {
             <button
               type="button"
               onClick={() => setLeftMinimized((value) => !value)}
-              className="hidden h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 lg:flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-xl text-text-muted hover:bg-surface-page lg:flex"
               aria-label={leftMinimized ? "Expand chat history" : "Collapse chat history"}
             >
               {leftMinimized ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
             </button>
+            <div className="hero-gradient hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-brand-soft sm:flex">
+              <Bot className="h-5 w-5" />
+            </div>
             <div className="min-w-0">
-              <h1 className="truncate text-lg font-black tracking-tight text-slate-950">AI Assistant</h1>
-              <p className="truncate text-xs font-bold uppercase tracking-widest text-slate-400">
-                {activeSession?.title || "Learning planner chat"} · {user?.full_name || "Learner"}
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-lg font-semibold tracking-tight text-text-strong">AI Learning Copilot</h1>
+                <span className="hidden rounded-full bg-surface-accent-soft px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-700 dark:text-primary-300 md:inline-flex">
+                  Grounded in your learning path
+                </span>
+              </div>
+              <p className="truncate text-xs font-medium text-text-muted">
+                {activeSession?.title || "Ask about your path, prerequisites, weak areas, or next step."} · {user?.full_name || "Learner"}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {isLoadingSessions ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" /> : null}
+            {isLoadingSessions ? <Loader2 className="h-4 w-4 animate-spin text-text-muted" /> : null}
           </div>
         </header>
 
         <main ref={scrollRef} className="relative flex-1 overflow-y-auto">
-          <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, #1e293b 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+          <div className="pointer-events-none absolute inset-0 opacity-[0.035]" style={{ backgroundImage: "radial-gradient(circle, var(--text-strong) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
           <div className="relative mx-auto max-w-4xl space-y-6 px-4 py-8">
             {error ? (
               <div className="rounded-2xl border border-red-100 bg-red-50 p-4 text-sm font-medium text-red-700">
@@ -1551,7 +1623,7 @@ export default function AgentChatPage() {
             ) : null}
             {isLoadingMessages ? (
               <div className="flex min-h-[50vh] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-primary-700" />
               </div>
             ) : messages.length === 0 ? (
               <EmptyState onPrompt={sendMessage} />
@@ -1605,7 +1677,7 @@ export default function AgentChatPage() {
             onClick={() => setSelectedCitation(null)}
             aria-label="Close source detail"
           />
-          <div className="absolute bottom-0 right-0 top-0 w-full max-w-[390px] bg-white shadow-2xl">
+          <div className="absolute bottom-0 right-0 top-0 w-full max-w-[390px] bg-surface-card shadow-2xl">
             <SourceDetailPanel
               citation={selectedCitation}
               unitContext={selectedUnitContext}
