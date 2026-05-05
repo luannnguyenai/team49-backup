@@ -12,6 +12,14 @@ describe("auth middleware public route handling", () => {
     expect(response.status).toBe(200);
   });
 
+  it("allows unauthenticated reset-password route", () => {
+    const request = new NextRequest("http://localhost:3000/reset-password?token=abc");
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(200);
+  });
+
   it("allows authenticated forgot-password route", () => {
     const request = new NextRequest("http://localhost:3000/forgot-password");
     request.cookies.set("al_access_token", "token");
