@@ -8,6 +8,7 @@
  */
 
 import { api } from "@/lib/api";
+import type { QuestionForAssessment } from "@/types";
 
 // ---------------------------------------------------------------------------
 // Types matching backend ReplanAnalyzeResponse / ReplanAssessmentStartResponse
@@ -38,6 +39,23 @@ export interface ReplanAnalyzeResponse {
   prerequisites: ReplanPrerequisiteSuggestion[];
   keywordPlanSpecificity: string;
   guardrailFlags: string[];
+  status:
+    | "ready"
+    | "guardrail_blocked"
+    | "no_active_path"
+    | "no_matching_units"
+    | "all_already_mastered"
+    | "internal_error";
+  popup: {
+    kind:
+      | "guardrail_blocked"
+      | "no_active_path"
+      | "no_matching_units"
+      | "all_already_mastered"
+      | "internal_error";
+    title: string;
+    message: string;
+  } | null;
 }
 
 export interface ReplanAssessmentUnitPayload {
@@ -51,6 +69,7 @@ export interface ReplanAssessmentStartResponse {
   canonicalUnitIds: string[];
   unitNameMap: Record<string, string>;
   assessmentHref: string;
+  questions: QuestionForAssessment[];
 }
 
 // ---------------------------------------------------------------------------

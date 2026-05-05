@@ -26,8 +26,18 @@ class ReplanPrerequisiteSuggestion(BaseModel):
 
 
 class ReplanPrerequisiteSuggester:
-    def __init__(self, prerequisite_edges: dict[str, list[str]]) -> None:
+    def __init__(
+        self,
+        prerequisite_edges: dict[str, list[str]],
+        unit_kp_edges: dict[tuple[str, str], list[tuple[str, str]]] | None = None,
+    ) -> None:
+        """
+        Args:
+            prerequisite_edges: {unit_id -> [prerequisite_unit_ids]}
+            unit_kp_edges: {(source_unit, target_unit) -> [(source_kp_name, target_kp_name), ...]}
+        """
         self.prerequisite_edges = prerequisite_edges
+        self.unit_kp_edges = unit_kp_edges or {}
 
     def suggest(
         self,
@@ -51,13 +61,17 @@ class ReplanPrerequisiteSuggester:
             unit = units_by_id.get(prerequisite_id)
             if unit and self._eligible(unit):
                 existing = suggestions.get(prerequisite_id)
+
+                # Build reason with KP names if available
+                reason = self._build_reason(prerequisite_id, root_id, units_by_id)
+
                 suggestion = ReplanPrerequisiteSuggestion(
                     canonical_unit_id=unit.canonical_unit_id,
                     title=unit.title,
                     suggested_for_canonical_unit_id=root_id,
                     depth=depth,
                     path_order=unit.path_order,
-                    reason=f"{unit.title} is a prerequisite for {root_id}.",
+                    reason=reason,
                 )
                 if existing is None or (suggestion.depth, suggestion.path_order) < (
                     existing.depth,
@@ -77,6 +91,39 @@ class ReplanPrerequisiteSuggester:
             key=lambda suggestion: (suggestion.depth, suggestion.path_order, suggestion.canonical_unit_id),
         )
         return ranked[:max_suggestions]
+
+    def _build_reason(
+        self,
+        prereq_unit_id: str,
+        target_unit_id: str,
+        units_by_id: dict[str, ReplanPrerequisiteUnit],
+    ) -> str:
+        """Build reason string with KP names if available."""
+        prereq_unit = units_by_id.get(prereq_unit_id)
+        target_unit = units_by_id.get(target_unit_id)
+
+        prereq_title = prereq_unit.title if prereq_unit else prereq_unit_id
+        target_title = target_unit.title if target_unit else target_unit_id
+
+        # Check if we have KP-level edges for this unit pair
+        kp_edges = self.unit_kp_edges.get((prereq_unit_id, target_unit_id), [])
+
+        if not kp_edges:
+            # Fallback to unit-level reason
+            return f"{prereq_title} is a prerequisite for {target_title}."
+
+        # Build reason with specific KP pairs
+        # Show up to 2 KP pairs to keep it concise
+        shown_kp_pairs = kp_edges[:2]
+        kp_reasons = [
+            f"{source_kp} → {target_kp}"
+            for source_kp, target_kp in shown_kp_pairs
+        ]
+
+        if len(kp_edges) > 2:
+            kp_reasons.append(f"and {len(kp_edges) - 2} more")
+
+        return f"Prerequisite: {', '.join(kp_reasons)}."
 
     @staticmethod
     def _eligible(unit: ReplanPrerequisiteUnit) -> bool:

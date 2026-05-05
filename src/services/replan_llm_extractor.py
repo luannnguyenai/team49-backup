@@ -73,6 +73,7 @@ The claim may be in ANY language - detect it and adapt.
 1. **Primary keywords**: Technical concepts the learner claims to know
    - Strip filler phrases (first-person pronoun + knowledge verb)
    - Extract ONLY technical/conceptual terms
+   - IMPORTANT: If the learner's topics don't match their available learning path, still extract the keywords - the system will handle mismatch
 
 2. **Secondary keywords**: Related concepts mentioned but not the focus
 

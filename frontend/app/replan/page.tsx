@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Brain, Loader2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Brain, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import ReplanKnowledgeClaimStep from "@/components/replan/ReplanKnowledgeClaimStep";
@@ -14,7 +14,10 @@ import ErrorModal from "@/components/replan/ErrorModal";
 import { writeReplanAssessmentContext } from "@/lib/replan-assessment-context";
 import { validateReplanKnowledgeClaim } from "@/lib/replan-claim-guardrails";
 import { replanApi, type ReplanAnalyzeResponse } from "@/lib/replan-api";
-import { writePendingCanonicalAssessment } from "@/lib/canonical-assessment-session";
+import {
+  writePendingCanonicalAssessment,
+  writeStartedCanonicalAssessment,
+} from "@/lib/canonical-assessment-session";
 
 export default function ReplanPage() {
   const router = useRouter();
@@ -26,22 +29,24 @@ export default function ReplanPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+  const [statusPopup, setStatusPopup] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
 
   // Store backend prerequisites for the dialog
   const [backendPrerequisites, setBackendPrerequisites] = useState<
     (PrerequisiteSuggestion & { reviewUnit: ReplanReviewUnit })[]
   >([]);
-  // Store the first matched unit title for the prerequisite dialog
-  const [targetTitle, setTargetTitle] = useState("");
 
   async function continueToAnalysis() {
     const validation = validateReplanKnowledgeClaim(claim);
-    if (!validation.ok) {
+    if (!validation.ok && validation.reason === "too_short") {
       setMessage(validation.message);
       return;
     }
 
-    setMessage(validation.warning ?? null);
+    setMessage(validation.ok ? validation.warning ?? null : null);
     setAnalyzeError(null);
     setIsAnalyzing(true);
 
@@ -49,8 +54,15 @@ export default function ReplanPage() {
       const response: ReplanAnalyzeResponse = await replanApi.analyze(claim);
 
       // Check guardrail flags
-      if (response.guardrailFlags.includes("no_active_path")) {
-        setMessage("Bạn chưa có lộ trình học. Hãy chọn khoá học và tạo lộ trình trước khi tối ưu.");
+      if (response.status !== "ready" && response.popup) {
+        setStatusPopup({
+          title: response.popup.title,
+          message: response.popup.message,
+        });
+      }
+
+      if (response.status === "no_active_path" || response.guardrailFlags.includes("no_active_path")) {
+        setMessage(response.popup?.message ?? "You don't have an active learning path yet. Please select a course and create a path before optimizing.");
         setReviewUnits([]);
         setShowPrerequisites(false);
         setStep("review");
@@ -58,8 +70,40 @@ export default function ReplanPage() {
         return;
       }
 
-      if (response.guardrailFlags.includes("internal_error")) {
-        setAnalyzeError("Có lỗi xảy ra khi phân tích. Vui lòng thử lại sau.");
+      if (response.status === "all_already_mastered") {
+        setMessage(null);
+        setReviewUnits([]);
+        setShowPrerequisites(false);
+        setStep("review");
+        setIsAnalyzing(false);
+        return;
+      }
+
+      if (response.status === "guardrail_blocked") {
+        setMessage(null);
+        setReviewUnits([]);
+        setShowPrerequisites(false);
+        setStep("describe");
+        setIsAnalyzing(false);
+        return;
+      }
+
+      if (response.status === "no_matching_units" || response.guardrailFlags.includes("no_matching_units")) {
+        setMessage(response.popup?.message ?? "No units in your learning path match your description. Your course may not cover these topics yet.");
+        setReviewUnits([]);
+        setShowPrerequisites(false);
+        setStep("review");
+        setIsAnalyzing(false);
+        return;
+      }
+
+      if (response.status === "internal_error" || response.guardrailFlags.includes("internal_error")) {
+        // Extract error details from guardrail flags (if available)
+        const errorDetail = response.guardrailFlags.find((f) => f.includes(":"));
+        const errorMessage = errorDetail
+          ? `An error occurred: ${errorDetail}`
+          : "An error occurred while analyzing. Please try again later.";
+        setAnalyzeError(errorMessage);
         setIsAnalyzing(false);
         return;
       }
@@ -92,11 +136,10 @@ export default function ReplanPage() {
 
       setReviewUnits(mappedUnits);
       setBackendPrerequisites(mappedPrereqs);
-      setTargetTitle(mappedUnits[0]?.title ?? "selected unit");
       setShowPrerequisites(mappedPrereqs.length > 0);
 
       if (mappedUnits.length === 0) {
-        setMessage("Không tìm thấy unit nào trong lộ trình khớp với mô tả. Hãy thử mô tả cụ thể hơn.");
+        setMessage("No units found in your path match the description. Try being more specific.");
       }
 
       setStep("review");
@@ -168,6 +211,12 @@ export default function ReplanPage() {
         unitNameMap: response.unitNameMap,
         assessmentDepth: "deep",
       });
+      writeStartedCanonicalAssessment({
+        sessionId: response.sessionId,
+        questions: response.questions,
+        canonicalUnitIds: response.canonicalUnitIds,
+        unitNameMap: response.unitNameMap,
+      });
 
       // Also write replan-specific scope metadata
       writeReplanAssessmentContext({
@@ -219,7 +268,7 @@ export default function ReplanPage() {
           style={{ color: "var(--text-muted)" }}
         >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại
+          Back
         </button>
 
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
@@ -228,10 +277,10 @@ export default function ReplanPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-              Tối ưu lộ trình học
+              Optimize Learning Path
             </h1>
             <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-              Tạo phạm vi assessment từ phần bạn đã biết rồi chuyển sang trang assessment hiện có.
+              Create an assessment scope from what you already know, then continue to the existing assessment page.
             </p>
           </div>
         </div>
@@ -268,7 +317,7 @@ export default function ReplanPage() {
                 <div className="flex items-center justify-center gap-2 py-4">
                   <Loader2 className="h-5 w-5 animate-spin text-primary-600" />
                   <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
-                    Đang phân tích lộ trình của bạn...
+                    Analyzing your learning path...
                   </span>
                 </div>
               )}
@@ -277,7 +326,6 @@ export default function ReplanPage() {
             <>
               {showPrerequisites ? (
                 <PrerequisiteSuggestionDialog
-                  targetTitle={targetTitle}
                   suggestions={backendPrerequisites}
                   onInclude={includePrerequisites}
                   onSkip={() => setShowPrerequisites(false)}
@@ -292,7 +340,7 @@ export default function ReplanPage() {
                 <div className="flex items-center justify-center gap-2 py-4">
                   <Loader2 className="h-5 w-5 animate-spin text-primary-600" />
                   <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
-                    Đang tạo bài assessment...
+                    Creating assessment...
                   </span>
                 </div>
               )}
@@ -329,6 +377,47 @@ export default function ReplanPage() {
           message={analyzeError}
           onDismiss={() => setAnalyzeError(null)}
         />
+      )}
+      {statusPopup && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setStatusPopup(null)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-label={statusPopup.title}
+            className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-slate-800"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-4 flex items-start gap-3">
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                  {statusPopup.title}
+                </h3>
+                <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+                  {statusPopup.message}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStatusPopup(null)}
+                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setStatusPopup(null)}
+                className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+              >
+                Close
+              </button>
+            </div>
+          </section>
+        </div>
       )}
     </div>
   );

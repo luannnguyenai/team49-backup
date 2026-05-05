@@ -17,10 +17,10 @@ export default function ReplanKnowledgeClaimStep({
     <>
       <div>
         <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-          Bạn đã biết phần nào rồi?
+          What do you already know?
         </p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-          Mô tả cụ thể những phần bạn đã nắm để hệ thống tạo bài kiểm tra xác nhận. Mô tả này không tự động bỏ qua bài học. Kết quả assessment mới được dùng để cập nhật lộ trình.
+          Specifically describe the parts you've mastered so the system can create a verification assessment. This description does not automatically skip lessons. New assessment results will be used to update your learning path.
         </p>
       </div>
 
@@ -36,11 +36,11 @@ export default function ReplanKnowledgeClaimStep({
           className="text-sm font-semibold"
           style={{ color: "var(--text-primary)" }}
         >
-          Bạn đã biết phần nào rồi?
+          What do you already know?
         </label>
         <textarea
           id="replan-knowledge-claim"
-          aria-label="Bạn đã biết phần nào rồi?"
+          aria-label="What do you already know?"
           value={claim}
           onChange={(event) => onClaimChange(event.target.value)}
           className="mt-3 min-h-28 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-primary-500"
@@ -49,7 +49,7 @@ export default function ReplanKnowledgeClaimStep({
             backgroundColor: "var(--bg-card)",
             color: "var(--text-primary)",
           }}
-          placeholder={"Ví dụ:\n- Tôi đã nắm CNN, convolution, pooling.\n- Tôi biết Faster R-CNN nhưng chưa chắc YOLO.\n- Tôi hiểu object detection cơ bản, muốn kiểm tra để bỏ bớt phần nền tảng."}
+          placeholder={"Example:\n- I've mastered CNN, convolution, pooling.\n- I know Faster R-CNN but not sure about YOLO.\n- I understand basic object detection, want to test to skip foundational parts."}
         />
       </div>
 

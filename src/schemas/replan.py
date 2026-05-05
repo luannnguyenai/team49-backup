@@ -13,6 +13,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.schemas.assessment import QuestionForAssessment
+
 
 # ===========================================================================
 # Shared types
@@ -20,6 +22,21 @@ from pydantic import BaseModel, ConfigDict, Field
 
 Difficulty = Literal["easy", "medium", "hard", "application"]
 DifficultyFilter = Literal["easy", "easy_medium", "easy_medium_hard", "all"]
+ReplanAnalyzeStatus = Literal[
+    "ready",
+    "guardrail_blocked",
+    "no_active_path",
+    "no_matching_units",
+    "all_already_mastered",
+    "internal_error",
+]
+ReplanPopupKind = Literal[
+    "guardrail_blocked",
+    "no_active_path",
+    "no_matching_units",
+    "all_already_mastered",
+    "internal_error",
+]
 
 
 # ===========================================================================
@@ -61,6 +78,14 @@ class ReplanPrerequisiteSuggestionResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class ReplanPopup(BaseModel):
+    """Popup metadata for frontend status-specific dialogs."""
+
+    kind: ReplanPopupKind
+    title: str
+    message: str
+
+
 class ReplanAnalyzeResponse(BaseModel):
     """Full analyze response with matched units, prerequisites, and metadata."""
 
@@ -68,6 +93,8 @@ class ReplanAnalyzeResponse(BaseModel):
     prerequisites: list[ReplanPrerequisiteSuggestionResponse]
     keyword_plan_specificity: str = Field(alias="keywordPlanSpecificity")
     guardrail_flags: list[str] = Field(default_factory=list, alias="guardrailFlags")
+    status: ReplanAnalyzeStatus = "ready"
+    popup: ReplanPopup | None = None
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -109,5 +136,6 @@ class ReplanAssessmentStartResponse(BaseModel):
     canonical_unit_ids: list[str] = Field(alias="canonicalUnitIds")
     unit_name_map: dict[str, str] = Field(alias="unitNameMap")
     assessment_href: str = Field(alias="assessmentHref")
+    questions: list[QuestionForAssessment]
 
     model_config = ConfigDict(populate_by_name=True)

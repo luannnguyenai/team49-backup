@@ -10,10 +10,10 @@ export type ReplanClaimValidation =
       warning?: string;
     };
 
-const TOO_SHORT_MESSAGE = 'Hãy mô tả cụ thể concept hoặc unit bạn đã biết, ví dụ: "CNN, R-CNN, Faster R-CNN".';
+const TOO_SHORT_MESSAGE = 'Please describe specific concepts or units you know, e.g., "CNN, R-CNN, Faster R-CNN".';
 const SKIP_ALL_MESSAGE =
-  "Mình không thể tạo bài kiểm tra để bỏ toàn bộ lộ trình từ một mô tả quá chung. Hãy nêu cụ thể những concept hoặc unit bạn đã biết.";
-const BROAD_WARNING = "Mô tả của bạn khá rộng. Hãy kiểm tra kỹ danh sách unit được chọn trước khi bắt đầu assessment.";
+  "I cannot create an assessment to skip your entire learning path from such a general description. Please specify the concepts or units you already know.";
+const BROAD_WARNING = "Your description is quite broad. Please carefully review the selected unit list before starting the assessment.";
 
 const SKIP_ALL_PATTERNS = [
   /biết\s+hết/i,

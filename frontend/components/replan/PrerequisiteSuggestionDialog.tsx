@@ -8,14 +8,12 @@ export interface PrerequisiteSuggestion {
 }
 
 interface Props {
-  targetTitle: string;
   suggestions: PrerequisiteSuggestion[];
   onInclude: (suggestions: PrerequisiteSuggestion[]) => void;
   onSkip: () => void;
 }
 
 export default function PrerequisiteSuggestionDialog({
-  targetTitle,
   suggestions,
   onInclude,
   onSkip,
@@ -25,16 +23,16 @@ export default function PrerequisiteSuggestionDialog({
       <section
         role="dialog"
         aria-modal="true"
-        aria-label="Mình tìm thấy một vài phần nền tảng liên quan"
+        aria-label="Found related foundational topics"
         className="w-full max-w-lg rounded-2xl border bg-white p-5 shadow-xl dark:bg-slate-950"
         style={{ borderColor: "var(--border)" }}
       >
         <div>
           <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
-            Mình tìm thấy một vài phần nền tảng liên quan
+            Found related foundational topics
           </h2>
           <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            "{targetTitle}" thường dựa trên các phần trước đó trong lộ trình. Một số phần này chưa được ghi nhận là bạn đã nắm rõ. Bạn có muốn thêm chúng vào bài kiểm tra xác nhận không?
+            Some topics you selected typically build on earlier topics in your learning path. These foundational topics haven't been marked as mastered yet. Would you like to add them to your verification assessment?
           </p>
         </div>
 
@@ -66,14 +64,14 @@ export default function PrerequisiteSuggestionDialog({
               backgroundColor: "var(--bg-card)",
             }}
           >
-            Bỏ qua
+            Skip
           </button>
           <button
             type="button"
             onClick={() => onInclude(suggestions)}
             className="rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99]"
           >
-            Thêm vào bài kiểm tra
+            Add to assessment
           </button>
         </div>
       </section>

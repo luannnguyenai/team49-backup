@@ -1,8 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ReplanPage from "@/app/replan/page";
-import { readPendingCanonicalAssessment } from "@/lib/canonical-assessment-session";
+import {
+  readPendingCanonicalAssessment,
+  readStartedCanonicalAssessment,
+} from "@/lib/canonical-assessment-session";
 import { replanApi } from "@/lib/replan-api";
 
 const navigationMock = vi.hoisted(() => ({
@@ -44,6 +47,8 @@ describe("replan page", () => {
       prerequisites: [],
       keywordPlanSpecificity: "specific",
       guardrailFlags: [],
+      status: "ready",
+      popup: null,
     });
     vi.mocked(replanApi.startAssessment).mockResolvedValue({
       sessionId: "test-session-123",
@@ -51,34 +56,68 @@ describe("replan page", () => {
       canonicalUnitIds: ["unit_faster_rcnn"],
       unitNameMap: { unit_faster_rcnn: "Faster R-CNN" },
       assessmentHref: "/assessment?next=%2Flearn",
+      questions: [
+        {
+          id: null,
+          item_id: "item-1",
+          canonical_item_id: "item-1",
+          canonical_unit_id: "unit_faster_rcnn",
+          topic_id: null,
+          bloom_level: null,
+          difficulty_bucket: "easy",
+          stem_text: "Question",
+          option_a: "A",
+          option_b: "B",
+          option_c: "C",
+          option_d: "D",
+          time_expected_seconds: 30,
+        },
+      ],
     });
   });
 
   it("renders a scope-builder wizard without a cancel flow", () => {
     render(<ReplanPage />);
 
-    expect(screen.getByRole("heading", { name: "Tối ưu lộ trình học" })).toBeInTheDocument();
-    expect(screen.getByText(/Mô tả này không tự động bỏ qua bài học/i)).toBeInTheDocument();
-    expect(screen.getByLabelText("Bạn đã biết phần nào rồi?")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Optimize Learning Path" })).toBeInTheDocument();
+    expect(screen.getByText(/This description does not automatically skip lessons/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("What do you already know?")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /cancel/i })).not.toBeInTheDocument();
   });
 
-  it("shows guardrail feedback before continuing", () => {
+  it("uses the backend guardrail classification before showing skip-all feedback", async () => {
+    vi.mocked(replanApi.analyze).mockResolvedValue({
+      units: [],
+      prerequisites: [],
+      keywordPlanSpecificity: "broad",
+      guardrailFlags: ["skip_all"],
+      status: "guardrail_blocked",
+      popup: {
+        kind: "guardrail_blocked",
+        title: "Scope too broad",
+        message: "Specify the concepts or units you already know instead of trying to skip the entire path.",
+      },
+    });
+
     render(<ReplanPage />);
 
-    fireEvent.change(screen.getByLabelText("Bạn đã biết phần nào rồi?"), {
+    fireEvent.change(screen.getByLabelText("What do you already know?"), {
       target: { value: "skip all" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(screen.getByText(/không thể tạo bài kiểm tra để bỏ toàn bộ lộ trình/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(replanApi.analyze).toHaveBeenCalledWith("skip all");
+    });
+    expect(await screen.findByRole("dialog", { name: "Scope too broad" })).toBeInTheDocument();
+    expect(screen.getByText(/instead of trying to skip the entire path/i)).toBeInTheDocument();
   });
 
   it("continues from a valid claim to scope review and starts the existing assessment flow", async () => {
     render(<ReplanPage />);
 
-    fireEvent.change(screen.getByLabelText("Bạn đã biết phần nào rồi?"), {
+    fireEvent.change(screen.getByLabelText("What do you already know?"), {
       target: { value: "I know Faster R-CNN and CNN feature extraction" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
@@ -104,6 +143,16 @@ describe("replan page", () => {
         unit_faster_rcnn: "Faster R-CNN",
       },
       assessmentDepth: "deep",
+    });
+    expect(readStartedCanonicalAssessment()).toMatchObject({
+      sessionId: "test-session-123",
+      canonicalUnitIds: ["unit_faster_rcnn"],
+      questions: [
+        expect.objectContaining({
+          canonical_item_id: "item-1",
+          canonical_unit_id: "unit_faster_rcnn",
+        }),
+      ],
     });
     expect(navigationMock.push).toHaveBeenCalledWith("/assessment?next=%2Flearn");
   });
@@ -139,19 +188,21 @@ describe("replan page", () => {
       ],
       keywordPlanSpecificity: "specific",
       guardrailFlags: [],
+      status: "ready",
+      popup: null,
     });
 
     render(<ReplanPage />);
 
-    fireEvent.change(screen.getByLabelText("Bạn đã biết phần nào rồi?"), {
+    fireEvent.change(screen.getByLabelText("What do you already know?"), {
       target: { value: "I know Faster R-CNN and CNN feature extraction" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(await screen.findByRole("dialog", { name: /Mình tìm thấy một vài phần nền tảng liên quan/i })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: /Found related foundational topics/i })).toBeInTheDocument();
     expect(screen.queryByRole("checkbox", { name: "Include R-CNN" })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Thêm vào bài kiểm tra" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add to assessment" }));
 
     expect(screen.getByRole("checkbox", { name: "Include R-CNN" })).toBeChecked();
     expect(screen.getByText("Source: Suggested prerequisite for Faster R-CNN")).toBeInTheDocument();
@@ -164,16 +215,23 @@ describe("replan page", () => {
       prerequisites: [],
       keywordPlanSpecificity: "specific",
       guardrailFlags: ["all_already_mastered"],
+      status: "all_already_mastered",
+      popup: {
+        kind: "all_already_mastered",
+        title: "Already mastered",
+        message: "These units are already marked as mastered in your learning path.",
+      },
     });
 
     render(<ReplanPage />);
 
-    fireEvent.change(screen.getByLabelText("Bạn đã biết phần nào rồi?"), {
+    fireEvent.change(screen.getByLabelText("What do you already know?"), {
       target: { value: "I already mastered Faster R-CNN" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
 
-    expect(await screen.findByText(/Không tìm thấy unit nào/i)).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "Already mastered" })).toBeInTheDocument();
+    expect(screen.getByText(/already marked as mastered/i)).toBeInTheDocument();
     expect(screen.queryByText("Review verification scope")).not.toBeInTheDocument();
   });
 });

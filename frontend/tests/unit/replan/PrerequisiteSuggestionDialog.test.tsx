@@ -23,14 +23,13 @@ describe("PrerequisiteSuggestionDialog", () => {
     const onInclude = vi.fn();
     render(
       <PrerequisiteSuggestionDialog
-        targetTitle="Faster R-CNN"
         suggestions={suggestions}
         onInclude={onInclude}
         onSkip={vi.fn()}
       />,
     );
 
-    expect(screen.getByRole("dialog", { name: "Mình tìm thấy một vài phần nền tảng liên quan" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Found related foundational topics" })).toBeInTheDocument();
     expect(screen.getByText("R-CNN")).toBeInTheDocument();
     expect(screen.getByText("CNN foundations")).toBeInTheDocument();
     expect(onInclude).not.toHaveBeenCalled();
@@ -41,26 +40,24 @@ describe("PrerequisiteSuggestionDialog", () => {
     const onSkip = vi.fn();
     const { rerender } = render(
       <PrerequisiteSuggestionDialog
-        targetTitle="Faster R-CNN"
         suggestions={suggestions}
         onInclude={onInclude}
         onSkip={onSkip}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Thêm vào bài kiểm tra" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add to assessment" }));
     expect(onInclude).toHaveBeenCalledWith(suggestions);
     expect(onSkip).not.toHaveBeenCalled();
 
     rerender(
       <PrerequisiteSuggestionDialog
-        targetTitle="Faster R-CNN"
         suggestions={suggestions}
         onInclude={onInclude}
         onSkip={onSkip}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Bỏ qua" }));
+    fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     expect(onSkip).toHaveBeenCalledOnce();
   });
 });
