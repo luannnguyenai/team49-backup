@@ -31,6 +31,71 @@
     --brand-accent-soft:   rgba(34, 211, 238, 0.12);
     --ring-brand:          rgba(34, 211, 238, 0.34);
     --shadow-brand-soft:   0 20px 60px -30px rgba(8, 145, 178, 0.32);
+
+    /* ── Landing-aligned CTA tokens (sync-ui phase-0) ──────────────────── */
+    --brand-ink:           #020617;   /* slate-950 — primary CTA bg */
+    --brand-ink-hover:     #1e293b;   /* slate-800 */
+    --brand-ink-fg:        #ffffff;
+    --glass-bg:            rgba(255, 255, 255, 0.80);
+    --glass-bg-hover:      #ffffff;
+    --glass-border:        #e2e8f0;   /* slate-200 */
+    --glass-border-hover:  #cbd5e1;   /* slate-300 */
+    --glass-fg:            #334155;   /* slate-700 */
+    --shadow-glass:        0 20px 60px -35px rgba(15, 23, 42, 0.35);
+    --shadow-ink:          0 30px 80px -40px rgba(8, 145, 178, 0.65);
+    --bloom-remember:        #0ea5e9;
+    --bloom-remember-soft:   #e0f2fe;
+    --bloom-understand:      #8b5cf6;
+    --bloom-understand-soft: #ede9fe;
+    --bloom-apply:           #f59e0b;
+    --bloom-apply-soft:      #fef3c7;
+    --bloom-analyze:         #ef4444;
+    --bloom-analyze-soft:    #fee2e2;
+    --bloom-evaluate:        #ec4899;
+    --bloom-evaluate-soft:   #fce7f3;
+    --bloom-create:          #14b8a6;
+    --bloom-create-soft:     #ccfbf1;
+    --session-assessment:      #8b5cf6;
+    --session-assessment-soft: #ede9fe;
+    --session-quiz:            #3b82f6;
+    --session-quiz-soft:       #dbeafe;
+    --session-module-test:      #f59e0b;
+    --session-module-test-soft: #fef3c7;
+    --session-practice:         #64748b;
+    --session-practice-soft:    #f1f5f9;
+    --tier-bronze:        #b45309;
+    --tier-bronze-soft:   #fef3c7;
+    --tier-silver:        #475569;
+    --tier-silver-soft:   #f1f5f9;
+    --tier-gold:          #ca8a04;
+    --tier-gold-soft:     #fef9c3;
+    --tier-platinum:      #4f46e5;
+    --tier-platinum-soft: #e0e7ff;
+    --stat-courses:        #2563eb;
+    --stat-courses-soft:   #dbeafe;
+    --stat-progress:       #059669;
+    --stat-progress-soft:  #d1fae5;
+    --stat-time:           #7c3aed;
+    --stat-time-soft:      #ede9fe;
+    --stat-completed:      #d97706;
+    --stat-completed-soft: #fef3c7;
+    --insight-bg:     #ecfeff;
+    --insight-fg:     #0e7490;
+    --insight-border: #a5f3fc;
+    --state-success-bg:     #ecfdf5;
+    --state-success-fg:     #047857;
+    --state-success-border: #6ee7b7;
+    --state-error-bg:       #fef2f2;
+    --state-error-fg:       #b91c1c;
+    --state-error-border:   #fca5a5;
+    --state-warning-bg:     #fffbeb;
+    --state-warning-fg:     #b45309;
+    --state-warning-border: #fcd34d;
+    --chart-1: #0891b2;
+    --chart-2: #4f46e5;
+    --chart-3: #2dd4bf;
+    --chart-4: #f59e0b;
+    --chart-5: #ec4899;
   }
 
   .dark {
@@ -58,6 +123,48 @@
     --brand-accent-soft:   rgba(34, 211, 238, 0.16);
     --ring-brand:          rgba(103, 232, 249, 0.36);
     --shadow-brand-soft:   0 20px 60px -30px rgba(34, 211, 238, 0.28);
+
+    /* ── Landing-aligned CTA tokens (dark) ─────────────────────────────── */
+    --brand-ink:           #f8fafc;   /* invert: light ink on dark surface */
+    --brand-ink-hover:     #e2e8f0;
+    --brand-ink-fg:        #020617;
+    --glass-bg:            rgba(15, 23, 42, 0.80);
+    --glass-bg-hover:      #0f172a;
+    --glass-border:        #334155;
+    --glass-border-hover:  #475569;
+    --glass-fg:            #f1f5f9;
+    --shadow-glass:        0 20px 60px -35px rgba(0, 0, 0, 0.55);
+    --shadow-ink:          0 30px 80px -40px rgba(34, 211, 238, 0.45);
+    --bloom-remember-soft:   rgba(14, 165, 233, 0.18);
+    --bloom-understand-soft: rgba(139, 92, 246, 0.18);
+    --bloom-apply-soft:      rgba(245, 158, 11, 0.18);
+    --bloom-analyze-soft:    rgba(239, 68, 68, 0.18);
+    --bloom-evaluate-soft:   rgba(236, 72, 153, 0.18);
+    --bloom-create-soft:     rgba(20, 184, 166, 0.18);
+    --session-assessment-soft: rgba(139, 92, 246, 0.18);
+    --session-quiz-soft:       rgba(59, 130, 246, 0.18);
+    --session-module-test-soft: rgba(245, 158, 11, 0.18);
+    --session-practice-soft:    rgba(100, 116, 139, 0.22);
+    --tier-bronze-soft:   rgba(180, 83, 9, 0.18);
+    --tier-silver-soft:   rgba(100, 116, 139, 0.22);
+    --tier-gold-soft:     rgba(202, 138, 4, 0.18);
+    --tier-platinum-soft: rgba(79, 70, 229, 0.18);
+    --stat-courses-soft:   rgba(37, 99, 235, 0.18);
+    --stat-progress-soft:  rgba(5, 150, 105, 0.18);
+    --stat-time-soft:      rgba(124, 58, 237, 0.18);
+    --stat-completed-soft: rgba(217, 119, 6, 0.18);
+    --insight-bg:     rgba(8, 145, 178, 0.14);
+    --insight-fg:     #67e8f9;
+    --insight-border: rgba(34, 211, 238, 0.34);
+    --state-success-bg:     rgba(16, 185, 129, 0.16);
+    --state-success-fg:     #6ee7b7;
+    --state-success-border: rgba(110, 231, 183, 0.4);
+    --state-error-bg:       rgba(239, 68, 68, 0.16);
+    --state-error-fg:       #fca5a5;
+    --state-error-border:   rgba(252, 165, 165, 0.4);
+    --state-warning-bg:     rgba(245, 158, 11, 0.16);
+    --state-warning-fg:     #fcd34d;
+    --state-warning-border: rgba(252, 211, 77, 0.4);
   }
 
   * { border-color: var(--border); }
@@ -90,6 +197,31 @@
     border-color: var(--border-subtle);
   }
 
+  /* Glass card variant — used for hero/feature surfaces (matches Landing). */
+  .card-glass {
+    @apply rounded-3xl p-6;
+    background-color: var(--glass-bg);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: var(--shadow-glass);
+    backdrop-filter: blur(12px);
+  }
+  .dark .card-glass {
+    border-color: #1e293b;
+  }
+
+  /* Ink showcase card — dark high-contrast surface (matches Landing showcase). */
+  .card-ink {
+    @apply rounded-[32px] p-6;
+    background-color: #020617;
+    color: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: var(--shadow-ink);
+  }
+  .dark .card-ink {
+    background-color: #0f172a;
+    border-color: #334155;
+  }
+
   .input-base {
     @apply w-full rounded-lg border bg-surface-card px-3.5 py-2.5 text-sm
            text-text-strong outline-none transition-all duration-150;
@@ -104,24 +236,68 @@
     @apply border-red-500 ring-2 ring-red-500/20;
   }
 
+  /* Landing-aligned ink primary CTA (sync-ui phase-0).
+     Pill shape, slate-950 bg in light mode, inverted in dark. */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg
-           bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white
-           transition-all duration-150 hover:bg-primary-700
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+           px-5 py-2.5 text-sm font-semibold
+           transition-all duration-150
            active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
            focus-visible:outline-none focus-visible:ring-2
-           focus-visible:ring-primary-600 focus-visible:ring-offset-2;
-    border-color: transparent;
+           focus-visible:ring-offset-2;
+    background-color: var(--brand-ink);
+    color: var(--brand-ink-fg);
+    border: 1px solid transparent;
+  }
+  .btn-primary:hover { background-color: var(--brand-ink-hover); }
+  .btn-primary:focus-visible { box-shadow: 0 0 0 3px var(--ring-brand); }
+
+  /* Landing-aligned glass outline secondary CTA. */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+           px-5 py-2.5 text-sm font-semibold
+           transition-all duration-150
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-offset-2;
+    background-color: var(--glass-bg);
+    color: var(--glass-fg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(8px);
+  }
+  .btn-secondary:hover {
+    background-color: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+  }
+  .btn-secondary:focus-visible { box-shadow: 0 0 0 3px var(--ring-brand); }
+
+  .hero-gradient {
+    @apply bg-gradient-to-br from-indigo-600 via-cyan-500 to-teal-400;
   }
 
-  .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg
-           border bg-surface-card px-4 py-2.5 text-sm font-semibold text-text-body
-           transition-all duration-150 hover:bg-surface-page
-           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
-           focus-visible:outline-none focus-visible:ring-2
-           focus-visible:ring-primary-600 focus-visible:ring-offset-2;
-    border-color: var(--border-subtle);
+  .insight-card {
+    @apply rounded-lg border px-3 py-2 text-sm;
+    background: var(--insight-bg);
+    color: var(--insight-fg);
+    border-color: var(--insight-border);
+  }
+
+  .state-success {
+    background: var(--state-success-bg);
+    color: var(--state-success-fg);
+    border-color: var(--state-success-border);
+  }
+
+  .state-error {
+    background: var(--state-error-bg);
+    color: var(--state-error-fg);
+    border-color: var(--state-error-border);
+  }
+
+  .state-warning {
+    background: var(--state-warning-bg);
+    color: var(--state-warning-fg);
+    border-color: var(--state-warning-border);
   }
 
   .btn-ghost {
