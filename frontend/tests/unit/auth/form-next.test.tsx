@@ -5,6 +5,7 @@ import LoginForm from "@/components/auth/LoginForm";
 import RegisterForm from "@/components/auth/RegisterForm";
 
 const routerPushMock = vi.fn();
+const routerReplaceMock = vi.fn();
 const loginMock = vi.fn();
 const registerUserMock = vi.fn();
 const clearErrorMock = vi.fn();
@@ -25,6 +26,7 @@ vi.mock("next/navigation", async () => {
     ...actual,
     useRouter: () => ({
       push: routerPushMock,
+      replace: routerReplaceMock,
     }),
     useSearchParams: () => currentSearchParams,
   };
@@ -64,7 +66,8 @@ describe("auth forms preserve next redirect context", () => {
         email: "learner@example.com",
         password: "password1",
       });
-      expect(routerPushMock).toHaveBeenCalledWith("/courses/cs231n/start");
+      expect(routerReplaceMock).toHaveBeenCalledWith("/courses/cs231n/start");
+      expect(routerPushMock).not.toHaveBeenCalled();
     });
   });
 

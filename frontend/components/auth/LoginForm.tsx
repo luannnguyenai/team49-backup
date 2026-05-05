@@ -37,7 +37,7 @@ export default function LoginForm() {
     try {
       await login(data);
       const next = searchParams.get("next") ?? searchParams.get("from") ?? "/dashboard";
-      router.push(next);
+      router.replace(next);
     } catch {
       // error is set in store
     }

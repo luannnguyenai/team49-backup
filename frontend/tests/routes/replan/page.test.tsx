@@ -101,6 +101,17 @@ describe("replan page", () => {
     expect(navigationMock.back).not.toHaveBeenCalled();
   });
 
+  it("returns to dashboard after auth forwarded directly into replan without a return target", () => {
+    navigationMock.searchParams = new URLSearchParams("source=learn&from=%2Freplan");
+
+    render(<ReplanPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(navigationMock.push).toHaveBeenCalledWith("/dashboard");
+    expect(navigationMock.back).not.toHaveBeenCalled();
+  });
+
   it("uses the backend guardrail classification before showing skip-all feedback", async () => {
     vi.mocked(replanApi.analyze).mockResolvedValue({
       units: [],

@@ -19,6 +19,10 @@ import {
   writeStartedCanonicalAssessment,
 } from "@/lib/canonical-assessment-session";
 
+function isSafeInternalPath(value: string | null): value is string {
+  return Boolean(value && value.startsWith("/") && !value.startsWith("//"));
+}
+
 export default function ReplanPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -184,10 +188,17 @@ export default function ReplanPage() {
 
   function backToSource() {
     const returnTo = searchParams.get("returnTo");
-    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+    if (isSafeInternalPath(returnTo)) {
       router.push(returnTo);
       return;
     }
+
+    const from = searchParams.get("from");
+    if (from === "/replan") {
+      router.push("/dashboard");
+      return;
+    }
+
     router.back();
   }
 
