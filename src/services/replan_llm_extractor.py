@@ -3,8 +3,8 @@ services/replan_llm_extractor.py
 ---------------------------------
 LLM-based keyword extraction for Replan.
 
-Uses GPT-5.4-mini with thinking mode to analyze knowledge claims
-and extract structured keyword plans.
+Uses the configured default model (settings.default_model) to analyze
+knowledge claims and extract structured keyword plans.
 """
 
 import json
@@ -102,7 +102,7 @@ Respond with JSON matching the schema."""
 
 
 class ReplanLLMKeywordExtractor:
-    """LLM-based keyword extraction using GPT-4.1-mini with thinking."""
+    """LLM-based keyword extraction using the configured default model."""
 
     def __init__(self):
         self._model = None
