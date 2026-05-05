@@ -11,10 +11,10 @@ export default function LoginPage() {
   return (
     <>
       <div className="mb-6">
-        <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+        <h2 className="text-xl font-bold text-text-strong">
           Welcome back 👋
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+        <p className="mt-1 text-sm text-text-body">
           Sign in to continue your learning journey.
         </p>
       </div>
