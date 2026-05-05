@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -53,8 +54,33 @@ class ReplanKeywordPlanner:
         Uses LLM if enabled, otherwise falls back to rule-based extraction.
         """
         if self.use_llm:
-            return await self._plan_with_llm(claim)
-        return self._plan_rule_based(claim)
+            return self._allow_single_technical_token(claim, await self._plan_with_llm(claim))
+        return self._allow_single_technical_token(claim, self._plan_rule_based(claim))
+
+    def _allow_single_technical_token(self, claim: str, plan: ReplanKeywordPlan) -> ReplanKeywordPlan:
+        """Keep compact technical terms like Word2vec or CNN from being rejected as too short."""
+        if "too_short" not in plan.guardrail_flags or not _looks_like_technical_concept(claim):
+            return plan
+
+        normalized = " ".join(claim.split())
+        guardrail_flags = [flag for flag in plan.guardrail_flags if flag != "too_short"]
+        primary_keywords = plan.primary_keywords or [
+            ReplanKeyword(
+                text=normalized,
+                reason="User provided a compact technical concept.",
+                mustKeepPhrase=True,
+            ),
+        ]
+        search_queries = plan.search_queries or [normalized]
+
+        return plan.model_copy(
+            update={
+                "primary_keywords": primary_keywords,
+                "search_queries": search_queries,
+                "guardrail_flags": guardrail_flags,
+                "specificity": "specific",
+            },
+        )
 
     async def _plan_with_llm(self, claim: str) -> ReplanKeywordPlan:
         """Use LLM for keyword extraction."""
@@ -117,3 +143,14 @@ class ReplanKeywordPlanner:
             searchQueries=[normalized],
             specificity="specific",
         )
+
+
+def _looks_like_technical_concept(claim: str) -> bool:
+    compact = re.sub(r"\s+", "", claim)
+    if len(compact) < 2:
+        return False
+    return bool(
+        re.search(r"[A-Za-z]+\d+[A-Za-z]*", compact)
+        or re.search(r"[A-Z]{2,}", compact)
+        or re.search(r"[A-Za-z]+-[A-Za-z0-9]+", claim)
+    )

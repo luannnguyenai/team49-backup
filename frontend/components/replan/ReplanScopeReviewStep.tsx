@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 type DifficultyFilter = "easy" | "easy_medium" | "easy_medium_hard" | "all";
+type QuestionCountBreakdown = ReplanReviewUnit["questionCounts"];
 
 export interface ReplanReviewUnit {
   canonicalUnitId: string;
@@ -44,11 +45,18 @@ function sourceLabel(unit: ReplanReviewUnit): string {
 }
 
 function countForFilter(unit: ReplanReviewUnit, filter: DifficultyFilter): number {
-  const counts = unit.questionCounts;
-  if (filter === "easy") return counts.easy;
-  if (filter === "easy_medium") return counts.easy + counts.medium;
-  if (filter === "easy_medium_hard") return counts.easy + counts.medium + counts.hard;
+  const counts = countsForFilter(unit, filter);
   return counts.easy + counts.medium + counts.hard + counts.application;
+}
+
+function countsForFilter(unit: ReplanReviewUnit, filter: DifficultyFilter): QuestionCountBreakdown {
+  const counts = unit.questionCounts;
+  return {
+    easy: counts.easy,
+    medium: filter === "easy" ? 0 : counts.medium,
+    hard: filter === "easy" || filter === "easy_medium" ? 0 : counts.hard,
+    application: filter === "all" ? counts.application : 0,
+  };
 }
 
 export default function ReplanScopeReviewStep({
@@ -80,6 +88,23 @@ export default function ReplanScopeReviewStep({
         if (!selectedUnitIds.has(unit.canonicalUnitId)) return total;
         return total + countForFilter(unit, filters[unit.canonicalUnitId] ?? "all");
       }, 0),
+    [filters, selectedUnitIds, units],
+  );
+  const selectedQuestionBreakdown = useMemo(
+    () =>
+      units.reduce<QuestionCountBreakdown>(
+        (total, unit) => {
+          if (!selectedUnitIds.has(unit.canonicalUnitId)) return total;
+          const counts = countsForFilter(unit, filters[unit.canonicalUnitId] ?? "all");
+          return {
+            easy: total.easy + counts.easy,
+            medium: total.medium + counts.medium,
+            hard: total.hard + counts.hard,
+            application: total.application + counts.application,
+          };
+        },
+        { easy: 0, medium: 0, hard: 0, application: 0 },
+      ),
     [filters, selectedUnitIds, units],
   );
   const selectedUnits = useMemo(
@@ -190,6 +215,26 @@ export default function ReplanScopeReviewStep({
         <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
           Total selected questions: {selectedQuestions}
         </p>
+        <div className="mt-3">
+          <p className="text-xs font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
+            Selected question breakdown
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              ["Easy", selectedQuestionBreakdown.easy, "bg-emerald-50 text-emerald-700 border-emerald-100"],
+              ["Medium", selectedQuestionBreakdown.medium, "bg-sky-50 text-sky-700 border-sky-100"],
+              ["Hard", selectedQuestionBreakdown.hard, "bg-amber-50 text-amber-700 border-amber-100"],
+              ["Application", selectedQuestionBreakdown.application, "bg-violet-50 text-violet-700 border-violet-100"],
+            ].map(([label, count, className]) => (
+              <span
+                key={label}
+                className={`rounded-lg border px-3 py-2 text-xs font-semibold ${className}`}
+              >
+                {label} {count}
+              </span>
+            ))}
+          </div>
+        </div>
         <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
           Estimated time: ~{estimatedMinutes} minutes
         </p>

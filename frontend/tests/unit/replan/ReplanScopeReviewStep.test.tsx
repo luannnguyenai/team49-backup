@@ -37,6 +37,11 @@ describe("ReplanScopeReviewStep", () => {
     expect(screen.getByText("Source: Suggested prerequisite for Faster R-CNN")).toBeInTheDocument();
     expect(screen.getByText("Easy 3 · Medium 4 · Hard 2 · Application 1")).toBeInTheDocument();
     expect(screen.getByText("Total selected questions: 16")).toBeInTheDocument();
+    expect(screen.getByText("Selected question breakdown")).toBeInTheDocument();
+    expect(screen.getByText("Easy 5")).toBeInTheDocument();
+    expect(screen.getByText("Medium 7")).toBeInTheDocument();
+    expect(screen.getByText("Hard 3")).toBeInTheDocument();
+    expect(screen.getByText("Application 1")).toBeInTheDocument();
     expect(screen.getByText("Estimated time: ~3 minutes")).toBeInTheDocument();
   });
 
@@ -51,6 +56,10 @@ describe("ReplanScopeReviewStep", () => {
       target: { value: "easy_medium" },
     });
     expect(screen.getByText("Total selected questions: 7")).toBeInTheDocument();
+    expect(screen.getByText("Easy 3")).toBeInTheDocument();
+    expect(screen.getByText("Medium 4")).toBeInTheDocument();
+    expect(screen.getByText("Hard 0")).toBeInTheDocument();
+    expect(screen.getByText("Application 0")).toBeInTheDocument();
     expect(screen.getByText("Estimated time: ~2 minutes")).toBeInTheDocument();
   });
 

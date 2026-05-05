@@ -1,6 +1,6 @@
 import pytest
 
-from src.services.replan_keyword_planner import ReplanKeywordPlanner
+from src.services.replan_keyword_planner import ReplanKeywordPlan, ReplanKeywordPlanner
 
 
 @pytest.mark.asyncio
@@ -32,3 +32,24 @@ async def test_broad_claim_is_marked_broad_not_blocked():
     assert plan.specificity == "broad"
     assert plan.guardrail_flags == []
     assert "object detection" in plan.search_queries
+
+
+@pytest.mark.asyncio
+async def test_single_technical_token_is_not_blocked_when_llm_marks_too_short(monkeypatch):
+    planner = ReplanKeywordPlanner(use_llm=True)
+
+    async def fake_llm_plan(claim: str) -> ReplanKeywordPlan:
+        return ReplanKeywordPlan(
+            primaryKeywords=[],
+            searchQueries=[claim],
+            specificity="specific",
+            guardrailFlags=["too_short"],
+        )
+
+    monkeypatch.setattr(planner, "_plan_with_llm", fake_llm_plan)
+
+    plan = await planner.plan("Word2vec")
+
+    assert plan.guardrail_flags == []
+    assert [keyword.text for keyword in plan.primary_keywords] == ["Word2vec"]
+    assert plan.search_queries == ["Word2vec"]
