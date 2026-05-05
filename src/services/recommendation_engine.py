@@ -898,10 +898,18 @@ async def _get_canonical_path_status_map(
     waived_repo = WaivedUnitRepository(db)
     progress_by_unit = await progress_repo.list_for_user_units(user_id, learning_unit_ids)
     waived_by_unit = await waived_repo.list_for_user_units(user_id, learning_unit_ids)
+    placement_results = await PlacementAssessmentRepository(db).get_by_user_id(user_id)
+    placement_skipped_units = {
+        row.topic_unit_id for row in placement_results
+        if row.topic_unit_id in learning_unit_ids and row.decision == "skip"
+    }
 
     status_by_unit: dict[uuid.UUID, PathStatus] = {}
     for learning_unit_id in learning_unit_ids:
         if learning_unit_id in waived_by_unit:
+            status_by_unit[learning_unit_id] = PathStatus.skipped
+            continue
+        if learning_unit_id in placement_skipped_units:
             status_by_unit[learning_unit_id] = PathStatus.skipped
             continue
         progress = progress_by_unit.get(learning_unit_id)

@@ -6,11 +6,22 @@ describe("validateReplanKnowledgeClaim", () => {
     expect(validateReplanKnowledgeClaim("   ")).toEqual({
       ok: false,
       reason: "too_short",
-      message: 'Hãy mô tả cụ thể concept hoặc unit bạn đã biết, ví dụ: "CNN, R-CNN, Faster R-CNN".',
+      message: 'Please describe specific concepts or units you know, e.g., "CNN, R-CNN, Faster R-CNN".',
     });
-    expect(validateReplanKnowledgeClaim("CNN")).toMatchObject({
+    expect(validateReplanKnowledgeClaim("know")).toMatchObject({
       ok: false,
       reason: "too_short",
+    });
+  });
+
+  it("allows a single technical concept token", () => {
+    expect(validateReplanKnowledgeClaim("Word2vec")).toEqual({
+      ok: true,
+      specificity: "specific",
+    });
+    expect(validateReplanKnowledgeClaim("CNN")).toEqual({
+      ok: true,
+      specificity: "specific",
     });
   });
 
@@ -18,7 +29,7 @@ describe("validateReplanKnowledgeClaim", () => {
     expect(validateReplanKnowledgeClaim("tôi biết hết, bỏ hết path này đi")).toEqual({
       ok: false,
       reason: "skip_all",
-      message: "Mình không thể tạo bài kiểm tra để bỏ toàn bộ lộ trình từ một mô tả quá chung. Hãy nêu cụ thể những concept hoặc unit bạn đã biết.",
+      message: "I cannot create an assessment to skip your entire learning path from such a general description. Please specify the concepts or units you already know.",
     });
     expect(validateReplanKnowledgeClaim("skip all")).toMatchObject({
       ok: false,
@@ -30,7 +41,7 @@ describe("validateReplanKnowledgeClaim", () => {
     expect(validateReplanKnowledgeClaim("Tôi biết object detection cơ bản")).toEqual({
       ok: true,
       specificity: "broad",
-      warning: "Mô tả của bạn khá rộng. Hãy kiểm tra kỹ danh sách unit được chọn trước khi bắt đầu assessment.",
+      warning: "Your description is quite broad. Please carefully review the selected unit list before starting the assessment.",
     });
   });
 

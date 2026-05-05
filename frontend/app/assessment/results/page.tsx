@@ -431,13 +431,37 @@ function AssessmentResultsInner() {
         {viewModel.counts.skip > 0 && (
           <div className="card flex items-start gap-3">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
-            <div>
+            <div className="min-w-0 flex-1">
               <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                 {viewModel.counts.skip} sections will be skipped
               </h2>
               <p className="mt-1 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                 These are the areas you already handled well on the assessment. The planner will use this automatically when building your path.
               </p>
+              <div className="mt-3 space-y-2">
+                {viewModel.masteredPreview.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-lg border border-emerald-100 bg-emerald-50/70 px-3 py-2 dark:border-emerald-900/40 dark:bg-emerald-900/20"
+                  >
+                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                      {item.title}
+                    </p>
+                    <p className="mt-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                      {item.scorePercent.toFixed(0)}%
+                      {typeof item.questionsCorrect === "number" && typeof item.questionsTotal === "number"
+                        ? ` (${item.questionsCorrect}/${item.questionsTotal})`
+                        : null}{" "}
+                      correct
+                    </p>
+                  </div>
+                ))}
+                {viewModel.counts.skip > viewModel.masteredPreview.length && (
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    And {viewModel.counts.skip - viewModel.masteredPreview.length} more sections.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}

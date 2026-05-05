@@ -129,6 +129,61 @@ async def test_get_learning_path_reads_latest_canonical_plan(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_canonical_path_status_map_marks_placement_skip_as_skipped(monkeypatch):
+    user_id = uuid4()
+    skipped_unit_id = uuid4()
+    review_unit_id = uuid4()
+    progress_unit_id = uuid4()
+
+    class FakeLearningProgressRepository:
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def list_for_user_units(self, actual_user_id, learning_unit_ids):
+            assert actual_user_id == user_id
+            assert learning_unit_ids == [skipped_unit_id, review_unit_id, progress_unit_id]
+            return {
+                progress_unit_id: SimpleNamespace(
+                    learning_unit_id=progress_unit_id,
+                    status=LearningProgressStatus.completed,
+                )
+            }
+
+    class FakeWaivedUnitRepository:
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def list_for_user_units(self, actual_user_id, learning_unit_ids):
+            assert actual_user_id == user_id
+            return {}
+
+    class FakePlacementAssessmentRepository:
+        def __init__(self, db):
+            assert db == "db-session"
+
+        async def get_by_user_id(self, actual_user_id):
+            assert actual_user_id == user_id
+            return [
+                SimpleNamespace(topic_unit_id=skipped_unit_id, decision="skip"),
+                SimpleNamespace(topic_unit_id=review_unit_id, decision="review"),
+            ]
+
+    monkeypatch.setattr(recommendation_engine, "LearningProgressRepository", FakeLearningProgressRepository)
+    monkeypatch.setattr(recommendation_engine, "WaivedUnitRepository", FakeWaivedUnitRepository)
+    monkeypatch.setattr(recommendation_engine, "PlacementAssessmentRepository", FakePlacementAssessmentRepository)
+
+    status_by_unit = await recommendation_engine._get_canonical_path_status_map(
+        "db-session",
+        user_id=user_id,
+        learning_unit_ids=[skipped_unit_id, review_unit_id, progress_unit_id],
+    )
+
+    assert status_by_unit[skipped_unit_id] == PathStatus.skipped
+    assert review_unit_id not in status_by_unit
+    assert status_by_unit[progress_unit_id] == PathStatus.completed
+
+
+@pytest.mark.asyncio
 async def test_get_learning_path_timeline_groups_canonical_non_skip_items(monkeypatch):
     user_id = uuid4()
 
