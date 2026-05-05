@@ -10,6 +10,8 @@ import { replanApi } from "@/lib/replan-api";
 
 const navigationMock = vi.hoisted(() => ({
   push: vi.fn(),
+  back: vi.fn(),
+  searchParams: new URLSearchParams(),
 }));
 
 vi.mock("next/navigation", async () => {
@@ -17,6 +19,7 @@ vi.mock("next/navigation", async () => {
   return {
     ...actual,
     useRouter: () => navigationMock,
+    useSearchParams: () => navigationMock.searchParams,
   };
 });
 
@@ -32,6 +35,7 @@ describe("replan page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.sessionStorage.clear();
+    navigationMock.searchParams = new URLSearchParams();
     // Default successful API responses
     vi.mocked(replanApi.analyze).mockResolvedValue({
       units: [
@@ -84,6 +88,17 @@ describe("replan page", () => {
     expect(screen.getByLabelText("What do you already know?")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /cancel/i })).not.toBeInTheDocument();
+  });
+
+  it("returns to the explicit source route when launched with a return target", () => {
+    navigationMock.searchParams = new URLSearchParams("source=agent&returnTo=%2Fagent");
+
+    render(<ReplanPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(navigationMock.push).toHaveBeenCalledWith("/agent");
+    expect(navigationMock.back).not.toHaveBeenCalled();
   });
 
   it("uses the backend guardrail classification before showing skip-all feedback", async () => {

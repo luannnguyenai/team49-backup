@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ArrowLeft, Brain, Loader2, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import ReplanKnowledgeClaimStep from "@/components/replan/ReplanKnowledgeClaimStep";
 import PrerequisiteSuggestionDialog, { type PrerequisiteSuggestion } from "@/components/replan/PrerequisiteSuggestionDialog";
@@ -21,6 +21,7 @@ import {
 
 export default function ReplanPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [claim, setClaim] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [step, setStep] = useState<"describe" | "review">("describe");
@@ -181,6 +182,15 @@ export default function ReplanPage() {
     setAnalyzeError(null);
   }
 
+  function backToSource() {
+    const returnTo = searchParams.get("returnTo");
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+      router.push(returnTo);
+      return;
+    }
+    router.back();
+  }
+
   function includePrerequisites(suggestions: PrerequisiteSuggestion[]) {
     const suggestionIds = new Set(suggestions.map((s) => s.canonicalUnitId));
     setReviewUnits([
@@ -263,7 +273,7 @@ export default function ReplanPage() {
         {/* Back button */}
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={backToSource}
           className="mb-4 flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary-600"
           style={{ color: "var(--text-muted)" }}
         >
