@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
+from urllib.parse import urlencode
 from urllib.parse import quote_plus
-
-import httpx
+from urllib.request import Request, urlopen
 
 from src.schemas.agent import AgentCitation, AgentFallback
 from src.services.agent_graph_contracts import ToolResult
@@ -50,12 +51,11 @@ class AgentExternalResearchService:
     async def _act(self, queries: list[str]) -> list[ExternalResearchDocument]:
         if not queries:
             return []
-        async with httpx.AsyncClient(timeout=self.timeout_s, follow_redirects=True) as client:
-            tasks = []
-            for query in queries:
-                tasks.append(self._with_retry(lambda q=query: self._search_web(client, q)))
-                tasks.append(self._with_retry(lambda q=query: self._search_papers(client, q)))
-            responses = await asyncio.gather(*tasks, return_exceptions=True)
+        tasks = []
+        for query in queries:
+            tasks.append(self._with_retry(lambda q=query: self._search_web(q)))
+            tasks.append(self._with_retry(lambda q=query: self._search_papers(q)))
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
         documents: list[ExternalResearchDocument] = []
         seen: set[str] = set()
         for response in responses:
@@ -82,18 +82,19 @@ class AgentExternalResearchService:
             raise last_error
         return []
 
-    async def _search_web(self, client: httpx.AsyncClient, query: str) -> list[ExternalResearchDocument]:
-        response = await client.get(
-            "https://api.duckduckgo.com/",
-            params={
+    async def _search_web(self, query: str) -> list[ExternalResearchDocument]:
+        payload = await asyncio.to_thread(
+            self._fetch_json,
+            "https://api.duckduckgo.com/?"
+            + urlencode(
+                {
                 "q": query,
                 "format": "json",
                 "no_html": "1",
                 "skip_disambig": "1",
-            },
+                }
+            ),
         )
-        response.raise_for_status()
-        payload = response.json()
         documents: list[ExternalResearchDocument] = []
         title = str(payload.get("Heading") or "").strip()
         snippet = str(payload.get("AbstractText") or "").strip()
@@ -121,12 +122,12 @@ class AgentExternalResearchService:
                     return documents
         return documents
 
-    async def _search_papers(self, client: httpx.AsyncClient, query: str) -> list[ExternalResearchDocument]:
-        response = await client.get(
-            f"https://export.arxiv.org/api/query?search_query=all:{quote_plus(query)}&start=0&max_results=4"
+    async def _search_papers(self, query: str) -> list[ExternalResearchDocument]:
+        text = await asyncio.to_thread(
+            self._fetch_text,
+            f"https://export.arxiv.org/api/query?search_query=all:{quote_plus(query)}&start=0&max_results=4",
         )
-        response.raise_for_status()
-        root = ET.fromstring(response.text)
+        root = ET.fromstring(text)
         ns = {"atom": "http://www.w3.org/2005/Atom"}
         documents: list[ExternalResearchDocument] = []
         for entry in root.findall("atom:entry", ns):
@@ -143,6 +144,14 @@ class AgentExternalResearchService:
                     )
                 )
         return documents
+
+    def _fetch_json(self, url: str) -> dict:
+        return json.loads(self._fetch_text(url))
+
+    def _fetch_text(self, url: str) -> str:
+        request = Request(url, headers={"User-Agent": "AI-Learning-Copilot/1.0"})
+        with urlopen(request, timeout=self.timeout_s) as response:
+            return response.read().decode("utf-8", errors="replace")
 
     def _observe(self, message: str, documents: list[ExternalResearchDocument]) -> list[ExternalResearchDocument]:
         tokens = {
