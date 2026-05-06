@@ -94,6 +94,33 @@ class Settings(BaseSettings):
     rate_limit_login_per_minute: int = Field(default=5)
     rate_limit_forgot_password_per_hour: int = Field(default=5)
     asset_url_expire_seconds: int = Field(default=900)
+
+    # ---- Asset delivery (local vs AWS S3 + CloudFront) ----
+    # Default `local` keeps the existing /data/{asset_path} flow intact for dev.
+    # Set to `s3` on Render production to return CloudFront URLs instead.
+    asset_storage_provider: Literal["local", "s3"] = Field(
+        default="local",
+        description="Asset delivery mode: 'local' for /data/* signed URLs, 's3' for CloudFront URLs.",
+    )
+    aws_region: str = Field(default="", description="AWS region for the S3 asset bucket.")
+    aws_s3_bucket: str = Field(default="", description="Private S3 bucket name holding course assets.")
+    aws_s3_prefix: str = Field(
+        default="courses",
+        description="Key prefix inside the S3 bucket where course assets live.",
+    )
+    cloudfront_domain: str = Field(
+        default="",
+        description="CloudFront domain name (no scheme), e.g. 'd123.cloudfront.net' or 'cdn.example.com'.",
+    )
+    cloudfront_key_pair_id: str = Field(
+        default="",
+        description="CloudFront public key ID; required only when issuing signed URLs.",
+    )
+    cloudfront_private_key: str = Field(
+        default="",
+        description="CloudFront private key PEM contents; required only when issuing signed URLs.",
+    )
+
     gmail_app_password: str = Field(default="")
     email_from: str = Field(default="")
     frontend_base_url: str = Field(default="http://localhost:3000")

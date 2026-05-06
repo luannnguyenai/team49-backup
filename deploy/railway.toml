@@ -1,15 +1,23 @@
-# Railway service config (backend mặc định).
-# Đặt file này ở repo root nếu muốn Railway pickup tự động,
-# hoặc giữ ở deploy/ làm reference và copy lên dashboard.
+# DEPRECATED — kept for reference only.
 #
-# Frontend service: set Root Directory = "frontend" trong dashboard,
-# Railway sẽ dùng frontend/Dockerfile.
+# This file belonged to the previous Railway-based deployment plan.
+# Current plan uses Render + AWS S3 + CloudFront. See:
+#   - deploy/DEPLOYMENT_PLAN.md
+#   - deploy/README.md
+#
+# Known issues with this legacy config (do not copy verbatim):
+#   - startCommand uses "main:app" which does not match the actual app
+#     module path "src.api.app:app" in the root Dockerfile.
+#   - References Railway-only build/deploy semantics not used on Render.
+#
+# Do not delete blindly without checking git history if Railway revival is needed.
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
+# WRONG module path; kept only for historical reference.
 startCommand = "uv run uvicorn main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/health"
 healthcheckTimeout = 30

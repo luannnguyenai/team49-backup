@@ -30,5 +30,6 @@ ENV PYTHONPATH="/app"
 EXPOSE 8000
 
 # Default production-safe startup for the standalone backend image.
+# Use shell form so ${PORT} is expanded at runtime (Render injects PORT, e.g. 10000).
 # Compose can still override this for dev reload or multi-worker prod.
-CMD ["uv", "run", "python", "-m", "uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uv run python -m uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8000}"]
