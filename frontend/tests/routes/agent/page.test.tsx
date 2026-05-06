@@ -463,7 +463,8 @@ describe("agent page", () => {
       conversationId: "conversation-1",
       messageId: "message-external-citations",
       answer: {
-        markdown: "CNN is a convolutional model. Sources: [1](https://arxiv.org/abs/2004.15004) [2](https://example.com/cnn)",
+        markdown:
+          "CNN is a convolutional model. Sources: [1. CNN Explainer](https://arxiv.org/abs/2004.15004) | [2. CNN](https://example.com/cnn)",
         confidence: "grounded",
       },
       citations: [
@@ -493,11 +494,11 @@ describe("agent page", () => {
     fireEvent.change(input, { target: { value: "Giải thích CNN" } });
     fireEvent.click(screen.getByRole("button", { name: /send message/i }));
 
-    const firstSource = await screen.findByRole("link", { name: "1" });
+    const firstSource = await screen.findByRole("link", { name: "1. CNN Explainer" });
     expect(firstSource).toHaveAttribute("href", "https://arxiv.org/abs/2004.15004");
     expect(firstSource).toHaveAttribute("target", "_blank");
     expect(firstSource).toHaveAttribute("rel", expect.stringContaining("noopener"));
-    expect(screen.getByRole("link", { name: "2" })).toHaveAttribute("target", "_blank");
+    expect(screen.getByRole("link", { name: "2. CNN" })).toHaveAttribute("target", "_blank");
     expect(screen.queryByText("Sources")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /view source details: cnn explainer/i })).not.toBeInTheDocument();
   });

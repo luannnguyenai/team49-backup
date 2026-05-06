@@ -57,7 +57,10 @@ async def test_external_research_synthesizes_answer_from_observed_sources():
     assert "I searched web and paper sources" not in result.answer_markdown
     assert "Most relevant evidence" not in result.answer_markdown
     assert result.answer_markdown.startswith("CNN là mạng neural")
-    assert "[1](https://arxiv.org/abs/2004.15004)" in result.answer_markdown
+    assert (
+        "[1. CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization]"
+        "(https://arxiv.org/abs/2004.15004)" in result.answer_markdown
+    )
     assert "[^" not in result.answer_markdown
     assert result.citations[0].source == "paper"
     assert responder.calls
