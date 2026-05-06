@@ -119,7 +119,7 @@ cp .env.example .env
 Minimum values:
 
 ```env
-DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/ai_learning
+DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5433/ai_learning
 REDIS_URL=redis://:password@localhost:6379/0
 SECRET_KEY=replace-with-random-secret
 MODEL_PROVIDER=google_genai

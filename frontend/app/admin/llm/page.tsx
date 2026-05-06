@@ -15,21 +15,16 @@ import {
   YAxis,
 } from "recharts";
 
-import Link from "next/link";
-
 import KpiCard from "@/components/admin/KpiCard";
 import KpiGroup from "@/components/admin/KpiGroup";
 import ChartCard from "@/components/admin/ChartCard";
 import {
   adminApi,
-  type AdminOverview,
   type FeedbackStats,
   type LlmStats,
   type NegativeFeedbackRow,
 } from "@/lib/admin-api";
 import { CHART_GRID, CHART_PALETTE, CHART_STATUS } from "@/lib/admin/chart-theme";
-
-const LANGFUSE_HOST = process.env.NEXT_PUBLIC_LANGFUSE_HOST || "";
 
 function fmtPct(p: number | null | undefined): string {
   if (p === null || p === undefined) return "—";
@@ -42,7 +37,6 @@ function fmtMs(value: number | null | undefined): string {
 }
 
 export default function AdminLlmPage() {
-  const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [stats, setStats] = useState<LlmStats | null>(null);
   const [recent, setRecent] = useState<Record<string, unknown>[]>([]);
   const [feedback, setFeedback] = useState<FeedbackStats | null>(null);
@@ -54,15 +48,13 @@ export default function AdminLlmPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const [o, s, r, fb, neg] = await Promise.all([
-          adminApi.overview(),
+        const [s, r, fb, neg] = await Promise.all([
           adminApi.llmStats(24),
           adminApi.llmRecent(10),
           adminApi.feedbackStats(14),
           adminApi.feedbackNegative(20),
         ]);
         if (!cancelled) {
-          setOverview(o);
           setStats(s);
           setRecent(r);
           setFeedback(fb);
@@ -97,14 +89,9 @@ export default function AdminLlmPage() {
         </p>
       </div>
 
-      <KpiGroup title="Volume" cols={3}>
+      <KpiGroup title="Volume" cols={2}>
         <KpiCard
-          label="LLM calls (24h)"
-          value={overview?.llm_calls_24h ?? "—"}
-          loading={loading}
-        />
-        <KpiCard
-          label="Total calls (window)"
+          label="LLM calls (window)"
           value={stats?.total_calls ?? "—"}
           hint={`${stats?.window_hours ?? 0}h window`}
           loading={loading}
@@ -117,13 +104,7 @@ export default function AdminLlmPage() {
         />
       </KpiGroup>
 
-      <KpiGroup title="Latency" cols={5}>
-        <KpiCard
-          label="Avg p95 latency"
-          value={overview?.avg_latency_ms != null ? `${overview.avg_latency_ms} ms` : "—"}
-          hint="Prometheus 5m"
-          loading={loading}
-        />
+      <KpiGroup title="Latency" cols={4}>
         <KpiCard
           label="First status p95"
           value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_status_p95_ms)}
@@ -326,96 +307,49 @@ export default function AdminLlmPage() {
         </ResponsiveContainer>
       </ChartCard>
 
-      <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-              Langfuse trace explorer
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Open Langfuse in a separate tab for full traces, prompts, latency, token usage, and scores.
-            </p>
-          </div>
-          <Link
-            href="/admin/langfuse"
-            className="btn-primary px-4 py-2 text-xs"
-          >
-            Mở trang đầy đủ →
-          </Link>
-        </div>
-        {!LANGFUSE_HOST.trim() ? (
-          <p className="rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-            Thiếu <code className="rounded bg-amber-100 px-1 dark:bg-amber-900/60">NEXT_PUBLIC_LANGFUSE_HOST</code> trong runtime frontend nên chưa thể mở Langfuse từ admin dashboard.
-          </p>
-        ) : (
-          <div className="rounded-[18px] border border-slate-200/80 bg-slate-50/90 p-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-300">
-            Langfuse Cloud currently blocks third-party iframe embedding via security headers, so the admin dashboard links out to the hosted UI instead of rendering it inline.
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-        <Link
-          href="/admin/langfuse"
-          className="group flex h-full items-center justify-between gap-4 rounded-[24px] border border-slate-200/70 bg-gradient-to-br from-indigo-50/60 via-white/70 to-cyan-50/60 p-5 backdrop-blur-md transition hover:border-cyan-400 dark:border-slate-800 dark:from-slate-900/70 dark:via-slate-900/60 dark:to-slate-900/70"
-        >
-          <div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-              Langfuse tracing
-            </h3>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Xem chi tiết trace, prompt, cost tại trang riêng.
-            </p>
-          </div>
-          <span className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition group-hover:bg-cyan-600">
-            Mở Langfuse →
-          </span>
-        </Link>
-
-        <div className="space-y-5">
-          <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-semibold text-slate-900 dark:text-white">
-                  Recent negative feedback
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Last {negatives.length} answers rated 👎.
-                </p>
-              </div>
-            </div>
-            {negatives.length === 0 ? (
-              <p className="rounded-xl bg-emerald-500/10 px-4 py-3 text-xs text-emerald-700 dark:text-emerald-300">
-                No negative ratings yet.
+      <div className="space-y-5">
+        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                Recent negative feedback
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Last {negatives.length} answers rated 👎.
               </p>
-            ) : (
-              <div className="divide-y divide-slate-200/70 dark:divide-slate-800">
-                {negatives.map((n) => (
-                  <div key={n.id} className="py-3">
-                    <div className="flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
-                      <span>
-                        #{n.id} · lecture <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">{n.lecture_id?.slice(0, 14) ?? "—"}</code>
-                      </span>
-                      <span>{n.created_at ? new Date(n.created_at).toLocaleString() : "—"}</span>
-                    </div>
-                    <p className="mt-1 text-sm font-medium text-slate-900 dark:text-white">
-                      Q: {n.question}
-                    </p>
-                    <p className="mt-1 line-clamp-3 text-sm text-slate-600 dark:text-slate-300">
-                      A: {n.answer}
-                    </p>
+            </div>
+          </div>
+          {negatives.length === 0 ? (
+            <p className="rounded-xl bg-emerald-500/10 px-4 py-3 text-xs text-emerald-700 dark:text-emerald-300">
+              No negative ratings yet.
+            </p>
+          ) : (
+            <div className="divide-y divide-slate-200/70 dark:divide-slate-800">
+              {negatives.map((n) => (
+                <div key={n.id} className="py-3">
+                  <div className="flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <span>
+                      #{n.id} · lecture <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">{n.lecture_id?.slice(0, 14) ?? "—"}</code>
+                    </span>
+                    <span>{n.created_at ? new Date(n.created_at).toLocaleString() : "—"}</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <p className="mt-1 text-sm font-medium text-slate-900 dark:text-white">
+                    Q: {n.question}
+                  </p>
+                  <p className="mt-1 line-clamp-3 text-sm text-slate-600 dark:text-slate-300">
+                    A: {n.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-          <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
-            <h3 className="mb-3 text-base font-semibold text-slate-900 dark:text-white">Recent LLM events</h3>
-            <pre className="max-h-72 overflow-auto rounded-xl bg-slate-950/95 p-4 text-xs text-slate-200">
+        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+          <h3 className="mb-3 text-base font-semibold text-slate-900 dark:text-white">Recent LLM events</h3>
+          <pre className="max-h-72 overflow-auto rounded-xl bg-slate-950/95 p-4 text-xs text-slate-200">
 {recent.map((r) => JSON.stringify(r)).join("\n")}
-            </pre>
-          </div>
+          </pre>
         </div>
       </div>
     </div>
