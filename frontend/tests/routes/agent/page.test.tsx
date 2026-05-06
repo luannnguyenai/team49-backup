@@ -203,6 +203,73 @@ describe("agent page", () => {
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
   });
 
+  it("renders prerequisite path actions as a learning order card", async () => {
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-prereq-path",
+      answer: {
+        markdown: "Mask R-CNN extends object detection by adding a mask branch.",
+        confidence: "grounded",
+      },
+      citations: [],
+      actions: [
+        {
+          type: "review_prerequisite_path",
+          label: "Review prerequisite order",
+          canonicalUnitIds: ["unit-prereq", "unit-target"],
+          canonicalUnitId: "unit-target",
+          prerequisitePath: {
+            targetCanonicalUnitId: "unit-target",
+            nodes: [
+              {
+                canonicalUnitId: "unit-prereq",
+                unitName: "Object detection foundations",
+                role: "prerequisite",
+                status: "skipped",
+                learnHref: "/courses/cs231n/learn/object-detection",
+                reason: "Already handled; included so the learning order is clear.",
+              },
+              {
+                canonicalUnitId: "unit-target",
+                unitName: "Instance segmentation with Mask R-CNN",
+                role: "target",
+                status: "target",
+                learnHref: "/courses/cs231n/learn/mask-r-cnn",
+                reason: "Current topic.",
+              },
+            ],
+            edges: [
+              {
+                fromCanonicalUnitId: "unit-prereq",
+                toCanonicalUnitId: "unit-target",
+                reason: "Object detection -> Mask R-CNN",
+              },
+            ],
+          },
+        },
+      ],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Explain Mask R-CNN" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    expect(await screen.findByText("Suggested prerequisite order")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Object detection foundations" })).toHaveAttribute(
+      "href",
+      "/courses/cs231n/learn/object-detection",
+    );
+    expect(screen.getByRole("link", { name: "Instance segmentation with Mask R-CNN" })).toHaveAttribute(
+      "href",
+      "/courses/cs231n/learn/mask-r-cnn",
+    );
+    expect(screen.getByText("Skipped")).toBeInTheDocument();
+    expect(screen.getByText("Current topic")).toBeInTheDocument();
+    expect(screen.getByText("Already handled; included so the learning order is clear.")).toBeInTheDocument();
+  });
+
   it("shows a compact expandable thinking progress indicator while the assistant responds", async () => {
     let resolveChat!: (value: {
       conversationId: string;

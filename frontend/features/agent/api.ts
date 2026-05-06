@@ -71,6 +71,46 @@ export interface AgentAction {
   disabled_reason?: string | null;
   disabledReason?: string | null;
   proposal?: AssessmentProposal | null;
+  prerequisite_path?: AgentPrerequisitePath | null;
+  prerequisitePath?: AgentPrerequisitePath | null;
+}
+
+export type AgentPrerequisitePathStatus =
+  | "unknown"
+  | "needs_review"
+  | "mastered"
+  | "completed"
+  | "skipped"
+  | "in_progress"
+  | "target";
+
+export interface AgentPrerequisitePathNode {
+  canonical_unit_id?: string;
+  canonicalUnitId?: string;
+  unit_name?: string;
+  unitName?: string;
+  role: "prerequisite" | "target";
+  status?: AgentPrerequisitePathStatus;
+  learn_href?: string | null;
+  learnHref?: string | null;
+  mastery_lcb?: number | null;
+  masteryLcb?: number | null;
+  reason?: string | null;
+}
+
+export interface AgentPrerequisitePathEdge {
+  from_canonical_unit_id?: string;
+  fromCanonicalUnitId?: string;
+  to_canonical_unit_id?: string;
+  toCanonicalUnitId?: string;
+  reason?: string | null;
+}
+
+export interface AgentPrerequisitePath {
+  target_canonical_unit_id?: string;
+  targetCanonicalUnitId?: string;
+  nodes: AgentPrerequisitePathNode[];
+  edges: AgentPrerequisitePathEdge[];
 }
 
 export interface AgentWarning {
@@ -390,6 +430,26 @@ export function getUnitContextQuizAvailable(value: AgentUnitContext | null | und
 
 export function getActionCanonicalIds(value: AgentAction) {
   return value.canonicalUnitIds ?? value.canonical_unit_ids ?? [];
+}
+
+export function getActionPrerequisitePath(value: AgentAction) {
+  return value.prerequisitePath ?? value.prerequisite_path ?? null;
+}
+
+export function getPrerequisiteNodeCanonicalId(value: AgentPrerequisitePathNode) {
+  return value.canonicalUnitId ?? value.canonical_unit_id ?? "";
+}
+
+export function getPrerequisiteNodeName(value: AgentPrerequisitePathNode) {
+  return value.unitName ?? value.unit_name ?? "Learning unit";
+}
+
+export function getPrerequisiteNodeHref(value: AgentPrerequisitePathNode) {
+  return value.learnHref ?? value.learn_href ?? null;
+}
+
+export function getPrerequisiteNodeMasteryLcb(value: AgentPrerequisitePathNode) {
+  return value.masteryLcb ?? value.mastery_lcb ?? null;
 }
 
 export function getActionDisabledReason(value: AgentAction) {

@@ -48,6 +48,7 @@ import {
   getActionCanonicalId,
   getActionCanonicalIds,
   getActionDisabledReason,
+  getActionPrerequisitePath,
   getActionId,
   getActionQuestionBudget,
   getCitationCanonicalId,
@@ -62,6 +63,10 @@ import {
   getProposalMinutes,
   getProposalQuestionCount,
   getProposalReductionOptions,
+  getPrerequisiteNodeCanonicalId,
+  getPrerequisiteNodeHref,
+  getPrerequisiteNodeMasteryLcb,
+  getPrerequisiteNodeName,
   getReductionQuestionCount,
   getScopeUnitCount,
   getUnitContextCourseId,
@@ -71,6 +76,7 @@ import {
   getUpdatedAt,
   getWorkflowId,
   type AgentAction,
+  type AgentPrerequisitePathNode,
   type AgentAssessmentWorkflowResponse,
   type AgentChatResponse,
   type AgentCitation,
@@ -453,27 +459,99 @@ function SourceDetailPanel({
   );
 }
 
-function PrerequisitePath({ unitIds }: { unitIds: string[] }) {
-  if (unitIds.length === 0) return null;
+function getPrerequisiteStatusMeta(status: AgentPrerequisitePathNode["status"] | undefined) {
+  switch (status) {
+    case "mastered":
+      return { label: "Mastered", className: "bg-state-success-bg text-state-success-fg", icon: CheckCircle2 };
+    case "completed":
+      return { label: "Completed", className: "bg-state-success-bg text-state-success-fg", icon: CheckCircle2 };
+    case "skipped":
+      return { label: "Skipped", className: "bg-state-success-bg text-state-success-fg", icon: CheckCircle2 };
+    case "in_progress":
+      return { label: "In progress", className: "bg-surface-accent-soft text-primary-700", icon: Clock };
+    case "target":
+      return { label: "Current topic", className: "bg-surface-accent-soft text-primary-700", icon: Target };
+    case "needs_review":
+      return { label: "Review first", className: "bg-state-warning-bg text-state-warning-fg", icon: BookOpen };
+    default:
+      return { label: "Review", className: "bg-surface-page text-text-muted", icon: BookOpen };
+  }
+}
+
+function PrerequisitePath({ action }: { action: AgentAction }) {
+  const path = getActionPrerequisitePath(action);
+  const nodes =
+    path?.nodes && path.nodes.length > 0
+      ? path.nodes
+      : getActionCanonicalIds(action).map(
+          (unitId): AgentPrerequisitePathNode => ({
+            canonicalUnitId: unitId,
+            unitName: unitId,
+            role: "prerequisite",
+            status: "needs_review",
+          }),
+        );
+
+  if (nodes.length === 0) return null;
   return (
     <div className="mt-3 rounded-2xl border border-border-subtle bg-surface-page p-4">
-      <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-text-strong">
-        <Map className="h-4 w-4 text-primary-700" />
-        Suggested prerequisite order
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm font-semibold text-text-strong">
+          <Map className="h-4 w-4 text-primary-700" />
+          Suggested prerequisite order
+        </div>
+        <span className="shrink-0 rounded-full bg-surface-card px-2.5 py-1 text-[11px] font-semibold text-text-muted">
+          {nodes.length} units
+        </span>
       </div>
       <div className="space-y-4">
-        {unitIds.map((unitId, index) => (
-          <div key={unitId} className="relative flex gap-3">
-            {index < unitIds.length - 1 ? (
-              <div className="absolute left-[7px] top-6 h-8 border-l-2 border-dotted border-border-subtle" />
-            ) : null}
-            <span className="relative z-10 mt-1 h-4 w-4 rounded-full border-2 border-primary-500 bg-surface-card" />
-            <div>
-              <p className="text-sm font-semibold text-text-strong">Review {unitId}</p>
-              <p className="text-xs text-text-muted">Grounded prerequisite candidate from the path graph.</p>
+        {nodes.map((node, index) => {
+          const unitId = getPrerequisiteNodeCanonicalId(node) || `${node.role}-${index}`;
+          const unitName = getPrerequisiteNodeName(node);
+          const href = getPrerequisiteNodeHref(node);
+          const masteryLcb = getPrerequisiteNodeMasteryLcb(node);
+          const statusMeta = getPrerequisiteStatusMeta(node.status);
+          const StatusIcon = statusMeta.icon;
+          return (
+            <div key={`${unitId}-${index}`} className="relative flex gap-3">
+              {index < nodes.length - 1 ? (
+                <div className="absolute left-[13px] top-9 h-9 border-l-2 border-dotted border-border-subtle" />
+              ) : null}
+              <span
+                className={cn(
+                  "relative z-10 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border bg-surface-card",
+                  node.role === "target" ? "border-primary-500 text-primary-700" : "border-border-subtle text-text-muted",
+                )}
+              >
+                {index < nodes.length - 1 ? <ArrowRight className="h-3.5 w-3.5" /> : <Target className="h-3.5 w-3.5" />}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  {href ? (
+                    <Link href={href} className="text-sm font-semibold text-text-strong hover:text-primary-700">
+                      {unitName}
+                    </Link>
+                  ) : (
+                    <p className="text-sm font-semibold text-text-strong">{unitName}</p>
+                  )}
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                      statusMeta.className,
+                    )}
+                  >
+                    <StatusIcon className="h-3 w-3" />
+                    {statusMeta.label}
+                  </span>
+                  {masteryLcb !== null && node.status === "mastered" ? (
+                    <span className="text-[11px] font-medium text-text-muted">{Math.round(masteryLcb * 100)}% mastery</span>
+                  ) : null}
+                </div>
+                {node.reason ? <p className="mt-1 text-xs leading-5 text-text-muted">{node.reason}</p> : null}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -1126,7 +1204,7 @@ function ChatMessageItem({
           </div>
         ) : null}
 
-        {!isUser && prereqAction ? <PrerequisitePath unitIds={getActionCanonicalIds(prereqAction)} /> : null}
+        {!isUser && prereqAction ? <PrerequisitePath action={prereqAction} /> : null}
 
         {!isUser && workflowActions.map((action) => <WorkflowAction key={`${action.type}-${action.label}`} action={action} />)}
 
