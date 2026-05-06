@@ -24,6 +24,7 @@ import {
   type LlmStats,
   type NegativeFeedbackRow,
 } from "@/lib/admin-api";
+import { llmTooltips } from "@/lib/admin-tooltips";
 import { CHART_GRID, CHART_PALETTE, CHART_STATUS } from "@/lib/admin/chart-theme";
 
 function fmtPct(p: number | null | undefined): string {
@@ -94,12 +95,14 @@ export default function AdminLlmPage() {
           label="LLM calls (window)"
           value={stats?.total_calls ?? "—"}
           hint={`${stats?.window_hours ?? 0}h window`}
+          tooltip={llmTooltips.callsWindow}
           loading={loading}
         />
         <KpiCard
           label="Errors (window)"
           value={stats?.errors ?? "—"}
           hint="qa_history.jsonl"
+          tooltip={llmTooltips.errorsWindow}
           loading={loading}
         />
       </KpiGroup>
@@ -109,24 +112,28 @@ export default function AdminLlmPage() {
           label="First status p95"
           value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_status_p95_ms)}
           hint="Latest hourly bucket"
+          tooltip={llmTooltips.firstStatusP95}
           loading={loading}
         />
         <KpiCard
           label="First status p50"
           value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_status_p50_ms)}
           hint="Latest hourly bucket"
+          tooltip={llmTooltips.firstStatusP50}
           loading={loading}
         />
         <KpiCard
           label="First answer p95"
           value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_answer_p95_ms)}
           hint="Latest hourly bucket"
+          tooltip={llmTooltips.firstAnswerP95}
           loading={loading}
         />
         <KpiCard
           label="First answer p50"
           value={fmtMs(stats?.tutor_latency_per_hour.at(-1)?.first_answer_p50_ms)}
           hint="Latest hourly bucket"
+          tooltip={llmTooltips.firstAnswerP50}
           loading={loading}
         />
       </KpiGroup>
@@ -136,24 +143,28 @@ export default function AdminLlmPage() {
           label="Positive ratings"
           value={feedback?.positive ?? "—"}
           hint="👍"
+          tooltip={llmTooltips.positiveRatings}
           loading={loading}
         />
         <KpiCard
           label="Negative ratings"
           value={feedback?.negative ?? "—"}
           hint="👎"
+          tooltip={llmTooltips.negativeRatings}
           loading={loading}
         />
         <KpiCard
           label="Positive ratio"
           value={fmtPct(feedback?.positive_ratio)}
           hint={`Total rated: ${feedback?.total_ratings ?? 0}`}
+          tooltip={llmTooltips.positiveRatio}
           loading={loading}
         />
         <KpiCard
           label="Unrated (24h)"
           value={feedback?.unrated_24h ?? "—"}
           hint="LLM calls without thumb"
+          tooltip={llmTooltips.unrated24h}
           loading={loading}
         />
       </KpiGroup>

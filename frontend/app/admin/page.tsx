@@ -11,6 +11,7 @@ import {
   AdminOverview,
   CurrentModel,
 } from "@/lib/admin-api";
+import { overviewTooltips } from "@/lib/admin-tooltips";
 
 function fmtPct(p: number | null | undefined): string {
   if (p === null || p === undefined) return "—";
@@ -72,19 +73,34 @@ export default function AdminOverviewPage() {
         <KpiCard
           label="Total users"
           value={overview?.total_users ?? "—"}
+          tooltip={overviewTooltips.totalUsers}
           loading={loading}
         />
-        <KpiCard label="DAU" value={overview?.dau ?? "—"} hint="Last 24h" loading={loading} />
-        <KpiCard label="MAU" value={overview?.mau ?? "—"} hint="Last 30d" loading={loading} />
+        <KpiCard
+          label="DAU"
+          value={overview?.dau ?? "—"}
+          hint="Last 24h"
+          tooltip={overviewTooltips.dau}
+          loading={loading}
+        />
+        <KpiCard
+          label="MAU"
+          value={overview?.mau ?? "—"}
+          hint="Last 30d"
+          tooltip={overviewTooltips.mau}
+          loading={loading}
+        />
         <KpiCard
           label="Signups (7d)"
           value={overview?.signups_7d ?? "—"}
+          tooltip={overviewTooltips.signups7d}
           loading={loading}
         />
         <KpiCard
           label="Online now"
           value={overview?.active_now ?? "—"}
           hint="Active ≤ 15m"
+          tooltip={overviewTooltips.activeNow}
           loading={loading}
         />
       </KpiGroup>
@@ -93,6 +109,7 @@ export default function AdminOverviewPage() {
         <KpiCard
           label="LLM calls (24h)"
           value={overview?.llm_calls_24h ?? "—"}
+          tooltip={overviewTooltips.llmCalls24h}
           loading={loading}
         />
         <KpiCard
@@ -107,12 +124,14 @@ export default function AdminOverviewPage() {
             )
           }
           hint={model ? `${model.provider} · fast: ${model.fast_model}` : "Loading…"}
+          tooltip={overviewTooltips.modelCurrent}
           loading={loading}
         />
         <KpiCard
           label="Error rate"
           value={fmtPct(overview?.error_rate)}
           hint="5xx / total (5m)"
+          tooltip={overviewTooltips.errorRate}
           loading={loading}
         />
       </KpiGroup>
