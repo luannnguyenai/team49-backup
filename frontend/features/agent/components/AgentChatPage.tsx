@@ -82,6 +82,7 @@ import {
   type AgentCitation,
   type AgentConversationMessage,
   type AgentConversationSummary,
+  type AgentToolMode,
   type AgentUnitContext,
   type AgentWarning,
   type AssessmentProposal,
@@ -1514,7 +1515,17 @@ function EmptyState({ onPrompt }: { onPrompt: (prompt: string) => void }) {
   );
 }
 
-function Composer({ onSend, disabled }: { onSend: (message: string) => void; disabled: boolean }) {
+function Composer({
+  onSend,
+  disabled,
+  toolMode,
+  onToolModeChange,
+}: {
+  onSend: (message: string) => void;
+  disabled: boolean;
+  toolMode: AgentToolMode;
+  onToolModeChange: (mode: AgentToolMode) => void;
+}) {
   const [text, setText] = useState("");
   const send = (event?: FormEvent) => {
     event?.preventDefault();
@@ -1527,6 +1538,33 @@ function Composer({ onSend, disabled }: { onSend: (message: string) => void; dis
   return (
     <div className="border-t border-border-subtle bg-white/80 p-4 backdrop-blur">
       <div className="mx-auto max-w-3xl">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          {[
+            { value: "course" as const, label: "Course", icon: BookOpen },
+            { value: "web_papers" as const, label: "Search Web & Papers", icon: Search },
+          ].map((mode) => {
+            const Icon = mode.icon;
+            const isActive = toolMode === mode.value;
+            return (
+              <button
+                key={mode.value}
+                type="button"
+                disabled={disabled}
+                onClick={() => onToolModeChange(mode.value)}
+                className={cn(
+                  "inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition disabled:opacity-60",
+                  isActive
+                    ? "border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                    : "border-border-subtle bg-surface-card text-text-muted hover:bg-surface-page hover:text-text-strong",
+                )}
+                aria-pressed={isActive}
+              >
+                <Icon className="h-4 w-4" />
+                {mode.label}
+              </button>
+            );
+          })}
+        </div>
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
           {QUICK_PROMPTS.map((prompt) => (
             <button
@@ -1650,6 +1688,7 @@ export default function AgentChatPage() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [turnProgressIndex, setTurnProgressIndex] = useState(0);
+  const [toolMode, setToolMode] = useState<AgentToolMode>("course");
   const [error, setError] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(false);
   const [leftMinimized, setLeftMinimized] = useState(false);
@@ -1911,6 +1950,7 @@ export default function AgentChatPage() {
         incomingMessageId,
         conversationId: activeSessionId,
         traceMode: "summary",
+        ...(toolMode === "web_papers" ? { toolMode } : {}),
       });
       appendAgentResponse(response, { message, incomingMessageId });
     } catch (err) {
@@ -2080,7 +2120,12 @@ export default function AgentChatPage() {
           </div>
         </main>
 
-        <Composer onSend={sendMessage} disabled={isThinking} />
+        <Composer
+          onSend={sendMessage}
+          disabled={isThinking}
+          toolMode={toolMode}
+          onToolModeChange={setToolMode}
+        />
       </section>
 
       {selectedCitation ? (

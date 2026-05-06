@@ -203,6 +203,27 @@ describe("agent page", () => {
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
   });
 
+  it("sends web and paper mode only when the learner enables external search", async () => {
+    render(<AgentPage />);
+
+    const webMode = await screen.findByRole("button", { name: /search web & papers/i });
+    fireEvent.click(webMode);
+
+    const input = screen.getByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Find current papers about CNN pruning" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenCalledWith({
+        message: "Find current papers about CNN pruning",
+        incomingMessageId: expect.any(String),
+        conversationId: null,
+        traceMode: "summary",
+        toolMode: "web_papers",
+      });
+    });
+  });
+
   it("opens prerequisite path units in the existing source sidebar before learning", async () => {
     agentApiMock.unitContext.mockResolvedValueOnce({
       canonical_unit_id: "unit-prereq",

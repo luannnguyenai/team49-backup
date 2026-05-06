@@ -136,6 +136,8 @@ export interface AgentChatResponse {
   fallback?: { reason: string; message: string; errorCode?: string | null; error_code?: string | null } | null;
 }
 
+export type AgentToolMode = "course" | "web_papers";
+
 export interface AgentInProgressResponse {
   status: "in_progress";
   conversationId: string;
@@ -302,6 +304,7 @@ export const agentApi = {
     conversationId?: string | null;
     routeContext?: Record<string, unknown>;
     traceMode?: "none" | "summary" | "full";
+    toolMode?: AgentToolMode;
   }) =>
     api
       .post<AgentChatResponse>(agentRuntimeEndpoint(AGENT_CHAT_PATH), payload, {

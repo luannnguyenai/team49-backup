@@ -58,6 +58,29 @@ describe("agent api", () => {
     );
   });
 
+  it("passes the selected agent tool mode through chat requests", async () => {
+    const { AGENT_REQUEST_TIMEOUT_MS, agentApi } = await import("@/features/agent/api");
+    postMock.mockResolvedValueOnce({ data: { ok: true } });
+
+    await agentApi.chat({
+      message: "find recent papers about diffusion",
+      incomingMessageId: "msg-web-papers",
+      traceMode: "summary",
+      toolMode: "web_papers",
+    });
+
+    expect(postMock).toHaveBeenCalledWith(
+      "/api/agent/chat",
+      {
+        message: "find recent papers about diffusion",
+        incomingMessageId: "msg-web-papers",
+        traceMode: "summary",
+        toolMode: "web_papers",
+      },
+      { timeout: AGENT_REQUEST_TIMEOUT_MS },
+    );
+  });
+
   it("uses an agent-specific timeout for action continuations", async () => {
     const { AGENT_REQUEST_TIMEOUT_MS, agentApi } = await import("@/features/agent/api");
     postMock.mockResolvedValueOnce({ data: { ok: true } });
