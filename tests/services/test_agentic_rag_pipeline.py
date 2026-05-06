@@ -325,6 +325,43 @@ async def test_agentic_rag_pipeline_does_not_emit_hidden_thinking():
 
 
 @pytest.mark.asyncio
+async def test_agentic_rag_pipeline_strips_llm_footnote_citation_markers():
+    class FootnoteRouter(FakePipelineRouter):
+        def rag_respond(self, **kwargs):
+            self.calls.append(("respond", kwargs))
+            return type(
+                "Final",
+                (),
+                {
+                    "answer_markdown": (
+                        "Mask R-CNN adds a pixel-level mask branch for each detected object."
+                        "[^maskrcnn-proposals]"
+                    ),
+                    "evidence_status": "grounded",
+                    "evidence_sufficient": True,
+                    "clarification_question": None,
+                },
+            )()
+
+    pipeline = AgenticRAGPipeline(
+        router=FootnoteRouter(),
+        tool_executor=AgenticRAGToolExecutor(GroundedToolNodes()),
+    )
+
+    result = await pipeline.run(
+        message="Giải thích Mask R-CNN",
+        intent="find_content",
+        slots=AgentSlots(raw_topic="Mask R-CNN"),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS231N"],
+    )
+
+    assert "[^" not in result.answer_markdown
+    assert result.answer_markdown == "Mask R-CNN adds a pixel-level mask branch for each detected object."
+
+
+@pytest.mark.asyncio
 async def test_agentic_rag_pipeline_preserves_topic_choice_tool_answer():
     from src.schemas.agent import AgentAction
 

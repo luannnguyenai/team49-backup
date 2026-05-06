@@ -167,4 +167,5 @@ class AgenticRAGPipeline:
     def _strip_hidden_stage_text(markdown: str) -> str:
         value = markdown.strip()
         value = re.sub(r"(?is)hidden\s+thought\s*:.*?(final\s*:)", r"\1", value).strip()
-        return re.sub(r"(?i)^final\s*:\s*", "", value).strip()
+        value = re.sub(r"(?i)^final\s*:\s*", "", value).strip()
+        return re.sub(r"\s*\[\^[^\]]+\]", "", value).strip()

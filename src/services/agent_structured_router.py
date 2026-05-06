@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -439,6 +440,7 @@ class StructuredAgentRouter:
         return str(content).strip()
 
     def _strip_trailing_followup_question(self, answer: str) -> str:
+        answer = self._strip_footnote_citation_markers(answer)
         paragraphs = answer.rstrip().split("\n\n")
         if not paragraphs:
             return answer.strip()
@@ -456,6 +458,10 @@ class StructuredAgentRouter:
         if tail.endswith("?") or tail.lower().startswith(optional_offer_starts):
             paragraphs = paragraphs[:-1]
         return "\n\n".join(part for part in paragraphs if part.strip()).strip()
+
+    @staticmethod
+    def _strip_footnote_citation_markers(answer: str) -> str:
+        return re.sub(r"\s*\[\^[^\]]+\]", "", answer).strip()
 
     def compose_assistant_help(
         self,
@@ -516,6 +522,8 @@ class StructuredAgentRouter:
                             "with standard LaTeX delimiters only when the answer needs formulas. "
                             "Do not include raw URLs, course hrefs, or source links in the answer text; "
                             "navigation is provided by citations/source cards. "
+                            "Do not include footnote-style citation markers such as [^source-id]; "
+                            "source details are rendered separately by the UI. "
                             "Do not invent missing course facts. If the retrieved units do not directly support "
                             "the user's requested topic, set evidence_sufficient=false, choose no_source or partial "
                             "confidence, and ask one concise clarifying question or say that no direct grounded "
