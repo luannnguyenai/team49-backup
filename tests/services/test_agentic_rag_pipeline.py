@@ -322,3 +322,56 @@ async def test_agentic_rag_pipeline_does_not_emit_hidden_thinking():
 
     assert "Hidden thought" not in result.answer_markdown
     assert result.answer_markdown == "YOLO is covered."
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_pipeline_preserves_topic_choice_tool_answer():
+    from src.schemas.agent import AgentAction
+
+    class TopicChoiceToolNodes(FakeToolNodes):
+        async def find_content(self, message, intent, slots, allowed_course_ids):
+            return ToolResult(
+                kind="clarification",
+                answer_markdown="I found several matching topics for CNN. Choose one below.",
+                actions=[
+                    AgentAction(
+                        type="choose_topic",
+                        label="Learn about CNN foundations",
+                        canonical_unit_id="unit-cnn",
+                    )
+                ],
+                requires_evidence=False,
+                metadata={"topic_selection_offered": True},
+            )
+
+    class OverwritingRouter(FakePipelineRouter):
+        def rag_respond(self, **kwargs):
+            self.calls.append(("respond", kwargs))
+            return type(
+                "Final",
+                (),
+                {
+                    "answer_markdown": "Unrelated generated options that do not match the cards.",
+                    "evidence_status": "needs_clarification",
+                    "evidence_sufficient": False,
+                    "clarification_question": None,
+                },
+            )()
+
+    pipeline = AgenticRAGPipeline(
+        router=OverwritingRouter(),
+        tool_executor=AgenticRAGToolExecutor(TopicChoiceToolNodes()),
+    )
+
+    result = await pipeline.run(
+        message="Explain CNN",
+        intent="explain_concept",
+        slots=AgentSlots(raw_topic="CNN"),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS224n", "CS231n"],
+    )
+
+    assert result.answer_markdown == "I found several matching topics for CNN. Choose one below."
+    assert result.actions[0].type == "choose_topic"
+    assert result.metadata["preserved_tool_topic_selection_answer"] is True
