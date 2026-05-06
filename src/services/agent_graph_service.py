@@ -29,6 +29,7 @@ from src.services.agent_graph_contracts import (
 from src.services.agent_memory_compaction_service import AgentMemoryCompactionService
 from src.services.agent_pending_action_decision import AgentPendingActionDecisionService
 from src.services.agent_policy_service import AgentPolicyService
+from src.services.agent_prerequisite_path_service import AgentPrerequisitePathService
 from src.services.agent_response_composer import AgentResponseComposer
 from src.services.agent_search_scope_service import AgentSearchScopeService
 from src.services.agent_slot_resolver import AgentSlotResolver
@@ -100,7 +101,18 @@ class AgentGraphService:
         self.policy = AgentPolicyService()
         self.composer = AgentResponseComposer()
         self.scope_service = AgentSearchScopeService()
-        self.tools = AgentToolNodes(search_service, requirement_service)
+        prerequisite_path_service = None
+        if hasattr(search_service, "repo"):
+            prerequisite_path_service = AgentPrerequisitePathService(
+                search_service.repo,
+                getattr(search_service, "navigation_service", None),
+            )
+        self.tools = AgentToolNodes(
+            search_service,
+            requirement_service,
+            prerequisite_path_service=prerequisite_path_service,
+            user_id=getattr(action_user, "id", None),
+        )
         self.agentic_rag_tools = AgenticRAGToolExecutor(self.tools)
         self.agentic_rag = AgenticRAGPipeline(
             router=router,

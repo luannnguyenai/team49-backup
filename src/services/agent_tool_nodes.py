@@ -19,9 +19,17 @@ from src.services.agent_search_scope_service import AgentSearchScopeService
 class AgentToolNodes:
     TOO_MANY_RESULTS_THRESHOLD = 20
 
-    def __init__(self, search_service, requirement_service):
+    def __init__(
+        self,
+        search_service,
+        requirement_service,
+        prerequisite_path_service=None,
+        user_id=None,
+    ):
         self.search_service = search_service
         self.requirement_service = requirement_service
+        self.prerequisite_path_service = prerequisite_path_service
+        self.user_id = user_id
         self.scope_service = AgentSearchScopeService()
         self.evidence_quality = AgentEvidenceQualityService()
 
@@ -164,6 +172,14 @@ class AgentToolNodes:
             for result in results
             if result.learn_href
         ]
+        prereq_action = await self._build_prerequisite_path_action(
+            verdict_label=verdict.label,
+            all_results=all_results,
+            selected_unit_ids=verdict.selected_unit_ids,
+            allowed_course_ids=allowed_course_ids,
+        )
+        if prereq_action is not None:
+            actions.append(prereq_action)
         trace = search.trace.model_copy(
             update={
                 "intent": intent,
@@ -328,6 +344,48 @@ class AgentToolNodes:
             seen.add(key)
             deduped.append(candidate)
         return deduped[:5]
+
+    async def _build_prerequisite_path_action(
+        self,
+        *,
+        verdict_label: str,
+        all_results,
+        selected_unit_ids: list[str],
+        allowed_course_ids: list[str],
+    ) -> AgentAction | None:
+        if verdict_label != "direct_match" or self.prerequisite_path_service is None:
+            return None
+        target_result = self._specific_target_result(all_results, selected_unit_ids)
+        if target_result is None:
+            return None
+        prerequisite_path = await self.prerequisite_path_service.build(
+            target_canonical_unit_id=target_result.canonical_unit_id,
+            allowed_course_ids=allowed_course_ids,
+            user_id=self.user_id,
+        )
+        if prerequisite_path is None or len(prerequisite_path.nodes) < 2:
+            return None
+        canonical_unit_ids = [node.canonical_unit_id for node in prerequisite_path.nodes]
+        return AgentAction(
+            type="review_prerequisite_path",
+            label="Review prerequisite order",
+            canonical_unit_ids=canonical_unit_ids,
+            canonical_unit_id=target_result.canonical_unit_id,
+            prerequisitePath=prerequisite_path,
+        )
+
+    @staticmethod
+    def _specific_target_result(all_results, selected_unit_ids: list[str]):
+        selected = [
+            result
+            for result in all_results
+            if result.canonical_unit_id in set(selected_unit_ids)
+        ]
+        if not selected:
+            return None
+        if len(selected) == 1:
+            return selected[0]
+        return selected[0] if selected[0].score > selected[1].score else None
 
     async def planner_decision(
         self,
