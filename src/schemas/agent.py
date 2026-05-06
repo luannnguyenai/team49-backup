@@ -156,6 +156,42 @@ class AssessmentProposal(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class AgentPrerequisitePathNode(BaseModel):
+    canonical_unit_id: str = Field(alias="canonicalUnitId")
+    unit_name: str = Field(alias="unitName")
+    role: Literal["prerequisite", "target"]
+    status: Literal[
+        "unknown",
+        "needs_review",
+        "mastered",
+        "completed",
+        "skipped",
+        "in_progress",
+        "target",
+    ] = "unknown"
+    learn_href: str | None = Field(default=None, alias="learnHref")
+    mastery_lcb: float | None = Field(default=None, alias="masteryLcb")
+    reason: str | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentPrerequisitePathEdge(BaseModel):
+    from_canonical_unit_id: str = Field(alias="fromCanonicalUnitId")
+    to_canonical_unit_id: str = Field(alias="toCanonicalUnitId")
+    reason: str | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentPrerequisitePath(BaseModel):
+    target_canonical_unit_id: str = Field(alias="targetCanonicalUnitId")
+    nodes: list[AgentPrerequisitePathNode] = Field(default_factory=list)
+    edges: list[AgentPrerequisitePathEdge] = Field(default_factory=list)
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class AgentAction(BaseModel):
     type: Literal[
         "open_unit",
@@ -200,6 +236,7 @@ class AgentAction(BaseModel):
         default_factory=list, alias="sourceCanonicalUnitIds"
     )
     proposal: AssessmentProposal | None = None
+    prerequisite_path: AgentPrerequisitePath | None = Field(default=None, alias="prerequisitePath")
 
     model_config = ConfigDict(populate_by_name=True)
 

@@ -114,11 +114,42 @@ def test_agent_actions_support_prerequisite_path_and_target_choice():
         label="Review prerequisite order",
         canonical_unit_ids=["cs230-l01-u05", "cs230-l03-u02"],
         eligible=True,
+        prerequisitePath={
+            "targetCanonicalUnitId": "cs230-l03-u02",
+            "nodes": [
+                {
+                    "canonicalUnitId": "cs230-l01-u05",
+                    "unitName": "Vector basics",
+                    "role": "prerequisite",
+                    "status": "skipped",
+                    "learnHref": "/learn/vector-basics",
+                    "reason": "Already handled from skip evidence.",
+                },
+                {
+                    "canonicalUnitId": "cs230-l03-u02",
+                    "unitName": "Target unit",
+                    "role": "target",
+                    "status": "needs_review",
+                    "learnHref": "/learn/target-unit",
+                },
+            ],
+            "edges": [
+                {
+                    "fromCanonicalUnitId": "cs230-l01-u05",
+                    "toCanonicalUnitId": "cs230-l03-u02",
+                    "reason": "Vector basics supports the target unit.",
+                }
+            ],
+        },
     )
     target = AgentAction(type="choose_target_path", label="Computer Vision", eligible=True)
     path_switch = AgentAction(type="request_path_switch", label="Switch to NLP", eligible=True)
 
     assert prereq.canonical_unit_ids == ["cs230-l01-u05", "cs230-l03-u02"]
+    assert prereq.prerequisite_path is not None
+    assert prereq.prerequisite_path.nodes[0].status == "skipped"
+    assert prereq.prerequisite_path.nodes[1].role == "target"
+    assert prereq.prerequisite_path.edges[0].from_canonical_unit_id == "cs230-l01-u05"
     assert target.type == "choose_target_path"
     assert path_switch.type == "request_path_switch"
 
