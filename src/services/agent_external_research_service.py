@@ -195,6 +195,7 @@ class AgentExternalResearchService:
             recent_messages=recent_messages,
         )
         if synthesized_answer:
+            synthesized_answer = self._with_numeric_source_links(synthesized_answer, citations)
             return ToolResult(
                 kind="find_content",
                 answer_markdown=synthesized_answer,
@@ -291,6 +292,18 @@ class AgentExternalResearchService:
         if not answer:
             return None
         return answer
+
+    def _with_numeric_source_links(self, answer: str, citations: list[AgentCitation]) -> str:
+        cleaned = re.sub(r"\s*\[\^[^\]]+\]", "", answer).strip()
+        links = []
+        for index, citation in enumerate(citations[:5], start=1):
+            if citation.learn_href:
+                links.append(f"[{index}]({citation.learn_href})")
+        if not links:
+            return cleaned
+        if any(f"[{index}](" in cleaned for index in range(1, len(links) + 1)):
+            return cleaned
+        return f"{cleaned}\n\nSources: {' '.join(links)}"
 
     @staticmethod
     def _xml_text(element) -> str:

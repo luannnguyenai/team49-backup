@@ -124,11 +124,29 @@ function cleanSourceSummary(value: string) {
     .trim();
 }
 
-function AssistantMarkdown({ markdown }: { markdown: string }) {
+function AssistantMarkdown({ markdown, citations = [] }: { markdown: string; citations?: AgentCitation[] }) {
+  const allowedExternalHrefs = new Set(
+    citations
+      .filter(isExternalCitation)
+      .map((citation) => getCitationHref(citation))
+      .filter((href): href is string => Boolean(href)),
+  );
   return (
     <ReactMarkdown
       components={{
-        a: ({ children }) => <span>{children}</span>,
+        a: ({ children, href }) =>
+          href && allowedExternalHrefs.has(href) ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-primary-700 underline decoration-primary-300 underline-offset-2 transition hover:text-primary-900 dark:text-primary-300"
+            >
+              {children}
+            </a>
+          ) : (
+            <span>{children}</span>
+          ),
       }}
     >
       {markdown}
@@ -294,7 +312,16 @@ function findPathItemForCitation(citation: AgentCitation, items: PathItemRespons
 }
 
 function isExternalCitation(citation: AgentCitation) {
-  return citation.source === "web" || citation.source === "paper";
+  const source = citation.source?.toLowerCase();
+  const courseId = getCitationCourseId(citation).toUpperCase();
+  const canonicalId = getCitationCanonicalId(citation);
+  return (
+    source === "web" ||
+    source === "paper" ||
+    courseId === "WEB" ||
+    courseId === "PAPER" ||
+    canonicalId.startsWith("external::")
+  );
 }
 
 function CitationCard({
@@ -1180,6 +1207,7 @@ function ChatMessageItem({
   const workflowActions = message.actions.filter(
     (action) => action.type === "start_assessment_workflow" || action.type === "continue_assessment_workflow",
   );
+  const sourceCardCitations = message.citations.filter((citation) => !isExternalCitation(citation));
   const simpleActions = message.actions.filter(
     (action) =>
       action.type !== "review_prerequisite_path" &&
@@ -1217,7 +1245,7 @@ function ChatMessageItem({
             <p className="whitespace-pre-wrap">{message.markdown}</p>
           ) : (
             <div className="prose prose-sm prose-slate max-w-none leading-7 dark:prose-invert">
-              <AssistantMarkdown markdown={message.markdown} />
+              <AssistantMarkdown markdown={message.markdown} citations={message.citations} />
             </div>
           )}
           {!isUser && message.warning && !isDuplicateWarning(message) ? <WarningBlock warning={message.warning} /> : null}
@@ -1241,13 +1269,13 @@ function ChatMessageItem({
           ) : null}
         </div>
 
-        {!isUser && message.citations.length > 0 ? (
+        {!isUser && sourceCardCitations.length > 0 ? (
           <div className="mt-3 space-y-2">
             <div className="flex items-center gap-2 px-1 text-[11px] font-bold uppercase tracking-widest text-text-muted">
               <Search className="h-3 w-3" />
               Sources
             </div>
-            {message.citations.map((citation, index) => (
+            {sourceCardCitations.map((citation, index) => (
               <CitationCard
                 key={citationKey(citation) || index}
                 citation={citation}
@@ -1865,14 +1893,17 @@ export default function AgentChatPage() {
 
   const selectCitation = async (citation: AgentCitation) => {
     const canonicalId = getCitationCanonicalId(citation);
+    if (isExternalCitation(citation)) {
+      const href = getCitationHref(citation);
+      if (href) {
+        window.open(href, "_blank", "noopener,noreferrer");
+      }
+      return;
+    }
     setSelectedCitation(citation);
     setSelectedUnitContext(null);
     setSelectedPathItem(null);
     setSourceDetailError(null);
-    if (isExternalCitation(citation)) {
-      setIsLoadingSourceDetail(false);
-      return;
-    }
     if (!canonicalId) {
       setSourceDetailError("This source does not expose a unit id yet.");
       return;

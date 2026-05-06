@@ -458,6 +458,50 @@ describe("agent page", () => {
     expect(screen.queryByRole("link", { name: /source/i })).not.toBeInTheDocument();
   });
 
+  it("renders external citation markdown links in a new tab without source cards", async () => {
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-external-citations",
+      answer: {
+        markdown: "CNN is a convolutional model. Sources: [1](https://arxiv.org/abs/2004.15004) [2](https://example.com/cnn)",
+        confidence: "grounded",
+      },
+      citations: [
+        {
+          canonical_unit_id: "external::paper::1",
+          course_id: "PAPER",
+          unit_name: "CNN Explainer",
+          lecture_title: "External paper",
+          learn_href: "https://arxiv.org/abs/2004.15004",
+          source: "paper",
+        },
+        {
+          canonical_unit_id: "external::web::2",
+          course_id: "WEB",
+          unit_name: "CNN",
+          lecture_title: "Web source",
+          learn_href: "https://example.com/cnn",
+          source: "web",
+        },
+      ],
+      actions: [],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Giải thích CNN" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    const firstSource = await screen.findByRole("link", { name: "1" });
+    expect(firstSource).toHaveAttribute("href", "https://arxiv.org/abs/2004.15004");
+    expect(firstSource).toHaveAttribute("target", "_blank");
+    expect(firstSource).toHaveAttribute("rel", expect.stringContaining("noopener"));
+    expect(screen.getByRole("link", { name: "2" })).toHaveAttribute("target", "_blank");
+    expect(screen.queryByText("Sources")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /view source details: cnn explainer/i })).not.toBeInTheDocument();
+  });
+
   it("renders assistant markdown and retries a failed request with the same message id", async () => {
     agentApiMock.chat
       .mockRejectedValueOnce(new Error("network down"))
