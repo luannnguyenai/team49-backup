@@ -203,7 +203,15 @@ describe("agent page", () => {
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
   });
 
-  it("renders prerequisite path actions as a learning order card", async () => {
+  it("opens prerequisite path units in the existing source sidebar before learning", async () => {
+    agentApiMock.unitContext.mockResolvedValueOnce({
+      canonical_unit_id: "unit-prereq",
+      course_id: "CS231n",
+      unit_name: "Object detection foundations",
+      summary: "This unit covers object detection concepts needed before Mask R-CNN.",
+      quiz_available: true,
+      learn_href: "/courses/cs231n/learn/object-detection",
+    });
     agentApiMock.chat.mockResolvedValueOnce({
       conversationId: "conversation-1",
       messageId: "message-prereq-path",
@@ -257,17 +265,26 @@ describe("agent page", () => {
     fireEvent.click(screen.getByRole("button", { name: /send message/i }));
 
     expect(await screen.findByText("Suggested prerequisite order")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Object detection foundations" })).toHaveAttribute(
-      "href",
-      "/courses/cs231n/learn/object-detection",
-    );
-    expect(screen.getByRole("link", { name: "Instance segmentation with Mask R-CNN" })).toHaveAttribute(
-      "href",
-      "/courses/cs231n/learn/mask-r-cnn",
-    );
+    expect(screen.queryByRole("link", { name: "Object detection foundations" })).not.toBeInTheDocument();
+    const prerequisiteUnit = screen.getByRole("button", {
+      name: /view source details: object detection foundations/i,
+    });
     expect(screen.getByText("Skipped")).toBeInTheDocument();
     expect(screen.getByText("Current topic")).toBeInTheDocument();
     expect(screen.getByText("Already handled; included so the learning order is clear.")).toBeInTheDocument();
+
+    fireEvent.click(prerequisiteUnit);
+
+    await waitFor(() => {
+      expect(agentApiMock.unitContext).toHaveBeenCalledWith("unit-prereq");
+      expect(learningPathApiMock.getLearningPath).toHaveBeenCalled();
+    });
+    expect(await screen.findAllByText("Evidence")).toHaveLength(2);
+    expect(screen.getByTestId("agent-source-sidebar")).toHaveClass("hidden", "md:block");
+    expect(screen.getAllByRole("link", { name: /start learning/i })[0]).toHaveAttribute(
+      "href",
+      "/courses/cs231n/learn/object-detection",
+    );
   });
 
   it("shows a compact expandable thinking progress indicator while the assistant responds", async () => {

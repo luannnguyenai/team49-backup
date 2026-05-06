@@ -451,27 +451,7 @@ class AgentToolNodes:
         all_results,
         selected_unit_ids: list[str],
     ) -> list[AgentAction]:
-        if not selected_unit_ids:
-            return []
-        target_result = self._specific_target_result(all_results, selected_unit_ids)
-        if target_result is not None:
-            return []
-        selected_ids = set(selected_unit_ids)
-        actions = []
-        for result in all_results:
-            if result.canonical_unit_id not in selected_ids:
-                continue
-            actions.append(
-                AgentAction(
-                    type="choose_topic",
-                    label=f"Learn about {result.unit_name}",
-                    canonical_unit_id=result.canonical_unit_id,
-                    learn_href=result.learn_href,
-                )
-            )
-            if len(actions) >= 3:
-                break
-        return actions if len(actions) > 1 else []
+        return []
 
     def _topic_choice_message(self, message: str, raw_topic: str) -> str:
         if self._looks_vietnamese(message):

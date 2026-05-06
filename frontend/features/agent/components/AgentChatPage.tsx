@@ -478,7 +478,13 @@ function getPrerequisiteStatusMeta(status: AgentPrerequisitePathNode["status"] |
   }
 }
 
-function PrerequisitePath({ action }: { action: AgentAction }) {
+function PrerequisitePath({
+  action,
+  onSelectUnit,
+}: {
+  action: AgentAction;
+  onSelectUnit: (node: AgentPrerequisitePathNode) => void;
+}) {
   const path = getActionPrerequisitePath(action);
   const nodes =
     path?.nodes && path.nodes.length > 0
@@ -508,10 +514,10 @@ function PrerequisitePath({ action }: { action: AgentAction }) {
         {nodes.map((node, index) => {
           const unitId = getPrerequisiteNodeCanonicalId(node) || `${node.role}-${index}`;
           const unitName = getPrerequisiteNodeName(node);
-          const href = getPrerequisiteNodeHref(node);
           const masteryLcb = getPrerequisiteNodeMasteryLcb(node);
           const statusMeta = getPrerequisiteStatusMeta(node.status);
           const StatusIcon = statusMeta.icon;
+          const canOpenSource = Boolean(getPrerequisiteNodeCanonicalId(node));
           return (
             <div key={`${unitId}-${index}`} className="relative flex gap-3">
               {index < nodes.length - 1 ? (
@@ -527,10 +533,15 @@ function PrerequisitePath({ action }: { action: AgentAction }) {
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  {href ? (
-                    <Link href={href} className="text-sm font-semibold text-text-strong hover:text-primary-700">
+                  {canOpenSource ? (
+                    <button
+                      type="button"
+                      onClick={() => onSelectUnit(node)}
+                      className="text-left text-sm font-semibold text-text-strong transition hover:text-primary-700"
+                      aria-label={`View source details: ${unitName}`}
+                    >
                       {unitName}
-                    </Link>
+                    </button>
                   ) : (
                     <p className="text-sm font-semibold text-text-strong">{unitName}</p>
                   )}
@@ -1170,6 +1181,16 @@ function ChatMessageItem({
       !workflowActions.includes(action) &&
       !isDuplicateOpenUnitAction(action, message.citations),
   );
+  const selectPrerequisiteUnit = (node: AgentPrerequisitePathNode) => {
+    onSelectCitation({
+      canonicalUnitId: getPrerequisiteNodeCanonicalId(node),
+      unitName: getPrerequisiteNodeName(node),
+      learnHref: getPrerequisiteNodeHref(node),
+      lectureTitle: node.role === "target" ? "Current topic" : "Suggested prerequisite",
+      quote: node.reason ?? null,
+      source: "planner",
+    });
+  };
 
   return (
     <div className={cn("flex w-full gap-3", isUser && "justify-end")}>
@@ -1232,7 +1253,9 @@ function ChatMessageItem({
           </div>
         ) : null}
 
-        {!isUser && prereqAction ? <PrerequisitePath action={prereqAction} /> : null}
+        {!isUser && prereqAction ? (
+          <PrerequisitePath action={prereqAction} onSelectUnit={selectPrerequisiteUnit} />
+        ) : null}
 
         {!isUser && workflowActions.map((action) => <WorkflowAction key={`${action.type}-${action.label}`} action={action} />)}
 
