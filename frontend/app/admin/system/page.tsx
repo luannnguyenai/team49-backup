@@ -18,6 +18,7 @@ import KpiGroup from "@/components/admin/KpiGroup";
 import ChartCard from "@/components/admin/ChartCard";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { adminApi, SystemHealth } from "@/lib/admin-api";
+import { systemTooltips } from "@/lib/admin-tooltips";
 import { CHART_GRID, CHART_PALETTE } from "@/lib/admin/chart-theme";
 
 type SeriesPoint = { t: number; cpu: number | null; ram: number | null };
@@ -76,9 +77,24 @@ export default function AdminSystemPage() {
   return (
     <div className="space-y-6">
       <KpiGroup title="Tài nguyên" cols={3}>
-        <KpiCard label="CPU usage" value={fmtPct(data?.cpu_pct)} loading={loading} />
-        <KpiCard label="RAM usage" value={fmtPct(data?.ram_pct)} loading={loading} />
-        <KpiCard label="Disk usage" value={fmtPct(data?.disk_pct)} loading={loading} />
+        <KpiCard
+          label="CPU usage"
+          value={fmtPct(data?.cpu_pct)}
+          tooltip={systemTooltips.cpuUsage}
+          loading={loading}
+        />
+        <KpiCard
+          label="RAM usage"
+          value={fmtPct(data?.ram_pct)}
+          tooltip={systemTooltips.ramUsage}
+          loading={loading}
+        />
+        <KpiCard
+          label="Disk usage"
+          value={fmtPct(data?.disk_pct)}
+          tooltip={systemTooltips.diskUsage}
+          loading={loading}
+        />
       </KpiGroup>
 
       <KpiGroup title="Hạ tầng" cols={2}>
@@ -86,12 +102,14 @@ export default function AdminSystemPage() {
           label="DB connections"
           value={data?.db_connections ?? "—"}
           hint="pg_stat_activity"
+          tooltip={systemTooltips.dbConnections}
           loading={loading}
         />
         <KpiCard
           label="Redis hit rate"
           value={data?.redis_hit_rate != null ? `${(data.redis_hit_rate * 100).toFixed(1)}%` : "—"}
           hint="keyspace_hits / total"
+          tooltip={systemTooltips.redisHitRate}
           loading={loading}
         />
       </KpiGroup>
@@ -100,6 +118,7 @@ export default function AdminSystemPage() {
         <KpiCard
           label="Service uptime"
           value={fmtUptime(data?.uptime_seconds)}
+          tooltip={systemTooltips.serviceUptime}
           loading={loading}
         />
       </KpiGroup>
