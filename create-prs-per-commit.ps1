@@ -4,7 +4,7 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-
++ 1b3a3d68f66d04e4c5642c07d13dba5d82f27995 update deploy plan
 "@
 
 
