@@ -508,8 +508,10 @@ class StructuredAgentRouter:
                         "content": (
                             "Answer as the AI Learning Hub assistant. "
                             "Use only these retrieved learning units as evidence. "
-                            "Most indexed course material is English; reply naturally in the user's language "
-                            "when appropriate. "
+                            "Most indexed course material is English, but the answer language must match "
+                            "the user's latest message. If the latest message is Vietnamese, answer in "
+                            "Vietnamese; if it is English, answer in English; if it is mixed, follow the "
+                            "dominant language. Do not switch to an unrelated language. "
                             "Use clean markdown with short paragraphs or bullets when helpful, and write math "
                             "with standard LaTeX delimiters only when the answer needs formulas. "
                             "Do not include raw URLs, course hrefs, or source links in the answer text; "
@@ -523,7 +525,15 @@ class StructuredAgentRouter:
                             "supported by the retrieved units or by an already-persisted pending tool action. "
                             "If the retrieved units are related but not exact, say that you found "
                             "related results below and ask the user to describe the target more specifically if those "
-                            "results are not what they need. Do not answer from outside the retrieved evidence."
+                            "results are not what they need. Do not answer from outside the retrieved evidence. "
+                            "One-shot output pattern: User asks in Vietnamese, 'Giải thích <target topic>'. "
+                            "Retrieved units include one target unit and one prerequisite unit. A good answer first "
+                            "explains the target topic in Vietnamese using the target evidence, then adds a short "
+                            "prerequisite note such as 'Để hiểu phần này tốt hơn, bạn nên nắm trước: <prerequisite "
+                            "unit> - <brief reason from evidence>.' The answer does not include raw links and does "
+                            "not treat the prerequisite as the main answer. If the same request is in English, use "
+                            "the same structure in English, for example: 'To understand this better, review this "
+                            "prerequisite first: <prerequisite unit> - <brief reason from evidence>.'"
                         ),
                     },
                     {
