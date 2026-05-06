@@ -97,6 +97,7 @@ class AgentChatRequest(BaseModel):
         default="non_streaming", alias="responseMode"
     )
     trace_mode: Literal["none", "summary", "full"] = Field(default="summary", alias="traceMode")
+    tool_mode: Literal["course", "web_papers"] = Field(default="course", alias="toolMode")
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -115,7 +116,7 @@ class AgentCitation(BaseModel):
     learn_href: str | None = None
     timestamp_s: int | None = None
     quote: str | None = None
-    source: Literal["summary", "key_point", "transcript", "planner", "mastery"]
+    source: Literal["summary", "key_point", "transcript", "planner", "mastery", "web", "paper"]
 
 
 class AssessmentProposalScopeItem(BaseModel):
@@ -156,6 +157,42 @@ class AssessmentProposal(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class AgentPrerequisitePathNode(BaseModel):
+    canonical_unit_id: str = Field(alias="canonicalUnitId")
+    unit_name: str = Field(alias="unitName")
+    role: Literal["prerequisite", "target"]
+    status: Literal[
+        "unknown",
+        "needs_review",
+        "mastered",
+        "completed",
+        "skipped",
+        "in_progress",
+        "target",
+    ] = "unknown"
+    learn_href: str | None = Field(default=None, alias="learnHref")
+    mastery_lcb: float | None = Field(default=None, alias="masteryLcb")
+    reason: str | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentPrerequisitePathEdge(BaseModel):
+    from_canonical_unit_id: str = Field(alias="fromCanonicalUnitId")
+    to_canonical_unit_id: str = Field(alias="toCanonicalUnitId")
+    reason: str | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class AgentPrerequisitePath(BaseModel):
+    target_canonical_unit_id: str = Field(alias="targetCanonicalUnitId")
+    nodes: list[AgentPrerequisitePathNode] = Field(default_factory=list)
+    edges: list[AgentPrerequisitePathEdge] = Field(default_factory=list)
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class AgentAction(BaseModel):
     type: Literal[
         "open_unit",
@@ -167,6 +204,7 @@ class AgentAction(BaseModel):
         "request_path_switch",
         "continue_assessment_workflow",
         "choose_target_path",
+        "choose_topic",
     ]
     label: str
     action_id: str | None = Field(default=None, alias="actionId")
@@ -200,6 +238,7 @@ class AgentAction(BaseModel):
         default_factory=list, alias="sourceCanonicalUnitIds"
     )
     proposal: AssessmentProposal | None = None
+    prerequisite_path: AgentPrerequisitePath | None = Field(default=None, alias="prerequisitePath")
 
     model_config = ConfigDict(populate_by_name=True)
 

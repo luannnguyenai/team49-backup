@@ -242,3 +242,49 @@ class CanonicalContentRepository:
         for row in result.scalars().all():
             mastery[row.kp_id] = max(0.0, float(row.mastery_mean_cached) - float(row.theta_sigma) * 0.5)
         return mastery
+
+    async def get_user_learning_status_by_canonical_ids(
+        self,
+        user_id,
+        canonical_unit_ids: list[str],
+    ) -> dict[str, str]:
+        if not canonical_unit_ids:
+            return {}
+
+        from src.models.course import LearningProgressStatus
+        from src.repositories.learning_progress_repo import LearningProgressRepository
+        from src.repositories.waived_unit_repo import WaivedUnitRepository
+
+        linked_units = await self.get_learning_units_by_canonical_ids(canonical_unit_ids)
+        learning_unit_ids = [unit.id for unit, _course, _section in linked_units.values()]
+        if not learning_unit_ids:
+            return {}
+
+        waived_by_unit = await WaivedUnitRepository(self.session).list_for_user_units(
+            user_id,
+            learning_unit_ids,
+        )
+        progress_by_unit = await LearningProgressRepository(self.session).list_for_user_units(
+            user_id,
+            learning_unit_ids,
+        )
+
+        status_by_canonical_id: dict[str, str] = {}
+        for canonical_unit_id, (unit, _course, _section) in linked_units.items():
+            if unit.id in waived_by_unit:
+                status_by_canonical_id[canonical_unit_id] = "skipped"
+                continue
+            progress = progress_by_unit.get(unit.id)
+            if progress is None:
+                status_by_canonical_id[canonical_unit_id] = "not_started"
+                continue
+            if progress.status == LearningProgressStatus.skipped:
+                status_by_canonical_id[canonical_unit_id] = "skipped"
+            elif progress.status == LearningProgressStatus.completed:
+                status_by_canonical_id[canonical_unit_id] = "completed"
+            elif progress.status == LearningProgressStatus.in_progress:
+                status_by_canonical_id[canonical_unit_id] = "in_progress"
+            else:
+                status_by_canonical_id[canonical_unit_id] = "not_started"
+
+        return status_by_canonical_id

@@ -1,5 +1,5 @@
 import { StrictMode } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import LearningUnitLoading from "@/app/(protected)/courses/[courseSlug]/learn/[unitSlug]/loading";
@@ -681,6 +681,101 @@ describe("learning unit page (US3)", () => {
       expect(video!.currentTime).toBe(300);
       expect(screen.getAllByText(/05:00 \/ 10:00/).length).toBeGreaterThan(0);
     });
+  });
+
+  it("starts the visible rail progress at the selected canonical unit timestamp", async () => {
+    const targetUnit = {
+      ...LECTURE_1_UNIT,
+      unit: {
+        ...LECTURE_1_UNIT.unit,
+        start_seconds: 300,
+      },
+    };
+
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={targetUnit}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+
+    fireEvent(video!, new Event("loadedmetadata"));
+
+    const fill = await screen.findByTestId("video-progress-fill");
+    expect(fill).toHaveStyle({ left: "50%", width: "0%" });
+  });
+
+  it("does not count the automatic canonical unit seek as watched progress", async () => {
+    vi.useFakeTimers();
+    const targetUnit = {
+      ...LECTURE_1_UNIT,
+      unit: {
+        ...LECTURE_1_UNIT.unit,
+        start_seconds: 300,
+      },
+    };
+
+    try {
+      const { container } = render(
+        <LearningPageScreen
+          courseSlug="cs231n"
+          unitSlug="lecture-1-introduction"
+          data={targetUnit}
+        />,
+      );
+
+      const video = container.querySelector("video");
+      expect(video).not.toBeNull();
+
+      Object.defineProperty(video, "duration", {
+        configurable: true,
+        writable: true,
+        value: 600,
+      });
+      Object.defineProperty(video, "currentTime", {
+        configurable: true,
+        writable: true,
+        value: 0,
+      });
+
+      await act(async () => {
+        fireEvent(video!, new Event("loadedmetadata"));
+      });
+
+      expect(video!.currentTime).toBe(300);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(700);
+      });
+
+      expect(learningSessionApiMock.updateProgress).not.toHaveBeenCalledWith(
+        "unit_lecture_01",
+        expect.objectContaining({
+          video_progress_s: 300,
+          watch_percent: 0.5,
+        }),
+      );
+      expect(
+        screen.queryByText("This quiz appears directly over the video, so you can stay in the lesson."),
+      ).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("shows the mid-video quiz overlay prompt when the viewer reaches the midpoint", async () => {

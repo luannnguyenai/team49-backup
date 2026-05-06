@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -439,6 +440,7 @@ class StructuredAgentRouter:
         return str(content).strip()
 
     def _strip_trailing_followup_question(self, answer: str) -> str:
+        answer = self._strip_footnote_citation_markers(answer)
         paragraphs = answer.rstrip().split("\n\n")
         if not paragraphs:
             return answer.strip()
@@ -456,6 +458,10 @@ class StructuredAgentRouter:
         if tail.endswith("?") or tail.lower().startswith(optional_offer_starts):
             paragraphs = paragraphs[:-1]
         return "\n\n".join(part for part in paragraphs if part.strip()).strip()
+
+    @staticmethod
+    def _strip_footnote_citation_markers(answer: str) -> str:
+        return re.sub(r"\s*\[\^[^\]]+\]", "", answer).strip()
 
     def compose_assistant_help(
         self,
@@ -508,12 +514,16 @@ class StructuredAgentRouter:
                         "content": (
                             "Answer as the AI Learning Hub assistant. "
                             "Use only these retrieved learning units as evidence. "
-                            "Most indexed course material is English; reply naturally in the user's language "
-                            "when appropriate. "
+                            "Most indexed course material is English, but the answer language must match "
+                            "the user's latest message. If the latest message is Vietnamese, answer in "
+                            "Vietnamese; if it is English, answer in English; if it is mixed, follow the "
+                            "dominant language. Do not switch to an unrelated language. "
                             "Use clean markdown with short paragraphs or bullets when helpful, and write math "
                             "with standard LaTeX delimiters only when the answer needs formulas. "
                             "Do not include raw URLs, course hrefs, or source links in the answer text; "
                             "navigation is provided by citations/source cards. "
+                            "Do not include footnote-style citation markers such as [^source-id]; "
+                            "source details are rendered separately by the UI. "
                             "Do not invent missing course facts. If the retrieved units do not directly support "
                             "the user's requested topic, set evidence_sufficient=false, choose no_source or partial "
                             "confidence, and ask one concise clarifying question or say that no direct grounded "
@@ -523,7 +533,15 @@ class StructuredAgentRouter:
                             "supported by the retrieved units or by an already-persisted pending tool action. "
                             "If the retrieved units are related but not exact, say that you found "
                             "related results below and ask the user to describe the target more specifically if those "
-                            "results are not what they need. Do not answer from outside the retrieved evidence."
+                            "results are not what they need. Do not answer from outside the retrieved evidence. "
+                            "One-shot output pattern: User asks in Vietnamese, 'Giải thích <target topic>'. "
+                            "Retrieved units include one target unit and one prerequisite unit. A good answer first "
+                            "explains the target topic in Vietnamese using the target evidence, then adds a short "
+                            "prerequisite note such as 'Để hiểu phần này tốt hơn, bạn nên nắm trước: <prerequisite "
+                            "unit> - <brief reason from evidence>.' The answer does not include raw links and does "
+                            "not treat the prerequisite as the main answer. If the same request is in English, use "
+                            "the same structure in English, for example: 'To understand this better, review this "
+                            "prerequisite first: <prerequisite unit> - <brief reason from evidence>.'"
                         ),
                     },
                     {

@@ -272,6 +272,7 @@ function VideoProgressRail({
   duration,
   chapters,
   activeChapterTitle,
+  progressStartSeconds,
   markers,
   onSeek,
 }: {
@@ -279,10 +280,17 @@ function VideoProgressRail({
   duration: number;
   chapters: ChapterView[];
   activeChapterTitle: string;
+  progressStartSeconds?: number | null;
   markers: VideoProgressRailMarker[];
   onSeek: (seconds: number) => void;
 }) {
-  const progressPct = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+  const currentProgressPct = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+  const startProgressPct =
+    duration > 0 && typeof progressStartSeconds === "number" && Number.isFinite(progressStartSeconds)
+      ? clamp((progressStartSeconds / duration) * 100, 0, 100)
+      : 0;
+  const fillLeftPct = startProgressPct;
+  const fillWidthPct = Math.max(0, currentProgressPct - startProgressPct);
   const [hoveredSection, setHoveredSection] = useState<{
     label: string;
     positionPct: number;
@@ -353,7 +361,8 @@ function VideoProgressRail({
 
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-blue-600 transition-[width] duration-150"
-          style={{ width: `${progressPct}%` }}
+          data-testid="video-progress-fill"
+          style={{ left: `${fillLeftPct}%`, width: `${fillWidthPct}%` }}
         />
 
         {markers.map((marker) => (
@@ -621,6 +630,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   const inlineQuizSubmitPendingRef = useRef(false);
   const handledCheckpointHashRef = useRef<string | null>(null);
   const handledUnitSeekRef = useRef<string | null>(null);
+  const suppressNextWatchSyncRef = useRef(false);
 
   useEffect(() => {
     quizProgressRef.current = inlineQuizProgress;
@@ -797,6 +807,11 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
 
   useEffect(() => {
     if (!duration) return;
+    if (suppressNextWatchSyncRef.current) {
+      suppressNextWatchSyncRef.current = false;
+      lastWatchSyncRef.current = watchPercent;
+      return;
+    }
     if (Math.abs(watchPercent - lastWatchSyncRef.current) < 0.05 && watchPercent < END_THRESHOLD) {
       return;
     }
@@ -1130,6 +1145,16 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
       setCurrentTime(targetUnitStartSeconds);
       handledUnitSeekRef.current = seekKey;
       syncVideoDuration();
+      suppressNextWatchSyncRef.current = true;
+      const durationSeconds = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
+      if (durationSeconds > 0) {
+        const targetWatchPercent = clamp(targetUnitStartSeconds / durationSeconds, 0, 1);
+        setDismissedPrompts((previous) => ({
+          ...previous,
+          midpoint: previous.midpoint || targetWatchPercent >= MIDPOINT_THRESHOLD,
+          end: previous.end || targetWatchPercent >= END_THRESHOLD,
+        }));
+      }
     };
 
     if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
@@ -1364,6 +1389,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                 duration={duration}
                 chapters={chapters}
                 activeChapterTitle={activeChapter?.title ?? "No section available"}
+                progressStartSeconds={targetUnitStartSeconds}
                 markers={allRailMarkers}
                 onSeek={handleSeek}
               />

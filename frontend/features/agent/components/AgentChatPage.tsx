@@ -48,6 +48,7 @@ import {
   getActionCanonicalId,
   getActionCanonicalIds,
   getActionDisabledReason,
+  getActionPrerequisitePath,
   getActionId,
   getActionQuestionBudget,
   getCitationCanonicalId,
@@ -62,6 +63,10 @@ import {
   getProposalMinutes,
   getProposalQuestionCount,
   getProposalReductionOptions,
+  getPrerequisiteNodeCanonicalId,
+  getPrerequisiteNodeHref,
+  getPrerequisiteNodeMasteryLcb,
+  getPrerequisiteNodeName,
   getReductionQuestionCount,
   getScopeUnitCount,
   getUnitContextCourseId,
@@ -71,11 +76,13 @@ import {
   getUpdatedAt,
   getWorkflowId,
   type AgentAction,
+  type AgentPrerequisitePathNode,
   type AgentAssessmentWorkflowResponse,
   type AgentChatResponse,
   type AgentCitation,
   type AgentConversationMessage,
   type AgentConversationSummary,
+  type AgentToolMode,
   type AgentUnitContext,
   type AgentWarning,
   type AssessmentProposal,
@@ -117,11 +124,29 @@ function cleanSourceSummary(value: string) {
     .trim();
 }
 
-function AssistantMarkdown({ markdown }: { markdown: string }) {
+function AssistantMarkdown({ markdown, citations = [] }: { markdown: string; citations?: AgentCitation[] }) {
+  const allowedExternalHrefs = new Set(
+    citations
+      .filter(isExternalCitation)
+      .map((citation) => getCitationHref(citation))
+      .filter((href): href is string => Boolean(href)),
+  );
   return (
     <ReactMarkdown
       components={{
-        a: ({ children }) => <span>{children}</span>,
+        a: ({ children, href }) =>
+          href && allowedExternalHrefs.has(href) ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-primary-700 underline decoration-primary-300 underline-offset-2 transition hover:text-primary-900 dark:text-primary-300"
+            >
+              {children}
+            </a>
+          ) : (
+            <span>{children}</span>
+          ),
       }}
     >
       {markdown}
@@ -283,6 +308,19 @@ function findPathItemForCitation(citation: AgentCitation, items: PathItemRespons
     items.find((item) => canonicalId && item.canonical_unit_id === canonicalId) ??
     items.find((item) => href && item.learn_href === href) ??
     null
+  );
+}
+
+function isExternalCitation(citation: AgentCitation) {
+  const source = citation.source?.toLowerCase();
+  const courseId = getCitationCourseId(citation).toUpperCase();
+  const canonicalId = getCitationCanonicalId(citation);
+  return (
+    source === "web" ||
+    source === "paper" ||
+    courseId === "WEB" ||
+    courseId === "PAPER" ||
+    canonicalId.startsWith("external::")
   );
 }
 
@@ -453,27 +491,110 @@ function SourceDetailPanel({
   );
 }
 
-function PrerequisitePath({ unitIds }: { unitIds: string[] }) {
-  if (unitIds.length === 0) return null;
+function getPrerequisiteStatusMeta(status: AgentPrerequisitePathNode["status"] | undefined) {
+  switch (status) {
+    case "mastered":
+      return { label: "Mastered", className: "bg-state-success-bg text-state-success-fg", icon: CheckCircle2 };
+    case "completed":
+      return { label: "Completed", className: "bg-state-success-bg text-state-success-fg", icon: CheckCircle2 };
+    case "skipped":
+      return { label: "Skipped", className: "bg-state-success-bg text-state-success-fg", icon: CheckCircle2 };
+    case "in_progress":
+      return { label: "In progress", className: "bg-surface-accent-soft text-primary-700", icon: Clock };
+    case "target":
+      return { label: "Current topic", className: "bg-surface-accent-soft text-primary-700", icon: Target };
+    case "needs_review":
+      return { label: "Review first", className: "bg-state-warning-bg text-state-warning-fg", icon: BookOpen };
+    default:
+      return { label: "Review", className: "bg-surface-page text-text-muted", icon: BookOpen };
+  }
+}
+
+function PrerequisitePath({
+  action,
+  onSelectUnit,
+}: {
+  action: AgentAction;
+  onSelectUnit: (node: AgentPrerequisitePathNode) => void;
+}) {
+  const path = getActionPrerequisitePath(action);
+  const nodes =
+    path?.nodes && path.nodes.length > 0
+      ? path.nodes
+      : getActionCanonicalIds(action).map(
+          (unitId): AgentPrerequisitePathNode => ({
+            canonicalUnitId: unitId,
+            unitName: unitId,
+            role: "prerequisite",
+            status: "needs_review",
+          }),
+        );
+
+  if (nodes.length === 0) return null;
   return (
     <div className="mt-3 rounded-2xl border border-border-subtle bg-surface-page p-4">
-      <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-text-strong">
-        <Map className="h-4 w-4 text-primary-700" />
-        Suggested prerequisite order
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm font-semibold text-text-strong">
+          <Map className="h-4 w-4 text-primary-700" />
+          Suggested prerequisite order
+        </div>
+        <span className="shrink-0 rounded-full bg-surface-card px-2.5 py-1 text-[11px] font-semibold text-text-muted">
+          {nodes.length} units
+        </span>
       </div>
       <div className="space-y-4">
-        {unitIds.map((unitId, index) => (
-          <div key={unitId} className="relative flex gap-3">
-            {index < unitIds.length - 1 ? (
-              <div className="absolute left-[7px] top-6 h-8 border-l-2 border-dotted border-border-subtle" />
-            ) : null}
-            <span className="relative z-10 mt-1 h-4 w-4 rounded-full border-2 border-primary-500 bg-surface-card" />
-            <div>
-              <p className="text-sm font-semibold text-text-strong">Review {unitId}</p>
-              <p className="text-xs text-text-muted">Grounded prerequisite candidate from the path graph.</p>
+        {nodes.map((node, index) => {
+          const unitId = getPrerequisiteNodeCanonicalId(node) || `${node.role}-${index}`;
+          const unitName = getPrerequisiteNodeName(node);
+          const masteryLcb = getPrerequisiteNodeMasteryLcb(node);
+          const statusMeta = getPrerequisiteStatusMeta(node.status);
+          const StatusIcon = statusMeta.icon;
+          const canOpenSource = Boolean(getPrerequisiteNodeCanonicalId(node));
+          return (
+            <div key={`${unitId}-${index}`} className="relative flex gap-3">
+              {index < nodes.length - 1 ? (
+                <div className="absolute left-[13px] top-9 h-9 border-l-2 border-dotted border-border-subtle" />
+              ) : null}
+              <span
+                className={cn(
+                  "relative z-10 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border bg-surface-card",
+                  node.role === "target" ? "border-primary-500 text-primary-700" : "border-border-subtle text-text-muted",
+                )}
+              >
+                {index < nodes.length - 1 ? <ArrowRight className="h-3.5 w-3.5" /> : <Target className="h-3.5 w-3.5" />}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  {canOpenSource ? (
+                    <button
+                      type="button"
+                      onClick={() => onSelectUnit(node)}
+                      className="text-left text-sm font-semibold text-text-strong transition hover:text-primary-700"
+                      aria-label={`View source details: ${unitName}`}
+                    >
+                      {unitName}
+                    </button>
+                  ) : (
+                    <p className="text-sm font-semibold text-text-strong">{unitName}</p>
+                  )}
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                      statusMeta.className,
+                    )}
+                  >
+                    <StatusIcon className="h-3 w-3" />
+                    {statusMeta.label}
+                  </span>
+                  {masteryLcb !== null && node.status === "mastered" ? (
+                    <span className="text-[11px] font-medium text-text-muted">{Math.round(masteryLcb * 100)}% mastery</span>
+                  ) : null}
+                </div>
+                {node.reason ? <p className="mt-1 text-xs leading-5 text-text-muted">{node.reason}</p> : null}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -724,6 +845,26 @@ function ActionButton({
     }
   };
 
+  const chooseTopic = async () => {
+    const topicUnitId = getActionCanonicalId(action);
+    if (!conversationId || !topicUnitId || disabled || !onActionResponse) return;
+    setIsStarting(true);
+    setStartError(null);
+    try {
+      const response = await agentApi.chat({
+        message: `choose_topic:${topicUnitId}`,
+        incomingMessageId: createIncomingMessageId(),
+        conversationId,
+        traceMode: "summary",
+      });
+      onActionResponse(response);
+    } catch (err) {
+      setStartError(err instanceof Error ? err.message : "Topic selection could not be completed.");
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
   const content = (
     <span
       className={cn(
@@ -817,6 +958,14 @@ function ActionButton({
   if (action.type === "choose_target_path") {
     return (
       <button type="button" disabled={disabled || isStarting} onClick={chooseTargetPath} className="w-full">
+        {content}
+      </button>
+    );
+  }
+
+  if (action.type === "choose_topic") {
+    return (
+      <button type="button" disabled={disabled || isStarting} onClick={chooseTopic} className="w-full">
         {content}
       </button>
     );
@@ -1058,12 +1207,23 @@ function ChatMessageItem({
   const workflowActions = message.actions.filter(
     (action) => action.type === "start_assessment_workflow" || action.type === "continue_assessment_workflow",
   );
+  const sourceCardCitations = message.citations.filter((citation) => !isExternalCitation(citation));
   const simpleActions = message.actions.filter(
     (action) =>
       action.type !== "review_prerequisite_path" &&
       !workflowActions.includes(action) &&
       !isDuplicateOpenUnitAction(action, message.citations),
   );
+  const selectPrerequisiteUnit = (node: AgentPrerequisitePathNode) => {
+    onSelectCitation({
+      canonicalUnitId: getPrerequisiteNodeCanonicalId(node),
+      unitName: getPrerequisiteNodeName(node),
+      learnHref: getPrerequisiteNodeHref(node),
+      lectureTitle: node.role === "target" ? "Current topic" : "Suggested prerequisite",
+      quote: node.reason ?? null,
+      source: "planner",
+    });
+  };
 
   return (
     <div className={cn("flex w-full gap-3", isUser && "justify-end")}>
@@ -1085,7 +1245,7 @@ function ChatMessageItem({
             <p className="whitespace-pre-wrap">{message.markdown}</p>
           ) : (
             <div className="prose prose-sm prose-slate max-w-none leading-7 dark:prose-invert">
-              <AssistantMarkdown markdown={message.markdown} />
+              <AssistantMarkdown markdown={message.markdown} citations={message.citations} />
             </div>
           )}
           {!isUser && message.warning && !isDuplicateWarning(message) ? <WarningBlock warning={message.warning} /> : null}
@@ -1109,13 +1269,13 @@ function ChatMessageItem({
           ) : null}
         </div>
 
-        {!isUser && message.citations.length > 0 ? (
+        {!isUser && sourceCardCitations.length > 0 ? (
           <div className="mt-3 space-y-2">
             <div className="flex items-center gap-2 px-1 text-[11px] font-bold uppercase tracking-widest text-text-muted">
               <Search className="h-3 w-3" />
               Sources
             </div>
-            {message.citations.map((citation, index) => (
+            {sourceCardCitations.map((citation, index) => (
               <CitationCard
                 key={citationKey(citation) || index}
                 citation={citation}
@@ -1126,7 +1286,9 @@ function ChatMessageItem({
           </div>
         ) : null}
 
-        {!isUser && prereqAction ? <PrerequisitePath unitIds={getActionCanonicalIds(prereqAction)} /> : null}
+        {!isUser && prereqAction ? (
+          <PrerequisitePath action={prereqAction} onSelectUnit={selectPrerequisiteUnit} />
+        ) : null}
 
         {!isUser && workflowActions.map((action) => <WorkflowAction key={`${action.type}-${action.label}`} action={action} />)}
 
@@ -1385,7 +1547,17 @@ function EmptyState({ onPrompt }: { onPrompt: (prompt: string) => void }) {
   );
 }
 
-function Composer({ onSend, disabled }: { onSend: (message: string) => void; disabled: boolean }) {
+function Composer({
+  onSend,
+  disabled,
+  toolMode,
+  onToolModeChange,
+}: {
+  onSend: (message: string) => void;
+  disabled: boolean;
+  toolMode: AgentToolMode;
+  onToolModeChange: (mode: AgentToolMode) => void;
+}) {
   const [text, setText] = useState("");
   const send = (event?: FormEvent) => {
     event?.preventDefault();
@@ -1397,49 +1569,82 @@ function Composer({ onSend, disabled }: { onSend: (message: string) => void; dis
 
   return (
     <div className="border-t border-border-subtle bg-white/80 p-4 backdrop-blur">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-          {QUICK_PROMPTS.map((prompt) => (
-            <button
-              key={prompt}
-              type="button"
-              disabled={disabled}
-              onClick={() => onSend(prompt)}
-              className="btn-secondary shrink-0 px-3 py-2 text-xs disabled:opacity-60"
-            >
-              {prompt}
-            </button>
-          ))}
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 lg:flex-row lg:items-start">
+        <div
+          className="flex shrink-0 flex-wrap items-center gap-2 lg:w-60 lg:flex-col lg:items-stretch"
+          data-testid="agent-tool-mode-selector"
+        >
+          {[
+            { value: "course" as const, label: "Course", icon: BookOpen },
+            { value: "web_papers" as const, label: "Search Web & Papers", icon: Search },
+          ].map((mode) => {
+            const Icon = mode.icon;
+            const isActive = toolMode === mode.value;
+            return (
+              <button
+                key={mode.value}
+                type="button"
+                disabled={disabled}
+                onClick={() => onToolModeChange(mode.value)}
+                className={cn(
+                  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-semibold transition disabled:opacity-60 lg:justify-start",
+                  isActive
+                    ? "border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                    : "border-border-subtle bg-surface-card text-text-muted hover:bg-surface-page hover:text-text-strong",
+                )}
+                aria-pressed={isActive}
+              >
+                <Icon className="h-4 w-4" />
+                {mode.label}
+              </button>
+            );
+          })}
         </div>
-        <form onSubmit={send} className="relative flex items-end">
-          <label htmlFor="agent-message" className="sr-only">
-            Message AI Assistant
-          </label>
-          <div className="relative flex w-full flex-1 items-center">
-            <textarea
-              id="agent-message"
-              value={text}
-              onChange={(event) => setText(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  send(event);
-                }
-              }}
-              placeholder="Ask about your learning path..."
-              rows={1}
-              className="input-base max-h-32 min-h-[52px] resize-none rounded-2xl py-3 pl-4 pr-14 text-[15px] leading-relaxed"
-            />
-            <button
-              type="submit"
-              disabled={disabled || !text.trim()}
-              className="btn-primary absolute right-1.5 z-10 h-10 w-10 p-0 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Send message"
-            >
-              <Send className="h-[18px] w-[18px]" />
-            </button>
+
+        <div className="min-w-0 flex-1">
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+            {QUICK_PROMPTS.map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                disabled={disabled}
+                onClick={() => onSend(prompt)}
+                className="btn-secondary shrink-0 px-3 py-2 text-xs disabled:opacity-60"
+              >
+                {prompt}
+              </button>
+            ))}
           </div>
-        </form>
+          <form onSubmit={send} className="relative flex items-end">
+            <label htmlFor="agent-message" className="sr-only">
+              Message AI Assistant
+            </label>
+            <div className="relative flex w-full flex-1 items-center">
+              <textarea
+                id="agent-message"
+                value={text}
+                onChange={(event) => setText(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    send(event);
+                  }
+                }}
+                placeholder="Ask about your learning path..."
+                rows={1}
+                className="input-base max-h-32 min-h-[52px] resize-none rounded-2xl py-3 pl-4 pr-14 text-[15px] leading-relaxed"
+              />
+              <button
+                type="submit"
+                disabled={disabled || !text.trim()}
+                className="btn-primary absolute right-1.5 z-10 h-10 w-10 p-0 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Send message"
+              >
+                <Send className="h-[18px] w-[18px]" />
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
@@ -1521,6 +1726,7 @@ export default function AgentChatPage() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [turnProgressIndex, setTurnProgressIndex] = useState(0);
+  const [toolMode, setToolMode] = useState<AgentToolMode>("course");
   const [error, setError] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(false);
   const [leftMinimized, setLeftMinimized] = useState(false);
@@ -1687,6 +1893,13 @@ export default function AgentChatPage() {
 
   const selectCitation = async (citation: AgentCitation) => {
     const canonicalId = getCitationCanonicalId(citation);
+    if (isExternalCitation(citation)) {
+      const href = getCitationHref(citation);
+      if (href) {
+        window.open(href, "_blank", "noopener,noreferrer");
+      }
+      return;
+    }
     setSelectedCitation(citation);
     setSelectedUnitContext(null);
     setSelectedPathItem(null);
@@ -1782,6 +1995,7 @@ export default function AgentChatPage() {
         incomingMessageId,
         conversationId: activeSessionId,
         traceMode: "summary",
+        ...(toolMode === "web_papers" ? { toolMode } : {}),
       });
       appendAgentResponse(response, { message, incomingMessageId });
     } catch (err) {
@@ -1951,7 +2165,12 @@ export default function AgentChatPage() {
           </div>
         </main>
 
-        <Composer onSend={sendMessage} disabled={isThinking} />
+        <Composer
+          onSend={sendMessage}
+          disabled={isThinking}
+          toolMode={toolMode}
+          onToolModeChange={setToolMode}
+        />
       </section>
 
       {selectedCitation ? (
