@@ -29,6 +29,7 @@ import {
   RotateCcw,
   Search,
   Send,
+  Sparkles,
   Target,
   Trash2,
   User,
@@ -742,7 +743,34 @@ function ActionButton({
   );
 
   if (action.type === "request_replan") {
-    return <Link href="/replan?source=agent&returnTo=%2Fagent">{content}</Link>;
+    return (
+      <Link
+        href="/replan?source=agent&returnTo=%2Fagent"
+        className="group relative mt-3 flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-cyan-200/70 bg-gradient-to-br from-cyan-50 via-white to-indigo-50 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-300/20 blur-2xl transition group-hover:bg-cyan-300/30"
+        />
+        <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-500 text-white shadow-sm">
+          <Sparkles className="h-5 w-5" />
+        </span>
+        <span className="relative flex min-w-0 flex-1 flex-col">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-700">
+            AI Action
+          </span>
+          <span className="truncate text-sm font-bold text-slate-900">
+            {action.label}
+          </span>
+          <span className="mt-0.5 text-xs text-slate-600">
+            Tell me what you already know — I'll re-optimize your learning path.
+          </span>
+        </span>
+        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-cyan-700 shadow-sm transition group-hover:bg-cyan-600 group-hover:text-white">
+          <ArrowRight className="h-4 w-4" />
+        </span>
+      </Link>
+    );
   }
 
   if (action.type === "request_path_switch") {
@@ -1145,6 +1173,26 @@ function SessionSidebar({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [menuId, setMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!menuId) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (menuRef.current.contains(event.target as Node)) return;
+      setMenuId(null);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuId(null);
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuId]);
+
   const filtered = sessions.filter((session) => {
     const query = filter.trim().toLowerCase();
     if (!query) return true;
@@ -1253,7 +1301,7 @@ function SessionSidebar({
                   <p className="mt-1 truncate text-xs font-medium text-text-muted">{session.preview || "No messages yet"}</p>
                 </div>
                 {!isEditing ? (
-                  <div className="absolute right-2 top-2">
+                  <div className="absolute right-2 top-2" ref={menuId === id ? menuRef : undefined}>
                     <button
                       type="button"
                       onClick={(event) => {
@@ -1476,6 +1524,45 @@ export default function AgentChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(false);
   const [leftMinimized, setLeftMinimized] = useState(false);
+  const SIDEBAR_MIN = 220;
+  const SIDEBAR_MAX = 480;
+  const SIDEBAR_DEFAULT = 288;
+  const [sidebarWidth, setSidebarWidth] = useState<number>(SIDEBAR_DEFAULT);
+  const [isResizingSidebar, setIsResizingSidebar] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("agent.sidebarWidth");
+    if (!stored) return;
+    const parsed = Number.parseInt(stored, 10);
+    if (Number.isFinite(parsed) && parsed >= SIDEBAR_MIN && parsed <= SIDEBAR_MAX) {
+      setSidebarWidth(parsed);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isResizingSidebar) return;
+    const handleMove = (event: MouseEvent) => {
+      const next = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, event.clientX));
+      setSidebarWidth(next);
+    };
+    const handleUp = () => {
+      setIsResizingSidebar(false);
+      try {
+        window.localStorage.setItem("agent.sidebarWidth", String(sidebarWidth));
+      } catch {}
+    };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+    return () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+  }, [isResizingSidebar, sidebarWidth]);
   const [selectedCitation, setSelectedCitation] = useState<AgentCitation | null>(null);
   const [selectedUnitContext, setSelectedUnitContext] = useState<AgentUnitContext | null>(null);
   const [selectedPathItem, setSelectedPathItem] = useState<PathItemResponse | null>(null);
@@ -1735,7 +1822,14 @@ export default function AgentChatPage() {
   return (
     <div className="relative flex h-full min-h-0 overflow-hidden bg-surface-page text-text-strong">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.12),_transparent_30%)]" />
-      <div className={cn("relative hidden shrink-0 border-r border-border-subtle bg-surface-card transition-all lg:block", leftMinimized ? "w-20" : "w-72")}>
+      <div
+        className={cn(
+          "relative hidden shrink-0 border-r border-border-subtle bg-surface-card lg:block",
+          leftMinimized ? "w-20" : "",
+          isResizingSidebar ? "" : "transition-[width] duration-150",
+        )}
+        style={leftMinimized ? undefined : { width: sidebarWidth }}
+      >
         <SessionSidebar
           sessions={sessions}
           activeId={activeSessionId}
@@ -1745,6 +1839,37 @@ export default function AgentChatPage() {
           onDelete={deleteSession}
           isMinimized={leftMinimized}
         />
+        {!leftMinimized ? (
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize chat history sidebar"
+            onMouseDown={(event) => {
+              event.preventDefault();
+              setIsResizingSidebar(true);
+            }}
+            onDoubleClick={() => {
+              setSidebarWidth(SIDEBAR_DEFAULT);
+              try {
+                window.localStorage.setItem("agent.sidebarWidth", String(SIDEBAR_DEFAULT));
+              } catch {}
+            }}
+            className={cn(
+              "group absolute top-0 -right-1 z-10 flex h-full w-2 cursor-col-resize items-center justify-center",
+              "before:absolute before:inset-y-0 before:left-1/2 before:w-px before:-translate-x-1/2 before:bg-transparent before:transition before:content-['']",
+              "hover:before:bg-cyan-400/60",
+              isResizingSidebar && "before:bg-cyan-500",
+            )}
+          >
+            <span
+              aria-hidden
+              className={cn(
+                "h-10 w-1 rounded-full bg-border-subtle transition group-hover:bg-cyan-400",
+                isResizingSidebar && "bg-cyan-500",
+              )}
+            />
+          </div>
+        ) : null}
       </div>
 
       <section className="flex min-w-0 flex-1 flex-col">
