@@ -683,6 +683,43 @@ describe("learning unit page (US3)", () => {
     });
   });
 
+  it("starts the visible rail progress at the selected canonical unit timestamp", async () => {
+    const targetUnit = {
+      ...LECTURE_1_UNIT,
+      unit: {
+        ...LECTURE_1_UNIT.unit,
+        start_seconds: 300,
+      },
+    };
+
+    const { container } = render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={targetUnit}
+      />,
+    );
+
+    const video = container.querySelector("video");
+    expect(video).not.toBeNull();
+
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      writable: true,
+      value: 600,
+    });
+    Object.defineProperty(video, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+
+    fireEvent(video!, new Event("loadedmetadata"));
+
+    const fill = await screen.findByTestId("video-progress-fill");
+    expect(fill).toHaveStyle({ left: "50%", width: "0%" });
+  });
+
   it("does not count the automatic canonical unit seek as watched progress", async () => {
     vi.useFakeTimers();
     const targetUnit = {

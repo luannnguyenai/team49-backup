@@ -272,6 +272,7 @@ function VideoProgressRail({
   duration,
   chapters,
   activeChapterTitle,
+  progressStartSeconds,
   markers,
   onSeek,
 }: {
@@ -279,10 +280,17 @@ function VideoProgressRail({
   duration: number;
   chapters: ChapterView[];
   activeChapterTitle: string;
+  progressStartSeconds?: number | null;
   markers: VideoProgressRailMarker[];
   onSeek: (seconds: number) => void;
 }) {
-  const progressPct = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+  const currentProgressPct = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+  const startProgressPct =
+    duration > 0 && typeof progressStartSeconds === "number" && Number.isFinite(progressStartSeconds)
+      ? clamp((progressStartSeconds / duration) * 100, 0, 100)
+      : 0;
+  const fillLeftPct = startProgressPct;
+  const fillWidthPct = Math.max(0, currentProgressPct - startProgressPct);
   const [hoveredSection, setHoveredSection] = useState<{
     label: string;
     positionPct: number;
@@ -353,7 +361,8 @@ function VideoProgressRail({
 
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-blue-600 transition-[width] duration-150"
-          style={{ width: `${progressPct}%` }}
+          data-testid="video-progress-fill"
+          style={{ left: `${fillLeftPct}%`, width: `${fillWidthPct}%` }}
         />
 
         {markers.map((marker) => (
@@ -1380,6 +1389,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                 duration={duration}
                 chapters={chapters}
                 activeChapterTitle={activeChapter?.title ?? "No section available"}
+                progressStartSeconds={targetUnitStartSeconds}
                 markers={allRailMarkers}
                 onSeek={handleSeek}
               />
