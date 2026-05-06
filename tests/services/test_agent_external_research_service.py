@@ -37,7 +37,7 @@ class RecordingResponder:
         self.answers = answers or [
             (
                 "CNN là mạng neural dùng phép tích chập để học đặc trưng cục bộ, "
-                "thường dùng cho ảnh và các dữ liệu có cấu trúc không gian."
+                "thường dùng cho ảnh và các dữ liệu có cấu trúc không gian. [1]"
             )
         ]
 
@@ -62,9 +62,15 @@ async def test_external_research_synthesizes_answer_from_observed_sources():
     assert "Most relevant evidence" not in result.answer_markdown
     assert result.answer_markdown.startswith("CNN là mạng neural")
     assert (
-        "[1. CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization]"
+        "[1]"
         "(https://arxiv.org/abs/2004.15004)" in result.answer_markdown
     )
+    assert "## Sources" in result.answer_markdown
+    assert (
+        "1. [CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization]"
+        "(https://arxiv.org/abs/2004.15004)" in result.answer_markdown
+    )
+    assert "— Paper" in result.answer_markdown
     assert "[^" not in result.answer_markdown
     assert result.citations[0].source == "paper"
     assert responder.calls

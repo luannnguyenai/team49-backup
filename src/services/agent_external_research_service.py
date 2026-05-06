@@ -216,11 +216,14 @@ class AgentExternalResearchService:
         ]
         return ToolResult(
             kind="find_content",
-            answer_markdown=(
-                f"I searched web and paper sources for: **{message.strip()}**\n\n"
-                "Most relevant evidence:\n"
-                + "\n".join(source_lines)
-                + "\n\nUse the source cards to inspect the original source before relying on it."
+            answer_markdown=self._with_numeric_source_links(
+                (
+                    f"I searched web and paper sources for: **{message.strip()}**\n\n"
+                    "Most relevant evidence:\n"
+                    + "\n".join(source_lines)
+                    + "\n\nUse the linked sources below to inspect the original material before relying on it."
+                ),
+                citations,
             ),
             citations=citations,
             requires_evidence=False,
@@ -284,7 +287,10 @@ class AgentExternalResearchService:
             "answer_requirements": (
                 "Produce a complete user-facing answer before the backend appends sources. "
                 "Prefer 2-4 short paragraphs or 3-5 complete bullets. Do not use a numbered "
-                "section heading unless the answer contains more than one numbered section."
+                "section heading unless the answer contains more than one numbered section. "
+                "When a claim comes from an external source, cite it with bracketed source "
+                "numbers like [1] or [2]. Use only citation numbers that appear in the provided "
+                "citations list. Do not write raw URLs or a Sources section."
             ),
         }
         final = rag_respond(
@@ -332,17 +338,49 @@ class AgentExternalResearchService:
         return False
 
     def _with_numeric_source_links(self, answer: str, citations: list[AgentCitation]) -> str:
-        cleaned = re.sub(r"\s*\[\^[^\]]+\]", "", answer).strip()
-        links = []
-        for index, citation in enumerate(citations[:5], start=1):
-            if citation.learn_href:
-                title = self._markdown_link_label(f"{index}. {citation.unit_name}")
-                links.append(f"[{title}]({citation.learn_href})")
-        if not links:
+        cleaned = self._strip_existing_source_section(re.sub(r"\s*\[\^[^\]]+\]", "", answer)).strip()
+        indexed_citations = [
+            (index, citation)
+            for index, citation in enumerate(citations[:5], start=1)
+            if citation.learn_href
+        ]
+        if not indexed_citations:
             return cleaned
-        if any(f"[{index}](" in cleaned for index in range(1, len(links) + 1)):
-            return cleaned
-        return f"{cleaned}\n\nSources: {' | '.join(links)}"
+
+        linked_answer = self._link_numeric_citation_markers(cleaned, indexed_citations)
+        return f"{linked_answer}\n\n{self._source_reference_section(indexed_citations)}"
+
+    def _link_numeric_citation_markers(
+        self,
+        answer: str,
+        indexed_citations: list[tuple[int, AgentCitation]],
+    ) -> str:
+        href_by_index = {index: citation.learn_href for index, citation in indexed_citations if citation.learn_href}
+
+        def replace(match: re.Match[str]) -> str:
+            index = int(match.group(1))
+            href = href_by_index.get(index)
+            if not href:
+                return match.group(0)
+            return f"[{index}]({href})"
+
+        return re.sub(r"(?<!\[)\[(\d{1,2})\](?!\()", replace, answer)
+
+    def _source_reference_section(self, indexed_citations: list[tuple[int, AgentCitation]]) -> str:
+        lines = ["## Sources"]
+        for index, citation in indexed_citations:
+            title = self._markdown_link_label(citation.unit_name)
+            source = "Paper" if str(citation.source or "").lower() == "paper" else "Web"
+            summary = self._shorten(citation.quote or "", limit=180)
+            line = f"{index}. [{title}]({citation.learn_href}) — {source}"
+            if summary:
+                line = f"{line}. {summary}"
+            lines.append(line)
+        return "\n".join(lines)
+
+    @staticmethod
+    def _strip_existing_source_section(answer: str) -> str:
+        return re.split(r"\n\s*(?:#{1,6}\s*)?Sources\s*:?\s*\n", answer, maxsplit=1, flags=re.IGNORECASE)[0]
 
     @staticmethod
     def _markdown_link_label(value: str) -> str:
