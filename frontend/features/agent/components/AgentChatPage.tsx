@@ -1541,8 +1541,11 @@ function Composer({
 
   return (
     <div className="border-t border-border-subtle bg-white/80 p-4 backdrop-blur">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 lg:flex-row lg:items-start">
+        <div
+          className="flex shrink-0 flex-wrap items-center gap-2 lg:w-60 lg:flex-col lg:items-stretch"
+          data-testid="agent-tool-mode-selector"
+        >
           {[
             { value: "course" as const, label: "Course", icon: BookOpen },
             { value: "web_papers" as const, label: "Search Web & Papers", icon: Search },
@@ -1556,7 +1559,7 @@ function Composer({
                 disabled={disabled}
                 onClick={() => onToolModeChange(mode.value)}
                 className={cn(
-                  "inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition disabled:opacity-60",
+                  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-semibold transition disabled:opacity-60 lg:justify-start",
                   isActive
                     ? "border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
                     : "border-border-subtle bg-surface-card text-text-muted hover:bg-surface-page hover:text-text-strong",
@@ -1569,48 +1572,51 @@ function Composer({
             );
           })}
         </div>
-        <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-          {QUICK_PROMPTS.map((prompt) => (
-            <button
-              key={prompt}
-              type="button"
-              disabled={disabled}
-              onClick={() => onSend(prompt)}
-              className="btn-secondary shrink-0 px-3 py-2 text-xs disabled:opacity-60"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
-        <form onSubmit={send} className="relative flex items-end">
-          <label htmlFor="agent-message" className="sr-only">
-            Message AI Assistant
-          </label>
-          <div className="relative flex w-full flex-1 items-center">
-            <textarea
-              id="agent-message"
-              value={text}
-              onChange={(event) => setText(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  send(event);
-                }
-              }}
-              placeholder="Ask about your learning path..."
-              rows={1}
-              className="input-base max-h-32 min-h-[52px] resize-none rounded-2xl py-3 pl-4 pr-14 text-[15px] leading-relaxed"
-            />
-            <button
-              type="submit"
-              disabled={disabled || !text.trim()}
-              className="btn-primary absolute right-1.5 z-10 h-10 w-10 p-0 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Send message"
-            >
-              <Send className="h-[18px] w-[18px]" />
-            </button>
+
+        <div className="min-w-0 flex-1">
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+            {QUICK_PROMPTS.map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                disabled={disabled}
+                onClick={() => onSend(prompt)}
+                className="btn-secondary shrink-0 px-3 py-2 text-xs disabled:opacity-60"
+              >
+                {prompt}
+              </button>
+            ))}
           </div>
-        </form>
+          <form onSubmit={send} className="relative flex items-end">
+            <label htmlFor="agent-message" className="sr-only">
+              Message AI Assistant
+            </label>
+            <div className="relative flex w-full flex-1 items-center">
+              <textarea
+                id="agent-message"
+                value={text}
+                onChange={(event) => setText(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    send(event);
+                  }
+                }}
+                placeholder="Ask about your learning path..."
+                rows={1}
+                className="input-base max-h-32 min-h-[52px] resize-none rounded-2xl py-3 pl-4 pr-14 text-[15px] leading-relaxed"
+              />
+              <button
+                type="submit"
+                disabled={disabled || !text.trim()}
+                className="btn-primary absolute right-1.5 z-10 h-10 w-10 p-0 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Send message"
+              >
+                <Send className="h-[18px] w-[18px]" />
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
