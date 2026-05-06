@@ -21,15 +21,16 @@ class ExternalResearchDocument:
 
 
 class AgentExternalResearchService:
-    def __init__(self, *, timeout_s: float = 8.0, max_retries: int = 2):
+    def __init__(self, *, timeout_s: float = 8.0, max_retries: int = 2, responder=None):
         self.timeout_s = timeout_s
         self.max_retries = max(1, max_retries)
+        self.responder = responder
 
     async def answer(self, *, message: str, recent_messages: list[dict] | None = None) -> ToolResult:
         queries = self._plan_queries(message)
         documents = await self._act(queries)
         observed = self._observe(message, documents)
-        return self._respond(message, observed)
+        return self._respond(message, observed, recent_messages or [])
 
     def _plan_queries(self, message: str) -> list[str]:
         normalized = re.sub(r"\s+", " ", message).strip()
@@ -159,7 +160,12 @@ class AgentExternalResearchService:
         ranked = sorted(documents, key=score, reverse=True)
         return ranked[:6]
 
-    def _respond(self, message: str, documents: list[ExternalResearchDocument]) -> ToolResult:
+    def _respond(
+        self,
+        message: str,
+        documents: list[ExternalResearchDocument],
+        recent_messages: list[dict],
+    ) -> ToolResult:
         if not documents:
             return ToolResult(
                 kind="find_content",
@@ -172,18 +178,27 @@ class AgentExternalResearchService:
                 requires_evidence=True,
                 metadata={"tool_mode": "web_papers", "pipeline": ["plan", "act", "observe", "respond"]},
             )
-        citations = [
-            AgentCitation(
-                canonical_unit_id=f"external::{document.source}::{index}",
-                course_id="PAPER" if document.source == "paper" else "WEB",
-                unit_name=document.title,
-                lecture_title="External paper" if document.source == "paper" else "Web source",
-                learn_href=document.url,
-                quote=document.snippet[:700],
-                source=document.source,
+        citations = self._citations(documents)
+        synthesized_answer = self._synthesize_answer(
+            message=message,
+            documents=documents,
+            citations=citations,
+            recent_messages=recent_messages,
+        )
+        if synthesized_answer:
+            return ToolResult(
+                kind="find_content",
+                answer_markdown=synthesized_answer,
+                citations=citations,
+                requires_evidence=False,
+                metadata={
+                    "tool_mode": "web_papers",
+                    "answer_confidence": "grounded",
+                    "pipeline": ["plan", "act", "observe", "respond"],
+                    "external_source_count": len(documents),
+                    "response_synthesized": True,
+                },
             )
-            for index, document in enumerate(documents[:5], start=1)
-        ]
         source_lines = [
             f"{index}. **{document.title}** ({'paper' if document.source == 'paper' else 'web'}): "
             f"{self._shorten(document.snippet)}"
@@ -204,8 +219,69 @@ class AgentExternalResearchService:
                 "answer_confidence": "grounded",
                 "pipeline": ["plan", "act", "observe", "respond"],
                 "external_source_count": len(documents),
+                "response_synthesized": False,
             },
         )
+
+    def _citations(self, documents: list[ExternalResearchDocument]) -> list[AgentCitation]:
+        return [
+            AgentCitation(
+                canonical_unit_id=f"external::{document.source}::{index}",
+                course_id="PAPER" if document.source == "paper" else "WEB",
+                unit_name=document.title,
+                lecture_title="External paper" if document.source == "paper" else "Web source",
+                learn_href=document.url,
+                quote=document.snippet[:700],
+                source=document.source,
+            )
+            for index, document in enumerate(documents[:5], start=1)
+        ]
+
+    def _synthesize_answer(
+        self,
+        *,
+        message: str,
+        documents: list[ExternalResearchDocument],
+        citations: list[AgentCitation],
+        recent_messages: list[dict],
+    ) -> str | None:
+        responder = self.responder
+        rag_respond = getattr(responder, "rag_respond", None)
+        if rag_respond is None:
+            return None
+        observation = {
+            "tool": "search_web_papers",
+            "success": True,
+            "evidence_status": "grounded",
+            "result": {
+                "kind": "find_content",
+                "external_sources": [
+                    {
+                        "title": document.title,
+                        "source": document.source,
+                        "url": document.url,
+                        "snippet": self._shorten(document.snippet, limit=900),
+                    }
+                    for document in documents[:6]
+                ],
+                "citations": [citation.model_dump(mode="json") for citation in citations],
+            },
+        }
+        final = rag_respond(
+            message=message,
+            thought={
+                "user_goal": message,
+                "evidence_need": "external_web_and_papers",
+                "tool_plan": ["search_web", "search_papers", "synthesize_answer"],
+            },
+            observations=[observation],
+            route_context=None,
+            recent_messages=recent_messages,
+        )
+        answer = str(getattr(final, "answer_markdown", "") or "").strip()
+        if not answer:
+            return None
+        return answer
 
     @staticmethod
     def _xml_text(element) -> str:

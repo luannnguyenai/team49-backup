@@ -103,7 +103,9 @@ class AgentGraphService:
         self.policy = AgentPolicyService()
         self.composer = AgentResponseComposer()
         self.scope_service = AgentSearchScopeService()
-        self.external_research = external_research_service or AgentExternalResearchService()
+        self.external_research = external_research_service or AgentExternalResearchService(
+            responder=router
+        )
         prerequisite_path_service = None
         if hasattr(search_service, "repo"):
             prerequisite_path_service = AgentPrerequisitePathService(
