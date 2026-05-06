@@ -553,7 +553,7 @@ async def system_health(
     try:
         from src.redis_client import get_redis
 
-        r = await get_redis()
+        r = get_redis()
         if r is not None:
             info = await r.info("stats")
             hits = int(info.get("keyspace_hits", 0))

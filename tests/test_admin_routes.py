@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -7,13 +8,14 @@ from src.routers.admin import current_model, llm_stats
 
 @pytest.mark.asyncio
 async def test_llm_stats_includes_tutor_latency_timeseries():
+    now = datetime.now(timezone.utc)
     fake_entries = [
         {
-            "timestamp": "2026-05-03T00:00:00+00:00",
+            "timestamp": (now - timedelta(minutes=20)).isoformat(),
             "user_id": "user-1",
         },
         {
-            "timestamp": "2026-05-03T00:10:00+00:00",
+            "timestamp": (now - timedelta(minutes=10)).isoformat(),
             "user_id": "user-2",
             "status": "error",
         },
@@ -83,3 +85,30 @@ async def test_stats_overview_includes_active_now():
     assert "active_now" in result
     assert isinstance(result["active_now"], int)
     assert result["active_now"] == 0
+
+
+@pytest.mark.asyncio
+async def test_system_health_reports_redis_healthy_when_client_is_initialized():
+    from src.routers.admin import system_health
+
+    db_result = MagicMock()
+    db_result.scalar_one.return_value = 3
+    fake_db = MagicMock()
+    fake_db.execute = AsyncMock(return_value=db_result)
+
+    fake_redis = AsyncMock()
+    fake_redis.info.return_value = {
+        "keyspace_hits": 9,
+        "keyspace_misses": 1,
+    }
+
+    with (
+        patch("src.routers.admin.psutil", None),
+        patch("src.redis_client.get_redis", return_value=fake_redis),
+    ):
+        result = await system_health(_admin=object(), db=fake_db)
+
+    assert result["db_connections"] == 3
+    assert result["redis_hit_rate"] == 0.9
+    assert {"name": "postgres", "status": "healthy"} in result["services"]
+    assert {"name": "redis", "status": "healthy"} in result["services"]
