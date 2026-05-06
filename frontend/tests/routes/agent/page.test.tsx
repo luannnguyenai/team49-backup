@@ -721,4 +721,53 @@ describe("agent page", () => {
     });
     expect(await screen.findByText("I found relevant CNN units in Computer Vision.")).toBeInTheDocument();
   });
+
+  it("chooses a topic card through the active conversation", async () => {
+    agentApiMock.chat
+      .mockResolvedValueOnce({
+        conversationId: "conversation-1",
+        messageId: "message-topic-choice",
+        answer: {
+          markdown: "I found several matching topics for CNN.",
+          confidence: "partial",
+        },
+        citations: [],
+        actions: [
+          {
+            type: "choose_topic",
+            label: "Learn about CNN foundations for vision",
+            canonicalUnitId: "unit-cnn-vision",
+          },
+        ],
+        warning: null,
+      })
+      .mockResolvedValueOnce({
+        conversationId: "conversation-1",
+        messageId: "message-topic-answer",
+        answer: {
+          markdown: "Here is the narrowed CNN explanation.",
+          confidence: "grounded",
+        },
+        citations: [],
+        actions: [],
+        warning: null,
+      });
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Explain CNN" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+    const topicChoice = await screen.findByRole("button", { name: /learn about cnn foundations for vision/i });
+    fireEvent.click(topicChoice);
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenLastCalledWith({
+        message: "choose_topic:unit-cnn-vision",
+        incomingMessageId: expect.any(String),
+        conversationId: "conversation-1",
+        traceMode: "summary",
+      });
+    });
+    expect(await screen.findByText("Here is the narrowed CNN explanation.")).toBeInTheDocument();
+  });
 });

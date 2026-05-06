@@ -26,7 +26,8 @@ export type AgentActionType =
   | "request_replan"
   | "request_path_switch"
   | "continue_assessment_workflow"
-  | "choose_target_path";
+  | "choose_target_path"
+  | "choose_topic";
 
 export interface AgentCitation {
   canonical_unit_id?: string;

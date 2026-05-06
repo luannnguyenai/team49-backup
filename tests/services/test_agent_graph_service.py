@@ -2157,6 +2157,94 @@ async def test_selected_path_with_related_but_weak_evidence_keeps_result_cards_a
     assert response.actions[0].type == "open_unit"
 
 
+async def test_topic_choice_pending_clarification_filters_to_selected_unit():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-topic-select",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "topic_selection",
+            "original_intent": "explain_concept",
+            "original_message": "Explain CNN",
+            "raw_topic": "CNN",
+            "search_scope": "current_path",
+            "resolved_search_path_ids": ["computer_vision"],
+            "topic_options": ["unit-cnn-vision", "unit-cnn-nlp"],
+            "topic_names": {
+                "unit-cnn-vision": "CNN foundations for vision",
+                "unit-cnn-nlp": "CNNs for sentence classification",
+            },
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn-vision",
+                    course_id="CS231n",
+                    unit_name="CNN foundations for vision",
+                    summary="Vision CNN content.",
+                    score=4,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/cnn",
+                ),
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn-nlp",
+                    course_id="CS224n",
+                    unit_name="CNNs for sentence classification",
+                    summary="NLP CNN content.",
+                    score=4,
+                    quiz_available=True,
+                    learn_href="/courses/cs224n/learn/cnn",
+                ),
+            ],
+            trace=RetrievalTrace(trace_id="trace-topic-select", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-topic-select",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=PendingDecisionRouter(grounded_answer="Narrowed CNN answer."),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="choose_topic:unit-cnn-vision", incomingMessageId="msg-topic-select"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-topic-select",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n", "CS224n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Narrowed CNN answer."
+    assert search_requests[0].query == "CNN foundations for vision"
+    assert response.citations[0].canonical_unit_id == "unit-cnn-vision"
+    assert [action.type for action in response.actions] == ["open_unit"]
+
+
 async def test_content_intent_without_extracted_topic_clarifies_before_search():
     class Router:
         def route(self, message, route_context):

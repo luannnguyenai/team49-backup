@@ -203,6 +203,7 @@ class AgentAction(BaseModel):
         "request_path_switch",
         "continue_assessment_workflow",
         "choose_target_path",
+        "choose_topic",
     ]
     label: str
     action_id: str | None = Field(default=None, alias="actionId")

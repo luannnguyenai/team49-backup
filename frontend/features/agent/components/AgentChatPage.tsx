@@ -802,6 +802,26 @@ function ActionButton({
     }
   };
 
+  const chooseTopic = async () => {
+    const topicUnitId = getActionCanonicalId(action);
+    if (!conversationId || !topicUnitId || disabled || !onActionResponse) return;
+    setIsStarting(true);
+    setStartError(null);
+    try {
+      const response = await agentApi.chat({
+        message: `choose_topic:${topicUnitId}`,
+        incomingMessageId: createIncomingMessageId(),
+        conversationId,
+        traceMode: "summary",
+      });
+      onActionResponse(response);
+    } catch (err) {
+      setStartError(err instanceof Error ? err.message : "Topic selection could not be completed.");
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
   const content = (
     <span
       className={cn(
@@ -895,6 +915,14 @@ function ActionButton({
   if (action.type === "choose_target_path") {
     return (
       <button type="button" disabled={disabled || isStarting} onClick={chooseTargetPath} className="w-full">
+        {content}
+      </button>
+    );
+  }
+
+  if (action.type === "choose_topic") {
+    return (
+      <button type="button" disabled={disabled || isStarting} onClick={chooseTopic} className="w-full">
         {content}
       </button>
     );

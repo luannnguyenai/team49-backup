@@ -12,6 +12,7 @@ from src.schemas.agent import (
     UnitSearchRequest,
 )
 from src.services.agent_evidence_quality import AgentEvidenceQualityService
+from src.services.agent_evidence_quality import EvidenceQualityVerdict
 from src.services.agent_graph_contracts import AgentSlots, ToolResult
 from src.services.agent_search_scope_service import AgentSearchScopeService
 
@@ -89,6 +90,61 @@ class AgentToolNodes:
             reverse=True,
         )
         verdict = self.evidence_quality.score(slots.raw_topic or search_queries[0], all_results)
+        if slots.canonical_unit_ids:
+            selected_exact_ids = [
+                result.canonical_unit_id
+                for result in all_results
+                if result.canonical_unit_id in set(slots.canonical_unit_ids)
+            ]
+            if selected_exact_ids:
+                verdict = EvidenceQualityVerdict(
+                    label="direct_match",
+                    selected_unit_ids=selected_exact_ids[:3],
+                    reason_codes=["explicit_topic_choice"],
+                    match_reasons={
+                        unit_id: "The learner selected this topic from the ambiguity card."
+                        for unit_id in selected_exact_ids[:3]
+                    },
+                )
+                all_results = [
+                    result
+                    for result in all_results
+                    if result.canonical_unit_id in set(selected_exact_ids)
+                ]
+        if not slots.topic_choice_approved:
+            topic_choice_actions = self._build_topic_choice_actions(
+                message=message,
+                raw_topic=slots.raw_topic or search_queries[0],
+                all_results=all_results,
+                selected_unit_ids=verdict.selected_unit_ids,
+            )
+        else:
+            topic_choice_actions = []
+        if topic_choice_actions:
+            trace = search.trace.model_copy(
+                update={
+                    "intent": intent,
+                    "selected_path": slots.search_scope,
+                    "candidate_courses": course_ids,
+                    "selected_unit_ids": [],
+                }
+            )
+            return ToolResult(
+                kind="clarification",
+                answer_markdown=self._topic_choice_message(message, slots.raw_topic or search_queries[0]),
+                actions=topic_choice_actions,
+                warning=AgentWarning(
+                    type="ambiguous_target",
+                    message="Multiple matching units were found; choose one to narrow the explanation.",
+                ),
+                requires_evidence=False,
+                metadata={
+                    "topic_selection_offered": True,
+                    "evidence_verdict": verdict.label,
+                    "search_queries": search_queries,
+                },
+                trace=trace,
+            )
         if (
             len(all_results) >= self.TOO_MANY_RESULTS_THRESHOLD
             and not slots.show_top_results_approved
@@ -386,6 +442,65 @@ class AgentToolNodes:
         if len(selected) == 1:
             return selected[0]
         return selected[0] if selected[0].score > selected[1].score else None
+
+    def _build_topic_choice_actions(
+        self,
+        *,
+        message: str,
+        raw_topic: str,
+        all_results,
+        selected_unit_ids: list[str],
+    ) -> list[AgentAction]:
+        if not selected_unit_ids:
+            return []
+        target_result = self._specific_target_result(all_results, selected_unit_ids)
+        if target_result is not None:
+            return []
+        selected_ids = set(selected_unit_ids)
+        actions = []
+        for result in all_results:
+            if result.canonical_unit_id not in selected_ids:
+                continue
+            actions.append(
+                AgentAction(
+                    type="choose_topic",
+                    label=f"Learn about {result.unit_name}",
+                    canonical_unit_id=result.canonical_unit_id,
+                    learn_href=result.learn_href,
+                )
+            )
+            if len(actions) >= 3:
+                break
+        return actions if len(actions) > 1 else []
+
+    def _topic_choice_message(self, message: str, raw_topic: str) -> str:
+        if self._looks_vietnamese(message):
+            return (
+                f"Mình tìm thấy vài chủ đề khớp với {raw_topic}. "
+                "Chọn một chủ đề bên dưới để mình giải thích đúng phạm vi và kiểm tra prerequisite liên quan."
+            )
+        return (
+            f"I found several matching topics for {raw_topic}. "
+            "Choose one below so I can explain the right scope and check the related prerequisites."
+        )
+
+    @staticmethod
+    def _looks_vietnamese(message: str) -> bool:
+        lowered = f" {message.lower()} "
+        vietnamese_markers = (
+            " tôi ",
+            " bạn ",
+            " muốn ",
+            " học ",
+            " giải thích ",
+            " tìm ",
+            " lộ trình ",
+            " kiến thức ",
+        )
+        return bool(
+            any(marker in lowered for marker in vietnamese_markers)
+            or any(char in lowered for char in "ăâđêôơưáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ")
+        )
 
     async def planner_decision(
         self,

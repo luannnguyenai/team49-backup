@@ -425,6 +425,14 @@ class AgentGraphService:
             pending_result = self._resolve_pending_path_selection(state, pending)
             if pending_result is not None:
                 return pending_result
+        if (
+            pending is not None
+            and pending.type == "slot_disambiguation"
+            and pending.payload.get("kind") == "topic_selection"
+        ):
+            pending_result = self._resolve_pending_topic_selection(state, pending)
+            if pending_result is not None:
+                return pending_result
         if pending is not None and pending.type == "search_scope_expansion":
             pending_result = self._resolve_pending_scope_expansion(state, pending)
             if pending_result is not None:
@@ -746,6 +754,41 @@ class AgentGraphService:
                 requested_path_id=selected_path_id,
                 search_scope="explicit_path",
                 resolved_search_path_ids=[selected_path_id],
+            ),
+            "pending_clarification": None,
+            "clarification_question": None,
+        }
+
+    def _resolve_pending_topic_selection(
+        self,
+        state: dict,
+        pending: PendingClarification,
+    ) -> dict | None:
+        payload = pending.payload
+        message = state["message"].strip()
+        normalized = message.lower()
+        options = [str(unit_id) for unit_id in payload.get("topic_options", [])]
+        selected_unit_id = ""
+        if normalized.startswith("choose_topic:"):
+            selected_unit_id = message.split(":", 1)[1].strip()
+        if selected_unit_id not in options:
+            return self._route_new_request_after_pending(state)
+        unit_names = payload.get("topic_names") or {}
+        unit_name = str(unit_names.get(selected_unit_id) or payload.get("raw_topic") or "").strip()
+        return {
+            **state,
+            "intent": payload.get("original_intent") or "find_content",
+            "intent_confidence": 1.0,
+            "slots": AgentSlots(
+                raw_topic=unit_name or selected_unit_id,
+                search_queries=[query for query in [unit_name] if query] or [selected_unit_id],
+                canonical_unit_ids=[selected_unit_id],
+                target_path=payload.get("target_path"),
+                requested_path_id=payload.get("requested_path_id"),
+                search_scope=payload.get("search_scope") or "current_path",
+                resolved_search_path_ids=payload.get("resolved_search_path_ids") or [],
+                excluded_search_path_ids=payload.get("excluded_search_path_ids") or [],
+                topic_choice_approved=True,
             ),
             "pending_clarification": None,
             "clarification_question": None,
@@ -1167,6 +1210,35 @@ class AgentGraphService:
                 },
                 expires_at=datetime.now(UTC) + timedelta(minutes=30),
             )
+        if result.metadata.get("topic_selection_offered"):
+            topic_actions = [
+                action
+                for action in result.actions
+                if action.type == "choose_topic" and action.canonical_unit_id
+            ]
+            update["pending_clarification"] = PendingClarification(
+                clarification_id=f"clar_{uuid4()}",
+                type="slot_disambiguation",
+                status="awaiting_response",
+                payload={
+                    "kind": "topic_selection",
+                    "original_intent": update["intent"],
+                    "original_message": update["message"],
+                    "raw_topic": slots.raw_topic,
+                    "target_path": slots.target_path,
+                    "requested_path_id": slots.requested_path_id,
+                    "search_scope": slots.search_scope,
+                    "resolved_search_path_ids": slots.resolved_search_path_ids,
+                    "excluded_search_path_ids": slots.excluded_search_path_ids,
+                    "topic_options": [action.canonical_unit_id for action in topic_actions],
+                    "topic_names": {
+                        action.canonical_unit_id: action.label.removeprefix("Learn about ").strip()
+                        for action in topic_actions
+                        if action.canonical_unit_id
+                    },
+                },
+                expires_at=datetime.now(UTC) + timedelta(minutes=30),
+            )
         return update
 
     def _append_rag_observation(
@@ -1558,6 +1630,35 @@ class AgentGraphService:
                         "original_message": state["message"],
                         "raw_topic": slots.raw_topic,
                         "path_options": result.metadata.get("path_options", []),
+                    },
+                    expires_at=datetime.now(UTC) + timedelta(minutes=30),
+                )
+            if result.metadata.get("topic_selection_offered"):
+                topic_actions = [
+                    action
+                    for action in result.actions
+                    if action.type == "choose_topic" and action.canonical_unit_id
+                ]
+                update["pending_clarification"] = PendingClarification(
+                    clarification_id=f"clar_{uuid4()}",
+                    type="slot_disambiguation",
+                    status="awaiting_response",
+                    payload={
+                        "kind": "topic_selection",
+                        "original_intent": state["intent"],
+                        "original_message": state["message"],
+                        "raw_topic": slots.raw_topic,
+                        "target_path": slots.target_path,
+                        "requested_path_id": slots.requested_path_id,
+                        "search_scope": slots.search_scope,
+                        "resolved_search_path_ids": slots.resolved_search_path_ids,
+                        "excluded_search_path_ids": slots.excluded_search_path_ids,
+                        "topic_options": [action.canonical_unit_id for action in topic_actions],
+                        "topic_names": {
+                            action.canonical_unit_id: action.label.removeprefix("Learn about ").strip()
+                            for action in topic_actions
+                            if action.canonical_unit_id
+                        },
                     },
                     expires_at=datetime.now(UTC) + timedelta(minutes=30),
                 )
