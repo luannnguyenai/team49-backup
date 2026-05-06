@@ -32,16 +32,20 @@ class FixedExternalResearchService(AgentExternalResearchService):
 
 
 class RecordingResponder:
-    def __init__(self):
+    def __init__(self, answers: list[str] | None = None):
         self.calls = []
+        self.answers = answers or [
+            (
+                "CNN là mạng neural dùng phép tích chập để học đặc trưng cục bộ, "
+                "thường dùng cho ảnh và các dữ liệu có cấu trúc không gian."
+            )
+        ]
 
     def rag_respond(self, **kwargs):
         self.calls.append(kwargs)
+        answer = self.answers[min(len(self.calls) - 1, len(self.answers) - 1)]
         return AgenticRAGFinal(
-            answer_markdown=(
-                "CNN là mạng neural dùng phép tích chập để học đặc trưng cục bộ, "
-                "thường dùng cho ảnh và các dữ liệu có cấu trúc không gian."
-            ),
+            answer_markdown=answer,
             evidence_status="grounded",
             evidence_sufficient=True,
         )
@@ -67,3 +71,28 @@ async def test_external_research_synthesizes_answer_from_observed_sources():
     observation = responder.calls[0]["observations"][0]
     assert observation["tool"] == "search_web_papers"
     assert "CNN Explainer" in str(observation)
+
+
+@pytest.mark.asyncio
+async def test_external_research_retries_truncated_outline_synthesis():
+    responder = RecordingResponder(
+        answers=[
+            "1) RCNN giải quyết bài toán gì?\n\nRCNN dự đoán class và bounding box.",
+            (
+                "RCNN là họ mô hình phát hiện đối tượng dựa trên region proposals. "
+                "Thay vì quét mọi cửa sổ ảnh, mô hình chọn các vùng ứng viên rồi phân loại "
+                "và tinh chỉnh bounding box cho từng vùng.\n\n"
+                "Ý chính là tách bài toán detection thành hai phần: tìm vùng có khả năng chứa "
+                "đối tượng, sau đó dự đoán nhãn và tọa độ hộp bao. Cách này làm pipeline dễ "
+                "hiểu hơn, dù các biến thể đầu tiên khá tốn chi phí tính toán."
+            ),
+        ]
+    )
+    service = FixedExternalResearchService(responder=responder)
+
+    result = await service.answer(message="Giải thích thêm về RCNN", recent_messages=[])
+
+    assert len(responder.calls) == 2
+    assert "RCNN là họ mô hình" in result.answer_markdown
+    assert "1) RCNN giải quyết bài toán gì?" not in result.answer_markdown
+    assert responder.calls[1]["thought"]["quality_retry"] == "complete_external_answer"

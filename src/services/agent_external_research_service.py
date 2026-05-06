@@ -277,21 +277,59 @@ class AgentExternalResearchService:
                 "citations": [citation.model_dump(mode="json") for citation in citations],
             },
         }
+        base_thought = {
+            "user_goal": message,
+            "evidence_need": "external_web_and_papers",
+            "tool_plan": ["search_web", "search_papers", "synthesize_answer"],
+            "answer_requirements": (
+                "Produce a complete user-facing answer before the backend appends sources. "
+                "Prefer 2-4 short paragraphs or 3-5 complete bullets. Do not use a numbered "
+                "section heading unless the answer contains more than one numbered section."
+            ),
+        }
         final = rag_respond(
             message=message,
-            thought={
-                "user_goal": message,
-                "evidence_need": "external_web_and_papers",
-                "tool_plan": ["search_web", "search_papers", "synthesize_answer"],
-            },
+            thought=base_thought,
             observations=[observation],
             route_context=None,
             recent_messages=recent_messages,
         )
         answer = str(getattr(final, "answer_markdown", "") or "").strip()
+        if self._looks_like_incomplete_synthesis(answer):
+            retry_final = rag_respond(
+                message=message,
+                thought={
+                    **base_thought,
+                    "quality_retry": "complete_external_answer",
+                    "previous_draft": answer,
+                    "retry_instruction": (
+                        "The previous draft looked truncated or like an unfinished outline. "
+                        "Rewrite it as a complete answer and finish the explanation before sources."
+                    ),
+                },
+                observations=[observation],
+                route_context=None,
+                recent_messages=recent_messages,
+            )
+            retry_answer = str(getattr(retry_final, "answer_markdown", "") or "").strip()
+            if retry_answer:
+                answer = retry_answer
         if not answer:
             return None
         return answer
+
+    def _looks_like_incomplete_synthesis(self, answer: str) -> bool:
+        cleaned = re.sub(r"\s*\[\^[^\]]+\]", "", answer).strip()
+        if not cleaned:
+            return False
+        word_count = len(re.findall(r"\w+", cleaned, flags=re.UNICODE))
+        has_first_heading = re.search(r"(?m)^\s*1[.)]\s+\S", cleaned) is not None
+        has_second_heading = re.search(r"(?m)^\s*2[.)]\s+\S", cleaned) is not None
+        if has_first_heading and not has_second_heading and word_count < 160:
+            return True
+        if word_count < 70 and cleaned.endswith((",", ":", ";", "và", "hoặc", "and", "or")):
+            return True
+        return False
 
     def _with_numeric_source_links(self, answer: str, citations: list[AgentCitation]) -> str:
         cleaned = re.sub(r"\s*\[\^[^\]]+\]", "", answer).strip()
