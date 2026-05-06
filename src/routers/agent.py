@@ -56,6 +56,7 @@ from src.services.agent_path_switch_service import AgentPathSwitchService
 from src.services.agent_response_composer import AgentResponseComposer
 from src.services.agent_router_factory import build_production_agent_router
 from src.services.agent_search_service import AgentUnitSearchService
+from src.services.agent_title_generator import generate_conversation_title
 from src.services.agent_unit_context_service import AgentUnitContextService
 from src.services.agent_error_codes import classify_agent_error
 from src.services.recommendation_engine import generate_learning_path
@@ -91,6 +92,37 @@ def _agent_system_error_response(conversation_id: str, error_code: str, exc: Exc
         conversation_id=conversation_id,
         error_code=error_code,
     )
+
+
+async def _maybe_generate_conversation_title(
+    *,
+    conversation_repo: AgentConversationRepository,
+    conversation_id: UUID,
+    user: User,
+    user_message: str,
+    assistant_markdown: str,
+) -> None:
+    """Replace the placeholder title with an LLM summary after the first turn."""
+    try:
+        conversation = await conversation_repo.get_conversation(conversation_id, user.id)
+        if conversation is None:
+            return
+        if (conversation.message_count or 0) != 2:
+            return
+        current_title = (conversation.title or "").strip()
+        if not current_title:
+            current_title = "New chat"
+        first_user_seed = (user_message or "").strip()[:60]
+        if current_title not in ("New chat", first_user_seed):
+            return
+        if not assistant_markdown.strip():
+            return
+        title = await generate_conversation_title(user_message, assistant_markdown)
+        if not title:
+            return
+        await conversation_repo.rename_conversation(conversation_id, user.id, title)
+    except Exception:
+        logger.exception("agent_title_generation_failed conversation_id=%s", conversation_id)
 
 
 @agent_router.post("/chat", response_model=AgentChatResponse)
@@ -139,6 +171,13 @@ async def agent_chat(
                 allowed_course_ids=context.allowed_course_ids,
                 current_path_course_ids=context.selected_path_course_ids,
             )
+        await _maybe_generate_conversation_title(
+            conversation_repo=conversation_repo,
+            conversation_id=conversation_id,
+            user=user,
+            user_message=body.message,
+            assistant_markdown=getattr(response, "markdown", "") or "",
+        )
         await db.commit()
     except AgentInProgressError as exc:
         return JSONResponse(status_code=409, content=exc.to_response().model_dump(by_alias=True))

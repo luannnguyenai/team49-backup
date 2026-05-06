@@ -163,16 +163,19 @@ class AgentConversationRepository:
         await self.session.flush()
 
         preview = markdown[:180]
-        title = preview[:60] or "New chat"
+        values: dict = {
+            "preview": preview,
+            "message_count": AgentConversation.message_count + 1,
+            "updated_at": func.now(),
+        }
+        if role == "user":
+            conversation = await self.get_conversation(conversation_id, user_id)
+            if conversation is not None and (conversation.title or "").strip() in ("", "New chat"):
+                values["title"] = (preview[:60] or "New chat")
         await self.session.execute(
             update(AgentConversation)
             .where(AgentConversation.id == conversation_id, AgentConversation.user_id == user_id)
-            .values(
-                preview=preview,
-                title=title,
-                message_count=AgentConversation.message_count + 1,
-                updated_at=func.now(),
-            )
+            .values(**values)
         )
         await self.session.flush()
         return row
