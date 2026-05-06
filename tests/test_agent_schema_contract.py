@@ -36,6 +36,17 @@ def test_chat_request_accepts_client_incoming_message_id():
     assert request.incoming_message_id == "msg-client-1"
 
 
+def test_chat_request_accepts_web_and_paper_tool_mode():
+    request = AgentChatRequest(
+        message="Find recent papers about CNN pruning.",
+        incomingMessageId="msg-web-papers",
+        toolMode="web_papers",
+    )
+
+    assert request.tool_mode == "web_papers"
+    assert request.model_dump(by_alias=True)["toolMode"] == "web_papers"
+
+
 def test_in_progress_and_resume_contracts_are_stable():
     progress = AgentInProgressResponse(
         conversationId="conv-1",

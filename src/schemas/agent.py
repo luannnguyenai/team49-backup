@@ -97,6 +97,7 @@ class AgentChatRequest(BaseModel):
         default="non_streaming", alias="responseMode"
     )
     trace_mode: Literal["none", "summary", "full"] = Field(default="summary", alias="traceMode")
+    tool_mode: Literal["course", "web_papers"] = Field(default="course", alias="toolMode")
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -115,7 +116,7 @@ class AgentCitation(BaseModel):
     learn_href: str | None = None
     timestamp_s: int | None = None
     quote: str | None = None
-    source: Literal["summary", "key_point", "transcript", "planner", "mastery"]
+    source: Literal["summary", "key_point", "transcript", "planner", "mastery", "web", "paper"]
 
 
 class AssessmentProposalScopeItem(BaseModel):

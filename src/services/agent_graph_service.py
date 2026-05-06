@@ -17,6 +17,7 @@ except ModuleNotFoundError:  # pragma: no cover - dependency exists in productio
 
 from src.schemas.agent import AgentAction, AgentActionResumeRequest, AgentChatRequest, AgentChatResponse, AgentCitation
 from src.services.agent_action_commit_service import AgentActionCommitService
+from src.services.agent_external_research_service import AgentExternalResearchService
 from src.services.agent_graph_contracts import (
     AgentCheckpointState,
     AgentInProgressError,
@@ -75,6 +76,7 @@ class AgentGraphService:
         action_db=None,
         action_user=None,
         checkpointer=None,
+        external_research_service=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -101,6 +103,7 @@ class AgentGraphService:
         self.policy = AgentPolicyService()
         self.composer = AgentResponseComposer()
         self.scope_service = AgentSearchScopeService()
+        self.external_research = external_research_service or AgentExternalResearchService()
         prerequisite_path_service = None
         if hasattr(search_service, "repo"):
             prerequisite_path_service = AgentPrerequisitePathService(
@@ -375,6 +378,16 @@ class AgentGraphService:
             thread_id,
         )
         state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id, thread_id)
+        if request.tool_mode == "web_papers":
+            result = await self.external_research.answer(
+                message=request.message,
+                recent_messages=state["recent_messages"],
+            )
+            return self.composer.compose(
+                conversation_id=conversation_id,
+                message_id=str(uuid4()),
+                result=result,
+            )
         if self._graph is None:
             raise RuntimeError("langgraph_not_installed")
         final_state = await self._graph.ainvoke(

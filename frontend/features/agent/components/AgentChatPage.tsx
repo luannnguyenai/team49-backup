@@ -293,6 +293,10 @@ function findPathItemForCitation(citation: AgentCitation, items: PathItemRespons
   );
 }
 
+function isExternalCitation(citation: AgentCitation) {
+  return citation.source === "web" || citation.source === "paper";
+}
+
 function CitationCard({
   citation,
   isSelected,
@@ -1859,6 +1863,10 @@ export default function AgentChatPage() {
     setSelectedUnitContext(null);
     setSelectedPathItem(null);
     setSourceDetailError(null);
+    if (isExternalCitation(citation)) {
+      setIsLoadingSourceDetail(false);
+      return;
+    }
     if (!canonicalId) {
       setSourceDetailError("This source does not expose a unit id yet.");
       return;

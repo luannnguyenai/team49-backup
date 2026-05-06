@@ -146,6 +146,48 @@ async def test_graph_returns_grounded_find_content_from_search():
     assert response.trace.selected_unit_ids == ["unit-attn"]
 
 
+async def test_graph_routes_web_paper_mode_to_external_research():
+    calls = []
+
+    async def search(request, allowed_course_ids):
+        calls.append(("course_search", request.query))
+        return UnitSearchResponse(results=[], trace=RetrievalTrace(trace_id="trace-1", ranking_version="unit_search_v1"))
+
+    class ExternalResearch:
+        async def answer(self, *, message, recent_messages):
+            calls.append(("external_research", message, recent_messages))
+            from src.services.agent_graph_contracts import ToolResult
+
+            return ToolResult(
+                kind="find_content",
+                answer_markdown="External web and paper answer.",
+                requires_evidence=False,
+                metadata={"tool_mode": "web_papers"},
+            )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+        external_research_service=ExternalResearch(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="Find recent papers about CNN pruning",
+            incomingMessageId="msg-web-papers",
+            toolMode="web_papers",
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-1",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS224n"],
+    )
+
+    assert response.answer.markdown == "External web and paper answer."
+    assert [call[0] for call in calls] == ["external_research"]
+
+
 async def test_graph_uses_react_rag_tool_decision_before_search():
     calls = []
 
