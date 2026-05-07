@@ -537,7 +537,7 @@ export default function InContextTutor({
         inputRef.current?.focus();
       }, 0);
     }
-  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId]);
+  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId, userFullName]);
 
   const hasMessages = messages.length > 0;
 
