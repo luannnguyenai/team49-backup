@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import KpiCard from "@/components/admin/KpiCard";
 import KpiGroup from "@/components/admin/KpiGroup";
 import { adminApi, TrafficSummary } from "@/lib/admin-api";
+import { trafficTooltips } from "@/lib/admin-tooltips";
 
 const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST || "http://localhost:3001";
 const TRAFFIC_DASHBOARD_UID = "a20-api-traffic";
@@ -57,19 +58,47 @@ export default function AdminTrafficPage() {
           label="Req / sec (1m)"
           value={summary?.rps_1m != null ? summary.rps_1m.toFixed(2) : "—"}
           hint="Prometheus rate"
+          tooltip={trafficTooltips.rps1m}
           loading={loading}
         />
       </KpiGroup>
 
       <KpiGroup title="Latency" cols={3}>
-        <KpiCard label="p50 latency" value={fmtSec(summary?.latency_seconds.p50)} loading={loading} />
-        <KpiCard label="p95 latency" value={fmtSec(summary?.latency_seconds.p95)} loading={loading} />
-        <KpiCard label="p99 latency" value={fmtSec(summary?.latency_seconds.p99)} loading={loading} />
+        <KpiCard
+          label="p50 latency"
+          value={fmtSec(summary?.latency_seconds.p50)}
+          tooltip={trafficTooltips.p50Latency}
+          loading={loading}
+        />
+        <KpiCard
+          label="p95 latency"
+          value={fmtSec(summary?.latency_seconds.p95)}
+          tooltip={trafficTooltips.p95Latency}
+          loading={loading}
+        />
+        <KpiCard
+          label="p99 latency"
+          value={fmtSec(summary?.latency_seconds.p99)}
+          tooltip={trafficTooltips.p99Latency}
+          loading={loading}
+        />
       </KpiGroup>
 
       <KpiGroup title="Errors" cols={2}>
-        <KpiCard label="4xx rate" value={fmtPct(summary?.rate_4xx)} hint="5m window" loading={loading} />
-        <KpiCard label="5xx rate" value={fmtPct(summary?.rate_5xx)} hint="5m window" loading={loading} />
+        <KpiCard
+          label="4xx rate"
+          value={fmtPct(summary?.rate_4xx)}
+          hint="5m window"
+          tooltip={trafficTooltips.rate4xx}
+          loading={loading}
+        />
+        <KpiCard
+          label="5xx rate"
+          value={fmtPct(summary?.rate_5xx)}
+          hint="5m window"
+          tooltip={trafficTooltips.rate5xx}
+          loading={loading}
+        />
       </KpiGroup>
 
       {err && (
