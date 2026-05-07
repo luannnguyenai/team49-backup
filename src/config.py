@@ -71,7 +71,7 @@ class Settings(BaseSettings):
 
     # ---- Database (PostgreSQL async) ----
     database_url: str = Field(
-        default="postgresql+asyncpg://postgres:change_me_strong_password@localhost:5432/ai_learning",
+        default="postgresql+asyncpg://postgres:change_me_strong_password@localhost:5433/ai_learning",
         description="Full asyncpg-compatible connection URL",
     )
     agent_graph_checkpointer_backend: Literal["memory", "postgres"] = Field(

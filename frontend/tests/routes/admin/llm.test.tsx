@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminLlmPage from "@/app/admin/llm/page";
 
 const adminApiMock = vi.hoisted(() => ({
-  overview: vi.fn(),
   llmStats: vi.fn(),
   llmRecent: vi.fn(),
   feedbackStats: vi.fn(),
@@ -17,7 +16,6 @@ vi.mock("@/lib/admin-api", async () => {
     ...actual,
     adminApi: {
       ...actual.adminApi,
-      overview: adminApiMock.overview,
       llmStats: adminApiMock.llmStats,
       llmRecent: adminApiMock.llmRecent,
       feedbackStats: adminApiMock.feedbackStats,
@@ -39,16 +37,6 @@ vi.mock("recharts", async () => {
 describe("admin llm page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    adminApiMock.overview.mockResolvedValue({
-      total_users: 42,
-      dau: 7,
-      mau: 21,
-      signups_7d: 5,
-      llm_calls_24h: 14,
-      avg_latency_ms: 832.5,
-      error_rate: 0.01,
-      uptime_seconds: 3600,
-    });
     adminApiMock.llmStats.mockResolvedValue({
       window_hours: 24,
       total_calls: 14,

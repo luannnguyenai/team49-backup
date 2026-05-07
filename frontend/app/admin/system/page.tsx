@@ -81,7 +81,7 @@ export default function AdminSystemPage() {
         <KpiCard label="Disk usage" value={fmtPct(data?.disk_pct)} loading={loading} />
       </KpiGroup>
 
-      <KpiGroup title="Hạ tầng" cols={3}>
+      <KpiGroup title="Hạ tầng" cols={2}>
         <KpiCard
           label="DB connections"
           value={data?.db_connections ?? "—"}
@@ -94,11 +94,6 @@ export default function AdminSystemPage() {
           hint="keyspace_hits / total"
           loading={loading}
         />
-        <KpiCard
-          label="Healthy services"
-          value={`${data?.services.filter((s) => s.status === "healthy").length ?? 0}/${data?.services.length ?? 0}`}
-          loading={loading}
-        />
       </KpiGroup>
 
       <KpiGroup title="Trạng thái" cols={2}>
@@ -107,7 +102,6 @@ export default function AdminSystemPage() {
           value={fmtUptime(data?.uptime_seconds)}
           loading={loading}
         />
-        <KpiCard label="Auto-refresh" value="10s" hint="psutil + Postgres + Redis INFO" />
       </KpiGroup>
 
       {err && (
@@ -134,7 +128,10 @@ export default function AdminSystemPage() {
         </div>
       </div>
 
-      <ChartCard title="CPU & RAM (live)" subtitle={`${series.length} samples · 10s interval`}>
+      <ChartCard
+        title="CPU & RAM (current session)"
+        subtitle={`${series.length} samples · 10s interval · browser-local sample`}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={series} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID.stroke} vertical={false} />
