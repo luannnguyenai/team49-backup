@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { ArrowLeft, Brain, Loader2, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -23,7 +23,7 @@ function isSafeInternalPath(value: string | null): value is string {
   return Boolean(value && value.startsWith("/") && !value.startsWith("//"));
 }
 
-export default function ReplanPage() {
+function ReplanPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [claim, setClaim] = useState("");
@@ -441,5 +441,13 @@ export default function ReplanPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ReplanPage() {
+  return (
+    <Suspense fallback={null}>
+      <ReplanPageContent />
+    </Suspense>
   );
 }
