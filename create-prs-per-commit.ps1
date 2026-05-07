@@ -4,7 +4,16 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-
++ abeba6858d7582aeead9ac21a5ce150abb290c54 Update page.tsx
++ ee41381c5661fc3f24544ceda8e720204636889f Update PrerequisiteSuggestionDialog.tsx
++ 31e383c9074b0577bc4e067b4a8d5717c941fd8d Update ReplanKnowledgeClaimStep.tsx
++ 384a5a1552c2a80f86bb559ded4410f9fa8f86de Update admin-tooltips.ts
++ 20bf4ef6015e453f912a522878f2da1423bb0a5a Update page.tsx
++ 38f1b919c451b75982d64438b60d934843c93387 Update TopNav.tsx
++ d398fca67729c4444abbcf537f8bb73b40ac210b Update page.tsx
++ 3d8742659116000ffa4fa6021188f24cd941c418 Update InContextTutor.tsx
++ e45c59f66b69a94603c028a2e96d9f71a72e9dd9 Update next.config.mjs
++ 4ca2df9247016d50d4deb85c4622d1fab5d20261 Update app.py
 "@
 
 
