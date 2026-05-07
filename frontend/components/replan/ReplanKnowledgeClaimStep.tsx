@@ -20,7 +20,7 @@ export default function ReplanKnowledgeClaimStep({
           What do you already know?
         </p>
         <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-          Specifically describe the parts you've mastered so the system can create a verification assessment. This description does not automatically skip lessons. New assessment results will be used to update your learning path.
+          Specifically describe the parts you&apos;ve mastered so the system can create a verification assessment. This description does not automatically skip lessons. New assessment results will be used to update your learning path.
         </p>
       </div>
 
@@ -49,7 +49,7 @@ export default function ReplanKnowledgeClaimStep({
             backgroundColor: "var(--bg-card)",
             color: "var(--text-primary)",
           }}
-          placeholder={"Example:\n- I've mastered CNN, convolution, pooling.\n- I know Faster R-CNN but not sure about YOLO.\n- I understand basic object detection, want to test to skip foundational parts."}
+          placeholder={"Example:\n- I\u2019ve mastered CNN, convolution, pooling.\n- I know Faster R-CNN but not sure about YOLO.\n- I understand basic object detection, want to test to skip foundational parts."}
         />
       </div>
 
