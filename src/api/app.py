@@ -139,7 +139,8 @@ app.include_router(placement_lite_router)
 app.include_router(quiz_router)
 app.include_router(replan_router)
 app.include_router(review_router)
-app.include_router(test_support_router)
+if settings.debug:
+    app.include_router(test_support_router)
 app.include_router(admin_router)
 
 
