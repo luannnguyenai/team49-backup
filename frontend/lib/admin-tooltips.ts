@@ -2,132 +2,132 @@ import type { KpiTooltip } from "@/components/admin/KpiCard";
 
 export const overviewTooltips = {
   totalUsers: {
-    summary: "Tong so user da duoc tao trong he thong.",
-    detail: "Dem tu bang users. Day la cumulative metric, khong phan anh muc do active hien tai.",
+    summary: "Tổng số người dùng đã được tạo trong hệ thống.",
+    detail: "Đếm từ bảng users. Đây là chỉ số cộng dồn, không phản ánh mức độ active hiện tại.",
   },
   dau: {
-    summary: "So user hoat dong trong 24 gio gan nhat.",
-    detail: "Uoc tinh tu sessions theo user distinct trong 24h. Huu ich de theo doi usage ngan han.",
+    summary: "Số người dùng hoạt động trong 24 giờ gần nhất.",
+    detail: "Ước tính từ sessions theo user distinct trong 24 giờ. Hữu ích để theo dõi usage ngắn hạn.",
   },
   mau: {
-    summary: "So user hoat dong trong 30 ngay gan nhat.",
-    detail: "Uoc tinh tu sessions theo user distinct trong 30 ngay. Dung de nhin muc do giu chan tong quat.",
+    summary: "Số người dùng hoạt động trong 30 ngày gần nhất.",
+    detail: "Ước tính từ sessions theo user distinct trong 30 ngày. Dùng để nhìn mức độ giữ chân tổng quát.",
   },
   signups7d: {
-    summary: "So user dang ky moi trong 7 ngay gan nhat.",
-    detail: "Dem tu users.created_at. Dung de theo doi tang truong dau vao.",
+    summary: "Số người dùng đăng ký mới trong 7 ngày gần nhất.",
+    detail: "Đếm từ users.created_at. Dùng để theo dõi tăng trưởng đầu vào.",
   },
   activeNow: {
-    summary: "So user duoc xem la dang hoat dong luc nay.",
-    detail: "Uoc tinh tu session gan day hoac session chua dong trong khoang ngan. Day la near-real-time signal, khong phai so tuyet doi chinh xac.",
+    summary: "Số người dùng được xem là đang hoạt động lúc này.",
+    detail: "Ước tính từ session gần đây hoặc session chưa đóng trong khoảng ngắn. Đây là tín hiệu near-real-time, không phải số tuyệt đối chính xác.",
   },
   llmCalls24h: {
-    summary: "Tong so luot goi LLM trong 24 gio gan nhat.",
-    detail: "Dem tu du lieu lich su hoi dap. Dung de theo doi tai AI va muc su dung tutor.",
+    summary: "Tổng số lượt gọi LLM trong 24 giờ gần nhất.",
+    detail: "Đếm từ dữ liệu lịch sử hỏi đáp. Dùng để theo dõi tải AI và mức sử dụng tutor.",
   },
   modelCurrent: {
-    summary: "Model mac dinh backend dang cau hinh de phuc vu request.",
-    detail: "Lay tu config runtime. Day la thong tin cau hinh, khong phai metric hieu nang.",
+    summary: "Model mặc định backend đang cấu hình để phục vụ request.",
+    detail: "Lấy từ config runtime. Đây là thông tin cấu hình, không phải metric hiệu năng.",
   },
   errorRate: {
-    summary: "Ty le request backend bi loi phia server.",
-    detail: "Tinh tu HTTP 5xx / tong request trong 5 phut gan nhat tu Prometheus. Neu tang lien tuc thi can kiem tra backend hoac upstream.",
+    summary: "Tỷ lệ request backend bị lỗi phía server.",
+    detail: "Tính từ HTTP 5xx trên tổng request trong 5 phút gần nhất từ Prometheus. Nếu tăng liên tục thì cần kiểm tra backend hoặc upstream.",
   },
 } satisfies Record<string, KpiTooltip>;
 
 export const llmTooltips = {
   callsWindow: {
-    summary: "Tong so luot goi LLM trong cua so thoi gian dang xem.",
-    detail: "Hien dang tong hop theo 24h tu qa_history.jsonl. Dung de theo doi luu luong tutor AI.",
+    summary: "Tổng số lượt gọi LLM trong cửa sổ thời gian đang xem.",
+    detail: "Hiện đang tổng hợp theo 24 giờ từ qa_history.jsonl. Dùng để theo dõi lưu lượng tutor AI.",
   },
   errorsWindow: {
-    summary: "So luot goi LLM bi danh dau loi trong cua so thoi gian.",
-    detail: "Doc tu log qa_history.jsonl. Neu tang, can doi chieu voi latency, provider status, va log chi tiet.",
+    summary: "Số lượt gọi LLM bị đánh dấu lỗi trong cửa sổ thời gian.",
+    detail: "Đọc từ log qa_history.jsonl. Nếu tăng, cần đối chiếu với latency, provider status và log chi tiết.",
   },
   firstStatusP95: {
-    summary: "95% request nhan duoc tin hieu trang thai dau tien nhanh hon moc nay.",
-    detail: "Tinh tu Prometheus theo bucket 1 gio. Day la tin hieu dau tien cua stream bat dau phan hoi.",
+    summary: "95% request nhận được tín hiệu trạng thái đầu tiên nhanh hơn mốc này.",
+    detail: "Tính từ Prometheus theo bucket 1 giờ. Đây là tín hiệu đầu tiên của stream bắt đầu phản hồi.",
   },
   firstStatusP50: {
-    summary: "Mot nua request nhan duoc tin hieu trang thai dau tien nhanh hon moc nay.",
-    detail: "Giup nhin do tre dien hinh thay vi chi nhin tail latency.",
+    summary: "Một nửa request nhận được tín hiệu trạng thái đầu tiên nhanh hơn mốc này.",
+    detail: "Giúp nhìn độ trễ điển hình thay vì chỉ nhìn tail latency.",
   },
   firstAnswerP95: {
-    summary: "95% request nhan duoc phan noi dung tra loi dau tien nhanh hon moc nay.",
-    detail: "Day gan voi TTFT trong streaming tutor. Neu tang cao, trai nghiem nguoi dung se thay cham ro ret.",
+    summary: "95% request nhận được phần nội dung trả lời đầu tiên nhanh hơn mốc này.",
+    detail: "Đây gần với TTFT trong streaming tutor. Nếu tăng cao, trải nghiệm người dùng sẽ thấy chậm rõ rệt.",
   },
   firstAnswerP50: {
-    summary: "Mot nua request nhan duoc phan noi dung tra loi dau tien nhanh hon moc nay.",
-    detail: "Phan anh toc do phan hoi dien hinh cua tutor trong dieu kien binh thuong.",
+    summary: "Một nửa request nhận được phần nội dung trả lời đầu tiên nhanh hơn mốc này.",
+    detail: "Phản ánh tốc độ phản hồi điển hình của tutor trong điều kiện bình thường.",
   },
   positiveRatings: {
-    summary: "So luot phan hoi tich cuc tu nguoi dung.",
-    detail: "Dem tu qa_history.rating = 1 trong 14 ngay gan nhat. Dung de theo doi chat luong cam nhan.",
+    summary: "Số lượt phản hồi tích cực từ người dùng.",
+    detail: "Đếm từ qa_history.rating = 1 trong 14 ngày gần nhất. Dùng để theo dõi chất lượng cảm nhận.",
   },
   negativeRatings: {
-    summary: "So luot phan hoi tieu cuc tu nguoi dung.",
-    detail: "Dem tu qa_history.rating = -1 trong 14 ngay gan nhat. Nen doc cung recent negative feedback de hieu nguyen nhan.",
+    summary: "Số lượt phản hồi tiêu cực từ người dùng.",
+    detail: "Đếm từ qa_history.rating = -1 trong 14 ngày gần nhất. Nên đọc cùng recent negative feedback để hiểu nguyên nhân.",
   },
   positiveRatio: {
-    summary: "Ty le phan hoi tich cuc tren tong phan hoi da duoc cham.",
-    detail: "Tinh tu positive / total rated trong 14 ngay. Huu ich hon khi xem cung sample size.",
+    summary: "Tỷ lệ phản hồi tích cực trên tổng phản hồi đã được chấm.",
+    detail: "Tính từ positive trên total rated trong 14 ngày. Hữu ích hơn khi xem cùng sample size.",
   },
   unrated24h: {
-    summary: "So luot tra loi chua duoc nguoi dung danh gia trong 24 gio gan nhat.",
-    detail: "Dung de biet bao nhieu interaction chua co feedback, khong dong nghia voi tot hay xau.",
+    summary: "Số lượt trả lời chưa được người dùng đánh giá trong 24 giờ gần nhất.",
+    detail: "Dùng để biết bao nhiêu interaction chưa có feedback, không đồng nghĩa với tốt hay xấu.",
   },
 } satisfies Record<string, KpiTooltip>;
 
 export const trafficTooltips = {
   rps1m: {
-    summary: "So request backend trung binh moi giay trong 1 phut gan nhat.",
-    detail: "Lay tu Prometheus rate. Dung de theo doi tai he thong theo thoi gian thuc.",
+    summary: "Số request backend trung bình mỗi giây trong 1 phút gần nhất.",
+    detail: "Lấy từ Prometheus rate. Dùng để theo dõi tải hệ thống theo thời gian thực.",
   },
   p50Latency: {
-    summary: "Mot nua request hoan thanh nhanh hon moc nay.",
-    detail: "Phan anh do tre dien hinh cua API tu Prometheus trong cua so 5 phut.",
+    summary: "Một nửa request hoàn thành nhanh hơn mốc này.",
+    detail: "Phản ánh độ trễ điển hình của API từ Prometheus trong cửa sổ 5 phút.",
   },
   p95Latency: {
-    summary: "95% request hoan thanh nhanh hon moc nay.",
-    detail: "Dung de theo doi tail latency. Neu tang, mot nhom nguoi dung se cam thay he thong cham ro ret.",
+    summary: "95% request hoàn thành nhanh hơn mốc này.",
+    detail: "Dùng để theo dõi tail latency. Nếu tăng, một nhóm người dùng sẽ cảm thấy hệ thống chậm rõ rệt.",
   },
   p99Latency: {
-    summary: "99% request hoan thanh nhanh hon moc nay.",
-    detail: "Nhay voi outlier va spike. Huu ich de phat hien su co ngat quang.",
+    summary: "99% request hoàn thành nhanh hơn mốc này.",
+    detail: "Nhạy với outlier và spike. Hữu ích để phát hiện sự cố ngắt quãng.",
   },
   rate4xx: {
-    summary: "Ty le request bi tu choi hoac sai tu phia client.",
-    detail: "Tinh tu HTTP 4xx / tong request trong 5 phut. Tang cao co the do auth, route sai, hoac misuse tu frontend.",
+    summary: "Tỷ lệ request bị từ chối hoặc sai từ phía client.",
+    detail: "Tính từ HTTP 4xx trên tổng request trong 5 phút. Tăng cao có thể do auth, route sai hoặc misuse từ frontend.",
   },
   rate5xx: {
-    summary: "Ty le request loi phia server.",
-    detail: "Tinh tu HTTP 5xx / tong request trong 5 phut. Day la chi bao chinh cho backend instability.",
+    summary: "Tỷ lệ request lỗi phía server.",
+    detail: "Tính từ HTTP 5xx trên tổng request trong 5 phút. Đây là chỉ báo chính cho backend instability.",
   },
 } satisfies Record<string, KpiTooltip>;
 
 export const systemTooltips = {
   cpuUsage: {
-    summary: "Muc su dung CPU hien tai cua may hoac runtime backend.",
-    detail: "Lay tu psutil. Dung de phat hien tai xu ly tang cao hoac saturation.",
+    summary: "Mức sử dụng CPU hiện tại của máy hoặc runtime backend.",
+    detail: "Lấy từ psutil. Dùng để phát hiện tải xử lý tăng cao hoặc saturation.",
   },
   ramUsage: {
-    summary: "Ty le bo nho dang duoc su dung.",
-    detail: "Lay tu psutil. Neu tang lien tuc co the la dau hieu memory pressure hoac leak.",
+    summary: "Tỷ lệ bộ nhớ đang được sử dụng.",
+    detail: "Lấy từ psutil. Nếu tăng liên tục có thể là dấu hiệu memory pressure hoặc leak.",
   },
   diskUsage: {
-    summary: "Ty le dung luong dia dang dung.",
-    detail: "Lay tu psutil. Quan trong voi moi truong local hoac container neu log hoac data tang nhanh.",
+    summary: "Tỷ lệ dung lượng đĩa đang dùng.",
+    detail: "Lấy từ psutil. Quan trọng với môi trường local hoặc container nếu log hoặc data tăng nhanh.",
   },
   dbConnections: {
-    summary: "So ket noi hien co toi PostgreSQL.",
-    detail: "Doc tu pg_stat_activity. Neu tang bat thuong co the lien quan connection leak hoac tai cao.",
+    summary: "Số kết nối hiện có tới PostgreSQL.",
+    detail: "Đọc từ pg_stat_activity. Nếu tăng bất thường có thể liên quan connection leak hoặc tải cao.",
   },
   redisHitRate: {
-    summary: "Ty le cache hit cua Redis tren tong hit va miss.",
-    detail: "Lay tu Redis INFO stats. Cao hon thuong tot hon, nhung can doc cung loai workload.",
+    summary: "Tỷ lệ cache hit của Redis trên tổng hit và miss.",
+    detail: "Lấy từ Redis INFO stats. Cao hơn thường tốt hơn, nhưng cần đọc cùng loại workload.",
   },
   serviceUptime: {
-    summary: "Thoi gian backend process hien tai da chay lien tuc.",
-    detail: "Tinh tu luc app boot. Neu thuong xuyen reset ve thap, co the app dang restart.",
+    summary: "Thời gian backend process hiện tại đã chạy liên tục.",
+    detail: "Tính từ lúc app boot. Nếu thường xuyên reset về thấp, có thể app đang restart.",
   },
 } satisfies Record<string, KpiTooltip>;
