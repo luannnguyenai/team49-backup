@@ -32,7 +32,7 @@ export default function PrerequisiteSuggestionDialog({
             Found related foundational topics
           </h2>
           <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            Some topics you selected typically build on earlier topics in your learning path. These foundational topics haven't been marked as mastered yet. Would you like to add them to your verification assessment?
+            Some topics you selected typically build on earlier topics in your learning path. These foundational topics haven&apos;t been marked as mastered yet. Would you like to add them to your verification assessment?
           </p>
         </div>
 
