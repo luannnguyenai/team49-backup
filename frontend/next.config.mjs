@@ -1,4 +1,12 @@
 /** @type {import('next').NextConfig} */
+const apiTarget = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL;
+
+if (process.env.NODE_ENV === "production" && !apiTarget) {
+  throw new Error(
+    "Missing API_INTERNAL_URL or NEXT_PUBLIC_API_URL for production build/runtime.",
+  );
+}
+
 const nextConfig = {
   reactStrictMode: true,
 
@@ -10,10 +18,7 @@ const nextConfig = {
   // API_INTERNAL_URL is read at runtime (server-side), not baked in at build time.
   // NEXT_PUBLIC_API_URL is for client-side direct calls (fallback).
   async rewrites() {
-    const target =
-      process.env.API_INTERNAL_URL ||
-      process.env.NEXT_PUBLIC_API_URL ||
-      "http://localhost:8000";
+    const target = apiTarget || "http://localhost:8000";
     return [
       {
         source: "/api/:path*",
