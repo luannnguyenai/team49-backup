@@ -9,7 +9,7 @@ import KpiGroup from "@/components/admin/KpiGroup";
 import { adminApi, TrafficSummary } from "@/lib/admin-api";
 import { trafficTooltips } from "@/lib/admin-tooltips";
 
-const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST || "http://localhost:3001";
+const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST?.trim() || null;
 const TRAFFIC_DASHBOARD_UID = "a20-api-traffic";
 
 function fmtSec(s: number | null | undefined): string {
@@ -109,27 +109,37 @@ export default function AdminTrafficPage() {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h3 className="text-base font-semibold text-slate-900 dark:text-white">Grafana — API Traffic</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Embedded from <code>{GRAFANA_HOST}</code> · provisioned dashboard <code>{TRAFFIC_DASHBOARD_UID}</code>.
-            </p>
+            {GRAFANA_HOST ? (
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Embedded from <code>{GRAFANA_HOST}</code> · provisioned dashboard <code>{TRAFFIC_DASHBOARD_UID}</code>.
+              </p>
+            ) : (
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                Chưa cấu hình <code>NEXT_PUBLIC_GRAFANA_HOST</code>, nên chưa thể mở dashboard nhúng.
+              </p>
+            )}
           </div>
-          <a
-            href={`${GRAFANA_HOST}/d/${TRAFFIC_DASHBOARD_UID}`}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-          >
-            Open Grafana →
-          </a>
+          {GRAFANA_HOST ? (
+            <a
+              href={`${GRAFANA_HOST}/d/${TRAFFIC_DASHBOARD_UID}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+            >
+              Open Grafana →
+            </a>
+          ) : null}
         </div>
-        <div className="overflow-hidden rounded-[20px] border border-slate-200/80 bg-white/80">
-          <iframe
-            src={`${GRAFANA_HOST}/d/${TRAFFIC_DASHBOARD_UID}?theme=light&kiosk`}
-            title="Grafana — API Traffic"
-            className="h-[720px] w-full"
-            loading="lazy"
-          />
-        </div>
+        {GRAFANA_HOST ? (
+          <div className="overflow-hidden rounded-[20px] border border-slate-200/80 bg-white/80">
+            <iframe
+              src={`${GRAFANA_HOST}/d/${TRAFFIC_DASHBOARD_UID}?theme=light&kiosk`}
+              title="Grafana — API Traffic"
+              className="h-[720px] w-full"
+              loading="lazy"
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );
