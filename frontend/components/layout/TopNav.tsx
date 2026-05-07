@@ -2,7 +2,7 @@
 // components/layout/TopNav.tsx
 // Horizontal top navigation bar — replaces the left Sidebar + TopBar combo.
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Moon, Sun, Bell, LogOut, Search, Menu, X } from "lucide-react";
@@ -75,7 +75,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
     router.push(getCourseHref(courseSlug));
   };
 
-  const ensureCatalogLoaded = () => {
+  const ensureCatalogLoaded = useCallback(() => {
     if (hasLoadedCourses || isLoadingCourses) {
       return;
     }
@@ -99,11 +99,11 @@ function TopNavSearch({ pathname }: { pathname: string }) {
           setIsLoadingCourses(false);
         }
       });
-  };
+  }, [hasLoadedCourses, isLoadingCourses]);
 
   useEffect(() => {
     ensureCatalogLoaded();
-  }, []);
+  }, [ensureCatalogLoaded]);
 
   const hasDraftQuery = draftQuery.length > 0;
 
