@@ -1,0 +1,70 @@
+name: Terraform
+
+on:
+  pull_request:
+    paths:
+      - "deploy/terraform/**"
+      - ".github/workflows/terraform.yml"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Apply reviewed production Terraform plan"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: read
+
+concurrency:
+  group: terraform-prod
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: ap-southeast-1
+
+      - name: Write backend config
+        working-directory: deploy/terraform/live/prod
+        run: printf '%s' "${{ secrets.TF_BACKEND_HCL_PROD }}" > backend.hcl
+
+      - name: Write production variables
+        working-directory: deploy/terraform/live/prod
+        run: printf '%s' "${{ secrets.TFVARS_PROD }}" > terraform.tfvars
+
+      - name: Terraform init
+        working-directory: deploy/terraform/live/prod
+        run: terraform init -backend-config=backend.hcl
+
+      - name: Terraform fmt
+        working-directory: deploy/terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform validate
+        working-directory: deploy/terraform/live/prod
+        run: terraform validate
+
+      - name: Terraform plan
+        working-directory: deploy/terraform/live/prod
+        run: terraform plan -var-file=terraform.tfvars -out prod.tfplan
+
+      - name: Terraform apply
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.apply == 'true' }}
+        working-directory: deploy/terraform/live/prod
+        run: terraform apply -auto-approve prod.tfplan
