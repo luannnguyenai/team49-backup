@@ -2,11 +2,10 @@
 # the performance. Learn more at
 # https://dvc.org/doc/user-guide/dvcignore
 
-# Raw course assets stay outside DVC by default. They are large and are only
-# needed when re-running ingest, not when loading the app/database.
+# Large raw course assets stay outside DVC by default. Transcripts are small
+# runtime inputs and can be tracked explicitly when needed.
 data/courses/*/videos/**
 data/courses/*/slides/**
-data/courses/*/transcripts/**
 
 # Working directories, archives, and local experiments should not be pushed as
 # shared data artifacts.

@@ -1,0 +1,6 @@
+outs:
+- md5: 22f9aa51efd1af1e81d295672967c330.dir
+  size: 891903
+  nfiles: 9
+  hash: md5
+  path: transcripts
