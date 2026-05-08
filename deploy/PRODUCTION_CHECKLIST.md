@@ -1,121 +1,156 @@
-# Deploy Checklist — Render + AWS
+# Production Checklist — Full AWS
 
-Tick song song khi thực thi `DEPLOYMENT_PLAN.md`. Chỉ chuyển nhóm tiếp theo khi nhóm trước đã pass.
+Tick this while executing `DEPLOYMENT_PLAN.md`. Move to the next group only when the previous group passes.
 
 ## Pre-deploy
 
-- [ ] Repo đã push lên GitHub, branch deploy sẵn sàng.
-- [ ] Backend `Dockerfile` bind `0.0.0.0:${PORT:-8000}` (không hard-code 8000).
-- [ ] Frontend `frontend/Dockerfile` build standalone, listen `$PORT` nếu Render yêu cầu.
-- [ ] Có tài khoản Render đã link GitHub.
-- [ ] Có tài khoản AWS với quota đủ cho S3 + CloudFront.
-- [ ] Đã chọn AWS region (ví dụ `ap-southeast-1`).
-- [ ] Đã chọn LLM provider, có API key còn quota.
-- [ ] Đã chọn email provider (nếu bật forgot-password) và verify sender.
-- [ ] `SECRET_KEY` random 64 hex đã generate (`openssl rand -hex 32`).
-- [ ] Đã chốt domain layout dự kiến (`app.<domain>`, `api.<domain>`, `cdn.<domain>`).
+- [ ] Repo is pushed and deploy branch is ready.
+- [ ] Backend `Dockerfile` binds `0.0.0.0:${PORT:-8000}`.
+- [ ] Frontend `frontend/Dockerfile` listens on runtime `PORT` with fallback `3000`.
+- [ ] AWS account has quota for App Runner, ECR, RDS, ElastiCache, S3, CloudFront, Route 53, ACM, Secrets Manager, and CloudWatch.
+- [ ] Primary region selected: `ap-southeast-1`.
+- [ ] CloudFront certificate region understood: `us-east-1`.
+- [ ] Domain layout selected: `app.<domain>`, `api.<domain>`, `cdn.<domain>`.
+- [ ] LLM provider selected and API key available.
+- [ ] Email provider sender/domain verified if forgot-password is enabled.
+- [ ] `SECRET_KEY` generated with a secure random value.
+- [ ] AWS Budget thresholds selected.
+
+## CI/CD
+
+- [ ] GitHub Actions deploy role exists and uses AWS OIDC.
+- [ ] Deploy role trust policy restricts this repository and production branch/environment.
+- [ ] Deploy role has scoped ECR and App Runner permissions.
+- [ ] No long-lived AWS access keys are stored in GitHub secrets.
+- [ ] `.github/workflows/ci.yml` uses Python 3.12.
+- [ ] CI runs backend lint/tests.
+- [ ] CI runs frontend lint/type-check/build and unit tests where available.
+- [ ] Production deploy workflow builds SHA-tagged ECR images.
+- [ ] Production deploy workflow updates App Runner services.
+- [ ] Production deploy workflow runs backend/frontend smoke tests.
+
+## ECR
+
+- [ ] ECR repository `a20-backend` exists.
+- [ ] ECR repository `a20-frontend` exists.
+- [ ] Image scan on push enabled where available.
+- [ ] Lifecycle policies configured.
+- [ ] Backend image pushed with current commit SHA.
+- [ ] Frontend image pushed with current commit SHA.
+
+## Network
+
+- [ ] VPC selected or created.
+- [ ] Private subnets selected for RDS and ElastiCache.
+- [ ] App Runner VPC connector exists.
+- [ ] RDS security group allows PostgreSQL only from backend path.
+- [ ] ElastiCache security group allows Redis only from backend path.
+- [ ] RDS is not publicly accessible.
+- [ ] ElastiCache is not publicly accessible.
+
+## Database and cache
+
+- [ ] RDS PostgreSQL instance exists.
+- [ ] Automated backups enabled.
+- [ ] Pre-migration snapshot/backup process confirmed.
+- [ ] `CREATE EXTENSION IF NOT EXISTS vector;` ran successfully.
+- [ ] `SELECT extname FROM pg_extension WHERE extname='vector';` returns `vector`.
+- [ ] ElastiCache Redis OSS/Valkey exists.
+- [ ] `DATABASE_URL` and `REDIS_URL` stored in Secrets Manager or App Runner secret references.
 
 ## AWS asset infra
 
-- [ ] S3 bucket private đã tạo, Block Public Access bật.
-- [ ] Versioning bucket bật (nếu muốn rollback asset).
-- [ ] `aws s3 sync ./data/courses s3://<bucket>/courses` chạy thành công.
-- [ ] Đã ghi lại object count và total size trên S3.
-- [ ] CloudFront distribution đã tạo, dùng OAC, S3 vẫn private.
-- [ ] CloudFront cho phép `GET`, `HEAD`, redirect HTTP→HTTPS.
-- [ ] CloudFront range request hoạt động (MP4 seek được).
-- [ ] (Tùy chọn) CloudFront key pair tạo cho signed URL, private key lưu an toàn.
-- [ ] (Tùy chọn) CloudFront Response Headers Policy set CORS nếu frontend fetch range qua XHR.
+- [ ] S3 bucket exists in selected region.
+- [ ] S3 Block Public Access enabled.
+- [ ] S3 versioning enabled.
+- [ ] S3 default encryption enabled.
+- [ ] `aws s3 sync ./data/courses s3://<bucket>/courses` completed.
+- [ ] Object count and total size recorded.
+- [ ] CloudFront distribution exists with S3 origin.
+- [ ] CloudFront uses Origin Access Control.
+- [ ] Direct public S3 access is blocked.
+- [ ] CloudFront range requests work for MP4 seeking.
+- [ ] Optional signed URL key material stored safely.
 
-## Render database + cache
+## Backend App Runner
 
-- [ ] Render PostgreSQL đã tạo, region đúng.
-- [ ] `CREATE EXTENSION IF NOT EXISTS vector;` chạy OK.
-- [ ] `SELECT extname ... 'vector'` trả về `vector`.
-- [ ] Render Redis/Key Value đã tạo, có `REDIS_URL`.
+- [ ] App Runner service `a20-backend` exists.
+- [ ] Backend service uses ECR image tagged with current commit SHA.
+- [ ] VPC connector attached.
+- [ ] Health check path `/health` configured.
+- [ ] Backend env/secrets complete:
+  - [ ] `DATABASE_URL`
+  - [ ] `REDIS_URL`
+  - [ ] `SECRET_KEY`
+  - [ ] `CORS_ORIGINS`
+  - [ ] `FRONTEND_BASE_URL`
+  - [ ] LLM provider key
+  - [ ] `DEBUG=false`
+  - [ ] `ASSET_STORAGE_PROVIDER=s3`
+  - [ ] `AWS_REGION`, `AWS_S3_BUCKET`, `AWS_S3_PREFIX`, `CLOUDFRONT_DOMAIN`
+  - [ ] CloudFront signed URL values if used
+- [ ] `curl https://<backend-app-runner-url>/health` returns 200.
+- [ ] Backend logs show no secret values and no repeated startup errors.
 
-## Backend deploy
+## Database migration and bootstrap
 
-- [ ] Render Web Service `a20-backend` deploy thành công (Docker, root `Dockerfile`).
-- [ ] Health check path `/health` set đúng.
-- [ ] Env backend đầy đủ:
-  - [ ] `DATABASE_URL` prefix `postgresql+asyncpg://`.
-  - [ ] `REDIS_URL`.
-  - [ ] `SECRET_KEY`, `ALGORITHM`, `ACCESS_TOKEN_EXPIRE_MINUTES`, `REFRESH_TOKEN_EXPIRE_DAYS`.
-  - [ ] `CORS_ORIGINS` JSON array hợp lệ.
-  - [ ] `FRONTEND_BASE_URL`.
-  - [ ] `MODEL_PROVIDER` + API key tương ứng.
-  - [ ] `DEBUG=false`, `LOG_LEVEL=INFO`.
-  - [ ] `ASSET_STORAGE_PROVIDER=s3`.
-  - [ ] `AWS_REGION`, `AWS_S3_BUCKET`, `AWS_S3_PREFIX`, `CLOUDFRONT_DOMAIN`.
-  - [ ] (Tùy chọn) `CLOUDFRONT_KEY_PAIR_ID`, `CLOUDFRONT_PRIVATE_KEY` nếu dùng signed URL.
-- [ ] `curl https://<backend>.onrender.com/health` → 200.
-- [ ] Logs backend không có secret và không lỗi lặp.
+- [ ] DB snapshot/backup exists before migration.
+- [ ] Alembic migrations ran against RDS.
+- [ ] Current migration head verified.
+- [ ] Production bootstrap wrapper reviewed if needed.
+- [ ] Bootstrap/import ran against RDS.
+- [ ] Course rows exist.
+- [ ] Lecture/unit rows exist.
+- [ ] Admin/demo account policy executed.
+- [ ] DB asset keys match S3 object keys.
 
-## Database migration + bootstrap pipeline
+## Frontend App Runner
 
-- [ ] `scripts/render_bootstrap.sh` đã được tạo và chạy local container thành công (idempotent).
-- [ ] Trên Render shell: `bash scripts/render_bootstrap.sh` exit code 0.
-  - [ ] 1/8 alembic upgrade head OK.
-  - [ ] 2/8 seed canonical product shell OK (hoặc skipped if populated).
-  - [ ] 3/8 seed CS231n lectures OK (hoặc skipped).
-  - [ ] 4/8 import canonical artifacts schema v2 OK.
-  - [ ] 5/8 backfill schema v2 OK.
-  - [ ] 6/8 validate schema v2 OK.
-  - [ ] 7/8 canonical runtime parity OK.
-  - [ ] 8/8 create admin/demo accounts OK.
-- [ ] Verify counts sau bootstrap:
-  - [ ] `SELECT COUNT(*) FROM learning_units` > 0.
-  - [ ] `SELECT COUNT(*) FROM lectures` > 0.
-  - [ ] `SELECT COUNT(*) FROM users WHERE role='admin'` >= 1.
-- [ ] Verify parity S3 ↔ DB: `storage_key`/`video_filename` trong DB khớp object thật trên S3 (Phase 14.1).
-
-## Frontend deploy
-
-- [ ] Render Web Service `a20-frontend` deploy thành công (Docker, root `frontend/`).
-- [ ] Env frontend đầy đủ:
-  - [ ] `NEXT_PUBLIC_API_URL` = backend URL.
-  - [ ] `API_INTERNAL_URL` (nếu dùng).
-  - [ ] `NODE_ENV=production`, `NEXT_TELEMETRY_DISABLED=1`.
-- [ ] `curl https://<frontend>.onrender.com/api/health` → 200.
-- [ ] Frontend rebuild nếu đổi `NEXT_PUBLIC_API_URL`.
+- [ ] App Runner service `a20-frontend` exists.
+- [ ] Frontend service uses ECR image tagged with current commit SHA.
+- [ ] `NEXT_PUBLIC_API_URL` points to backend default/custom URL.
+- [ ] `API_INTERNAL_URL` set if server-side calls need it.
+- [ ] `NODE_ENV=production`.
+- [ ] `NEXT_TELEMETRY_DISABLED=1`.
+- [ ] `curl https://<frontend-app-runner-url>/api/health` returns 200.
+- [ ] Frontend rebuilt after any API URL change.
 
 ## Smoke test functional
 
-- [ ] Home page load.
-- [ ] Register + login OK.
-- [ ] (Nếu bật email) Forgot password gửi mail, link mở `/reset-password?token=...` đúng.
-- [ ] Reset password thành công, mật khẩu cũ fail, mật khẩu mới login được.
-- [ ] Course catalog load.
-- [ ] Ít nhất 1 learning unit load.
-- [ ] Video URL trả về dạng CloudFront, không phải `/data/...`.
-- [ ] Video play + seek được.
-- [ ] 1 quiz/session start + submit OK.
-- [ ] Tutor endpoint trả response từ LLM.
-- [ ] Browser console không gọi `localhost`.
-- [ ] Không có mixed content HTTP.
+- [ ] Home page loads.
+- [ ] Register and login work.
+- [ ] Forgot-password flow works if enabled.
+- [ ] Course catalog loads.
+- [ ] At least one learning unit loads.
+- [ ] Video URL is CloudFront, not local `/data/...`.
+- [ ] Video play and seek work.
+- [ ] Quiz/session start and submit work.
+- [ ] Tutor endpoint responds from selected LLM provider.
+- [ ] Browser console has no localhost calls.
+- [ ] No mixed-content HTTP.
 
-## Custom domain (sau khi mua)
+## Custom domain
 
-- [ ] `app.<domain>` map vào Render frontend, TLS active.
-- [ ] `api.<domain>` map vào Render backend, TLS active.
-- [ ] `cdn.<domain>` map vào CloudFront, ACM cert ở `us-east-1`.
-- [ ] Backend env update: `CORS_ORIGINS`, `FRONTEND_BASE_URL`, `CLOUDFRONT_DOMAIN`.
-- [ ] Frontend env update: `NEXT_PUBLIC_API_URL`, `API_INTERNAL_URL` + redeploy.
-- [ ] Smoke test toàn bộ flow lại bằng domain thật.
+- [ ] Route 53 hosted zone exists.
+- [ ] `app.<domain>` maps to frontend App Runner custom domain.
+- [ ] `api.<domain>` maps to backend App Runner custom domain.
+- [ ] `cdn.<domain>` maps to CloudFront.
+- [ ] ACM certs issued and attached.
+- [ ] Backend env updated: `CORS_ORIGINS`, `FRONTEND_BASE_URL`, `CLOUDFRONT_DOMAIN`.
+- [ ] Frontend env updated: `NEXT_PUBLIC_API_URL`, `API_INTERNAL_URL`.
+- [ ] Frontend rebuilt/redeployed after final API URL change.
+- [ ] Full smoke test passes on final domains.
 
-## Final production-readiness
+## Cost and operations
 
-- [ ] `DEBUG=false` trên backend.
-- [ ] CORS chỉ allow domain frontend hợp lệ.
-- [ ] S3 bucket vẫn private.
-- [ ] CloudFront là entrypoint duy nhất cho asset.
-- [ ] Backend không proxy video bytes.
-- [ ] AWS Budget alert đã bật.
-- [ ] CloudFront usage metric visible.
-- [ ] Render service plans known + billing đã review.
-- [ ] Note 3 domain final để share demo.
-- [ ] Note git commit SHA đang chạy.
-- [ ] Theo dõi logs 30 phút đầu.
-- [ ] Theo dõi LLM cost burn rate.
-- [ ] Note known issues vào `THINGS NEED FIX.md` hoặc tracker.
+- [ ] AWS Budget alerts enabled.
+- [ ] CloudFront bytes alarm enabled.
+- [ ] App Runner 5xx alarm enabled.
+- [ ] RDS CPU/storage alarms enabled.
+- [ ] CloudWatch log retention set.
+- [ ] ECR lifecycle policy enabled.
+- [ ] S3 lifecycle policy reviewed.
+- [ ] Deployed commit SHA and image digests recorded.
+- [ ] Rollback image digests known.
+- [ ] Logs monitored during first 30 minutes.
+- [ ] LLM cost monitored after launch.
