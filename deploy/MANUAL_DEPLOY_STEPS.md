@@ -1,552 +1,306 @@
-# Manual Deploy Steps — Render + AWS S3/CloudFront
+# Manual Deploy Steps — Full AWS
 
-File này là checklist thao tác tay để deploy app lên:
+Use this checklist when deploying manually before CI/CD is fully trusted.
 
-- Render: backend, frontend, PostgreSQL, Redis/Key Value
-- AWS: S3 private bucket, CloudFront CDN
+## 0. Fill deployment values
 
-Không commit secret thật vào git.
-
----
-
-## 0. Thông tin cần chốt trước
-
-Điền các giá trị thật của bạn vào bảng này khi làm:
-
-| Key | Value |
+| Item | Value |
 |---|---|
+| AWS account ID | `________________` |
 | AWS region | `ap-southeast-1` |
+| Backend ECR repo | `a20-backend` |
+| Frontend ECR repo | `a20-frontend` |
+| Backend App Runner URL | `https://________________` |
+| Frontend App Runner URL | `https://________________` |
+| RDS endpoint | `________________.rds.amazonaws.com` |
+| ElastiCache endpoint | `________________.cache.amazonaws.com` |
 | S3 bucket | `a20-course-assets-prod` |
-| S3 prefix | `courses` |
-| CloudFront domain | `____________________________` |
-| Render backend URL | `https://________________.onrender.com` |
-| Render frontend URL | `https://________________.onrender.com` |
-| Render Postgres URL | `postgresql://________________` |
-| Render Redis URL | `redis://________________` |
-| Final frontend domain | `app.<domain>` hoặc `<domain>` |
+| CloudFront domain | `________________.cloudfront.net` |
+| Final frontend domain | `app.<domain>` |
 | Final backend domain | `api.<domain>` |
 | Final CDN domain | `cdn.<domain>` |
 
----
-
-## 1. Chuẩn bị local
-
-Chạy ở repo root:
+## 1. Verify AWS CLI identity
 
 ```bash
-git status
-bash scripts/setup_hooks.sh
-openssl rand -hex 32
+aws sts get-caller-identity
+aws configure get region
 ```
 
-Lưu output của `openssl rand -hex 32`. Giá trị đó dùng cho:
+Expected region: `ap-southeast-1`.
 
-```text
-SECRET_KEY=<output>
-```
-
-Kiểm tra local course assets:
+## 2. Create ECR repositories
 
 ```bash
-ls data/courses
+aws ecr create-repository --repository-name a20-backend --region ap-southeast-1
+aws ecr create-repository --repository-name a20-frontend --region ap-southeast-1
 ```
 
-Expected có các course như:
+Enable lifecycle policies so only recent SHA-tagged images are retained.
 
-```text
-CS224n
-CS230
-CS231n
-```
-
----
-
-## 2. Tạo S3 bucket private
-
-Set biến local:
+## 3. Build and push backend image
 
 ```bash
-export AWS_REGION=ap-southeast-1
-export AWS_S3_BUCKET=a20-course-assets-prod
+AWS_ACCOUNT_ID=<account-id>
+AWS_REGION=ap-southeast-1
+COMMIT_SHA=$(git rev-parse --short=12 HEAD)
+
+aws ecr get-login-password --region "$AWS_REGION" \
+  | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+
+docker build -t a20-backend:"$COMMIT_SHA" .
+docker tag a20-backend:"$COMMIT_SHA" "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/a20-backend:$COMMIT_SHA"
+docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/a20-backend:$COMMIT_SHA"
 ```
 
-Tạo bucket:
+Record the pushed image digest.
+
+## 4. Build and push frontend image
 
 ```bash
-aws s3api create-bucket \
-  --bucket "$AWS_S3_BUCKET" \
-  --region "$AWS_REGION" \
-  --create-bucket-configuration LocationConstraint="$AWS_REGION"
+AWS_ACCOUNT_ID=<account-id>
+AWS_REGION=ap-southeast-1
+COMMIT_SHA=$(git rev-parse --short=12 HEAD)
+
+docker build \
+  --build-arg NEXT_PUBLIC_API_URL=https://<backend-url-or-api-domain> \
+  -t a20-frontend:"$COMMIT_SHA" ./frontend
+
+docker tag a20-frontend:"$COMMIT_SHA" "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/a20-frontend:$COMMIT_SHA"
+docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/a20-frontend:$COMMIT_SHA"
 ```
 
-Bật Block Public Access:
+Record the pushed image digest.
 
-```bash
-aws s3api put-public-access-block \
-  --bucket "$AWS_S3_BUCKET" \
-  --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
-```
+## 5. Create private network dependencies
 
-Bật versioning:
+Create or select:
 
-```bash
-aws s3api put-bucket-versioning \
-  --bucket "$AWS_S3_BUCKET" \
-  --versioning-configuration Status=Enabled
-```
+- VPC.
+- Private subnets.
+- Backend security group path for App Runner VPC connector.
+- RDS security group.
+- ElastiCache security group.
 
-Verify:
+RDS and ElastiCache must not be public.
 
-```bash
-aws s3api get-public-access-block --bucket "$AWS_S3_BUCKET"
-aws s3api get-bucket-versioning --bucket "$AWS_S3_BUCKET"
-```
+## 6. Create RDS PostgreSQL
 
----
+Create RDS PostgreSQL with:
 
-## 3. Upload course assets lên S3
+- Identifier: `a20-postgres-prod`
+- Engine: PostgreSQL
+- Initial size: `db.t4g.micro` or `db.t4g.small`
+- Storage: 20 GB or higher
+- Backups: enabled
+- Public access: no
 
-Upload toàn bộ `data/courses` vào prefix `courses/`:
-
-```bash
-aws s3 sync ./data/courses s3://a20-course-assets-prod/courses --delete
-```
-
-Verify số lượng và dung lượng:
-
-```bash
-aws s3 ls s3://a20-course-assets-prod/courses --recursive --summarize
-```
-
-Test vài file cụ thể:
-
-```bash
-aws s3 ls s3://a20-course-assets-prod/courses/CS231n/videos/
-aws s3 ls s3://a20-course-assets-prod/courses/CS224n/
-aws s3 ls s3://a20-course-assets-prod/courses/CS230/
-```
-
-Expected key format:
-
-```text
-courses/CS231n/videos/<file>.mp4
-courses/CS231n/transcripts/<file>.txt
-courses/CS231n/slides/<file>.pdf
-```
-
----
-
-## 4. Tạo CloudFront distribution
-
-Vào AWS Console → CloudFront → Create distribution.
-
-Config:
-
-| Field | Value |
-|---|---|
-| Origin | S3 bucket `a20-course-assets-prod` |
-| Origin access | Origin Access Control / OAC |
-| S3 bucket public access | Keep private |
-| Viewer protocol policy | Redirect HTTP to HTTPS |
-| Allowed HTTP methods | GET, HEAD |
-| Cache policy | CachingOptimized hoặc default |
-| Price class | tùy budget |
-
-Sau khi tạo xong, CloudFront sẽ hiện domain dạng:
-
-```text
-dxxxxxxxxxxxxx.cloudfront.net
-```
-
-Lưu domain này:
-
-```text
-CLOUDFRONT_DOMAIN=dxxxxxxxxxxxxx.cloudfront.net
-```
-
-CloudFront sẽ đề xuất S3 bucket policy cho OAC. Copy policy đó và apply vào S3 bucket.
-
-Verify bằng 1 video thật:
-
-```bash
-curl -I https://dxxxxxxxxxxxxx.cloudfront.net/courses/CS231n/videos/<file>.mp4
-```
-
-Expected:
-
-```text
-HTTP/2 200
-```
-
-hoặc:
-
-```text
-HTTP/2 206
-```
-
-Nếu bị `403`, kiểm tra lại OAC bucket policy.
-
-Nếu bị `404`, kiểm tra lại object key trên S3.
-
----
-
-## 5. Tạo Render PostgreSQL
-
-Vào Render Dashboard → New → PostgreSQL.
-
-Gợi ý:
-
-| Field | Value |
-|---|---|
-| Name | `a20-db` |
-| Region | cùng region Render backend nếu chọn được |
-| Plan | Free/Starter tùy demo |
-
-Sau khi DB ready:
-
-1. Copy connection string.
-2. Mở Render PostgreSQL shell hoặc dùng external connection.
-3. Chạy:
+Enable pgvector:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 SELECT extname FROM pg_extension WHERE extname = 'vector';
 ```
 
-Render URL thường có dạng:
+Store the final async URL:
 
 ```text
-postgresql://USER:PASSWORD@HOST:PORT/DB
+DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@HOST:5432/DB
 ```
 
-Backend cần đổi prefix thành:
+## 7. Create ElastiCache
+
+Create Redis OSS or Valkey in private subnets.
+
+Store:
 
 ```text
-postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DB
+REDIS_URL=redis://HOST:6379/0
 ```
 
-Lưu giá trị này để set:
+## 8. Create S3 bucket and upload assets
+
+```bash
+aws s3api create-bucket \
+  --bucket a20-course-assets-prod \
+  --region ap-southeast-1 \
+  --create-bucket-configuration LocationConstraint=ap-southeast-1
+
+aws s3api put-public-access-block \
+  --bucket a20-course-assets-prod \
+  --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+
+aws s3api put-bucket-versioning \
+  --bucket a20-course-assets-prod \
+  --versioning-configuration Status=Enabled
+
+aws s3 sync ./data/courses s3://a20-course-assets-prod/courses --delete
+```
+
+Record object count and total size:
+
+```bash
+aws s3 ls s3://a20-course-assets-prod/courses --recursive --summarize
+```
+
+## 9. Create CloudFront distribution
+
+Create a distribution with:
+
+- Origin: S3 bucket.
+- Access: Origin Access Control.
+- Viewer protocol policy: redirect HTTP to HTTPS.
+- Methods: `GET`, `HEAD`.
+- Range requests: supported.
+
+Verify one asset through the CloudFront domain.
+
+## 10. Store secrets
+
+Store runtime secrets in Secrets Manager or App Runner secret references:
 
 ```text
-DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DB
+DATABASE_URL
+REDIS_URL
+SECRET_KEY
+OPENAI_API_KEY
+ANTHROPIC_API_KEY
+GEMINI_API_KEY
+RESEND_API_KEY
+CLOUDFRONT_PRIVATE_KEY
 ```
 
----
+## 11. Create backend App Runner service
 
-## 6. Tạo Render Redis / Key Value
+Create service from backend ECR image.
 
-Vào Render Dashboard → New → Key Value.
+Required settings:
 
-Gợi ý:
-
-| Field | Value |
-|---|---|
-| Name | `a20-redis` |
-| Region | cùng backend nếu chọn được |
-
-Copy Redis URL:
-
-```text
-REDIS_URL=redis://...
-```
-
-Nếu Render có internal URL và backend cùng region/account, ưu tiên internal URL.
-
----
-
-## 7. Deploy backend lên Render
-
-Vào Render Dashboard → New → Web Service.
-
-Config:
-
-| Field | Value |
-|---|---|
-| Name | `a20-backend` |
-| Environment | Docker |
-| Root Directory | repo root / để trống |
-| Dockerfile Path | `Dockerfile` |
-| Health Check Path | `/health` |
-
-Set environment variables:
-
-```text
-DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DB
-REDIS_URL=redis://...
-DB_ECHO=false
-DB_POOL_SIZE=5
-DB_MAX_OVERFLOW=10
-
-SECRET_KEY=<openssl-rand-hex-32-output>
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-REFRESH_TOKEN_EXPIRE_DAYS=7
-RATE_LIMIT_LOGIN_PER_MINUTE=5
-RATE_LIMIT_FORGOT_PASSWORD_PER_HOUR=5
-PASSWORD_RESET_TOKEN_TTL_MINUTES=30
-
-FRONTEND_BASE_URL=https://<frontend>.onrender.com
-CORS_ORIGINS=["https://<frontend>.onrender.com"]
-
-DEBUG=false
-LOG_LEVEL=INFO
-
-MODEL_PROVIDER=openai
-DEFAULT_MODEL=<real-model-id>
-FAST_MODEL=<real-fast-model-id>
-OPENAI_API_KEY=<real-openai-key>
-ANTHROPIC_API_KEY=
-GEMINI_API_KEY=
-
-ASSET_STORAGE_PROVIDER=s3
-ASSET_URL_EXPIRE_SECONDS=900
-AWS_REGION=ap-southeast-1
-AWS_S3_BUCKET=a20-course-assets-prod
-AWS_S3_PREFIX=courses
-CLOUDFRONT_DOMAIN=dxxxxxxxxxxxxx.cloudfront.net
-CLOUDFRONT_KEY_PAIR_ID=
-CLOUDFRONT_PRIVATE_KEY=
-```
-
-Deploy backend.
+- Service name: `a20-backend`
+- Port: `8000`
+- VPC connector: attached
+- Health path: `/health`
+- Env/secrets: from `ENVIRONMENT_MATRIX.md`
 
 Verify:
 
 ```bash
-curl https://<backend>.onrender.com/health
+curl https://<backend-app-runner-url>/health
 ```
 
-Expected:
+## 12. Run migrations
 
-```text
-200 OK
-```
-
----
-
-## 8. Chạy DB bootstrap trên Render backend
-
-Vào Render backend service → Shell.
-
-Chạy:
+Create DB snapshot first, then run migrations from a trusted admin environment or one-off task:
 
 ```bash
-bash scripts/render_bootstrap.sh
+alembic upgrade head
 ```
 
-Expected output:
+Verify migration head after completion.
 
-```text
-[1/8] Run Alembic migrations
-[2/8] Seed canonical product shell
-[3/8] Seed lecture runtime data
-[4/8] Import canonical artifacts Schema v2
-[5/8] Backfill Schema v2
-[6/8] Validate Schema v2
-[7/8] Check canonical runtime parity
-[8/8] Create admin/demo accounts
-Render bootstrap completed.
+## 13. Run bootstrap/import
+
+Run the reviewed production bootstrap wrapper if available:
+
+```bash
+bash scripts/aws_bootstrap.sh
 ```
 
-Nếu fail:
-
-| Error | Cách xử lý |
-|---|---|
-| DB connection fail | kiểm tra `DATABASE_URL`, prefix `postgresql+asyncpg://`, allow network |
-| vector extension missing | chạy lại `CREATE EXTENSION IF NOT EXISTS vector;` |
-| missing data file | kiểm tra file data có trong Docker image không; video mp4 không cần trong image, nhưng JSON/bootstrap artifacts cần |
-| LLM key fail | kiểm tra `MODEL_PROVIDER` và API key tương ứng |
-
-Sau khi pass, verify DB counts:
+Verify:
 
 ```sql
 SELECT COUNT(*) FROM learning_units;
 SELECT COUNT(*) FROM lectures;
-SELECT COUNT(*) FROM users WHERE role='admin';
 ```
 
-Expected:
+## 14. Verify S3 to DB asset parity
 
-```text
-learning_units > 0
-lectures >= 0 hoặc > 0 nếu lecture data có trong image
-admin users >= 1
-```
+Export DB asset keys and compare with S3 object keys under `courses/`.
 
----
+Failure condition: any DB asset key points to a missing S3 object.
 
-## 9. Deploy frontend lên Render
+## 15. Create frontend App Runner service
 
-Vào Render Dashboard → New → Web Service.
+Create service from frontend ECR image.
 
-Config:
+Required settings:
 
-| Field | Value |
-|---|---|
-| Name | `a20-frontend` |
-| Environment | Docker |
-| Root Directory | `frontend` |
-| Dockerfile Path | `Dockerfile` |
-| Health Check Path | `/api/health` |
-
-Set environment variables:
-
-```text
-NEXT_PUBLIC_API_URL=https://<backend>.onrender.com
-API_INTERNAL_URL=https://<backend>.onrender.com
-NEXT_PUBLIC_GRAFANA_HOST=
-NEXT_PUBLIC_LANGFUSE_HOST=https://cloud.langfuse.com
-NEXT_TELEMETRY_DISABLED=1
-NODE_ENV=production
-```
-
-Deploy frontend.
+- Service name: `a20-frontend`
+- Port: `3000`
+- Env: `NEXT_PUBLIC_API_URL`, `API_INTERNAL_URL`, `NODE_ENV`, `NEXT_TELEMETRY_DISABLED`
 
 Verify:
 
 ```bash
-curl https://<frontend>.onrender.com/api/health
+curl https://<frontend-app-runner-url>/api/health
 ```
 
-Expected:
+## 16. Smoke test temporary AWS domains
+
+- [ ] Backend `/health` returns 200.
+- [ ] Frontend health returns 200.
+- [ ] Home page loads.
+- [ ] Auth flow works.
+- [ ] Course catalog loads.
+- [ ] Video URL uses CloudFront.
+- [ ] Video play and seek work.
+- [ ] Browser console has no localhost calls.
+
+## 17. Set up custom domains
+
+Use Route 53 and ACM:
 
 ```text
-200 OK
+app.<domain>  -> frontend App Runner custom domain
+api.<domain>  -> backend App Runner custom domain
+cdn.<domain>  -> CloudFront distribution
 ```
 
-Sau khi biết frontend URL thật, quay lại backend env update:
+CloudFront certificate must be in `us-east-1`.
 
-```text
-FRONTEND_BASE_URL=https://<frontend>.onrender.com
-CORS_ORIGINS=["https://<frontend>.onrender.com"]
-```
-
-Redeploy backend nếu Render không tự restart sau env update.
-
----
-
-## 10. Smoke test app trên temporary domains
-
-Checklist:
-
-- [ ] `https://<backend>.onrender.com/health` trả 200.
-- [ ] `https://<frontend>.onrender.com/api/health` trả 200.
-- [ ] Home page load.
-- [ ] Register/login OK.
-- [ ] Course catalog load.
-- [ ] Mở ít nhất 1 learning unit.
-- [ ] Video URL bắt đầu bằng `https://dxxxxxxxxxxxxx.cloudfront.net/courses/...`.
-- [ ] Video play được.
-- [ ] Video seek được.
-- [ ] Browser console không gọi `localhost`.
-- [ ] Backend logs không lộ secret.
-- [ ] Backend logs không spam error.
-
-Nếu video không play:
-
-1. Copy URL video trong browser/network tab.
-2. Chạy:
-
-```bash
-curl -I "<video-url>"
-```
-
-3. Debug:
-
-| Status | Nguyên nhân thường gặp |
-|---|---|
-| 403 | CloudFront OAC/S3 bucket policy sai |
-| 404 | S3 object key không khớp DB/generated URL |
-| CORS error | cần thêm CloudFront response headers policy nếu frontend fetch video qua XHR |
-| `/data/...` URL | backend chưa set `ASSET_STORAGE_PROVIDER=s3` hoặc chưa redeploy |
-
----
-
-## 11. Gắn custom domain sau khi smoke test pass
-
-Domain layout đề xuất:
-
-```text
-app.<domain>  -> Render frontend
-api.<domain>  -> Render backend
-cdn.<domain>  -> CloudFront
-```
-
-### 11.1 Render frontend/backend domain
-
-Trong Render:
-
-1. Frontend service → Settings → Custom Domains → add `app.<domain>`.
-2. Backend service → Settings → Custom Domains → add `api.<domain>`.
-3. Tạo DNS record theo Render hướng dẫn.
-4. Đợi TLS active.
-
-Update backend env:
+Update backend:
 
 ```text
 FRONTEND_BASE_URL=https://app.<domain>
 CORS_ORIGINS=["https://app.<domain>"]
+CLOUDFRONT_DOMAIN=cdn.<domain>
 ```
 
-Update frontend env:
+Update frontend and rebuild:
 
 ```text
 NEXT_PUBLIC_API_URL=https://api.<domain>
 API_INTERNAL_URL=https://api.<domain>
 ```
 
-Redeploy frontend vì `NEXT_PUBLIC_API_URL` được bake vào build.
+## 18. Configure CI/CD
 
-### 11.2 CloudFront custom domain
+Create GitHub Actions variables from `AWS_CICD_GUIDE.md`.
 
-Trong AWS Certificate Manager:
-
-1. Region phải là `us-east-1`.
-2. Request cert cho `cdn.<domain>`.
-3. Verify DNS.
-4. Attach cert vào CloudFront distribution.
-5. Add alternate domain name `cdn.<domain>`.
-6. Tạo DNS CNAME/alias `cdn.<domain>` trỏ về CloudFront.
-
-Update backend env:
+Create AWS OIDC role and set:
 
 ```text
-CLOUDFRONT_DOMAIN=cdn.<domain>
+AWS_DEPLOY_ROLE_ARN=<role-arn>
 ```
 
-Redeploy backend.
+Run workflow manually once with `workflow_dispatch`, then rely on `push main` after it is trusted.
 
-Smoke test lại toàn bộ bằng domain thật.
+## 19. Enable budgets and alarms
 
----
+- [ ] AWS Budget alerts.
+- [ ] CloudFront bytes alarm.
+- [ ] App Runner 5xx alarm.
+- [ ] RDS CPU/storage alarms.
+- [ ] CloudWatch log retention.
 
-## 12. Final checklist
+## 20. Record rollback data
 
-- [ ] S3 bucket private.
-- [ ] CloudFront dùng OAC.
-- [ ] Backend không proxy video bytes.
-- [ ] `ASSET_STORAGE_PROVIDER=s3` trên Render backend.
-- [ ] `CLOUDFRONT_DOMAIN` đúng.
-- [ ] `DATABASE_URL` dùng `postgresql+asyncpg://`.
-- [ ] `vector` extension enabled.
-- [ ] Redis URL set.
-- [ ] `DEBUG=false`.
-- [ ] `CORS_ORIGINS` chỉ allow frontend domain.
-- [ ] Frontend `NEXT_PUBLIC_API_URL` trỏ backend domain đúng.
-- [ ] Video URL là CloudFront URL.
-- [ ] Login/course/video/quiz smoke test pass.
-- [ ] Không secret trong logs.
-- [ ] Ghi lại commit SHA đang deploy.
+Record:
 
----
+- Git commit SHA.
+- Backend image digest.
+- Frontend image digest.
+- RDS snapshot ID before migration.
+- CloudFront distribution ID.
 
-## 13. Files liên quan trong repo
-
-- `deploy/DEPLOYMENT_PLAN.md`
-- `deploy/ENVIRONMENT_MATRIX.md`
-- `deploy/PRODUCTION_CHECKLIST.md`
-- `deploy/.env.production.example`
-- `deploy/RENDER_AWS_CONFIG_GUIDE.md`
-- `scripts/render_bootstrap.sh`
-- `Dockerfile`
-- `frontend/Dockerfile`
+Rollback app services by updating App Runner to previous ECR image digest.
