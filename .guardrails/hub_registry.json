@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "validators": {
+    "guardrails/detect_pii": {
+      "import_path": "guardrails_grhub_detect_pii",
+      "exports": [
+        "DetectPII"
+      ],
+      "installed_at": "2026-05-08T02:34:47.600415+00:00",
+      "package_name": "guardrails-grhub-detect-pii"
+    }
+  }
+}
