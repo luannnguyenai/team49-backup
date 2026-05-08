@@ -1,77 +1,103 @@
-# Environment Matrix — Full AWS
+# Environment Matrix - AWS-First Simple Managed
 
-Set runtime values in AWS App Runner, Secrets Manager, GitHub Actions variables, and local admin shells. Do not commit real `.env` files or secret values.
+Set runtime values in AWS Amplify, App Runner, Secrets Manager, GitHub
+Environment values, and local admin shells. Do not commit real `.env` files,
+secret values, Terraform state, or Terraform plan artifacts.
 
-## Backend service `a20-backend` on App Runner
+## Backend Service `a20-backend` On App Runner
 
-### Core / database / cache
+### Core / Database / Cache
 
-| Variable | Value | Note |
-|---|---|---|
-| `DATABASE_URL` | `postgresql+asyncpg://USER:PASS@HOST:5432/DB` | RDS PostgreSQL URL for SQLAlchemy async |
-| `REDIS_URL` | `redis://HOST:6379/0` or TLS/auth variant | ElastiCache Redis OSS/Valkey endpoint |
-| `DB_ECHO` | `false` | Must stay false in production |
-| `DB_POOL_SIZE` | `5` | Start small for App Runner |
-| `DB_MAX_OVERFLOW` | `10` | Tune after observing RDS connections |
-| `PORT` | App Runner runtime value or `8000` | Backend must bind `0.0.0.0:$PORT` |
+| Variable | Example | Store | Note |
+|---|---|---|---|
+| `DATABASE_URL` | `postgresql+asyncpg://USER:PASS@RDS_HOST:5432/DB` | Secret reference | Production RDS async URL |
+| `REDIS_URL` | `redis://HOST:6379/0` | Secret reference | ElastiCache endpoint; use TLS/auth variant if enabled |
+| `DB_ECHO` | `false` | Env | Must stay false in production |
+| `DB_POOL_SIZE` | `5` | Env | Start small for App Runner |
+| `DB_MAX_OVERFLOW` | `10` | Env | Tune after observing RDS connections |
+| `PORT` | `8000` | Env | Backend binds `0.0.0.0:$PORT` |
 
-Store `DATABASE_URL` and `REDIS_URL` in Secrets Manager or App Runner secret references.
+### Auth / Security
 
-### Auth / security
+| Variable | Example | Store | Note |
+|---|---|---|---|
+| `SECRET_KEY` | generated 64 hex chars | Secret reference | Required |
+| `ALGORITHM` | `HS256` | Env | |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Env | |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | `7` | Env | |
+| `RATE_LIMIT_LOGIN_PER_MINUTE` | `5` | Env | |
+| `RATE_LIMIT_FORGOT_PASSWORD_PER_HOUR` | `5` | Env | |
+| `EMAIL_FROM` | `noreply@<verified-domain>` | Env/secret | Required if forgot-password email is enabled |
+| `FRONTEND_BASE_URL` | `https://<amplify-temp-url>` or `https://app.<domain>` | Env | Reset links and canonical frontend |
+| `PASSWORD_RESET_TOKEN_TTL_MINUTES` | `30` | Env | |
+| `CORS_ORIGINS` | `["https://<amplify-temp-url>"]` | Env | JSON array |
 
-| Variable | Value | Note |
-|---|---|---|
-| `SECRET_KEY` | generated 64 hex chars | Store in Secrets Manager |
-| `ALGORITHM` | `HS256` | |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | |
-| `REFRESH_TOKEN_EXPIRE_DAYS` | `7` | |
-| `RATE_LIMIT_LOGIN_PER_MINUTE` | `5` | |
-| `RATE_LIMIT_FORGOT_PASSWORD_PER_HOUR` | `5` | Per IP and normalized email |
-| `EMAIL_FROM` | `noreply@<verified-domain>` | Required if forgot-password email is enabled |
-| `FRONTEND_BASE_URL` | `https://<frontend-app-runner-url>` or `https://app.<domain>` | Used for reset links |
-| `PASSWORD_RESET_TOKEN_TTL_MINUTES` | `30` | Reset link TTL |
-| `CORS_ORIGINS` | `["https://<frontend-app-runner-url>"]` or `["https://app.<domain>"]` | JSON array |
+### App / LLM Runtime
 
-### App / runtime
+| Variable | Example | Store | Note |
+|---|---|---|---|
+| `DEBUG` | `false` | Env | Required |
+| `LOG_LEVEL` | `INFO` | Env | |
+| `MODEL_PROVIDER` | `openai` / `anthropic` / `gemini` | Env | Select one |
+| `DEFAULT_MODEL` | provider model id | Env | Verify availability before setting |
+| `FAST_MODEL` | provider model id | Env | |
+| `OPENAI_API_KEY` | secret value | Secret reference | Store only if used |
+| `ANTHROPIC_API_KEY` | secret value | Secret reference | Store only if used |
+| `GEMINI_API_KEY` | secret value | Secret reference | Store only if used |
+| `GEMINI_REQUESTS_PER_MINUTE` | `15` | Env | |
 
-| Variable | Value | Note |
-|---|---|---|
-| `DEBUG` | `false` | Required |
-| `LOG_LEVEL` | `INFO` | |
-| `MODEL_PROVIDER` | `openai` / `anthropic` / `gemini` | |
-| `DEFAULT_MODEL` | provider model id | Verify provider availability before setting |
-| `FAST_MODEL` | provider model id | |
-| `OPENAI_API_KEY` | secret value | Store in Secrets Manager |
-| `ANTHROPIC_API_KEY` | secret value | Store in Secrets Manager |
-| `GEMINI_API_KEY` | secret value | Store in Secrets Manager |
-| `GEMINI_REQUESTS_PER_MINUTE` | `15` | |
+### Asset Delivery
 
-### Asset delivery
+| Variable | Example | Store | Note |
+|---|---|---|---|
+| `ASSET_STORAGE_PROVIDER` | `s3` | Env | `local` only for local development |
+| `ASSET_URL_EXPIRE_SECONDS` | `900` | Env | Signed asset URL TTL if enabled |
+| `AWS_REGION` | `ap-southeast-1` | Env | Primary AWS region |
+| `AWS_S3_BUCKET` | `a20-course-assets-prod` | Env | Private asset bucket |
+| `AWS_S3_PREFIX` | `courses` | Env | Stable object prefix |
+| `CLOUDFRONT_DOMAIN` | `<id>.cloudfront.net` or `cdn.<domain>` | Env | No scheme |
+| `CLOUDFRONT_KEY_PAIR_ID` | key pair id | Secret/env | Only if signed CloudFront URLs are enabled |
+| `CLOUDFRONT_PRIVATE_KEY` | private key PEM | Secret reference | Only if signed CloudFront URLs are enabled |
 
-| Variable | Value | Note |
-|---|---|---|
-| `ASSET_STORAGE_PROVIDER` | `s3` | `local` only for local development |
-| `ASSET_URL_EXPIRE_SECONDS` | `900` | Signed asset URL TTL |
-| `AWS_REGION` | `ap-southeast-1` | Primary region |
-| `AWS_S3_BUCKET` | `a20-course-assets-prod` | Private bucket |
-| `AWS_S3_PREFIX` | `courses` | Prefix containing course assets |
-| `CLOUDFRONT_DOMAIN` | `<id>.cloudfront.net` or `cdn.<domain>` | Do not include scheme if app builds URL from domain |
-| `CLOUDFRONT_KEY_PAIR_ID` | key pair id | Only if signed CloudFront URLs are enabled |
-| `CLOUDFRONT_PRIVATE_KEY` | private key | Store in Secrets Manager only |
+## Frontend App `a20-frontend` On Amplify
 
-## Frontend service `a20-frontend` on App Runner
+| Variable | Example | Store | Note |
+|---|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `https://<backend-app-runner-url>` or `https://api.<domain>` | Amplify env | Baked into client build |
+| `API_INTERNAL_URL` | same backend URL | Amplify env | Server-side calls if used |
+| `NEXT_PUBLIC_GRAFANA_HOST` | optional | Amplify env | Optional |
+| `NEXT_PUBLIC_LANGFUSE_HOST` | `https://cloud.langfuse.com` | Amplify env | Optional |
+| `NEXT_TELEMETRY_DISABLED` | `1` | Amplify env | |
+| `NODE_ENV` | `production` | Amplify env | |
 
-| Variable | Value | Note |
-|---|---|---|
-| `NEXT_PUBLIC_API_URL` | `https://<backend-app-runner-url>` or `https://api.<domain>` | Baked into frontend build |
-| `API_INTERNAL_URL` | same backend URL | For server-side calls if used |
-| `NEXT_PUBLIC_GRAFANA_HOST` | optional | |
-| `NEXT_PUBLIC_LANGFUSE_HOST` | `https://cloud.langfuse.com` | optional |
-| `NEXT_TELEMETRY_DISABLED` | `1` | |
-| `NODE_ENV` | `production` | |
-| `PORT` | App Runner runtime value or `3000` | Frontend must listen on runtime port |
+Changing `NEXT_PUBLIC_API_URL` requires a new Amplify build/redeploy.
 
-Changing `NEXT_PUBLIC_API_URL` requires rebuilding and redeploying the frontend image.
+## App Runner Source Auto Deploy
+
+| Setting | Value |
+|---|---|
+| Service name | `a20-backend` |
+| Repository | this GitHub repository |
+| Branch | `main` or selected production branch |
+| Source | root `Dockerfile` |
+| Port | `8000` or runtime `PORT` |
+| Health path | `/health` |
+| Auto deploy | enabled |
+| VPC connector | required when RDS/ElastiCache are private |
+| GitHub connection | authorize outside Terraform, pass ARN into Terraform |
+
+## Amplify GitHub Auto Deploy
+
+| Setting | Value |
+|---|---|
+| App name | `a20-frontend` |
+| Repository | this GitHub repository |
+| Branch | `main` or selected production branch |
+| App root | `frontend` |
+| Install command | `npm ci --legacy-peer-deps` |
+| Build command | `npm run build` |
+| Auto deploy | enabled |
+| GitHub connection | authorize/import preferred; token-in-state requires explicit acceptance |
 
 ## RDS PostgreSQL
 
@@ -86,58 +112,103 @@ Required settings:
 
 - Private subnets only.
 - Automated backups enabled.
+- Deletion protection enabled for production.
 - Storage autoscaling cap recorded.
-- Security group allows PostgreSQL only from backend App Runner VPC connector path.
+- Security group allows PostgreSQL only from backend App Runner path.
 
 ## ElastiCache Redis OSS / Valkey
 
 Required settings:
 
 - Private subnets only.
-- Security group allows cache traffic only from backend App Runner VPC connector path.
-- Endpoint stored in Secrets Manager or App Runner secret reference.
+- Security group allows cache traffic only from backend App Runner path.
+- Endpoint stored as `REDIS_URL` in App Runner secret/env configuration.
 
-## S3 and CloudFront
+## Networking Decision
 
-| Variable / value | Example | Note |
+If App Runner uses a VPC connector to private RDS/ElastiCache and the backend
+must call public LLM/email APIs, configure explicit public egress.
+
+Recommended production default:
+
+```text
+private RDS/Redis + App Runner VPC connector + NAT Gateway
+```
+
+If NAT is deferred, tutor/email production traffic is not considered validated.
+
+## S3 And CloudFront
+
+| Value | Example | Note |
 |---|---|---|
-| S3 bucket | `a20-course-assets-prod` | Block Public Access enabled |
-| S3 prefix | `courses` | Upload course assets here |
-| CloudFront domain | `<id>.cloudfront.net` | Initial CDN domain |
+| S3 bucket | `a20-course-assets-prod` | Created by Terraform |
+| S3 prefix | `courses` | Uploaded outside Terraform |
+| CloudFront domain | `<id>.cloudfront.net` | Temporary CDN domain |
 | CDN custom domain | `cdn.<domain>` | After Route 53 + ACM setup |
 
-CloudFront should use Origin Access Control so S3 remains private.
+CloudFront must use Origin Access Control so S3 remains private.
 
-## GitHub Actions CI/CD
+## GitHub Actions CI
 
-Use GitHub repository or environment variables:
+| Requirement | Value |
+|---|---|
+| Python | `3.12` |
+| Node | `20` |
+| Backend checks | Ruff + pytest with Postgres/Redis services |
+| Frontend checks | lint + type-check + build + unit tests if available |
+| App deploy behavior | none in v1; Amplify/App Runner native auto deploy handles app deploy |
 
-| Variable | Value | Note |
+## Terraform Infrastructure CI
+
+Local files that must not be committed:
+
+| File | Purpose |
+|---|---|
+| `deploy/terraform/live/prod/backend.hcl` | S3 backend config |
+| `deploy/terraform/live/prod/terraform.tfvars` | Production variable values |
+| `*.tfplan` | Reviewed binary plan files |
+
+GitHub Environment values if Terraform runs in Actions:
+
+| Name | Type | Purpose |
 |---|---|---|
-| `AWS_REGION` | `ap-southeast-1` | |
-| `AWS_ACCOUNT_ID` | account id | |
-| `AWS_DEPLOY_ROLE_ARN` | IAM role ARN | OIDC role, not access key |
-| `ECR_BACKEND_REPOSITORY` | `a20-backend` | |
-| `ECR_FRONTEND_REPOSITORY` | `a20-frontend` | |
-| `APP_RUNNER_BACKEND_SERVICE_ARN` | service ARN | |
-| `APP_RUNNER_FRONTEND_SERVICE_ARN` | service ARN | |
-| `PRODUCTION_BACKEND_URL` | backend default/custom URL | Smoke test target |
-| `PRODUCTION_FRONTEND_URL` | frontend default/custom URL | Smoke test target |
+| `AWS_TERRAFORM_ROLE_ARN` | secret | OIDC role for Terraform plan/apply |
+| `TF_BACKEND_HCL_PROD` | secret or protected variable | Full `backend.hcl` content written at runtime |
+| `TFVARS_PROD` | secret or protected variable | Full `terraform.tfvars` content written at runtime |
 
-No long-lived AWS access keys should be required in GitHub secrets.
+Recommended local commands:
 
-## Local/admin AWS env
+```bash
+cd deploy/terraform/live/prod
+terraform init -backend-config=backend.hcl
+terraform validate
+terraform plan -var-file=terraform.tfvars -out prod.tfplan
+terraform apply prod.tfplan
+```
 
-Use local AWS CLI profiles for provisioning and asset uploads:
+## Optional Later App Deploy Variables
+
+Use only after moving backend app deploy to ECR + OIDC:
+
+| Variable | Example |
+|---|---|
+| `AWS_REGION` | `ap-southeast-1` |
+| `AWS_ACCOUNT_ID` | `123456789012` |
+| `AWS_DEPLOY_ROLE_ARN` | `arn:aws:iam::123456789012:role/github-a20-prod-deploy` |
+| `ECR_BACKEND_REPOSITORY` | `a20-backend` |
+| `APP_RUNNER_BACKEND_SERVICE_ARN` | App Runner service ARN |
+| `PRODUCTION_BACKEND_URL` | `https://api.<domain>` |
+
+## Local/Admin AWS Env
+
+Use local AWS CLI profiles for trusted admin operations:
 
 ```bash
 aws sts get-caller-identity
 aws s3 sync ./data/courses s3://a20-course-assets-prod/courses --delete
 ```
 
-Use least-privilege IAM users/roles for admin operations where possible.
-
-## After custom domain cutover
+## After Custom Domain Cutover
 
 Backend:
 

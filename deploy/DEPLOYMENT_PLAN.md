@@ -1,1216 +1,488 @@
-# Deployment Plan — Full AWS
+# Deployment Plan - AWS-First Simple Managed
 
-## Requirement lock
+## Requirement Lock
 
-User requirements:
+The production plan optimizes for:
 
-- Deploy **full AWS** for the production path.
-- Sau deploy sẽ mua và gắn custom domain.
-- Data/course/video assets đặt trong **AWS S3 private bucket** và stream qua **CloudFront**.
-- Kế hoạch phải chia phase như cũ.
-- **Mỗi phase chỉ làm 1 task**.
-- Mỗi phase phải có **DoD checklist**.
-- Mỗi phase phải ghi rõ **files sẽ touch**.
-- Thay đổi phải **isolated**, tránh ảnh hưởng logic khác.
-- Plan phải có **ước tính chi phí AWS theo tháng**.
+- AWS as the primary production target and learning path.
+- Managed AWS services with GitHub-connected auto deploy.
+- No manual server SSH work on normal production commits.
+- Terraform-managed infrastructure after remote-state bootstrap.
+- Private S3 course assets delivered through CloudFront.
+- Temporary AWS domains first, custom domains only after smoke tests.
+- Isolated changes that preserve local Docker/dev behavior.
 
-## Target architecture
+## Source Of Truth Rules
+
+1. This file controls phase order and deployment gates.
+2. `TERRAFORM_PLAN.md` controls how infrastructure modules are implemented.
+3. `ENVIRONMENT_MATRIX.md` controls runtime values and where they are stored.
+4. `MANUAL_DEPLOY_STEPS.md` is an execution runbook, not a separate architecture.
+5. If docs disagree, update the lower-priority doc to match this file.
+
+## Recommended V1 Architecture
 
 ```text
+GitHub
+  -> GitHub Actions CI gate
+  -> Amplify Hosting auto deploys Next.js frontend
+  -> App Runner auto deploys FastAPI backend from repository Dockerfile
+
 Browser
-  ├─ AWS App Runner: Next.js frontend
-  │    temp:  https://<frontend-service>.<region>.awsapprunner.com
-  │    final: https://app.<domain> hoặc https://<domain>
-  │
-  ├─ AWS App Runner: FastAPI backend
-  │    temp:  https://<backend-service>.<region>.awsapprunner.com
-  │    final: https://api.<domain>
-  │    deps:  RDS PostgreSQL + pgvector, ElastiCache Redis/Valkey
-  │
-  └─ AWS CloudFront CDN
-       final: https://cdn.<domain>
-       origin: private S3 bucket
+  -> Amplify frontend
+  -> App Runner backend API
+  -> CloudFront CDN
+       -> private S3 bucket with course/video assets
+
+App Runner
+  -> VPC connector
+       -> private RDS PostgreSQL + pgvector
+       -> private ElastiCache Redis/Valkey
+  -> NAT Gateway when public LLM/email egress is required
 ```
 
-Critical rule: video/large assets phải stream trực tiếp `CloudFront -> Browser`. Backend không proxy video bytes từ S3 về user.
+Critical rule: large course/video assets must stream directly from CloudFront to
+the browser. The backend returns metadata and URLs only.
 
-## AWS service choices
+## Service Choices
 
-| Area | AWS service | Decision |
+| Area | V1 service | Reason |
 |---|---|---|
-| Backend compute | App Runner | Simpler than ECS for first production deploy; deploy from ECR image |
-| Frontend compute | App Runner | Keeps full app runtime on AWS |
-| Container registry | ECR private repositories | One repo for backend, one repo for frontend |
-| Database | RDS PostgreSQL, Single-AZ | Start small with `db.t4g.micro` or `db.t4g.small`; enable `vector` extension |
-| Cache/session/rate limit | ElastiCache Redis OSS or Valkey | Start with `cache.t4g.micro` or serverless if ops simplicity wins |
-| Assets | S3 Standard | Private bucket, block public access, versioning enabled |
-| CDN | CloudFront | S3 origin access control, range requests, optional signed URLs |
-| Secrets | Secrets Manager | Store DB URL/passwords, Redis URL, LLM keys, Resend key, CloudFront private key |
-| DNS | Route 53 | Hosted zone and records for app/api/cdn |
-| TLS | ACM | Public certificates for App Runner custom domains and CloudFront |
-| Logs/metrics | CloudWatch | App Runner logs, RDS metrics, CloudFront metrics, budget alarms |
-| CI/CD | GitHub Actions + AWS OIDC | CI validates PRs; deploy workflow builds ECR images and updates App Runner without long-lived AWS keys |
+| Frontend | Amplify Hosting | GitHub auto deploy and managed Next.js hosting |
+| Backend | App Runner | Managed container runtime and source auto deploy |
+| Database | RDS PostgreSQL | Managed backups, standard Postgres, pgvector support |
+| Cache | ElastiCache Redis OSS/Valkey | Managed Redis-compatible cache |
+| Assets | S3 Standard | Private durable object storage |
+| CDN | CloudFront | Range requests, edge delivery, OAC, optional signed URLs |
+| Secrets | Secrets Manager + service secret refs | Keeps real values out of git and Terraform variables |
+| DNS/TLS | Route 53 + ACM | Native AWS certificates and records |
+| Observability | CloudWatch + Budgets | Minimal production operations controls |
+| App deploy v1 | Amplify/App Runner native auto deploy | Avoids early ECR/OIDC complexity |
+| Infra | Terraform | Repeatable reviewed `plan/apply` |
 
-## Cost estimate
+## Locked Defaults
 
-### Assumptions
-
-- Region: `ap-southeast-1` (Singapore) for app, DB, cache, S3.
-- One production environment only.
-- Backend: App Runner `1 vCPU / 2 GB`, min 1 provisioned instance.
-- Frontend: App Runner `0.5 vCPU / 1 GB`, min 1 provisioned instance.
-- Light demo traffic: active CPU about 2 hours/day/service average. Higher traffic increases App Runner active vCPU and CloudFront egress.
-- RDS: Single-AZ PostgreSQL, `db.t4g.micro` or `db.t4g.small`, 20 GB gp3/general purpose storage.
-- ElastiCache: one small node, no Multi-AZ replica in v1.
-- Assets: 15 GB S3 Standard course/video data.
-- CloudFront data out examples: 50 GB, 200 GB, and 1 TB/month.
-- Does not include LLM/API provider usage, domain registration, taxes, support plan, or one-off migration labor.
-- GitHub Actions usage assumed within current GitHub plan/free quota; if private-runner minutes exceed quota, add GitHub billing separately.
-
-### Monthly estimate
-
-| Cost item | Demo/light | Safer small prod | Notes |
-|---|---:|---:|---|
-| App Runner backend | $15-25 | $35-75 | Depends heavily on active CPU time |
-| App Runner frontend | $8-18 | $20-45 | Static-heavy frontend may be cheaper on Amplify/S3, but this plan keeps App Runner |
-| RDS PostgreSQL | $18-35 | $35-80 | `db.t4g.micro/small` + 20 GB storage + backup headroom |
-| ElastiCache Redis/Valkey | $12-20 | $20-45 | Single small node; serverless can differ |
-| S3 Standard 15 GB | <$1 | <$1 | Storage only; requests usually small for this scope |
-| CloudFront data out | $5-20 | $20-90 | Main variable; depends on video watch traffic and cache hit |
-| ECR private repos | <$2 | <$5 | Depends on image size/retention |
-| Secrets Manager | $2-5 | $5-10 | Number of secrets + API calls |
-| CloudWatch logs/metrics | $2-10 | $10-30 | Keep retention short at first |
-| Route 53 hosted zone | ~$1 | ~$1 | Excludes domain registration |
-| ACM public certs | $0 | $0 | Non-exportable public certs for integrated AWS services |
-| CI/CD | $0-10 | $0-30 | Usually GitHub Actions minutes/artifact storage; AWS side is mostly ECR/CloudWatch already counted |
-| **Estimated total** | **$65-135/month** | **$145-380/month** | Before AWS credits/taxes/support |
-
-### Traffic sensitivity
-
-| Monthly video delivery through CloudFront | Expected added cost |
-|---:|---:|
-| 50 GB | ~$5-10 |
-| 200 GB | ~$15-25 |
-| 1 TB | ~$80-100 |
-
-Cost controls:
-
-- Set AWS Budget alerts at `$50`, `$100`, and 80% of remaining AWS credits.
-- Add CloudWatch alarm on CloudFront `BytesDownloaded`.
-- Keep App Runner max concurrency and max instances bounded until real traffic is known.
-- Use S3 lifecycle rules for obsolete assets and ECR lifecycle policies for old images.
-- Keep CloudWatch log retention at 7-14 days in v1.
-
-Pricing references to verify before provisioning:
-
-- AWS App Runner Pricing: https://aws.amazon.com/apprunner/pricing/
-- Amazon RDS for PostgreSQL Pricing: https://aws.amazon.com/rds/postgresql/pricing/
-- Amazon ElastiCache Pricing: https://aws.amazon.com/elasticache/pricing/
-- Amazon S3 Pricing: https://aws.amazon.com/s3/pricing/
-- Amazon CloudFront Pricing: https://aws.amazon.com/cloudfront/pricing/
-- Amazon ECR Pricing: https://aws.amazon.com/ecr/pricing/
-- AWS Secrets Manager Pricing: https://aws.amazon.com/secrets-manager/pricing/
-- Amazon Route 53 Pricing: https://aws.amazon.com/route53/pricing/
-- AWS Certificate Manager Pricing: https://aws.amazon.com/certificate-manager/pricing/
-- AWS Pricing Calculator: https://calculator.aws/
-
-## Global rules
-
-1. **One task per phase**: không gom infra + code + data + validation vào cùng phase.
-2. **DoD gate**: phase sau chỉ bắt đầu khi DoD phase trước pass.
-3. **Isolation**:
-   - Không refactor unrelated auth, quiz, planner, recommendation, course ordering.
-   - Không đổi DB schema nếu phase không yêu cầu.
-   - Không đổi UI/UX nếu phase không yêu cầu.
-   - Giữ local dev chạy được.
-4. **Asset provider must be config-driven**:
-   - `ASSET_STORAGE_PROVIDER=local`: giữ behavior local `/data/...` hiện tại.
-   - `ASSET_STORAGE_PROVIDER=s3`: trả CloudFront URL.
-5. **No secrets in git**: AWS/DB/Redis/LLM/Resend keys chỉ set trong Secrets Manager, App Runner env, hoặc local `.env` không commit.
-6. **CI/CD uses short-lived AWS auth**: GitHub Actions must use OIDC-assumed IAM roles, not committed AWS access keys or long-lived repository secrets.
-
-## Phase overview
-
-| Phase | Single task |
-|---:|---|
-| 0 | Lock AWS deploy variables |
-| 1 | Make backend Docker App Runner-compatible |
-| 2 | Make frontend Docker App Runner-compatible |
-| 2.1 | Audit and freeze current CI/CD mismatch |
-| 2.2 | Create AWS IAM OIDC deploy roles |
-| 2.3 | Update CI workflow gates |
-| 2.4 | Replace production deploy workflow with AWS App Runner flow |
-| 2.5 | Add CI/CD secrets and environment documentation |
-| 3 | Create ECR repositories |
-| 4 | Build and push backend image to ECR |
-| 5 | Build and push frontend image to ECR |
-| 6 | Create VPC networking for private dependencies |
-| 7 | Create RDS PostgreSQL |
-| 8 | Enable pgvector |
-| 9 | Create ElastiCache Redis/Valkey |
-| 10 | Create private S3 bucket |
-| 11 | Upload course assets to S3 |
-| 12 | Create CloudFront distribution |
-| 12.1 | (Conditional) Set up CloudFront signed URL keys |
-| 13 | Store production secrets in Secrets Manager |
-| 14 | Add asset delivery config |
-| 15 | Add CloudFront asset URL service |
-| 16 | Switch course asset URL generation behind config |
-| 17 | Create App Runner backend service |
-| 18 | Run database migrations |
-| 19 | Create production bootstrap wrapper |
-| 20 | Run full bootstrap pipeline against RDS |
-| 20.1 | Verify S3 to DB asset key parity |
-| 21 | Create App Runner frontend service |
-| 22 | Smoke test on App Runner temporary domains |
-| 23 | Attach frontend/backend custom domains |
-| 24 | Attach CDN custom domain |
-| 25 | Add budgets and production alarms |
-| 26 | Final production-readiness check |
-| 27 | Document rollback commands |
-
----
-
-## Phase 0 — Lock AWS deploy variables
-
-### Task
-
-Chốt biến triển khai trước khi sửa code hoặc tạo cloud resources.
-
-### Files that will be touched
-
-- `deploy/DEPLOYMENT_PLAN.md` only if decisions are recorded.
-
-### Locked decisions
-
-| Hạng mục | Giá trị |
+| Item | Value |
 |---|---|
-| AWS region | `ap-southeast-1` (Singapore) |
-| Backend service name | `a20-backend` |
-| Frontend service name | `a20-frontend` |
-| Backend ECR repo | `a20-backend` |
-| Frontend ECR repo | `a20-frontend` |
+| AWS region | `ap-southeast-1` |
+| CloudFront certificate region | `us-east-1` |
+| Backend App Runner service | `a20-backend` |
+| Frontend Amplify app | `a20-frontend` |
 | RDS identifier | `a20-postgres-prod` |
 | ElastiCache identifier | `a20-redis-prod` |
-| S3 bucket name | `a20-course-assets-prod` |
-| Demo data | Upload toàn bộ 3 course `CS224n`, `CS230`, `CS231n` (~15GB) lên S3 |
-| Custom domain | Mua ở cuối sau khi smoke test pass; Phase 23-24 mới gắn |
-| Tạm thời dùng | App Runner default domains và CloudFront default domain |
+| S3 asset bucket | `a20-course-assets-prod` |
+| S3 asset prefix | `courses` |
+| Demo asset scope | `CS224n`, `CS230`, `CS231n` |
+| Frontend domain | `app.<domain>` or apex after smoke tests |
+| Backend domain | `api.<domain>` after smoke tests |
+| CDN domain | `cdn.<domain>` after smoke tests |
 
-### DoD checklist
+## Terraform And Manual Boundaries
 
-- [ ] AWS region recorded.
-- [ ] Service names recorded.
-- [ ] Repository/resource names recorded.
-- [ ] Domain layout recorded.
-- [ ] Demo asset scope recorded.
-- [ ] Cost budget thresholds recorded.
-- [ ] No code/cloud resource changed before decisions are complete.
+Terraform manages:
 
-### Isolation guard
+- Network, route tables, security groups, NAT when accepted.
+- S3 bucket controls and CloudFront.
+- RDS, ElastiCache, App Runner service shell, Amplify app/branch where supported.
+- Route 53, ACM, alarms, budgets.
+- Secrets Manager containers.
 
-Planning only. Không sửa Dockerfile, app code, DB, hoặc AWS resources.
+Manual or post-provision steps:
 
----
+- GitHub OAuth/App Runner connection authorization.
+- Amplify repository authorization if the team avoids access tokens in state.
+- Real secret values.
+- Course/video uploads to S3.
+- RDS snapshots, Alembic migrations, `CREATE EXTENSION vector`.
+- Production bootstrap/import and S3-to-DB parity verification.
 
-## Phase 1 — Make backend Docker App Runner-compatible
+## Phase Overview
 
-### Task
+| Phase | Gate |
+|---:|---|
+| 0 | Lock deploy variables and budget assumptions |
+| 1 | Freeze legacy non-AWS deploy workflow |
+| 2 | Bootstrap Terraform state and production root |
+| 3 | Align CI as validation gate |
+| 4 | Prepare backend for App Runner |
+| 5 | Prepare frontend for Amplify |
+| 6 | Provision asset infrastructure with Terraform |
+| 7 | Upload course assets to S3 |
+| 8 | Provision network, database, and cache with Terraform |
+| 9 | Store runtime secrets and env values |
+| 10 | Provision App Runner backend and verify temporary backend URL |
+| 11 | Run migrations, bootstrap/import, and asset parity verification |
+| 12 | Provision Amplify frontend and verify temporary frontend URL |
+| 13 | Smoke test temporary AWS domains |
+| 14 | Attach custom domains |
+| 15 | Add operations controls and rollback records |
+| 16 | Optional later: ECR + GitHub OIDC hardening |
 
-Cho backend container listen đúng App Runner runtime port.
+## Phase 0 - Lock Deploy Variables
 
-### Files that may be touched
+**Task:** Record AWS account, region, domain, budget, production branch, service
+names, asset scope, LLM provider, and email provider decision.
 
-- `Dockerfile`
-- `.dockerignore` only if build context includes unnecessary large assets.
+**May touch:**
 
-### Steps
-
-1. Ensure Uvicorn binds `0.0.0.0:${PORT:-8000}`.
-2. Preserve app module `src.api.app:app`.
-3. Ensure health endpoint stays available.
-4. Không sửa API/business logic.
-
-### DoD checklist
-
-- [ ] Backend Dockerfile uses `$PORT` with fallback `8000`.
-- [ ] `docker build -t a20-backend .` succeeds, or failure is documented as local tooling issue.
-- [ ] Container starts with default port `8000` when `PORT` is not set.
-- [ ] Container starts with overridden `PORT`.
-- [ ] `/health` returns 200 locally on the chosen port.
-- [ ] No backend business logic files changed.
-
-### Isolation guard
-
-Only container startup is in scope. Không chạm auth, DB, course, quiz, LLM, planner, recommendation, asset logic.
-
----
-
-## Phase 2 — Make frontend Docker App Runner-compatible
-
-### Task
-
-Cho frontend container compatible với App Runner runtime/build.
-
-### Files that may be touched
-
-- `frontend/Dockerfile`
-- `frontend/next.config.mjs` only if standalone output is missing/broken.
-
-### Steps
-
-1. Ensure frontend server listens on `${PORT:-3000}`.
-2. Preserve `NEXT_PUBLIC_API_URL` as build-time value.
-3. Keep Docker build reproducible from `frontend/`.
-4. Do not change UI behavior.
-
-### DoD checklist
-
-- [ ] Frontend Dockerfile uses App Runner-compatible port binding.
-- [ ] `docker build -t a20-frontend ./frontend` succeeds, or failure is documented.
-- [ ] Container starts locally.
-- [ ] Home/login route loads locally.
-- [ ] No unrelated frontend files changed.
-
-### Isolation guard
-
-Only frontend container startup/build is in scope.
-
----
-
-## Phase 2.1 — Audit and freeze current CI/CD mismatch
-
-### Task
-
-Ghi nhận rõ workflow hiện tại đang deploy sai target và đóng băng nó trước khi thay bằng full AWS.
-
-### Files that may be touched
-
-- `remaining tasks/cicd/current-state.md`
-- `deploy/DEPLOYMENT_PLAN.md` only if CI/CD phase decisions change.
-
-### Current finding
-
-`.github/workflows/deploy.yml` must be aligned to the full AWS production target. The new CI/CD plan should replace any older production deploy path instead of extending it.
-
-### DoD checklist
-
-- [ ] Current deploy workflow providers recorded.
-- [ ] Decision recorded: production deploy target is AWS App Runner + ECR + RDS + ElastiCache.
-- [ ] Old deploy secrets identified for removal or deprecation.
-- [ ] No production deploy workflow is changed before the replacement design is ready.
-- [ ] No cloud deployment is triggered in this phase.
-
-### Isolation guard
-
-Documentation/audit only. Do not edit workflow behavior yet.
-
----
-
-## Phase 2.2 — Create AWS IAM OIDC deploy roles
-
-### Task
-
-Create least-privilege AWS IAM roles for GitHub Actions deployments using OIDC.
-
-### Files that may be touched
-
+- `deploy/DEPLOYMENT_PLAN.md`
 - `deploy/ENVIRONMENT_MATRIX.md`
 - `deploy/.env.production.example`
-- Optional future IaC under `deploy/aws/` if requested.
 
-### Required AWS setup
+**Done when:**
 
-- GitHub OIDC provider in AWS IAM.
-- Deploy role trusted only by this repository and protected branches/environments.
-- Permissions scoped to:
-  - ECR login/push/pull for `a20-backend` and `a20-frontend`.
-  - App Runner update/read for `a20-backend` and `a20-frontend`.
-  - Secrets Manager read for deploy-time references only if workflow needs it.
-  - CloudWatch read for smoke/deploy status if needed.
+- Region, names, domain layout, and asset scope are recorded.
+- Budget threshold and alert recipient are selected.
+- NAT decision is explicit: accepted, deferred for smoke tests only, or replaced
+  with a documented alternative.
+- No cloud runtime resource has been created yet.
 
-### DoD checklist
+## Phase 1 - Freeze Legacy Non-AWS Deploy Workflow
 
-- [ ] IAM OIDC provider exists.
-- [ ] GitHub Actions deploy role exists.
-- [ ] Trust policy restricts repository, branch, and/or GitHub environment.
-- [ ] Role grants ECR permissions only for required repositories.
-- [ ] Role grants App Runner permissions only for required services.
-- [ ] No long-lived `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` repository secrets are required.
-- [ ] Role ARN documented as `AWS_DEPLOY_ROLE_ARN`.
+**Task:** Prevent the old Vercel/Railway/Supabase workflow from deploying on
+`push main`.
 
-### Isolation guard
+**May touch:**
 
-IAM setup only. Do not edit workflows or deploy services in this phase.
+- `.github/workflows/deploy.yml`
+- `deploy/AWS_CICD_GUIDE.md`
 
----
+**Acceptable outcomes:**
 
-## Phase 2.3 — Update CI workflow gates
+- Disable the `push main` trigger and keep the file as a historical reference.
+- Replace it with a manual/no-op reference workflow.
+- Delete it after confirming the old stack is not used.
 
-### Task
+**Done when:**
 
-Update CI so PR/main validation matches the project runtime and blocks bad deploys.
+- `push main` cannot deploy to Vercel/Railway/Supabase.
+- GitHub Actions CI still runs before production merges.
+- No ECR/OIDC deploy workflow is introduced in this phase.
 
-### Files that may be touched
+## Phase 2 - Bootstrap Terraform State And Production Root
+
+**Task:** Create the Terraform management layer described in
+`TERRAFORM_PLAN.md`.
+
+**May touch:**
+
+- `.gitignore`
+- `deploy/TERRAFORM_PLAN.md`
+- `deploy/terraform/**`
+
+**Required behavior:**
+
+- Bootstrap S3 remote state bucket `a20-terraform-state-prod`.
+- Use S3 backend with `use_lockfile = true`.
+- Create `deploy/terraform/live/prod`.
+- Keep real `backend.hcl`, `terraform.tfvars`, state, and plan files out of git.
+
+**Done when:**
+
+- Bootstrap and prod stacks exist.
+- `backend.hcl.example` and `terraform.tfvars.example` exist.
+- `terraform fmt -check -recursive` and `terraform validate` pass.
+- First prod `terraform plan` is reviewed before apply.
+- No real secret values are committed.
+
+## Phase 3 - Align CI As Validation Gate
+
+**Task:** Make CI match production runtime requirements before auto deploy.
+
+**May touch:**
 
 - `.github/workflows/ci.yml`
 - `.github/workflows/kg-sync.yml` only if Python version alignment is required.
-- `remaining tasks/cicd/current-state.md`
 
-### Required CI behavior
+**Done when:**
 
-- Use Python 3.12 consistently.
-- Keep backend lint and tests.
-- Keep frontend lint, type-check, and production build.
-- Add frontend unit test command if package scripts support it.
-- Add `workflow_call` so deploy workflow can reuse CI as a gate.
-- Keep branch/PR triggers.
+- CI uses Python 3.12 and Node 20.
+- Backend lint/tests run with Postgres and Redis services.
+- Frontend lint, type-check, build, and unit tests run where available.
+- No production AWS app deploy secrets are added to CI.
 
-### DoD checklist
+## Phase 4 - Prepare Backend For App Runner
 
-- [ ] CI uses Python 3.12.
-- [ ] CI still runs backend lint.
-- [ ] CI still runs backend tests with Postgres and Redis services.
-- [ ] CI still runs frontend lint/type-check/build.
-- [ ] Frontend unit tests run if available.
-- [ ] `workflow_call` is supported for deploy workflow reuse.
-- [ ] CI artifacts remain useful for failures.
-- [ ] No deployment step is added to CI.
+**Task:** Verify the backend container can run in App Runner from the repository
+Dockerfile.
 
-### Isolation guard
+**May touch:**
 
-CI validation only. Do not add AWS deploy behavior in this phase.
-
----
-
-## Phase 2.4 — Replace production deploy workflow with AWS App Runner flow
-
-### Task
-
-Replace the old deploy workflow with an AWS deployment workflow.
-
-### Files that may be touched
-
-- `.github/workflows/deploy.yml`
-- Optional helper scripts under `scripts/` only if needed for smoke polling.
+- `Dockerfile`
+- `.dockerignore`
 - `deploy/ENVIRONMENT_MATRIX.md`
 
-### Required deploy behavior
+**Done when:**
 
-1. Trigger only on `push` to `main` and optional `workflow_dispatch`.
-2. Run CI gate first.
-3. Configure AWS credentials with GitHub OIDC role assumption.
-4. Build backend image, tag with commit SHA, push to ECR.
-5. Update App Runner backend service to the new backend image.
-6. Wait for backend operation completion and smoke test `/health`.
-7. Build frontend image with the chosen API URL, tag with commit SHA, push to ECR.
-8. Update App Runner frontend service to the new frontend image.
-9. Wait for frontend operation completion and smoke test the frontend URL.
-10. Write image digests, service ARNs, URLs, and smoke results to `GITHUB_STEP_SUMMARY`.
+- Dockerfile binds `0.0.0.0:${PORT:-8000}`.
+- Local image builds or the local tooling blocker is documented.
+- Container starts with and without overridden `PORT`.
+- `/health` returns 200.
+- `.dockerignore` excludes secrets and large local media.
+- No backend business logic changes were made.
 
-### Required GitHub environment/secrets
+## Phase 5 - Prepare Frontend For Amplify
 
-- `AWS_REGION`
-- `AWS_DEPLOY_ROLE_ARN`
-- `AWS_ACCOUNT_ID`
-- `ECR_BACKEND_REPOSITORY`
-- `ECR_FRONTEND_REPOSITORY`
-- `APP_RUNNER_BACKEND_SERVICE_ARN`
-- `APP_RUNNER_FRONTEND_SERVICE_ARN`
-- `PRODUCTION_BACKEND_URL`
-- `PRODUCTION_FRONTEND_URL`
+**Task:** Verify the Next.js frontend can build in Amplify Hosting.
 
-### DoD checklist
+**May touch:**
 
-- [ ] Old backend deploy step replaced with AWS App Runner update.
-- [ ] Old frontend deploy step replaced with AWS App Runner update.
-- [ ] Old database secret usage replaced with AWS RDS/Secrets Manager values.
-- [ ] Deploy workflow uses OIDC role assumption.
-- [ ] Backend image is built, pushed, and deployed by SHA tag.
-- [ ] Frontend image is built, pushed, and deployed by SHA tag.
-- [ ] App Runner update waits for completion before smoke tests.
-- [ ] Failed smoke test fails the workflow.
-- [ ] Workflow has `concurrency: deploy-production`.
-- [ ] Workflow summary includes deployed commit SHA and image digests.
-
-### Isolation guard
-
-Deploy workflow only. Do not change app code or cloud resources in this phase.
-
----
-
-## Phase 2.5 — Add CI/CD secrets and environment documentation
-
-### Task
-
-Document all GitHub Actions variables, secrets, and manual controls required for full AWS CI/CD.
-
-### Files that may be touched
-
-- `deploy/ENVIRONMENT_MATRIX.md`
-- `deploy/README.md`
-- `deploy/DEPLOYMENT_PLAN.md`
-- Optional new file: `deploy/CICD_AWS_GUIDE.md`
-
-### Documentation requirements
-
-- GitHub repository variables vs secrets.
-- GitHub Environment protection rules for `production`.
-- Required AWS IAM role ARN and trust-policy expectations.
-- Required App Runner service ARNs.
-- Required ECR repository names.
-- Manual deployment flow with `workflow_dispatch`.
-- Rollback by previous ECR image digest.
-
-### DoD checklist
-
-- [ ] All required GitHub Actions variables are listed.
-- [ ] All required GitHub Actions secrets are listed, if any.
-- [ ] OIDC role setup is documented.
-- [ ] Production environment approval requirement is documented.
-- [ ] Manual deploy trigger is documented.
-- [ ] Rollback input values are documented.
-- [ ] No real secret values are committed.
-
-### Isolation guard
-
-Documentation only.
-
----
-
-## Phase 3 — Create ECR repositories
-
-### Task
-
-Create private ECR repositories for backend and frontend images.
-
-### Files that may be touched
-
-- `deploy/DEPLOYMENT_PLAN.md` only if final repository names change.
-
-### DoD checklist
-
-- [ ] `a20-backend` ECR repo exists.
-- [ ] `a20-frontend` ECR repo exists.
-- [ ] Image scan on push enabled where available.
-- [ ] Lifecycle policy keeps only recent image tags.
-- [ ] No app code changed.
-
-### Isolation guard
-
-AWS registry setup only.
-
----
-
-## Phase 4 — Build and push backend image to ECR
-
-### Task
-
-Build backend container image and push it to ECR.
-
-### Files that may be touched
-
-- None expected.
-
-### DoD checklist
-
-- [ ] AWS CLI authenticated to ECR.
-- [ ] Backend image built with a commit SHA tag.
-- [ ] Backend image pushed to ECR.
-- [ ] Image digest recorded.
-- [ ] No secrets baked into image.
-
-### Isolation guard
-
-Image build/push only. Do not deploy App Runner yet.
-
----
-
-## Phase 5 — Build and push frontend image to ECR
-
-### Task
-
-Build frontend container image and push it to ECR.
-
-### Files that may be touched
-
-- None expected unless Docker build fails due to missing frontend build config.
-
-### DoD checklist
-
-- [ ] Frontend image built with a commit SHA tag.
-- [ ] Frontend image pushed to ECR.
-- [ ] Image digest recorded.
-- [ ] `NEXT_PUBLIC_API_URL` placeholder strategy is documented.
-- [ ] No secrets baked into image.
-
-### Isolation guard
-
-Image build/push only. Do not deploy App Runner yet.
-
----
-
-## Phase 6 — Create VPC networking for private dependencies
-
-### Task
-
-Create the VPC/subnets/security groups required for App Runner VPC connector, RDS, and ElastiCache.
-
-### Files that may be touched
-
-- Optional future IaC file if requested, e.g. `deploy/aws/`.
-
-### DoD checklist
-
-- [ ] VPC selected or created.
-- [ ] Private subnets selected for RDS/ElastiCache.
-- [ ] App Runner VPC connector can reach private subnets.
-- [ ] Security group allows backend to reach RDS.
-- [ ] Security group allows backend to reach Redis/Valkey.
-- [ ] No public DB/cache endpoint is required.
-
-### Isolation guard
-
-Networking only. Do not create DB/cache/app services in this phase.
-
----
-
-## Phase 7 — Create RDS PostgreSQL
-
-### Task
-
-Create production PostgreSQL database on RDS.
-
-### Files that may be touched
-
-- `deploy/DEPLOYMENT_PLAN.md` only if DB size/identifier changes.
-
-### DoD checklist
-
-- [ ] RDS PostgreSQL instance exists.
-- [ ] Single-AZ or Multi-AZ decision recorded.
-- [ ] Storage size and autoscaling cap recorded.
-- [ ] Automated backups enabled.
-- [ ] DB is private, not publicly accessible.
-- [ ] Master credentials stored in Secrets Manager, not git.
-
-### Isolation guard
-
-Database provisioning only. No migrations yet.
-
----
-
-## Phase 8 — Enable pgvector
-
-### Task
-
-Enable `vector` extension in the RDS database.
-
-### Files that may be touched
-
-- None expected.
-
-### DoD checklist
-
-- [ ] Connected to RDS with admin/migration role.
-- [ ] `CREATE EXTENSION IF NOT EXISTS vector;` executed.
-- [ ] Extension exists in target database.
-- [ ] App schema not changed yet.
-
-### Isolation guard
-
-Extension enablement only.
-
----
-
-## Phase 9 — Create ElastiCache Redis/Valkey
-
-### Task
-
-Create managed cache for rate limit/session/cache workloads.
-
-### Files that may be touched
-
-- `deploy/DEPLOYMENT_PLAN.md` only if cache engine/size changes.
-
-### DoD checklist
-
-- [ ] Cache cluster/serverless cache exists.
-- [ ] Engine choice recorded: Redis OSS or Valkey.
-- [ ] Endpoint stored in Secrets Manager or App Runner env source.
-- [ ] Security group permits backend access only.
-- [ ] No public cache access.
-
-### Isolation guard
-
-Cache provisioning only.
-
----
-
-## Phase 10 — Create private S3 bucket
-
-### Task
-
-Create private S3 bucket for course/video assets.
-
-### Files that may be touched
-
-- None expected.
-
-### DoD checklist
-
-- [ ] Bucket `a20-course-assets-prod` exists in locked region.
-- [ ] Block Public Access enabled.
-- [ ] Versioning enabled.
-- [ ] Default encryption enabled.
-- [ ] Bucket policy does not allow public reads.
-
-### Isolation guard
-
-S3 bucket only. Do not upload app data yet.
-
----
-
-## Phase 11 — Upload course assets to S3
-
-### Task
-
-Upload course/video assets to S3 under a stable prefix.
-
-### Files that may be touched
-
-- None expected unless upload scripts are created later.
-
-### DoD checklist
-
-- [ ] Assets uploaded under `courses/`.
-- [ ] Object count recorded.
-- [ ] Total uploaded size recorded.
-- [ ] Representative MP4 object exists.
-- [ ] Local source files are not deleted.
-
-### Isolation guard
-
-Upload only. Do not change database references yet.
-
----
-
-## Phase 12 — Create CloudFront distribution
-
-### Task
-
-Create CloudFront distribution for S3-backed course assets.
-
-### Files that may be touched
-
-- None expected.
-
-### DoD checklist
-
-- [ ] CloudFront distribution exists.
-- [ ] S3 origin uses Origin Access Control or equivalent private access.
-- [ ] Direct public S3 access remains blocked.
-- [ ] Range requests work for MP4 seeking.
-- [ ] Cache policy recorded.
-- [ ] Default CloudFront domain recorded.
-
-### Isolation guard
-
-CDN only. Do not modify app code yet.
-
----
-
-## Phase 12.1 — Set up CloudFront signed URL keys
-
-### Task
-
-Set up CloudFront signed URL key material if assets must be protected from hotlinking.
-
-### Files that may be touched
-
-- `deploy/.env.production.example`
+- `frontend/package.json` only if build scripts need alignment.
+- `frontend/next.config.mjs` only if Amplify compatibility requires it.
+- `frontend/amplify.yml` if autodetection is not enough.
 - `deploy/ENVIRONMENT_MATRIX.md`
 
-### DoD checklist
+**Done when:**
 
-- [ ] Public key uploaded to CloudFront.
-- [ ] Private key stored only in Secrets Manager.
-- [ ] Key pair ID recorded as a secret/env value.
-- [ ] Test signed URL can access one object.
-- [ ] Unsigned URL behavior matches chosen policy.
+- Build command is `npm ci --legacy-peer-deps` then `npm run build`.
+- `NEXT_PUBLIC_API_URL` and `API_INTERNAL_URL` strategy is documented.
+- Local frontend build succeeds or the blocker is documented.
+- No unrelated UI behavior changes were made.
 
-### Isolation guard
+## Phase 6 - Provision Asset Infrastructure With Terraform
 
-Security key setup only.
+**Task:** Create private S3 bucket controls and CloudFront distribution.
 
----
+**May touch:**
 
-## Phase 13 — Store production secrets in Secrets Manager
+- `deploy/terraform/modules/assets/**`
+- `deploy/terraform/live/prod/**`
 
-### Task
+**Done when:**
 
-Store production runtime secrets in AWS Secrets Manager.
+- S3 bucket exists with public access block, versioning, and encryption.
+- CloudFront distribution uses S3 Origin Access Control.
+- Direct public S3 access remains blocked.
+- CloudFront default domain is recorded.
+- Signed URLs are explicitly enabled or deferred.
+- Terraform does not upload course objects.
 
-### Files that may be touched
+## Phase 7 - Upload Course Assets To S3
 
-- `.env.example` only for placeholder names.
-- `deploy/.env.production.example`
+**Task:** Upload selected course assets under the stable prefix.
+
+**May touch:**
+
+- None expected unless a small verification script is added later.
+
+**Done when:**
+
+- Assets exist under `s3://a20-course-assets-prod/courses/`.
+- Object count and total size are recorded.
+- Representative MP4 object exists.
+- Local source files remain intact.
+
+## Phase 8 - Provision Network, Database, And Cache
+
+**Task:** Create the private runtime data plane.
+
+**May touch:**
+
+- `deploy/terraform/modules/network/**`
+- `deploy/terraform/modules/database/**`
+- `deploy/terraform/modules/cache/**`
+- `deploy/terraform/live/prod/**`
 - `deploy/ENVIRONMENT_MATRIX.md`
 
-### DoD checklist
+**Required behavior:**
 
-- [ ] DB credentials stored.
-- [ ] Redis endpoint/auth stored if required.
-- [ ] App secret/JWT values stored.
-- [ ] Resend/LLM keys stored.
-- [ ] CloudFront private key stored if signed URLs are used.
-- [ ] No real secret values committed.
+- VPC includes public/private subnets, route tables, and route table associations.
+- NAT Gateway is created only when `enable_nat_gateway = true`.
+- App Runner security group can reach RDS and Redis.
+- RDS and ElastiCache are private.
+- RDS master password is AWS-managed or otherwise kept out of git.
 
-### Isolation guard
+**Done when:**
 
-Secrets setup/docs only. Do not change app runtime yet.
+- App Runner VPC connector path is available.
+- RDS PostgreSQL exists with backups and deletion protection.
+- `CREATE EXTENSION IF NOT EXISTS vector;` has been run and verified.
+- ElastiCache Redis OSS/Valkey exists.
+- Public egress for LLM/email providers is tested if required.
 
----
+## Phase 9 - Store Runtime Secrets And Env Values
 
-## Phase 14 — Add asset delivery config
+**Task:** Store production runtime values in AWS-managed locations.
 
-### Task
+**May touch:**
 
-Add config values for local vs S3/CloudFront asset delivery.
-
-### Files that may be touched
-
-- `src/config.py`
 - `.env.example`
 - `deploy/.env.production.example`
 - `deploy/ENVIRONMENT_MATRIX.md`
 
-### DoD checklist
+**Done when:**
 
-- [ ] `ASSET_STORAGE_PROVIDER=local|s3` supported.
-- [ ] `AWS_REGION`, `AWS_S3_BUCKET`, `AWS_S3_PREFIX`, `CLOUDFRONT_DOMAIN` documented.
-- [ ] Signed URL env values documented if used.
-- [ ] Local defaults preserve current `/data/...` behavior.
-- [ ] Config fails clearly for incomplete production S3 mode.
+- `DATABASE_URL`, `REDIS_URL`, `SECRET_KEY`, LLM key, and email values are set
+  as service secret references or Secrets Manager values.
+- Backend asset settings are set with `ASSET_STORAGE_PROVIDER=s3`.
+- Frontend Amplify env includes `NEXT_PUBLIC_API_URL` and `API_INTERNAL_URL`.
+- No real secret values are committed.
 
-### Isolation guard
+## Phase 10 - Provision App Runner Backend
 
-Config only. Do not change URL generation yet.
+**Task:** Create App Runner backend service with source auto deploy.
 
----
+**May touch:**
 
-## Phase 15 — Add CloudFront asset URL service
-
-### Task
-
-Add a service/helper that builds CloudFront asset URLs.
-
-### Files that may be touched
-
-- `src/services/asset_delivery.py` or `src/services/asset_signing.py`
-- `tests/services/test_asset_delivery.py` or nearest existing service tests
-
-### DoD checklist
-
-- [ ] Local provider returns current local asset path shape.
-- [ ] S3 provider returns CloudFront URL.
-- [ ] Signed URL branch works if enabled.
-- [ ] Unit tests cover local and S3 modes.
-- [ ] No course business logic changed yet.
-
-### Isolation guard
-
-New helper + tests only.
-
----
-
-## Phase 16 — Switch course asset URL generation behind config
-
-### Task
-
-Use the asset delivery helper where course/lecture/video URLs are returned.
-
-### Files that may be touched
-
-- `src/services/learning_unit_service.py`
-- `src/services/content_service.py`
-- Nearby tests covering lecture/content payloads
-
-### DoD checklist
-
-- [ ] Local mode returns existing local URLs.
-- [ ] S3 mode returns CloudFront URLs.
-- [ ] Backend does not proxy video bytes.
-- [ ] Existing lecture/catalog tests pass.
-- [ ] New/updated tests cover S3 mode.
-
-### Isolation guard
-
-Only asset URL generation is in scope.
-
----
-
-## Phase 17 — Create App Runner backend service
-
-### Task
-
-Deploy backend image from ECR to App Runner.
-
-### Files that may be touched
-
-- Optional future IaC file if requested.
-
-### DoD checklist
-
-- [ ] App Runner backend service created from backend ECR image.
-- [ ] Runtime env/secrets set.
-- [ ] VPC connector attached.
-- [ ] Backend can reach RDS and ElastiCache.
-- [ ] `/health` returns 200 on App Runner default domain.
-- [ ] App Runner max instances/concurrency bounded for cost control.
-
-### Isolation guard
-
-Backend deploy only. Do not run migrations/bootstrap yet.
-
----
-
-## Phase 18 — Run database migrations
-
-### Task
-
-Run application migrations against RDS.
-
-### Files that may be touched
-
-- None expected.
-
-### DoD checklist
-
-- [ ] DB backup/snapshot exists before migration.
-- [ ] Migration command executed against RDS.
-- [ ] Alembic/current migration state verified.
-- [ ] Backend health still passes after migration.
-- [ ] No data import run yet.
-
-### Isolation guard
-
-Schema migration only.
-
----
-
-## Phase 19 — Create production bootstrap wrapper
-
-### Task
-
-Create a reviewed wrapper for production bootstrap/import commands if current scripts require environment setup.
-
-### Files that may be touched
-
-- `scripts/aws_bootstrap.sh` or equivalent new script
-- `deploy/DEPLOYMENT_PLAN.md` only if command changes
-
-### DoD checklist
-
-- [ ] Wrapper uses existing import/bootstrap code.
-- [ ] Wrapper reads target DB/settings from env.
-- [ ] Wrapper is idempotent or documents rerun behavior.
-- [ ] Wrapper has no hard-coded secrets.
-- [ ] Dry-run/help output works locally if supported.
-
-### Isolation guard
-
-Script wrapper only. Do not run data import in this phase.
-
----
-
-## Phase 20 — Run full bootstrap pipeline against RDS
-
-### Task
-
-Run the reviewed bootstrap/import pipeline against production RDS.
-
-### Files that may be touched
-
-- None expected.
-
-### DoD checklist
-
-- [ ] Bootstrap command executed once against RDS.
-- [ ] Course rows exist.
-- [ ] Lecture/unit rows exist.
-- [ ] Asset keys are stored as S3 keys, not local absolute paths.
-- [ ] Backend API returns catalog data from RDS.
-
-### Isolation guard
-
-Data import only.
-
----
-
-## Phase 20.1 — Verify S3 to DB asset key parity
-
-### Task
-
-Verify every DB asset key required by the app exists in S3.
-
-### Files that may be touched
-
-- Optional verification script if no existing command can check this.
-
-### DoD checklist
-
-- [ ] DB asset key list exported or queried.
-- [ ] S3 object list checked.
-- [ ] Missing objects count is zero.
-- [ ] Representative video URL works through CloudFront.
-- [ ] Verification result recorded.
-
-### Isolation guard
-
-Verification only.
-
----
-
-## Phase 21 — Create App Runner frontend service
-
-### Task
-
-Deploy frontend image from ECR to App Runner.
-
-### Files that may be touched
-
-- None expected.
-
-### DoD checklist
-
-- [ ] Frontend App Runner service created from frontend ECR image.
-- [ ] `NEXT_PUBLIC_API_URL` points to backend default or final API URL.
-- [ ] Frontend default domain loads.
-- [ ] Frontend can call backend health/catalog.
-- [ ] App Runner max instances/concurrency bounded for cost control.
-
-### Isolation guard
-
-Frontend deploy only.
-
----
-
-## Phase 22 — Smoke test on App Runner temporary domains
-
-### Task
-
-Validate deployed app before custom domain cutover.
-
-### Files that may be touched
-
-- None expected.
-
-### DoD checklist
-
-- [ ] Frontend default URL loads.
-- [ ] Backend `/health` returns 200.
-- [ ] Catalog page loads courses.
-- [ ] Ready course can enter learning flow.
-- [ ] Representative lecture video URL is CloudFront.
-- [ ] Browser can seek video via CloudFront range requests.
-- [ ] Auth/login still works.
-
-### Isolation guard
-
-Validation only.
-
----
-
-## Phase 23 — Attach frontend/backend custom domains
-
-### Task
-
-Attach custom domains to App Runner frontend and backend.
-
-### Files that may be touched
-
+- `apprunner.yaml` only if source configuration requires it.
+- `deploy/terraform/modules/backend_apprunner/**`
+- `deploy/terraform/live/prod/**`
 - `deploy/ENVIRONMENT_MATRIX.md`
-- `deploy/.env.production.example`
 
-### DoD checklist
+**Connection rule:**
 
-- [ ] Route 53 hosted zone exists.
-- [ ] ACM/App Runner domain validation complete.
-- [ ] `app.<domain>` or apex points to frontend.
-- [ ] `api.<domain>` points to backend.
-- [ ] Frontend rebuilt/redeployed if API URL changed.
-- [ ] HTTPS works for frontend and backend.
+- Preferred: create/authorize the App Runner GitHub connection outside
+  Terraform, pass the connection ARN to Terraform, and keep the OAuth handshake
+  out of state.
+- If the connection ARN is empty, Terraform must skip the App Runner service and
+  document the missing input.
 
-### Isolation guard
+**Done when:**
 
-DNS/domain only.
+- Service `a20-backend` exists.
+- Auto deploy from production branch is enabled.
+- Env/secrets and VPC connector are attached.
+- Backend can reach RDS, Redis, and required public providers.
+- App Runner default-domain `/health` returns 200.
+- Max size/instances are bounded for cost control.
 
----
+## Phase 11 - Run Migrations, Bootstrap, And Asset Parity
 
-## Phase 24 — Attach CDN custom domain
+**Task:** Move production data into the AWS data plane.
 
-### Task
+**May touch:**
 
-Attach `cdn.<domain>` to CloudFront.
+- Optional `scripts/aws_bootstrap.sh` if current commands are too easy to misuse.
 
-### Files that may be touched
+**Done when:**
 
+- RDS snapshot exists before migration.
+- Alembic migrations reach head.
+- Bootstrap/import runs exactly once or idempotency behavior is documented.
+- Course and learning-unit rows exist.
+- DB asset keys match S3 object keys.
+- Representative CloudFront MP4 URL plays and seeks in the browser.
+
+## Phase 12 - Provision Amplify Frontend
+
+**Task:** Create Amplify app/branch and enable frontend auto deploy.
+
+**May touch:**
+
+- `frontend/amplify.yml` if needed.
+- `deploy/terraform/modules/frontend_amplify/**`
+- `deploy/terraform/live/prod/**`
 - `deploy/ENVIRONMENT_MATRIX.md`
+
+**Connection rule:**
+
+- Preferred: authorize/create or import the Amplify GitHub connection/app and
+  manage stable settings in Terraform.
+- Using `amplify_access_token` is allowed only after accepting that provider
+  handled sensitive material may appear in Terraform state.
+
+**Done when:**
+
+- Amplify app `a20-frontend` exists.
+- Branch auto deploy is enabled.
+- App root is `frontend`.
+- Env points to the App Runner temporary backend URL.
+- Amplify default domain loads and can call backend health/catalog APIs.
+
+## Phase 13 - Smoke Test Temporary AWS Domains
+
+**Task:** Validate the app before custom domain cutover.
+
+**May touch:** none expected.
+
+**Done when:**
+
+- Amplify default URL loads.
+- App Runner default `/health` returns 200.
+- Catalog, auth/register/login, learning flow, quiz, and tutor smoke paths pass.
+- Video URLs use CloudFront and support seeking.
+- Browser console has no `localhost` calls and no mixed content.
+
+## Phase 14 - Attach Custom Domains
+
+**Task:** Attach final frontend, backend, and CDN domains.
+
+**May touch:**
+
+- `deploy/terraform/modules/assets/**`
+- `deploy/terraform/modules/backend_apprunner/**`
+- `deploy/terraform/modules/frontend_amplify/**`
+- `deploy/terraform/live/prod/**`
 - `deploy/.env.production.example`
+- `deploy/ENVIRONMENT_MATRIX.md`
 
-### DoD checklist
+**Done when:**
 
-- [ ] ACM certificate for CloudFront created in `us-east-1`.
-- [ ] CloudFront alternate domain name configured.
-- [ ] Route 53 record points `cdn.<domain>` to CloudFront.
-- [ ] Backend `CLOUDFRONT_DOMAIN` updated if needed.
-- [ ] Representative asset URL works on CDN custom domain.
+- Route 53 hosted zone exists or external DNS delegation is documented.
+- `app.<domain>` points to Amplify.
+- `api.<domain>` points to App Runner.
+- `cdn.<domain>` points to CloudFront.
+- ACM certificates are issued and attached.
+- Backend CORS/base URL and frontend API URL are updated.
+- Frontend is rebuilt after final API URL change.
+- Full smoke test passes on final domains.
 
-### Isolation guard
+## Phase 15 - Operations Controls And Rollback Records
 
-CDN domain only.
+**Task:** Add minimal production operations and rollback metadata.
 
----
-
-## Phase 25 — Add budgets and production alarms
-
-### Task
-
-Add AWS budget alerts and minimal production alarms.
-
-### Files that may be touched
-
-- Optional future IaC file if requested.
-- `deploy/PRODUCTION_CHECKLIST.md`
-
-### DoD checklist
-
-- [ ] AWS Budget monthly threshold created.
-- [ ] Budget alert recipients configured.
-- [ ] CloudFront bytes alarm created.
-- [ ] App Runner 5xx alarm created.
-- [ ] RDS CPU/storage alarm created.
-- [ ] CloudWatch log retention set.
-
-### Isolation guard
-
-Monitoring/cost controls only.
-
----
-
-## Phase 26 — Final production-readiness check
-
-### Task
-
-Run final checks before calling production ready.
-
-### Files that may be touched
+**May touch:**
 
 - `deploy/PRODUCTION_CHECKLIST.md`
+- `deploy/terraform/modules/observability/**`
+- `deploy/terraform/live/prod/**`
+- Optional future `deploy/ROLLBACK.md`
 
-### DoD checklist
+**Done when:**
 
-- [ ] No production secret is committed.
-- [ ] App URLs and API URLs use final domains.
-- [ ] Backend logs show no startup/config errors.
-- [ ] RDS backup retention confirmed.
-- [ ] S3 public access blocked.
-- [ ] CloudFront distribution enabled.
-- [ ] Budget alerts enabled.
-- [ ] Rollback path documented or ready for Phase 27.
+- AWS Budget and alert recipient are configured.
+- CloudFront bytes, App Runner 5xx, RDS CPU/storage, and log-retention controls
+  are configured where supported.
+- NAT spend review is recorded if NAT is enabled.
+- Deployed commit SHA, Amplify deployment ID, App Runner deployment ID, RDS
+  snapshot ID, and CloudFront distribution ID are recorded.
+- Rollback paths for frontend, backend, DB, and assets are documented.
 
-### Isolation guard
+## Phase 16 - Optional Later ECR/OIDC Hardening
 
-Checklist/verification only.
+**Task:** Replace native source deploy with a custom deploy workflow only when v1
+is stable and the added control is worth the complexity.
 
----
+**Upgrade when:**
 
-## Phase 27 — Document rollback commands
+- Immutable Docker image digest rollback is required.
+- GitHub Environment approval gates are required for app deploy.
+- One workflow must build, tag, update App Runner, wait, and smoke test.
 
-### Task
+**Done when:**
 
-Document rollback commands and manual rollback steps for app, DB, and assets.
+- OIDC role is least-privilege.
+- ECR repository exists.
+- Workflow builds SHA-tagged images.
+- Workflow updates App Runner and waits for completion.
+- Rollback image digests are recorded.
 
-### Files that may be touched
+## Current Known Code Touch Points
 
-- `deploy/DEPLOYMENT_PLAN.md`
-- Optional future file if requested: `deploy/ROLLBACK.md`
-
-### Rollback steps
-
-#### App Runner app rollback
-
-- Backend: update App Runner service to previous ECR image digest.
-- Frontend: update App Runner service to previous ECR image digest.
-
-#### Database rollback
-
-Before risky migrations:
-
-```bash
-pg_dump "$DATABASE_URL" > backup_before_migration.sql
-```
-
-Restore if required:
-
-```bash
-psql "$DATABASE_URL" < backup_before_migration.sql
-```
-
-For RDS-managed rollback, restore from the pre-migration snapshot into a new instance and repoint `DATABASE_URL` after validation.
-
-#### Asset rollback
-
-If S3 versioning is enabled, restore previous object versions.
-
-If CloudFront cache must be cleared:
-
-```bash
-aws cloudfront create-invalidation --distribution-id <DIST_ID> --paths "/courses/*"
-```
-
-### DoD checklist
-
-- [ ] Backend rollback path documented.
-- [ ] Frontend rollback path documented.
-- [ ] DB backup command documented.
-- [ ] DB restore command documented.
-- [ ] RDS snapshot rollback path documented.
-- [ ] S3 versioning status known.
-- [ ] CloudFront invalidation command documented.
-- [ ] No destructive rollback command executed without explicit confirmation.
-
-### Isolation guard
-
-Documentation only. Do not execute destructive rollback commands unless user explicitly confirms.
-
----
-
-## Current known future code touch points
-
-These files are not all changed by this plan. They are likely touch points for future implementation phases:
-
-| Area | Likely file(s) | Reason |
+| Area | File(s) | Reason |
 |---|---|---|
-| Backend App Runner port | `Dockerfile` | Use `$PORT` instead of hard-coded `8000` if required |
-| Frontend App Runner runtime | `frontend/Dockerfile` | Ensure App Runner runtime compatibility |
-| Config | `src/config.py` | Add AWS/CloudFront asset settings |
-| Asset URL builder | `src/services/asset_signing.py` or `src/services/asset_delivery.py` | Generate local or CloudFront asset URLs |
-| Course asset URL usage | `src/services/learning_unit_service.py`, `src/services/content_service.py` | Return CloudFront URLs in S3 mode |
-| Env docs | `deploy/.env.production.example`, `deploy/ENVIRONMENT_MATRIX.md` | Document full AWS env values |
-| CI workflow | `.github/workflows/ci.yml` | Add reusable CI gate, Python 3.12 alignment, frontend test coverage |
-| Deploy workflow | `.github/workflows/deploy.yml` | Deploy with AWS OIDC + ECR + App Runner |
-| CI/CD docs | `deploy/CICD_AWS_GUIDE.md`, `deploy/ENVIRONMENT_MATRIX.md` | Document GitHub environment variables, OIDC role, manual deploy and rollback |
-| Tests | `tests/services/test_asset_delivery.py` or nearby tests | Validate URL generation and provider switch |
-| Bootstrap | `scripts/aws_bootstrap.sh` if needed | Wrap production import/bootstrap safely |
+| Terraform | `deploy/terraform/**` | AWS infrastructure |
+| Backend container | `Dockerfile`, `.dockerignore` | App Runner runtime |
+| Frontend build | `frontend/amplify.yml` if needed | Amplify monorepo build |
+| Backend config | `src/config.py` | Asset/provider env handling |
+| Asset delivery | `src/services/asset_delivery.py` | CloudFront URL generation |
+| CI | `.github/workflows/ci.yml` | Production gate |
+| Legacy deploy | `.github/workflows/deploy.yml` | Must be frozen before AWS production |
+| Bootstrap | `scripts/aws_bootstrap.sh` if needed | Safer production import wrapper |
 
-## Non-goals
+## Non-Goals For V1
 
-- Keep production hosting on AWS services.
-- Do not implement DRM.
-- Do not implement multi-region HA in v1.
-- Do not build full observability stack beyond CloudWatch alarms/budgets.
-- Do not rewrite course, quiz, auth, planner, or recommendation systems.
-- Do not proxy large video files through FastAPI.
-- Do not introduce Kubernetes/EKS for v1.
+- No ECS, EKS, Kubernetes, multi-region HA, or DRM.
+- No custom ECR/OIDC deploy before native AWS auto deploy works.
+- No rewrite of course, quiz, auth, planner, recommendation, or UI systems.
+- No FastAPI proxying of large course/video assets.

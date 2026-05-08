@@ -1,17 +1,20 @@
-# Manual Deploy Steps — Full AWS
+# Manual Deploy Steps - AWS-First Simple Managed
 
-Use this checklist when deploying manually before CI/CD is fully trusted.
+Use this runbook when executing the plan by hand from an approved admin machine.
+It follows `DEPLOYMENT_PLAN.md` and keeps AWS infrastructure Terraform-first.
 
-## 0. Fill deployment values
+## 0. Fill Deployment Values
 
 | Item | Value |
 |---|---|
 | AWS account ID | `________________` |
 | AWS region | `ap-southeast-1` |
-| Backend ECR repo | `a20-backend` |
-| Frontend ECR repo | `a20-frontend` |
-| Backend App Runner URL | `https://________________` |
-| Frontend App Runner URL | `https://________________` |
+| Production branch | `main` or `________________` |
+| Domain | `________________` |
+| Backend App Runner service | `a20-backend` |
+| Frontend Amplify app | `a20-frontend` |
+| Backend temporary URL | `https://________________` |
+| Frontend temporary URL | `https://________________` |
 | RDS endpoint | `________________.rds.amazonaws.com` |
 | ElastiCache endpoint | `________________.cache.amazonaws.com` |
 | S3 bucket | `a20-course-assets-prod` |
@@ -20,7 +23,7 @@ Use this checklist when deploying manually before CI/CD is fully trusted.
 | Final backend domain | `api.<domain>` |
 | Final CDN domain | `cdn.<domain>` |
 
-## 1. Verify AWS CLI identity
+## 1. Verify AWS CLI Identity
 
 ```bash
 aws sts get-caller-identity
@@ -29,168 +32,158 @@ aws configure get region
 
 Expected region: `ap-southeast-1`.
 
-## 2. Create ECR repositories
+## 2. Freeze Legacy Deploy Workflow
+
+Before pushing to `main`, confirm `.github/workflows/deploy.yml` cannot deploy
+to Vercel/Railway/Supabase.
+
+Acceptable actions:
+
+- Disable its `push main` trigger.
+- Replace it with a manual/no-op reference workflow.
+- Delete it after confirming the old deployment stack is retired.
+
+## 3. Bootstrap Terraform State
+
+Run once:
 
 ```bash
-aws ecr create-repository --repository-name a20-backend --region ap-southeast-1
-aws ecr create-repository --repository-name a20-frontend --region ap-southeast-1
+cd deploy/terraform/bootstrap-state
+terraform init
+terraform plan -out bootstrap.tfplan
+terraform apply bootstrap.tfplan
 ```
 
-Enable lifecycle policies so only recent SHA-tagged images are retained.
-
-## 3. Build and push backend image
+Then initialize production:
 
 ```bash
-AWS_ACCOUNT_ID=<account-id>
-AWS_REGION=ap-southeast-1
-COMMIT_SHA=$(git rev-parse --short=12 HEAD)
-
-aws ecr get-login-password --region "$AWS_REGION" \
-  | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
-
-docker build -t a20-backend:"$COMMIT_SHA" .
-docker tag a20-backend:"$COMMIT_SHA" "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/a20-backend:$COMMIT_SHA"
-docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/a20-backend:$COMMIT_SHA"
+cd ../live/prod
+cp backend.hcl.example backend.hcl
+cp terraform.tfvars.example terraform.tfvars
+terraform init -backend-config=backend.hcl
+terraform validate
+terraform plan -var-file=terraform.tfvars -out prod.tfplan
 ```
 
-Record the pushed image digest.
-
-## 4. Build and push frontend image
+Review every plan before apply:
 
 ```bash
-AWS_ACCOUNT_ID=<account-id>
-AWS_REGION=ap-southeast-1
-COMMIT_SHA=$(git rev-parse --short=12 HEAD)
-
-docker build \
-  --build-arg NEXT_PUBLIC_API_URL=https://<backend-url-or-api-domain> \
-  -t a20-frontend:"$COMMIT_SHA" ./frontend
-
-docker tag a20-frontend:"$COMMIT_SHA" "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/a20-frontend:$COMMIT_SHA"
-docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/a20-frontend:$COMMIT_SHA"
+terraform apply prod.tfplan
 ```
 
-Record the pushed image digest.
+## 4. Authorize GitHub Connections
 
-## 5. Create private network dependencies
+App Runner:
 
-Create or select:
+- Create/authorize the App Runner GitHub connection.
+- Record the connection ARN in local `terraform.tfvars`.
+- Do not commit the connection ARN if it is treated as sensitive.
 
-- VPC.
-- Private subnets.
-- Backend security group path for App Runner VPC connector.
-- RDS security group.
-- ElastiCache security group.
+Amplify:
 
-RDS and ElastiCache must not be public.
+- Preferred: create/authorize or import the Amplify app/connection, then manage
+  stable settings through Terraform where accepted.
+- Only use token-based Terraform creation after accepting state implications.
 
-## 6. Create RDS PostgreSQL
+## 5. Apply Terraform Infrastructure In Phases
 
-Create RDS PostgreSQL with:
+Run targeted plans only when helpful for review. Full plans are acceptable after
+module wiring is stable.
 
-- Identifier: `a20-postgres-prod`
-- Engine: PostgreSQL
-- Initial size: `db.t4g.micro` or `db.t4g.small`
-- Storage: 20 GB or higher
-- Backups: enabled
-- Public access: no
+Suggested order:
 
-Enable pgvector:
+```bash
+cd deploy/terraform/live/prod
+terraform plan -var-file=terraform.tfvars -out prod-assets.tfplan
+terraform apply prod-assets.tfplan
+
+terraform plan -var-file=terraform.tfvars -out prod-network-data.tfplan
+terraform apply prod-network-data.tfplan
+
+terraform plan -var-file=terraform.tfvars -out prod-apps.tfplan
+terraform apply prod-apps.tfplan
+
+terraform plan -var-file=terraform.tfvars -out prod-ops.tfplan
+terraform apply prod-ops.tfplan
+```
+
+Confirm every plan creates only resources for the intended phase.
+
+## 6. Upload Course Assets
+
+Run only after Terraform creates the S3 bucket.
+
+```bash
+aws s3 sync ./data/courses s3://a20-course-assets-prod/courses --delete
+aws s3 ls s3://a20-course-assets-prod/courses --recursive --summarize
+```
+
+Record:
+
+- Object count.
+- Total uploaded size.
+- Representative MP4 key.
+
+## 7. Enable Pgvector
+
+After RDS is available and reachable from a trusted environment:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 SELECT extname FROM pg_extension WHERE extname = 'vector';
 ```
 
-Store the final async URL:
+Expected result: `vector`.
 
-```text
-DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@HOST:5432/DB
-```
+## 8. Store Backend Secrets And Env
 
-## 7. Create ElastiCache
-
-Create Redis OSS or Valkey in private subnets.
-
-Store:
-
-```text
-REDIS_URL=redis://HOST:6379/0
-```
-
-## 8. Create S3 bucket and upload assets
-
-```bash
-aws s3api create-bucket \
-  --bucket a20-course-assets-prod \
-  --region ap-southeast-1 \
-  --create-bucket-configuration LocationConstraint=ap-southeast-1
-
-aws s3api put-public-access-block \
-  --bucket a20-course-assets-prod \
-  --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
-
-aws s3api put-bucket-versioning \
-  --bucket a20-course-assets-prod \
-  --versioning-configuration Status=Enabled
-
-aws s3 sync ./data/courses s3://a20-course-assets-prod/courses --delete
-```
-
-Record object count and total size:
-
-```bash
-aws s3 ls s3://a20-course-assets-prod/courses --recursive --summarize
-```
-
-## 9. Create CloudFront distribution
-
-Create a distribution with:
-
-- Origin: S3 bucket.
-- Access: Origin Access Control.
-- Viewer protocol policy: redirect HTTP to HTTPS.
-- Methods: `GET`, `HEAD`.
-- Range requests: supported.
-
-Verify one asset through the CloudFront domain.
-
-## 10. Store secrets
-
-Store runtime secrets in Secrets Manager or App Runner secret references:
+Configure App Runner env/secret refs:
 
 ```text
 DATABASE_URL
 REDIS_URL
 SECRET_KEY
-OPENAI_API_KEY
-ANTHROPIC_API_KEY
-GEMINI_API_KEY
-RESEND_API_KEY
-CLOUDFRONT_PRIVATE_KEY
+OPENAI_API_KEY / ANTHROPIC_API_KEY / GEMINI_API_KEY
+DEBUG=false
+LOG_LEVEL=INFO
+FRONTEND_BASE_URL=https://<amplify-temp-url>
+CORS_ORIGINS=["https://<amplify-temp-url>"]
+ASSET_STORAGE_PROVIDER=s3
+AWS_REGION=ap-southeast-1
+AWS_S3_BUCKET=a20-course-assets-prod
+AWS_S3_PREFIX=courses
+CLOUDFRONT_DOMAIN=<cloudfront-domain>
 ```
 
-## 11. Create backend App Runner service
+Do not paste real secrets into committed files or Terraform variables.
 
-Create service from backend ECR image.
+## 9. Verify Backend App Runner
 
-Required settings:
+Confirm service settings:
 
-- Service name: `a20-backend`
-- Port: `8000`
-- VPC connector: attached
-- Health path: `/health`
-- Env/secrets: from `ENVIRONMENT_MATRIX.md`
+- Service name: `a20-backend`.
+- Source: repository root `Dockerfile`.
+- Branch: `main` or production branch.
+- Auto deploy: enabled.
+- Port: `8000` or runtime `PORT`.
+- VPC connector attached if RDS/Redis are private.
+- Health path: `/health`.
 
 Verify:
 
 ```bash
-curl https://<backend-app-runner-url>/health
+curl --fail https://<backend-app-runner-url>/health
 ```
 
-## 12. Run migrations
+Confirm backend can reach:
 
-Create DB snapshot first, then run migrations from a trusted admin environment or one-off task:
+- RDS.
+- Redis/Valkey.
+- Selected LLM/email provider if enabled.
+
+## 10. Run Migrations
+
+Create or confirm an RDS snapshot first. Then run:
 
 ```bash
 alembic upgrade head
@@ -198,7 +191,7 @@ alembic upgrade head
 
 Verify migration head after completion.
 
-## 13. Run bootstrap/import
+## 11. Run Bootstrap/Import
 
 Run the reviewed production bootstrap wrapper if available:
 
@@ -206,53 +199,77 @@ Run the reviewed production bootstrap wrapper if available:
 bash scripts/aws_bootstrap.sh
 ```
 
+If the wrapper does not exist, record the exact existing import commands used.
+
 Verify:
 
 ```sql
+SELECT COUNT(*) FROM courses;
 SELECT COUNT(*) FROM learning_units;
-SELECT COUNT(*) FROM lectures;
 ```
 
-## 14. Verify S3 to DB asset parity
+## 12. Verify S3 To DB Asset Parity
 
 Export DB asset keys and compare with S3 object keys under `courses/`.
 
-Failure condition: any DB asset key points to a missing S3 object.
+Failure condition:
 
-## 15. Create frontend App Runner service
+```text
+any DB asset key points to a missing S3 object
+```
 
-Create service from frontend ECR image.
+Verify one representative video through CloudFront and confirm browser seeking
+works.
 
-Required settings:
+## 13. Verify Frontend Amplify
 
-- Service name: `a20-frontend`
-- Port: `3000`
-- Env: `NEXT_PUBLIC_API_URL`, `API_INTERNAL_URL`, `NODE_ENV`, `NEXT_TELEMETRY_DISABLED`
+Confirm service settings:
+
+- App name: `a20-frontend`.
+- Source: GitHub repository.
+- Branch: `main` or production branch.
+- App root: `frontend`.
+- Auto deploy: enabled.
+- Install command: `npm ci --legacy-peer-deps`.
+- Build command: `npm run build`.
+
+Set Amplify env:
+
+```text
+NEXT_PUBLIC_API_URL=https://<backend-app-runner-url>
+API_INTERNAL_URL=https://<backend-app-runner-url>
+NEXT_TELEMETRY_DISABLED=1
+NODE_ENV=production
+```
 
 Verify:
 
 ```bash
-curl https://<frontend-app-runner-url>/api/health
+curl --fail https://<frontend-amplify-url>/api/health
 ```
 
-## 16. Smoke test temporary AWS domains
+## 14. Smoke Test Temporary AWS Domains
 
 - [ ] Backend `/health` returns 200.
 - [ ] Frontend health returns 200.
 - [ ] Home page loads.
-- [ ] Auth flow works.
+- [ ] Register and login work.
+- [ ] Forgot-password works if enabled.
 - [ ] Course catalog loads.
+- [ ] Learning flow opens at least one ready course.
 - [ ] Video URL uses CloudFront.
 - [ ] Video play and seek work.
-- [ ] Browser console has no localhost calls.
+- [ ] Tutor/email calls work if enabled.
+- [ ] Browser console has no `localhost` calls.
+- [ ] No mixed-content HTTP warnings.
 
-## 17. Set up custom domains
+## 15. Attach Custom Domains
 
-Use Route 53 and ACM:
+Use Terraform for Route 53, ACM, and service domain resources when possible.
 
 ```text
-app.<domain>  -> frontend App Runner custom domain
-api.<domain>  -> backend App Runner custom domain
+app.<domain>  -> Amplify frontend
+api.<domain>  -> App Runner backend
 cdn.<domain>  -> CloudFront distribution
 ```
 
@@ -273,34 +290,30 @@ NEXT_PUBLIC_API_URL=https://api.<domain>
 API_INTERNAL_URL=https://api.<domain>
 ```
 
-## 18. Configure CI/CD
-
-Create GitHub Actions variables from `AWS_CICD_GUIDE.md`.
-
-Create AWS OIDC role and set:
-
-```text
-AWS_DEPLOY_ROLE_ARN=<role-arn>
-```
-
-Run workflow manually once with `workflow_dispatch`, then rely on `push main` after it is trusted.
-
-## 19. Enable budgets and alarms
+## 16. Configure Budgets And Alarms
 
 - [ ] AWS Budget alerts.
 - [ ] CloudFront bytes alarm.
 - [ ] App Runner 5xx alarm.
 - [ ] RDS CPU/storage alarms.
+- [ ] NAT cost review if NAT is used.
 - [ ] CloudWatch log retention.
+- [ ] S3 lifecycle policy reviewed.
 
-## 20. Record rollback data
+## 17. Record Rollback Data
 
 Record:
 
 - Git commit SHA.
-- Backend image digest.
-- Frontend image digest.
+- Amplify deployment/build ID.
+- App Runner deployment ID.
 - RDS snapshot ID before migration.
 - CloudFront distribution ID.
+- Terraform plan/apply timestamp.
 
-Rollback app services by updating App Runner to previous ECR image digest.
+Rollback:
+
+- Frontend: redeploy previous Amplify build or revert commit.
+- Backend: redeploy previous App Runner deployment or revert commit.
+- DB: restore from RDS snapshot into a new instance and repoint `DATABASE_URL`.
+- Assets: restore S3 object versions and invalidate CloudFront paths if needed.
