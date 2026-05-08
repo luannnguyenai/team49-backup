@@ -1,8 +1,8 @@
 # Deployment Plan — Full AWS
 
-## Requirement lock
+## Requirement Lock
 
-User requirements:
+The production plan optimizes for:
 
 - Deploy **full AWS** for the production path.
 - Sau deploy sẽ mua và gắn custom domain.
@@ -14,9 +14,22 @@ User requirements:
 - Thay đổi phải **isolated**, tránh ảnh hưởng logic khác.
 - Plan phải có **ước tính chi phí AWS theo tháng**.
 
-## Target architecture
+## Source Of Truth Rules
+
+1. This file controls phase order and deployment gates.
+2. `TERRAFORM_PLAN.md` controls how infrastructure modules are implemented.
+3. `ENVIRONMENT_MATRIX.md` controls runtime values and where they are stored.
+4. `MANUAL_DEPLOY_STEPS.md` is an execution runbook, not a separate architecture.
+5. If docs disagree, update the lower-priority doc to match this file.
+
+## Chosen Feasible V1 Architecture
 
 ```text
+GitHub
+  -> GitHub Actions CI gate
+  -> Amplify Hosting auto deploys Next.js frontend
+  -> App Runner auto deploys FastAPI backend from repository Dockerfile
+
 Browser
   ├─ AWS App Runner: Next.js frontend
   │    temp:  https://<frontend-service>.<region>.awsapprunner.com
@@ -129,7 +142,7 @@ Pricing references to verify before provisioning:
 5. **No secrets in git**: AWS/DB/Redis/LLM/Resend keys chỉ set trong Secrets Manager, App Runner env, hoặc local `.env` không commit.
 6. **CI/CD uses short-lived AWS auth**: GitHub Actions must use OIDC-assumed IAM roles, not committed AWS access keys or long-lived repository secrets.
 
-## Phase overview
+## Service Choices
 
 | Phase | Single task |
 |---:|---|
@@ -293,7 +306,7 @@ Ghi nhận rõ workflow hiện tại đang deploy sai target và đóng băng n�
 
 `.github/workflows/deploy.yml` must be aligned to the full AWS production target. The new CI/CD plan should replace any older production deploy path instead of extending it.
 
-### DoD checklist
+**May touch:**
 
 - [ ] Current deploy workflow providers recorded.
 - [ ] Decision recorded: production deploy target is AWS App Runner + ECR + RDS + ElastiCache.
@@ -301,15 +314,15 @@ Ghi nhận rõ workflow hiện tại đang deploy sai target và đóng băng n�
 - [ ] No production deploy workflow is changed before the replacement design is ready.
 - [ ] No cloud deployment is triggered in this phase.
 
-### Isolation guard
+**Acceptable outcomes:**
 
 Documentation/audit only. Do not edit workflow behavior yet.
 
----
+**Done when:**
 
 ## Phase 2.2 — Create AWS IAM OIDC deploy roles
 
-### Task
+## Phase 2 - Bootstrap Terraform State And Production Root
 
 Create least-privilege AWS IAM roles for GitHub Actions deployments using OIDC.
 
@@ -329,7 +342,7 @@ Create least-privilege AWS IAM roles for GitHub Actions deployments using OIDC.
   - Secrets Manager read for deploy-time references only if workflow needs it.
   - CloudWatch read for smoke/deploy status if needed.
 
-### DoD checklist
+**May touch:**
 
 - [ ] IAM OIDC provider exists.
 - [ ] GitHub Actions deploy role exists.
@@ -339,15 +352,15 @@ Create least-privilege AWS IAM roles for GitHub Actions deployments using OIDC.
 - [ ] No long-lived `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` repository secrets are required.
 - [ ] Role ARN documented as `AWS_DEPLOY_ROLE_ARN`.
 
-### Isolation guard
+**Done when:**
 
 IAM setup only. Do not edit workflows or deploy services in this phase.
 
----
+## Phase 4 - Prepare Backend For App Runner
 
 ## Phase 2.3 — Update CI workflow gates
 
-### Task
+**May touch:**
 
 Update CI so PR/main validation matches the project runtime and blocks bad deploys.
 
@@ -366,7 +379,7 @@ Update CI so PR/main validation matches the project runtime and blocks bad deplo
 - Add `workflow_call` so deploy workflow can reuse CI as a gate.
 - Keep branch/PR triggers.
 
-### DoD checklist
+**May touch:**
 
 - [ ] CI uses Python 3.12.
 - [ ] CI still runs backend lint.
@@ -377,11 +390,11 @@ Update CI so PR/main validation matches the project runtime and blocks bad deplo
 - [ ] CI artifacts remain useful for failures.
 - [ ] No deployment step is added to CI.
 
-### Isolation guard
+## Phase 6 - Provision Asset Infrastructure With Terraform
 
 CI validation only. Do not add AWS deploy behavior in this phase.
 
----
+**May touch:**
 
 ## Phase 2.4 — Replace production deploy workflow with AWS App Runner flow
 
@@ -462,7 +475,7 @@ Document all GitHub Actions variables, secrets, and manual controls required for
 - Manual deployment flow with `workflow_dispatch`.
 - Rollback by previous ECR image digest.
 
-### DoD checklist
+**May touch:**
 
 - [ ] All required GitHub Actions variables are listed.
 - [ ] All required GitHub Actions secrets are listed, if any.
@@ -472,19 +485,19 @@ Document all GitHub Actions variables, secrets, and manual controls required for
 - [ ] Rollback input values are documented.
 - [ ] No real secret values are committed.
 
-### Isolation guard
+**Required behavior:**
 
 Documentation only.
 
----
+**Done when:**
 
 ## Phase 3 — Create ECR repositories
 
-### Task
+## Phase 9 - Store Runtime Secrets And Env Values
 
 Create private ECR repositories for backend and frontend images.
 
-### Files that may be touched
+**May touch:**
 
 - `deploy/DEPLOYMENT_PLAN.md` only if final repository names change.
 
@@ -1071,11 +1084,11 @@ Attach `cdn.<domain>` to CloudFront.
 
 CDN domain only.
 
----
+**Connection rule:**
 
 ## Phase 25 — Add budgets and production alarms
 
-### Task
+**Done when:**
 
 Add AWS budget alerts and minimal production alarms.
 
@@ -1084,7 +1097,7 @@ Add AWS budget alerts and minimal production alarms.
 - Optional future IaC file if requested.
 - `deploy/PRODUCTION_CHECKLIST.md`
 
-### DoD checklist
+**May touch:**
 
 - [ ] AWS Budget monthly threshold created.
 - [ ] Budget alert recipients configured.
@@ -1120,57 +1133,82 @@ Run final checks before calling production ready.
 - [ ] Budget alerts enabled.
 - [ ] Rollback path documented or ready for Phase 27.
 
-### Isolation guard
+- Use Amplify's native GitHub authorization for the first deployment.
+- Do not use an Amplify access token for the first deployment path.
+- Import or Terraform-manage the app later only after the default-domain
+  frontend is healthy.
 
 Checklist/verification only.
 
----
+- Amplify app `a20-frontend` exists.
+- Branch auto deploy is enabled.
+- App root is `frontend`.
+- Env points to the App Runner temporary backend URL.
+- Amplify default domain loads and can call backend health/catalog APIs.
 
 ## Phase 27 — Document rollback commands
 
-### Task
+**Task:** Validate the app before custom domain cutover.
 
-Document rollback commands and manual rollback steps for app, DB, and assets.
+**May touch:** none expected.
 
-### Files that may be touched
+**Done when:**
 
-- `deploy/DEPLOYMENT_PLAN.md`
-- Optional future file if requested: `deploy/ROLLBACK.md`
+- Amplify default URL loads.
+- App Runner default `/health` returns 200.
+- Catalog, auth/register/login, learning flow, quiz, and tutor smoke paths pass.
+- Video URLs use CloudFront and support seeking.
+- Browser console has no `localhost` calls and no mixed content.
 
-### Rollback steps
+## Phase 14 - Attach Custom Domains
 
 #### App Runner app rollback
 
 - Backend: update App Runner service to previous ECR image digest.
 - Frontend: update App Runner service to previous ECR image digest.
 
-#### Database rollback
+- `deploy/terraform/modules/assets/**`
+- `deploy/terraform/modules/backend_apprunner/**`
+- `deploy/terraform/modules/frontend_amplify/**`
+- `deploy/terraform/live/prod/**`
+- `deploy/.env.production.example`
+- `deploy/ENVIRONMENT_MATRIX.md`
 
-Before risky migrations:
+**Done when:**
 
-```bash
-pg_dump "$DATABASE_URL" > backup_before_migration.sql
-```
+- Route 53 hosted zone exists or external DNS delegation is documented.
+- `app.<domain>` points to Amplify.
+- `api.<domain>` points to App Runner.
+- `cdn.<domain>` points to CloudFront.
+- ACM certificates are issued and attached.
+- Backend CORS/base URL and frontend API URL are updated.
+- Frontend is rebuilt after final API URL change.
+- Full smoke test passes on final domains.
 
-Restore if required:
+## Phase 15 - Operations Controls And Rollback Records
 
-```bash
-psql "$DATABASE_URL" < backup_before_migration.sql
-```
+**Task:** Add minimal production operations and rollback metadata.
 
 For RDS-managed rollback, restore from the pre-migration snapshot into a new instance and repoint `DATABASE_URL` after validation.
 
 #### Asset rollback
 
-If S3 versioning is enabled, restore previous object versions.
+- `deploy/PRODUCTION_CHECKLIST.md`
+- `deploy/terraform/modules/observability/**`
+- `deploy/terraform/live/prod/**`
+- Optional future `deploy/ROLLBACK.md`
 
-If CloudFront cache must be cleared:
+**Done when:**
 
-```bash
-aws cloudfront create-invalidation --distribution-id <DIST_ID> --paths "/courses/*"
-```
+- AWS Budget and alert recipient are configured.
+- CloudFront bytes, App Runner 5xx, RDS CPU/storage, and log-retention controls
+  are configured where supported.
+- NAT spend review is recorded if NAT is enabled.
+- Deployed commit SHA, Amplify deployment ID, App Runner deployment ID, RDS
+  snapshot ID, and CloudFront distribution ID are recorded.
+- Rollback paths for frontend, backend, DB, and assets are documented.
 
-### DoD checklist
+## Phase 16 - Optional Later ECR/OIDC Hardening
 
 - [ ] Backend rollback path documented.
 - [ ] Frontend rollback path documented.
@@ -1181,17 +1219,23 @@ aws cloudfront create-invalidation --distribution-id <DIST_ID> --paths "/courses
 - [ ] CloudFront invalidation command documented.
 - [ ] No destructive rollback command executed without explicit confirmation.
 
-### Isolation guard
+**Upgrade when:**
 
-Documentation only. Do not execute destructive rollback commands unless user explicitly confirms.
+- Immutable Docker image digest rollback is required.
+- GitHub Environment approval gates are required for app deploy.
+- One workflow must build, tag, update App Runner, wait, and smoke test.
 
----
+**Done when:**
 
-## Current known future code touch points
+- OIDC role is least-privilege.
+- ECR repository exists.
+- Workflow builds SHA-tagged images.
+- Workflow updates App Runner and waits for completion.
+- Rollback image digests are recorded.
 
-These files are not all changed by this plan. They are likely touch points for future implementation phases:
+## Current Known Code Touch Points
 
-| Area | Likely file(s) | Reason |
+| Area | File(s) | Reason |
 |---|---|---|
 | Backend App Runner port | `Dockerfile` | Use `$PORT` instead of hard-coded `8000` if required |
 | Frontend App Runner runtime | `frontend/Dockerfile` | Ensure App Runner runtime compatibility |

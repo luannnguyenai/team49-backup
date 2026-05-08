@@ -182,7 +182,7 @@ Required settings:
 - Health path: `/health`
 - Env/secrets: from `ENVIRONMENT_MATRIX.md`
 
-Verify:
+## 9. Verify Backend App Runner
 
 ```bash
 curl https://<backend-app-runner-url>/health
@@ -209,6 +209,7 @@ bash scripts/aws_bootstrap.sh
 Verify:
 
 ```sql
+SELECT COUNT(*) FROM courses;
 SELECT COUNT(*) FROM learning_units;
 SELECT COUNT(*) FROM lectures;
 ```

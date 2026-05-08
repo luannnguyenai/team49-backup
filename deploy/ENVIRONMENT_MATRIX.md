@@ -4,7 +4,11 @@ Set runtime values in AWS App Runner, Secrets Manager, GitHub Actions variables,
 
 ## Backend service `a20-backend` on App Runner
 
-### Core / database / cache
+- Private subnets only.
+- Automated backups enabled.
+- Deletion protection enabled for production.
+- Storage autoscaling cap recorded.
+- Security group allows PostgreSQL only from backend App Runner path.
 
 | Variable | Value | Note |
 |---|---|---|
@@ -17,7 +21,7 @@ Set runtime values in AWS App Runner, Secrets Manager, GitHub Actions variables,
 
 Store `DATABASE_URL` and `REDIS_URL` in Secrets Manager or App Runner secret references.
 
-### Auth / security
+Required settings:
 
 | Variable | Value | Note |
 |---|---|---|
@@ -77,9 +81,10 @@ Changing `NEXT_PUBLIC_API_URL` requires rebuilding and redeploying the frontend 
 
 Run once after provisioning:
 
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
-SELECT extname FROM pg_extension WHERE extname = 'vector';
+Chosen production default:
+
+```text
+private RDS/Redis + App Runner VPC connector + NAT Gateway
 ```
 
 Required settings:

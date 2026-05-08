@@ -2,7 +2,7 @@
 
 Kế hoạch production hiện tại deploy **full AWS**: App Runner cho frontend/backend, RDS PostgreSQL, ElastiCache Redis/Valkey, ECR, Secrets Manager, S3 private bucket, CloudFront, Route 53, và ACM. Data/video lớn đặt trên **AWS S3** và stream qua **CloudFront**. Sau khi mua domain, gắn custom domain cho frontend, backend, CDN.
 
-## Files
+## Source Of Truth
 
 - `DEPLOYMENT_PLAN.md`: kế hoạch full AWS theo phase, mỗi phase 1 task, có DoD checklist + files touch + isolation guard + estimate chi phí + CI/CD setup.
 - `PRODUCTION_CHECKLIST.md`: checklist trước/trong/sau deploy full AWS.
@@ -13,7 +13,11 @@ Kế hoạch production hiện tại deploy **full AWS**: App Runner cho fronten
 - `MANUAL_DEPLOY_STEPS.md`: checklist thao tác tay full AWS.
 - `PLATFORM_ANALYSIS.md`: phân tích các lựa chọn triển khai trong AWS.
 
-## Quyết định hiện tại
+1. `DEPLOYMENT_PLAN.md` - authoritative phase plan and gates.
+2. `TERRAFORM_PLAN.md` - implementation plan for AWS infrastructure as code.
+3. `ENVIRONMENT_MATRIX.md` - runtime variables, secrets, and CI values.
+4. `MANUAL_DEPLOY_STEPS.md` - operator runbook for executing the plan.
+5. `PRODUCTION_CHECKLIST.md` - final go/no-go checklist.
 
 - 2 App Runner services: `a20-backend`, `a20-frontend`.
 - 2 private ECR repositories: `a20-backend`, `a20-frontend`.

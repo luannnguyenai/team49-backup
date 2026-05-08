@@ -24,3 +24,5 @@
 ## Verification
 - Add backend tests that assert original rules still appear in the prompt unchanged.
 - Add backend tests that assert the new guardrails are appended for both text-only and image-enabled tutor prompts.
+
+## bổ sung các cơ chế guardrails từ thư viện guardrails hub

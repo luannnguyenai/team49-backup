@@ -5,9 +5,9 @@
 **Data:** ~15 GB MP4 course/video assets  
 **Constraint:** Production deployment must be full AWS
 
----
+## Decision
 
-## TL;DR
+Use this AWS simple managed architecture for v1:
 
 Use **AWS App Runner + ECR + RDS PostgreSQL + ElastiCache + S3 + CloudFront** for the first production deployment.
 
@@ -129,7 +129,9 @@ Assumptions:
 
 This excludes taxes, support plan, domain registration, and LLM provider usage.
 
----
+The backend needs private access to RDS/ElastiCache and may need public outbound
+access to LLM/email providers. When App Runner uses a VPC connector for private
+resources, public egress must be designed explicitly.
 
 ## Cost Controls
 
@@ -141,7 +143,7 @@ This excludes taxes, support plan, domain registration, and LLM provider usage.
 - Enable S3 lifecycle rules for obsolete assets.
 - Review Cost Explorer weekly during the first month.
 
----
+If NAT is deferred, production tutor/email traffic is not fully validated.
 
 ## Upgrade Path
 
@@ -160,7 +162,7 @@ Move to ECS Fargate if any of these become blockers:
 
 Move to EKS only if the team already needs Kubernetes for multiple services and has operational maturity for it.
 
----
+Upgrade to:
 
 ## Decision
 
