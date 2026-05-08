@@ -22,6 +22,14 @@ push main or workflow_dispatch
      - push frontend SHA tag to ECR
      - update frontend App Runner service
      - smoke test frontend
+
+pull_request on deploy/terraform/** or workflow_dispatch
+  -> terraform
+     - assume AWS Terraform role through OIDC
+     - write runtime-only backend.hcl
+     - write runtime-only terraform.tfvars
+     - terraform fmt/validate/plan
+     - optional reviewed apply
 ```
 
 ## GitHub environment
@@ -46,6 +54,14 @@ Create a `production` GitHub Environment with:
 | `PRODUCTION_BACKEND_URL` | `https://api.<domain>` |
 | `PRODUCTION_FRONTEND_URL` | `https://app.<domain>` |
 
+## Required Terraform variables
+
+| Name | Example |
+|---|---|
+| `AWS_TERRAFORM_ROLE_ARN` | `arn:aws:iam::123456789012:role/github-a20-prod-terraform` |
+| `TF_BACKEND_HCL_PROD` | full `backend.hcl` file content |
+| `TFVARS_PROD` | full `terraform.tfvars` file content |
+
 ## AWS IAM role
 
 Trust policy must restrict access to this repository and the intended branch or GitHub environment.
@@ -55,6 +71,12 @@ The deploy role needs only:
 - ECR auth and push/pull for backend/frontend repositories.
 - App Runner read/update for backend/frontend services.
 - CloudWatch read if deployment polling or log checks need it.
+
+Terraform role needs only:
+
+- S3 backend access to `a20-terraform-state-prod`.
+- Create/read/update/delete permissions only for the Terraform-managed foundation resources.
+- Route 53/ACM/CloudWatch/Budgets permissions only if those modules remain managed by Terraform.
 
 Do not grant broad administrator access to the CI/CD role.
 

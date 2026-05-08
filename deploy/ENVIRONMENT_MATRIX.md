@@ -131,6 +131,29 @@ Use GitHub repository or environment variables:
 
 No long-lived AWS access keys should be required in GitHub secrets.
 
+## GitHub Actions Terraform
+
+Use GitHub repository or environment secrets/variables for `.github/workflows/terraform.yml`:
+
+| Variable | Value | Note |
+|---|---|---|
+| `AWS_TERRAFORM_ROLE_ARN` | IAM role ARN | OIDC role for Terraform workflow |
+| `TF_BACKEND_HCL_PROD` | full `backend.hcl` content | Runtime-only backend config |
+| `TFVARS_PROD` | full `terraform.tfvars` content | Runtime-only production variables |
+
+The live Terraform state currently resolves to:
+
+- state bucket: `a20-terraform-state-prod`
+- key: `a20/prod/terraform.tfstate`
+- region: `ap-southeast-1`
+
+Current applied infrastructure outputs:
+
+- `AWS_S3_BUCKET=a20-course-assets-prod`
+- `CLOUDFRONT_DOMAIN=d2iilj98tzo5kp.cloudfront.net`
+- `RDS endpoint = a20-postgres-prod.cbea2u80yox7.ap-southeast-1.rds.amazonaws.com`
+- `REDIS endpoint = master.a20-redis-prod.frlokk.apse1.cache.amazonaws.com`
+
 ## Local/admin AWS env
 
 Use local AWS CLI profiles for provisioning and asset uploads:
