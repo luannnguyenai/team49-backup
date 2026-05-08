@@ -641,6 +641,9 @@ def test_structured_router_composes_grounded_answer_with_llm():
     assert "related results below" in model.messages[0]["content"]
     assert "When evidence_sufficient=true, do not end with a follow-up question" in model.messages[0]["content"]
     assert "Do not suggest variants, rankings, comparisons, or choices" in model.messages[0]["content"]
+    assert "the answer language must match the user's latest message" in model.messages[0]["content"]
+    assert "One-shot output pattern" in model.messages[0]["content"]
+    assert "To understand this better, review this prerequisite first" in model.messages[0]["content"]
     assert "Where should I review CNNs?" in model.messages[1]["content"]
 
 

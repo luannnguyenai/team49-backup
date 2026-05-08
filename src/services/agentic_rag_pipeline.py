@@ -117,6 +117,17 @@ class AgenticRAGPipeline:
                     clarification_question=getattr(final, "clarification_question", None),
                 )
         result = observation.result
+        if result.metadata.get("topic_selection_offered"):
+            return result.model_copy(
+                update={
+                    "requires_evidence": False,
+                    "metadata": {
+                        **result.metadata,
+                        "agentic_rag_evidence_status": final.evidence_status,
+                        "preserved_tool_topic_selection_answer": True,
+                    },
+                }
+            )
         answer_markdown = final.answer_markdown or final.clarification_question or result.answer_markdown
         answer_markdown = self._strip_hidden_stage_text(answer_markdown or "")
         if final.evidence_sufficient and result.citations:
@@ -156,4 +167,5 @@ class AgenticRAGPipeline:
     def _strip_hidden_stage_text(markdown: str) -> str:
         value = markdown.strip()
         value = re.sub(r"(?is)hidden\s+thought\s*:.*?(final\s*:)", r"\1", value).strip()
-        return re.sub(r"(?i)^final\s*:\s*", "", value).strip()
+        value = re.sub(r"(?i)^final\s*:\s*", "", value).strip()
+        return re.sub(r"\s*\[\^[^\]]+\]", "", value).strip()

@@ -1,192 +1,139 @@
-# Production Checklist - AWS-First Simple Managed
+# Production Checklist — Full AWS
 
-Use this while executing `DEPLOYMENT_PLAN.md`. Do not move to the next group
-until the current group passes.
+Tick this while executing `DEPLOYMENT_PLAN.md`. Move to the next group only when the previous group passes.
 
-## Production Definition Of Done
+## Pre-deploy
 
-Production is done only when all mandatory checklist groups for the selected
-launch scope are checked, every external dependency has been exercised from AWS,
-and rollback plus monitoring records exist.
-
-Done means:
-
-- The deployed app uses Amplify, App Runner, RDS, Redis/Valkey, S3, CloudFront,
-  Secrets Manager/service secret refs, and CloudWatch/Budgets as selected in
-  `DEPLOYMENT_PLAN.md`.
-- No committed workflow can deploy the legacy Vercel/Railway/Supabase stack on
-  `push main`.
-- CI, Terraform validation, backend image build, migrations, bootstrap/import,
-  asset parity checks, and smoke tests have fresh evidence.
-- Temporary AWS domains pass before custom domains are attached.
-- Final domains pass auth, catalog, learning unit, video, quiz, tutor, and
-  browser-console checks.
-- Costs, alarms, log retention, deployment IDs, commit SHA, snapshot ID, and
-  rollback steps are recorded.
-
-## Final Completion Checklist
-
-- [ ] Every checklist group below has been reviewed in order.
-- [ ] All unchecked items are explicitly marked non-applicable for this launch
-  with a reason.
-- [ ] The production branch and deployed commit SHA match.
-- [ ] App Runner and Amplify deployment IDs are recorded.
-- [ ] RDS snapshot ID before migration is recorded.
-- [ ] CloudFront distribution ID and final CDN domain are recorded.
-- [ ] Smoke tests pass on final domains after the last frontend rebuild.
-- [ ] First-30-minute logs and metrics have been reviewed.
-- [ ] Rollback owner and decision path are known before user traffic is opened.
-
-## Pre-Deploy Decisions
-
-- [ ] Production branch selected.
-- [ ] AWS account and region confirmed: `ap-southeast-1`.
+- [ ] Repo is pushed and deploy branch is ready.
+- [ ] Backend `Dockerfile` binds `0.0.0.0:${PORT:-8000}`.
+- [ ] Frontend `frontend/Dockerfile` listens on runtime `PORT` with fallback `3000`.
+- [ ] AWS account has quota for App Runner, ECR, RDS, ElastiCache, S3, CloudFront, Route 53, ACM, Secrets Manager, and CloudWatch.
+- [ ] Primary region selected: `ap-southeast-1`.
+- [ ] CloudFront certificate region understood: `us-east-1`.
 - [ ] Domain layout selected: `app.<domain>`, `api.<domain>`, `cdn.<domain>`.
-- [ ] CloudFront ACM region understood: `us-east-1`.
 - [ ] LLM provider selected and API key available.
-- [ ] Email sender/domain verified if forgot-password is enabled.
+- [ ] Email provider sender/domain verified if forgot-password is enabled.
 - [ ] `SECRET_KEY` generated with a secure random value.
-- [ ] AWS Budget threshold and alert recipient selected.
-- [ ] NAT decision recorded for App Runner private VPC plus public egress.
+- [ ] AWS Budget thresholds selected.
 
-## CI And Legacy Workflow
+## CI/CD
 
-- [ ] Branch protection requires CI before merge.
-- [ ] Legacy `.github/workflows/deploy.yml` cannot deploy to Vercel/Railway/Supabase on `push main`.
+- [ ] GitHub Actions deploy role exists and uses AWS OIDC.
+- [ ] Deploy role trust policy restricts this repository and production branch/environment.
+- [ ] Deploy role has scoped ECR and App Runner permissions.
+- [ ] No long-lived AWS access keys are stored in GitHub secrets.
 - [ ] `.github/workflows/ci.yml` uses Python 3.12.
-- [ ] CI runs backend lint/tests with Postgres and Redis.
+- [ ] CI runs backend lint/tests.
 - [ ] CI runs frontend lint/type-check/build and unit tests where available.
-- [ ] No long-lived AWS access keys are stored for v1 app deploy.
-- [ ] Production app deploy is handled by Amplify/App Runner native auto deploy.
+- [ ] Production deploy workflow builds SHA-tagged ECR images.
+- [ ] Production deploy workflow updates App Runner services.
+- [ ] Production deploy workflow runs backend/frontend smoke tests.
 
-## Terraform Foundation
+## ECR
 
-- [ ] `deploy/TERRAFORM_PLAN.md` reviewed.
-- [ ] Terraform state bucket `a20-terraform-state-prod` exists.
-- [ ] State bucket has versioning, encryption, and public access block.
-- [ ] `deploy/terraform/live/prod/backend.hcl` exists locally and is not committed.
-- [ ] `deploy/terraform/live/prod/terraform.tfvars` exists locally and is not committed.
-- [ ] `terraform fmt -check -recursive` passes from `deploy/terraform`.
-- [ ] `terraform validate` passes from `deploy/terraform/live/prod`.
-- [ ] Terraform plan reviewed before every apply.
-- [ ] Terraform apply output recorded.
-- [ ] No real secret value is present in committed Terraform files or plan artifacts.
-
-## AWS Asset Infrastructure
-
-- [ ] S3 bucket `a20-course-assets-prod` exists.
-- [ ] S3 Block Public Access enabled.
-- [ ] S3 versioning enabled.
-- [ ] S3 default encryption enabled.
-- [ ] CloudFront distribution exists with S3 origin.
-- [ ] CloudFront uses Origin Access Control.
-- [ ] Bucket policy allows CloudFront access only through the distribution.
-- [ ] Direct public S3 access is blocked.
-- [ ] Course assets uploaded under `s3://a20-course-assets-prod/courses/`.
-- [ ] Object count and total size recorded.
-- [ ] CloudFront range requests work for MP4 seeking.
-- [ ] Signed URL decision recorded.
+- [ ] ECR repository `a20-backend` exists.
+- [ ] ECR repository `a20-frontend` exists.
+- [ ] Image scan on push enabled where available.
+- [ ] Lifecycle policies configured.
+- [ ] Backend image pushed with current commit SHA.
+- [ ] Frontend image pushed with current commit SHA.
 
 ## Network
 
-- [ ] VPC exists.
-- [ ] Public and private subnets exist.
-- [ ] Public and private route tables exist.
-- [ ] Route table associations exist.
-- [ ] NAT Gateway exists if public egress is required.
+- [ ] VPC selected or created.
+- [ ] Private subnets selected for RDS and ElastiCache.
 - [ ] App Runner VPC connector exists.
 - [ ] RDS security group allows PostgreSQL only from backend path.
 - [ ] ElastiCache security group allows Redis only from backend path.
 - [ ] RDS is not publicly accessible.
 - [ ] ElastiCache is not publicly accessible.
-- [ ] Backend public egress to LLM/email provider works if required.
-- [ ] NAT budget impact accepted if NAT is used.
 
-## Database And Cache
+## Database and cache
 
 - [ ] RDS PostgreSQL instance exists.
 - [ ] Automated backups enabled.
-- [ ] Deletion protection enabled.
-- [ ] Pre-migration snapshot process confirmed.
+- [ ] Pre-migration snapshot/backup process confirmed.
 - [ ] `CREATE EXTENSION IF NOT EXISTS vector;` ran successfully.
 - [ ] `SELECT extname FROM pg_extension WHERE extname='vector';` returns `vector`.
 - [ ] ElastiCache Redis OSS/Valkey exists.
-- [ ] `DATABASE_URL` stored in App Runner secret refs or Secrets Manager.
-- [ ] `REDIS_URL` stored in App Runner secret refs or Secrets Manager.
+- [ ] `DATABASE_URL` and `REDIS_URL` stored in Secrets Manager or App Runner secret references.
+
+## AWS asset infra
+
+- [ ] S3 bucket exists in selected region.
+- [ ] S3 Block Public Access enabled.
+- [ ] S3 versioning enabled.
+- [ ] S3 default encryption enabled.
+- [ ] `aws s3 sync ./data/courses s3://<bucket>/courses` completed.
+- [ ] Object count and total size recorded.
+- [ ] CloudFront distribution exists with S3 origin.
+- [ ] CloudFront uses Origin Access Control.
+- [ ] Direct public S3 access is blocked.
+- [ ] CloudFront range requests work for MP4 seeking.
+- [ ] Optional signed URL key material stored safely.
 
 ## Backend App Runner
 
-- [ ] GitHub connection authorized and ARN recorded privately.
 - [ ] App Runner service `a20-backend` exists.
-- [ ] Source points to GitHub repository root `Dockerfile`.
-- [ ] Service was created through AWS native GitHub/source flow for first deploy.
-- [ ] Production branch auto deploy is enabled.
-- [ ] VPC connector attached if RDS/Redis are private.
+- [ ] Backend service uses ECR image tagged with current commit SHA.
+- [ ] VPC connector attached.
 - [ ] Health check path `/health` configured.
-- [ ] Runtime env/secrets complete:
+- [ ] Backend env/secrets complete:
   - [ ] `DATABASE_URL`
   - [ ] `REDIS_URL`
   - [ ] `SECRET_KEY`
   - [ ] `CORS_ORIGINS`
   - [ ] `FRONTEND_BASE_URL`
-  - [ ] selected LLM provider key
+  - [ ] LLM provider key
   - [ ] `DEBUG=false`
   - [ ] `ASSET_STORAGE_PROVIDER=s3`
   - [ ] `AWS_REGION`, `AWS_S3_BUCKET`, `AWS_S3_PREFIX`, `CLOUDFRONT_DOMAIN`
   - [ ] CloudFront signed URL values if used
-- [ ] `curl --fail https://<backend-app-runner-url>/health` returns 200.
+- [ ] `curl https://<backend-app-runner-url>/health` returns 200.
 - [ ] Backend logs show no secret values and no repeated startup errors.
-- [ ] Backend can reach RDS.
-- [ ] Backend can reach Redis.
-- [ ] Backend can call selected LLM/email provider if enabled.
 
-## Migration And Bootstrap
+## Database migration and bootstrap
 
-- [ ] RDS snapshot/backup exists before migration.
+- [ ] DB snapshot/backup exists before migration.
 - [ ] Alembic migrations ran against RDS.
 - [ ] Current migration head verified.
-- [ ] Production bootstrap command/wrapper reviewed.
+- [ ] Production bootstrap wrapper reviewed if needed.
 - [ ] Bootstrap/import ran against RDS.
 - [ ] Course rows exist.
-- [ ] Learning unit rows exist.
-- [ ] Admin/demo account policy executed if required.
+- [ ] Lecture/unit rows exist.
+- [ ] Admin/demo account policy executed.
 - [ ] DB asset keys match S3 object keys.
 
-## Frontend Amplify
+## Frontend App Runner
 
-- [ ] Amplify repository authorization/import path recorded.
-- [ ] Amplify app `a20-frontend` exists.
-- [ ] Source points to GitHub repository.
-- [ ] App was created through AWS native GitHub flow for first deploy.
-- [ ] Production branch auto deploy is enabled.
-- [ ] App root is `frontend`.
-- [ ] Build settings run `npm ci --legacy-peer-deps` and `npm run build`.
-- [ ] `NEXT_PUBLIC_API_URL` points to backend temporary/custom URL.
+- [ ] App Runner service `a20-frontend` exists.
+- [ ] Frontend service uses ECR image tagged with current commit SHA.
+- [ ] `NEXT_PUBLIC_API_URL` points to backend default/custom URL.
 - [ ] `API_INTERNAL_URL` set if server-side calls need it.
 - [ ] `NODE_ENV=production`.
 - [ ] `NEXT_TELEMETRY_DISABLED=1`.
-- [ ] `curl --fail https://<frontend-amplify-url>/api/health` returns 200.
+- [ ] `curl https://<frontend-app-runner-url>/api/health` returns 200.
 - [ ] Frontend rebuilt after any API URL change.
 
-## Temporary-Domain Smoke Test
+## Smoke test functional
 
 - [ ] Home page loads.
 - [ ] Register and login work.
-- [ ] Forgot-password works if enabled.
+- [ ] Forgot-password flow works if enabled.
 - [ ] Course catalog loads.
 - [ ] At least one learning unit loads.
 - [ ] Video URL is CloudFront, not local `/data/...`.
 - [ ] Video play and seek work.
 - [ ] Quiz/session start and submit work.
-- [ ] Tutor endpoint responds from selected LLM provider if enabled.
-- [ ] Browser console has no `localhost` calls.
+- [ ] Tutor endpoint responds from selected LLM provider.
+- [ ] Browser console has no localhost calls.
 - [ ] No mixed-content HTTP.
 
-## Custom Domain
+## Custom domain
 
-- [ ] Route 53 hosted zone exists or external DNS delegation is documented.
-- [ ] `app.<domain>` maps to Amplify frontend.
-- [ ] `api.<domain>` maps to App Runner backend.
+- [ ] Route 53 hosted zone exists.
+- [ ] `app.<domain>` maps to frontend App Runner custom domain.
+- [ ] `api.<domain>` maps to backend App Runner custom domain.
 - [ ] `cdn.<domain>` maps to CloudFront.
 - [ ] ACM certs issued and attached.
 - [ ] Backend env updated: `CORS_ORIGINS`, `FRONTEND_BASE_URL`, `CLOUDFRONT_DOMAIN`.
@@ -194,30 +141,16 @@ Done means:
 - [ ] Frontend rebuilt/redeployed after final API URL change.
 - [ ] Full smoke test passes on final domains.
 
-## Cost And Operations
+## Cost and operations
 
 - [ ] AWS Budget alerts enabled.
 - [ ] CloudFront bytes alarm enabled.
 - [ ] App Runner 5xx alarm enabled.
 - [ ] RDS CPU/storage alarms enabled.
-- [ ] NAT spend reviewed if NAT is used.
 - [ ] CloudWatch log retention set.
+- [ ] ECR lifecycle policy enabled.
 - [ ] S3 lifecycle policy reviewed.
-- [ ] Deployed commit SHA recorded.
-- [ ] Terraform plan/apply timestamp recorded.
-- [ ] Amplify deployment ID recorded.
-- [ ] App Runner deployment ID recorded.
-- [ ] RDS snapshot ID recorded.
-- [ ] Rollback path documented.
+- [ ] Deployed commit SHA and image digests recorded.
+- [ ] Rollback image digests known.
 - [ ] Logs monitored during first 30 minutes.
 - [ ] LLM cost monitored after launch.
-
-## Optional Later ECR/OIDC Hardening
-
-- [ ] Need for immutable image rollback confirmed.
-- [ ] AWS OIDC deploy role exists and is least-privilege.
-- [ ] ECR backend repository exists.
-- [ ] Deploy workflow builds SHA-tagged image.
-- [ ] Deploy workflow updates App Runner.
-- [ ] Deploy workflow waits for deployment completion.
-- [ ] Deploy workflow runs smoke tests.

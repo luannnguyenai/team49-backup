@@ -203,6 +203,111 @@ describe("agent page", () => {
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
   });
 
+  it("sends web and paper mode only when the learner enables external search", async () => {
+    render(<AgentPage />);
+
+    const webMode = await screen.findByRole("button", { name: /search web & papers/i });
+    fireEvent.click(webMode);
+
+    const input = screen.getByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Find current papers about CNN pruning" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenCalledWith({
+        message: "Find current papers about CNN pruning",
+        incomingMessageId: expect.any(String),
+        conversationId: null,
+        traceMode: "summary",
+        toolMode: "web_papers",
+      });
+    });
+  });
+
+  it("opens prerequisite path units in the existing source sidebar before learning", async () => {
+    agentApiMock.unitContext.mockResolvedValueOnce({
+      canonical_unit_id: "unit-prereq",
+      course_id: "CS231n",
+      unit_name: "Object detection foundations",
+      summary: "This unit covers object detection concepts needed before Mask R-CNN.",
+      quiz_available: true,
+      learn_href: "/courses/cs231n/learn/object-detection",
+    });
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-prereq-path",
+      answer: {
+        markdown: "Mask R-CNN extends object detection by adding a mask branch.",
+        confidence: "grounded",
+      },
+      citations: [],
+      actions: [
+        {
+          type: "review_prerequisite_path",
+          label: "Review prerequisite order",
+          canonicalUnitIds: ["unit-prereq", "unit-target"],
+          canonicalUnitId: "unit-target",
+          prerequisitePath: {
+            targetCanonicalUnitId: "unit-target",
+            nodes: [
+              {
+                canonicalUnitId: "unit-prereq",
+                unitName: "Object detection foundations",
+                role: "prerequisite",
+                status: "skipped",
+                learnHref: "/courses/cs231n/learn/object-detection",
+                reason: "Already handled; included so the learning order is clear.",
+              },
+              {
+                canonicalUnitId: "unit-target",
+                unitName: "Instance segmentation with Mask R-CNN",
+                role: "target",
+                status: "target",
+                learnHref: "/courses/cs231n/learn/mask-r-cnn",
+                reason: "Current topic.",
+              },
+            ],
+            edges: [
+              {
+                fromCanonicalUnitId: "unit-prereq",
+                toCanonicalUnitId: "unit-target",
+                reason: "Object detection -> Mask R-CNN",
+              },
+            ],
+          },
+        },
+      ],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Explain Mask R-CNN" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    expect(await screen.findByText("Suggested prerequisite order")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Object detection foundations" })).not.toBeInTheDocument();
+    const prerequisiteUnit = screen.getByRole("button", {
+      name: /view source details: object detection foundations/i,
+    });
+    expect(screen.getByText("Skipped")).toBeInTheDocument();
+    expect(screen.getByText("Current topic")).toBeInTheDocument();
+    expect(screen.getByText("Already handled; included so the learning order is clear.")).toBeInTheDocument();
+
+    fireEvent.click(prerequisiteUnit);
+
+    await waitFor(() => {
+      expect(agentApiMock.unitContext).toHaveBeenCalledWith("unit-prereq");
+      expect(learningPathApiMock.getLearningPath).toHaveBeenCalled();
+    });
+    expect(await screen.findAllByText("Evidence")).toHaveLength(2);
+    expect(screen.getByTestId("agent-source-sidebar")).toHaveClass("hidden", "md:block");
+    expect(screen.getAllByRole("link", { name: /start learning/i })[0]).toHaveAttribute(
+      "href",
+      "/courses/cs231n/learn/object-detection",
+    );
+  });
+
   it("shows a compact expandable thinking progress indicator while the assistant responds", async () => {
     let resolveChat!: (value: {
       conversationId: string;
@@ -351,6 +456,55 @@ describe("agent page", () => {
     expect(screen.queryByRole("link", { name: /lecture 5/i })).not.toBeInTheDocument();
     expect(screen.getByText("source")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /source/i })).not.toBeInTheDocument();
+  });
+
+  it("renders external citation markdown links in a new tab without source cards", async () => {
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-1",
+      messageId: "message-external-citations",
+      answer: {
+        markdown:
+          "CNN is a convolutional model. [1](https://arxiv.org/abs/2004.15004)\n\n## Sources\n1. [CNN Explainer](https://arxiv.org/abs/2004.15004) — Paper\n2. [CNN](https://example.com/cnn) — Web",
+        confidence: "grounded",
+      },
+      citations: [
+        {
+          canonical_unit_id: "external::paper::1",
+          course_id: "PAPER",
+          unit_name: "CNN Explainer",
+          lecture_title: "External paper",
+          learn_href: "https://arxiv.org/abs/2004.15004",
+          source: "paper",
+        },
+        {
+          canonical_unit_id: "external::web::2",
+          course_id: "WEB",
+          unit_name: "CNN",
+          lecture_title: "Web source",
+          learn_href: "https://example.com/cnn",
+          source: "web",
+        },
+      ],
+      actions: [],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Giải thích CNN" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    const inlineCitation = await screen.findByRole("link", { name: "1" });
+    expect(inlineCitation).toHaveAttribute("href", "https://arxiv.org/abs/2004.15004");
+    expect(inlineCitation).toHaveAttribute("target", "_blank");
+
+    const firstSource = await screen.findByRole("link", { name: "CNN Explainer" });
+    expect(firstSource).toHaveAttribute("href", "https://arxiv.org/abs/2004.15004");
+    expect(firstSource).toHaveAttribute("target", "_blank");
+    expect(firstSource).toHaveAttribute("rel", expect.stringContaining("noopener"));
+    expect(screen.getByRole("link", { name: "CNN" })).toHaveAttribute("target", "_blank");
+    expect(screen.getByRole("heading", { name: "Sources" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /view source details: cnn explainer/i })).not.toBeInTheDocument();
   });
 
   it("renders assistant markdown and retries a failed request with the same message id", async () => {
@@ -653,5 +807,54 @@ describe("agent page", () => {
       });
     });
     expect(await screen.findByText("I found relevant CNN units in Computer Vision.")).toBeInTheDocument();
+  });
+
+  it("chooses a topic card through the active conversation", async () => {
+    agentApiMock.chat
+      .mockResolvedValueOnce({
+        conversationId: "conversation-1",
+        messageId: "message-topic-choice",
+        answer: {
+          markdown: "I found several matching topics for CNN.",
+          confidence: "partial",
+        },
+        citations: [],
+        actions: [
+          {
+            type: "choose_topic",
+            label: "Learn about CNN foundations for vision",
+            canonicalUnitId: "unit-cnn-vision",
+          },
+        ],
+        warning: null,
+      })
+      .mockResolvedValueOnce({
+        conversationId: "conversation-1",
+        messageId: "message-topic-answer",
+        answer: {
+          markdown: "Here is the narrowed CNN explanation.",
+          confidence: "grounded",
+        },
+        citations: [],
+        actions: [],
+        warning: null,
+      });
+    render(<AgentPage />);
+
+    const input = await screen.findByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Explain CNN" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+    const topicChoice = await screen.findByRole("button", { name: /learn about cnn foundations for vision/i });
+    fireEvent.click(topicChoice);
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenLastCalledWith({
+        message: "choose_topic:unit-cnn-vision",
+        incomingMessageId: expect.any(String),
+        conversationId: "conversation-1",
+        traceMode: "summary",
+      });
+    });
+    expect(await screen.findByText("Here is the narrowed CNN explanation.")).toBeInTheDocument();
   });
 });

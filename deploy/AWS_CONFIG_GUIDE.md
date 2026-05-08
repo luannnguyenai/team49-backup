@@ -1,281 +1,227 @@
-# AWS Configuration Guide - Simple Managed V1
+# AWS Configuration Guide
 
-This guide explains how each AWS service should be configured for the
-AWS-first deployment. It does not replace `DEPLOYMENT_PLAN.md`; use it as a
-service reference while executing the phase plan.
+Hướng dẫn này dùng cho production full AWS:
 
-## 0. Terraform First
+- Backend: AWS App Runner từ ECR image `a20-backend`
+- Frontend: AWS App Runner từ ECR image `a20-frontend`
+- Database: Amazon RDS PostgreSQL + `vector`
+- Cache: Amazon ElastiCache Redis OSS hoặc Valkey
+- Course/video assets: private Amazon S3 bucket
+- Public asset delivery: Amazon CloudFront
+- Secrets: AWS Secrets Manager
+- DNS/TLS: Route 53 + ACM
+- CI/CD: GitHub Actions dùng AWS OIDC role
 
-After Phase 2, create or update AWS infrastructure with Terraform unless the
-deployment plan explicitly calls out a manual step.
+## 1. Region and names
 
-```bash
-cd deploy/terraform/live/prod
-terraform init -backend-config=backend.hcl
-terraform validate
-terraform plan -var-file=terraform.tfvars -out prod.tfplan
-terraform apply prod.tfplan
-```
-
-Do not commit:
-
-- `backend.hcl`
-- `terraform.tfvars`
-- `*.tfplan`
-- `*.tfstate`
-
-Manual steps are part of the chosen v1 path for:
-
-- GitHub OAuth/App Runner connection authorization.
-- Amplify repository authorization.
-- Entering real secret values.
-- Uploading course assets after the S3 bucket exists.
-- Running migrations, `CREATE EXTENSION vector`, bootstrap/import, and smoke
-  tests.
-
-## 1. Region And Names
+Use one primary region unless a service explicitly requires another:
 
 ```text
 AWS_REGION=ap-southeast-1
 BACKEND_SERVICE=a20-backend
-FRONTEND_APP=a20-frontend
+FRONTEND_SERVICE=a20-frontend
+BACKEND_ECR_REPOSITORY=a20-backend
+FRONTEND_ECR_REPOSITORY=a20-frontend
 RDS_IDENTIFIER=a20-postgres-prod
 ELASTICACHE_IDENTIFIER=a20-redis-prod
 AWS_S3_BUCKET=a20-course-assets-prod
 AWS_S3_PREFIX=courses
 ```
 
-CloudFront custom-domain certificates must be issued in `us-east-1`.
+CloudFront ACM certificates must be created in `us-east-1`.
 
-## 2. S3 Asset Bucket
+## 2. ECR
 
-Terraform creates the bucket and security controls.
-
-Required settings:
-
-- Block Public Access enabled.
-- Versioning enabled.
-- Default encryption enabled.
-- No public read policy.
-- CloudFront OAC is the only public delivery path.
-
-Upload assets only after Terraform creates the bucket:
+Create two private repositories:
 
 ```bash
-aws s3 sync ./data/courses s3://a20-course-assets-prod/courses --delete
-aws s3 ls s3://a20-course-assets-prod/courses --recursive --summarize
+aws ecr create-repository --repository-name a20-backend --region ap-southeast-1
+aws ecr create-repository --repository-name a20-frontend --region ap-southeast-1
 ```
 
-Record object count and total size after upload.
+Enable image scanning and lifecycle policies so old SHA images do not accumulate indefinitely.
 
-## 3. CloudFront
+## 3. Network
 
-Terraform creates the distribution.
+Create or select a VPC with:
 
-Required settings:
-
-- Origin: S3 regional domain for the private asset bucket.
-- Access: Origin Access Control.
-- Methods: `GET`, `HEAD`.
-- Viewer protocol policy: redirect HTTP to HTTPS.
-- Range requests supported for MP4 seeking.
-- Optional signed URLs explicitly enabled or deferred.
-
-If using `cdn.<domain>`, request the CloudFront ACM certificate in `us-east-1`
-and add the alternate domain through Terraform.
-
-## 4. Network
-
-Terraform creates or selects:
-
-- VPC.
-- Public subnets for NAT Gateway.
 - Private subnets for RDS and ElastiCache.
-- Public and private route tables plus route table associations.
-- App Runner VPC connector security group.
-- RDS security group allowing PostgreSQL only from App Runner path.
-- ElastiCache security group allowing Redis only from App Runner path.
+- Security group for backend App Runner VPC connector.
+- Security group for RDS allowing PostgreSQL only from backend security group.
+- Security group for ElastiCache allowing Redis only from backend security group.
 
-If App Runner uses a VPC connector for private RDS/Redis and the backend must
-call public LLM/email APIs, configure explicit public egress. The recommended
-production default is NAT Gateway, with budget alerts because NAT has meaningful
-fixed and data-processing cost.
+Keep RDS and ElastiCache private.
 
-## 5. RDS PostgreSQL
+## 4. RDS PostgreSQL
 
-Terraform creates RDS PostgreSQL in private subnets.
+Create RDS PostgreSQL in private subnets. Start with Single-AZ for the first production pass unless availability requirements require Multi-AZ.
 
-Required settings:
-
-- PostgreSQL engine.
-- `publicly_accessible = false`.
-- Automated backups enabled.
-- Deletion protection enabled for production.
-- Storage autoscaling cap recorded.
-- Master password is AWS-managed or kept out of git.
-
-After provisioning, run:
+After the DB is available, enable pgvector:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 SELECT extname FROM pg_extension WHERE extname = 'vector';
 ```
 
-App runtime URL shape:
+Use SQLAlchemy async format in app runtime:
 
 ```text
 DATABASE_URL=postgresql+asyncpg://USER:PASSWORD@HOST:5432/DB
 ```
 
-Store this as a service secret reference or Secrets Manager value.
+Store DB credentials in Secrets Manager.
 
-## 6. ElastiCache Redis OSS / Valkey
+## 5. ElastiCache
 
-Terraform creates the cache in private subnets.
-
-Runtime URL shape:
+Create Redis OSS or Valkey in private subnets. Store the endpoint as:
 
 ```text
 REDIS_URL=redis://HOST:6379/0
 ```
 
-If TLS/auth is enabled, use the URL shape required by the selected engine
-configuration.
+If auth/TLS is enabled, use the URL shape required by the selected engine settings.
 
-## 7. Secrets And Runtime Env
+## 6. S3
 
-Backend service values:
+Create a private bucket:
+
+```bash
+aws s3api create-bucket \
+  --bucket a20-course-assets-prod \
+  --region ap-southeast-1 \
+  --create-bucket-configuration LocationConstraint=ap-southeast-1
+```
+
+Required settings:
+
+- Block Public Access: enabled.
+- Versioning: enabled.
+- Default encryption: enabled.
+- Public bucket policy: not allowed.
+
+Upload assets:
+
+```bash
+aws s3 sync ./data/courses s3://a20-course-assets-prod/courses --delete
+```
+
+## 7. CloudFront
+
+Create a CloudFront distribution:
+
+- Origin: S3 bucket.
+- Access: Origin Access Control.
+- Allowed methods: `GET`, `HEAD`.
+- Viewer protocol policy: redirect HTTP to HTTPS.
+- Range requests: supported for MP4 seeking.
+- Optional: signed URLs for protected course assets.
+
+If using `cdn.<domain>`, request the ACM certificate in `us-east-1`, then add the alternate domain name to CloudFront.
+
+## 8. Secrets Manager
+
+Store production values in Secrets Manager or App Runner secret references:
 
 ```text
 DATABASE_URL
 REDIS_URL
 SECRET_KEY
-OPENAI_API_KEY / ANTHROPIC_API_KEY / GEMINI_API_KEY
+OPENAI_API_KEY
+ANTHROPIC_API_KEY
+GEMINI_API_KEY
 EMAIL_FROM
-RESEND_API_KEY or provider-specific email secret
+RESEND_API_KEY
+CLOUDFRONT_PRIVATE_KEY
+```
+
+Do not commit real secret values.
+
+## 9. App Runner backend
+
+Create App Runner service from ECR image:
+
+- Service name: `a20-backend`
+- Image: backend ECR repo, commit SHA tag
+- Port: `8000` or runtime `PORT`
+- VPC connector: attached
+- Health path: `/health`
+
+Set backend env:
+
+```text
+DATABASE_URL=<Secrets Manager reference>
+REDIS_URL=<Secrets Manager reference>
+SECRET_KEY=<Secrets Manager reference>
+DEBUG=false
+LOG_LEVEL=INFO
+FRONTEND_BASE_URL=https://<frontend-app-runner-url-or-app-domain>
+CORS_ORIGINS=["https://<frontend-app-runner-url-or-app-domain>"]
 ASSET_STORAGE_PROVIDER=s3
 AWS_REGION=ap-southeast-1
 AWS_S3_BUCKET=a20-course-assets-prod
 AWS_S3_PREFIX=courses
-CLOUDFRONT_DOMAIN=<distribution>.cloudfront.net or cdn.<domain>
+CLOUDFRONT_DOMAIN=<distribution>.cloudfront.net
 ```
 
-Frontend Amplify values:
+Verify:
+
+```bash
+curl https://<backend-app-runner-url>/health
+```
+
+## 10. App Runner frontend
+
+Create App Runner service from ECR image:
+
+- Service name: `a20-frontend`
+- Image: frontend ECR repo, commit SHA tag
+- Port: `3000` or runtime `PORT`
+
+Set frontend env:
 
 ```text
-NEXT_PUBLIC_API_URL=https://<backend-url>
-API_INTERNAL_URL=https://<backend-url>
+NEXT_PUBLIC_API_URL=https://<backend-app-runner-url-or-api-domain>
+API_INTERNAL_URL=https://<backend-app-runner-url-or-api-domain>
 NEXT_TELEMETRY_DISABLED=1
 NODE_ENV=production
 ```
 
-Changing `NEXT_PUBLIC_API_URL` requires a new Amplify build.
+Changing `NEXT_PUBLIC_API_URL` requires rebuild/redeploy.
 
-## 8. App Runner Backend
+## 11. CI/CD
 
-For the first production deploy, create and authorize App Runner through the AWS
-native GitHub/source flow. Do not block the first deploy on Terraform-managed
-App Runner creation.
+Use GitHub Actions with AWS OIDC:
 
-Required settings:
+- Repository variable: `AWS_REGION`
+- Repository variable/secret: `AWS_DEPLOY_ROLE_ARN`
+- Repository variable: `AWS_ACCOUNT_ID`
+- Repository variable: `ECR_BACKEND_REPOSITORY`
+- Repository variable: `ECR_FRONTEND_REPOSITORY`
+- Repository variable: `APP_RUNNER_BACKEND_SERVICE_ARN`
+- Repository variable: `APP_RUNNER_FRONTEND_SERVICE_ARN`
+- Repository variable: `PRODUCTION_BACKEND_URL`
+- Repository variable: `PRODUCTION_FRONTEND_URL`
 
-- Service name: `a20-backend`.
-- Source: repository root `Dockerfile`.
-- Branch: `main` or selected production branch.
-- Auto deploy: enabled.
-- Port: `8000` or runtime `PORT`.
-- VPC connector: attached when RDS/Redis are private.
-- Health path: `/health`.
+The workflow should build images, push SHA tags to ECR, update App Runner services, wait for deployment completion, and run smoke tests.
 
-After the default-domain backend is healthy, import or manage the stable App
-Runner service with Terraform only if that reduces drift without introducing
-GitHub connection/token risk.
+## 12. Domain cutover
 
-Verify:
-
-```bash
-curl --fail https://<backend-app-runner-url>/health
-```
-
-## 9. Database Migrations And Bootstrap
-
-Before migrations:
-
-- Confirm an RDS snapshot or backup exists.
-- Confirm the admin environment can reach RDS.
-- Confirm `DATABASE_URL` targets production RDS, not local or legacy DB.
-
-Run:
-
-```bash
-alembic upgrade head
-```
-
-Then run the reviewed bootstrap/import command. Prefer a wrapper if added:
-
-```bash
-bash scripts/aws_bootstrap.sh
-```
-
-Verify catalog data through the backend API before frontend cutover.
-
-## 10. Amplify Frontend
-
-Chosen v1 path:
-
-- Authorize/create the Amplify app through the AWS native GitHub flow.
-- Do not use an Amplify access token in Terraform for the first deployment.
-- Import or manage stable Amplify settings in Terraform later only after the
-  temporary frontend URL is healthy.
-
-Required settings:
-
-- App name: `a20-frontend`.
-- Source: GitHub repository.
-- Branch: `main` or production branch.
-- App root: `frontend`.
-- Install command: `npm ci --legacy-peer-deps`.
-- Build command: `npm run build`.
-- Auto deploy: enabled.
-
-Verify:
-
-```bash
-curl --fail https://<frontend-amplify-url>/api/health
-```
-
-## 11. Domain Cutover
-
-Attach custom domains only after temporary-domain smoke tests pass.
+Use Route 53 records:
 
 ```text
-app.<domain>  -> Amplify frontend
-api.<domain>  -> App Runner backend
+app.<domain>  -> App Runner frontend custom domain
+api.<domain>  -> App Runner backend custom domain
 cdn.<domain>  -> CloudFront distribution
 ```
 
-After cutover, update backend:
+After domain cutover, update:
 
 ```text
 FRONTEND_BASE_URL=https://app.<domain>
 CORS_ORIGINS=["https://app.<domain>"]
+NEXT_PUBLIC_API_URL=https://api.<domain>
+API_INTERNAL_URL=https://api.<domain>
 CLOUDFRONT_DOMAIN=cdn.<domain>
 ```
 
-Update frontend and rebuild:
-
-```text
-NEXT_PUBLIC_API_URL=https://api.<domain>
-API_INTERNAL_URL=https://api.<domain>
-```
-
-## 12. Optional Later ECR/OIDC
-
-Move to a custom deploy pipeline only after native auto deploy is stable:
-
-```text
-GitHub Actions -> AWS OIDC -> ECR SHA image -> App Runner service update
-```
-
-Use this when immutable image rollback, GitHub Environment deploy approvals, or
-single-workflow deploy orchestration become worth the added complexity.
+Redeploy frontend after API URL changes.
