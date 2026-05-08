@@ -4,16 +4,19 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ abeba6858d7582aeead9ac21a5ce150abb290c54 Update page.tsx
-+ ee41381c5661fc3f24544ceda8e720204636889f Update PrerequisiteSuggestionDialog.tsx
-+ 31e383c9074b0577bc4e067b4a8d5717c941fd8d Update ReplanKnowledgeClaimStep.tsx
-+ 384a5a1552c2a80f86bb559ded4410f9fa8f86de Update admin-tooltips.ts
-+ 20bf4ef6015e453f912a522878f2da1423bb0a5a Update page.tsx
-+ 38f1b919c451b75982d64438b60d934843c93387 Update TopNav.tsx
-+ d398fca67729c4444abbcf537f8bb73b40ac210b Update page.tsx
-+ 3d8742659116000ffa4fa6021188f24cd941c418 Update InContextTutor.tsx
-+ e45c59f66b69a94603c028a2e96d9f71a72e9dd9 Update next.config.mjs
-+ 4ca2df9247016d50d4deb85c4622d1fab5d20261 Update app.py
++ ac69f1cc0e5e08f3972977f377730a403c7cbedd Create hub_registry.json
++ 05e40de75cce6c223eeefadeba70fd21e104de62 Update .env.production.example
++ 776f8183e71be668416321bb6e75f1eecd98b5dd Create AWS_CICD_GUIDE.md
++ b6c0c206bb2c88f4a15a081c7f1e3522f4d27840 Create AWS_CONFIG_GUIDE.md
++ d71fddce2ea2058608c8abffb5ec97eca38962ab Update DEPLOYMENT_PLAN.md
++ ae97a1a684141cdd9803023b27cca42cb9b894b8 Update ENVIRONMENT_MATRIX.md
++ 9bf0a34a4bf2c52248a0361f2bd0a89882819729 Update MANUAL_DEPLOY_STEPS.md
++ cb09293032eb83d4d7f47202268cb3903fc7111e Update PLATFORM_ANALYSIS.md
++ 265cb2a99ddcc3db5212d684bd0bd8e3f67ffb9f Update PRODUCTION_CHECKLIST.md
++ f4b09e11f5222aa21cb2b0b930232db60bef03f3 Delete railway.toml
++ ff758a189b5764e0b99ff94b31ce56239047a992 Update README.md
++ ff60a577b50c739a38c179cb6b24a8384b563a99 Delete RENDER_AWS_CONFIG_GUIDE.md
++ 2002809bfa1e2e82d95633b74cab8196f3471ac6 Create 2026-05-07-predeploy-remediation.md
 "@
 
 
