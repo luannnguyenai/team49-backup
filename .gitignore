@@ -48,5 +48,22 @@ playwright-report/
 .claude/settings.local.json
 .claude/settings.local.json
 /.claude
+.worktrees/
 .gitnexus
 create-prs-per-commit.ps1
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfvars
+!*.tfvars.example
+backend.hcl
+!backend.hcl.example

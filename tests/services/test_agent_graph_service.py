@@ -24,6 +24,29 @@ from src.services.agent_memory_compaction_service import AgentMemoryCompactionSe
 pytestmark = pytest.mark.asyncio
 
 
+class EchoSanitizedAgentGraphService(AgentGraphService):
+    async def _invoke_graph_and_compose(
+        self,
+        *,
+        request: AgentChatRequest,
+        conversation_id: str,
+        thread_id: str,
+        user_id: str,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None,
+    ) -> AgentChatResponse:
+        return AgentChatResponse(
+            conversation_id=conversation_id,
+            message_id="msg-echo",
+            answer=AgentAnswer(
+                markdown=f"Reply to {request.message}. Call me at 555-123-4567.",
+                confidence="partial",
+            ),
+            citations=[],
+            actions=[],
+        )
+
+
 class NoopLock:
     async def __aenter__(self):
         return None
@@ -186,6 +209,33 @@ async def test_graph_routes_web_paper_mode_to_external_research():
 
     assert response.answer.markdown == "External web and paper answer."
     assert [call[0] for call in calls] == ["external_research"]
+
+
+async def test_graph_chat_sanitizes_input_and_output_for_assistant_flow():
+    service = EchoSanitizedAgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=DeterministicAgentRouter(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="Email me at alice@example.com",
+            incomingMessageId="msg-guardrail-1",
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-1",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS224n"],
+    )
+
+    assert "[REDACTED_EMAIL]" in response.answer.markdown
+    assert "[REDACTED_PHONE]" in response.answer.markdown
+    assert "alice@example.com" not in response.answer.markdown
+    assert "555-123-4567" not in response.answer.markdown
+    assert response.guardrail is not None
+    assert response.guardrail.input_redacted is True
+    assert response.guardrail.output_redacted is True
 
 
 async def test_graph_uses_react_rag_tool_decision_before_search():

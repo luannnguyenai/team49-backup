@@ -268,6 +268,16 @@ class AgentWarning(BaseModel):
     message: str
 
 
+class AgentGuardrail(BaseModel):
+    input_redacted: bool = Field(default=False, alias="inputRedacted")
+    output_redacted: bool = Field(default=False, alias="outputRedacted")
+    blocked: bool = False
+    block_reason: str | None = Field(default=None, alias="blockReason")
+    error_code: str | None = Field(default=None, alias="errorCode")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class AgentChatResponse(BaseModel):
     conversation_id: str
     message_id: str
@@ -277,6 +287,7 @@ class AgentChatResponse(BaseModel):
     warning: AgentWarning | None = None
     fallback: AgentFallback | None = None
     trace: RetrievalTrace | None = None
+    guardrail: AgentGuardrail | None = None
 
 
 class AgentInProgressResponse(BaseModel):

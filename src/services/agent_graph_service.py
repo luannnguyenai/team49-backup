@@ -16,6 +16,7 @@ except ModuleNotFoundError:  # pragma: no cover - dependency exists in productio
     Command = interrupt = None
 
 from src.schemas.agent import AgentAction, AgentActionResumeRequest, AgentChatRequest, AgentChatResponse, AgentCitation
+from src.schemas.agent import AgentGuardrail
 from src.services.agent_action_commit_service import AgentActionCommitService
 from src.services.agent_external_research_service import AgentExternalResearchService
 from src.services.agent_graph_contracts import (
@@ -38,6 +39,7 @@ from src.services.agent_thread_memory_state import AgentThreadMemoryStateStore
 from src.services.agent_tool_nodes import AgentToolNodes
 from src.services.agentic_rag_pipeline import AgenticRAGPipeline
 from src.services.agentic_rag_tools import AgenticRAGToolExecutor
+from src.services.guardrails.pii_guardrail import PIIGuardrailService
 
 
 RAG_AGENT_INTENTS = {
@@ -77,6 +79,7 @@ class AgentGraphService:
         action_user=None,
         checkpointer=None,
         external_research_service=None,
+        pii_guardrail_service=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -106,6 +109,7 @@ class AgentGraphService:
         self.external_research = external_research_service or AgentExternalResearchService(
             responder=router
         )
+        self.pii_guardrail = pii_guardrail_service or PIIGuardrailService()
         prerequisite_path_service = None
         if hasattr(search_service, "repo"):
             prerequisite_path_service = AgentPrerequisitePathService(
@@ -219,20 +223,29 @@ class AgentGraphService:
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None = None,
     ) -> AgentChatResponse:
+        sanitized_request, input_guardrail = self._sanitize_request(request)
+        if input_guardrail.should_block:
+            return self.composer.compose_guardrail_block(
+                conversation_id=conversation_id,
+                block_reason=input_guardrail.block_reason or "pii_input_blocked",
+                error_code=input_guardrail.error_code,
+            )
+
         if self.graph_repo is None:
-            return await self._invoke_graph_and_compose(
-                request=request,
+            response = await self._invoke_graph_and_compose(
+                request=sanitized_request,
                 conversation_id=conversation_id,
                 thread_id=thread_id,
                 user_id=user_id,
                 allowed_course_ids=allowed_course_ids,
                 current_path_course_ids=current_path_course_ids,
             )
+            return self._sanitize_response(response, input_guardrail)
 
         completed = await self.graph_repo.get_completed_response_by_incoming_message(
             conversation_id=conversation_id,
             thread_id=thread_id,
-            incoming_message_id=request.incoming_message_id,
+            incoming_message_id=sanitized_request.incoming_message_id,
         )
         if completed is not None:
             return completed
@@ -243,12 +256,12 @@ class AgentGraphService:
             existing_run = await get_run(
                 conversation_id=conversation_id,
                 thread_id=thread_id,
-                incoming_message_id=request.incoming_message_id,
+                incoming_message_id=sanitized_request.incoming_message_id,
             )
         lock_graph_run_id = (
             str(existing_run.id)
             if existing_run is not None and getattr(existing_run, "id", None) is not None
-            else f"pending:{request.incoming_message_id}"
+            else f"pending:{sanitized_request.incoming_message_id}"
         )
         async with self.thread_lock.acquire(
             conversation_id=conversation_id,
@@ -270,7 +283,7 @@ class AgentGraphService:
                 run = await self.graph_repo.create_run(
                     conversation_id=conversation_id,
                     thread_id=thread_id,
-                    incoming_message_id=request.incoming_message_id,
+                    incoming_message_id=sanitized_request.incoming_message_id,
                 )
                 if getattr(run, "existing", False):
                     if getattr(run, "status", None) == "succeeded" and getattr(run, "response_ref", None):
@@ -288,16 +301,17 @@ class AgentGraphService:
                         conversation_id=UUID(str(conversation_id)),
                         user_id=UUID(str(user_id)),
                         role="user",
-                        markdown=request.message,
+                        markdown=sanitized_request.message,
                     )
                 response = await self._invoke_graph_and_compose(
-                    request=request,
+                    request=sanitized_request,
                     conversation_id=conversation_id,
                     thread_id=thread_id,
                     user_id=user_id,
                     allowed_course_ids=allowed_course_ids,
                     current_path_course_ids=current_path_course_ids,
                 )
+                response = self._sanitize_response(response, input_guardrail)
                 if self.conversation_repo is not None:
                     await self.conversation_repo.add_message(
                         conversation_id=UUID(str(conversation_id)),
@@ -315,7 +329,7 @@ class AgentGraphService:
                 response_ref = await self.graph_repo.store_response_payload(
                     graph_run_id=run.graph_run_id,
                     response=response,
-                    deterministic_key=f"{thread_id}:{request.incoming_message_id}",
+                    deterministic_key=f"{thread_id}:{sanitized_request.incoming_message_id}",
                 )
                 has_pending_action = any(
                     action.status == "awaiting_confirmation" for action in response.actions
@@ -344,10 +358,44 @@ class AgentGraphService:
                         conversation_id=conversation_id,
                         user_id=user_id,
                         thread_id=thread_id,
-                        request=request,
+                        request=sanitized_request,
                         error=exc,
                     )
                 raise
+
+    def _sanitize_request(
+        self,
+        request: AgentChatRequest,
+    ) -> tuple[AgentChatRequest, object]:
+        result = self.pii_guardrail.sanitize_input(request.message)
+        sanitized_request = request.model_copy(update={"message": result.sanitized_text})
+        return sanitized_request, result
+
+    def _sanitize_response(
+        self,
+        response: AgentChatResponse,
+        input_guardrail,
+    ) -> AgentChatResponse:
+        output_guardrail = self.pii_guardrail.sanitize_output(response.answer.markdown)
+        sanitized_answer = response.answer.model_copy(update={"markdown": output_guardrail.sanitized_text})
+
+        existing_guardrail = response.guardrail or AgentGuardrail()
+        merged_guardrail = existing_guardrail.model_copy(
+            update={
+                "input_redacted": existing_guardrail.input_redacted or input_guardrail.was_redacted,
+                "output_redacted": existing_guardrail.output_redacted or output_guardrail.was_redacted,
+                "blocked": existing_guardrail.blocked or output_guardrail.should_block,
+                "block_reason": existing_guardrail.block_reason or output_guardrail.block_reason,
+                "error_code": existing_guardrail.error_code or input_guardrail.error_code or output_guardrail.error_code,
+            }
+        )
+
+        return response.model_copy(
+            update={
+                "answer": sanitized_answer,
+                "guardrail": merged_guardrail,
+            }
+        )
 
     async def _invoke_graph_and_compose(
         self,

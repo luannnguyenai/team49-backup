@@ -39,3 +39,10 @@ psutil>=6.0.0
 # Dev / testing
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
+
+# Optional guardrails PII stack
+# Keep this optional until a version is confirmed compatible with openai>=2.x.
+# guardrails-ai==0.6.7
+# presidio-analyzer==2.2.360
+# presidio-anonymizer==2.2.360
+# gliner==0.2.22

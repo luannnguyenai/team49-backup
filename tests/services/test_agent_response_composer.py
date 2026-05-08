@@ -87,3 +87,24 @@ def test_composer_allows_partial_confidence_override_with_citations():
 
     assert response.answer.confidence == "partial"
     assert response.citations[0].canonical_unit_id == "unit-related"
+
+
+def test_composer_can_attach_guardrail_metadata():
+    response = AgentResponseComposer().compose(
+        conversation_id="conv-1",
+        message_id="msg-1",
+        result=ToolResult(
+            kind="clarification",
+            answer_markdown="Sanitized response.",
+            metadata={
+                "guardrail": {
+                    "inputRedacted": True,
+                    "outputRedacted": True,
+                }
+            },
+        ),
+    )
+
+    assert response.guardrail is not None
+    assert response.guardrail.input_redacted is True
+    assert response.guardrail.output_redacted is True

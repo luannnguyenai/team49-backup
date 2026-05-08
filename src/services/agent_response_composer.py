@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from src.schemas.agent import AgentAnswer, AgentChatResponse, AgentFallback, AgentWarning
+from src.schemas.agent import AgentAnswer, AgentChatResponse, AgentFallback, AgentGuardrail, AgentWarning
 from src.services.agent_error_codes import agent_system_error_message
 from src.services.agent_graph_contracts import ToolResult
 
@@ -48,6 +48,9 @@ class AgentResponseComposer:
             warning=result.warning,
             fallback=result.fallback,
             trace=result.trace,
+            guardrail=AgentGuardrail.model_validate(result.metadata["guardrail"])
+            if isinstance(result.metadata.get("guardrail"), dict)
+            else None,
         )
 
     def compose_action_error(self, conversation_id: str, reason: str) -> AgentChatResponse:
@@ -82,6 +85,32 @@ class AgentResponseComposer:
             fallback=AgentFallback(
                 reason="agent_unavailable",
                 message="The agent request failed before a safe answer could be produced.",
+                errorCode=error_code,
+            ),
+        )
+
+    def compose_guardrail_block(
+        self,
+        *,
+        conversation_id: str,
+        block_reason: str,
+        error_code: str | None = None,
+    ) -> AgentChatResponse:
+        return AgentChatResponse(
+            conversation_id=conversation_id,
+            message_id=str(uuid4()),
+            answer=AgentAnswer(
+                markdown="Please remove sensitive personal information and try again.",
+                confidence="fallback",
+            ),
+            fallback=AgentFallback(
+                reason="unsafe_action",
+                message="The message was blocked by the PII guardrail.",
+                errorCode=error_code or block_reason,
+            ),
+            guardrail=AgentGuardrail(
+                blocked=True,
+                blockReason=block_reason,
                 errorCode=error_code,
             ),
         )

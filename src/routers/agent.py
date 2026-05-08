@@ -59,12 +59,14 @@ from src.services.agent_search_service import AgentUnitSearchService
 from src.services.agent_title_generator import generate_conversation_title
 from src.services.agent_unit_context_service import AgentUnitContextService
 from src.services.agent_error_codes import classify_agent_error
+from src.services.guardrails.pii_guardrail import PIIGuardrailService
 from src.services.recommendation_engine import generate_learning_path
 
 
 logger = logging.getLogger(__name__)
 agent_router = APIRouter(prefix="/api/agent", tags=["agent"])
 assessment_workflow_service = AgentAssessmentWorkflowService()
+pii_guardrail_service = PIIGuardrailService()
 
 
 async def _agent_context_for_user(user: User, db: AsyncSession):
@@ -117,7 +119,9 @@ async def _maybe_generate_conversation_title(
             return
         if not assistant_markdown.strip():
             return
-        title = await generate_conversation_title(user_message, assistant_markdown)
+        sanitized_user_message = pii_guardrail_service.sanitize_input(user_message).sanitized_text
+        sanitized_assistant_markdown = pii_guardrail_service.sanitize_output(assistant_markdown).sanitized_text
+        title = await generate_conversation_title(sanitized_user_message, sanitized_assistant_markdown)
         if not title:
             return
         await conversation_repo.rename_conversation(conversation_id, user.id, title)
