@@ -8,14 +8,15 @@ deploy simple.
 
 ## Decision
 
-Use AWS simple managed architecture for v1:
+Use this AWS simple managed architecture for v1:
 
 ```text
 Amplify Hosting + App Runner + RDS + ElastiCache + S3 + CloudFront + Terraform
 ```
 
-Keep ECR + GitHub OIDC app deployment as a later hardening step after v1 is
-working.
+Create App Runner and Amplify with AWS native GitHub authorization first. Use
+Terraform for foundational infrastructure, then import app-service resources
+later only if the native deployment path is already healthy.
 
 ## Why This Option Wins For V1
 
@@ -32,13 +33,13 @@ working.
 
 | Option | Fit | CI/CD simplicity | AWS learning value | Main drawback |
 |---|---|---|---|---|
-| AWS simple managed: Amplify + App Runner | Recommended v1 | High | High | Requires explicit VPC egress design |
+| AWS simple managed: Amplify + App Runner | Chosen v1 | High | High | Requires explicit VPC egress design |
 | App Runner + ECR + GitHub OIDC | Later hardening | Medium | Very high | Too much before first deploy |
 | ECS Fargate + ALB | Later if needed | Medium | Very high | More networking and operations |
 | Hybrid Vercel/Render/Railway + AWS assets | Fastest launch | Very high | Low-medium | Does not satisfy AWS-first goal |
 | EKS | Not v1 | Low | High | Operationally excessive |
 
-## Recommended Architecture
+## Chosen Architecture
 
 ```text
 GitHub
@@ -70,7 +71,7 @@ The backend needs private access to RDS/ElastiCache and may need public outbound
 access to LLM/email providers. When App Runner uses a VPC connector for private
 resources, public egress must be designed explicitly.
 
-Recommended production default:
+Chosen production default:
 
 - Keep RDS and ElastiCache private.
 - Attach App Runner VPC connector.

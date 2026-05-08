@@ -42,7 +42,7 @@ branch. It is not local hot reload and it does not replace CI branch protection.
 
 ## GitHub Branch Policy
 
-Recommended:
+Branch policy:
 
 - Protect `main`.
 - Require CI checks before merge.

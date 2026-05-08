@@ -24,10 +24,10 @@ Do not commit:
 - `*.tfplan`
 - `*.tfstate`
 
-Manual steps remain valid for:
+Manual steps are part of the chosen v1 path for:
 
 - GitHub OAuth/App Runner connection authorization.
-- Amplify repository authorization or import.
+- Amplify repository authorization.
 - Entering real secret values.
 - Uploading course assets after the S3 bucket exists.
 - Running migrations, `CREATE EXTENSION vector`, bootstrap/import, and smoke
@@ -173,8 +173,9 @@ Changing `NEXT_PUBLIC_API_URL` requires a new Amplify build.
 
 ## 8. App Runner Backend
 
-App Runner is created by Terraform only after the GitHub connection ARN is
-authorized and supplied.
+For the first production deploy, create and authorize App Runner through the AWS
+native GitHub/source flow. Do not block the first deploy on Terraform-managed
+App Runner creation.
 
 Required settings:
 
@@ -185,6 +186,10 @@ Required settings:
 - Port: `8000` or runtime `PORT`.
 - VPC connector: attached when RDS/Redis are private.
 - Health path: `/health`.
+
+After the default-domain backend is healthy, import or manage the stable App
+Runner service with Terraform only if that reduces drift without introducing
+GitHub connection/token risk.
 
 Verify:
 
@@ -216,12 +221,12 @@ Verify catalog data through the backend API before frontend cutover.
 
 ## 10. Amplify Frontend
 
-Preferred v1 path:
+Chosen v1 path:
 
-- Authorize/create or import the Amplify GitHub connection/app.
-- Manage stable app/branch/env settings in Terraform where accepted.
-- Avoid storing an Amplify access token in Terraform state unless that tradeoff
-  is explicitly approved.
+- Authorize/create the Amplify app through the AWS native GitHub flow.
+- Do not use an Amplify access token in Terraform for the first deployment.
+- Import or manage stable Amplify settings in Terraform later only after the
+  temporary frontend URL is healthy.
 
 Required settings:
 

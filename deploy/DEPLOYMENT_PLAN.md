@@ -20,7 +20,7 @@ The production plan optimizes for:
 4. `MANUAL_DEPLOY_STEPS.md` is an execution runbook, not a separate architecture.
 5. If docs disagree, update the lower-priority doc to match this file.
 
-## Recommended V1 Architecture
+## Chosen Feasible V1 Architecture
 
 ```text
 GitHub
@@ -57,8 +57,8 @@ the browser. The backend returns metadata and URLs only.
 | Secrets | Secrets Manager + service secret refs | Keeps real values out of git and Terraform variables |
 | DNS/TLS | Route 53 + ACM | Native AWS certificates and records |
 | Observability | CloudWatch + Budgets | Minimal production operations controls |
-| App deploy v1 | Amplify/App Runner native auto deploy | Avoids early ECR/OIDC complexity |
-| Infra | Terraform | Repeatable reviewed `plan/apply` |
+| App deploy v1 | Amplify/App Runner native auto deploy | Matches the current codebase with the least app refactor |
+| Infra | Terraform | Repeatable reviewed `plan/apply` for foundational AWS resources |
 
 ## Locked Defaults
 
@@ -79,18 +79,24 @@ the browser. The backend returns metadata and URLs only.
 
 ## Terraform And Manual Boundaries
 
-Terraform manages:
+Terraform manages for the first production deploy:
 
 - Network, route tables, security groups, NAT when accepted.
 - S3 bucket controls and CloudFront.
-- RDS, ElastiCache, App Runner service shell, Amplify app/branch where supported.
+- RDS and ElastiCache.
 - Route 53, ACM, alarms, budgets.
 - Secrets Manager containers.
+
+App Runner and Amplify are created through AWS native GitHub authorization first
+because that is the most reliable path for this codebase. After both services
+work on temporary AWS domains, stable service resources can be imported into
+Terraform or recreated by Terraform in a controlled follow-up.
 
 Manual or post-provision steps:
 
 - GitHub OAuth/App Runner connection authorization.
-- Amplify repository authorization if the team avoids access tokens in state.
+- Amplify repository authorization.
+- Token-based Amplify Terraform creation for the first deploy.
 - Real secret values.
 - Course/video uploads to S3.
 - RDS snapshots, Alembic migrations, `CREATE EXTENSION vector`.
@@ -110,13 +116,50 @@ Manual or post-provision steps:
 | 7 | Upload course assets to S3 |
 | 8 | Provision network, database, and cache with Terraform |
 | 9 | Store runtime secrets and env values |
-| 10 | Provision App Runner backend and verify temporary backend URL |
+| 10 | Create App Runner backend and verify temporary backend URL |
 | 11 | Run migrations, bootstrap/import, and asset parity verification |
-| 12 | Provision Amplify frontend and verify temporary frontend URL |
+| 12 | Create Amplify frontend and verify temporary frontend URL |
 | 13 | Smoke test temporary AWS domains |
 | 14 | Attach custom domains |
 | 15 | Add operations controls and rollback records |
 | 16 | Optional later: ECR + GitHub OIDC hardening |
+
+## Overall Definition Of Done
+
+The AWS production deployment is done only when the application is running on
+AWS managed services, all mandatory gates in this plan have evidence, and
+`deploy/PRODUCTION_CHECKLIST.md` is complete for the chosen launch scope.
+
+Done means:
+
+- Legacy Vercel/Railway/Supabase deploys cannot run on `push main`.
+- CI is the required merge gate and uses the same Python/Node major versions as
+  production.
+- Terraform state, foundational infrastructure, plans, and applies are recorded.
+- Backend App Runner and frontend Amplify are deployed through the chosen AWS
+  GitHub-connected flow.
+- RDS, Redis/Valkey, S3, CloudFront, env values, and secrets are configured.
+- Alembic migrations and bootstrap/import have run against production RDS.
+- Course asset keys in the database match uploaded S3 objects.
+- Temporary AWS domains pass smoke tests before any custom domain cutover.
+- Final domains, CORS, API URLs, and CDN URLs pass the full smoke test.
+- Budget, alarms, logs, rollback records, and deployment IDs are recorded.
+
+## Overall Completion Checklist
+
+- [ ] Every required phase from 0 through 15 has its `Done when` items checked or
+  a documented exception approved.
+- [ ] `deploy/TERRAFORM_PLAN.md` has been implemented or the remaining Terraform
+  ownership boundary is explicitly deferred.
+- [ ] `deploy/MANUAL_DEPLOY_STEPS.md` has been followed with command output or
+  AWS console evidence recorded.
+- [ ] `deploy/PRODUCTION_CHECKLIST.md` has no unchecked mandatory item for the
+  selected production launch scope.
+- [ ] The deployed commit SHA is recorded and matches the code reviewed for
+  launch.
+- [ ] A rollback path exists for frontend, backend, database, and assets.
+- [ ] First-30-minute production monitoring has no unresolved startup, 5xx,
+  database, Redis, asset-delivery, or LLM/email errors.
 
 ## Phase 0 - Lock Deploy Variables
 
@@ -320,22 +363,24 @@ Dockerfile.
 
 ## Phase 10 - Provision App Runner Backend
 
-**Task:** Create App Runner backend service with source auto deploy.
+**Task:** Create App Runner backend service with source auto deploy using the AWS
+native GitHub connection flow.
 
 **May touch:**
 
 - `apprunner.yaml` only if source configuration requires it.
-- `deploy/terraform/modules/backend_apprunner/**`
-- `deploy/terraform/live/prod/**`
+- `deploy/terraform/modules/backend_apprunner/**` only if importing/managing the service after native creation.
+- `deploy/terraform/live/prod/**` only if importing/managing the service after native creation.
 - `deploy/ENVIRONMENT_MATRIX.md`
 
 **Connection rule:**
 
-- Preferred: create/authorize the App Runner GitHub connection outside
-  Terraform, pass the connection ARN to Terraform, and keep the OAuth handshake
-  out of state.
-- If the connection ARN is empty, Terraform must skip the App Runner service and
-  document the missing input.
+- Create/authorize the App Runner GitHub connection outside Terraform.
+- Use the repository root `Dockerfile`; the current Dockerfile already binds
+  `0.0.0.0:${PORT:-8000}`.
+- Do not block the first deploy on Terraform-managed App Runner creation.
+- Import or Terraform-manage the service later only after the default-domain
+  backend is healthy.
 
 **Done when:**
 
@@ -363,23 +408,24 @@ Dockerfile.
 - DB asset keys match S3 object keys.
 - Representative CloudFront MP4 URL plays and seeks in the browser.
 
-## Phase 12 - Provision Amplify Frontend
+## Phase 12 - Create Amplify Frontend
 
-**Task:** Create Amplify app/branch and enable frontend auto deploy.
+**Task:** Create Amplify app/branch with native GitHub authorization and enable
+frontend auto deploy.
 
 **May touch:**
 
 - `frontend/amplify.yml` if needed.
-- `deploy/terraform/modules/frontend_amplify/**`
-- `deploy/terraform/live/prod/**`
+- `deploy/terraform/modules/frontend_amplify/**` only if importing/managing the app after native creation.
+- `deploy/terraform/live/prod/**` only if importing/managing the app after native creation.
 - `deploy/ENVIRONMENT_MATRIX.md`
 
 **Connection rule:**
 
-- Preferred: authorize/create or import the Amplify GitHub connection/app and
-  manage stable settings in Terraform.
-- Using `amplify_access_token` is allowed only after accepting that provider
-  handled sensitive material may appear in Terraform state.
+- Use Amplify's native GitHub authorization for the first deployment.
+- Do not use an Amplify access token for the first deployment path.
+- Import or Terraform-manage the app later only after the default-domain
+  frontend is healthy.
 
 **Done when:**
 

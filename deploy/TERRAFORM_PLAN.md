@@ -4,7 +4,7 @@
 
 **Goal:** Add Terraform infrastructure-as-code for the AWS-first deployment so AWS infrastructure is reviewed with `terraform plan`, applied repeatably, and protected from console drift.
 
-**Architecture:** Terraform manages infrastructure in `deploy/terraform/` using an S3 backend with native S3 state locking. Application deploys remain native Amplify/App Runner source auto deploy for v1. GitHub OAuth authorization, real secret values, object uploads, migrations, and bootstrap/import commands stay outside Terraform.
+**Architecture:** Terraform manages foundational infrastructure in `deploy/terraform/` using an S3 backend with native S3 state locking. Application deploys remain native Amplify/App Runner source auto deploy for v1. App Runner and Amplify are created through AWS native GitHub authorization first, then imported or managed by Terraform later only if it reduces drift. GitHub OAuth authorization, real secret values, object uploads, migrations, and bootstrap/import commands stay outside Terraform.
 
 **Tech Stack:** Terraform CLI, HashiCorp AWS provider, AWS S3 backend with `use_lockfile`, AWS Amplify Hosting, AWS App Runner, RDS PostgreSQL, ElastiCache Redis OSS/Valkey, S3, CloudFront OAC, ACM, Route 53, CloudWatch, AWS Budgets, GitHub Actions OIDC for infrastructure automation.
 
@@ -20,7 +20,10 @@
 - RDS master credentials use AWS-managed password when possible.
 - Course/video assets are uploaded with AWS CLI after S3 exists; Terraform never tracks the 15 GB object set.
 - `pgvector`, Alembic migrations, bootstrap/import, and S3-to-DB parity checks are explicit operator steps.
-- App Runner and Amplify GitHub authorization is handled before Terraform creates/imports app resources.
+- App Runner and Amplify GitHub authorization is handled through AWS native flows
+  for the first deployment.
+- Terraform app-service modules are optional follow-up work after temporary AWS
+  domains are healthy.
 
 ## File Structure
 
@@ -59,11 +62,11 @@ deploy/terraform/
       main.tf
       variables.tf
       outputs.tf
-    backend_apprunner/
+    backend_apprunner/      # optional after first healthy native deploy
       main.tf
       variables.tf
       outputs.tf
-    frontend_amplify/
+    frontend_amplify/       # optional after first healthy native deploy
       main.tf
       variables.tf
       outputs.tf
@@ -72,6 +75,50 @@ deploy/terraform/
       variables.tf
       outputs.tf
 ```
+
+## Definition Of Done
+
+Terraform implementation is done when the repository contains a usable
+`deploy/terraform/` foundation, production state is remote and protected, and a
+reviewed production plan can be generated without committing local state,
+tfvars, secrets, or plan artifacts.
+
+Done means:
+
+- `.gitignore` protects `.terraform/`, state, tfvars, backend config, and plan
+  files while allowing example files.
+- `bootstrap-state` can create or verify the remote-state S3 bucket.
+- `live/prod` initializes from `backend.hcl.example` and
+  `terraform.tfvars.example`.
+- Network, assets, database, cache, observability, and optional domain resources
+  are represented in modules or explicitly deferred.
+- Secrets Manager containers may be managed, but real secret values are not in
+  Terraform code, state inputs, examples, or docs.
+- Course/video objects, migrations, pgvector setup, bootstrap/import, and native
+  GitHub authorization remain outside Terraform.
+- `terraform fmt -check -recursive`, `terraform validate`, and a reviewed
+  `terraform plan` pass for the production root.
+
+## Completion Checklist
+
+- [ ] Task 1 guardrails are implemented and `git diff --check` passes.
+- [ ] Task 2 bootstrap-state stack initializes, validates, and plans cleanly.
+- [ ] Task 3 production root initializes with local `backend.hcl` and
+  `terraform.tfvars` copied from examples.
+- [ ] Task 4 network module plans VPC, public/private subnets, routes, route
+  table associations, NAT when enabled, and security groups.
+- [ ] Task 5 assets module plans private S3, CloudFront, OAC, and bucket policy
+  without S3 object resources.
+- [ ] Task 6 database/cache modules plan private RDS and Redis/Valkey without
+  DB passwords in `.tfvars`.
+- [ ] Task 7 App Runner and Amplify ownership boundary is documented and does
+  not block native first deploy.
+- [ ] Task 8 observability and custom-domain behavior plans correctly for both
+  `enable_custom_domains = false` and `true`.
+- [ ] Task 9 Terraform CI can create runtime-only backend/tfvars files from
+  protected values and run fmt, validate, and plan.
+- [ ] Task 10 documentation scans pass and legacy deploy wording appears only as
+  warnings or historical context.
 
 ## Task 1: Add Terraform Guardrails
 
@@ -872,60 +919,57 @@ SELECT extname FROM pg_extension WHERE extname = 'vector';
 
 Expected: query returns `vector`.
 
-## Task 7: Add App Runner And Amplify Modules
+## Task 7: Document App Runner And Amplify Ownership
 
 **Files:**
 
-- Create: `deploy/terraform/modules/backend_apprunner/main.tf`
-- Create: `deploy/terraform/modules/backend_apprunner/variables.tf`
-- Create: `deploy/terraform/modules/backend_apprunner/outputs.tf`
-- Create: `deploy/terraform/modules/frontend_amplify/main.tf`
-- Create: `deploy/terraform/modules/frontend_amplify/variables.tf`
-- Create: `deploy/terraform/modules/frontend_amplify/outputs.tf`
-- Modify: `deploy/terraform/live/prod/main.tf`
-- Modify: `deploy/terraform/live/prod/outputs.tf`
+- Modify: `deploy/terraform/README.md`
+- Modify: `deploy/terraform/live/prod/terraform.tfvars.example`
+- Optional later: `deploy/terraform/modules/backend_apprunner/**`
+- Optional later: `deploy/terraform/modules/frontend_amplify/**`
+- Optional later: `deploy/terraform/live/prod/**`
 
-**App Runner rule:**
+**Chosen first-deploy rule:**
 
-- `app_runner_connection_arn` must be supplied after GitHub authorization.
-- If the connection ARN is empty, the module must create zero App Runner service
-  resources and output an empty service URL.
+- Create App Runner through the AWS native GitHub/source flow using the existing
+  root `Dockerfile`.
+- Create Amplify through the AWS native GitHub flow with app root `frontend`.
+- Do not use an Amplify access token in Terraform for the first deploy.
+- Do not block the first working deployment on Terraform ownership of app
+  services.
 
-**Amplify rule:**
+**Later Terraform ownership rule:**
 
-- Preferred v1 path is manual authorization/import to avoid access tokens in
-  Terraform state.
-- If `manage_amplify_in_terraform = false`, module creates no resources and the
-  operator records the manual Amplify app ID.
-- If Terraform manages Amplify, the team must explicitly accept token/state
-  tradeoffs before adding token variables.
+- Import App Runner and Amplify resources only after temporary domains are
+  healthy.
+- Manage stable service settings only if import is low risk.
+- Keep GitHub OAuth handshakes and secret values outside Terraform state.
 
-- [ ] **Step 1: Wire root**
+- [ ] **Step 1: Update Terraform README ownership note**
 
-```hcl
-module "backend_apprunner" {
-  source = "../../modules/backend_apprunner"
+Add:
 
-  service_name       = var.backend_service_name
-  repository_url     = var.github_repository_url
-  branch_name        = var.github_branch
-  connection_arn     = var.app_runner_connection_arn
-  private_subnet_ids = module.network.private_subnet_ids
-  security_group_id  = module.network.app_runner_security_group_id
-}
+```markdown
+## App Runner And Amplify Ownership
 
-module "frontend_amplify" {
-  source = "../../modules/frontend_amplify"
-
-  count               = var.manage_amplify_in_terraform ? 1 : 0
-  app_name            = var.frontend_app_name
-  repository_url      = var.github_repository_url
-  branch_name         = var.github_branch
-  backend_url         = module.backend_apprunner.service_url
-}
+For the first production deploy, create App Runner and Amplify through AWS native
+GitHub authorization. Terraform manages foundational infrastructure first. After
+the backend and frontend default AWS domains are healthy, app-service resources
+may be imported into Terraform if doing so reduces drift without storing GitHub
+tokens or real secret values in state.
 ```
 
-- [ ] **Step 2: Plan**
+- [ ] **Step 2: Keep app-service variables non-blocking**
+
+Keep `terraform.tfvars.example` values empty or disabled:
+
+```hcl
+app_runner_connection_arn = ""
+manage_amplify_in_terraform = false
+amplify_app_id              = ""
+```
+
+- [ ] **Step 3: Validate foundational plan still works**
 
 Run:
 
@@ -933,10 +977,10 @@ Run:
 cd deploy/terraform/live/prod
 terraform fmt -recursive
 terraform validate
-terraform plan -var-file=terraform.tfvars -out prod-apps.tfplan
+terraform plan -var-file=terraform.tfvars -out prod-foundation.tfplan
 ```
 
-Expected: App Runner resources appear only when the connection ARN is present. Amplify resources appear only when `manage_amplify_in_terraform = true`.
+Expected: the foundational plan does not require App Runner or Amplify Terraform ownership.
 
 ## Task 8: Add Domains And Observability
 

@@ -3,6 +3,40 @@
 Use this while executing `DEPLOYMENT_PLAN.md`. Do not move to the next group
 until the current group passes.
 
+## Production Definition Of Done
+
+Production is done only when all mandatory checklist groups for the selected
+launch scope are checked, every external dependency has been exercised from AWS,
+and rollback plus monitoring records exist.
+
+Done means:
+
+- The deployed app uses Amplify, App Runner, RDS, Redis/Valkey, S3, CloudFront,
+  Secrets Manager/service secret refs, and CloudWatch/Budgets as selected in
+  `DEPLOYMENT_PLAN.md`.
+- No committed workflow can deploy the legacy Vercel/Railway/Supabase stack on
+  `push main`.
+- CI, Terraform validation, backend image build, migrations, bootstrap/import,
+  asset parity checks, and smoke tests have fresh evidence.
+- Temporary AWS domains pass before custom domains are attached.
+- Final domains pass auth, catalog, learning unit, video, quiz, tutor, and
+  browser-console checks.
+- Costs, alarms, log retention, deployment IDs, commit SHA, snapshot ID, and
+  rollback steps are recorded.
+
+## Final Completion Checklist
+
+- [ ] Every checklist group below has been reviewed in order.
+- [ ] All unchecked items are explicitly marked non-applicable for this launch
+  with a reason.
+- [ ] The production branch and deployed commit SHA match.
+- [ ] App Runner and Amplify deployment IDs are recorded.
+- [ ] RDS snapshot ID before migration is recorded.
+- [ ] CloudFront distribution ID and final CDN domain are recorded.
+- [ ] Smoke tests pass on final domains after the last frontend rebuild.
+- [ ] First-30-minute logs and metrics have been reviewed.
+- [ ] Rollback owner and decision path are known before user traffic is opened.
+
 ## Pre-Deploy Decisions
 
 - [ ] Production branch selected.
@@ -85,6 +119,7 @@ until the current group passes.
 - [ ] GitHub connection authorized and ARN recorded privately.
 - [ ] App Runner service `a20-backend` exists.
 - [ ] Source points to GitHub repository root `Dockerfile`.
+- [ ] Service was created through AWS native GitHub/source flow for first deploy.
 - [ ] Production branch auto deploy is enabled.
 - [ ] VPC connector attached if RDS/Redis are private.
 - [ ] Health check path `/health` configured.
@@ -122,6 +157,7 @@ until the current group passes.
 - [ ] Amplify repository authorization/import path recorded.
 - [ ] Amplify app `a20-frontend` exists.
 - [ ] Source points to GitHub repository.
+- [ ] App was created through AWS native GitHub flow for first deploy.
 - [ ] Production branch auto deploy is enabled.
 - [ ] App root is `frontend`.
 - [ ] Build settings run `npm ci --legacy-peer-deps` and `npm run build`.

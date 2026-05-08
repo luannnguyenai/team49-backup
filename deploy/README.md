@@ -21,7 +21,23 @@ The remaining files explain decisions or give focused references:
 - `AWS_CONFIG_GUIDE.md` - service-specific AWS configuration notes.
 - `AWS_CICD_GUIDE.md` - CI/CD model and GitHub Actions boundaries.
 
-## V1 Decision Lock
+## Completion Standard
+
+Deployment is complete only when the definition of done in each execution
+document is satisfied:
+
+- `DEPLOYMENT_PLAN.md` - overall phase definition of done and completion
+  checklist.
+- `TERRAFORM_PLAN.md` - Terraform implementation definition of done and
+  checklist.
+- `MANUAL_DEPLOY_STEPS.md` - runbook definition of done and execution checklist.
+- `PRODUCTION_CHECKLIST.md` - final production definition of done and go/no-go
+  checklist.
+
+If these documents disagree, use `DEPLOYMENT_PLAN.md` as the source of truth and
+update the other document before proceeding.
+
+## Most Feasible V1 Path
 
 | Area | Decision |
 |---|---|
@@ -35,7 +51,8 @@ The remaining files explain decisions or give focused references:
 | Secrets | Secrets Manager plus service env/secret references |
 | Logs/metrics | CloudWatch, AWS Budgets, focused alarms |
 | App CI/CD v1 | GitHub Actions is a CI gate only; deploys are native AWS auto deploy |
-| Infra management | Terraform remote S3 state and reviewed `plan/apply` |
+| Infra management | Terraform remote S3 state for foundational AWS resources |
+| App service ownership | Create/authorize App Runner and Amplify with AWS native GitHub flow first; import/manage stable parts later if useful |
 | Later hardening | ECR + GitHub OIDC + custom deploy workflow after v1 is stable |
 
 ## Terraform Boundary
@@ -44,15 +61,18 @@ Terraform should manage AWS infrastructure after the remote-state bootstrap:
 
 - VPC, subnets, route tables, security groups, NAT if accepted.
 - S3 bucket security settings, CloudFront distribution, OAC.
-- RDS, ElastiCache, App Runner service shell, Amplify app/branch when the GitHub
-  connection approach is approved.
+- RDS and ElastiCache.
 - Route 53, ACM, CloudWatch alarms, Budgets.
+- App Runner and Amplify only after the native GitHub connection is authorized
+  and the resource is either created safely by Terraform or imported after the
+  first working deployment.
 - Secrets Manager secret containers, not secret values.
 
 Terraform should not manage:
 
 - Real secret values.
 - GitHub OAuth authorization handshakes.
+- Amplify access tokens for the first deployment path.
 - 15 GB course/video object uploads.
 - Alembic migrations, `pgvector` SQL execution, or bootstrap/import data jobs.
 - Per-commit app deployments; Amplify/App Runner native auto deploy handles those.
@@ -63,13 +83,10 @@ Terraform should not manage:
   cannot deploy to Vercel, Railway, or Supabase.
 - Bootstrap Terraform state and review the first production `terraform plan`.
 - Choose the App Runner egress model before private RDS/Redis are connected.
-  Recommended production default: private RDS/Redis plus NAT Gateway when
+  Chosen production default: private RDS/Redis plus NAT Gateway when
   tutor/email providers must be reachable.
-- Decide the GitHub connection path for App Runner and Amplify:
-  - Preferred: authorize/import connection-managed resources, then manage stable
-    infrastructure in Terraform.
-  - Alternative: use provider access tokens only after accepting their Terraform
-    state implications.
+- Authorize App Runner and Amplify through AWS native GitHub connection flows.
+  Avoid token-based Terraform creation for the first deployment.
 - Smoke test temporary AWS domains before attaching custom domains.
 
 ## Non-Goals For V1

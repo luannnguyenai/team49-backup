@@ -10,6 +10,7 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.models.canonical import CanonicalUnit
 from src.models.course import Course, CourseAsset, CourseAssetType, CourseSection, LearningUnit
 from src.schemas.content import (
@@ -18,6 +19,8 @@ from src.schemas.content import (
     LearningUnitContentResponse,
     LearningUnitSelectionItem,
 )
+from src.services.asset_delivery import AssetDeliveryConfigError, build_cloudfront_url
+from src.services.asset_signing import build_signed_asset_url
 
 # ---------------------------------------------------------------------------
 # Canonical content route surface
@@ -150,7 +153,7 @@ async def _canonical_unit_video_url(
     )
     asset = asset_result.scalar_one_or_none()
     if asset is not None:
-        return asset.delivery_url or asset.storage_key
+        return asset.delivery_url or _course_asset_url_from_storage_key(asset.storage_key)
 
     if canonical_unit is None or not canonical_unit.content_ref:
         return None
@@ -159,6 +162,15 @@ async def _canonical_unit_video_url(
         value = content_ref.get("video_url") or content_ref.get("url")
         return str(value) if value else None
     return None
+
+
+def _course_asset_url_from_storage_key(storage_key: str) -> str | None:
+    if settings.asset_storage_provider == "s3":
+        try:
+            return build_cloudfront_url(storage_key)
+        except AssetDeliveryConfigError:
+            return None
+    return build_signed_asset_url(storage_key)
 
 
 def _minutes_to_hours(minutes: int | None, *, divisor: int = 60) -> float | None:

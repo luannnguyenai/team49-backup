@@ -3,6 +3,40 @@
 Use this runbook when executing the plan by hand from an approved admin machine.
 It follows `DEPLOYMENT_PLAN.md` and keeps AWS infrastructure Terraform-first.
 
+## Runbook Definition Of Done
+
+This runbook is complete only when every command or console action needed for
+the selected launch scope has evidence recorded, temporary AWS domains pass the
+smoke test, final domains pass after cutover, and rollback data is captured.
+
+Done means:
+
+- AWS identity, region, production branch, domain, and service names are filled
+  in before infrastructure changes.
+- Legacy non-AWS deploys are frozen before pushing production changes.
+- Terraform bootstrap, plan review, and apply evidence is recorded.
+- App Runner and Amplify native GitHub connections are authorized and their
+  deployment IDs are recorded.
+- S3 upload summary, RDS migration result, pgvector verification, and bootstrap
+  data checks are recorded.
+- Backend and frontend health endpoints return 200 on temporary and final URLs.
+- CloudFront video playback and seeking work from the browser.
+- Budgets, alarms, log retention, and rollback records exist before launch is
+  considered complete.
+
+## Runbook Completion Checklist
+
+- [ ] Section 0 values are filled in.
+- [ ] Sections 1 through 5 have command output or AWS console evidence recorded.
+- [ ] Section 6 asset upload records object count, total size, and sample MP4
+  key.
+- [ ] Sections 7 through 12 verify RDS, migrations, bootstrap/import, and S3 to
+  DB asset parity.
+- [ ] Sections 13 and 14 pass on temporary AWS domains.
+- [ ] Section 15 passes on custom domains after env/CORS/API URL updates.
+- [ ] Sections 16 and 17 record operations controls and rollback data.
+- [ ] Any skipped item has an owner, reason, risk, and follow-up date.
+
 ## 0. Fill Deployment Values
 
 | Item | Value |
@@ -71,26 +105,26 @@ Review every plan before apply:
 terraform apply prod.tfplan
 ```
 
-## 4. Authorize GitHub Connections
+## 4. Create Native GitHub Connections
 
 App Runner:
 
-- Create/authorize the App Runner GitHub connection.
-- Record the connection ARN in local `terraform.tfvars`.
-- Do not commit the connection ARN if it is treated as sensitive.
+- Create/authorize the App Runner GitHub connection in AWS.
+- Use the repository root `Dockerfile`.
+- Do not wait for Terraform app-service ownership before the first deploy.
 
 Amplify:
 
-- Preferred: create/authorize or import the Amplify app/connection, then manage
-  stable settings through Terraform where accepted.
-- Only use token-based Terraform creation after accepting state implications.
+- Create/authorize the Amplify GitHub connection in AWS.
+- Use app root `frontend`.
+- Do not use token-based Terraform creation for the first deploy.
 
 ## 5. Apply Terraform Infrastructure In Phases
 
 Run targeted plans only when helpful for review. Full plans are acceptable after
 module wiring is stable.
 
-Suggested order:
+Suggested order for foundational infrastructure:
 
 ```bash
 cd deploy/terraform/live/prod
@@ -99,9 +133,6 @@ terraform apply prod-assets.tfplan
 
 terraform plan -var-file=terraform.tfvars -out prod-network-data.tfplan
 terraform apply prod-network-data.tfplan
-
-terraform plan -var-file=terraform.tfvars -out prod-apps.tfplan
-terraform apply prod-apps.tfplan
 
 terraform plan -var-file=terraform.tfvars -out prod-ops.tfplan
 terraform apply prod-ops.tfplan
@@ -168,6 +199,7 @@ Confirm service settings:
 - Port: `8000` or runtime `PORT`.
 - VPC connector attached if RDS/Redis are private.
 - Health path: `/health`.
+- Service can be imported into Terraform later after this health check passes.
 
 Verify:
 
@@ -232,6 +264,7 @@ Confirm service settings:
 - Auto deploy: enabled.
 - Install command: `npm ci --legacy-peer-deps`.
 - Build command: `npm run build`.
+- App can be imported into Terraform later after this health check passes.
 
 Set Amplify env:
 

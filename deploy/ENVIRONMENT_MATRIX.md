@@ -84,7 +84,7 @@ Changing `NEXT_PUBLIC_API_URL` requires a new Amplify build/redeploy.
 | Health path | `/health` |
 | Auto deploy | enabled |
 | VPC connector | required when RDS/ElastiCache are private |
-| GitHub connection | authorize outside Terraform, pass ARN into Terraform |
+| GitHub connection | authorize in AWS native flow; import/manage later only if useful |
 
 ## Amplify GitHub Auto Deploy
 
@@ -97,7 +97,7 @@ Changing `NEXT_PUBLIC_API_URL` requires a new Amplify build/redeploy.
 | Install command | `npm ci --legacy-peer-deps` |
 | Build command | `npm run build` |
 | Auto deploy | enabled |
-| GitHub connection | authorize/import preferred; token-in-state requires explicit acceptance |
+| GitHub connection | authorize in AWS native flow; do not use token-based Terraform creation for first deploy |
 
 ## RDS PostgreSQL
 
@@ -129,7 +129,7 @@ Required settings:
 If App Runner uses a VPC connector to private RDS/ElastiCache and the backend
 must call public LLM/email APIs, configure explicit public egress.
 
-Recommended production default:
+Chosen production default:
 
 ```text
 private RDS/Redis + App Runner VPC connector + NAT Gateway
@@ -157,6 +157,7 @@ CloudFront must use Origin Access Control so S3 remains private.
 | Backend checks | Ruff + pytest with Postgres/Redis services |
 | Frontend checks | lint + type-check + build + unit tests if available |
 | App deploy behavior | none in v1; Amplify/App Runner native auto deploy handles app deploy |
+| App service Terraform ownership | defer until after native App Runner/Amplify services are healthy |
 
 ## Terraform Infrastructure CI
 
@@ -176,7 +177,7 @@ GitHub Environment values if Terraform runs in Actions:
 | `TF_BACKEND_HCL_PROD` | secret or protected variable | Full `backend.hcl` content written at runtime |
 | `TFVARS_PROD` | secret or protected variable | Full `terraform.tfvars` content written at runtime |
 
-Recommended local commands:
+Local Terraform commands:
 
 ```bash
 cd deploy/terraform/live/prod

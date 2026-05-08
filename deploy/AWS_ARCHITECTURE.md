@@ -40,8 +40,8 @@ flowchart TB
   Terraform --> Redis
   Terraform --> S3
   Terraform --> CloudFront
-  Terraform --> AppRunner
-  Terraform --> Amplify
+  Terraform -. import after first healthy deploy .-> AppRunner
+  Terraform -. import after first healthy deploy .-> Amplify
   Terraform --> Route53
   Terraform --> Observability[CloudWatch alarms<br/>Budgets / log retention]
 ```
@@ -77,7 +77,7 @@ sequenceDiagram
 | Component | Responsibility |
 |---|---|
 | GitHub Actions CI | Validate code before merge |
-| Terraform | Provision and update AWS infrastructure through reviewed `plan/apply` |
+| Terraform | Provision foundational AWS infrastructure through reviewed `plan/apply` |
 | Amplify | Build and deploy Next.js frontend from GitHub |
 | App Runner | Build and deploy FastAPI backend from GitHub/source |
 | App Runner VPC connector | Private backend access to VPC resources |
@@ -94,6 +94,6 @@ sequenceDiagram
 
 - Terraform manages infrastructure, not large S3 objects or app releases.
 - Course videos must stream `CloudFront -> Browser`, not through FastAPI.
-- GitHub OAuth/App Runner/Amplify repository authorization can be manual or
-  imported to avoid access tokens in Terraform state.
+- App Runner and Amplify use native AWS GitHub authorization for the first
+  deployment. Import into Terraform later only if it improves drift control.
 - Custom domains are attached only after temporary AWS domains pass smoke tests.
