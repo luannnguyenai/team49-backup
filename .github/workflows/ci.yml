@@ -1,13 +1,9 @@
 # =============================================================================
-# CI — Lint + Test on pushes and pull requests
+# CI — Path-aware validation for pushes and pull requests
 # =============================================================================
-# Triggers:  push to any branch including main + pull_request targeting main
-#            + reusable workflow_call for deployment gates
-# Jobs:
-#   lint-backend  — ruff (lint + format check)
-#   test-backend  — pytest with a real PostgreSQL service container
-#   lint-frontend — ESLint
-#   typecheck-fe  — tsc --noEmit
+# Backend checks run only for backend/runtime changes.
+# Frontend checks run only for frontend changes.
+# Workflow/deploy-doc changes get a lightweight repo config validation job.
 # =============================================================================
 
 name: CI
@@ -21,18 +17,84 @@ on:
       - main
   workflow_call:
 
-# Cancel in-progress runs on the same PR / branch
+permissions:
+  contents: read
+  pull-requests: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # Backend — lint
-  # ---------------------------------------------------------------------------
+  changes:
+    name: "Detect changed areas"
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      repo_config: ${{ steps.filter.outputs.repo_config }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - "src/**"
+              - "tests/**"
+              - "alembic/**"
+              - "scripts/**"
+              - "data/bootstrap/**"
+              - "requirements.txt"
+              - "pyproject.toml"
+              - "uv.lock"
+              - "Dockerfile"
+              - ".dockerignore"
+            frontend:
+              - "frontend/**"
+            repo_config:
+              - ".github/workflows/**"
+              - "deploy/**"
+              - ".gitignore"
+              - "AGENTS.md"
+
+  repo-config:
+    name: "Repo config · Validate"
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.repo_config == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install YAML parser
+        run: pip install pyyaml
+
+      - name: Validate workflow YAML
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          for path in sorted(Path(".github/workflows").glob("*.yml")):
+              yaml.safe_load(path.read_text(encoding="utf-8"))
+              print(f"parsed {path}")
+          PY
+
+      - name: Check deploy docs whitespace
+        run: git diff --check -- deploy .github/workflows .dockerignore pyproject.toml
+
   lint-backend:
     name: "Backend · Lint (ruff)"
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
 
     steps:
       - uses: actions/checkout@v4
@@ -51,22 +113,19 @@ jobs:
       - name: Ruff format check
         run: ruff format --check src/ scripts/
 
-
-  # ---------------------------------------------------------------------------
-  # Backend — tests
-  # ---------------------------------------------------------------------------
   test-backend:
     name: "Backend · Test (pytest)"
     runs-on: ubuntu-latest
-    needs: lint-backend
+    needs: [changes, lint-backend]
+    if: needs.changes.outputs.backend == 'true'
 
     services:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER:     test
+          POSTGRES_USER: test
           POSTGRES_PASSWORD: test
-          POSTGRES_DB:       test_ai_learning
+          POSTGRES_DB: test_ai_learning
         ports:
           - 5432:5432
         options: >-
@@ -86,12 +145,12 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL:     postgresql+asyncpg://test:test@localhost:5432/test_ai_learning
-      REDIS_URL:        redis://localhost:6379/0
-      SECRET_KEY:       ci_test_secret_key_min_32_chars_long
-      ALGORITHM:        HS256
+      DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test_ai_learning
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci_test_secret_key_min_32_chars_long
+      ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
-      REFRESH_TOKEN_EXPIRE_DAYS:   7
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
 
     steps:
       - uses: actions/checkout@v4
@@ -123,13 +182,11 @@ jobs:
           name: backend-test-results
           path: reports/
 
-
-  # ---------------------------------------------------------------------------
-  # Frontend — lint
-  # ---------------------------------------------------------------------------
   lint-frontend:
     name: "Frontend · Lint (ESLint)"
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
 
     defaults:
       run:
@@ -150,14 +207,11 @@ jobs:
       - name: ESLint
         run: npm run lint
 
-
-  # ---------------------------------------------------------------------------
-  # Frontend — TypeScript
-  # ---------------------------------------------------------------------------
   typecheck-frontend:
     name: "Frontend · TypeScript"
     runs-on: ubuntu-latest
-    needs: lint-frontend
+    needs: [changes, lint-frontend]
+    if: needs.changes.outputs.frontend == 'true'
 
     defaults:
       run:
@@ -176,9 +230,48 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: TypeScript type-check
-        run: npx tsc --noEmit
+        run: npm run type-check
 
       - name: Next.js build (dry-run)
         env:
           NEXT_PUBLIC_API_URL: http://localhost:8000
         run: npm run build
+
+  ci-status:
+    name: "CI · Status"
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - repo-config
+      - test-backend
+      - typecheck-frontend
+    if: always()
+
+    steps:
+      - name: Check required CI jobs
+        run: |
+          backend="${{ needs.changes.outputs.backend }}"
+          frontend="${{ needs.changes.outputs.frontend }}"
+          repo_config="${{ needs.changes.outputs.repo_config }}"
+
+          repo_result="${{ needs.repo-config.result }}"
+          backend_result="${{ needs.test-backend.result }}"
+          frontend_result="${{ needs.typecheck-frontend.result }}"
+
+          echo "backend changed: $backend -> $backend_result"
+          echo "frontend changed: $frontend -> $frontend_result"
+          echo "repo config changed: $repo_config -> $repo_result"
+
+          if [ "$backend" = "true" ] && [ "$backend_result" != "success" ]; then
+            exit 1
+          fi
+
+          if [ "$frontend" = "true" ] && [ "$frontend_result" != "success" ]; then
+            exit 1
+          fi
+
+          if [ "$repo_config" = "true" ] && [ "$repo_result" != "success" ]; then
+            exit 1
+          fi
+
+          echo "Selected CI checks passed."
