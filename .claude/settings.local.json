@@ -12,7 +12,9 @@
       "Bash(rtk ps *)",
       "Bash(rtk docker *)",
       "Bash(rtk ls *)",
-      "Bash(rtk find *)"
+      "Bash(rtk find *)",
+      "PowerShell(aws ecs wait tasks-stopped *)",
+      "PowerShell(aws ecs describe-tasks *)"
     ]
   },
   "disabledMcpjsonServers": [
