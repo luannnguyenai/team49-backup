@@ -4,7 +4,9 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-
++ a98a7cd305003e2d88179ab2311d42472d0790e2 infra: add aws terraform foundation
++ aeba664e3ca9fd2e9ea8d441f29c490f73d5f491 docs: align deploy docs with terraform state
++ 8f06302ce4b268d4b3683b55138f55d2667dadfd Create implemented-guardrails.md
 "@
 
 
