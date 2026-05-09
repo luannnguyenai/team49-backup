@@ -1,5 +1,5 @@
 $baseBranch = "main"
-$sourceBranch = "deploy-6"
+$sourceBranch = "feat-terraform-aws"
 $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
