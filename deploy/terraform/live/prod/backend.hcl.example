@@ -1,0 +1,5 @@
+bucket       = "a20-terraform-state-prod"
+key          = "a20/prod/terraform.tfstate"
+region       = "ap-southeast-1"
+use_lockfile = true
+encrypt      = true
