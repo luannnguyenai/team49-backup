@@ -5,6 +5,9 @@ resource "aws_lb" "this" {
   subnets            = var.public_subnet_ids
   security_groups    = [var.alb_security_group_id]
 
+  # Chat / agent endpoints may run langgraph + KG lookup + LLM > 60s
+  idle_timeout = 180
+
   tags = {
     Name = "${var.name_prefix}-alb"
   }

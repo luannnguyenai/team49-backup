@@ -1,0 +1,27 @@
+{
+  "family": "a20-backend-admin-query",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role",
+  "containerDefinitions": [
+    {
+      "name": "admin-query",
+      "image": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend:7deedc0-data",
+      "essential": true,
+      "command": [
+        "uv","run","python","-c",
+        "import asyncio; from sqlalchemy import text; from src.database import async_session\nasync def m():\n  async with async_session() as s:\n    cols = (await s.execute(text(\"SELECT column_name, data_type FROM information_schema.columns WHERE table_name='users' ORDER BY ordinal_position\"))).all()\n    print('=== users columns ===')\n    for c in cols:\n      print(f'  {c[0]}: {c[1]}')\n    rows = (await s.execute(text('SELECT * FROM users'))).mappings().all()\n    print(f'=== {len(rows)} user(s) ===')\n    for r in rows:\n      print(dict(r))\nasyncio.run(m())"
+      ],
+      "secrets": [
+        {"name":"DATABASE_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:DATABASE_URL::"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/a20-backend-migrate","awslogs-region": "ap-southeast-1","awslogs-stream-prefix": "admin-query"}
+      }
+    }
+  ]
+}

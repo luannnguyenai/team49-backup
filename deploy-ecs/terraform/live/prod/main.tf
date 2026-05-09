@@ -108,23 +108,100 @@ module "backend_service" {
   health_check_grace_period_seconds = 60
 
   environment = [
+    # Core runtime
     { name = "PORT", value = tostring(var.backend_container_port) },
     { name = "DEBUG", value = "false" },
     { name = "LOG_LEVEL", value = "INFO" },
+    { name = "DB_ECHO", value = "false" },
+    { name = "DB_POOL_SIZE", value = "10" },
+    { name = "DB_MAX_OVERFLOW", value = "20" },
+
+    # LangGraph checkpointer — skip setup() vì tables đã được alembic migrate.
+    # Setup() trên psycopg với RDS hang vô hạn (advisory lock?). Fix: false.
+    { name = "AGENT_GRAPH_CHECKPOINTER_SETUP", value = "false" },
+    { name = "AGENT_GRAPH_CHECKPOINTER_BACKEND", value = "postgres" },
+
+    # Asset delivery
     { name = "ASSET_STORAGE_PROVIDER", value = "s3" },
     { name = "AWS_REGION", value = var.aws_region },
     { name = "AWS_S3_BUCKET", value = var.asset_bucket_name },
     { name = "AWS_S3_PREFIX", value = var.asset_prefix },
     { name = "CLOUDFRONT_DOMAIN", value = module.assets.cloudfront_domain_name },
+    { name = "ASSET_URL_EXPIRE_SECONDS", value = "900" },
+
+    # CORS / frontend
     { name = "FRONTEND_BASE_URL", value = "http://${module.alb.alb_dns_name}" },
-    { name = "CORS_ORIGINS", value = "[\"http://${module.alb.alb_dns_name}\"]" }
+    { name = "CORS_ORIGINS", value = "[\"http://${module.alb.alb_dns_name}\"]" },
+
+    # Auth
+    { name = "ALGORITHM", value = "HS256" },
+    { name = "ACCESS_TOKEN_EXPIRE_MINUTES", value = "30" },
+    { name = "REFRESH_TOKEN_EXPIRE_DAYS", value = "7" },
+    { name = "RATE_LIMIT_LOGIN_PER_MINUTE", value = "5" },
+    { name = "PASSWORD_RESET_TOKEN_TTL_MINUTES", value = "30" },
+
+    # LLM provider
+    { name = "MODEL_PROVIDER", value = "openai" },
+    { name = "DEFAULT_MODEL", value = "gpt-5.4-mini" },
+    { name = "FAST_MODEL", value = "gpt-5.4-nano" },
+    { name = "GEMINI_REQUESTS_PER_MINUTE", value = "15" },
+    { name = "MODEL_EXTRA_KWARGS", value = "{}" },
+    { name = "LLM_REQUEST_TIMEOUT_SECONDS", value = "30" },
+    { name = "LLM_MAX_RETRIES", value = "1" },
+
+    # Langfuse non-secret
+    { name = "LANGFUSE_BASE_URL", value = "https://cloud.langfuse.com" },
+
+    # Knowledge graph
+    { name = "KG_PHASE", value = "0" },
+    { name = "KG_MASTERY_SKIP_THRESHOLD", value = "0.7" },
+    { name = "KG_MASTERY_REVIEW_THRESHOLD", value = "0.4" },
+    { name = "KG_SHORTCUT_MASTERY_THRESHOLD", value = "0.8" },
+    { name = "KG_SHORTCUT_HOURS_FACTOR", value = "0.4" },
+    { name = "KG_PATH_WEEK_BUFFER", value = "0.2" },
+    { name = "KG_BUCKET_WEIGHTS", value = "{\"easy\":1.0,\"medium\":1.3,\"hard\":1.6}" },
+    { name = "KG_RECSYS_WEIGHTS", value = "{\"mastery_gap\":0.35,\"prereq_ready\":0.25,\"transfer_boost\":0.2,\"goal_distance\":0.15,\"freshness\":0.05}" },
+
+    # Canonical runtime feature flags
+    { name = "WRITE_GOAL_PREFERENCES_ENABLED", value = "true" },
+    { name = "WRITE_LEARNER_MASTERY_KP_ENABLED", value = "true" },
+    { name = "WRITE_WAIVED_UNITS_ENABLED", value = "true" },
+    { name = "WRITE_PLANNER_AUDIT_ENABLED", value = "true" },
+    { name = "READ_GOAL_PREFERENCES_ENABLED", value = "true" },
+    { name = "READ_LEARNER_MASTERY_KP_ENABLED", value = "true" },
+    { name = "READ_CANONICAL_QUESTIONS_ENABLED", value = "true" },
+    { name = "WRITE_CANONICAL_INTERACTIONS_ENABLED", value = "true" },
+    { name = "READ_CANONICAL_PLANNER_ENABLED", value = "true" },
+
+    # Placement / IRT
+    { name = "COLD_START_MODE", value = "spread_by_prior" },
+    { name = "IRT_MIN_AVG_RESPONSES", value = "200" },
+    { name = "IRT_MIN_CALIBRATED_RATIO", value = "0.8" },
+    { name = "IRT_MAX_MEDIAN_SE_B", value = "0.3" },
+    { name = "IRT_EXPOSURE_CAP_HOURS", value = "24" },
+    { name = "IRT_USE_2PL", value = "false" },
+
+    # AI prompt logging
+    { name = "AI_LOG_SERVER", value = "https://ai-logs.note.transformerlabs.ai/api/ingest" },
+    { name = "AI_LOG_DIR", value = ".ai-log" },
+
+    # Email
+    { name = "EMAIL_FROM", value = "eddiedepunnie@gmail.com" }
   ]
 
   # Trap B4: secrets via secrets[] block, never environment[]
   secrets = [
     { name = "DATABASE_URL", valueFrom = "${var.backend_secret_arn}:DATABASE_URL::" },
     { name = "REDIS_URL", valueFrom = "${var.backend_secret_arn}:REDIS_URL::" },
-    { name = "SECRET_KEY", valueFrom = "${var.backend_secret_arn}:SECRET_KEY::" }
+    { name = "SECRET_KEY", valueFrom = "${var.backend_secret_arn}:SECRET_KEY::" },
+    { name = "OPENAI_API_KEY", valueFrom = "${var.backend_secret_arn}:OPENAI_API_KEY::" },
+    { name = "ANTHROPIC_API_KEY", valueFrom = "${var.backend_secret_arn}:ANTHROPIC_API_KEY::" },
+    { name = "GEMINI_API_KEY", valueFrom = "${var.backend_secret_arn}:GEMINI_API_KEY::" },
+    { name = "LANGFUSE_SECRET_KEY", valueFrom = "${var.backend_secret_arn}:LANGFUSE_SECRET_KEY::" },
+    { name = "LANGFUSE_PUBLIC_KEY", valueFrom = "${var.backend_secret_arn}:LANGFUSE_PUBLIC_KEY::" },
+    { name = "GMAIL_APP_PASSWORD", valueFrom = "${var.backend_secret_arn}:GMAIL_APP_PASSWORD::" },
+    { name = "AI_LOG_API_KEY", valueFrom = "${var.backend_secret_arn}:AI_LOG_API_KEY::" },
+    { name = "ADMIN_TOKEN", valueFrom = "${var.backend_secret_arn}:ADMIN_TOKEN::" }
   ]
 
   depends_on = [module.observability]

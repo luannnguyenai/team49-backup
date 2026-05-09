@@ -1,0 +1,40 @@
+{
+  "family": "a20-backend-chat-debug",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "executionRoleArn": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role",
+  "containerDefinitions": [
+    {
+      "name": "chatdebug",
+      "image": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend:7deedc0-data",
+      "essential": true,
+      "command": [
+        "uv","run","python","-c",
+        "import asyncio, time, sys; from src.services.agent_checkpointer_factory import build_agent_graph_checkpointer\nfrom src.config import settings\nasync def m():\n  print(f'agent_graph_checkpointer_backend={settings.agent_graph_checkpointer_backend}', flush=True)\n  print(f'agent_graph_checkpointer_setup={settings.agent_graph_checkpointer_setup}', flush=True)\n  t0=time.time()\n  print('STEP 1: build_agent_graph_checkpointer()...', flush=True)\n  try:\n    async with build_agent_graph_checkpointer() as cp:\n      print(f'  checkpointer={type(cp).__name__} [{time.time()-t0:.1f}s]', flush=True)\n  except Exception as e:\n    print(f'  FAIL: {type(e).__name__}: {e}', flush=True)\n  t0=time.time()\n  print('STEP 2: import langgraph and create production_agent_router()...', flush=True)\n  try:\n    from src.services.agent_graph_service import build_production_agent_router\n    router = build_production_agent_router()\n    print(f'  router={type(router).__name__} [{time.time()-t0:.1f}s]', flush=True)\n  except Exception as e:\n    print(f'  FAIL: {type(e).__name__}: {e}', flush=True)\n    return\n  t0=time.time()\n  print('STEP 3: invoke router with sample message...', flush=True)\n  try:\n    result = await asyncio.wait_for(router.ainvoke({'message': 'Hi', 'allowed_course_ids': ['cs230'], 'current_path_course_ids': ['cs230'], 'recent_messages': [], 'pending_clarification': None}, config={'configurable': {'thread_id': 'test-thread-debug'}}), timeout=60)\n    print(f'  router result keys={list(result.keys()) if isinstance(result, dict) else type(result)} [{time.time()-t0:.1f}s]', flush=True)\n  except asyncio.TimeoutError:\n    print(f'  TIMEOUT after 60s — router.ainvoke hang', flush=True)\n  except Exception as e:\n    print(f'  FAIL: {type(e).__name__}: {e}', flush=True)\nasyncio.run(m())"
+      ],
+      "secrets": [
+        {"name":"DATABASE_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:DATABASE_URL::"},
+        {"name":"REDIS_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:REDIS_URL::"},
+        {"name":"OPENAI_API_KEY","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:OPENAI_API_KEY::"},
+        {"name":"SECRET_KEY","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:SECRET_KEY::"},
+        {"name":"LANGFUSE_PUBLIC_KEY","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:LANGFUSE_PUBLIC_KEY::"},
+        {"name":"LANGFUSE_SECRET_KEY","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:LANGFUSE_SECRET_KEY::"}
+      ],
+      "environment": [
+        {"name":"MODEL_PROVIDER","value":"openai"},
+        {"name":"DEFAULT_MODEL","value":"gpt-5.4-mini"},
+        {"name":"FAST_MODEL","value":"gpt-5.4-nano"},
+        {"name":"LANGFUSE_BASE_URL","value":"https://cloud.langfuse.com"},
+        {"name":"LOG_LEVEL","value":"DEBUG"},
+        {"name":"PYTHONUNBUFFERED","value":"1"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/a20-backend-migrate","awslogs-region": "ap-southeast-1","awslogs-stream-prefix": "chatdebug"}
+      }
+    }
+  ]
+}

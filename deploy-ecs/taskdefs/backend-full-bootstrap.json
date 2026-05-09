@@ -1,0 +1,27 @@
+{
+  "family": "a20-backend-full-bootstrap",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "executionRoleArn": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role",
+  "containerDefinitions": [
+    {
+      "name": "bootstrap",
+      "image": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend:7deedc0-data",
+      "essential": true,
+      "command": [
+        "sh","-c",
+        "set -e; mkdir -p reports; echo '=== 3.2 seed_lectures ==='; uv run python scripts/seed_lectures.py || echo 'seed_lectures FAILED'; echo '=== 3.5.2 backfill_schema_v2 ==='; uv run python -m src.scripts.schema_v2.backfill_schema_v2 --apply --report-path reports/backfill.json || echo 'backfill FAILED'; echo '=== 3.5.3 validate_schema_v2 ==='; uv run python -m src.scripts.schema_v2.validate_schema_v2 --report-path reports/validate.json || echo 'validate FAILED'; echo '=== 3.5.4 parity ==='; uv run python -m src.scripts.pipeline.check_canonical_runtime_parity || echo 'parity FAILED'; echo '=== 6 create_seed_accounts ==='; uv run python -m src.scripts.create_seed_accounts || echo 'create_seed_accounts FAILED'; echo '=== DONE ==='"
+      ],
+      "secrets": [
+        {"name":"DATABASE_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:DATABASE_URL::"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/a20-backend-migrate","awslogs-region": "ap-southeast-1","awslogs-stream-prefix": "fullboot"}
+      }
+    }
+  ]
+}
