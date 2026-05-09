@@ -13,7 +13,7 @@
       "essential": true,
       "command": [
         "uv","run","python","-c",
-        "import asyncio; from datetime import datetime, timezone; from sqlalchemy import text; from src.database import async_session\nasync def m():\n  async with async_session() as s:\n    rows = (await s.execute(text(\"SELECT id, email, role FROM users\"))).all()\n    for r in rows:\n      uid, email, role = r\n      r2 = await s.execute(text('INSERT INTO sessions (id, user_id, session_type, started_at, completed_at) VALUES (gen_random_uuid(), :uid, \\'assessment\\', NOW(), NOW()) RETURNING id'), {'uid': uid})\n      sid = r2.scalar()\n      print(f'{email} ({role}) -> session: {sid}')\n    await s.commit()\nasyncio.run(m())"
+        "import asyncio; from datetime import datetime, timezone; from sqlalchemy import text; from src.database import async_session\nasync def m():\n  async with async_session() as s:\n    rows = (await s.execute(text(\"SELECT id, email, role FROM users\"))).all()\n    for r in rows:\n      uid, email, role = r\n      r2 = await s.execute(text('INSERT INTO sessions (id, user_id, session_type, started_at, completed_at, total_questions, correct_count) VALUES (gen_random_uuid(), :uid, \\'assessment\\', NOW(), NOW(), 0, 0) RETURNING id'), {'uid': uid})\n      sid = r2.scalar()\n      print(f'{email} ({role}) -> session: {sid}')\n    await s.commit()\nasyncio.run(m())"
       ],
       "secrets": [
         {"name":"DATABASE_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:DATABASE_URL::"}
