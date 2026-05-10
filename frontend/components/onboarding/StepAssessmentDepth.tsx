@@ -9,6 +9,7 @@ interface Props {
   onBack: () => void;
   onNext: () => void;
   nextLabel?: string;
+  nextLoading?: boolean;
 }
 
 const DEPTH_OPTIONS: Array<{
@@ -37,7 +38,12 @@ const DEPTH_OPTIONS: Array<{
   },
 ];
 
-export default function StepAssessmentDepth({ onBack, onNext, nextLabel = "Continue" }: Props) {
+export default function StepAssessmentDepth({
+  onBack,
+  onNext,
+  nextLabel = "Continue",
+  nextLoading = false,
+}: Props) {
   const assessmentDepth = useOnboardingStore((s) => s.assessmentDepth);
   const setAssessmentDepth = useOnboardingStore((s) => s.setAssessmentDepth);
 
@@ -92,6 +98,7 @@ export default function StepAssessmentDepth({ onBack, onNext, nextLabel = "Conti
         <button
           type="button"
           onClick={onBack}
+          disabled={nextLoading}
           className="rounded-xl border-2 px-6 py-3 text-sm font-semibold transition-all duration-150 hover:shadow-sm active:scale-[0.99]"
           style={{
             borderColor: "var(--border)",
@@ -104,9 +111,10 @@ export default function StepAssessmentDepth({ onBack, onNext, nextLabel = "Conti
         <button
           type="button"
           onClick={onNext}
-          className="rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99]"
+          disabled={nextLoading}
+          className="rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-150 hover:bg-primary-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {nextLabel}
+          {nextLoading ? "Saving..." : nextLabel}
         </button>
       </div>
     </div>

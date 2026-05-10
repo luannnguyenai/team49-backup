@@ -98,4 +98,28 @@ describe("assessment results page", () => {
     expect(await screen.findByText("1 sections will be skipped")).toBeInTheDocument();
     expect(screen.getByText("Word2vec training setup and likelihood objective")).toBeInTheDocument();
   });
+
+  it("renders AI summary when available", async () => {
+    vi.mocked(assessmentApi.summary).mockResolvedValue({
+      available: true,
+      summary: "Review activation functions before moving on.",
+      highlights: ["1 unit needs review"],
+      next_step: "Start with the weakest unit.",
+      model_used: "gpt-5.4-mini",
+      provider: "openai",
+    });
+
+    render(<AssessmentResultsPage />);
+
+    expect(await screen.findByText("AI summary")).toBeInTheDocument();
+    expect(screen.getByText("Review activation functions before moving on.")).toBeInTheDocument();
+  });
+
+  it("shows an unavailable AI feedback state instead of silently hiding it", async () => {
+    render(<AssessmentResultsPage />);
+
+    expect(
+      await screen.findByText("AI feedback is temporarily unavailable. Your scored placement results below are still saved."),
+    ).toBeInTheDocument();
+  });
 });

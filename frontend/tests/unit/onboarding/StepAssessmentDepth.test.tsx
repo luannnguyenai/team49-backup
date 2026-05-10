@@ -36,4 +36,18 @@ describe("StepAssessmentDepth", () => {
     expect(onBackMock).toHaveBeenCalledOnce();
     expect(onNextMock).toHaveBeenCalledOnce();
   });
+
+  it("disables finish while onboarding is saving", () => {
+    render(
+      <StepAssessmentDepth
+        onBack={onBackMock}
+        onNext={onNextMock}
+        nextLabel="Finish"
+        nextLoading
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Saving..." })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
+  });
 });

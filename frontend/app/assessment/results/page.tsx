@@ -218,9 +218,7 @@ function AssessmentResultsInner() {
         assessmentApi
           .summary(sessionId)
           .then((summary) => {
-            if (summary.available && summary.summary) {
-              setAiSummary(summary);
-            }
+            setAiSummary(summary);
           })
           .catch(() => {
             setAiSummary(null);
@@ -372,6 +370,12 @@ function AssessmentResultsInner() {
                     {aiSummary.next_step}
                   </p>
                 )}
+              </div>
+            )}
+
+            {aiSummary && !aiSummary.available && !aiSummaryLoading && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-100">
+                AI feedback is temporarily unavailable. Your scored placement results below are still saved.
               </div>
             )}
 

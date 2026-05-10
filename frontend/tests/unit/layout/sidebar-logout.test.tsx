@@ -68,4 +68,10 @@ describe("Sidebar logout routing", () => {
       expect(navigationMock.router.push).toHaveBeenCalledWith("/");
     });
   });
+
+  it("does not render the public Courses root link in the protected sidebar", () => {
+    render(<Sidebar mobileOpen={false} onMobileClose={vi.fn()} />);
+
+    expect(screen.queryByRole("link", { name: "Courses" })).not.toBeInTheDocument();
+  });
 });

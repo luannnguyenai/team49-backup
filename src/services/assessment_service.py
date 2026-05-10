@@ -10,6 +10,7 @@ placement_assessment_results.
 
 from __future__ import annotations
 
+import ast
 import json
 import logging
 import uuid
@@ -499,6 +500,13 @@ async def get_assessment_results(
 
 
 def _parse_assessment_ai_summary(raw: str) -> AssessmentAISummaryResponse:
+    def unavailable() -> AssessmentAISummaryResponse:
+        return AssessmentAISummaryResponse(
+            available=False,
+            model_used=DEFAULT_MODEL,
+            provider=settings.model_provider,
+        )
+
     text = raw.strip()
     if text.startswith("```"):
         text = text.split("```")[1]
@@ -509,17 +517,12 @@ def _parse_assessment_ai_summary(raw: str) -> AssessmentAISummaryResponse:
     try:
         payload = json.loads(text)
     except json.JSONDecodeError:
-        return AssessmentAISummaryResponse(
-            available=False,
-            model_used=DEFAULT_MODEL,
-            provider=settings.model_provider,
-        )
+        try:
+            payload = ast.literal_eval(text)
+        except (ValueError, SyntaxError):
+            return unavailable()
     if not isinstance(payload, dict):
-        return AssessmentAISummaryResponse(
-            available=False,
-            model_used=DEFAULT_MODEL,
-            provider=settings.model_provider,
-        )
+        return unavailable()
     summary = payload.get("summary")
     next_step = payload.get("next_step")
     highlights_payload = payload.get("highlights", [])
@@ -530,11 +533,7 @@ def _parse_assessment_ai_summary(raw: str) -> AssessmentAISummaryResponse:
     ][:3]
 
     if not isinstance(summary, str) or not summary.strip():
-        return AssessmentAISummaryResponse(
-            available=False,
-            model_used=DEFAULT_MODEL,
-            provider=settings.model_provider,
-        )
+        return unavailable()
 
     return AssessmentAISummaryResponse(
         available=True,
