@@ -28,7 +28,7 @@ concurrency:
 jobs:
   changes:
     name: "Detect changed areas"
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: ubuntu-latest
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
@@ -63,7 +63,7 @@ jobs:
 
   repo-config:
     name: "Repo config · Validate"
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.repo_config == 'true'
 
@@ -93,7 +93,7 @@ jobs:
 
   lint-backend:
     name: "Backend · Lint (ruff)"
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.backend == 'true'
 
@@ -116,7 +116,7 @@ jobs:
 
   test-backend:
     name: "Backend · Test (pytest)"
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: ubuntu-latest
     needs: [changes, lint-backend]
     if: needs.changes.outputs.backend == 'true'
 
@@ -185,7 +185,7 @@ jobs:
 
   lint-frontend:
     name: "Frontend · Lint (ESLint)"
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
 
@@ -210,7 +210,7 @@ jobs:
 
   typecheck-frontend:
     name: "Frontend · TypeScript"
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: ubuntu-latest
     needs: [changes, lint-frontend]
     if: needs.changes.outputs.frontend == 'true'
 
@@ -240,7 +240,7 @@ jobs:
 
   ci-status:
     name: "CI · Status"
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: ubuntu-latest
     needs:
       - changes
       - repo-config
