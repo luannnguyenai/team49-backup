@@ -6,62 +6,6 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 ## Các Quyết Định Kỹ Thuật (ADR)
 
-### [ADR-6] Ưu tiên Database-First Evolution cho phase production hardening — 23/04/2026
-
-**Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và demo đã đủ chạy, nút thắt lớn nhất không còn nằm ở prompt/pipeline nữa mà nằm ở sự lệch giữa runtime schema cũ (`topic/module`) và target schema mới (`kp/unit + planner audit`). Nếu tiếp tục nối service trực tiếp lên runtime cũ thì càng về sau càng khó migrate.
-
-**Quyết định:** Khóa một hướng đi rõ ràng:
-
-1. Xem canonical JSONL là ingestion contract sạch.
-2. Xem course-first tables là business shell của sản phẩm.
-3. Thêm learner/planner stub tables làm landing zone production:
-   - `learner_mastery_kp`
-   - `goal_preferences`
-   - `waived_units`
-   - `plan_history`
-   - `rationale_log`
-   - `planner_session_state`
-4. Chưa wire logic service ngay trong lượt này; phần đó sẽ được làm có kiểm soát ở phase integration sau.
-
-**Hệ quả:** Database direction rõ ràng hơn cho production. Người làm integration phía sau không phải đoán source-of-truth nữa, và việc nâng cấp database có thể tiến hành độc lập với việc refactor service/router/frontend.
-
-### [ADR-7] Canonical DB materialization và runtime cutover dùng feature flags — 23/04/2026
-
-**Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và learner/planner tables đã có landing zone, cùng một bài toán xuất hiện ở nhiều lớp: nếu runtime tiếp tục đọc/ghi theo `topic/module/questions/mastery_scores` cũ thì production sẽ bị kẹt ở schema legacy; nếu cắt thẳng sang canonical không kiểm soát thì dễ fabricate mapping hoặc phá web hiện tại.
-
-**Quyết định:** Gom các quyết định canonical DB/runtime cutover của phase production hardening thành một chiến lược additive, sau feature flags:
-
-1. Materialize canonical content artifacts thành DB tables:
-   - `concepts_kp`
-   - `units`
-   - `unit_kp_map`
-   - `question_bank`
-   - `item_calibration`
-   - `item_phase_map`
-   - `item_kp_map`
-   - `prerequisite_edges`
-   - `pruned_edges`
-2. Importer đọc `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`, validate manifest counts và upsert idempotent bằng natural keys.
-3. Thêm bridge columns thay vì suy luận ngầm:
-   - `courses.canonical_course_id`
-   - `learning_units.canonical_unit_id`
-   - `sessions.canonical_phase`
-   - `interactions.canonical_item_id`
-4. Runtime chỉ nối các path có grain an toàn:
-   - onboarding ghi compatibility snapshot vào `goal_preferences`
-   - legacy planner ghi audit vào `plan_history`, `rationale_log`, `planner_session_state`
-   - canonical assessment đọc `question_bank` + `item_phase_map`
-   - canonical assessment submit ghi `interactions.canonical_item_id`
-   - canonical mastery update ghi `learner_mastery_kp` qua `item_kp_map`
-   - canonical planner đọc `learning_units` + `unit_kp_map` + `learner_mastery_kp`
-5. Giữ `waived_units` chưa wire cho đến khi skip flow có `learning_unit_id` thật.
-6. Tạo handoff contract ở `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`.
-7. Thêm parity checker trước khi freeze legacy tables.
-
-Tất cả read/write path mới đều nằm sau feature flags. Không drop/truncate bảng cũ trong lượt này.
-
-**Hệ quả:** Backend có đường đi production sang canonical data nhưng vẫn rollback được bằng flag. Thành viên khác cần chạy migration/import/backfill/parity trước khi bật read flags ở môi trường thật. UI không bị đụng trong lượt DB/runtime cutover này.
-
 ### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
 
 **Bối cảnh:** AI xử lý thông tin với số lượng token lớn (Transcript dài 10 phút + 1 ảnh Frame Capture). API response theo dạng tĩnh truyền thống (Chờ AI xong mới trả toàn bộ một cục JSON) tạo ra thời gian chờ quá tải, dẫn đến UX bị ngắt quãng, không mang lại cảm giác "Trò chuyện tương tác thời gian thực".
@@ -225,7 +169,63 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
 
 ---
 
-### [ADR-9] Hard Canonical Cutover: drop legacy curriculum/mastery/planner tables — 23/04/2026
+### [ADR-9] Ưu tiên Database-First Evolution cho phase production hardening — 23/04/2026
+
+**Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và demo đã đủ chạy, nút thắt lớn nhất không còn nằm ở prompt/pipeline nữa mà nằm ở sự lệch giữa runtime schema cũ (`topic/module`) và target schema mới (`kp/unit + planner audit`). Nếu tiếp tục nối service trực tiếp lên runtime cũ thì càng về sau càng khó migrate.
+
+**Quyết định:** Khóa một hướng đi rõ ràng:
+
+1. Xem canonical JSONL là ingestion contract sạch.
+2. Xem course-first tables là business shell của sản phẩm.
+3. Thêm learner/planner stub tables làm landing zone production:
+   - `learner_mastery_kp`
+   - `goal_preferences`
+   - `waived_units`
+   - `plan_history`
+   - `rationale_log`
+   - `planner_session_state`
+4. Chưa wire logic service ngay trong lượt này; phần đó sẽ được làm có kiểm soát ở phase integration sau.
+
+**Hệ quả:** Database direction rõ ràng hơn cho production. Người làm integration phía sau không phải đoán source-of-truth nữa, và việc nâng cấp database có thể tiến hành độc lập với việc refactor service/router/frontend.
+
+### [ADR-10] Canonical DB materialization và runtime cutover dùng feature flags — 23/04/2026
+
+**Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và learner/planner tables đã có landing zone, cùng một bài toán xuất hiện ở nhiều lớp: nếu runtime tiếp tục đọc/ghi theo `topic/module/questions/mastery_scores` cũ thì production sẽ bị kẹt ở schema legacy; nếu cắt thẳng sang canonical không kiểm soát thì dễ fabricate mapping hoặc phá web hiện tại.
+
+**Quyết định:** Gom các quyết định canonical DB/runtime cutover của phase production hardening thành một chiến lược additive, sau feature flags:
+
+1. Materialize canonical content artifacts thành DB tables:
+   - `concepts_kp`
+   - `units`
+   - `unit_kp_map`
+   - `question_bank`
+   - `item_calibration`
+   - `item_phase_map`
+   - `item_kp_map`
+   - `prerequisite_edges`
+   - `pruned_edges`
+2. Importer đọc `data/final_artifacts/cs224n_cs231n_v1/canonical/*.jsonl`, validate manifest counts và upsert idempotent bằng natural keys.
+3. Thêm bridge columns thay vì suy luận ngầm:
+   - `courses.canonical_course_id`
+   - `learning_units.canonical_unit_id`
+   - `sessions.canonical_phase`
+   - `interactions.canonical_item_id`
+4. Runtime chỉ nối các path có grain an toàn:
+   - onboarding ghi compatibility snapshot vào `goal_preferences`
+   - legacy planner ghi audit vào `plan_history`, `rationale_log`, `planner_session_state`
+   - canonical assessment đọc `question_bank` + `item_phase_map`
+   - canonical assessment submit ghi `interactions.canonical_item_id`
+   - canonical mastery update ghi `learner_mastery_kp` qua `item_kp_map`
+   - canonical planner đọc `learning_units` + `unit_kp_map` + `learner_mastery_kp`
+5. Giữ `waived_units` chưa wire cho đến khi skip flow có `learning_unit_id` thật.
+6. Tạo handoff contract ở `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md`.
+7. Thêm parity checker trước khi freeze legacy tables.
+
+Tất cả read/write path mới đều nằm sau feature flags. Không drop/truncate bảng cũ trong lượt này.
+
+**Hệ quả:** Backend có đường đi production sang canonical data nhưng vẫn rollback được bằng flag. Thành viên khác cần chạy migration/import/backfill/parity trước khi bật read flags ở môi trường thật. UI không bị đụng trong lượt DB/runtime cutover này.
+
+### [ADR-11] Hard Canonical Cutover: drop legacy curriculum/mastery/planner tables — 23/04/2026
 
 **Bối cảnh:** Sau khi canonical importer, product-shell backfill, learner/planner sidecar tables và parity checker đã ổn, phần còn lại của rủi ro production nằm ở chỗ runtime vẫn có thể vô tình đọc/ghi các bảng legacy như `modules`, `topics`, `questions`, `mastery_scores`, `learning_paths`. Giữ chúng quá lâu sẽ khiến team tiếp tục build nhầm lên schema cũ.
 
@@ -405,3 +405,32 @@ Case runtime đã handle:
   - `advanced`: 7
 - Không state-lock. Nếu demo làm thay đổi state, chạy `.venv/bin/python -m src.scripts.pipeline.reset_demo_accounts` để reset riêng 9 demo accounts. Cohort 30 có command riêng để tránh reset nhầm khi đang demo.
 - Synthetic vẫn không được tính là real calibration evidence; calibration readiness tiếp tục tách real vs synthetic response counts.
+
+### [ADR-12] Chuẩn hóa fine-tuned local AI stack cho guardrail router và tutor answer generator — 11/05/2026
+
+**Bối cảnh:** Nhánh `rin/fine-tune` hoàn thiện một vòng fine-tune thực dụng cho hệ tutoring multilingual: model nhỏ làm lesson-scope guardrail/router, model lớn hơn làm answer/refusal generator. Mục tiêu không phải thay toàn bộ runtime ngay lập tức, mà là tạo một bộ artifact có thể tái lập, đo được, và đủ sạch để chuyển sang production integration sau.
+
+**Quyết định:** Khóa hướng local fine-tuned stack như sau:
+
+1. Dùng **Qwen3.5-0.8B LoRA** làm guardrail router label-only.
+   - Output chỉ gồm JSON ngắn: `safety_label`, `topic_label`, `action`, `attack_type`, `selected_kp_ids`.
+   - Route chính gộp safety thành `SAFE | HARMFUL` để tối ưu quyết định production.
+   - Router ưu tiên safety trước topic, và mọi `HARMFUL` đều đi tới `SAFETY_REFUSE`.
+2. Dùng **Qwen3.5-4B LoRA** làm answer/refusal generator cho lớp trả lời bài học.
+3. Version các artifact cần tái sử dụng bằng **DVC pointer** thay vì commit binary vào Git:
+   - router adapter final,
+   - answer generator adapter final,
+   - `guardrail_router/v2` train/validation/test splits.
+4. Giữ repo Git tập trung vào code, notebook, report, manifest và DVC pointer; raw model/data/checkpoint nằm ngoài Git.
+5. Thêm benchmark local để kiểm tra inference thực tế trên máy developer trước khi thiết kế serving.
+
+**Kết quả nổi bật:**
+
+- Guardrail router v2 đạt `valid_json_rate = 1.0` trên validation/test.
+- Test route chính đạt khoảng `route_exact_match = 0.9697`.
+- `harmful_false_allow_rate = 0.0`, tức không có harmful prompt nào bị route thành lesson answer trong eval hiện tại.
+- `ambiguous_recall = 0.9905`, cải thiện rõ so với v1 vì test đã có nhiều case ambiguous hơn.
+- `hard_offtopic_recall = 0.9408`, cho thấy router đã học được boundary unit/KP thay vì chỉ chặn off-topic dễ.
+- Benchmark local trên RTX 3050 Laptop GPU chạy được với peak VRAM khoảng `1.5GB`, output schema hợp lệ 8/8 mẫu smoke test, latency trung bình khoảng `3.4s/query`.
+
+**Hệ quả:** Nhánh này tạo được baseline local AI stack có thể kiểm chứng end-to-end: data selection -> dataset builder -> fine-tune notebook -> eval report -> adapter artifact -> local benchmark. Phần production integration phía sau có thể tập trung vào wrapper/serving, sanitizer cho non-ALLOW route, và wiring router trước Qwen3.5-4B thay vì phải tranh luận lại từ đầu về data/model choice.
