@@ -59,5 +59,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD wget -qO- "http://localhost:${PORT:-3000}/api/health" 2>/dev/null || exit 1
 
-# Next.js standalone server.js reads process.env.PORT automatically.
-CMD ["node", "server.js"]
+# App Runner injects its own HOSTNAME, so force the Next standalone server
+# to bind all interfaces at process launch time instead of trusting image ENV.
+CMD ["sh", "-c", "HOSTNAME=0.0.0.0 node server.js"]

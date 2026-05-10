@@ -22,7 +22,9 @@ from src.models.base import Base
 config = context.config
 
 # Override URL from settings (respects .env)
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# ConfigParser treats `%` as interpolation syntax, so percent-encoded
+# credentials in production URLs must be escaped before assigning.
+config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))
 
 # Set up logging from alembic.ini
 if config.config_file_name is not None:

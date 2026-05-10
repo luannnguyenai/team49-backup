@@ -26,6 +26,7 @@ migrations, bootstrap, ECR repositories, and custom domains remain operator step
 - `AWS_CONFIG_GUIDE.md`: hướng dẫn cấu hình full AWS từng dịch vụ.
 - `AWS_CICD_GUIDE.md`: hướng dẫn GitHub Actions + AWS OIDC.
 - `MANUAL_DEPLOY_STEPS.md`: checklist thao tác tay full AWS.
+- `HOW_TO_FIX.md`: postmortem from the 2026-05-08/09 App Runner + Alembic deployment session.
 - `PLATFORM_ANALYSIS.md`: phân tích các lựa chọn triển khai trong AWS.
 - `terraform/`: source of truth for AWS foundation infrastructure and Terraform workflow inputs.
 

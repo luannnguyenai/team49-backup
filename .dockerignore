@@ -35,16 +35,33 @@ logs/
 *.log
 .ai-log/
 
-# Media / large data files
-data/**/*.mp4
-data/*.pdf
-data/*.zip
+# Media / large data files — block heavy binaries, keep text/json/jsonl needed for seed
+data/courses/**/*.mp4
+data/courses/**/*.pdf
+data/courses/**/*.zip
+data/courses/**/*.mp3
+data/courses/**/*.wav
+data/courses/**/*.png
+data/courses/**/*.jpg
+data/courses/**/*.jpeg
+models/
+mlruns/
+outputs/
+notebooks/
+checkpoints/
+artifacts/
 *.tar.gz
+*.parquet
+*.h5
+*.pkl
+*.npy
+*.npz
 
 # Git & tooling
 .git/
 .github/
 .gitignore
+.dvc/
 .vscode/
 .idea/
 .DS_Store
@@ -57,6 +74,24 @@ architecture_*.png
 # Frontend (not needed in backend image)
 frontend/
 node_modules/
+
+# Deploy plans / IaC (not needed in backend image)
+deploy/
+deploy-ecs/
+terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform/
+
+# Tests not needed at runtime (scripts/ is kept — used for bootstrap task)
+tests/
+test/
+e2e/
+
+# Editor / OS noise
+*.swp
+Thumbs.db
 
 # Test artefacts
 build.log

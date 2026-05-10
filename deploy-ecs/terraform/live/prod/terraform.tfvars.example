@@ -1,0 +1,31 @@
+project_name              = "a20"
+environment               = "prod"
+aws_region                = "ap-southeast-1"
+domain_name               = "example.com"
+enable_custom_domains     = false
+enable_nat_gateway        = true
+cluster_name              = "a20-prod-cluster"
+backend_service_name      = "a20-backend"
+frontend_service_name     = "a20-frontend"
+backend_task_cpu          = 1024
+backend_task_memory       = 2048
+frontend_task_cpu         = 512
+frontend_task_memory      = 1024
+backend_container_port    = 8000
+frontend_container_port   = 3000
+backend_ecr_repo_name     = "a20-backend"
+frontend_ecr_repo_name    = "a20-frontend"
+asset_bucket_name         = "a20-course-assets-prod"
+asset_prefix              = "courses"
+rds_identifier            = "a20-postgres-prod"
+cache_identifier          = "a20-redis-prod"
+budget_alert_email        = "nguyendonduc1503@gmail.com"
+github_repository         = "edward1503/A20-App-049"
+
+# Stage 1 (default): foundation only — no ECS services.
+# After Stage 1 apply succeeds, push images to ECR, create the backend secret
+# in Secrets Manager, then flip enable_services to true and re-apply.
+enable_services    = false
+backend_image      = ""
+frontend_image     = ""
+backend_secret_arn = ""
