@@ -1,0 +1,262 @@
+name: Deploy ECS Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      deploy_backend:
+        description: Deploy backend service
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      deploy_frontend:
+        description: Deploy frontend service
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      run_migrations:
+        description: Run backend migration one-off task
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      run_bootstrap:
+        description: Run backend bootstrap one-off task
+        required: true
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      smoke_cloudfront:
+        description: Smoke test CloudFront known asset
+        required: true
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      image_tag:
+        description: Optional existing image tag for rollback/redeploy
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Deploy ECS
+    runs-on: ubuntu-latest
+    environment: production
+    needs: ci
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+      ECR_BACKEND_REPOSITORY: ${{ vars.ECR_BACKEND_REPOSITORY }}
+      ECR_FRONTEND_REPOSITORY: ${{ vars.ECR_FRONTEND_REPOSITORY }}
+      ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
+      ECS_BACKEND_SERVICE_NAME: ${{ vars.ECS_BACKEND_SERVICE_NAME }}
+      ECS_FRONTEND_SERVICE_NAME: ${{ vars.ECS_FRONTEND_SERVICE_NAME }}
+      BACKEND_TASK_FAMILY: ${{ vars.BACKEND_TASK_FAMILY }}
+      FRONTEND_TASK_FAMILY: ${{ vars.FRONTEND_TASK_FAMILY }}
+      MIGRATE_TASK_FAMILY: ${{ vars.MIGRATE_TASK_FAMILY }}
+      PRODUCTION_BACKEND_URL: ${{ vars.PRODUCTION_BACKEND_URL }}
+      PRODUCTION_FRONTEND_URL: ${{ vars.PRODUCTION_FRONTEND_URL }}
+      SMOKE_DB_ROUTE: ${{ vars.SMOKE_DB_ROUTE }}
+      CLOUDFRONT_DOMAIN: ${{ vars.CLOUDFRONT_DOMAIN }}
+      BACKEND_SECRET_ARN: ${{ secrets.BACKEND_SECRET_ARN }}
+      TASK_EXECUTION_ROLE_ARN: ${{ secrets.TASK_EXECUTION_ROLE_ARN }}
+      BACKEND_TASK_ROLE_ARN: ${{ secrets.BACKEND_TASK_ROLE_ARN }}
+      FRONTEND_TASK_ROLE_ARN: ${{ secrets.FRONTEND_TASK_ROLE_ARN }}
+      PRIVATE_SUBNET_IDS: ${{ secrets.PRIVATE_SUBNET_IDS }}
+      BACKEND_SECURITY_GROUP_ID: ${{ secrets.BACKEND_SECURITY_GROUP_ID }}
+      BACKEND_TARGET_GROUP_ARN: ${{ secrets.BACKEND_TARGET_GROUP_ARN }}
+      FRONTEND_TARGET_GROUP_ARN: ${{ secrets.FRONTEND_TARGET_GROUP_ARN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Resolve image tag
+        id: tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            deploy_backend="${{ inputs.deploy_backend }}"
+            deploy_frontend="${{ inputs.deploy_frontend }}"
+            run_migrations="${{ inputs.run_migrations }}"
+            run_bootstrap="${{ inputs.run_bootstrap }}"
+            smoke_cloudfront="${{ inputs.smoke_cloudfront }}"
+            requested_tag="${{ inputs.image_tag }}"
+          else
+            deploy_backend="true"
+            deploy_frontend="true"
+            run_migrations="true"
+            run_bootstrap="false"
+            smoke_cloudfront="false"
+            requested_tag=""
+          fi
+
+          if [ -n "$requested_tag" ]; then
+            tag="$requested_tag"
+            use_existing_image="true"
+          else
+            tag="${GITHUB_SHA}"
+            use_existing_image="false"
+          fi
+
+          echo "image_tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "deploy_backend=${deploy_backend}" >> "$GITHUB_OUTPUT"
+          echo "deploy_frontend=${deploy_frontend}" >> "$GITHUB_OUTPUT"
+          echo "run_migrations=${run_migrations}" >> "$GITHUB_OUTPUT"
+          echo "run_bootstrap=${run_bootstrap}" >> "$GITHUB_OUTPUT"
+          echo "smoke_cloudfront=${smoke_cloudfront}" >> "$GITHUB_OUTPUT"
+          echo "use_existing_image=${use_existing_image}" >> "$GITHUB_OUTPUT"
+          echo "BACKEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_BACKEND_REPOSITORY}:${tag}" >> "$GITHUB_ENV"
+          echo "FRONTEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_FRONTEND_REPOSITORY}:${tag}" >> "$GITHUB_ENV"
+
+      - name: Build and push backend image
+        if: ${{ steps.tag.outputs.deploy_backend == 'true' && steps.tag.outputs.use_existing_image != 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build -t "$BACKEND_IMAGE" .
+          docker push "$BACKEND_IMAGE"
+
+      - name: Build and push frontend image
+        if: ${{ steps.tag.outputs.deploy_frontend == 'true' && steps.tag.outputs.use_existing_image != 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build -f frontend/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL="$PRODUCTION_BACKEND_URL" \
+            --build-arg API_INTERNAL_URL="$PRODUCTION_BACKEND_URL" \
+            -t "$FRONTEND_IMAGE" frontend
+          docker push "$FRONTEND_IMAGE"
+
+      - name: Deploy backend service
+        if: ${{ steps.tag.outputs.deploy_backend == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$BACKEND_IMAGE" \
+          LOG_GROUP="/ecs/${ECS_BACKEND_SERVICE_NAME}" \
+          bash cicd/scripts/render-taskdef.sh \
+            cicd/taskdefs/backend-service.json.tpl \
+            /tmp/backend-service.json
+
+          backend_task_definition_arn="$(aws ecs register-task-definition \
+            --cli-input-json file:///tmp/backend-service.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --service "$ECS_BACKEND_SERVICE_NAME" \
+            --task-definition "$backend_task_definition_arn" \
+            --force-new-deployment
+
+          bash cicd/scripts/wait-ecs-service.sh \
+            "$ECS_CLUSTER_NAME" \
+            "$ECS_BACKEND_SERVICE_NAME" \
+            "$BACKEND_TARGET_GROUP_ARN"
+
+          bash cicd/scripts/smoke-ecs.sh backend
+          echo "BACKEND_TASK_DEFINITION_ARN=$backend_task_definition_arn" >> "$GITHUB_ENV"
+
+      - name: Run migrations
+        if: ${{ steps.tag.outputs.run_migrations == 'true' && steps.tag.outputs.deploy_backend == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$BACKEND_IMAGE" \
+          LOG_GROUP="/ecs/${MIGRATE_TASK_FAMILY}" \
+          bash cicd/scripts/render-taskdef.sh \
+            cicd/taskdefs/backend-migrate.json.tpl \
+            /tmp/backend-migrate.json
+
+          migrate_task_definition_arn="$(aws ecs register-task-definition \
+            --cli-input-json file:///tmp/backend-migrate.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+
+          bash cicd/scripts/run-ecs-task.sh "$migrate_task_definition_arn"
+          bash cicd/scripts/smoke-ecs.sh db
+          echo "MIGRATE_TASK_DEFINITION_ARN=$migrate_task_definition_arn" >> "$GITHUB_ENV"
+
+      - name: Run bootstrap
+        if: ${{ steps.tag.outputs.run_bootstrap == 'true' && steps.tag.outputs.deploy_backend == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$BACKEND_IMAGE" \
+          LOG_GROUP="/ecs/${MIGRATE_TASK_FAMILY}" \
+          bash cicd/scripts/render-taskdef.sh \
+            cicd/taskdefs/backend-bootstrap.json.tpl \
+            /tmp/backend-bootstrap.json
+
+          bootstrap_task_definition_arn="$(aws ecs register-task-definition \
+            --cli-input-json file:///tmp/backend-bootstrap.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+
+          bash cicd/scripts/run-ecs-task.sh "$bootstrap_task_definition_arn"
+          bash cicd/scripts/smoke-ecs.sh db
+          echo "BOOTSTRAP_TASK_DEFINITION_ARN=$bootstrap_task_definition_arn" >> "$GITHUB_ENV"
+
+      - name: Deploy frontend service
+        if: ${{ steps.tag.outputs.deploy_frontend == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$FRONTEND_IMAGE" \
+          LOG_GROUP="/ecs/${ECS_FRONTEND_SERVICE_NAME}" \
+          bash cicd/scripts/render-taskdef.sh \
+            cicd/taskdefs/frontend-service.json.tpl \
+            /tmp/frontend-service.json
+
+          frontend_task_definition_arn="$(aws ecs register-task-definition \
+            --cli-input-json file:///tmp/frontend-service.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --service "$ECS_FRONTEND_SERVICE_NAME" \
+            --task-definition "$frontend_task_definition_arn" \
+            --force-new-deployment
+
+          bash cicd/scripts/wait-ecs-service.sh \
+            "$ECS_CLUSTER_NAME" \
+            "$ECS_FRONTEND_SERVICE_NAME" \
+            "$FRONTEND_TARGET_GROUP_ARN"
+
+          bash cicd/scripts/smoke-ecs.sh frontend
+          echo "FRONTEND_TASK_DEFINITION_ARN=$frontend_task_definition_arn" >> "$GITHUB_ENV"
+
+      - name: Optional CloudFront smoke
+        if: ${{ steps.tag.outputs.smoke_cloudfront == 'true' }}
+        shell: bash
+        run: bash cicd/scripts/smoke-ecs.sh cloudfront
+
+      - name: Write deployment summary
+        if: always()
+        shell: bash
+        run: bash cicd/scripts/write-deploy-summary.sh
