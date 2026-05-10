@@ -30,6 +30,15 @@ app.db
 logs/
 reports/schema_v2_*_report.json
 
+# Local model and fine-tune artifacts
+models/**
+!models/**/
+!models/**/*.dvc
+!models/**/.gitignore
+*.safetensors
+*.pt
+*.pth
+
 # Frontend
 node_modules/
 .next/
