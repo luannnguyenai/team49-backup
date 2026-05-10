@@ -16,3 +16,8 @@ resource "aws_cloudwatch_log_group" "migrate" {
   name              = "/ecs/${var.backend_service_name}-migrate"
   retention_in_days = var.log_retention_days
 }
+
+resource "aws_cloudwatch_log_group" "bootstrap" {
+  name              = "/ecs/${var.backend_service_name}-bootstrap"
+  retention_in_days = var.log_retention_days
+}

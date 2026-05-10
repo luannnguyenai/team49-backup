@@ -56,7 +56,8 @@ jobs:
               - "frontend/**"
             repo_config:
               - ".github/workflows/**"
-              - "deploy/**"
+              - "cicd/**"
+              - "deploy-ecs/**"
               - ".gitignore"
               - "AGENTS.md"
 

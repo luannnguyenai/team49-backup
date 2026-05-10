@@ -1,5 +1,5 @@
 {
-  "family": "a20-backend-bootstrap",
+  "family": "__BOOTSTRAP_TASK_FAMILY__",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "2048",

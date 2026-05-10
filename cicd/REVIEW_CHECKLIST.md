@@ -39,7 +39,9 @@ Use this before promoting files from `cicd/workflows/` into `.github/workflows/`
 
 ## Promotion
 
-- [ ] Claude review approves `cicd/ECS_CICD_PLAN.md`.
-- [ ] GitHub production environment variables and secrets are created.
-- [ ] Workflow drafts are copied into `.github/workflows/`.
-- [ ] CI path filters include `deploy-ecs/**` and `cicd/**`.
+- [x] Claude review approves `cicd/ECS_CICD_PLAN.md` (REVIEW_FINDINGS.md, 2026-05-10).
+- [ ] GitHub production environment variables and secrets are created (incl. new: `BOOTSTRAP_TASK_FAMILY`, `CLOUDFRONT_SMOKE_URL`).
+- [x] Workflow drafts are copied into `.github/workflows/` (2026-05-10).
+- [x] CI path filters include `deploy-ecs/**` and `cicd/**` (2026-05-10).
+- [ ] `terraform apply` to create `aws_cloudwatch_log_group.bootstrap` (`/ecs/a20-backend-bootstrap`).
+- [ ] Dry dispatch test passes (all deploy flags = false).

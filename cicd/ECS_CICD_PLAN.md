@@ -49,10 +49,12 @@ ECS_FRONTEND_SERVICE_NAME=a20-frontend
 BACKEND_TASK_FAMILY=a20-backend
 FRONTEND_TASK_FAMILY=a20-frontend
 MIGRATE_TASK_FAMILY=a20-backend-migrate
+BOOTSTRAP_TASK_FAMILY=a20-backend-bootstrap
 PRODUCTION_BACKEND_URL=<ALB-or-api-url>
 PRODUCTION_FRONTEND_URL=<ALB-or-app-url>
 SMOKE_DB_ROUTE=/api/course-sections
 CLOUDFRONT_DOMAIN=<cloudfront-domain-without-scheme>
+CLOUDFRONT_SMOKE_URL=<full-https-url-to-known-asset>
 ```
 
 ## Required GitHub Production Secrets

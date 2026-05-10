@@ -9,3 +9,7 @@ output "frontend_log_group_name" {
 output "migrate_log_group_name" {
   value = aws_cloudwatch_log_group.migrate.name
 }
+
+output "bootstrap_log_group_name" {
+  value = aws_cloudwatch_log_group.bootstrap.name
+}
