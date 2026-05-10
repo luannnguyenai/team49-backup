@@ -106,6 +106,30 @@ SLIDES_DIR = CS231N_DIR / "slides"
 _LECTURE_NUMBER_RE = re.compile(r"(?:lecture|Lecture)[_ -]?0*(\d+)")
 _LECTURE_AVAILABILITY_CACHE: dict[Path, tuple[int | None, set[int]]] = {}
 
+# Asset manifest baked at build time from local data/courses listing.
+# Used in s3 mode where the container has no mp4/pdf binary files (excluded by
+# .dockerignore). The manifest maps {kind: {course_slug: {lecture_num: filename}}}.
+_ASSET_MANIFEST_PATH = Path("data/asset_manifest.json")
+
+
+@lru_cache(maxsize=1)
+def _load_asset_manifest() -> dict:
+    if not _ASSET_MANIFEST_PATH.exists():
+        return {"videos": {}, "slides": {}, "transcripts": {}}
+    with _ASSET_MANIFEST_PATH.open(encoding="utf-8") as h:
+        return json.load(h)
+
+
+def _manifest_lookup(kind: str, course_slug: str, lecture_num: int) -> str | None:
+    return _load_asset_manifest().get(kind, {}).get(course_slug, {}).get(str(lecture_num))
+
+
+def _manifest_available_lectures(kind: str, course_slug: str) -> set[int]:
+    return {
+        int(k)
+        for k in _load_asset_manifest().get(kind, {}).get(course_slug, {})
+    }
+
 
 def _read_json(path: Path) -> Any:
     with path.open(encoding="utf-8") as handle:
@@ -160,6 +184,8 @@ def _available_slide_lectures() -> set[int]:
 
 
 def _available_transcript_lectures_for(course_slug: str) -> set[int]:
+    if settings.asset_storage_provider == "s3":
+        return _manifest_available_lectures("transcripts", course_slug)
     course_dir = _course_dir_for_slug(course_slug)
     if course_dir is None:
         return set()
@@ -167,6 +193,8 @@ def _available_transcript_lectures_for(course_slug: str) -> set[int]:
 
 
 def _available_slide_lectures_for(course_slug: str) -> set[int]:
+    if settings.asset_storage_provider == "s3":
+        return _manifest_available_lectures("slides", course_slug)
     course_dir = _course_dir_for_slug(course_slug)
     if course_dir is None:
         return set()
@@ -371,8 +399,10 @@ async def _list_course_units_from_db(course_slug: str) -> list[dict[str, Any]]:
                 if section_id in seen_section_ids:
                     continue
                 seen_section_ids.add(section_id)
-                if _find_course_video_filename(course_slug, section.sort_order) is None:
-                    continue
+                # Note: skip filesystem video filename check — production reads
+                # video URL from canonical content_ref (YouTube) or S3 storage key,
+                # not from local data/courses/<C>/videos/. Dockerignore strips mp4
+                # so this check would always filter out all units in container.
                 lecture_units.append(
                     {
                         "id": str(unit.id),
@@ -436,6 +466,9 @@ def _course_dir_for_slug(course_slug: str) -> Path | None:
 def _find_course_video_filename(course_slug: str, lecture_num: int | None) -> str | None:
     if lecture_num is None:
         return None
+    if settings.asset_storage_provider == "s3":
+        # Container has no mp4 (stripped by .dockerignore). Use baked manifest.
+        return _manifest_lookup("videos", course_slug, lecture_num)
     course_dir = _course_dir_for_slug(course_slug)
     if course_dir is None:
         return None
