@@ -303,3 +303,71 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 - Không khóa state runtime. Demo account được phép thao tác; reset baseline bằng cách chạy lại script import.
 - Cohort có phân bố trình độ rõ (`beginner/developing/proficient/advanced`) để planner/mastery/history không nhìn như một nhóm user đồng nhất.
 - Sau review, source-of-truth được đổi từ procedural generation sang `scenarios.json` viết tay. Đây là điểm quan trọng: năng lực user phải review được bằng mắt, không ẩn trong Python helper.
+
+---
+
+## Tuần 8 — 11/05/2026
+
+**Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
+
+### Đã làm
+- Hoàn thiện nhánh `rin/fine-tune` cho hướng **local fine-tuned AI tutoring stack**:
+  - **Qwen3.5-0.8B LoRA** làm lesson-scope guardrail router.
+  - **Qwen3.5-4B LoRA** làm answer/refusal generator.
+  - Router chỉ trả label JSON ngắn, không sinh giải thích dài, phù hợp để đưa vào production pipeline.
+- Xây dựng và review bộ dữ liệu router v2 từ 5 nguồn chính:
+  - EduVidQA / question bank cho `ON_TOPIC`.
+  - CantTalkAboutThis + CLINC150/OOS + cross-pair cho `OFF_TOPIC`.
+  - WildGuardMix, JailBreakV-28K, MultiJail cho `HARMFUL` và prompt/router injection.
+  - Ambiguous templates và open-QA review labels cho các câu thiếu ngữ cảnh.
+- Chuyển route safety chính sang schema gọn hơn:
+  - `SAFE`
+  - `HARMFUL`
+  - `ON_TOPIC / OFF_TOPIC / AMBIGUOUS / N_A`
+  - `ALLOW_LESSON_ANSWER / SOFT_REFUSE_REDIRECT / ASK_CLARIFY / SAFETY_REFUSE`
+- Thêm data hardening quan trọng cho router:
+  - schema override ép model trả `SAFE`.
+  - policy override kiểu ignore previous/system/developer.
+  - role override.
+  - scope override.
+  - KP injection ép `selected_kp_ids` giả.
+  - hard off-topic với invariant `query_unit_id != context_unit_id` và primary KP không nằm trong candidate KPs.
+- Track artifact bằng **DVC** thay vì đưa binary vào Git:
+  - router v2 train/validation/test split.
+  - Qwen3.5-0.8B router adapter.
+  - Qwen3.5-4B answer generator adapter.
+- Thêm notebook và script phục vụ reproduce:
+  - dataset builders v1/v2.
+  - source review / source validation scripts.
+  - EduVidQA preparation.
+  - local router benchmark script.
+  - Colab notebooks cho fine-tune/eval Qwen3.5 router và answer model.
+
+### Kết quả nổi bật
+- Router v2 đạt `valid_json_rate = 1.0` trên validation/test.
+- Test route chính đạt `route_exact_match = 0.9697`.
+- `harmful_false_allow_rate = 0.0`, tức eval hiện tại không ghi nhận harmful prompt nào bị route thành lesson answer.
+- `ambiguous_recall = 0.9905`, tốt hơn v1 vì test đã có nhiều case ambiguous thật hơn.
+- `hard_offtopic_recall = 0.9408`, cho thấy router đã học boundary unit/KP chứ không chỉ chặn off-topic dễ.
+- Local smoke benchmark trên RTX 3050 Laptop GPU chạy được:
+  - peak VRAM khoảng `1.5GB`.
+  - output schema hợp lệ `8/8` prompt.
+  - các case router injection và KP injection được chặn đúng.
+  - latency trung bình khoảng `3.4s/query` khi chạy bằng script local.
+
+### AI tool đã dùng
+| Tool | Dùng để làm gì | Kết quả |
+|---|---|---|
+| Codex | Review dataset, viết dataset builders/tests, tạo DVC pointers, chuẩn hóa commit theo từng file, và benchmark local adapter | Tạo được baseline fine-tuned router + answer generator có thể tái lập bằng code, DVC artifact và notebook |
+| Gemini/OpenAI judge notebooks | Chấm chất lượng answer model và so sánh với baseline | Có report eval rõ ràng để chọn adapter 4B final thay vì chỉ nhìn loss |
+
+### Học được
+- Với guardrail router, chất lượng data quan trọng hơn prompt. Khi data được sửa đúng boundary, model nhỏ vẫn học route/action rất chắc.
+- Gộp `UNSAFE` và `JAILBREAK` thành `HARMFUL` cho route chính giúp production decision ổn định hơn, còn `attack_type` nên giữ làm telemetry phụ.
+- Fine-tune artifact không nên commit thẳng vào Git. DVC phù hợp hơn vì giữ được reproducibility mà repo vẫn nhẹ.
+- Benchmark local phải dùng đúng prompt/schema lúc train. Khi prompt inference lệch, model vẫn sinh JSON nhưng enum có thể sai hoàn toàn.
+
+### Nếu làm lại, sẽ làm khác
+- Thiết kế DVC tracking ngay từ đầu trước khi sinh nhiều output zip/checkpoint.
+- Đặt `WORKLOG`, `JOURNAL`, build report và model manifest thành checklist cố định sau mỗi vòng fine-tune.
+- Giữ benchmark nhỏ trong notebook lẫn script local để phát hiện sớm mismatch giữa training prompt và serving prompt.
