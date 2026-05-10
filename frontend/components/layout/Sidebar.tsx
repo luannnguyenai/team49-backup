@@ -25,6 +25,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const navItems = NAV_ITEMS.filter((navItem) => navItem.href !== "/");
 
   const handleLogout = async () => {
     await logout();
@@ -85,7 +86,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
 
       {/* Nav items */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
-        {NAV_ITEMS.map((navItem) => {
+        {navItems.map((navItem) => {
           const { href, label, icon: Icon } = navItem;
           const active = (navItem as any).exact
             ? pathname === href

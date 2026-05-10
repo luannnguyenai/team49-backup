@@ -1,3 +1,4 @@
+import sys
 from types import SimpleNamespace
 
 import pytest
@@ -65,3 +66,43 @@ async def test_postgres_setup_runs_once_per_process(monkeypatch):
     await _setup_postgres_checkpointer_once(Checkpointer())
 
     assert calls == ["setup"]
+
+
+@pytest.mark.asyncio
+async def test_postgres_backend_skips_setup_when_disabled(monkeypatch):
+    class FakeSaver:
+        def __init__(self):
+            self.setup_called = False
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def setup(self):
+            self.setup_called = True
+
+    saver = FakeSaver()
+
+    class FakeAsyncPostgresSaver:
+        @staticmethod
+        def from_conn_string(_uri):
+            return saver
+
+    monkeypatch.setitem(
+        sys.modules,
+        "langgraph.checkpoint.postgres.aio",
+        SimpleNamespace(AsyncPostgresSaver=FakeAsyncPostgresSaver),
+    )
+
+    settings = SimpleNamespace(
+        agent_graph_checkpointer_backend="postgres",
+        agent_graph_checkpointer_setup=False,
+        database_url="postgresql+asyncpg://user:pass@localhost/app",
+    )
+
+    async with build_agent_graph_checkpointer(app_settings=settings) as checkpointer:
+        assert checkpointer is saver
+
+    assert saver.setup_called is False

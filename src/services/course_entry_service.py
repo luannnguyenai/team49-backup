@@ -84,7 +84,8 @@ async def get_start_learning_decision(
     # This uses a lightweight query helper that avoids importing the full
     # assessment service at module level.
     has_completed_skill_test = await _check_skill_test_completed(user.id)
-    if not has_completed_skill_test:
+    placement_skipped = await _check_placement_skipped(user.id)
+    if not has_completed_skill_test and not placement_skipped:
         return StartLearningDecisionResponse(
             decision="redirect",
             target=f"/assessment?next=/courses/{course_slug}/start",
@@ -133,7 +134,8 @@ async def assert_learning_access(
         raise ForbiddenError("Please complete onboarding before accessing this learning content.")
 
     has_completed_skill_test = await _check_skill_test_completed(user.id)
-    if not has_completed_skill_test:
+    placement_skipped = await _check_placement_skipped(user.id)
+    if not has_completed_skill_test and not placement_skipped:
         raise ForbiddenError("Please complete the skill assessment before accessing this learning content.")
 
 
@@ -163,6 +165,23 @@ async def _check_skill_test_completed(user_id: uuid.UUID) -> bool:
             return result.scalar_one_or_none() is not None
     except Exception:
         # During testing or bootstrap without DB, fall back to False
+        return False
+
+
+async def _check_placement_skipped(user_id: uuid.UUID) -> bool:
+    """Check whether onboarding explicitly skipped placement for this user."""
+    try:
+        from src.database import async_session_factory
+        from src.models.learning import GoalPreference
+
+        async with async_session_factory() as db:
+            result = await db.execute(
+                select(GoalPreference.placement_status)
+                .where(GoalPreference.user_id == user_id)
+                .limit(1)
+            )
+            return result.scalar_one_or_none() == "skipped"
+    except Exception:
         return False
 
 

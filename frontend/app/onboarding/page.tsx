@@ -437,6 +437,7 @@ function OnboardingPageInner() {
                       handleSubmit(submitOnboarding)();
                     }}
                     nextLabel="Finish"
+                    nextLoading={isLoading}
                   />
                 )}
               </div>
