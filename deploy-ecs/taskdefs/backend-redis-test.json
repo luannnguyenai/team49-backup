@@ -1,0 +1,27 @@
+{
+  "family": "a20-backend-redis-test",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role",
+  "containerDefinitions": [
+    {
+      "name": "redistest",
+      "image": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend:7deedc0-data",
+      "essential": true,
+      "command": [
+        "uv","run","python","-c",
+        "import os, asyncio; import redis.asyncio as redis\nasync def m():\n  url = os.getenv('REDIS_URL')\n  print(f'REDIS_URL={url[:50]}...')\n  r = redis.from_url(url)\n  await r.set('test', 'ok'); v = await r.get('test')\n  print(f'redis ping ok: {v}')\n  await r.aclose()\nasyncio.run(m())"
+      ],
+      "secrets": [
+        {"name":"REDIS_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:REDIS_URL::"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/a20-backend-migrate","awslogs-region": "ap-southeast-1","awslogs-stream-prefix": "redistest"}
+      }
+    }
+  ]
+}

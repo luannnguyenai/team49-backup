@@ -1,0 +1,24 @@
+{
+  "family": "a20-backend-net-check",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role",
+  "containerDefinitions": [
+    {
+      "name": "netcheck",
+      "image": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend:7deedc0-data",
+      "essential": true,
+      "command": [
+        "python","-c",
+        "import socket, time\ntargets = [('api.openai.com',443),('cloud.langfuse.com',443),('s3.ap-southeast-1.amazonaws.com',443),('a20-postgres-prod.cbea2u80yox7.ap-southeast-1.rds.amazonaws.com',5432),('a20-redis-prod.frlokk.0001.apse1.cache.amazonaws.com',6379),('d2syr4kpiu8d9n.cloudfront.net',443),('ai-logs.note.transformerlabs.ai',443),('us.gcr.io',443)]\nfor h,p in targets:\n  t0 = time.time()\n  try:\n    socket.create_connection((h,p), timeout=5).close()\n    print(f'OK   {h}:{p} [{(time.time()-t0)*1000:.0f}ms]')\n  except Exception as e:\n    print(f'FAIL {h}:{p} [{(time.time()-t0)*1000:.0f}ms] {e}')\nprint('---HTTPS GET tests---')\nimport urllib.request\nfor url in ['https://api.openai.com/v1/models','https://cloud.langfuse.com/api/public/health']:\n  t0 = time.time()\n  try:\n    req = urllib.request.Request(url, headers={'User-Agent':'a20-netcheck'})\n    code = urllib.request.urlopen(req, timeout=5).status\n    print(f'OK   {url} {code} [{(time.time()-t0)*1000:.0f}ms]')\n  except urllib.error.HTTPError as e:\n    print(f'HTTP {url} {e.code} [{(time.time()-t0)*1000:.0f}ms]')\n  except Exception as e:\n    print(f'FAIL {url} [{(time.time()-t0)*1000:.0f}ms] {type(e).__name__}: {e}')"
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/a20-backend-migrate","awslogs-region": "ap-southeast-1","awslogs-stream-prefix": "netcheck"}
+      }
+    }
+  ]
+}

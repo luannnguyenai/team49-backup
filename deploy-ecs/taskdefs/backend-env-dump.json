@@ -1,0 +1,37 @@
+{
+  "family": "a20-backend-env-dump",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role",
+  "containerDefinitions": [
+    {
+      "name": "envdump",
+      "image": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend:7deedc0-data",
+      "essential": true,
+      "command": [
+        "sh","-c",
+        "echo '=== ENV (sensitive masked) ==='; env | sort | sed -E 's/(KEY|PASSWORD|URL|SECRET|TOKEN)=.*/\\1=***/' ; echo ''; echo '=== net check ==='; for h in api.openai.com cloud.langfuse.com s3.ap-southeast-1.amazonaws.com a20-postgres-prod.cbea2u80yox7.ap-southeast-1.rds.amazonaws.com a20-redis-prod.frlokk.0001.apse1.cache.amazonaws.com d2syr4kpiu8d9n.cloudfront.net ai-logs.note.transformerlabs.ai; do printf '%-70s ' \"$h\"; timeout 5 sh -c \"</dev/tcp/$h/443 && echo OK_443\" 2>&1 || timeout 5 sh -c \"</dev/tcp/$h/5432 && echo OK_5432\" 2>&1 || timeout 5 sh -c \"</dev/tcp/$h/6379 && echo OK_6379\" 2>&1 || echo FAIL; done"
+      ],
+      "secrets": [
+        {"name":"DATABASE_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:DATABASE_URL::"},
+        {"name":"REDIS_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:REDIS_URL::"},
+        {"name":"OPENAI_API_KEY","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:OPENAI_API_KEY::"},
+        {"name":"LANGFUSE_PUBLIC_KEY","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:LANGFUSE_PUBLIC_KEY::"},
+        {"name":"LANGFUSE_SECRET_KEY","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:LANGFUSE_SECRET_KEY::"}
+      ],
+      "environment": [
+        {"name":"MODEL_PROVIDER","value":"openai"},
+        {"name":"DEFAULT_MODEL","value":"gpt-5.4-mini"},
+        {"name":"FAST_MODEL","value":"gpt-5.4-nano"},
+        {"name":"LANGFUSE_BASE_URL","value":"https://cloud.langfuse.com"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/a20-backend-migrate","awslogs-region": "ap-southeast-1","awslogs-stream-prefix": "envdump"}
+      }
+    }
+  ]
+}

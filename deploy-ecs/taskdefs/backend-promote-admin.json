@@ -1,0 +1,27 @@
+{
+  "family": "a20-backend-promote-admin",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role",
+  "containerDefinitions": [
+    {
+      "name": "promote",
+      "image": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend:7deedc0-data",
+      "essential": true,
+      "command": [
+        "uv","run","python","-c",
+        "import asyncio; from sqlalchemy import text; from src.database import async_session\nasync def m():\n  async with async_session() as s:\n    res = await s.execute(text(\"UPDATE users SET role='admin' WHERE email='vanhuydz210@gmail.com' RETURNING email, role\"))\n    rows = res.all()\n    await s.commit()\n    print('Updated:', rows)\nasyncio.run(m())"
+      ],
+      "secrets": [
+        {"name":"DATABASE_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:DATABASE_URL::"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/a20-backend-migrate","awslogs-region": "ap-southeast-1","awslogs-stream-prefix": "promote"}
+      }
+    }
+  ]
+}

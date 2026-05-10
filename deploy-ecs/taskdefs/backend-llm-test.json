@@ -1,0 +1,31 @@
+{
+  "family": "a20-backend-llm-test",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role",
+  "containerDefinitions": [
+    {
+      "name": "llmtest",
+      "image": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend:7deedc0-data",
+      "essential": true,
+      "command": [
+        "uv","run","python","-c",
+        "import os, sys, time; from openai import OpenAI\nprint('MODEL_PROVIDER=' + os.getenv('MODEL_PROVIDER', 'NONE'))\nprint('DEFAULT_MODEL=' + os.getenv('DEFAULT_MODEL', 'NONE'))\nprint('OPENAI_API_KEY len=' + str(len(os.getenv('OPENAI_API_KEY', ''))))\ntry:\n  c = OpenAI()\n  t0 = time.time()\n  r = c.chat.completions.create(model=os.getenv('DEFAULT_MODEL','gpt-4o-mini'), messages=[{'role':'user','content':'say hi in 3 words'}], timeout=20)\n  print(f'OK [{(time.time()-t0):.1f}s]: {r.choices[0].message.content}')\nexcept Exception as e:\n  print(f'FAIL: {type(e).__name__}: {e}')"
+      ],
+      "secrets": [
+        {"name":"OPENAI_API_KEY","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:OPENAI_API_KEY::"}
+      ],
+      "environment": [
+        {"name":"MODEL_PROVIDER","value":"openai"},
+        {"name":"DEFAULT_MODEL","value":"gpt-5.4-mini"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/a20-backend-migrate","awslogs-region": "ap-southeast-1","awslogs-stream-prefix": "llmtest"}
+      }
+    }
+  ]
+}

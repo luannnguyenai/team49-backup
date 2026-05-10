@@ -1,0 +1,30 @@
+{
+  "family": "a20-backend-chat-debug-mem",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "executionRoleArn": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role",
+  "containerDefinitions": [
+    {
+      "name": "chatdebugmem",
+      "image": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend:7deedc0-data",
+      "essential": true,
+      "command": [
+        "uv","run","python","-c",
+        "import asyncio, time, os; from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver\nfrom src.services.agent_checkpointer_factory import langgraph_postgres_url\nasync def m():\n  db_url = langgraph_postgres_url(os.getenv('DATABASE_URL'))\n  print(f'URL prefix: {db_url[:40]}', flush=True)\n  t0=time.time()\n  print('TEST: AsyncPostgresSaver.from_conn_string + setup with timeout=30s', flush=True)\n  try:\n    async with asyncio.timeout(30):\n      async with AsyncPostgresSaver.from_conn_string(db_url) as cp:\n        print(f'  connected [{time.time()-t0:.1f}s]', flush=True)\n        await cp.setup()\n        print(f'  setup() done [{time.time()-t0:.1f}s]', flush=True)\n  except asyncio.TimeoutError:\n    print(f'  TIMEOUT after 30s — postgres saver hang [{time.time()-t0:.1f}s]', flush=True)\n  except Exception as e:\n    print(f'  EXCEPTION: {type(e).__name__}: {str(e)[:300]}', flush=True)\nasyncio.run(m())"
+      ],
+      "secrets": [
+        {"name":"DATABASE_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/backend-nwKKWN:DATABASE_URL::"}
+      ],
+      "environment": [
+        {"name":"PYTHONUNBUFFERED","value":"1"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {"awslogs-group": "/ecs/a20-backend-migrate","awslogs-region": "ap-southeast-1","awslogs-stream-prefix": "chatdebugmem"}
+      }
+    }
+  ]
+}
