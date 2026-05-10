@@ -30,6 +30,18 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "assets" {
   }
 }
 
+resource "aws_s3_bucket_cors_configuration" "assets" {
+  bucket = aws_s3_bucket.assets.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_origins = ["*"]
+    expose_headers  = ["Content-Length", "Content-Range", "Accept-Ranges", "ETag"]
+    max_age_seconds = 3600
+  }
+}
+
 resource "aws_cloudfront_origin_access_control" "this" {
   name                              = "${var.bucket_name}-oac"
   origin_access_control_origin_type = "s3"
@@ -52,11 +64,18 @@ resource "aws_cloudfront_distribution" "assets" {
   default_cache_behavior {
     target_origin_id       = "s3-${var.bucket_name}"
     viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD", "OPTIONS"]
     compress               = true
 
-    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6" # AWS managed CachingOptimized
+    # AWS managed CachingOptimized cache policy
+    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+
+    # AWS managed CORS-S3Origin origin request policy — forwards Origin/Access-Control-* headers to S3
+    origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+
+    # AWS managed SimpleCORS response headers policy — adds Access-Control-Allow-Origin: *
+    response_headers_policy_id = "60669652-455b-4ae9-85a4-c4c02393f86c"
   }
 
   viewer_certificate {
