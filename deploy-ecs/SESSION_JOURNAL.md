@@ -1,11 +1,15 @@
 # Session Journal — ECS Deployment
 
-**Date:** 2026-05-09
-**Session duration:** ~6 giờ
+**Date:** 2026-05-09 → 2026-05-10 (kéo qua midnight)
+**Session duration:** ~16 giờ
 **Operator:** edward1503 / vanhuydz210@gmail.com
 **AWS Account:** 116533674568
 **Region:** ap-southeast-1
 **Branch:** feat-terraform-aws
+
+> ⚠️ **Reading order note**: Section 4.A.5 và 4.A.5.bis hiện ngược order trong file (4.A.5.bis = fix xuất hiện trước 4.A.5 = diagnose). Đọc 4.A.5 trước rồi 4.A.5.bis sau cho đúng nhân quả.
+>
+> ⚠️ **Final state**: Section 4 endpoint matrix là snapshot **giữa** session (trước Bài 13/14). Final state ✅ tất cả pass — xem Section 4.B.5 + 4.C.4.
 
 Đây là nhật ký chi tiết của session deploy A20 từ App Runner sang ECS. Ghi lại
 mọi step, lỗi gặp phải, root cause, và cách fix. Mục đích: làm reference cho
@@ -424,11 +428,15 @@ Verify: backend stable, all health endpoints 200, OpenAI direct test (`gpt-5.4-m
 - `terraform apply` 1 change.
 - Retest: vẫn timeout sau 180s.
 
-**Conclusion**: lỗi tầng app, không phải infra. Cần content pipeline (KG) hoàn chỉnh hoặc code fix để handle empty KG gracefully. **Out of scope deploy**.
+**Conclusion (initial — sau đó sai)**: nghĩ KG empty + content pipeline. **Out of scope**.
+
+> ✅ **UPDATE Bài 13**: root cause thực sự là `AsyncPostgresSaver.setup()` hang trên RDS (không phải KG). Fix env `AGENT_GRAPH_CHECKPOINTER_SETUP=false`. Chi tiết Section 4.A.5.bis.
 
 ---
 
-## 4. State cuối session
+## 4. State giữa session (snapshot trước Bài 13/14 fixes)
+
+> ⚠️ Section này là **snapshot intermediate**, KHÔNG phải final state. Endpoint matrix bên dưới (line ~470) show chat 504, unit list `[]`, unit detail 403. Sau Bài 13/14 đã fix. Final state ✅: xem **Section 4.B.5** (unit list + video) và **Section 4.C.4** (CORS).
 
 ### Infrastructure (100% IaC)
 
@@ -617,9 +625,12 @@ Hypothesis: KG empty (`kg_concepts=0`, `kg_edges=0`) làm search node loop hoặ
 
 **Out of scope deploy fix.** Cần debug app code hoặc chạy content pipeline (vài giờ với LLM).
 
-### 4.A.6 Inventory cuối cùng
+### 4.A.6 Inventory tại Bài 12 (đã có thay đổi sau Bài 13/14)
 
-Không có thay đổi nào ngoài 5 lần task one-off (env-dump, net-check, llm-test, redis-test, unlock-unit fail).
+> ⚠️ Statement gốc nói "không có thay đổi" CHỈ ĐÚNG **đến hết Bài 12**. Sau đó Bài 13/14 có **3 lần thay đổi infra lớn**:
+> - Bài 13a: `terraform apply` thêm `AGENT_GRAPH_CHECKPOINTER_SETUP=false` → backend rev 4
+> - Bài 13b: build image `7deedc0-units` (manifest) + `terraform apply` đổi backend_image → backend rev 5
+> - Bài 14: `terraform apply` thêm S3 CORS + CloudFront response/origin policies + invalidate `/*`
 
 ### 4.A.7 Endpoint matrix sau test
 
@@ -1070,28 +1081,76 @@ deploy-ecs/SESSION_JOURNAL.md (file này)
 
 ---
 
-## 9. Reproduce session (pseudo-runbook)
+## 9. Reproduce session (pseudo-runbook) — UPDATED với Bài 13/14
 
-Cho lần deploy sau, theo thứ tự:
+Cho lần deploy sau, theo thứ tự **đầy đủ** (đã include Bài 13/14):
 
 ```text
 1. Code prep: verify .dockerignore, alembic env.py, frontend Dockerfile HOSTNAME
-2. Cost guard: aws budgets create-budget với 3 ngưỡng email
-3. Bootstrap state: terraform init + apply ở deploy-ecs/terraform/bootstrap-state
-4. Foundation: terraform init + plan + apply ở deploy-ecs/terraform/live/prod
-   (enable_services=false, đợi ~15 phút RDS+NAT)
-5. Login ECR: aws ecr get-login-password | docker login (dùng --password để bypass stdin)
-6. Build + push backend: docker build với .dockerignore relax cho data text
-7. Build + push frontend: với --build-arg NEXT_PUBLIC_API_URL=<alb-dns>
-8. Tạo app secret: write JSON to file → put-secret-value với file://
-9. Migration: register task def với ["uv","run","alembic","upgrade","head"] → run-task → wait stopped
-10. Stage 2: update tfvars enable_services=true + image + secret arn → apply
-11. Force redeploy: aws ecs update-service --force-new-deployment, wait stable
-12. Smoke 4 lớp: service running, target group healthy, /health 200, DB-backed route 200
-13. Asset upload: aws s3 sync data/courses → s3://...
-14. Full bootstrap: register + run task chạy đủ 5 step seed (seed_lectures, backfill_v2, validate, parity, create_seed_accounts)
-15. Verify: inventory task đếm row count, smoke endpoint
-16. Env mở rộng (LLM keys etc): merge vào secret + update task def + redeploy
-17. Custom domain (sau khi mua): ACM + ALB HTTPS + Route 53 + REBUILD frontend image
-18. Tear down: disable RDS deletion_protection → snapshot → disable CloudFront → empty S3 versions → terraform destroy
+2. **Generate asset manifest** (Bài 13 — KEY STEP, dễ quên):
+   python -c "..." > data/asset_manifest.json
+   (137 entries: videos/slides/transcripts từ data/courses/)
+   Commit JSON vào repo để bake vào image.
+3. Cost guard: aws budgets create-budget với 3 ngưỡng email
+4. Bootstrap state: terraform init + apply ở deploy-ecs/terraform/bootstrap-state
+5. Foundation: terraform init + plan + apply ở deploy-ecs/terraform/live/prod
+   - enable_services=false
+   - **AGENT_GRAPH_CHECKPOINTER_SETUP=false** (Bài 13 — đã có sẵn trong main.tf updated)
+   - **S3 CORS rule + CloudFront cache với CORS-S3Origin + SimpleCORS managed policies** (Bài 14 — đã có sẵn trong assets/main.tf updated)
+   - Đợi ~15 phút RDS+NAT
+6. Login ECR: aws ecr get-login-password | Select -Last 1 | docker login --password $pw (bypass stdin)
+7. Build + push backend: docker build với .dockerignore relax cho data text + manifest JSON.
+   Tag: 7deedc0-units (image phải có data/asset_manifest.json + data/bootstrap/*.json + data/final_artifacts/canonical/*.jsonl + transcripts text)
+8. Build + push frontend: --build-arg NEXT_PUBLIC_API_URL=http://<alb-dns>
+9. Tạo app secret: write JSON to file → put-secret-value với file://
+   Keys: DATABASE_URL, REDIS_URL, SECRET_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY (rỗng), GEMINI_API_KEY (rỗng), LANGFUSE_*, GMAIL_APP_PASSWORD, AI_LOG_API_KEY, ADMIN_TOKEN
+10. Migration: register task def với ["uv","run","alembic","upgrade","head"] → run-task → wait stopped exit 0
+11. Stage 2: update tfvars enable_services=true + backend_image=7deedc0-units + frontend_image + secret arn → apply
+12. Force redeploy: aws ecs update-service --force-new-deployment, wait stable
+13. Smoke 4 lớp: service running, target group healthy, /health 200, DB-backed route 200
+14. Asset upload: aws s3 sync data/courses → s3://... (15GB, ~30-40 phút VN→Singapore)
+    Sau xong: aws s3api list-multipart-uploads + abort leftover
+15. Full bootstrap: register + run task chạy đủ 5 step seed:
+    - seed_lectures.py (no-op nếu không có ToC_Summary, OK)
+    - backfill_schema_v2 --apply
+    - validate_schema_v2
+    - check_canonical_runtime_parity
+    - create_seed_accounts (tạo admin1-3 + demo1-2, password AdminTest123!)
+16. **Insert assessment session để bypass UX gate** (Bài 13 — KEY STEP):
+    INSERT INTO sessions (id, user_id, session_type, started_at, completed_at, total_questions, correct_count)
+    VALUES (gen_random_uuid(), <uid>, 'assessment', NOW(), NOW(), 0, 0)
+    cho mọi user cần demo unit detail.
+17. Verify: inventory task đếm row count + smoke endpoint
+18. Env mở rộng (LLM keys etc): nếu chưa có ở step 9, merge thêm vào secret
+19. **Verify video stream end-to-end**:
+    - GET /api/courses/<slug>/units (auth) → trả N units (không trả [])
+    - GET /api/courses/<slug>/units/<slug> (auth) → 200 với content.video_url = CloudFront URL
+    - HEAD CloudFront URL → 200 + Access-Control-Allow-Origin: *
+    - Range request → 206 Partial Content
+    - **Browser: load page, F12 Console không thấy CORS error** ← CRITICAL
+20. Verify chat: POST /api/agent/chat → 200 trong ~7s với answer thật
+21. Custom domain (sau khi mua): ACM + ALB HTTPS + Route 53 + REBUILD frontend image với production URL
+22. Tear down: disable RDS deletion_protection → snapshot → disable CloudFront → empty S3 versions → terraform destroy
+
+KEY ENV VARS không quên (trong main.tf hiện đã có sẵn):
+  AGENT_GRAPH_CHECKPOINTER_SETUP=false   ← chat fix Bài 13
+  AGENT_GRAPH_CHECKPOINTER_BACKEND=postgres
+  ASSET_STORAGE_PROVIDER=s3              ← bắt buộc cho manifest path
+  CLOUDFRONT_DOMAIN=<cf-domain>
+  AWS_S3_BUCKET, AWS_S3_PREFIX
+  MODEL_PROVIDER=openai
+  DEFAULT_MODEL=gpt-5.4-mini
+  FAST_MODEL=gpt-5.4-nano
+  + 50+ KG/IRT/feature flag vars
+
+KEY INFRA không quên (terraform module updated):
+  - assets module: S3 cors_configuration + CloudFront 3 policies (cache + origin_request + response_headers)
+  - ecs_service module backend: secrets[] có 11 keys (DB+Redis+Secret_Key + LLM keys + Langfuse + Gmail + AI logs)
+  - Sau apply Bài 14: invalidate CloudFront /* để clear cache không có CORS
+
+KNOWN ISSUES sau khi deploy đúng:
+  - lectures, chapters, transcript_lines, kg_concepts, kg_edges = 0 rows
+    → cần content pipeline ingest_cs231n.py (vài giờ + LLM API)
+    → KHÔNG block /learn flow chính (video play OK qua unit detail)
+  - Admin metrics tab 500 (PROMETHEUS_URL=localhost:9090, Prometheus chưa deploy)
 ```
