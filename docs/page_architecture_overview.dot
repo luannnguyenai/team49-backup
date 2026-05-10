@@ -1,0 +1,183 @@
+digraph PageArchitectureOverview {
+  graph [
+    rankdir=TB,
+    bgcolor="white",
+    pad="0.45",
+    nodesep="0.55",
+    ranksep="0.8",
+    splines=polyline,
+    fontname="DejaVu Sans",
+    label="AI Learning App - Page Architecture Overview",
+    labelloc=t,
+    fontsize=28
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="DejaVu Sans",
+    fontsize=14,
+    margin="0.14,0.08",
+    color="#334155",
+    fillcolor="#F8FAFC",
+    penwidth=1.3
+  ];
+
+  edge [
+    fontname="DejaVu Sans",
+    fontsize=11,
+    color="#475569",
+    arrowsize=0.75
+  ];
+
+  subgraph cluster_core {
+    label="Core Runtime";
+    fontsize=20;
+    color="#0F766E";
+    penwidth=2;
+    style="rounded";
+
+    FE [label="Next.js App Router\npages + feature components", fillcolor="#E0F2FE"];
+    API [label="Frontend API clients\n+ Zustand stores", fillcolor="#DBEAFE"];
+    Router [label="FastAPI routers\n/api/*", fillcolor="#EDE9FE"];
+    Service [label="Service layer\nbusiness workflows", fillcolor="#FCE7F3"];
+    Repo [label="Repositories\nDB access boundary", fillcolor="#FEF3C7"];
+    DB [label="PostgreSQL\nauthoritative app data", shape=cylinder, fillcolor="#DCFCE7"];
+
+    FE -> API -> Router -> Service -> Repo -> DB;
+    DB -> Repo [label="read/write"];
+  }
+
+  subgraph cluster_foundation {
+    label="Shared Domain Foundation";
+    fontsize=20;
+    color="#64748B";
+    penwidth=2;
+    style="rounded";
+
+    Canonical [label="Canonical Unit\ncommon learning object", fillcolor="#ECFDF5"];
+    KP [label="Knowledge Points\nconcepts_kp + mappings", fillcolor="#ECFDF5"];
+    QB [label="Question Bank\nassessment / quiz / eval", fillcolor="#ECFDF5"];
+    Runtime [label="Session / Progress / Mastery\nfeedback loop", fillcolor="#ECFDF5"];
+
+    Canonical -> KP;
+    KP -> QB;
+    QB -> Runtime;
+    Runtime -> Canonical [label="personalizes"];
+  }
+
+  subgraph cluster_ingest {
+    label="Data Ingest";
+    fontsize=20;
+    color="#9333EA";
+    penwidth=2;
+    style="rounded";
+
+    Raw [label="Raw course artifacts", fillcolor="#FAF5FF"];
+    Export [label="export_canonical_artifacts.py", fillcolor="#FAF5FF"];
+    Jsonl [label="canonical/*.jsonl\ncourses, units, KP, QB", fillcolor="#FAF5FF"];
+    Import [label="import_canonical_artifacts_to_db.py\nimport_product_shell_to_db.py", fillcolor="#FAF5FF"];
+    Backfill [label="schema_v2\nbackfill / sync / validate", fillcolor="#FAF5FF"];
+
+    Raw -> Export -> Jsonl -> Import -> Backfill;
+  }
+
+  subgraph cluster_agent {
+    label="Agent Page";
+    fontsize=20;
+    color="#2563EB";
+    penwidth=2;
+    style="rounded";
+
+    AgentPage [label="/agent", fillcolor="#EFF6FF"];
+    AgentUI [label="AgentChatPage\nchat + actions + workflows", fillcolor="#EFF6FF"];
+    AgentAPI [label="agentApi\n/api/agent/*", fillcolor="#EFF6FF"];
+    AgentGraph [label="AgentGraphService\nstateful orchestration", fillcolor="#EFF6FF"];
+    AgentTools [label="unit search\npath requirements\nassessment workflow\npath switch", fillcolor="#EFF6FF"];
+    AgentState [label="conversation repo\ncheckpointer + thread lock", fillcolor="#EFF6FF"];
+
+    AgentPage -> AgentUI -> AgentAPI -> AgentGraph;
+    AgentGraph -> AgentTools;
+    AgentGraph -> AgentState;
+  }
+
+  subgraph cluster_path {
+    label="Learning Path";
+    fontsize=20;
+    color="#059669";
+    penwidth=2;
+    style="rounded";
+
+    PathPage [label="/learning-path", fillcolor="#ECFDF5"];
+    PathUI [label="LearningPathShell\nroadmap + timeline + drawer", fillcolor="#ECFDF5"];
+    PathStore [label="Zustand path store\nloadPath / updateStatus", fillcolor="#ECFDF5"];
+    PathAPI [label="learningPathApi\n/api/learning-path/*", fillcolor="#ECFDF5"];
+    Reco [label="recommendation_engine.py\nplanner logic", fillcolor="#ECFDF5"];
+    PathInputs [label="goal preferences\ncanonical units\nKP mastery\nprogress + audits", fillcolor="#ECFDF5"];
+
+    PathPage -> PathUI -> PathStore -> PathAPI -> Reco -> PathInputs;
+  }
+
+  subgraph cluster_assessment {
+    label="Assessment";
+    fontsize=20;
+    color="#DC2626";
+    penwidth=2;
+    style="rounded";
+
+    AssessmentPage [label="/assessment", fillcolor="#FEF2F2"];
+    Pending [label="pending / started\nassessment context", fillcolor="#FEF2F2"];
+    Start [label="POST /api/assessment/start", fillcolor="#FEF2F2"];
+    Select [label="start_assessment\nselect questions by unit,\ndifficulty, depth, application", fillcolor="#FEF2F2"];
+    Submit [label="submit answers", fillcolor="#FEF2F2"];
+    Grade [label="grade + persist interactions\nupdate unit/KP mastery", fillcolor="#FEF2F2"];
+
+    AssessmentPage -> Pending -> Start -> Select -> Submit -> Grade;
+  }
+
+  subgraph cluster_player {
+    label="Player";
+    fontsize=20;
+    color="#D97706";
+    penwidth=2;
+    style="rounded";
+
+    SimpleLearn [label="/learn/[learningUnitId]\ncontent reader", fillcolor="#FFFBEB"];
+    RichLearn [label="Course learn screen\nLearningUnitShell", fillcolor="#FFFBEB"];
+    Video [label="video timestamp\nprogress tracking", fillcolor="#FFFBEB"];
+    InlineQuiz [label="inline quiz checkpoints", fillcolor="#FFFBEB"];
+    Tutor [label="InContextTutor\nquestion + timestamp + frame", fillcolor="#FFFBEB"];
+    LearnAPIs [label="courses / content\nlearning-session / quiz\nlectures ask", fillcolor="#FFFBEB"];
+
+    SimpleLearn -> LearnAPIs;
+    RichLearn -> Video;
+    Video -> InlineQuiz;
+    Video -> Tutor;
+    InlineQuiz -> LearnAPIs;
+    Tutor -> LearnAPIs;
+  }
+
+  Backfill -> DB [ltail=cluster_ingest, lhead=cluster_core, label="loads data"];
+  DB -> Canonical [label="stores"];
+  Canonical -> Service [label="shared domain"];
+
+  AgentAPI -> Router [label="calls"];
+  AgentGraph -> Service [label="uses"];
+  AgentTools -> Canonical [label="search/context"];
+  AgentTools -> Runtime [label="workflow state"];
+
+  PathAPI -> Router [label="calls"];
+  Reco -> Service [label="implemented in"];
+  PathInputs -> KP [label="mastery signal"];
+  PathInputs -> Runtime [label="progress signal"];
+
+  Start -> Router [label="calls"];
+  Select -> QB [label="samples"];
+  Grade -> Runtime [label="updates"];
+
+  LearnAPIs -> Router [label="calls"];
+  Video -> Runtime [label="updates"];
+  InlineQuiz -> QB [label="uses"];
+  Tutor -> Canonical [label="grounds context"];
+
+}
