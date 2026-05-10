@@ -4,7 +4,12 @@ $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-
++ 7a646fb8fe316550d717f590cd8585f626e3ad21 update terraform build
++ 19c1ece895fd0c17a4ad31a61227e159dddd178f deploy ecs
++ 23e7ae9e9f3d80b0b0e109dd7869642ebbb0539a update ecs deploy 3
++ 5487e9ce9130d633b13de665adc16b5a23dbaf5b Update SESSION_JOURNAL.md
++ 90d5edf6e071e12a83d8084f4bb91d7366fed069 Update learning_unit_service.py
++ 1346ab0a926c99e195a300f0a7afad0f02c27b3b fix freshstart ui
 "@
 
 
