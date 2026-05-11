@@ -14,6 +14,22 @@ DEFAULT_CHAT_MODEL_ID = "default"
 QWEN35_4B_CHAT_MODEL_ID = "qwen35_4b"
 
 
+class ChatModelUnavailableError(Exception):
+    def __init__(self, *, model_id: str, label: str, status: str) -> None:
+        self.model_id = model_id
+        self.label = label
+        self.status = status
+        super().__init__(f"chat_model_unavailable:{model_id}:{status}")
+
+    def public_detail(self) -> dict[str, str]:
+        return {
+            "code": "chat_model_unavailable",
+            "modelId": self.model_id,
+            "label": self.label,
+            "status": self.status,
+        }
+
+
 @dataclass(frozen=True)
 class ChatModelOption:
     id: str
@@ -190,3 +206,38 @@ async def check_all_chat_model_health(*, timeout_s: float = 4.0, client=None) ->
         await check_chat_model_health(option.id, timeout_s=timeout_s, client=client)
         for option in list_chat_model_options()
     ]
+
+
+def _availability_payload(health: dict) -> dict:
+    status = str(health.get("status") or "down")
+    return {
+        "id": health["id"],
+        "label": health["label"],
+        "status": status,
+        "available": status != "down",
+        "checked_at": health.get("checked_at"),
+    }
+
+
+async def check_all_chat_model_availability(*, timeout_s: float = 4.0, client=None) -> list[dict]:
+    return [
+        _availability_payload(health)
+        for health in await check_all_chat_model_health(timeout_s=timeout_s, client=client)
+    ]
+
+
+async def ensure_chat_model_available(
+    model_id: str | None,
+    *,
+    timeout_s: float = 4.0,
+    client=None,
+) -> ChatModelOption:
+    option = get_chat_model_option(model_id)
+    health = await check_chat_model_health(option.id, timeout_s=timeout_s, client=client)
+    if health.get("status") == "down":
+        raise ChatModelUnavailableError(
+            model_id=option.id,
+            label=option.label,
+            status=str(health.get("status") or "down"),
+        )
+    return option
