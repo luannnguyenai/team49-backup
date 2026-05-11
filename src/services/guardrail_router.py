@@ -75,7 +75,6 @@ class GuardrailDecision(BaseModel):
 
 @dataclass(frozen=True)
 class GuardrailRouterConfig:
-    enabled: bool = False
     base_url: str = ""
     model: str = "guardrail-router-merged"
     api_key: str = ""
@@ -162,9 +161,6 @@ class GuardrailRouterClient:
         self.fallback_model = fallback_model
 
     def route_sync(self, *, message: str, scope: GuardrailScopePacket) -> GuardrailDecision:
-        if not self.config.enabled:
-            return GuardrailDecision.allow()
-
         errors: list[str] = []
         if self.config.base_url.strip():
             try:
@@ -180,9 +176,6 @@ class GuardrailRouterClient:
         raise GuardrailRouterUnavailableError("; ".join(errors))
 
     async def route(self, *, message: str, scope: GuardrailScopePacket) -> GuardrailDecision:
-        if not self.config.enabled:
-            return GuardrailDecision.allow()
-
         errors: list[str] = []
         if self.config.base_url.strip():
             try:
@@ -295,7 +288,6 @@ def build_guardrail_config_from_settings(app_settings=settings) -> GuardrailRout
     fallback_provider = str(getattr(app_settings, "guardrail_router_fallback_provider", "") or "")
     fallback_model = str(getattr(app_settings, "guardrail_router_fallback_model", "") or "")
     return GuardrailRouterConfig(
-        enabled=True,
         base_url=str(getattr(app_settings, "guardrail_router_base_url", "") or ""),
         model=str(getattr(app_settings, "guardrail_router_model", "guardrail-router-merged") or ""),
         api_key=str(getattr(app_settings, "guardrail_router_api_key", "") or ""),
