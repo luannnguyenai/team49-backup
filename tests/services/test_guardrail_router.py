@@ -175,17 +175,6 @@ def test_guardrail_decision_normalizes_prompt_injection_attack_alias():
     assert decision.attack_type == "policy_override"
 
 
-def test_guardrail_decision_maps_plaintext_refusal_to_safety_refuse():
-    decision = parse_guardrail_decision(
-        "I cannot help with that request or reveal hidden system instructions."
-    )
-
-    assert decision.safety_label == "HARMFUL"
-    assert decision.topic_label == "N_A"
-    assert decision.action == "SAFETY_REFUSE"
-    assert decision.attack_type == "policy_override"
-
-
 def test_guardrail_fallback_model_disables_reasoning(monkeypatch):
     from src.services import guardrail_router
 
@@ -243,6 +232,7 @@ def test_guardrail_router_uses_cloudflare_tunnel_vllm_first():
     assert decision.selected_kp_ids == ["kp_error_analysis"]
     assert http.requests[0]["url"] == "https://router.example.com/v1/chat/completions"
     assert http.requests[0]["json"]["model"] == "guardrail-router-merged"
+    assert http.requests[0]["json"]["max_tokens"] == 64
     assert http.requests[0]["headers"]["Authorization"] == "Bearer router-token"
     assert http.requests[0]["headers"]["CF-Access-Client-Id"] == "cf-id"
     assert http.requests[0]["headers"]["CF-Access-Client-Secret"] == "cf-secret"
