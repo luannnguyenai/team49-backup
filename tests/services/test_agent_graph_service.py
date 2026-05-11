@@ -225,7 +225,7 @@ async def test_graph_routes_web_paper_mode_to_external_research():
     assert [call[0] for call in calls] == ["external_research"]
 
 
-def test_active_recent_citation_prefers_latest_message_topic_match():
+async def test_active_recent_citation_prefers_latest_message_topic_match():
     service = AgentGraphService(
         search_service=object(),
         requirement_service=object(),
