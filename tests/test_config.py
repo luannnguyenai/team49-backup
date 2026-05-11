@@ -84,7 +84,7 @@ def test_settings_default_guardrail_router_config(monkeypatch: pytest.MonkeyPatc
     assert settings.guardrail_router_api_key == ""
     assert settings.guardrail_router_cf_access_client_id == ""
     assert settings.guardrail_router_cf_access_client_secret == ""
-    assert settings.guardrail_router_timeout_seconds == 2.5
+    assert settings.guardrail_router_timeout_seconds == 10.0
     assert settings.guardrail_router_fallback_provider == ""
     assert settings.guardrail_router_fallback_model == ""
     assert settings.guardrail_router_max_tokens == 96
