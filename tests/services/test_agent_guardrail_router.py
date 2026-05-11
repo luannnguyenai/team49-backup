@@ -7,6 +7,7 @@ from src.services.guardrail_router import (
     GuardrailDecision,
     GuardrailRouterUnavailableError,
 )
+from src.services.language_normalization import LanguageNormalizationResult
 
 
 class FailingAgentRouter:
@@ -28,6 +29,31 @@ class BlockingGuardrailRouter:
 class FailingGuardrailRouter:
     async def route(self, *, message, scope):
         raise GuardrailRouterUnavailableError()
+
+
+class CapturingGuardrailRouter:
+    def __init__(self):
+        self.messages = []
+
+    async def route(self, *, message, scope):
+        self.messages.append(message)
+        return GuardrailDecision.allow()
+
+
+class FailingGraphRouter:
+    def route(self, *args, **kwargs):
+        raise RuntimeError("stop after guardrail")
+
+
+class TranslatingLanguageNormalizer:
+    async def normalize(self, text):
+        return LanguageNormalizationResult(
+            original_text=text,
+            normalized_text="Explain attention mechanisms in neural networks.",
+            detected_language="other",
+            target_language="en",
+            translated=True,
+        )
 
 
 @pytest.mark.asyncio
@@ -78,3 +104,29 @@ async def test_agent_chat_maps_guardrail_outage_to_router_unavailable():
         )
 
     assert exc.value.error_code == "GUARDRAIL_ROUTER_UNAVAILABLE"
+
+
+@pytest.mark.asyncio
+async def test_agent_chat_normalizes_third_language_before_guardrail():
+    guardrail_router = CapturingGuardrailRouter()
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=FailingGraphRouter(),
+        guardrail_router=guardrail_router,
+        language_normalizer=TranslatingLanguageNormalizer(),
+    )
+
+    with pytest.raises(RuntimeError, match="stop after guardrail"):
+        await service.chat(
+            request=AgentChatRequest(
+                message="Explique les mécanismes d’attention dans les réseaux neuronaux.",
+                incomingMessageId="msg-normalized-guardrail",
+            ),
+            conversation_id="conv-1",
+            thread_id="thread-1",
+            user_id="00000000-0000-0000-0000-000000000001",
+            allowed_course_ids=["CS224n"],
+        )
+
+    assert guardrail_router.messages == ["Explain attention mechanisms in neural networks."]
