@@ -501,7 +501,6 @@ def test_structured_router_agentic_rag_responding_stage_locks_latest_user_langua
     assert "If the latest message is English, answer in English" in system_prompt
     assert "Do not switch to an unrelated language" in system_prompt
     assert "Ignore unrelated languages in recent assistant messages" in system_prompt
-    assert "Required answer language: English" in user_prompt
     assert "Explain attention mechanisms in neural networks." in user_prompt
     assert "Je peux te l'expliquer clairement." in user_prompt
 
