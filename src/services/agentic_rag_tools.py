@@ -203,6 +203,12 @@ class AgenticRAGToolExecutor:
         ]
         if query and query.casefold() not in {item.casefold() for item in search_queries}:
             search_queries.insert(0, query)
+        for fallback_query in slots.search_queries:
+            fallback_query = str(fallback_query).strip()
+            if fallback_query and fallback_query.casefold() not in {
+                item.casefold() for item in search_queries
+            }:
+                search_queries.append(fallback_query)
         if not search_queries:
             search_queries = slots.search_queries or [slots.raw_topic or message]
         search_slots = slots.model_copy(update={"search_queries": search_queries[:5]})
