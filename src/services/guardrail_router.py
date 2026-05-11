@@ -105,6 +105,8 @@ ROUTER_SYSTEM_RULES = (
     "If safety_label is HARMFUL, set topic_label=N_A, action=SAFETY_REFUSE, and selected_kp_ids=[].\n"
     "If RECENT_CONTEXT contains pending_retrieval_query and USER_QUERY is a safe short refinement "
     "of that pending topic, classify it as ON_TOPIC and ALLOW_LESSON_ANSWER.\n"
+    "If RECENT_CONTEXT contains recent_assistant_response and USER_QUERY is a safe follow-up about "
+    "assistant-provided content, classify it as ON_TOPIC and ALLOW_LESSON_ANSWER.\n"
     "attack_type is auxiliary metadata and must not override the main safety/action decision."
 )
 
