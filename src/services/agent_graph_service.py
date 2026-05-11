@@ -831,6 +831,7 @@ class AgentGraphService:
             proposed_topic=proposed,
             decision_action=decision.action,
         )
+        short_detail_refinement = bool(forced_refinement and proposed)
         if forced_refinement:
             decision = SimpleNamespace(
                 action="refine",
@@ -874,13 +875,14 @@ class AgentGraphService:
             "intent_confidence": 1.0,
             "slots": AgentSlots(
                 raw_topic=raw_topic,
+                search_queries=[proposed] if short_detail_refinement else [],
                 target_path=payload.get("target_path"),
                 requested_path_id=payload.get("requested_path_id"),
                 search_scope=payload.get("search_scope") or "current_path",
                 resolved_search_path_ids=payload.get("resolved_search_path_ids") or [],
                 excluded_search_path_ids=payload.get("excluded_search_path_ids") or [],
                 scope_expansion_approved=scope_expansion_approved,
-                show_top_results_approved=decision.action == "approve",
+                show_top_results_approved=decision.action == "approve" or short_detail_refinement,
             ),
             "pending_clarification": None,
             "clarification_question": None,
