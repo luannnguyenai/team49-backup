@@ -1,6 +1,7 @@
 import pytest
 
 from src.services.agent_graph_contracts import AgentRouterUnavailableError, ToolResult
+from src.services.agent_prompt_manager import AgentPromptManager
 from src.services.agentic_rag_contracts import AgenticRAGObservation, AgenticRAGToolCall
 from src.services.agent_structured_router import StructuredAgentRouter
 
@@ -683,6 +684,25 @@ def test_structured_router_composes_assistant_help_with_llm():
     assert "English or Vietnamese" in model.messages[0]["content"]
     assert "Do not switch to a third language" in model.messages[0]["content"]
     assert "If the latest message is neither English nor Vietnamese, answer in English" in model.messages[0]["content"]
+
+
+def test_structured_router_composes_assistant_help_from_prompt_manager(tmp_path):
+    prompt_file = tmp_path / "agentic_rag.yaml"
+    prompt_file.write_text(
+        """
+assistant_help:
+  system: "Custom assistant-help prompt from YAML."
+""",
+        encoding="utf-8",
+    )
+    model = FakeChatModel()
+
+    StructuredAgentRouter(
+        model=model,
+        prompt_manager=AgentPromptManager(base_dir=tmp_path),
+    ).compose_assistant_help(message="hello", route_context=None)
+
+    assert model.messages[0]["content"] == "Custom assistant-help prompt from YAML."
 
 
 def test_structured_router_assistant_help_prompt_refuses_hidden_instruction_requests():
