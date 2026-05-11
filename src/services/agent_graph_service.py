@@ -760,6 +760,17 @@ class AgentGraphService:
                     "Okay. Please describe the topic or concept you want me to search for."
                 ),
             }
+        forced_refinement = self._coerce_pending_retrieval_detail_refinement(
+            message=message,
+            proposed_topic=proposed,
+            decision_action=decision.action,
+        )
+        if forced_refinement:
+            decision = SimpleNamespace(
+                action="refine",
+                refined_query=forced_refinement,
+                clarification_question=None,
+            )
         if decision.action == "clarify":
             return {
                 **state,
@@ -808,6 +819,24 @@ class AgentGraphService:
             "pending_clarification": None,
             "clarification_question": None,
         }
+
+    def _coerce_pending_retrieval_detail_refinement(
+        self,
+        *,
+        message: str,
+        proposed_topic: str,
+        decision_action: str,
+    ) -> str | None:
+        detail = re.sub(r"\s+", " ", message).strip(" .")
+        if decision_action != "clarify" or not proposed_topic or not detail:
+            return None
+        if len(detail.split()) > 8:
+            return None
+        if "?" in detail:
+            return None
+        if re.search(r"\b(yes|no|ok|okay|sure|show|see|cancel|stop|retry)\b", detail, re.IGNORECASE):
+            return None
+        return f"{proposed_topic} {detail}"
 
     def _resolve_pending_scope_expansion(
         self,
