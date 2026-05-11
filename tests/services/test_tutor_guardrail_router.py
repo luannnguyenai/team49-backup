@@ -1,5 +1,6 @@
 from src.services.guardrail_router import GuardrailDecision
 from src.services.language_normalization import LanguageNormalizationResult
+from src.api.app import AskRequest
 from src.services.llm_service import (
     build_tutor_guardrail_event,
     build_tutor_guardrail_scope,
@@ -24,6 +25,14 @@ class FakeTutorLanguageNormalizer:
             target_language="vi" if "Giải thích" in text else "en",
             translated=False,
         )
+
+
+def test_tutor_ask_request_limits_question_to_1500_chars():
+    import pytest
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        AskRequest(lecture_id="lecture-1", current_timestamp=0, question="x" * 1501)
 
 
 def test_tutor_guardrail_event_redirects_off_topic_in_english():

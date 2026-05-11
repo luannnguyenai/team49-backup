@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from src.schemas.agent import AgentAnswer, AgentChatRequest, AgentChatResponse
 from src.services.agent_graph_contracts import AgentRouterUnavailableError
@@ -68,6 +69,11 @@ class OutputTranslatingLanguageNormalizer:
 
     async def translate_to_english(self, text):
         return "Would you like to narrow the topic?"
+
+
+def test_agent_chat_request_limits_message_to_2000_chars():
+    with pytest.raises(ValidationError):
+        AgentChatRequest(message="x" * 2001)
 
 
 @pytest.mark.asyncio
