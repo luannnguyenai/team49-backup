@@ -174,18 +174,10 @@ def build_tutor_guardrail_scope(
     lecture_scope: dict | None,
     context_binding_id: str | None = None,
 ) -> GuardrailScopePacket:
-    scope_parts = [f"Lecture title: {lecture_title}"]
+    summary = (context_summary or "").strip()
+    scope_parts = [f"Unit summary: {summary}" if summary else "Unit summary: unavailable"]
     if current_chapter:
         scope_parts.append(f"Current chapter: {current_chapter}")
-    if lecture_scope:
-        core_topics = lecture_scope.get("core_topics") or []
-        scope_keywords = lecture_scope.get("scope_keywords") or []
-        if core_topics:
-            scope_parts.append("Core topics: " + ", ".join(str(topic) for topic in core_topics))
-        if scope_keywords:
-            scope_parts.append("Scope keywords: " + ", ".join(str(keyword) for keyword in scope_keywords))
-    if context_summary:
-        scope_parts.append("Lecture outline:\n" + context_summary)
 
     return GuardrailScopePacket(
         feature="tutor",
