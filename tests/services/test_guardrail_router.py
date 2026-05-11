@@ -45,14 +45,44 @@ class FakeSyncHttpClient:
         return self.response
 
 
+class FakeAsyncHttpClient:
+    def __init__(self, response=None, error: Exception | None = None):
+        self.response = response
+        self.error = error
+        self.requests = []
+
+    async def post(self, url, json=None, headers=None, timeout=None):
+        self.requests.append(
+            {
+                "url": url,
+                "json": json,
+                "headers": headers or {},
+                "timeout": timeout,
+            }
+        )
+        if self.error is not None:
+            raise self.error
+        return self.response
+
+
 class FakeFallbackModel:
     def __init__(self, content: str):
         self.content = content
         self.messages = None
+        self.invocations = 0
 
     def invoke(self, messages):
+        self.invocations += 1
         self.messages = messages
         return type("Message", (), {"content": self.content})()
+
+
+class FakeClock:
+    def __init__(self):
+        self.value = 0.0
+
+    def __call__(self):
+        return self.value
 
 
 def _scope() -> GuardrailScopePacket:
@@ -220,6 +250,113 @@ def test_guardrail_router_falls_back_to_provider_when_tunnel_fails():
 
     assert decision.action == "ASK_CLARIFY"
     assert fallback.messages is not None
+
+
+def test_guardrail_router_skips_local_router_during_unhealthy_cooldown():
+    clock = FakeClock()
+    http = FakeSyncHttpClient(error=TimeoutError("local tunnel unavailable"))
+    fallback = FakeFallbackModel(
+        json.dumps(
+            {
+                "safety_label": "SAFE",
+                "topic_label": "AMBIGUOUS",
+                "action": "ASK_CLARIFY",
+                "attack_type": "none",
+                "selected_kp_ids": [],
+            }
+        )
+    )
+    client = GuardrailRouterClient(
+        GuardrailRouterConfig(
+            base_url="https://router.example.com/v1",
+            model="guardrail-router-merged",
+            fallback_provider="openai",
+            fallback_model="gpt-5.4-nano",
+            router_unhealthy_cooldown_seconds=60,
+        ),
+        sync_http_client=http,
+        fallback_model=fallback,
+        monotonic=clock,
+    )
+
+    first = client.route_sync(message="What is this?", scope=_scope())
+    second = client.route_sync(message="What is this?", scope=_scope())
+    clock.value = 61
+    http.error = None
+    http.response = FakeResponse(
+        _chat_payload(
+            json.dumps(
+                {
+                    "safety_label": "SAFE",
+                    "topic_label": "ON_TOPIC",
+                    "action": "ALLOW_LESSON_ANSWER",
+                    "attack_type": "none",
+                    "selected_kp_ids": [],
+                }
+            )
+        )
+    )
+    third = client.route_sync(message="Explain error analysis.", scope=_scope())
+
+    assert first.action == "ASK_CLARIFY"
+    assert second.action == "ASK_CLARIFY"
+    assert third.action == "ALLOW_LESSON_ANSWER"
+    assert len(http.requests) == 2
+    assert fallback.invocations == 2
+
+
+@pytest.mark.asyncio
+async def test_async_guardrail_router_skips_local_router_during_unhealthy_cooldown():
+    clock = FakeClock()
+    http = FakeAsyncHttpClient(error=TimeoutError("local tunnel unavailable"))
+    fallback = FakeFallbackModel(
+        json.dumps(
+            {
+                "safety_label": "SAFE",
+                "topic_label": "AMBIGUOUS",
+                "action": "ASK_CLARIFY",
+                "attack_type": "none",
+                "selected_kp_ids": [],
+            }
+        )
+    )
+    client = GuardrailRouterClient(
+        GuardrailRouterConfig(
+            base_url="https://router.example.com/v1",
+            model="guardrail-router-merged",
+            fallback_provider="openai",
+            fallback_model="gpt-5.4-nano",
+            router_unhealthy_cooldown_seconds=60,
+        ),
+        async_http_client=http,
+        fallback_model=fallback,
+        monotonic=clock,
+    )
+
+    first = await client.route(message="What is this?", scope=_scope())
+    second = await client.route(message="What is this?", scope=_scope())
+    clock.value = 61
+    http.error = None
+    http.response = FakeResponse(
+        _chat_payload(
+            json.dumps(
+                {
+                    "safety_label": "SAFE",
+                    "topic_label": "ON_TOPIC",
+                    "action": "ALLOW_LESSON_ANSWER",
+                    "attack_type": "none",
+                    "selected_kp_ids": [],
+                }
+            )
+        )
+    )
+    third = await client.route(message="Explain error analysis.", scope=_scope())
+
+    assert first.action == "ASK_CLARIFY"
+    assert second.action == "ASK_CLARIFY"
+    assert third.action == "ALLOW_LESSON_ANSWER"
+    assert len(http.requests) == 2
+    assert fallback.invocations == 2
 
 
 def test_guardrail_router_uses_provider_fallback_when_local_url_is_empty():
