@@ -15,7 +15,7 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -207,7 +207,7 @@ async def read_root():
 class AskRequest(BaseModel):
     lecture_id: str
     current_timestamp: float
-    question: str
+    question: str = Field(min_length=1, max_length=1500)
     context_binding_id: str | None = None
     image_base64: str | None = None
 
