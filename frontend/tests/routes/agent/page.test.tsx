@@ -16,6 +16,7 @@ const agentApiMock = vi.hoisted(() => ({
   resumeAssessmentWorkflow: vi.fn(),
   startAssessmentAction: vi.fn(),
   unitContext: vi.fn(),
+  modelAvailability: vi.fn(),
 }));
 
 const learningPathApiMock = vi.hoisted(() => ({
@@ -51,6 +52,7 @@ vi.mock("@/stores/authStore", () => ({
 describe("agent page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
     authStoreMock.user = {
       id: "user-1",
       full_name: "Test Learner",
@@ -62,6 +64,12 @@ describe("agent page", () => {
     });
     agentApiMock.listConversations.mockResolvedValue([]);
     agentApiMock.messages.mockResolvedValue([]);
+    agentApiMock.modelAvailability.mockResolvedValue({
+      models: [
+        { id: "default", label: "Default", status: "healthy", available: true },
+        { id: "qwen35_4b", label: "Qwen 3.5 4B", status: "healthy", available: true },
+      ],
+    });
     agentApiMock.chat.mockResolvedValue({
       conversationId: "conversation-1",
       messageId: "message-1",
@@ -243,6 +251,34 @@ describe("agent page", () => {
         chatModelId: "qwen35_4b",
       });
     });
+  });
+
+  it("disables a down chat model and falls back to default before sending", async () => {
+    window.localStorage.setItem("agent.chatModelId", "qwen35_4b");
+    agentApiMock.modelAvailability.mockResolvedValueOnce({
+      models: [
+        { id: "default", label: "Default", status: "healthy", available: true },
+        { id: "qwen35_4b", label: "Qwen 3.5 4B", status: "down", available: false },
+      ],
+    });
+    render(<AgentPage />);
+
+    const qwenModel = await screen.findByRole("button", { name: /qwen 3.5 4b.*down/i });
+    expect(qwenModel).toBeDisabled();
+
+    const input = screen.getByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Explain CNNs" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenCalledWith({
+        message: "Explain CNNs",
+        incomingMessageId: expect.any(String),
+        conversationId: null,
+        traceMode: "summary",
+      });
+    });
+    expect(window.localStorage.getItem("agent.chatModelId")).toBe("default");
   });
 
   it("opens prerequisite path units in the existing source sidebar before learning", async () => {

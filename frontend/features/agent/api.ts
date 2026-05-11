@@ -1,5 +1,9 @@
 import { api } from "@/lib/api";
-import type { ChatModelId } from "@/lib/chat-model-options";
+import {
+  normalizeChatModelAvailability,
+  type ChatModelAvailabilityResponse,
+  type ChatModelId,
+} from "@/lib/chat-model-options";
 
 export const AGENT_REQUEST_TIMEOUT_MS = 60_000;
 const AGENT_CHAT_PATH = "/api/agent/chat";
@@ -360,6 +364,11 @@ export const agentApi = {
     api
       .post<AgentActionResponse>("/api/agent/actions/start-assessment", payload)
       .then((r) => r.data),
+
+  modelAvailability: () =>
+    api
+      .get<ChatModelAvailabilityResponse>("/api/chat-models/availability")
+      .then((r) => ({ models: normalizeChatModelAvailability(r.data.models) })),
 };
 
 export function getConversationId(value: AgentConversationSummary | AgentChatResponse | AgentConversationMemory) {
