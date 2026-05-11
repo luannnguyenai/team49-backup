@@ -58,6 +58,7 @@ from src.services.agent_router_factory import (
     build_production_agent_response_router,
     build_production_agent_router,
 )
+from src.services.model_registry import ChatModelUnavailableError, ensure_chat_model_available
 from src.services.agent_search_service import AgentUnitSearchService
 from src.services.agent_title_generator import generate_conversation_title
 from src.services.agent_unit_context_service import AgentUnitContextService
@@ -97,6 +98,10 @@ def _agent_system_error_response(conversation_id: str, error_code: str, exc: Exc
         conversation_id=conversation_id,
         error_code=error_code,
     )
+
+
+def _chat_model_unavailable_http_error(exc: ChatModelUnavailableError) -> HTTPException:
+    return HTTPException(status_code=503, detail=exc.public_detail())
 
 
 async def _maybe_generate_conversation_title(
@@ -140,6 +145,11 @@ async def agent_chat(
 ) -> AgentChatResponse:
     error_conversation_id = body.conversation_id or ""
     try:
+        try:
+            await ensure_chat_model_available(body.chat_model_id)
+        except ChatModelUnavailableError as exc:
+            raise _chat_model_unavailable_http_error(exc) from exc
+
         context = await _agent_context_for_user(user, db)
         _repo, _navigation, search, requirements = _services(db)
         conversation_repo = AgentConversationRepository(db)
