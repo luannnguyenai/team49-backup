@@ -339,6 +339,8 @@ def _normalize_guardrail_decision_payload(payload: dict[str, Any]) -> dict[str, 
     attack_type = str(normalized.get("attack_type", "")).strip().lower()
     if attack_type in {"", "n/a", "na", "none"}:
         normalized["attack_type"] = "none"
+    elif attack_type in {"prompt_injection", "injection", "system_prompt"}:
+        normalized["attack_type"] = "policy_override"
     return normalized
 
 
