@@ -23,6 +23,12 @@ from src.config import DEFAULT_MODEL, settings
 from src.database import tutor_thread_async_session_factory
 from src.models.store import Lecture, Chapter, TranscriptLine, QAHistory
 from src.services.chat_model_factory import build_chat_model_kwargs
+from src.services.guardrail_router import (
+    GuardrailDecision,
+    GuardrailScopePacket,
+    build_guardrail_router_client,
+    guardrail_user_message,
+)
 from src.services.lecture_scope_service import get_lecture_scope_metadata
 from src.services.llm_rate_limiter import enforce_llm_rate_limit
 from src.services.sandbox import run_python_code
@@ -126,6 +132,56 @@ Answer the student's question using ONLY the provided lecture context (transcrip
 - Reference timestamps when citing specific lecture moments.
 - Answer in the SAME LANGUAGE as the student's question.
 """
+
+
+def build_tutor_guardrail_event(decision: GuardrailDecision) -> dict | None:
+    if decision.action == "ALLOW_LESSON_ANSWER":
+        return None
+    return {
+        "blocked": True,
+        "message": guardrail_user_message(decision),
+        "guardrail": {
+            "blocked": True,
+            "action": decision.action,
+            "safety_label": decision.safety_label,
+            "topic_label": decision.topic_label,
+            "attack_type": decision.attack_type,
+            "selected_kp_ids": decision.selected_kp_ids,
+        },
+    }
+
+
+def build_tutor_guardrail_scope(
+    *,
+    lecture_id: str,
+    lecture_title: str,
+    context_summary: str,
+    current_chapter: str,
+    lecture_scope: dict | None,
+    context_binding_id: str | None = None,
+) -> GuardrailScopePacket:
+    scope_parts = [f"Lecture title: {lecture_title}"]
+    if current_chapter:
+        scope_parts.append(f"Current chapter: {current_chapter}")
+    if lecture_scope:
+        core_topics = lecture_scope.get("core_topics") or []
+        scope_keywords = lecture_scope.get("scope_keywords") or []
+        if core_topics:
+            scope_parts.append("Core topics: " + ", ".join(str(topic) for topic in core_topics))
+        if scope_keywords:
+            scope_parts.append("Scope keywords: " + ", ".join(str(keyword) for keyword in scope_keywords))
+    if context_summary:
+        scope_parts.append("Lecture outline:\n" + context_summary)
+
+    return GuardrailScopePacket(
+        feature="tutor",
+        scope_level="unit" if context_binding_id else "lecture",
+        scope_id=context_binding_id or lecture_id,
+        allowed_scope_summary="\n".join(scope_parts),
+        candidate_kps=[],
+        recent_context=[],
+        selected_text="",
+    )
 
 
 def _sanitize_tutor_input_question(question: str):
@@ -585,6 +641,43 @@ def get_context_and_stream_langgraph(
                     ),
                     "",
                 )
+                with start_langfuse_observation(
+                    name="tutor-guardrail-router",
+                    input={
+                        "question": sanitized_user_question,
+                        "lecture_title": lecture_title,
+                        "current_chapter": current_chapter,
+                    },
+                    metadata={
+                        "feature": "tutor",
+                        "step": "guardrail-router",
+                        "has_image": has_image,
+                    },
+                ):
+                    guardrail_decision = build_guardrail_router_client().route_sync(
+                        message=sanitized_user_question,
+                        scope=build_tutor_guardrail_scope(
+                            lecture_id=lecture_id,
+                            lecture_title=lecture_title,
+                            context_summary=context_summary,
+                            current_chapter=current_chapter,
+                            lecture_scope=lecture_scope,
+                            context_binding_id=context_binding_id,
+                        ),
+                    )
+                guardrail_event = build_tutor_guardrail_event(guardrail_decision)
+                if guardrail_event is not None:
+                    route = guardrail_decision.action
+                    if first_answer_at is None:
+                        first_answer_at = time.perf_counter()
+                    yield json.dumps(guardrail_event) + "\n"
+                    qa_logger.info(
+                        f"\n{'='*60}\n[GUARDRAIL] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"[Lecture] : {lecture_id}\n[Question]: {sanitized_user_question}\n"
+                        f"[Action]  : {guardrail_decision.action}\n"
+                        f"[Reason]  : {guardrail_decision.safety_label}/{guardrail_decision.topic_label}/{guardrail_decision.attack_type}\n{'='*60}"
+                    )
+                    return
                 with start_langfuse_observation(
                     name="tutor-route-question",
                     input={
