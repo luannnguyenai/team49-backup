@@ -2757,6 +2757,80 @@ async def test_pending_retrieval_query_short_detail_keeps_refined_query_title_le
     assert [request.query for request in search_requests] == ["CNN khái niệm tổng quan đi", "CNN"]
 
 
+async def test_pending_retrieval_query_concise_refinement_keeps_proposed_topic_fallback():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-cnn-concise-refine",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "proposed_raw_topic": "CNN",
+            "show_top_results_allowed": True,
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn",
+                    course_id="CS231n",
+                    unit_name="Convolutional Neural Networks",
+                    summary="CNN overview content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-cnn-concise", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-cnn-concise-refine",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=PendingDecisionRouter(
+            action="refine",
+            refined_query="CNN basic concepts",
+        ),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="khái niệm cơ bản", incomingMessageId="msg-cnn-concise-refine"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-cnn-concise-refine",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert [request.query for request in search_requests] == [
+        "CNN basic concepts",
+        "CNN",
+    ]
+
+
 async def test_pending_retrieval_query_user_detail_becomes_search_topic():
     conversation_id = uuid4()
     user_id = uuid4()
