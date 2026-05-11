@@ -883,7 +883,7 @@ class AgentGraphService:
             "intent_confidence": 1.0,
             "slots": AgentSlots(
                 raw_topic=raw_topic,
-                search_queries=[proposed] if short_detail_refinement else [],
+                search_queries=[raw_topic, proposed] if short_detail_refinement else [],
                 target_path=payload.get("target_path"),
                 requested_path_id=payload.get("requested_path_id"),
                 search_scope=payload.get("search_scope") or "current_path",
