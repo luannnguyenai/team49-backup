@@ -52,10 +52,6 @@ class Settings(BaseSettings):
         ge=0,
         description="Maximum provider retry attempts for LLM requests.",
     )
-    guardrail_router_enabled: bool = Field(
-        default=False,
-        description="Enable the shared guardrail router gate for Tutor and Agent requests.",
-    )
     guardrail_router_base_url: str = Field(
         default="",
         description="OpenAI-compatible /v1 base URL for the Cloudflare Tunnel vLLM guardrail router.",
