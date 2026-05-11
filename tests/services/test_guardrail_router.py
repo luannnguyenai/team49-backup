@@ -184,3 +184,23 @@ def test_guardrail_router_raises_when_tunnel_and_provider_fail():
         client.route_sync(message="Explain error analysis.", scope=_scope())
 
     assert exc.value.error_code == "GUARDRAIL_ROUTER_UNAVAILABLE"
+
+
+def test_guardrail_router_config_defaults_to_current_api_provider(monkeypatch):
+    from src.config import Settings
+    from src.services.guardrail_router import build_guardrail_config_from_settings
+
+    monkeypatch.delenv("GUARDRAIL_ROUTER_ENABLED", raising=False)
+    monkeypatch.delenv("GUARDRAIL_ROUTER_BASE_URL", raising=False)
+    monkeypatch.delenv("GUARDRAIL_ROUTER_FALLBACK_PROVIDER", raising=False)
+    monkeypatch.delenv("GUARDRAIL_ROUTER_FALLBACK_MODEL", raising=False)
+    monkeypatch.setenv("MODEL_PROVIDER", "gemini")
+    monkeypatch.setenv("FAST_MODEL", "gemini-2.5-flash")
+
+    settings = Settings(_env_file=None)
+    config = build_guardrail_config_from_settings(settings)
+
+    assert config.enabled is True
+    assert config.base_url == ""
+    assert config.fallback_provider == "gemini"
+    assert config.fallback_model == "gemini-2.5-flash"
