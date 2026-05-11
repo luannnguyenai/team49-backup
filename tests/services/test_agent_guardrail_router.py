@@ -34,9 +34,11 @@ class FailingGuardrailRouter:
 class CapturingGuardrailRouter:
     def __init__(self):
         self.messages = []
+        self.scopes = []
 
     async def route(self, *, message, scope):
         self.messages.append(message)
+        self.scopes.append(scope)
         return GuardrailDecision.allow()
 
 
@@ -142,6 +144,10 @@ async def test_agent_chat_normalizes_third_language_before_guardrail():
         )
 
     assert guardrail_router.messages == ["Explain attention mechanisms in neural networks."]
+    scope = guardrail_router.scopes[0]
+    assert scope.allowed_scope_summary == "Agent guardrail scope: current user query only."
+    assert scope.recent_context == []
+    assert scope.candidate_kps == []
 
 
 @pytest.mark.asyncio

@@ -1,6 +1,10 @@
 from src.services.guardrail_router import GuardrailDecision
 from src.services.language_normalization import LanguageNormalizationResult
-from src.services.llm_service import build_tutor_guardrail_event, normalize_tutor_question_for_model
+from src.services.llm_service import (
+    build_tutor_guardrail_event,
+    build_tutor_guardrail_scope,
+    normalize_tutor_question_for_model,
+)
 
 
 class FakeTutorLanguageNormalizer:
@@ -83,3 +87,23 @@ def test_tutor_question_normalization_translates_third_language_to_english():
     assert result.detected_language == "other"
     assert result.target_language == "en"
     assert result.translated is True
+
+
+def test_tutor_guardrail_scope_uses_unit_summary_without_history():
+    scope = build_tutor_guardrail_scope(
+        lecture_id="lecture-1",
+        lecture_title="Lecture 1: Introduction",
+        context_summary="- Overview: intro summary\n- Old unrelated history should not appear",
+        current_chapter="Overview",
+        lecture_scope={"core_topics": ["CNN"], "scope_keywords": ["vision"]},
+        context_binding_id="ctx_unit_1",
+    )
+
+    assert scope.allowed_scope_summary == (
+        "Unit summary: - Overview: intro summary\n"
+        "- Old unrelated history should not appear\n"
+        "Current chapter: Overview"
+    )
+    assert scope.recent_context == []
+    assert scope.candidate_kps == []
+    assert scope.selected_text == ""
