@@ -363,7 +363,8 @@ class StructuredAgentRouter:
                         "content": (
                             "You are the AI Learning Hub assistant. "
                             "The catalog search found many title-level learning units for the user's topic. "
-                            "Write one concise, natural clarification in the user's language. "
+                            "Write one concise, natural clarification in English or Vietnamese, matching the "
+                            "latest user message or visible conversation style. Do not switch to a third language. "
                             "Ask whether they want to narrow the topic with more detail or see the strongest "
                             "current results. Do not invent course facts and do not mention implementation details. "
                             "Do not mention examples, versions, subtypes, rankings, or choice dimensions that are "
