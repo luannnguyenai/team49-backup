@@ -225,6 +225,91 @@ async def test_graph_routes_web_paper_mode_to_external_research():
     assert [call[0] for call in calls] == ["external_research"]
 
 
+def test_active_recent_citation_prefers_latest_message_topic_match():
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=DeterministicAgentRouter(),
+    )
+
+    active = service._active_recent_citation(
+        {
+            "message": "à ý tôi là Mask RCNN",
+            "recent_messages": [
+                {
+                    "role": "assistant",
+                    "citations": [
+                        {
+                            "canonical_unit_id": "local::lecture_9::seg3",
+                            "course_id": "CS231n",
+                            "unit_name": "Object detection as classification plus localization and the R-CNN family",
+                            "lecture_title": "Lecture 9: Object Detection, Image Segmentation, Visualizing and Understanding",
+                            "source": "summary",
+                        },
+                        {
+                            "canonical_unit_id": "local::lecture_9::seg5",
+                            "course_id": "CS231n",
+                            "unit_name": "Instance segmentation with Mask R-CNN",
+                            "lecture_title": "Lecture 9: Object Detection, Image Segmentation, Visualizing and Understanding",
+                            "source": "summary",
+                        },
+                    ],
+                }
+            ],
+        }
+    )
+
+    assert active is not None
+    assert active.canonical_unit_id == "local::lecture_9::seg5"
+
+
+async def test_recent_message_context_preserves_persisted_actions():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    conversation_repo = SimpleNamespace(
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mask R-CNN answer.",
+                    citations_json=[],
+                    actions_json=[
+                        {
+                            "type": "review_prerequisite_path",
+                            "label": "Review prerequisite order",
+                            "canonical_unit_id": "local::lecture_9::seg5",
+                            "canonical_unit_ids": [
+                                "local::lecture_9::seg3",
+                                "local::lecture_9::seg5",
+                            ],
+                        }
+                    ],
+                )
+            ]
+        )
+    )
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    context = await service._load_recent_message_context(str(conversation_id), str(user_id))
+
+    assert context[0]["actions"] == [
+        {
+            "type": "review_prerequisite_path",
+            "label": "Review prerequisite order",
+            "canonical_unit_id": "local::lecture_9::seg5",
+            "canonical_unit_ids": [
+                "local::lecture_9::seg3",
+                "local::lecture_9::seg5",
+            ],
+        }
+    ]
+
+
 async def test_graph_chat_sanitizes_input_and_output_for_assistant_flow():
     service = EchoSanitizedAgentGraphService(
         search_service=SimpleNamespace(),
