@@ -440,27 +440,11 @@ class AgentGraphService:
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None,
     ) -> GuardrailScopePacket:
-        context = route_context.model_dump() if hasattr(route_context, "model_dump") else {}
-        scope_id = (
-            context.get("canonical_unit_id")
-            or context.get("unit_slug")
-            or context.get("course_slug")
-            or ",".join(current_path_course_ids or allowed_course_ids)
-            or "agent"
-        )
-        summary_parts = [
-            "Agent requests must stay within the user's allowed AI/ML learning context.",
-            f"Allowed course IDs: {', '.join(allowed_course_ids) if allowed_course_ids else 'none'}",
-        ]
-        if current_path_course_ids:
-            summary_parts.append(f"Current path course IDs: {', '.join(current_path_course_ids)}")
-        if context:
-            summary_parts.append(f"Route context: {context}")
         return GuardrailScopePacket(
             feature="agent",
-            scope_level="current_path",
-            scope_id=str(scope_id),
-            allowed_scope_summary="\n".join(summary_parts),
+            scope_level="query",
+            scope_id="agent",
+            allowed_scope_summary="Agent guardrail scope: current user query only.",
             candidate_kps=[],
             recent_context=[],
             selected_text="",
