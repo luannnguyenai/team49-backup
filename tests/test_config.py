@@ -65,7 +65,6 @@ def test_settings_default_guardrail_router_config(monkeypatch: pytest.MonkeyPatc
     from src.config import Settings
 
     for env_name in (
-        "GUARDRAIL_ROUTER_ENABLED",
         "GUARDRAIL_ROUTER_BASE_URL",
         "GUARDRAIL_ROUTER_MODEL",
         "GUARDRAIL_ROUTER_API_KEY",
@@ -80,7 +79,6 @@ def test_settings_default_guardrail_router_config(monkeypatch: pytest.MonkeyPatc
 
     settings = Settings(_env_file=None)
 
-    assert settings.guardrail_router_enabled is False
     assert settings.guardrail_router_base_url == ""
     assert settings.guardrail_router_model == "guardrail-router-merged"
     assert settings.guardrail_router_api_key == ""
@@ -95,7 +93,6 @@ def test_settings_default_guardrail_router_config(monkeypatch: pytest.MonkeyPatc
 def test_settings_parses_guardrail_router_config(monkeypatch: pytest.MonkeyPatch):
     from src.config import Settings
 
-    monkeypatch.setenv("GUARDRAIL_ROUTER_ENABLED", "true")
     monkeypatch.setenv("GUARDRAIL_ROUTER_BASE_URL", "https://router.example.com/v1")
     monkeypatch.setenv("GUARDRAIL_ROUTER_MODEL", "guardrail-router-merged")
     monkeypatch.setenv("GUARDRAIL_ROUTER_API_KEY", "router-token")
@@ -108,7 +105,6 @@ def test_settings_parses_guardrail_router_config(monkeypatch: pytest.MonkeyPatch
 
     settings = Settings(_env_file=None)
 
-    assert settings.guardrail_router_enabled is True
     assert settings.guardrail_router_base_url == "https://router.example.com/v1"
     assert settings.guardrail_router_model == "guardrail-router-merged"
     assert settings.guardrail_router_api_key == "router-token"
