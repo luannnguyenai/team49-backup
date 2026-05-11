@@ -4,11 +4,19 @@ from src.api.app import AskRequest
 from src.services.llm_service import (
     build_tutor_guardrail_event,
     build_tutor_guardrail_scope,
+    enforce_tutor_response_language,
     normalize_tutor_question_for_model,
 )
 
 
+class FakeTranslator:
+    async def translate_to_english(self, text):
+        return "Attention lets the model focus on relevant tokens."
+
+
 class FakeTutorLanguageNormalizer:
+    translator = FakeTranslator()
+
     async def normalize(self, text):
         if text == "Explique les mécanismes d’attention.":
             return LanguageNormalizationResult(
@@ -25,6 +33,9 @@ class FakeTutorLanguageNormalizer:
             target_language="vi" if "Giải thích" in text else "en",
             translated=False,
         )
+
+    def detect(self, text):
+        return "vi" if "trọng số" in text else "en"
 
 
 def test_tutor_ask_request_limits_question_to_1500_chars():
@@ -96,6 +107,22 @@ def test_tutor_question_normalization_translates_third_language_to_english():
     assert result.detected_language == "other"
     assert result.target_language == "en"
     assert result.translated is True
+
+
+def test_tutor_response_language_enforces_english_target_for_direct_answers():
+    result = enforce_tutor_response_language(
+        "Attention là cơ chế tính trọng số cho token liên quan.",
+        LanguageNormalizationResult(
+            original_text="Explain attention.",
+            normalized_text="Explain attention.",
+            detected_language="en",
+            target_language="en",
+            translated=False,
+        ),
+        normalizer=FakeTutorLanguageNormalizer(),
+    )
+
+    assert result == "Attention lets the model focus on relevant tokens."
 
 
 def test_tutor_guardrail_scope_uses_unit_summary_without_history():
