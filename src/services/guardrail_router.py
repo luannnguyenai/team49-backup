@@ -280,9 +280,19 @@ def parse_guardrail_decision(value: Any) -> GuardrailDecision:
         text = text.strip()
     try:
         parsed = json.loads(text)
+        if isinstance(parsed, dict):
+            parsed = _normalize_guardrail_decision_payload(parsed)
         return GuardrailDecision.model_validate(parsed)
     except (json.JSONDecodeError, ValidationError, TypeError) as exc:
         raise GuardrailRouterUnavailableError("guardrail_router_invalid_response") from exc
+
+
+def _normalize_guardrail_decision_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(payload)
+    attack_type = str(normalized.get("attack_type", "")).strip().lower()
+    if attack_type in {"", "n/a", "na", "none"}:
+        normalized["attack_type"] = "none"
+    return normalized
 
 
 def _guardrail_response_text(value: Any) -> str:
