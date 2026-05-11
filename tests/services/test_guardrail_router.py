@@ -305,6 +305,66 @@ def test_guardrail_router_skips_local_router_during_unhealthy_cooldown():
     assert fallback.invocations == 2
 
 
+def test_guardrail_router_cooldown_is_shared_across_clients_for_same_base_url():
+    clock = FakeClock()
+    base_url = "https://shared-router.example.com/v1"
+    first_http = FakeSyncHttpClient(error=TimeoutError("local tunnel unavailable"))
+    second_http = FakeSyncHttpClient(
+        response=FakeResponse(
+            _chat_payload(
+                json.dumps(
+                    {
+                        "safety_label": "SAFE",
+                        "topic_label": "ON_TOPIC",
+                        "action": "ALLOW_LESSON_ANSWER",
+                        "attack_type": "none",
+                        "selected_kp_ids": [],
+                    }
+                )
+            )
+        )
+    )
+    fallback = FakeFallbackModel(
+        json.dumps(
+            {
+                "safety_label": "SAFE",
+                "topic_label": "AMBIGUOUS",
+                "action": "ASK_CLARIFY",
+                "attack_type": "none",
+                "selected_kp_ids": [],
+            }
+        )
+    )
+    config = GuardrailRouterConfig(
+        base_url=base_url,
+        model="guardrail-router-merged",
+        fallback_provider="openai",
+        fallback_model="gpt-5.4-nano",
+        router_unhealthy_cooldown_seconds=60,
+    )
+
+    first_client = GuardrailRouterClient(
+        config,
+        sync_http_client=first_http,
+        fallback_model=fallback,
+        monotonic=clock,
+    )
+    first = first_client.route_sync(message="What is this?", scope=_scope())
+    second_client = GuardrailRouterClient(
+        config,
+        sync_http_client=second_http,
+        fallback_model=fallback,
+        monotonic=clock,
+    )
+    second = second_client.route_sync(message="What is this?", scope=_scope())
+
+    assert first.action == "ASK_CLARIFY"
+    assert second.action == "ASK_CLARIFY"
+    assert len(first_http.requests) == 1
+    assert second_http.requests == []
+    assert fallback.invocations == 2
+
+
 @pytest.mark.asyncio
 async def test_async_guardrail_router_skips_local_router_during_unhealthy_cooldown():
     clock = FakeClock()
