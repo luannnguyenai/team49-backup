@@ -71,6 +71,7 @@ def test_settings_default_guardrail_router_config(monkeypatch: pytest.MonkeyPatc
         "GUARDRAIL_ROUTER_CF_ACCESS_CLIENT_ID",
         "GUARDRAIL_ROUTER_CF_ACCESS_CLIENT_SECRET",
         "GUARDRAIL_ROUTER_TIMEOUT_SECONDS",
+        "GUARDRAIL_ROUTER_UNHEALTHY_COOLDOWN_SECONDS",
         "GUARDRAIL_ROUTER_FALLBACK_PROVIDER",
         "GUARDRAIL_ROUTER_FALLBACK_MODEL",
         "GUARDRAIL_ROUTER_MAX_TOKENS",
@@ -85,6 +86,7 @@ def test_settings_default_guardrail_router_config(monkeypatch: pytest.MonkeyPatc
     assert settings.guardrail_router_cf_access_client_id == ""
     assert settings.guardrail_router_cf_access_client_secret == ""
     assert settings.guardrail_router_timeout_seconds == 10.0
+    assert settings.guardrail_router_unhealthy_cooldown_seconds == 60.0
     assert settings.guardrail_router_fallback_provider == ""
     assert settings.guardrail_router_fallback_model == ""
     assert settings.guardrail_router_max_tokens == 96
@@ -99,6 +101,7 @@ def test_settings_parses_guardrail_router_config(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setenv("GUARDRAIL_ROUTER_CF_ACCESS_CLIENT_ID", "cf-id")
     monkeypatch.setenv("GUARDRAIL_ROUTER_CF_ACCESS_CLIENT_SECRET", "cf-secret")
     monkeypatch.setenv("GUARDRAIL_ROUTER_TIMEOUT_SECONDS", "1.75")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_UNHEALTHY_COOLDOWN_SECONDS", "45")
     monkeypatch.setenv("GUARDRAIL_ROUTER_FALLBACK_PROVIDER", "openai")
     monkeypatch.setenv("GUARDRAIL_ROUTER_FALLBACK_MODEL", "gpt-5.4-nano")
     monkeypatch.setenv("GUARDRAIL_ROUTER_MAX_TOKENS", "80")
@@ -111,6 +114,7 @@ def test_settings_parses_guardrail_router_config(monkeypatch: pytest.MonkeyPatch
     assert settings.guardrail_router_cf_access_client_id == "cf-id"
     assert settings.guardrail_router_cf_access_client_secret == "cf-secret"
     assert settings.guardrail_router_timeout_seconds == 1.75
+    assert settings.guardrail_router_unhealthy_cooldown_seconds == 45.0
     assert settings.guardrail_router_fallback_provider == "openai"
     assert settings.guardrail_router_fallback_model == "gpt-5.4-nano"
     assert settings.guardrail_router_max_tokens == 80
