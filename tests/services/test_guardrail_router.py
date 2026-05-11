@@ -146,6 +146,39 @@ def test_guardrail_prompt_allows_pending_retrieval_followup_refinements():
     assert '"proposed_raw_topic": "CNN"' in prompt
 
 
+def test_guardrail_prompt_allows_recent_assistant_followups():
+    prompt = build_guardrail_prompt(
+        "thông tin cụ thể hơn về Kim CNN đi",
+        GuardrailScopePacket(
+            feature="agent",
+            scope_level="query",
+            scope_id="agent",
+            allowed_scope_summary=(
+                "Agent guardrail scope: current user query only. Recent assistant context is "
+                "provided only to interpret safe follow-up questions."
+            ),
+            recent_context=[
+                {
+                    "type": "recent_assistant_response",
+                    "markdown": "Mình tìm thấy Kim CNN for sentence classification trong CS224n.",
+                    "citations": [
+                        {
+                            "course_id": "CS224n",
+                            "unit_name": "Kim CNN for sentence classification",
+                            "lecture_title": "Lecture 16 - ConvNets and TreeRNNs",
+                        }
+                    ],
+                    "actions": [],
+                }
+            ],
+        ),
+    )
+
+    assert "If RECENT_CONTEXT contains recent_assistant_response" in prompt
+    assert "safe follow-up about assistant-provided content" in prompt
+    assert '"unit_name": "Kim CNN for sentence classification"' in prompt
+
+
 def test_guardrail_decision_parses_openai_content_blocks():
     decision = parse_guardrail_decision(
         [
