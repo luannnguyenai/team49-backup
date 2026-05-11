@@ -195,6 +195,27 @@ def test_guardrail_prompt_allows_safe_assistant_operation_messages():
     assert "pass them to the downstream assistant router" in prompt
 
 
+def test_guardrail_prompt_uses_prompt_manager_system_rules(tmp_path):
+    from src.services.agent_prompt_manager import AgentPromptManager
+
+    (tmp_path / "guardrail_router.yaml").write_text(
+        'system: "Custom guardrail router system rules."\n',
+        encoding="utf-8",
+    )
+
+    prompt = build_guardrail_prompt(
+        "hello",
+        GuardrailScopePacket(
+            feature="agent",
+            scope_level="query",
+            scope_id="agent",
+        ),
+        prompt_manager=AgentPromptManager(base_dir=tmp_path),
+    )
+
+    assert prompt.startswith("Custom guardrail router system rules.")
+
+
 def test_guardrail_decision_parses_openai_content_blocks():
     decision = parse_guardrail_decision(
         [
