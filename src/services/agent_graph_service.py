@@ -426,7 +426,7 @@ class AgentGraphService:
         pending_clarification: PendingClarification | None = None,
     ) -> GuardrailDecision:
         try:
-            return await self.guardrail_router.route(
+            decision = await self.guardrail_router.route(
                 message=message,
                 scope=self._build_agent_guardrail_scope(
                     route_context=route_context,
@@ -435,6 +435,13 @@ class AgentGraphService:
                     pending_clarification=pending_clarification,
                 ),
             )
+            if self._should_allow_pending_retrieval_guardrail_followup(
+                message=message,
+                pending_clarification=pending_clarification,
+                decision=decision,
+            ):
+                return GuardrailDecision.allow()
+            return decision
         except GuardrailRouterUnavailableError as exc:
             raise AgentRouterUnavailableError(
                 "guardrail_router_unavailable",
@@ -480,6 +487,33 @@ class AgentGraphService:
             candidate_kps=[],
             recent_context=recent_context,
             selected_text="",
+        )
+
+    def _should_allow_pending_retrieval_guardrail_followup(
+        self,
+        *,
+        message: str,
+        pending_clarification: PendingClarification | None,
+        decision: GuardrailDecision,
+    ) -> bool:
+        if decision.safety_label != "SAFE" or decision.action != "ASK_CLARIFY":
+            return False
+        if (
+            pending_clarification is None
+            or pending_clarification.type != "slot_disambiguation"
+            or pending_clarification.payload.get("kind") != "retrieval_query"
+        ):
+            return False
+        proposed_topic = str(
+            pending_clarification.payload.get("proposed_raw_topic") or ""
+        ).strip()
+        return (
+            self._coerce_pending_retrieval_detail_refinement(
+                message=message,
+                proposed_topic=proposed_topic,
+                decision_action="clarify",
+            )
+            is not None
         )
 
     @staticmethod
