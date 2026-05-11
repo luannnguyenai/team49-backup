@@ -813,6 +813,9 @@ def test_structured_router_composes_retrieval_refinement_with_llm():
 
     assert "strongest results" in answer
     assert "many title-level learning units" in model.messages[0]["content"]
+    assert "English or Vietnamese" in model.messages[0]["content"]
+    assert "latest user message or visible conversation style" in model.messages[0]["content"]
+    assert "Do not switch to a third language" in model.messages[0]["content"]
     assert "Do not mention examples, versions, subtypes" in model.messages[0]["content"]
     assert "The only allowed choices are" in model.messages[0]["content"]
     assert "Result count: 30" in model.messages[1]["content"]
