@@ -1,0 +1,155 @@
+{
+  "alb_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:elasticloadbalancing:ap-southeast-1:116533674568:loadbalancer/app/a20-prod-alb/26d5c4737a7f2ce1"
+  },
+  "alb_dns_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "a20-prod-alb-1105228802.ap-southeast-1.elb.amazonaws.com"
+  },
+  "asset_bucket_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:s3:::a20-course-assets-prod"
+  },
+  "asset_bucket_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "a20-course-assets-prod"
+  },
+  "backend_log_group_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/ecs/a20-backend"
+  },
+  "backend_repository_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-backend"
+  },
+  "backend_security_group_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "sg-08fe77eb2f48f1e17"
+  },
+  "backend_target_group_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:elasticloadbalancing:ap-southeast-1:116533674568:targetgroup/a20-prod-be/eeb1efeeb6464320"
+  },
+  "backend_task_role_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:iam::116533674568:role/a20-prod-backend-task-role"
+  },
+  "cloudfront_distribution_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "E1DQW5ZJQ0TTWW"
+  },
+  "cloudfront_domain_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "d2syr4kpiu8d9n.cloudfront.net"
+  },
+  "deploy_role_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:iam::116533674568:role/a20-prod-gha-deploy"
+  },
+  "ecs_cluster_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:ecs:ap-southeast-1:116533674568:cluster/a20-prod-cluster"
+  },
+  "ecs_cluster_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "a20-prod-cluster"
+  },
+  "frontend_log_group_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/ecs/a20-frontend"
+  },
+  "frontend_repository_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "116533674568.dkr.ecr.ap-southeast-1.amazonaws.com/a20-frontend"
+  },
+  "frontend_security_group_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "sg-07beb6f954c05e124"
+  },
+  "frontend_target_group_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:elasticloadbalancing:ap-southeast-1:116533674568:targetgroup/a20-prod-fe/e8730606af8312d4"
+  },
+  "frontend_task_role_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:iam::116533674568:role/a20-prod-frontend-task-role"
+  },
+  "migrate_log_group_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "/ecs/a20-backend-migrate"
+  },
+  "private_subnet_ids": {
+    "sensitive": false,
+    "type": [
+      "tuple",
+      [
+        "string",
+        "string"
+      ]
+    ],
+    "value": [
+      "subnet-00a13b01b530670e6",
+      "subnet-0eb5c399b43baabb2"
+    ]
+  },
+  "public_subnet_ids": {
+    "sensitive": false,
+    "type": [
+      "tuple",
+      [
+        "string",
+        "string"
+      ]
+    ],
+    "value": [
+      "subnet-087ffa8925f9bf2e9",
+      "subnet-0ccffe140a374d13d"
+    ]
+  },
+  "rds_endpoint": {
+    "sensitive": false,
+    "type": "string",
+    "value": "a20-postgres-prod.cbea2u80yox7.ap-southeast-1.rds.amazonaws.com:5432"
+  },
+  "rds_master_user_secret_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:rds!db-bfab5bf2-a157-4aa9-b419-fe9b172a7a95-Gxxo3M"
+  },
+  "redis_endpoint": {
+    "sensitive": false,
+    "type": "string",
+    "value": "a20-redis-prod.frlokk.0001.apse1.cache.amazonaws.com"
+  },
+  "task_execution_role_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:iam::116533674568:role/a20-prod-task-execution-role"
+  },
+  "vpc_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "vpc-0b68be20a4c833321"
+  }
+}
