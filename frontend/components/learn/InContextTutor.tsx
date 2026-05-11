@@ -26,8 +26,14 @@ import { api } from "@/lib/api";
 import {
   CHAT_MODEL_OPTIONS,
   CHAT_MODEL_STORAGE_KEYS,
+  DEFAULT_CHAT_MODEL_AVAILABILITY,
+  fallbackUnavailableChatModel,
+  fetchChatModelAvailability,
+  getChatModelAvailability,
+  isChatModelAvailable,
   readStoredChatModelId,
   writeStoredChatModelId,
+  type ChatModelAvailability,
   type ChatModelId,
 } from "@/lib/chat-model-options";
 import {
@@ -194,6 +200,9 @@ export default function InContextTutor({
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [chatModelId, setChatModelId] = useState<ChatModelId>("default");
+  const [chatModelAvailability, setChatModelAvailability] = useState<ChatModelAvailability[]>(
+    DEFAULT_CHAT_MODEL_AVAILABILITY,
+  );
   const [expandedStepMessageIds, setExpandedStepMessageIds] = useState<Record<string, boolean>>({});
   const userFullName = useAuthStore((state) => state.user?.full_name?.trim() || "You");
   const resolvedLessonKey = lessonKey?.trim() || lectureId.trim();
@@ -210,10 +219,31 @@ export default function InContextTutor({
     setChatModelId(readStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.tutor));
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    fetchChatModelAvailability()
+      .then((models) => {
+        if (!active) return;
+        setChatModelAvailability(models);
+        setChatModelId((current) => {
+          const next = fallbackUnavailableChatModel(models, current);
+          if (next !== current) {
+            writeStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.tutor, next);
+          }
+          return next;
+        });
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const changeChatModel = useCallback((modelId: ChatModelId) => {
+    if (!isChatModelAvailable(chatModelAvailability, modelId)) return;
     setChatModelId(modelId);
     writeStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.tutor, modelId);
-  }, []);
+  }, [chatModelAvailability]);
 
   const nextMessageId = useCallback(() => {
     messageIdRef.current += 1;
@@ -286,6 +316,11 @@ export default function InContextTutor({
 
     setInput("");
     setStreaming(true);
+    const safeChatModelId = fallbackUnavailableChatModel(chatModelAvailability, chatModelId);
+    if (safeChatModelId !== chatModelId) {
+      setChatModelId(safeChatModelId);
+      writeStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.tutor, safeChatModelId);
+    }
     const img = captureFrame();
     const sentAt = formatMessageTime(new Date());
 
@@ -320,7 +355,7 @@ export default function InContextTutor({
           question: q,
           context_binding_id: contextBindingId,
           image_base64: img,
-          chatModelId,
+          chatModelId: safeChatModelId,
         }),
       });
 
@@ -555,7 +590,7 @@ export default function InContextTutor({
         inputRef.current?.focus();
       }, 0);
     }
-  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId, userFullName, chatModelId]);
+  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId, userFullName, chatModelId, chatModelAvailability]);
 
   const hasMessages = messages.length > 0;
 
@@ -598,11 +633,15 @@ export default function InContextTutor({
               color: "var(--text-primary)",
             }}
           >
-            {CHAT_MODEL_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
+            {CHAT_MODEL_OPTIONS.map((option) => {
+              const availability = getChatModelAvailability(chatModelAvailability, option.id);
+              const isUnavailable = !availability.available;
+              return (
+                <option key={option.id} value={option.id} disabled={isUnavailable}>
+                  {isUnavailable ? `${option.label} (${availability.status})` : option.label}
+                </option>
+              );
+            })}
           </select>
           {onClose ? (
             <button
