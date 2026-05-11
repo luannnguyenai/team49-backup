@@ -934,13 +934,16 @@ class AgentGraphService:
         else:
             raw_topic = message
             scope_expansion_approved = False
+        search_queries = [raw_topic] if raw_topic else []
+        if proposed and proposed.casefold() not in {query.casefold() for query in search_queries}:
+            search_queries.append(proposed)
         return {
             **state,
             "intent": payload.get("original_intent") or "find_content",
             "intent_confidence": 1.0,
             "slots": AgentSlots(
                 raw_topic=raw_topic,
-                search_queries=[raw_topic, proposed] if short_detail_refinement else [],
+                search_queries=search_queries,
                 target_path=payload.get("target_path"),
                 requested_path_id=payload.get("requested_path_id"),
                 search_scope=payload.get("search_scope") or "current_path",
