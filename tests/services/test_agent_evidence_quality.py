@@ -110,3 +110,31 @@ def test_evidence_quality_prioritizes_explicit_acronym_over_expanded_phrase_nois
 
     assert verdict.label == "direct_match"
     assert verdict.selected_unit_ids == ["unit-yolo"]
+
+
+def test_evidence_quality_does_not_treat_qualified_acronym_only_match_as_direct():
+    cnn_noise = [
+        UnitSearchResult(
+            canonical_unit_id=f"unit-cnn-{index}",
+            course_id="CS224n",
+            unit_name=f"Generic CNN result {index}",
+            summary="This unit mentions CNNs but not the requested qualifier.",
+            score=10 - index * 0.1,
+        )
+        for index in range(6)
+    ]
+    kim_result = UnitSearchResult(
+        canonical_unit_id="unit-kim-cnn",
+        course_id="CS224n",
+        unit_name="Kim CNN for sentence classification",
+        summary="Kim CNN applies convolutional filters over n-grams.",
+        score=3,
+    )
+
+    verdict = AgentEvidenceQualityService().score(
+        query="Kim CNN",
+        results=[*cnn_noise, kim_result],
+    )
+
+    assert verdict.label == "direct_match"
+    assert verdict.selected_unit_ids == ["unit-kim-cnn"]
