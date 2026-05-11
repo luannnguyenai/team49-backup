@@ -24,6 +24,20 @@ from src.services.agent_memory_compaction_service import AgentMemoryCompactionSe
 pytestmark = pytest.mark.asyncio
 
 
+@pytest.fixture(autouse=True)
+def allow_guardrail_router_by_default(monkeypatch):
+    class AllowGuardrailRouter:
+        async def route(self, *, message, scope):
+            from src.services.guardrail_router import GuardrailDecision
+
+            return GuardrailDecision.allow()
+
+    monkeypatch.setattr(
+        "src.services.agent_graph_service.build_guardrail_router_client",
+        lambda: AllowGuardrailRouter(),
+    )
+
+
 class EchoSanitizedAgentGraphService(AgentGraphService):
     async def _invoke_graph_and_compose(
         self,
@@ -2537,12 +2551,6 @@ async def test_pending_retrieval_query_short_detail_refines_proposed_topic_even_
         upsert_memory=AsyncMock(side_effect=lambda **kwargs: upserts.append(kwargs)),
     )
 
-    class AllowGuardrailRouter:
-        async def route(self, *, message, scope):
-            from src.services.guardrail_router import GuardrailDecision
-
-            return GuardrailDecision.allow()
-
     service = AgentGraphService(
         search_service=SimpleNamespace(search=search),
         requirement_service=SimpleNamespace(),
@@ -2551,7 +2559,6 @@ async def test_pending_retrieval_query_short_detail_refines_proposed_topic_even_
             clarification_question="Could you clarify how your question relates to the current lesson?",
         ),
         conversation_repo=conversation_repo,
-        guardrail_router=AllowGuardrailRouter(),
     )
 
     response = await service.chat(
