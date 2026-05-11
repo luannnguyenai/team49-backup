@@ -232,7 +232,7 @@ def test_guardrail_router_uses_cloudflare_tunnel_vllm_first():
     assert decision.selected_kp_ids == ["kp_error_analysis"]
     assert http.requests[0]["url"] == "https://router.example.com/v1/chat/completions"
     assert http.requests[0]["json"]["model"] == "guardrail-router-merged"
-    assert http.requests[0]["json"]["max_tokens"] == 64
+    assert http.requests[0]["json"]["max_tokens"] == 96
     assert http.requests[0]["headers"]["Authorization"] == "Bearer router-token"
     assert http.requests[0]["headers"]["CF-Access-Client-Id"] == "cf-id"
     assert http.requests[0]["headers"]["CF-Access-Client-Secret"] == "cf-secret"
