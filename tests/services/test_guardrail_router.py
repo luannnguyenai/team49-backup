@@ -8,6 +8,7 @@ from src.services.guardrail_router import (
     GuardrailRouterUnavailableError,
     GuardrailScopePacket,
     build_guardrail_prompt,
+    parse_guardrail_decision,
 )
 
 
@@ -87,6 +88,52 @@ def test_guardrail_prompt_matches_training_format():
     assert "out_of_scope_policy: strict" in prompt
     assert "- kp_error_analysis: Error analysis identifies dominant error sources." in prompt
     assert "### RECENT_CONTEXT\n\n### SELECTED_TEXT\n\n### USER_QUERY" in prompt
+
+
+def test_guardrail_decision_parses_openai_content_blocks():
+    decision = parse_guardrail_decision(
+        [
+            {"id": "reasoning", "summary": [], "type": "reasoning"},
+            {
+                "id": "message",
+                "type": "text",
+                "text": json.dumps(
+                    {
+                        "safety_label": "SAFE",
+                        "topic_label": "ON_TOPIC",
+                        "action": "ALLOW_LESSON_ANSWER",
+                        "attack_type": "none",
+                        "selected_kp_ids": [],
+                    }
+                ),
+            },
+        ]
+    )
+
+    assert decision.action == "ALLOW_LESSON_ANSWER"
+
+
+def test_guardrail_fallback_model_disables_reasoning(monkeypatch):
+    from src.services import guardrail_router
+
+    captured = {}
+
+    def fake_build_chat_model_kwargs(**kwargs):
+        captured.update(kwargs)
+        return {"model": kwargs["model"]}
+
+    monkeypatch.setattr(guardrail_router, "build_chat_model_kwargs", fake_build_chat_model_kwargs)
+    monkeypatch.setattr(guardrail_router, "init_chat_model", lambda **kwargs: object())
+
+    client = GuardrailRouterClient(
+        GuardrailRouterConfig(
+            fallback_provider="openai",
+            fallback_model="gpt-5.4-nano",
+        )
+    )
+
+    assert client._build_fallback_model() is not None
+    assert captured["reasoning_effort"] == "off"
 
 
 def test_guardrail_router_uses_cloudflare_tunnel_vllm_first():
