@@ -240,6 +240,7 @@ class GuardrailRouterClient:
                 model_provider=provider,
                 temperature=self.config.fallback_temperature,
                 max_tokens=self.config.max_tokens,
+                reasoning_effort="off",
             )
         )
 
@@ -271,7 +272,7 @@ class GuardrailRouterClient:
 
 
 def parse_guardrail_decision(value: Any) -> GuardrailDecision:
-    text = str(value).strip()
+    text = _guardrail_response_text(value).strip()
     if text.startswith("```"):
         text = text.split("```", 2)[1]
         if text.startswith("json"):
@@ -282,6 +283,18 @@ def parse_guardrail_decision(value: Any) -> GuardrailDecision:
         return GuardrailDecision.model_validate(parsed)
     except (json.JSONDecodeError, ValidationError, TypeError) as exc:
         raise GuardrailRouterUnavailableError("guardrail_router_invalid_response") from exc
+
+
+def _guardrail_response_text(value: Any) -> str:
+    if isinstance(value, list):
+        text_blocks = [
+            str(item.get("text", ""))
+            for item in value
+            if isinstance(item, dict) and item.get("type") == "text" and item.get("text")
+        ]
+        if text_blocks:
+            return "".join(text_blocks)
+    return str(value)
 
 
 def build_guardrail_config_from_settings(app_settings=settings) -> GuardrailRouterConfig:
