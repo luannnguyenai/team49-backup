@@ -328,6 +328,9 @@ def parse_guardrail_decision(value: Any) -> GuardrailDecision:
             parsed = _normalize_guardrail_decision_payload(parsed)
         return GuardrailDecision.model_validate(parsed)
     except (json.JSONDecodeError, ValidationError, TypeError) as exc:
+        plaintext_decision = _guardrail_decision_from_plaintext(text)
+        if plaintext_decision is not None:
+            return plaintext_decision
         raise GuardrailRouterUnavailableError("guardrail_router_invalid_response") from exc
 
 
@@ -337,6 +340,39 @@ def _normalize_guardrail_decision_payload(payload: dict[str, Any]) -> dict[str, 
     if attack_type in {"", "n/a", "na", "none"}:
         normalized["attack_type"] = "none"
     return normalized
+
+
+def _guardrail_decision_from_plaintext(text: str) -> GuardrailDecision | None:
+    lowered = text.strip().lower()
+    if not lowered:
+        return None
+    refusal_markers = (
+        "i cannot help",
+        "i can't help",
+        "cannot assist",
+        "can't assist",
+        "cannot comply",
+        "can't comply",
+        "not able to help",
+        "unable to help",
+        "i cannot reveal",
+        "can't reveal",
+        "system prompt",
+        "hidden system",
+        "previous instructions",
+    )
+    if not any(marker in lowered for marker in refusal_markers):
+        return None
+    attack_type = "policy_override" if any(
+        marker in lowered for marker in ("system prompt", "hidden system", "previous instructions")
+    ) else "harmful_request"
+    return GuardrailDecision(
+        safety_label="HARMFUL",
+        topic_label="N_A",
+        action="SAFETY_REFUSE",
+        attack_type=attack_type,
+        selected_kp_ids=[],
+    )
 
 
 def _guardrail_response_text(value: Any) -> str:
