@@ -417,6 +417,7 @@ def test_guardrail_router_config_defaults_to_current_api_provider(monkeypatch):
     monkeypatch.delenv("GUARDRAIL_ROUTER_BASE_URL", raising=False)
     monkeypatch.delenv("GUARDRAIL_ROUTER_FALLBACK_PROVIDER", raising=False)
     monkeypatch.delenv("GUARDRAIL_ROUTER_FALLBACK_MODEL", raising=False)
+    monkeypatch.setenv("GUARDRAIL_ROUTER_UNHEALTHY_COOLDOWN_SECONDS", "45")
     monkeypatch.setenv("MODEL_PROVIDER", "gemini")
     monkeypatch.setenv("FAST_MODEL", "gemini-2.5-flash")
 
@@ -426,3 +427,4 @@ def test_guardrail_router_config_defaults_to_current_api_provider(monkeypatch):
     assert config.base_url == ""
     assert config.fallback_provider == "gemini"
     assert config.fallback_model == "gemini-2.5-flash"
+    assert config.router_unhealthy_cooldown_seconds == 45.0
