@@ -120,6 +120,32 @@ def test_guardrail_prompt_matches_training_format():
     assert "### RECENT_CONTEXT\n\n### SELECTED_TEXT\n\n### USER_QUERY" in prompt
 
 
+def test_guardrail_prompt_allows_pending_retrieval_followup_refinements():
+    prompt = build_guardrail_prompt(
+        "khái niệm tổng quan đi",
+        GuardrailScopePacket(
+            feature="agent",
+            scope_level="query",
+            scope_id="agent",
+            allowed_scope_summary=(
+                "Agent guardrail scope: current user query only. Active pending retrieval topic is "
+                "provided only to interpret short follow-up refinements."
+            ),
+            recent_context=[
+                {
+                    "type": "pending_retrieval_query",
+                    "proposed_raw_topic": "CNN",
+                    "original_intent": "find_content",
+                }
+            ],
+        ),
+    )
+
+    assert "If RECENT_CONTEXT contains pending_retrieval_query" in prompt
+    assert "classify it as ON_TOPIC and ALLOW_LESSON_ANSWER" in prompt
+    assert '"proposed_raw_topic": "CNN"' in prompt
+
+
 def test_guardrail_decision_parses_openai_content_blocks():
     decision = parse_guardrail_decision(
         [
