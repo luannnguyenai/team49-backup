@@ -108,23 +108,29 @@ def build_guardrail_prompt(message: str, scope: GuardrailScopePacket) -> str:
         for item in scope.candidate_kps
         if item.get("id") or item.get("text")
     ]
-    recent_context = json.dumps(scope.recent_context, ensure_ascii=False)
+    recent_context = (
+        json.dumps(scope.recent_context, ensure_ascii=False)
+        if scope.recent_context
+        else ""
+    )
     selected_text = scope.selected_text.strip()
     return (
         f"{ROUTER_SYSTEM_RULES}\n\n"
         "### TASK\n"
-        "Classify the user query for safety and lesson scope. Return only valid JSON.\n\n"
+        "You are a lesson-scope safety router. Return only valid JSON.\n\n"
         "### SCOPE\n"
-        f"feature: {scope.feature}\n"
         f"scope_level: {scope.scope_level}\n"
         f"scope_id: {scope.scope_id}\n"
+        "out_of_scope_policy: strict\n"
         f"allowed_scope_summary: {scope.allowed_scope_summary.strip()}\n\n"
         "### CANDIDATE_KPS\n"
         f"{chr(10).join(candidate_lines) if candidate_lines else '- none'}\n\n"
         "### RECENT_CONTEXT\n"
-        f"{recent_context}\n\n"
+        f"{recent_context}"
+        f"{chr(10) if recent_context else ''}\n"
         "### SELECTED_TEXT\n"
-        f"{selected_text}\n\n"
+        f"{selected_text}"
+        f"{chr(10) if selected_text else ''}\n"
         "### USER_QUERY\n"
         f"{message}\n\n"
         "### OUTPUT_JSON"
