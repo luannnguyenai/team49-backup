@@ -1785,13 +1785,43 @@ class AgentGraphService:
         return terms
 
     def _active_recent_citation(self, state: dict) -> AgentCitation | None:
+        candidates: list[AgentCitation] = []
         for message in reversed(state.get("recent_messages") or []):
             for citation_payload in message.get("citations") or []:
                 try:
-                    return AgentCitation.model_validate(citation_payload)
+                    candidates.append(AgentCitation.model_validate(citation_payload))
                 except Exception:
                     continue
-        return None
+            if candidates:
+                break
+        if not candidates:
+            return None
+        return max(
+            candidates,
+            key=lambda citation: self._citation_message_match_score(
+                state.get("message"),
+                citation,
+            ),
+        )
+
+    def _citation_message_match_score(
+        self,
+        message: str | None,
+        citation: AgentCitation,
+    ) -> int:
+        message_terms = self._normalized_terms(message)
+        if not message_terms:
+            return 0
+        citation_text = " ".join(
+            part
+            for part in [
+                citation.unit_name,
+                citation.lecture_title,
+            ]
+            if part
+        )
+        citation_terms = self._normalized_terms(citation_text)
+        return len(message_terms.intersection(citation_terms))
 
     def _message_names_unmatched_explicit_topic(
         self,
@@ -2400,7 +2430,7 @@ class AgentGraphService:
                     "role": getattr(message, "role", "unknown"),
                     "markdown": markdown[:1200],
                     "citations": getattr(message, "citations_json", None) or [],
-                    "actions": [],
+                    "actions": getattr(message, "actions_json", None) or [],
                 }
             )
         return context
