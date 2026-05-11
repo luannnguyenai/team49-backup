@@ -79,6 +79,8 @@ def test_structured_router_returns_explicit_path_route():
     assert route.extracted_slots.search_queries == ["attention mask", "transformer attention mask"]
     assert route.extracted_slots.requested_path_id == "nlp"
     assert route.extracted_slots.search_scope == "explicit_path"
+    assert "English or Vietnamese" in model.messages[0]["content"]
+    assert "Do not produce user-facing text in a third language" in model.messages[0]["content"]
 
 
 def test_structured_router_accepts_serialized_route_context():
@@ -501,6 +503,7 @@ def test_structured_router_agentic_rag_responding_stage_locks_latest_user_langua
     assert "If the latest message is English, answer in English" in system_prompt
     assert "Do not switch to an unrelated language" in system_prompt
     assert "Ignore unrelated languages in recent assistant messages" in system_prompt
+    assert "English or Vietnamese" in system_prompt
     assert "Explain attention mechanisms in neural networks." in user_prompt
     assert "Je peux te l'expliquer clairement." in user_prompt
 
@@ -638,6 +641,8 @@ def test_structured_router_composes_assistant_help_with_llm():
 
     assert answer == "I can help you find content and plan reviews."
     assert "For simple greetings, greet briefly" in model.messages[0]["content"]
+    assert "English or Vietnamese" in model.messages[0]["content"]
+    assert "Do not switch to a third language" in model.messages[0]["content"]
 
 
 def test_structured_router_assistant_help_prompt_refuses_hidden_instruction_requests():
@@ -723,6 +728,8 @@ def test_structured_router_composes_grounded_answer_with_llm():
     assert "When evidence_sufficient=true, do not end with a follow-up question" in model.messages[0]["content"]
     assert "Do not suggest variants, rankings, comparisons, or choices" in model.messages[0]["content"]
     assert "the answer language must match the user's latest message" in model.messages[0]["content"]
+    assert "English or Vietnamese" in model.messages[0]["content"]
+    assert "Do not switch to a third language" in model.messages[0]["content"]
     assert "One-shot output pattern" in model.messages[0]["content"]
     assert "To understand this better, review this prerequisite first" in model.messages[0]["content"]
     assert "Where should I review CNNs?" in model.messages[1]["content"]
