@@ -1181,6 +1181,7 @@ class AgentGraphService:
         slots = state["slots"]
         if isinstance(slots, dict):
             slots = AgentSlots.model_validate(slots)
+        slots = self._slots_with_active_citation_for_followup(state, slots)
         result = await self.agentic_rag.run(
             message=state["message"],
             intent=state["intent"],
@@ -1191,6 +1192,41 @@ class AgentGraphService:
         )
         update: dict = {**state, "slots": slots, "tool_result": result}
         return self._attach_rag_pending_clarification(update, result, slots)
+
+    def _slots_with_active_citation_for_followup(
+        self,
+        state: dict,
+        slots: AgentSlots,
+    ) -> AgentSlots:
+        if len(str(state.get("message") or "").split()) > 12:
+            return slots
+        active = self._active_recent_citation(state)
+        if active is None or not active.canonical_unit_id:
+            return slots
+        if self._message_names_unmatched_explicit_topic(state.get("message"), active):
+            return slots
+        if not self._active_citation_matches_rag_query({**state, "slots": slots}, active):
+            return slots
+
+        canonical_unit_ids = [
+            active.canonical_unit_id,
+            *[
+                unit_id
+                for unit_id in slots.canonical_unit_ids
+                if unit_id != active.canonical_unit_id
+            ],
+        ]
+        search_queries = [
+            active.unit_name,
+            *[query for query in slots.search_queries if query != active.unit_name],
+        ]
+        return slots.model_copy(
+            update={
+                "raw_topic": active.unit_name,
+                "search_queries": search_queries[:5],
+                "canonical_unit_ids": canonical_unit_ids[:3],
+            }
+        )
 
     async def _rag_decide_tool(self, state: dict) -> dict:
         slots = state["slots"]
