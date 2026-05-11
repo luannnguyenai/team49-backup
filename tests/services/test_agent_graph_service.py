@@ -2485,6 +2485,88 @@ async def test_pending_retrieval_query_confirmation_uses_proposed_topic():
     assert upserts[-1]["summary_json"].get("pendingClarification") is None
 
 
+async def test_pending_retrieval_query_short_detail_refines_proposed_topic_even_if_router_clarifies():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-cnn-detail",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "original_message": "b có thể tìm cho mình nội dung về CNN k?",
+            "proposed_raw_topic": "CNN",
+            "show_top_results_allowed": True,
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn",
+                    course_id="CS231n",
+                    unit_name="Convolutional Neural Networks",
+                    summary="CNN overview content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-cnn", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-cnn-detail",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    upserts = []
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(side_effect=lambda **kwargs: upserts.append(kwargs)),
+    )
+
+    class AllowGuardrailRouter:
+        async def route(self, *, message, scope):
+            from src.services.guardrail_router import GuardrailDecision
+
+            return GuardrailDecision.allow()
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=PendingDecisionRouter(
+            action="clarify",
+            clarification_question="Could you clarify how your question relates to the current lesson?",
+        ),
+        conversation_repo=conversation_repo,
+        guardrail_router=AllowGuardrailRouter(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="khái niệm tổng quan đi", incomingMessageId="msg-cnn-detail"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-cnn-detail",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert search_requests[0].query == "CNN khái niệm tổng quan đi"
+    assert upserts[-1]["summary_json"].get("pendingClarification") is None
+
+
 async def test_pending_retrieval_query_user_detail_becomes_search_topic():
     conversation_id = uuid4()
     user_id = uuid4()
