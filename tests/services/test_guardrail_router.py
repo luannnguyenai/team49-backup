@@ -150,7 +150,7 @@ def test_guardrail_decision_normalizes_fallback_attack_type_alias():
                 "safety_label": "SAFE",
                 "topic_label": "ON_TOPIC",
                 "action": "ALLOW_LESSON_ANSWER",
-                "attack_type": "N/A",
+                "attack_type": "N_A",
                 "selected_kp_ids": [],
             }
         )
