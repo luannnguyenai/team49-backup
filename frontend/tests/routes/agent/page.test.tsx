@@ -224,6 +224,27 @@ describe("agent page", () => {
     });
   });
 
+  it("passes the selected chat model when the learner switches models", async () => {
+    render(<AgentPage />);
+
+    const qwenModel = await screen.findByRole("button", { name: /qwen 3.5 4b/i });
+    fireEvent.click(qwenModel);
+
+    const input = screen.getByPlaceholderText("Ask about your learning path...");
+    fireEvent.change(input, { target: { value: "Explain CNNs" } });
+    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenCalledWith({
+        message: "Explain CNNs",
+        incomingMessageId: expect.any(String),
+        conversationId: null,
+        traceMode: "summary",
+        chatModelId: "qwen35_4b",
+      });
+    });
+  });
+
   it("opens prerequisite path units in the existing source sidebar before learning", async () => {
     agentApiMock.unitContext.mockResolvedValueOnce({
       canonical_unit_id: "unit-prereq",

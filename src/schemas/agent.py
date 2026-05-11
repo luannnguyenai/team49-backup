@@ -4,7 +4,9 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from src.services.model_registry import DEFAULT_CHAT_MODEL_ID, get_chat_model_option
 
 
 AgentScope = Literal[
@@ -98,8 +100,14 @@ class AgentChatRequest(BaseModel):
     )
     trace_mode: Literal["none", "summary", "full"] = Field(default="summary", alias="traceMode")
     tool_mode: Literal["course", "web_papers"] = Field(default="course", alias="toolMode")
+    chat_model_id: str = Field(default=DEFAULT_CHAT_MODEL_ID, alias="chatModelId")
 
     model_config = ConfigDict(populate_by_name=True)
+
+    @field_validator("chat_model_id")
+    @classmethod
+    def validate_chat_model_id(cls, value: str) -> str:
+        return get_chat_model_option(value).id
 
 
 class AgentAnswer(BaseModel):

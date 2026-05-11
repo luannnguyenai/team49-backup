@@ -15,7 +15,7 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,6 +33,7 @@ from src.models.store import Lecture, Chapter, QAHistory, LearningProgress
 from src.models.course import LearningUnit
 from src.services.asset_signing import verify_signed_asset_url
 from src.services.llm_service import get_context_and_stream_langgraph
+from src.services.model_registry import DEFAULT_CHAT_MODEL_ID, get_chat_model_option
 from src.routers.auth import auth_router, users_router
 from src.routers.assessment import assessment_router, _deprecated_router as placement_deprecated_router
 from src.routers.agent import agent_router
@@ -210,6 +211,14 @@ class AskRequest(BaseModel):
     question: str
     context_binding_id: str | None = None
     image_base64: str | None = None
+    chat_model_id: str = Field(default=DEFAULT_CHAT_MODEL_ID, alias="chatModelId")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    @field_validator("chat_model_id")
+    @classmethod
+    def validate_chat_model_id(cls, value: str) -> str:
+        return get_chat_model_option(value).id
 
 
 async def _ensure_lecture_exists(
@@ -311,6 +320,7 @@ async def ask_question(
             image_base64=req.image_base64,
             context_binding_id=req.context_binding_id,
             user_id=user_id,
+            chat_model_id=req.chat_model_id,
         )
         return StreamingResponse(
             generator,

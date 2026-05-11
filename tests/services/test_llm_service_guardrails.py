@@ -6,6 +6,51 @@ from types import SimpleNamespace
 from src.services import llm_service
 
 
+def test_tutor_llm_factory_uses_selected_qwen_chat_model(monkeypatch) -> None:
+    captured_kwargs: dict[str, object] = {}
+
+    class FakeModel:
+        def bind_tools(self, tools):
+            return self
+
+    def fake_init_chat_model(**kwargs):
+        captured_kwargs.update(kwargs)
+        return FakeModel()
+
+    monkeypatch.setattr(llm_service, "init_chat_model", fake_init_chat_model)
+    llm_service._get_llm_with_tools.cache_clear()
+
+    llm_service._get_llm_with_tools("qwen35_4b")
+
+    assert captured_kwargs["model"] == "qwen 3.5 4B"
+    assert captured_kwargs["base_url"] == "https://vllm.a20-app-049.io.vn/v1"
+    assert captured_kwargs["api_key"] == "EMPTY"
+
+
+def test_tutor_call_model_uses_selected_chat_model_id(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    class FakeModel:
+        def invoke(self, messages, config=None):
+            captured["messages"] = messages
+            captured["config"] = config
+            return SimpleNamespace(content="answer")
+
+    def fake_get_llm_with_tools(chat_model_id):
+        captured["chat_model_id"] = chat_model_id
+        return FakeModel()
+
+    monkeypatch.setattr(llm_service, "_get_llm_with_tools", fake_get_llm_with_tools)
+    monkeypatch.setattr(llm_service, "enforce_llm_rate_limit", lambda **kwargs: captured.update({"rate_limit": kwargs}))
+    monkeypatch.setattr(llm_service, "llm_callbacks", lambda: [])
+
+    result = llm_service.call_model({"messages": [], "chat_model_id": "qwen35_4b"})
+
+    assert captured["chat_model_id"] == "qwen35_4b"
+    assert captured["rate_limit"] == {"model": "qwen 3.5 4B", "model_provider": "openai"}
+    assert result["messages"][0].content == "answer"
+
+
 def test_tutor_simple_route_sanitizes_streamed_answer_and_persisted_payload(monkeypatch) -> None:
     captured: dict[str, object] = {}
 

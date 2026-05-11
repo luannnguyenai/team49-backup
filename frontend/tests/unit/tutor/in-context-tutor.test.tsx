@@ -122,6 +122,7 @@ describe("InContextTutor", () => {
     mockTutorFetch({});
     Element.prototype.scrollIntoView = vi.fn();
     sessionStorage.clear();
+    localStorage.clear();
   });
 
   afterEach(() => {
@@ -196,6 +197,38 @@ describe("InContextTutor", () => {
         process.env.NEXT_PUBLIC_API_URL = originalApiUrl;
       }
     }
+  });
+
+  it("passes the selected tutor chat model in ask requests", async () => {
+    mockTutorFetch({
+      askResponse: buildChunkedNdjsonResponse(200, ['{"a":"Qwen tutor response."}\n{"qa_id":88}\n']),
+    });
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Tutor model"), {
+      target: { value: "qwen35_4b" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Explain the slide." },
+    });
+    fireEvent.click(screen.getAllByRole("button")[1]);
+
+    await waitFor(() => {
+      expect(screen.getByText("Qwen tutor response.")).toBeInTheDocument();
+    });
+
+    const postCall = getFetchCallsByMethod("POST")[0] as [string | URL | Request, RequestInit | undefined];
+    const body = JSON.parse(String(postCall[1]?.body ?? "{}"));
+    expect(body.chatModelId).toBe("qwen35_4b");
   });
 
   it("hydrates saved chat history from session storage on mount", async () => {

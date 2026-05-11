@@ -47,6 +47,30 @@ def test_chat_request_accepts_web_and_paper_tool_mode():
     assert request.model_dump(by_alias=True)["toolMode"] == "web_papers"
 
 
+def test_chat_request_accepts_chat_model_id_alias():
+    request = AgentChatRequest(
+        message="Explain CNNs.",
+        incomingMessageId="msg-qwen",
+        chatModelId="qwen35_4b",
+    )
+
+    assert request.chat_model_id == "qwen35_4b"
+    assert request.model_dump(by_alias=True)["chatModelId"] == "qwen35_4b"
+
+
+def test_chat_request_rejects_unknown_chat_model_id():
+    try:
+        AgentChatRequest(
+            message="Explain CNNs.",
+            incomingMessageId="msg-unknown-model",
+            chatModelId="not-supported",
+        )
+    except ValidationError as exc:
+        assert "unsupported_chat_model" in str(exc)
+    else:
+        raise AssertionError("unsupported chat model id must be rejected")
+
+
 def test_in_progress_and_resume_contracts_are_stable():
     progress = AgentInProgressResponse(
         conversationId="conv-1",

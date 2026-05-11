@@ -81,6 +81,29 @@ describe("agent api", () => {
     );
   });
 
+  it("passes the selected chat model through chat requests", async () => {
+    const { AGENT_REQUEST_TIMEOUT_MS, agentApi } = await import("@/features/agent/api");
+    postMock.mockResolvedValueOnce({ data: { ok: true } });
+
+    await agentApi.chat({
+      message: "explain CNNs",
+      incomingMessageId: "msg-qwen",
+      traceMode: "summary",
+      chatModelId: "qwen35_4b",
+    });
+
+    expect(postMock).toHaveBeenCalledWith(
+      "/api/agent/chat",
+      {
+        message: "explain CNNs",
+        incomingMessageId: "msg-qwen",
+        traceMode: "summary",
+        chatModelId: "qwen35_4b",
+      },
+      { timeout: AGENT_REQUEST_TIMEOUT_MS },
+    );
+  });
+
   it("uses an agent-specific timeout for action continuations", async () => {
     const { AGENT_REQUEST_TIMEOUT_MS, agentApi } = await import("@/features/agent/api");
     postMock.mockResolvedValueOnce({ data: { ok: true } });

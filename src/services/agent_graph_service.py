@@ -80,10 +80,12 @@ class AgentGraphService:
         checkpointer=None,
         external_research_service=None,
         pii_guardrail_service=None,
+        response_router=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
         self.router = router
+        self.response_router = response_router or router
         self.graph_repo = graph_repo
         self.thread_lock = thread_lock or _NoopThreadLock()
         self.conversation_repo = conversation_repo
@@ -107,7 +109,7 @@ class AgentGraphService:
         self.composer = AgentResponseComposer()
         self.scope_service = AgentSearchScopeService()
         self.external_research = external_research_service or AgentExternalResearchService(
-            responder=router
+            responder=self.response_router
         )
         self.pii_guardrail = pii_guardrail_service or PIIGuardrailService()
         prerequisite_path_service = None
@@ -126,6 +128,7 @@ class AgentGraphService:
         self.agentic_rag = AgenticRAGPipeline(
             router=router,
             tool_executor=self.agentic_rag_tools,
+            response_router=self.response_router,
         )
         self._checkpointer = checkpointer or (InMemorySaver() if InMemorySaver is not None else None)
         self._graph = self._build_graph() if StateGraph is not None else None
@@ -1118,7 +1121,7 @@ class AgentGraphService:
                 observations=state.get("rag_observations") or [],
             )
         else:
-            compose_grounded = getattr(self.router, "compose_grounded_answer", None)
+            compose_grounded = getattr(self.response_router, "compose_grounded_answer", None)
             if compose_grounded is None:
                 return result
             answer = compose_grounded(
@@ -1190,7 +1193,7 @@ class AgentGraphService:
         )
 
     def _compose_source_limited_answer(self, state: dict, result: ToolResult) -> str:
-        composer = getattr(self.router, "compose_source_limited_answer", None)
+        composer = getattr(self.response_router, "compose_source_limited_answer", None)
         if composer is None:
             raise AgentRouterUnavailableError("agent_source_limited_model_missing")
         answer = composer(
@@ -1524,7 +1527,7 @@ class AgentGraphService:
             return update
 
         if state["intent"] == "assistant_help":
-            compose_help = getattr(self.router, "compose_assistant_help", None)
+            compose_help = getattr(self.response_router, "compose_assistant_help", None)
             if compose_help is None:
                 raise AgentRouterUnavailableError("agent_assistant_help_model_missing")
             try:
@@ -1572,7 +1575,7 @@ class AgentGraphService:
             if result.citations and (
                 result.requires_evidence or result.metadata.get("evidence_verdict") == "related_match"
             ):
-                compose_grounded = getattr(self.router, "compose_grounded_answer", None)
+                compose_grounded = getattr(self.response_router, "compose_grounded_answer", None)
                 if compose_grounded is not None:
                     grounded_answer = compose_grounded(
                         state["message"],

@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.routers.admin import current_model, llm_stats
+from src.routers.admin import current_model, llm_stats, model_health
 
 
 @pytest.mark.asyncio
@@ -62,6 +62,39 @@ async def test_current_model_returns_settings_values():
         "provider": "anthropic",
         "fast_model": "claude-haiku-4-5",
     }
+
+
+@pytest.mark.asyncio
+async def test_model_health_returns_registered_models():
+    fake_health = [
+        {
+            "id": "default",
+            "label": "Default",
+            "provider": "openai",
+            "model": "gpt-5.4-mini",
+            "status": "healthy",
+            "latency_ms": 120,
+            "checked_at": "2026-05-11T00:00:00+00:00",
+            "error": None,
+        },
+        {
+            "id": "qwen35_4b",
+            "label": "Qwen 3.5 4B",
+            "provider": "openai",
+            "model": "qwen 3.5 4B",
+            "base_url": "https://vllm.a20-app-049.io.vn/v1",
+            "status": "healthy",
+            "latency_ms": 80,
+            "checked_at": "2026-05-11T00:00:00+00:00",
+            "error": None,
+        },
+    ]
+
+    with patch("src.routers.admin.check_all_chat_model_health", new=AsyncMock(return_value=fake_health)):
+        result = await model_health(_admin=object())
+
+    assert [item["id"] for item in result["models"]] == ["default", "qwen35_4b"]
+    assert result["models"][1]["base_url"] == "https://vllm.a20-app-049.io.vn/v1"
 
 
 @pytest.mark.asyncio

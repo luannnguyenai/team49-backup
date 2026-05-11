@@ -24,6 +24,13 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import {
+  CHAT_MODEL_OPTIONS,
+  CHAT_MODEL_STORAGE_KEYS,
+  readStoredChatModelId,
+  writeStoredChatModelId,
+  type ChatModelId,
+} from "@/lib/chat-model-options";
+import {
   buildTutorConversationKey,
   loadTutorConversation,
   saveTutorConversation,
@@ -186,6 +193,7 @@ export default function InContextTutor({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [chatModelId, setChatModelId] = useState<ChatModelId>("default");
   const [expandedStepMessageIds, setExpandedStepMessageIds] = useState<Record<string, boolean>>({});
   const userFullName = useAuthStore((state) => state.user?.full_name?.trim() || "You");
   const resolvedLessonKey = lessonKey?.trim() || lectureId.trim();
@@ -197,6 +205,15 @@ export default function InContextTutor({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messageIdRef = useRef(0);
   const loadedConversationKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setChatModelId(readStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.tutor));
+  }, []);
+
+  const changeChatModel = useCallback((modelId: ChatModelId) => {
+    setChatModelId(modelId);
+    writeStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.tutor, modelId);
+  }, []);
 
   const nextMessageId = useCallback(() => {
     messageIdRef.current += 1;
@@ -303,6 +320,7 @@ export default function InContextTutor({
           question: q,
           context_binding_id: contextBindingId,
           image_base64: img,
+          chatModelId,
         }),
       });
 
@@ -537,7 +555,7 @@ export default function InContextTutor({
         inputRef.current?.focus();
       }, 0);
     }
-  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId, userFullName]);
+  }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId, userFullName, chatModelId]);
 
   const hasMessages = messages.length > 0;
 
@@ -564,16 +582,39 @@ export default function InContextTutor({
             AI Tutor
           </span>
         </div>
-        {onClose ? (
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-            style={{ color: "var(--text-muted)" }}
+        <div className="flex items-center gap-2">
+          <label htmlFor="tutor-model-select" className="sr-only">
+            Tutor model
+          </label>
+          <select
+            id="tutor-model-select"
+            aria-label="Tutor model"
+            value={chatModelId}
+            disabled={streaming}
+            onChange={(event) => changeChatModel(event.target.value as ChatModelId)}
+            className="h-8 rounded-lg border bg-transparent px-2 text-xs font-medium outline-none transition-colors disabled:opacity-60"
+            style={{
+              borderColor: "var(--border)",
+              color: "var(--text-primary)",
+            }}
           >
-            <span className="sr-only">Close tutor</span>
-            <X className="h-4 w-4" />
-          </button>
-        ) : null}
+            {CHAT_MODEL_OPTIONS.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          {onClose ? (
+            <button
+              onClick={onClose}
+              className="rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+              style={{ color: "var(--text-muted)" }}
+            >
+              <span className="sr-only">Close tutor</span>
+              <X className="h-4 w-4" />
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {/* Chat messages */}

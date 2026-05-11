@@ -42,6 +42,18 @@ class Settings(BaseSettings):
         default_factory=dict,
         description="Provider-specific chat model kwargs, parsed from JSON.",
     )
+    qwen35_4b_model: str = Field(
+        default="qwen 3.5 4B",
+        description="OpenAI-compatible local Qwen chat model id.",
+    )
+    qwen35_4b_base_url: str = Field(
+        default="https://vllm.a20-app-049.io.vn/v1",
+        description="OpenAI-compatible local Qwen API base URL.",
+    )
+    qwen35_4b_api_key: str = Field(
+        default="EMPTY",
+        description="API key placeholder for local OpenAI-compatible Qwen servers.",
+    )
     llm_request_timeout_seconds: int = Field(
         default=30,
         ge=1,

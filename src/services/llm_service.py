@@ -19,12 +19,15 @@ from sqlalchemy import or_, select
 
 from src.models.canonical import CanonicalUnit
 from src.models.course import Course, LearningUnit
-from src.config import DEFAULT_MODEL, settings
 from src.database import tutor_thread_async_session_factory
 from src.models.store import Lecture, Chapter, TranscriptLine, QAHistory
-from src.services.chat_model_factory import build_chat_model_kwargs
 from src.services.lecture_scope_service import get_lecture_scope_metadata
 from src.services.llm_rate_limiter import enforce_llm_rate_limit
+from src.services.model_registry import (
+    DEFAULT_CHAT_MODEL_ID,
+    build_chat_model_kwargs_for_option,
+    get_chat_model_option,
+)
 from src.services.sandbox import run_python_code
 from src.services.router import route_question
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
@@ -335,6 +338,7 @@ async def _save_qa_history(
 
 class AgentState(TypedDict):
     messages: Annotated[list, operator.add]
+    chat_model_id: str
 
 
 @tool
@@ -347,12 +351,12 @@ def execute_python(code: str) -> str:
 tools = [execute_python]
 tool_node = ToolNode(tools)
 
-@lru_cache(maxsize=1)
-def _get_llm_with_tools():
+@lru_cache(maxsize=4)
+def _get_llm_with_tools(chat_model_id: str = DEFAULT_CHAT_MODEL_ID):
     """Lazily create the main tutor LLM so FastAPI can import without secrets."""
     llm = init_chat_model(
-        **build_chat_model_kwargs(
-            model=DEFAULT_MODEL,
+        **build_chat_model_kwargs_for_option(
+            chat_model_id,
             temperature=0.2,
         )
     )
@@ -364,8 +368,10 @@ def _get_llm_with_tools():
 
 
 def call_model(state: AgentState):
-    enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
-    response = _get_llm_with_tools().invoke(
+    chat_model_id = state.get("chat_model_id") or DEFAULT_CHAT_MODEL_ID
+    option = get_chat_model_option(chat_model_id)
+    enforce_llm_rate_limit(model=option.model, model_provider=option.provider)
+    response = _get_llm_with_tools(chat_model_id).invoke(
         state["messages"],
         config={"callbacks": llm_callbacks(), "metadata": {"node": "call_model"}},
     )
@@ -443,6 +449,7 @@ def get_context_and_stream_langgraph(
     image_base64: str | None = None,
     context_binding_id: str | None = None,
     user_id: str | None = None,
+    chat_model_id: str = DEFAULT_CHAT_MODEL_ID,
 ):
     """
     Main tutor streaming function.
@@ -616,7 +623,7 @@ def get_context_and_stream_langgraph(
                     )
                     return
 
-                if route == "SIMPLE" and not image_base64:
+                if route == "SIMPLE" and not image_base64 and chat_model_id == DEFAULT_CHAT_MODEL_ID:
                     direct_answer = routing.get("direct_answer", "")
                     sanitized_answer = _sanitize_tutor_output_text(direct_answer).sanitized_text
                     if first_answer_at is None:
@@ -745,7 +752,10 @@ def get_context_and_stream_langgraph(
                 in_tool_call = False
                 has_streamed_answer = False
 
-                inputs = {"messages": [sys_msg] + history_messages + [human_msg]}
+                inputs = {
+                    "messages": [sys_msg] + history_messages + [human_msg],
+                    "chat_model_id": chat_model_id,
+                }
 
                 yield emit_status(STATUS_THINKING_ANSWER)
 

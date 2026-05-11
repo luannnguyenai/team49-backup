@@ -22,6 +22,7 @@ import {
   adminApi,
   type FeedbackStats,
   type LlmStats,
+  type ModelHealthRow,
   type NegativeFeedbackRow,
 } from "@/lib/admin-api";
 import { llmTooltips } from "@/lib/admin-tooltips";
@@ -40,6 +41,7 @@ function fmtMs(value: number | null | undefined): string {
 export default function AdminLlmPage() {
   const [stats, setStats] = useState<LlmStats | null>(null);
   const [recent, setRecent] = useState<Record<string, unknown>[]>([]);
+  const [modelHealth, setModelHealth] = useState<ModelHealthRow[]>([]);
   const [feedback, setFeedback] = useState<FeedbackStats | null>(null);
   const [negatives, setNegatives] = useState<NegativeFeedbackRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,15 +51,17 @@ export default function AdminLlmPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const [s, r, fb, neg] = await Promise.all([
+        const [s, r, mh, fb, neg] = await Promise.all([
           adminApi.llmStats(24),
           adminApi.llmRecent(10),
+          adminApi.modelHealth().catch(() => ({ models: [] })),
           adminApi.feedbackStats(14),
           adminApi.feedbackNegative(20),
         ]);
         if (!cancelled) {
           setStats(s);
           setRecent(r);
+          setModelHealth(mh.models);
           setFeedback(fb);
           setNegatives(neg);
           setErr(null);
@@ -89,6 +93,55 @@ export default function AdminLlmPage() {
           Focused on first-status latency, answer latency, user feedback, and recent tutor activity.
         </p>
       </div>
+
+      <section className="space-y-3">
+        <header className="flex items-baseline justify-between gap-3">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+            Model health
+          </h3>
+        </header>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {modelHealth.length > 0 ? (
+            modelHealth.map((item) => {
+              const statusClass =
+                item.status === "healthy"
+                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                  : item.status === "degraded"
+                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                    : "bg-rose-500/10 text-rose-700 dark:text-rose-300";
+              return (
+                <div
+                  key={item.id}
+                  className="rounded-[18px] border border-slate-200/70 bg-white/70 p-4 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.label}</p>
+                      <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                        {item.provider}/{item.model}
+                      </p>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClass}`}>
+                      {item.status}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <span>{fmtMs(item.latency_ms)}</span>
+                    {item.base_url ? <span className="truncate">{item.base_url}</span> : null}
+                  </div>
+                  {item.error ? (
+                    <p className="mt-2 line-clamp-2 text-xs text-rose-600 dark:text-rose-300">{item.error}</p>
+                  ) : null}
+                </div>
+              );
+            })
+          ) : (
+            <div className="rounded-[18px] border border-slate-200/70 bg-white/70 p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
+              {loading ? "Checking models..." : "No model health data."}
+            </div>
+          )}
+        </div>
+      </section>
 
       <KpiGroup title="Volume" cols={2}>
         <KpiCard
