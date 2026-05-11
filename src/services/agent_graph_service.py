@@ -55,6 +55,7 @@ from src.services.guardrail_router import (
     guardrail_user_message,
 )
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
+from src.services.language_normalization import get_input_language_normalizer
 
 
 RAG_AGENT_INTENTS = {
@@ -96,6 +97,7 @@ class AgentGraphService:
         external_research_service=None,
         pii_guardrail_service=None,
         guardrail_router=None,
+        language_normalizer=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -127,6 +129,7 @@ class AgentGraphService:
         )
         self.pii_guardrail = pii_guardrail_service or PIIGuardrailService()
         self.guardrail_router = guardrail_router or build_guardrail_router_client()
+        self.language_normalizer = language_normalizer or get_input_language_normalizer()
         prerequisite_path_service = None
         if hasattr(search_service, "repo"):
             prerequisite_path_service = AgentPrerequisitePathService(
@@ -247,6 +250,10 @@ class AgentGraphService:
                 block_reason=input_guardrail.block_reason or "pii_input_blocked",
                 error_code=input_guardrail.error_code,
             )
+        normalized_language = await self.language_normalizer.normalize(sanitized_request.message)
+        sanitized_request = sanitized_request.model_copy(
+            update={"message": normalized_language.normalized_text}
+        )
         guardrail_decision = await self._route_guardrail(
             message=sanitized_request.message,
             route_context=sanitized_request.route_context,
