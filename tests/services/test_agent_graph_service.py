@@ -420,6 +420,115 @@ async def test_graph_delegates_supported_router_to_agentic_rag_pipeline():
     ]
 
 
+async def test_agentic_rag_pins_active_citation_for_short_followup():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="CNN", search_queries=["CNN"]),
+            )
+
+        def rag_think(self, **kwargs):
+            return {"user_goal": "Explain the active CNN unit", "active_topic": "CNN"}
+
+        def rag_act(self, **kwargs):
+            return AgenticRAGToolCall(
+                tool="search_current_path_units",
+                arguments={"query": "CNN", "search_queries": ["CNN"]},
+                rationale="Search the current path.",
+            )
+
+        def rag_observe(self, **kwargs):
+            return kwargs["tool_observation"]
+
+        def rag_respond(self, **kwargs):
+            observation = kwargs["observations"][0]
+            citations = observation["result"]["citations"]
+            return AgenticRAGFinal(
+                answer_markdown=f"Kim CNN detail from {citations[0]['unit_name']}.",
+                evidence_status="grounded",
+                evidence_sufficient=True,
+            )
+
+    async def search(request, allowed_course_ids):
+        results = [
+            UnitSearchResult(
+                canonical_unit_id="unit-kim-cnn",
+                course_id="CS224n",
+                unit_name="Kim CNN for sentence classification",
+                lecture_title="Lecture 16 - ConvNets and TreeRNNs",
+                summary="Yoon Kim's CNN applies filters over n-grams, max-pools, and classifies.",
+                learn_href="/courses/cs224n/learn/lecture17-convnets-seg2",
+                score=5,
+                quiz_available=True,
+            )
+        ]
+        results.extend(
+            UnitSearchResult(
+                canonical_unit_id=f"unit-cnn-{index}",
+                course_id="CS231n",
+                unit_name=f"CNN vision topic {index}",
+                summary="A CNN vision topic.",
+                learn_href=f"/courses/cs231n/learn/cnn-{index}",
+                score=4,
+                quiz_available=True,
+            )
+            for index in range(19)
+        )
+        return UnitSearchResponse(
+            results=results,
+            trace=RetrievalTrace(trace_id="trace-agentic-active-citation", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa giải thích khái niệm CNN và có nguồn Kim CNN.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-kim-cnn",
+                            "course_id": "CS224n",
+                            "lecture_title": "Lecture 16 - ConvNets and TreeRNNs",
+                            "unit_name": "Kim CNN for sentence classification",
+                            "learn_href": "/courses/cs224n/learn/lecture17-convnets-seg2",
+                            "quote": "Kim CNN uses n-gram filters and max pooling.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="thông tin cụ thể hơn về Kim CNN đi",
+            incomingMessageId="msg-agentic-active-citation",
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-agentic-active-citation",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS224n", "CS231n"],
+        current_path_course_ids=["CS224n", "CS231n"],
+    )
+
+    assert response.answer.markdown == "Kim CNN detail from Kim CNN for sentence classification."
+    assert [citation.canonical_unit_id for citation in response.citations] == ["unit-kim-cnn"]
+
+
 async def test_graph_react_rag_can_ask_clarification_without_searching():
     search = AsyncMock()
 
