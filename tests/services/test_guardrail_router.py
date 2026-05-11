@@ -159,6 +159,17 @@ def test_guardrail_decision_normalizes_fallback_attack_type_alias():
     assert decision.attack_type == "none"
 
 
+def test_guardrail_decision_maps_plaintext_refusal_to_safety_refuse():
+    decision = parse_guardrail_decision(
+        "I cannot help with that request or reveal hidden system instructions."
+    )
+
+    assert decision.safety_label == "HARMFUL"
+    assert decision.topic_label == "N_A"
+    assert decision.action == "SAFETY_REFUSE"
+    assert decision.attack_type == "policy_override"
+
+
 def test_guardrail_fallback_model_disables_reasoning(monkeypatch):
     from src.services import guardrail_router
 
