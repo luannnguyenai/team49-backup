@@ -1,5 +1,5 @@
 $baseBranch = "main"
-$sourceBranch = "feat-terraform-aws"
+$sourceBranch = "feat-chat-model-selector-health"
 $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
