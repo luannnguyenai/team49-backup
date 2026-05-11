@@ -123,6 +123,24 @@ def _build_out_of_scope_message(lecture_title: str, current_chapter: str) -> str
     )
 
 
+def _router_response_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for item in content:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict):
+                text = item.get("text")
+                if isinstance(text, str):
+                    parts.append(text)
+            elif hasattr(item, "text") and isinstance(item.text, str):
+                parts.append(item.text)
+        return "".join(parts)
+    return str(content)
+
+
 def route_question(
     question: str,
     lecture_title: str,
@@ -164,7 +182,7 @@ def route_question(
             HumanMessage(content=user_text),
         ])
 
-        raw = response.content.strip()
+        raw = _router_response_text(response.content).strip()
 
         # Parse JSON (handle markdown code fences from weaker models)
         if raw.startswith("```"):
