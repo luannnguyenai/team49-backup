@@ -7,6 +7,7 @@ from src.services.guardrail_router import (
     GuardrailRouterConfig,
     GuardrailRouterUnavailableError,
     GuardrailScopePacket,
+    build_guardrail_prompt,
 )
 
 
@@ -77,6 +78,15 @@ def _chat_payload(content: str) -> dict:
             }
         ]
     }
+
+
+def test_guardrail_prompt_matches_training_format():
+    prompt = build_guardrail_prompt("Explain error analysis.", _scope())
+
+    assert "### TASK\nYou are a lesson-scope safety router. Return only valid JSON." in prompt
+    assert "out_of_scope_policy: strict" in prompt
+    assert "- kp_error_analysis: Error analysis identifies dominant error sources." in prompt
+    assert "### RECENT_CONTEXT\n\n### SELECTED_TEXT\n\n### USER_QUERY" in prompt
 
 
 def test_guardrail_router_uses_cloudflare_tunnel_vllm_first():
