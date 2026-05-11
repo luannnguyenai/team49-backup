@@ -15,7 +15,15 @@ except ModuleNotFoundError:  # pragma: no cover - dependency exists in productio
     END = START = StateGraph = None
     Command = interrupt = None
 
-from src.schemas.agent import AgentAction, AgentActionResumeRequest, AgentChatRequest, AgentChatResponse, AgentCitation
+from src.schemas.agent import (
+    AgentAction,
+    AgentActionResumeRequest,
+    AgentAnswer,
+    AgentChatRequest,
+    AgentChatResponse,
+    AgentCitation,
+    AgentFallback,
+)
 from src.schemas.agent import AgentGuardrail
 from src.services.agent_action_commit_service import AgentActionCommitService
 from src.services.agent_external_research_service import AgentExternalResearchService
@@ -39,6 +47,13 @@ from src.services.agent_thread_memory_state import AgentThreadMemoryStateStore
 from src.services.agent_tool_nodes import AgentToolNodes
 from src.services.agentic_rag_pipeline import AgenticRAGPipeline
 from src.services.agentic_rag_tools import AgenticRAGToolExecutor
+from src.services.guardrail_router import (
+    GuardrailDecision,
+    GuardrailRouterUnavailableError,
+    GuardrailScopePacket,
+    build_guardrail_router_client,
+    guardrail_user_message,
+)
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
 
 
@@ -80,6 +95,7 @@ class AgentGraphService:
         checkpointer=None,
         external_research_service=None,
         pii_guardrail_service=None,
+        guardrail_router=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -110,6 +126,7 @@ class AgentGraphService:
             responder=router
         )
         self.pii_guardrail = pii_guardrail_service or PIIGuardrailService()
+        self.guardrail_router = guardrail_router or build_guardrail_router_client()
         prerequisite_path_service = None
         if hasattr(search_service, "repo"):
             prerequisite_path_service = AgentPrerequisitePathService(
@@ -230,6 +247,18 @@ class AgentGraphService:
                 block_reason=input_guardrail.block_reason or "pii_input_blocked",
                 error_code=input_guardrail.error_code,
             )
+        guardrail_decision = await self._route_guardrail(
+            message=sanitized_request.message,
+            route_context=sanitized_request.route_context,
+            allowed_course_ids=allowed_course_ids,
+            current_path_course_ids=current_path_course_ids,
+        )
+        guardrail_response = self._compose_guardrail_response(
+            conversation_id=conversation_id,
+            decision=guardrail_decision,
+        )
+        if guardrail_response is not None:
+            return guardrail_response
 
         if self.graph_repo is None:
             response = await self._invoke_graph_and_compose(
@@ -370,6 +399,87 @@ class AgentGraphService:
         result = self.pii_guardrail.sanitize_input(request.message)
         sanitized_request = request.model_copy(update={"message": result.sanitized_text})
         return sanitized_request, result
+
+    async def _route_guardrail(
+        self,
+        *,
+        message: str,
+        route_context,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None,
+    ) -> GuardrailDecision:
+        try:
+            return await self.guardrail_router.route(
+                message=message,
+                scope=self._build_agent_guardrail_scope(
+                    route_context=route_context,
+                    allowed_course_ids=allowed_course_ids,
+                    current_path_course_ids=current_path_course_ids,
+                ),
+            )
+        except GuardrailRouterUnavailableError as exc:
+            raise AgentRouterUnavailableError(
+                "guardrail_router_unavailable",
+                exc.error_code,
+            ) from exc
+
+    @staticmethod
+    def _build_agent_guardrail_scope(
+        *,
+        route_context,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None,
+    ) -> GuardrailScopePacket:
+        context = route_context.model_dump() if hasattr(route_context, "model_dump") else {}
+        scope_id = (
+            context.get("canonical_unit_id")
+            or context.get("unit_slug")
+            or context.get("course_slug")
+            or ",".join(current_path_course_ids or allowed_course_ids)
+            or "agent"
+        )
+        summary_parts = [
+            "Agent requests must stay within the user's allowed AI/ML learning context.",
+            f"Allowed course IDs: {', '.join(allowed_course_ids) if allowed_course_ids else 'none'}",
+        ]
+        if current_path_course_ids:
+            summary_parts.append(f"Current path course IDs: {', '.join(current_path_course_ids)}")
+        if context:
+            summary_parts.append(f"Route context: {context}")
+        return GuardrailScopePacket(
+            feature="agent",
+            scope_level="current_path",
+            scope_id=str(scope_id),
+            allowed_scope_summary="\n".join(summary_parts),
+            candidate_kps=[],
+            recent_context=[],
+            selected_text="",
+        )
+
+    @staticmethod
+    def _compose_guardrail_response(
+        *,
+        conversation_id: str,
+        decision: GuardrailDecision,
+    ) -> AgentChatResponse | None:
+        if decision.action == "ALLOW_LESSON_ANSWER":
+            return None
+        return AgentChatResponse(
+            conversation_id=conversation_id,
+            message_id=str(uuid4()),
+            answer=AgentAnswer(
+                markdown=guardrail_user_message(decision),
+                confidence="fallback",
+            ),
+            fallback=AgentFallback(
+                reason="unsafe_action",
+                message="The request was stopped by the guardrail router before agent routing.",
+            ),
+            guardrail=AgentGuardrail(
+                blocked=True,
+                blockReason=decision.action,
+            ),
+        )
 
     def _sanitize_response(
         self,
