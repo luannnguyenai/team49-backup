@@ -319,9 +319,13 @@ class StructuredAgentRouter:
                             "itself instead of an answer to the pending clarification, set action=new_request. "
                             "If the user provides more detail for a retrieval query, set action=refine and return a "
                             "single BM25-ready refined_query that combines the pending topic with the new detail. "
+                            "For retrieval_query payloads with proposed_raw_topic, a short aspect/detail reply "
+                            "should refine the pending topic: combine proposed_raw_topic with the user's detail "
+                            "and do not ask how it relates to the current lesson. "
                             "If the user approves showing offered top results or expanding search scope, set "
                             "action=approve and leave refined_query empty. If the reply is unclear, set action=clarify "
-                            "with one concise clarification_question."
+                            "with one concise clarification_question, matching the latest user message or visible "
+                            "conversation style in English or Vietnamese only."
                         ),
                     },
                     {
