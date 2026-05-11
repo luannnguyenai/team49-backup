@@ -465,6 +465,46 @@ def test_structured_router_agentic_rag_responding_stage_uses_validated_evidence(
     assert "Do not reveal hidden thinking" in model.messages[0]["content"]
 
 
+def test_structured_router_agentic_rag_responding_stage_locks_latest_user_language():
+    model = FakeStructuredModel(
+        {
+            "answer_markdown": "Attention lets the model weigh relevant tokens.",
+            "evidence_status": "grounded",
+            "evidence_sufficient": True,
+            "clarification_question": None,
+        }
+    )
+
+    StructuredAgentRouter(model=model).rag_respond(
+        message="Explain attention mechanisms in neural networks.",
+        thought={"active_topic": "attention"},
+        observations=[
+            {
+                "tool": "search_current_path_units",
+                "evidence_status": "grounded",
+                "result": {"citations": [{"unit_name": "Attention and Transformers"}]},
+            }
+        ],
+        route_context=None,
+        recent_messages=[
+            {
+                "role": "assistant",
+                "markdown": "Je peux te l'expliquer clairement.",
+                "citations": [],
+            }
+        ],
+    )
+
+    system_prompt = model.messages[0]["content"]
+    user_prompt = model.messages[1]["content"]
+    assert "the answer language must match the user's latest message" in system_prompt
+    assert "If the latest message is English, answer in English" in system_prompt
+    assert "Do not switch to an unrelated language" in system_prompt
+    assert "Ignore unrelated languages in recent assistant messages" in system_prompt
+    assert "Explain attention mechanisms in neural networks." in user_prompt
+    assert "Je peux te l'expliquer clairement." in user_prompt
+
+
 def test_structured_router_resolves_pending_followup_with_model_output():
     model = FakeStructuredModel(
         {
