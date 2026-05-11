@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   plan:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, phoenix-runner]
     environment: production
 
     steps:
