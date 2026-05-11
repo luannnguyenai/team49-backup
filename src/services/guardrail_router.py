@@ -36,6 +36,9 @@ AttackType = Literal[
     "unknown",
 ]
 
+_DEFAULT_MONOTONIC = time.monotonic
+_ROUTER_UNHEALTHY_UNTIL_BY_HEALTH_KEY: dict[str, float] = {}
+
 
 class GuardrailRouterUnavailableError(RuntimeError):
     def __init__(
@@ -163,8 +166,7 @@ class GuardrailRouterClient:
         self.sync_http_client = sync_http_client
         self.async_http_client = async_http_client
         self.fallback_model = fallback_model
-        self._monotonic = monotonic or time.monotonic
-        self._router_unhealthy_until = 0.0
+        self._monotonic = monotonic or _DEFAULT_MONOTONIC
 
     def route_sync(self, *, message: str, scope: GuardrailScopePacket) -> GuardrailDecision:
         errors: list[str] = []
@@ -207,15 +209,30 @@ class GuardrailRouterClient:
         raise GuardrailRouterUnavailableError("; ".join(errors))
 
     def _should_try_router(self) -> bool:
-        return bool(self.config.base_url.strip()) and self._monotonic() >= self._router_unhealthy_until
+        key = self._router_health_key()
+        return bool(key) and self._monotonic() >= _ROUTER_UNHEALTHY_UNTIL_BY_HEALTH_KEY.get(key, 0.0)
 
     def _mark_router_unhealthy(self) -> None:
+        key = self._router_health_key()
+        if not key:
+            return
         cooldown = max(0.0, self.config.router_unhealthy_cooldown_seconds)
         if cooldown:
-            self._router_unhealthy_until = max(self._router_unhealthy_until, self._monotonic() + cooldown)
+            _ROUTER_UNHEALTHY_UNTIL_BY_HEALTH_KEY[key] = max(
+                _ROUTER_UNHEALTHY_UNTIL_BY_HEALTH_KEY.get(key, 0.0),
+                self._monotonic() + cooldown,
+            )
 
     def _mark_router_healthy(self) -> None:
-        self._router_unhealthy_until = 0.0
+        key = self._router_health_key()
+        if key:
+            _ROUTER_UNHEALTHY_UNTIL_BY_HEALTH_KEY.pop(key, None)
+
+    def _router_health_key(self) -> str:
+        base_url = self.config.base_url.strip().rstrip("/")
+        if not base_url:
+            return ""
+        return f"{base_url}::{id(self._monotonic)}"
 
     def _route_via_http_sync(self, *, message: str, scope: GuardrailScopePacket) -> GuardrailDecision:
         client = self.sync_http_client or httpx.Client()
