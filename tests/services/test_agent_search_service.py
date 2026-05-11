@@ -127,3 +127,144 @@ async def test_search_does_not_compact_match_across_word_boundaries():
     )
 
     assert response.results[0].score == 0
+
+
+@pytest.mark.asyncio
+async def test_search_reranks_specific_mask_rcnn_above_broad_rcnn_family():
+    class Repo:
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
+            return [
+                SimpleNamespace(
+                    unit_id="rcnn-family",
+                    course_id="CS231n",
+                    lecture_id="lecture-09",
+                    lecture_title="Lecture 9: Object Detection, Image Segmentation, Visualizing and Understanding",
+                    unit_name="Object detection as classification plus localization and the R-CNN family",
+                    summary="R-CNN classifies proposal crops and refines boxes.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+                SimpleNamespace(
+                    unit_id="mask-rcnn",
+                    course_id="CS231n",
+                    lecture_id="lecture-09",
+                    lecture_title="Lecture 9: Object Detection, Image Segmentation, Visualizing and Understanding",
+                    unit_name="Instance segmentation with Mask R-CNN",
+                    summary=(
+                        "Mask R-CNN extends the R-CNN pipeline with an extra convolutional "
+                        "branch that predicts a pixel-level mask for each detected object."
+                    ),
+                    description="",
+                    has_quiz_items=True,
+                ),
+            ]
+
+    service = AgentUnitSearchService(Repo(), FakeNavigation())
+    response = await service.search(
+        UnitSearchRequest(query="Mask RCNN", courseIds=["CS231n"]),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.results[0].canonical_unit_id == "mask-rcnn"
+    assert response.results[0].score > response.results[1].score
+    assert response.trace.ranking_version == "unit_title_rerank_v1"
+
+
+@pytest.mark.asyncio
+async def test_search_reranks_broad_rcnn_to_family_before_mask_subtype():
+    class Repo:
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
+            return [
+                SimpleNamespace(
+                    unit_id="mask-rcnn",
+                    course_id="CS231n",
+                    lecture_id="lecture-09",
+                    lecture_title="Lecture 9: Object Detection, Image Segmentation, Visualizing and Understanding",
+                    unit_name="Instance segmentation with Mask R-CNN",
+                    summary="Mask R-CNN extends the R-CNN pipeline for instance segmentation.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+                SimpleNamespace(
+                    unit_id="rcnn-family",
+                    course_id="CS231n",
+                    lecture_id="lecture-09",
+                    lecture_title="Lecture 9: Object Detection, Image Segmentation, Visualizing and Understanding",
+                    unit_name="Object detection as classification plus localization and the R-CNN family",
+                    summary=(
+                        "R-CNN classifies proposal crops and refines boxes. Fast R-CNN shares "
+                        "convolution over the image and region proposal networks refine boxes."
+                    ),
+                    description="",
+                    has_quiz_items=True,
+                ),
+                SimpleNamespace(
+                    unit_id="cnn-foundations",
+                    course_id="CS231n",
+                    lecture_id="lecture-05",
+                    lecture_title="Lecture 5: Image Classification with CNNs",
+                    unit_name="What convolutional networks are and why they matter",
+                    summary="Convolutional networks use convolution and pooling layers.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+            ]
+
+    service = AgentUnitSearchService(Repo(), FakeNavigation())
+    response = await service.search(
+        UnitSearchRequest(query="RCNN", courseIds=["CS231n"]),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert [result.canonical_unit_id for result in response.results[:2]] == [
+        "rcnn-family",
+        "mask-rcnn",
+    ]
+    assert response.results[1].score > response.results[2].score
+
+
+@pytest.mark.asyncio
+async def test_search_reranks_kim_cnn_above_generic_cnn_units():
+    class Repo:
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
+            return [
+                SimpleNamespace(
+                    unit_id="deep-cnn",
+                    course_id="CS224n",
+                    lecture_id="lecture-16",
+                    lecture_title="Lecture 16 - ConvNets and TreeRNNs",
+                    unit_name="Deep CNN variants: batch norm, 1x1 conv, and VD-CNN",
+                    summary="Deep CNN variants include residual conv blocks and VD-CNN.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+                SimpleNamespace(
+                    unit_id="kim-cnn",
+                    course_id="CS224n",
+                    lecture_id="lecture-16",
+                    lecture_title="Lecture 16 - ConvNets and TreeRNNs",
+                    unit_name="Kim CNN for sentence classification",
+                    summary="Kim CNN applies filters over n-grams and max-pools for sentence classification.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+                SimpleNamespace(
+                    unit_id="vision-cnn",
+                    course_id="CS231n",
+                    lecture_id="lecture-05",
+                    lecture_title="Lecture 5: Image Classification with CNNs",
+                    unit_name="What convolutional networks are and why they matter",
+                    summary="CNNs are image models built from convolution layers.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+            ]
+
+    service = AgentUnitSearchService(Repo(), FakeNavigation())
+    response = await service.search(
+        UnitSearchRequest(query="Kim CNN", courseIds=["CS224n", "CS231n"]),
+        allowed_course_ids=["CS224n", "CS231n"],
+    )
+
+    assert response.results[0].canonical_unit_id == "kim-cnn"
+    assert response.results[0].score > response.results[1].score
