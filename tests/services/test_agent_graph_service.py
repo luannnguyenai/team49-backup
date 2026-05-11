@@ -2570,7 +2570,7 @@ async def test_pending_retrieval_query_short_detail_refines_proposed_topic_even_
     )
 
     assert response.answer.confidence == "grounded"
-    assert search_requests[0].query == "CNN khái niệm tổng quan đi"
+    assert search_requests[0].query == "CNN"
     assert upserts[-1]["summary_json"].get("pendingClarification") is None
 
 
@@ -2645,7 +2645,7 @@ async def test_pending_retrieval_query_short_detail_keeps_refined_query_title_le
     )
 
     assert response.answer.confidence == "grounded"
-    assert search_requests[0].query == "CNN khái niệm tổng quan đi"
+    assert search_requests[0].query == "CNN"
 
 
 async def test_pending_retrieval_query_user_detail_becomes_search_topic():
