@@ -894,7 +894,7 @@ class AgentGraphService:
         decision_action: str,
     ) -> str | None:
         detail = re.sub(r"\s+", " ", message).strip(" .")
-        if decision_action != "clarify" or not proposed_topic or not detail:
+        if decision_action not in {"clarify", "refine"} or not proposed_topic or not detail:
             return None
         if len(detail.split()) > 8:
             return None
