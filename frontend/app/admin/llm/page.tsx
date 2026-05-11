@@ -38,10 +38,28 @@ function fmtMs(value: number | null | undefined): string {
   return `${Math.round(value)} ms`;
 }
 
+function fmtCheckedAt(value: string | null | undefined): string {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
+}
+
+function modelStatusClass(status: string): string {
+  if (status === "healthy") {
+    return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
+  }
+  if (status === "degraded") {
+    return "bg-amber-500/10 text-amber-700 dark:text-amber-300";
+  }
+  return "bg-rose-500/10 text-rose-700 dark:text-rose-300";
+}
+
 export default function AdminLlmPage() {
   const [stats, setStats] = useState<LlmStats | null>(null);
   const [recent, setRecent] = useState<Record<string, unknown>[]>([]);
   const [modelHealth, setModelHealth] = useState<ModelHealthRow[]>([]);
+  const [modelHealthError, setModelHealthError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<FeedbackStats | null>(null);
   const [negatives, setNegatives] = useState<NegativeFeedbackRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,17 +69,24 @@ export default function AdminLlmPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const [s, r, mh, fb, neg] = await Promise.all([
+        const [s, r, mhResult, fb, neg] = await Promise.all([
           adminApi.llmStats(24),
           adminApi.llmRecent(10),
-          adminApi.modelHealth().catch(() => ({ models: [] })),
+          adminApi
+            .modelHealth()
+            .then((data) => ({ data, error: null as string | null }))
+            .catch((error) => ({
+              data: { models: [] },
+              error: String((error as Error).message ?? error),
+            })),
           adminApi.feedbackStats(14),
           adminApi.feedbackNegative(20),
         ]);
         if (!cancelled) {
           setStats(s);
           setRecent(r);
-          setModelHealth(mh.models);
+          setModelHealth(mhResult.data.models);
+          setModelHealthError(mhResult.error);
           setFeedback(fb);
           setNegatives(neg);
           setErr(null);
@@ -95,49 +120,75 @@ export default function AdminLlmPage() {
       </div>
 
       <section className="space-y-3">
-        <header className="flex items-baseline justify-between gap-3">
-          <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-            Model health
-          </h3>
+        <header className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+              Model health
+            </h3>
+            <p className="mt-1 text-base font-semibold text-slate-900 dark:text-white">
+              Configured models
+            </p>
+          </div>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            {modelHealth.length} model{modelHealth.length === 1 ? "" : "s"}
+          </span>
         </header>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="overflow-hidden rounded-[18px] border border-slate-200/70 bg-white/70 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+          {modelHealthError ? (
+            <div className="border-b border-amber-200/70 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200">
+              <p className="font-semibold">Model health unavailable</p>
+              <p className="mt-1 text-xs">{modelHealthError}</p>
+            </div>
+          ) : null}
+
           {modelHealth.length > 0 ? (
-            modelHealth.map((item) => {
-              const statusClass =
-                item.status === "healthy"
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                  : item.status === "degraded"
-                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
-                    : "bg-rose-500/10 text-rose-700 dark:text-rose-300";
-              return (
-                <div
-                  key={item.id}
-                  className="rounded-[18px] border border-slate-200/70 bg-white/70 p-4 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.label}</p>
-                      <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
-                        {item.provider}/{item.model}
-                      </p>
-                    </div>
-                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClass}`}>
-                      {item.status}
-                    </span>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
-                    <span>{fmtMs(item.latency_ms)}</span>
-                    {item.base_url ? <span className="truncate">{item.base_url}</span> : null}
-                  </div>
-                  {item.error ? (
-                    <p className="mt-2 line-clamp-2 text-xs text-rose-600 dark:text-rose-300">{item.error}</p>
-                  ) : null}
-                </div>
-              );
-            })
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-200/70 text-sm dark:divide-slate-800">
+                <thead className="bg-slate-50/80 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                  <tr>
+                    <th className="px-4 py-3">Model</th>
+                    <th className="px-4 py-3">Provider</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Latency</th>
+                    <th className="px-4 py-3">Base URL</th>
+                    <th className="px-4 py-3">Last checked</th>
+                    <th className="px-4 py-3">Error</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200/70 dark:divide-slate-800">
+                  {modelHealth.map((item) => (
+                    <tr key={item.id} className="align-top">
+                      <td className="px-4 py-3">
+                        <p className="font-semibold text-slate-900 dark:text-white">{item.label}</p>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.model}</p>
+                        {item.is_default ? (
+                          <span className="mt-2 inline-flex rounded-full bg-cyan-500/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">
+                            default
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.provider}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${modelStatusClass(item.status)}`}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{fmtMs(item.latency_ms)}</td>
+                      <td className="max-w-[260px] px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
+                        <span className="break-all">{item.base_url ?? "default provider endpoint"}</span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{fmtCheckedAt(item.checked_at)}</td>
+                      <td className="max-w-[300px] px-4 py-3 text-xs text-rose-600 dark:text-rose-300">
+                        <span className="line-clamp-3">{item.error ?? "—"}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <div className="rounded-[18px] border border-slate-200/70 bg-white/70 p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
-              {loading ? "Checking models..." : "No model health data."}
+            <div className="p-4 text-sm text-slate-500 dark:text-slate-400">
+              {loading ? "Checking configured models..." : "No configured model health data returned."}
             </div>
           )}
         </div>

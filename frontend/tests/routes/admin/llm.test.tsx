@@ -75,10 +75,10 @@ describe("admin llm page", () => {
           provider: "openai",
           model: "qwen 3.5 4B",
           base_url: "https://vllm.a20-app-049.io.vn/v1",
-          status: "healthy",
-          latency_ms: 80,
+          status: "down",
+          latency_ms: 195,
           checked_at: "2026-05-11T00:00:00+00:00",
-          error: null,
+          error: "Server error 530",
         },
       ],
     });
@@ -105,7 +105,23 @@ describe("admin llm page", () => {
     expect(screen.getByText("First answer p95")).toBeInTheDocument();
     expect(screen.getByText("920 ms")).toBeInTheDocument();
     expect(screen.getByText("Model health")).toBeInTheDocument();
+    expect(screen.getByText("Configured models")).toBeInTheDocument();
     expect(screen.getByText("Qwen 3.5 4B")).toBeInTheDocument();
     expect(screen.getAllByText("healthy").length).toBeGreaterThan(0);
+    expect(screen.getByText("down")).toBeInTheDocument();
+    expect(screen.getByText("https://vllm.a20-app-049.io.vn/v1")).toBeInTheDocument();
+    expect(screen.getByText("Server error 530")).toBeInTheDocument();
+  });
+
+  it("shows a model health error instead of silently hiding the model list", async () => {
+    adminApiMock.modelHealth.mockRejectedValue(new Error("health endpoint unavailable"));
+
+    render(<AdminLlmPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Model health unavailable")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("health endpoint unavailable")).toBeInTheDocument();
   });
 });
