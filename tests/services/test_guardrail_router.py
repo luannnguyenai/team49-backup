@@ -190,7 +190,6 @@ def test_guardrail_router_config_defaults_to_current_api_provider(monkeypatch):
     from src.config import Settings
     from src.services.guardrail_router import build_guardrail_config_from_settings
 
-    monkeypatch.delenv("GUARDRAIL_ROUTER_ENABLED", raising=False)
     monkeypatch.delenv("GUARDRAIL_ROUTER_BASE_URL", raising=False)
     monkeypatch.delenv("GUARDRAIL_ROUTER_FALLBACK_PROVIDER", raising=False)
     monkeypatch.delenv("GUARDRAIL_ROUTER_FALLBACK_MODEL", raising=False)
