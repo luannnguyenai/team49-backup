@@ -55,7 +55,8 @@ async def test_agent_chat_returns_guardrail_response_before_structured_router():
     assert response.guardrail.block_reason == "SOFT_REFUSE_REDIRECT"
     assert response.guardrail.error_code is None
     assert response.fallback is not None
-    assert response.fallback.reason == "guardrail_router"
+    assert response.fallback.reason == "unsafe_action"
+    assert "guardrail router" in response.fallback.message
 
 
 @pytest.mark.asyncio
