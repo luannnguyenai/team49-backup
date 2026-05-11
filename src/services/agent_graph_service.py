@@ -56,6 +56,7 @@ from src.services.guardrail_router import (
 )
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
 from src.services.language_normalization import get_input_language_normalizer
+from src.services.language_normalization import LanguageNormalizationResult
 
 
 RAG_AGENT_INTENTS = {
@@ -276,6 +277,7 @@ class AgentGraphService:
                 allowed_course_ids=allowed_course_ids,
                 current_path_course_ids=current_path_course_ids,
             )
+            response = await self._enforce_response_language(response, normalized_language)
             return self._sanitize_response(response, input_guardrail)
 
         completed = await self.graph_repo.get_completed_response_by_incoming_message(
@@ -347,6 +349,7 @@ class AgentGraphService:
                     allowed_course_ids=allowed_course_ids,
                     current_path_course_ids=current_path_course_ids,
                 )
+                response = await self._enforce_response_language(response, normalized_language)
                 response = self._sanitize_response(response, input_guardrail)
                 if self.conversation_repo is not None:
                     await self.conversation_repo.add_message(
@@ -512,6 +515,30 @@ class AgentGraphService:
                 "answer": sanitized_answer,
                 "guardrail": merged_guardrail,
             }
+        )
+
+    async def _enforce_response_language(
+        self,
+        response: AgentChatResponse,
+        language: LanguageNormalizationResult,
+    ) -> AgentChatResponse:
+        if language.target_language != "en" or not response.answer.markdown.strip():
+            return response
+        detect = getattr(self.language_normalizer, "detect", None)
+        if detect is None or detect(response.answer.markdown) == "en":
+            return response
+        translator = getattr(self.language_normalizer, "translator", None)
+        translate = getattr(translator, "translate_to_english", None)
+        if translate is None:
+            return response
+        try:
+            translated = await translate(response.answer.markdown)
+        except Exception:
+            return response
+        if not translated.strip():
+            return response
+        return response.model_copy(
+            update={"answer": response.answer.model_copy(update={"markdown": translated})}
         )
 
     async def _invoke_graph_and_compose(
