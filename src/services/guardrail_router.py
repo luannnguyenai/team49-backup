@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -80,7 +82,8 @@ class GuardrailRouterConfig:
     api_key: str = ""
     cf_access_client_id: str = ""
     cf_access_client_secret: str = ""
-    timeout_seconds: float = 2.5
+    timeout_seconds: float = 10.0
+    router_unhealthy_cooldown_seconds: float = 60.0
     fallback_provider: str = ""
     fallback_model: str = ""
     fallback_temperature: float = 0.0
@@ -154,19 +157,27 @@ class GuardrailRouterClient:
         sync_http_client=None,
         async_http_client=None,
         fallback_model=None,
+        monotonic: Callable[[], float] | None = None,
     ):
         self.config = config
         self.sync_http_client = sync_http_client
         self.async_http_client = async_http_client
         self.fallback_model = fallback_model
+        self._monotonic = monotonic or time.monotonic
+        self._router_unhealthy_until = 0.0
 
     def route_sync(self, *, message: str, scope: GuardrailScopePacket) -> GuardrailDecision:
         errors: list[str] = []
-        if self.config.base_url.strip():
+        if self._should_try_router():
             try:
-                return self._route_via_http_sync(message=message, scope=scope)
+                decision = self._route_via_http_sync(message=message, scope=scope)
+                self._mark_router_healthy()
+                return decision
             except Exception as exc:
+                self._mark_router_unhealthy()
                 errors.append(f"tunnel: {type(exc).__name__}: {exc}")
+        elif self.config.base_url.strip():
+            errors.append("tunnel: skipped_unhealthy_cooldown")
 
         try:
             return self._route_via_fallback_model(message=message, scope=scope)
@@ -177,11 +188,16 @@ class GuardrailRouterClient:
 
     async def route(self, *, message: str, scope: GuardrailScopePacket) -> GuardrailDecision:
         errors: list[str] = []
-        if self.config.base_url.strip():
+        if self._should_try_router():
             try:
-                return await self._route_via_http_async(message=message, scope=scope)
+                decision = await self._route_via_http_async(message=message, scope=scope)
+                self._mark_router_healthy()
+                return decision
             except Exception as exc:
+                self._mark_router_unhealthy()
                 errors.append(f"tunnel: {type(exc).__name__}: {exc}")
+        elif self.config.base_url.strip():
+            errors.append("tunnel: skipped_unhealthy_cooldown")
 
         try:
             return self._route_via_fallback_model(message=message, scope=scope)
@@ -189,6 +205,17 @@ class GuardrailRouterClient:
             errors.append(f"fallback: {type(exc).__name__}: {exc}")
 
         raise GuardrailRouterUnavailableError("; ".join(errors))
+
+    def _should_try_router(self) -> bool:
+        return bool(self.config.base_url.strip()) and self._monotonic() >= self._router_unhealthy_until
+
+    def _mark_router_unhealthy(self) -> None:
+        cooldown = max(0.0, self.config.router_unhealthy_cooldown_seconds)
+        if cooldown:
+            self._router_unhealthy_until = max(self._router_unhealthy_until, self._monotonic() + cooldown)
+
+    def _mark_router_healthy(self) -> None:
+        self._router_unhealthy_until = 0.0
 
     def _route_via_http_sync(self, *, message: str, scope: GuardrailScopePacket) -> GuardrailDecision:
         client = self.sync_http_client or httpx.Client()
@@ -316,7 +343,10 @@ def build_guardrail_config_from_settings(app_settings=settings) -> GuardrailRout
         api_key=str(getattr(app_settings, "guardrail_router_api_key", "") or ""),
         cf_access_client_id=str(getattr(app_settings, "guardrail_router_cf_access_client_id", "") or ""),
         cf_access_client_secret=str(getattr(app_settings, "guardrail_router_cf_access_client_secret", "") or ""),
-        timeout_seconds=float(getattr(app_settings, "guardrail_router_timeout_seconds", 2.5)),
+        timeout_seconds=float(getattr(app_settings, "guardrail_router_timeout_seconds", 10.0)),
+        router_unhealthy_cooldown_seconds=float(
+            getattr(app_settings, "guardrail_router_unhealthy_cooldown_seconds", 60.0)
+        ),
         fallback_provider=fallback_provider or str(getattr(app_settings, "model_provider", "") or ""),
         fallback_model=fallback_model or str(getattr(app_settings, "fast_model", "") or ""),
         max_tokens=int(getattr(app_settings, "guardrail_router_max_tokens", 96)),
