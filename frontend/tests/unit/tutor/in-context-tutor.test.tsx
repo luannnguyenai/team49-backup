@@ -86,10 +86,30 @@ describe("InContextTutor", () => {
   function mockTutorFetch(options: {
     askResponse?: Response;
     historyPayload?: unknown;
+    modelAvailabilityPayload?: unknown;
   }) {
     fetchMock.mockImplementation((input: string | URL | Request, init?: RequestInit) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
       const method = init?.method ?? (input instanceof Request ? input.method : "GET");
+
+      if (method === "GET" && url.endsWith("/api/chat-models/availability")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify(
+              options.modelAvailabilityPayload ?? {
+                models: [
+                  { id: "default", label: "Default", status: "healthy", available: true },
+                  { id: "qwen35_4b", label: "Qwen 3.5 4B", status: "healthy", available: true },
+                ],
+              },
+            ),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          ),
+        );
+      }
 
       if (method === "GET" && url.startsWith("/api/lectures/qa-history")) {
         return Promise.resolve(
@@ -229,6 +249,49 @@ describe("InContextTutor", () => {
     const postCall = getFetchCallsByMethod("POST")[0] as [string | URL | Request, RequestInit | undefined];
     const body = JSON.parse(String(postCall[1]?.body ?? "{}"));
     expect(body.chatModelId).toBe("qwen35_4b");
+  });
+
+  it("disables down tutor models and falls back to default before sending", async () => {
+    localStorage.setItem("tutor.chatModelId", "qwen35_4b");
+    mockTutorFetch({
+      modelAvailabilityPayload: {
+        models: [
+          { id: "default", label: "Default", status: "healthy", available: true },
+          { id: "qwen35_4b", label: "Qwen 3.5 4B", status: "down", available: false },
+        ],
+      },
+      askResponse: buildChunkedNdjsonResponse(200, ['{"a":"Default tutor response."}\n{"qa_id":89}\n']),
+    });
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    const modelSelect = screen.getByLabelText("Tutor model");
+    await waitFor(() => {
+      expect(modelSelect).toHaveValue("default");
+    });
+    expect(screen.getByRole("option", { name: /qwen 3.5 4b.*down/i })).toBeDisabled();
+
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Explain the slide." },
+    });
+    fireEvent.click(screen.getAllByRole("button")[1]);
+
+    await waitFor(() => {
+      expect(screen.getByText("Default tutor response.")).toBeInTheDocument();
+    });
+
+    const postCall = getFetchCallsByMethod("POST")[0] as [string | URL | Request, RequestInit | undefined];
+    const body = JSON.parse(String(postCall[1]?.body ?? "{}"));
+    expect(body.chatModelId).toBe("default");
+    expect(localStorage.getItem("tutor.chatModelId")).toBe("default");
   });
 
   it("hydrates saved chat history from session storage on mount", async () => {

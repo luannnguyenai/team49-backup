@@ -33,11 +33,17 @@ from src.models.store import Lecture, Chapter, QAHistory, LearningProgress
 from src.models.course import LearningUnit
 from src.services.asset_signing import verify_signed_asset_url
 from src.services.llm_service import get_context_and_stream_langgraph
-from src.services.model_registry import DEFAULT_CHAT_MODEL_ID, get_chat_model_option
+from src.services.model_registry import (
+    ChatModelUnavailableError,
+    DEFAULT_CHAT_MODEL_ID,
+    ensure_chat_model_available,
+    get_chat_model_option,
+)
 from src.routers.auth import auth_router, users_router
 from src.routers.assessment import assessment_router, _deprecated_router as placement_deprecated_router
 from src.routers.agent import agent_router
 from src.routers.agent_ops import agent_ops_router
+from src.routers.chat_models import chat_models_router
 from src.routers.content import content_router
 from src.routers.courses import courses_router
 from src.routers.history import history_router
@@ -130,6 +136,7 @@ app.include_router(courses_router)
 app.include_router(assessment_router)
 app.include_router(agent_router)
 app.include_router(agent_ops_router)
+app.include_router(chat_models_router)
 app.include_router(history_router)
 app.include_router(learning_path_router)
 app.include_router(learning_session_router)
@@ -151,6 +158,10 @@ app.include_router(admin_router)
 @app.get("/health", tags=["ops"])
 async def health_check():
     return {"status": "ok", "app": settings.app_name}
+
+
+def _chat_model_unavailable_http_error(exc: ChatModelUnavailableError) -> HTTPException:
+    return HTTPException(status_code=503, detail=exc.public_detail())
 
 
 def _resolve_data_file(asset_path: str) -> Path:
@@ -313,6 +324,10 @@ async def ask_question(
             context_binding_id=req.context_binding_id,
             db=db,
         )
+        try:
+            await ensure_chat_model_available(req.chat_model_id)
+        except ChatModelUnavailableError as exc:
+            raise _chat_model_unavailable_http_error(exc) from exc
         generator = get_context_and_stream_langgraph(
             req.lecture_id,
             req.current_timestamp,
