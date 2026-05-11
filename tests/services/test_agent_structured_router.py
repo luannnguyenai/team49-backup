@@ -571,6 +571,43 @@ def test_structured_router_resolves_pending_followup_with_recent_context():
     assert "action=new_request" in system_prompt
 
 
+def test_structured_router_pending_followup_prompt_refines_short_topic_details():
+    model = FakeStructuredModel(
+        {
+            "action": "refine",
+            "refined_query": "CNN khái niệm tổng quan",
+            "clarification_question": None,
+            "rationale": "The reply adds an overview aspect to the pending CNN topic.",
+        }
+    )
+
+    decision = StructuredAgentRouter(model=model).resolve_pending_followup(
+        message="khái niệm tổng quan đi",
+        pending_payload={
+            "kind": "retrieval_query",
+            "proposed_raw_topic": "CNN",
+            "show_top_results_allowed": True,
+        },
+        route_context=None,
+        recent_messages=[
+            {
+                "role": "assistant",
+                "markdown": "Bạn muốn mình tìm nội dung về CNN theo hướng nào?",
+                "citations": [],
+            }
+        ],
+    )
+
+    system_prompt = model.messages[0]["content"]
+    user_prompt = model.messages[1]["content"]
+    assert decision.action == "refine"
+    assert "short aspect/detail reply" in system_prompt
+    assert "combine proposed_raw_topic with the user's detail" in system_prompt
+    assert "do not ask how it relates to the current lesson" in system_prompt
+    assert "matching the latest user message or visible conversation style" in system_prompt
+    assert "'proposed_raw_topic': 'CNN'" in user_prompt
+
+
 def test_structured_router_preserves_model_candidate_intent_for_clarify():
     model = FakeStructuredModel(
         {
