@@ -292,16 +292,18 @@ def parse_guardrail_decision(value: Any) -> GuardrailDecision:
 
 
 def build_guardrail_config_from_settings(app_settings=settings) -> GuardrailRouterConfig:
+    fallback_provider = str(getattr(app_settings, "guardrail_router_fallback_provider", "") or "")
+    fallback_model = str(getattr(app_settings, "guardrail_router_fallback_model", "") or "")
     return GuardrailRouterConfig(
-        enabled=bool(getattr(app_settings, "guardrail_router_enabled", False)),
+        enabled=True,
         base_url=str(getattr(app_settings, "guardrail_router_base_url", "") or ""),
         model=str(getattr(app_settings, "guardrail_router_model", "guardrail-router-merged") or ""),
         api_key=str(getattr(app_settings, "guardrail_router_api_key", "") or ""),
         cf_access_client_id=str(getattr(app_settings, "guardrail_router_cf_access_client_id", "") or ""),
         cf_access_client_secret=str(getattr(app_settings, "guardrail_router_cf_access_client_secret", "") or ""),
         timeout_seconds=float(getattr(app_settings, "guardrail_router_timeout_seconds", 2.5)),
-        fallback_provider=str(getattr(app_settings, "guardrail_router_fallback_provider", "") or ""),
-        fallback_model=str(getattr(app_settings, "guardrail_router_fallback_model", "") or ""),
+        fallback_provider=fallback_provider or str(getattr(app_settings, "model_provider", "") or ""),
+        fallback_model=fallback_model or str(getattr(app_settings, "fast_model", "") or ""),
         max_tokens=int(getattr(app_settings, "guardrail_router_max_tokens", 96)),
     )
 
