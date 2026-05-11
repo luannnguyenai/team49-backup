@@ -34,6 +34,11 @@ from src.services.llm_rate_limiter import enforce_llm_rate_limit
 from src.services.sandbox import run_python_code
 from src.services.router import route_question
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
+from src.services.language_normalization import (
+    InputLanguageNormalizer,
+    LanguageNormalizationResult,
+    get_input_language_normalizer,
+)
 from src.core.observability import (
     build_langfuse_metadata,
     get_langfuse_client,
@@ -149,6 +154,15 @@ def build_tutor_guardrail_event(decision: GuardrailDecision) -> dict | None:
             "selected_kp_ids": decision.selected_kp_ids,
         },
     }
+
+
+def normalize_tutor_question_for_model(
+    question: str,
+    *,
+    normalizer: InputLanguageNormalizer | None = None,
+) -> LanguageNormalizationResult:
+    service = normalizer or get_input_language_normalizer()
+    return asyncio.run(service.normalize(question))
 
 
 def build_tutor_guardrail_scope(
@@ -536,6 +550,9 @@ def get_context_and_stream_langgraph(
             }
         ) + "\n"
         return
+
+    language_normalization = normalize_tutor_question_for_model(sanitized_user_question)
+    sanitized_user_question = language_normalization.normalized_text
 
     def emit_status(message: str) -> str:
         nonlocal first_status_at
