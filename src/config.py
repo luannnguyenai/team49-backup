@@ -73,7 +73,7 @@ class Settings(BaseSettings):
         description="Cloudflare Access service token client secret for the guardrail router tunnel.",
     )
     guardrail_router_timeout_seconds: float = Field(
-        default=2.5,
+        default=10.0,
         ge=0.1,
         description="Timeout for each guardrail router endpoint attempt.",
     )
