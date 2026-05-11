@@ -232,6 +232,124 @@ async def test_agent_guardrail_scope_includes_pending_retrieval_topic_for_short_
 
 
 @pytest.mark.asyncio
+async def test_agent_guardrail_scope_includes_recent_assistant_context_without_user_history():
+    guardrail_router = CapturingGuardrailRouter()
+    conversation_id = uuid4()
+    user_id = uuid4()
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="user",
+                    markdown="cho mình hỏi về CNN",
+                    citations_json=[],
+                    actions_json=[],
+                ),
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình tìm thấy Kim CNN for sentence classification trong CS224n.",
+                    citations_json=[
+                        {
+                            "course_id": "CS224n",
+                            "unit_name": "Kim CNN for sentence classification",
+                            "lecture_title": "Lecture 16 - ConvNets and TreeRNNs",
+                        }
+                    ],
+                    actions_json=[],
+                ),
+            ]
+        ),
+    )
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=FailingGraphRouter(),
+        guardrail_router=guardrail_router,
+        conversation_repo=conversation_repo,
+    )
+
+    with pytest.raises(RuntimeError, match="stop after guardrail"):
+        await service.chat(
+            request=AgentChatRequest(
+                message="thông tin cụ thể hơn về Kim CNN đi",
+                incomingMessageId="msg-recent-assistant-guardrail",
+            ),
+            conversation_id=str(conversation_id),
+            thread_id="thread-kim-cnn",
+            user_id=str(user_id),
+            allowed_course_ids=["CS224n"],
+        )
+
+    scope = guardrail_router.scopes[0]
+    assert "Recent assistant context" in scope.allowed_scope_summary
+    assert scope.recent_context == [
+        {
+            "type": "recent_assistant_response",
+            "markdown": "Mình tìm thấy Kim CNN for sentence classification trong CS224n.",
+            "citations": [
+                {
+                    "course_id": "CS224n",
+                    "unit_name": "Kim CNN for sentence classification",
+                    "lecture_title": "Lecture 16 - ConvNets and TreeRNNs",
+                }
+            ],
+            "actions": [],
+        }
+    ]
+
+
+@pytest.mark.asyncio
+async def test_agent_guardrail_allows_safe_short_recent_assistant_followup_after_model_clarify():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="user",
+                    markdown="cho mình hỏi về CNN",
+                    citations_json=[],
+                    actions_json=[],
+                ),
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình tìm thấy Kim CNN for sentence classification trong CS224n.",
+                    citations_json=[
+                        {
+                            "course_id": "CS224n",
+                            "unit_name": "Kim CNN for sentence classification",
+                            "lecture_title": "Lecture 16 - ConvNets and TreeRNNs",
+                        }
+                    ],
+                    actions_json=[],
+                ),
+            ]
+        ),
+    )
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=FailingGraphRouter(),
+        guardrail_router=ClarifyingGuardrailRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    with pytest.raises(RuntimeError, match="stop after guardrail"):
+        await service.chat(
+            request=AgentChatRequest(
+                message="thông tin cụ thể hơn về Kim CNN đi",
+                incomingMessageId="msg-recent-assistant-guardrail-allow",
+            ),
+            conversation_id=str(conversation_id),
+            thread_id="thread-kim-cnn-allow",
+            user_id=str(user_id),
+            allowed_course_ids=["CS224n"],
+        )
+
+
+@pytest.mark.asyncio
 async def test_agent_guardrail_allows_safe_short_pending_retrieval_detail_after_model_clarify():
     conversation_id = uuid4()
     user_id = uuid4()
