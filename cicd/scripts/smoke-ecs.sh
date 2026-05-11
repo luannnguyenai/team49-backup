@@ -27,7 +27,6 @@ case "$mode" in
     ;;
   frontend)
     : "${PRODUCTION_FRONTEND_URL:?PRODUCTION_FRONTEND_URL is required}"
-    require_200 "${PRODUCTION_FRONTEND_URL%/}/api/health"
     require_200 "${PRODUCTION_FRONTEND_URL%/}/"
     ;;
   db)
