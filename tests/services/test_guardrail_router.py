@@ -113,6 +113,22 @@ def test_guardrail_decision_parses_openai_content_blocks():
     assert decision.action == "ALLOW_LESSON_ANSWER"
 
 
+def test_guardrail_decision_normalizes_fallback_attack_type_alias():
+    decision = parse_guardrail_decision(
+        json.dumps(
+            {
+                "safety_label": "SAFE",
+                "topic_label": "ON_TOPIC",
+                "action": "ALLOW_LESSON_ANSWER",
+                "attack_type": "N/A",
+                "selected_kp_ids": [],
+            }
+        )
+    )
+
+    assert decision.attack_type == "none"
+
+
 def test_guardrail_fallback_model_disables_reasoning(monkeypatch):
     from src.services import guardrail_router
 
