@@ -826,10 +826,18 @@ class AgentGraphService:
                     "Okay. Please describe the topic or concept you want me to search for."
                 ),
             }
-        forced_refinement = self._coerce_pending_retrieval_detail_refinement(
-            message=message,
-            proposed_topic=proposed,
-            decision_action=decision.action,
+        force_short_detail_refinement = decision.action == "clarify" or (
+            decision.action == "refine"
+            and len(str(getattr(decision, "refined_query", "") or "").split()) > 8
+        )
+        forced_refinement = (
+            self._coerce_pending_retrieval_detail_refinement(
+                message=message,
+                proposed_topic=proposed,
+                decision_action=decision.action,
+            )
+            if force_short_detail_refinement
+            else None
         )
         short_detail_refinement = bool(forced_refinement and proposed)
         if forced_refinement:
