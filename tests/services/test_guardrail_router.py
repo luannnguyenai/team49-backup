@@ -107,7 +107,6 @@ def test_guardrail_router_uses_cloudflare_tunnel_vllm_first():
     )
     client = GuardrailRouterClient(
         GuardrailRouterConfig(
-            enabled=True,
             base_url="https://router.example.com/v1",
             model="guardrail-router-merged",
             api_key="router-token",
@@ -145,7 +144,6 @@ def test_guardrail_router_falls_back_to_provider_when_tunnel_fails():
     )
     client = GuardrailRouterClient(
         GuardrailRouterConfig(
-            enabled=True,
             base_url="https://router.example.com/v1",
             model="guardrail-router-merged",
             fallback_provider="openai",
@@ -161,6 +159,33 @@ def test_guardrail_router_falls_back_to_provider_when_tunnel_fails():
     assert fallback.messages is not None
 
 
+def test_guardrail_router_uses_provider_fallback_when_local_url_is_empty():
+    fallback = FakeFallbackModel(
+        json.dumps(
+            {
+                "safety_label": "SAFE",
+                "topic_label": "ON_TOPIC",
+                "action": "ALLOW_LESSON_ANSWER",
+                "attack_type": "none",
+                "selected_kp_ids": [],
+            }
+        )
+    )
+    client = GuardrailRouterClient(
+        GuardrailRouterConfig(
+            base_url="",
+            fallback_provider="openai",
+            fallback_model="gpt-5.4-nano",
+        ),
+        fallback_model=fallback,
+    )
+
+    decision = client.route_sync(message="Explain error analysis.", scope=_scope())
+
+    assert decision.action == "ALLOW_LESSON_ANSWER"
+    assert fallback.messages is not None
+
+
 def test_guardrail_router_raises_when_tunnel_and_provider_fail():
     http = FakeSyncHttpClient(error=TimeoutError("local tunnel unavailable"))
 
@@ -170,7 +195,6 @@ def test_guardrail_router_raises_when_tunnel_and_provider_fail():
 
     client = GuardrailRouterClient(
         GuardrailRouterConfig(
-            enabled=True,
             base_url="https://router.example.com/v1",
             model="guardrail-router-merged",
             fallback_provider="gemini",
@@ -199,7 +223,6 @@ def test_guardrail_router_config_defaults_to_current_api_provider(monkeypatch):
     settings = Settings(_env_file=None)
     config = build_guardrail_config_from_settings(settings)
 
-    assert config.enabled is True
     assert config.base_url == ""
     assert config.fallback_provider == "gemini"
     assert config.fallback_model == "gemini-2.5-flash"
