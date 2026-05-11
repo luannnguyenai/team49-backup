@@ -34,6 +34,17 @@ def test_settings_parses_json_cors_origins(monkeypatch: pytest.MonkeyPatch):
     ]
 
 
+def test_settings_default_cors_origins_include_loopback_frontend(monkeypatch: pytest.MonkeyPatch):
+    from src.config import Settings
+
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+
+    settings = Settings(_env_file=None)
+
+    assert "http://localhost:3000" in settings.cors_origins
+    assert "http://127.0.0.1:3000" in settings.cors_origins
+
+
 def test_settings_default_tutor_models(monkeypatch: pytest.MonkeyPatch):
     from src.config import Settings
 
