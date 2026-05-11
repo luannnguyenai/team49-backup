@@ -1,6 +1,6 @@
 import pytest
 
-from src.schemas.agent import AgentChatRequest
+from src.schemas.agent import AgentAnswer, AgentChatRequest, AgentChatResponse
 from src.services.agent_graph_contracts import AgentRouterUnavailableError
 from src.services.agent_graph_service import AgentGraphService
 from src.services.guardrail_router import (
@@ -54,6 +54,18 @@ class TranslatingLanguageNormalizer:
             target_language="en",
             translated=True,
         )
+
+
+class OutputTranslatingLanguageNormalizer:
+    def detect(self, text):
+        return "vi" if "Bạn muốn" in text else "en"
+
+    @property
+    def translator(self):
+        return self
+
+    async def translate_to_english(self, text):
+        return "Would you like to narrow the topic?"
 
 
 @pytest.mark.asyncio
@@ -130,3 +142,30 @@ async def test_agent_chat_normalizes_third_language_before_guardrail():
         )
 
     assert guardrail_router.messages == ["Explain attention mechanisms in neural networks."]
+
+
+@pytest.mark.asyncio
+async def test_agent_chat_translates_non_english_output_for_english_target():
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=FailingGraphRouter(),
+        guardrail_router=CapturingGuardrailRouter(),
+        language_normalizer=OutputTranslatingLanguageNormalizer(),
+    )
+    response = AgentChatResponse(
+        conversation_id="conv-1",
+        message_id="msg-1",
+        answer=AgentAnswer(markdown="Bạn muốn thu hẹp chủ đề không?", confidence="partial"),
+    )
+    language = LanguageNormalizationResult(
+        original_text="Explain attention.",
+        normalized_text="Explain attention.",
+        detected_language="en",
+        target_language="en",
+        translated=False,
+    )
+
+    updated = await service._enforce_response_language(response, language)
+
+    assert updated.answer.markdown == "Would you like to narrow the topic?"
