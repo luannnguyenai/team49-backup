@@ -260,12 +260,17 @@ class AgentGraphService:
             user_id,
             thread_id,
         )
+        assistant_context_for_guardrail = await self._load_guardrail_assistant_context(
+            conversation_id,
+            user_id,
+        )
         guardrail_decision = await self._route_guardrail(
             message=sanitized_request.message,
             route_context=sanitized_request.route_context,
             allowed_course_ids=allowed_course_ids,
             current_path_course_ids=current_path_course_ids,
             pending_clarification=pending_for_guardrail,
+            assistant_context=assistant_context_for_guardrail,
         )
         guardrail_response = self._compose_guardrail_response(
             conversation_id=conversation_id,
@@ -424,6 +429,7 @@ class AgentGraphService:
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None,
         pending_clarification: PendingClarification | None = None,
+        assistant_context: list[dict[str, Any]] | None = None,
     ) -> GuardrailDecision:
         try:
             decision = await self.guardrail_router.route(
@@ -433,11 +439,18 @@ class AgentGraphService:
                     allowed_course_ids=allowed_course_ids,
                     current_path_course_ids=current_path_course_ids,
                     pending_clarification=pending_clarification,
+                    assistant_context=assistant_context,
                 ),
             )
             if self._should_allow_pending_retrieval_guardrail_followup(
                 message=message,
                 pending_clarification=pending_clarification,
+                decision=decision,
+            ):
+                return GuardrailDecision.allow()
+            if self._should_allow_recent_assistant_guardrail_followup(
+                message=message,
+                assistant_context=assistant_context or [],
                 decision=decision,
             ):
                 return GuardrailDecision.allow()
@@ -455,9 +468,16 @@ class AgentGraphService:
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None,
         pending_clarification: PendingClarification | None = None,
+        assistant_context: list[dict[str, Any]] | None = None,
     ) -> GuardrailScopePacket:
         allowed_scope_summary = "Agent guardrail scope: current user query only."
         recent_context: list[dict[str, Any]] = []
+        if assistant_context:
+            allowed_scope_summary = (
+                f"{allowed_scope_summary} Recent assistant context is provided only "
+                "to interpret safe follow-up questions."
+            )
+            recent_context.extend(assistant_context[:2])
         if (
             pending_clarification is not None
             and pending_clarification.type == "slot_disambiguation"
@@ -515,6 +535,43 @@ class AgentGraphService:
             )
             is not None
         )
+
+    def _should_allow_recent_assistant_guardrail_followup(
+        self,
+        *,
+        message: str,
+        assistant_context: list[dict[str, Any]],
+        decision: GuardrailDecision,
+    ) -> bool:
+        if decision.safety_label != "SAFE" or decision.action != "ASK_CLARIFY":
+            return False
+        if not assistant_context or len(str(message or "").split()) > 12:
+            return False
+        message_terms = self._normalized_terms(message)
+        if not message_terms:
+            return False
+
+        context_parts: list[str] = []
+        for item in assistant_context[:2]:
+            if not isinstance(item, dict):
+                continue
+            context_parts.append(str(item.get("markdown") or ""))
+            for citation in item.get("citations") or []:
+                if not isinstance(citation, dict):
+                    continue
+                context_parts.extend(
+                    str(citation.get(key) or "")
+                    for key in ("course_id", "unit_name", "lecture_title")
+                )
+            for action in item.get("actions") or []:
+                if not isinstance(action, dict):
+                    continue
+                context_parts.extend(
+                    str(action.get(key) or "")
+                    for key in ("type", "label", "canonical_unit_id")
+                )
+        context_terms = self._normalized_terms(" ".join(context_parts))
+        return bool(message_terms & context_terms)
 
     @staticmethod
     def _compose_guardrail_response(
@@ -2308,6 +2365,55 @@ class AgentGraphService:
                 }
             )
         return context
+
+    async def _load_guardrail_assistant_context(
+        self,
+        conversation_id: str,
+        user_id: str,
+    ) -> list[dict[str, Any]]:
+        if self.conversation_repo is None or not hasattr(self.conversation_repo, "list_messages"):
+            return []
+        messages = await self.conversation_repo.list_messages(
+            UUID(str(conversation_id)),
+            UUID(str(user_id)),
+            limit=4,
+        )
+        context: list[dict] = []
+        for message in reversed(messages):
+            if getattr(message, "role", "") != "assistant":
+                continue
+            markdown = str(getattr(message, "markdown", "") or "").strip()
+            citations = [
+                {
+                    key: citation.get(key)
+                    for key in ("course_id", "unit_name", "lecture_title")
+                    if citation.get(key)
+                }
+                for citation in (getattr(message, "citations_json", None) or [])[:5]
+                if isinstance(citation, dict)
+            ]
+            actions = [
+                {
+                    key: action.get(key)
+                    for key in ("type", "label", "canonical_unit_id")
+                    if action.get(key)
+                }
+                for action in (getattr(message, "actions_json", None) or [])[:5]
+                if isinstance(action, dict)
+            ]
+            if not markdown and not citations and not actions:
+                continue
+            context.append(
+                {
+                    "type": "recent_assistant_response",
+                    "markdown": markdown[:800],
+                    "citations": citations,
+                    "actions": actions,
+                }
+            )
+            if len(context) >= 2:
+                break
+        return list(reversed(context))
 
     def _coerce_pending_clarification(self, value) -> PendingClarification | None:
         return self.thread_memory.coerce_pending_clarification(value)
