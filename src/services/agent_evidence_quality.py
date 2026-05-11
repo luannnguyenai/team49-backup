@@ -38,6 +38,8 @@ class AgentEvidenceQualityService:
                 reason_codes=["empty_query_terms"],
             )
         acronym_terms = self._acronym_terms(query)
+        non_acronym_terms = [term for term in query_terms if term not in set(acronym_terms)]
+        acronym_expansion_query = self._has_parenthetical_acronym_expansion(query, acronym_terms)
 
         match_reasons: dict[str, str] = {}
         direct_matches: list[tuple[float, float, int, str]] = []
@@ -63,6 +65,12 @@ class AgentEvidenceQualityService:
                 and (
                     self._coverage(acronym_terms, title_text) > 0
                     or self._coverage(acronym_terms, body_text) > 0
+                )
+                and (
+                    not non_acronym_terms
+                    or acronym_expansion_query
+                    or self._coverage(non_acronym_terms, title_text) > 0
+                    or self._coverage(non_acronym_terms, body_text) >= 0.5
                 )
             )
             title_direct = self._has_phrase_match(query_terms, title_text) or title_coverage >= 0.75
@@ -133,6 +141,14 @@ class AgentEvidenceQualityService:
                 for raw_term in re.findall(r"[A-Z][A-Z0-9]{2,}", query)
             }
         )
+
+    def _has_parenthetical_acronym_expansion(self, query: str, acronym_terms: list[str]) -> bool:
+        if not acronym_terms:
+            return False
+        for acronym in acronym_terms:
+            if re.search(rf"\b{re.escape(acronym)}\b\s*\(", query, re.IGNORECASE):
+                return True
+        return False
 
     def _coverage(self, terms: list[str], text: str) -> float:
         normalized = text.lower()
