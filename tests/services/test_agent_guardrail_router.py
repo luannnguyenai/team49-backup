@@ -32,6 +32,17 @@ class BlockingGuardrailRouter:
         )
 
 
+class ClarifyingGuardrailRouter:
+    async def route(self, *, message, scope):
+        return GuardrailDecision(
+            safety_label="SAFE",
+            topic_label="AMBIGUOUS",
+            action="ASK_CLARIFY",
+            attack_type="none",
+            selected_kp_ids=[],
+        )
+
+
 class FailingGuardrailRouter:
     async def route(self, *, message, scope):
         raise GuardrailRouterUnavailableError()
@@ -218,6 +229,54 @@ async def test_agent_guardrail_scope_includes_pending_retrieval_topic_for_short_
             "original_intent": "find_content",
         }
     ]
+
+
+@pytest.mark.asyncio
+async def test_agent_guardrail_allows_safe_short_pending_retrieval_detail_after_model_clarify():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    pending = PendingClarification(
+        clarification_id="clar-cnn",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "proposed_raw_topic": "CNN",
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(
+            return_value=SimpleNamespace(
+                summary_json={
+                    "pendingClarification": {
+                        "threadId": "thread-cnn",
+                        "clarification": pending.model_dump(mode="json"),
+                    }
+                }
+            )
+        )
+    )
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=FailingGraphRouter(),
+        guardrail_router=ClarifyingGuardrailRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    with pytest.raises(AgentRouterUnavailableError):
+        await service.chat(
+            request=AgentChatRequest(
+                message="khái niệm tổng quan đi",
+                incomingMessageId="msg-pending-guardrail-allow",
+            ),
+            conversation_id=str(conversation_id),
+            thread_id="thread-cnn",
+            user_id=str(user_id),
+            allowed_course_ids=["CS231n"],
+        )
 
 
 @pytest.mark.asyncio
