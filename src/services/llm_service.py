@@ -165,6 +165,29 @@ def normalize_tutor_question_for_model(
     return asyncio.run(service.normalize(question))
 
 
+def enforce_tutor_response_language(
+    text: str,
+    language: LanguageNormalizationResult,
+    *,
+    normalizer: InputLanguageNormalizer | None = None,
+) -> str:
+    if language.target_language != "en" or not text.strip():
+        return text
+    service = normalizer or get_input_language_normalizer()
+    detect = getattr(service, "detect", None)
+    if detect is None or detect(text) == "en":
+        return text
+    translator = getattr(service, "translator", None)
+    translate = getattr(translator, "translate_to_english", None)
+    if translate is None:
+        return text
+    try:
+        translated = asyncio.run(translate(text))
+    except Exception:
+        return text
+    return translated if translated.strip() else text
+
+
 def build_tutor_guardrail_scope(
     *,
     lecture_id: str,
@@ -720,7 +743,11 @@ def get_context_and_stream_langgraph(
 
                 if route == "SIMPLE" and not image_base64:
                     direct_answer = routing.get("direct_answer", "")
-                    sanitized_answer = _sanitize_tutor_output_text(direct_answer).sanitized_text
+                    language_answer = enforce_tutor_response_language(
+                        direct_answer,
+                        language_normalization,
+                    )
+                    sanitized_answer = _sanitize_tutor_output_text(language_answer).sanitized_text
                     if first_answer_at is None:
                         first_answer_at = time.perf_counter()
                     yield json.dumps(
@@ -728,7 +755,7 @@ def get_context_and_stream_langgraph(
                             "a": sanitized_answer,
                             "guardrail": {
                                 "input_redacted": input_guardrail.was_redacted,
-                                "output_redacted": sanitized_answer != direct_answer,
+                                "output_redacted": sanitized_answer != language_answer,
                             },
                         }
                     ) + "\n"
