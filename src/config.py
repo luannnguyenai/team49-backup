@@ -52,6 +52,48 @@ class Settings(BaseSettings):
         ge=0,
         description="Maximum provider retry attempts for LLM requests.",
     )
+    guardrail_router_enabled: bool = Field(
+        default=False,
+        description="Enable the shared guardrail router gate for Tutor and Agent requests.",
+    )
+    guardrail_router_base_url: str = Field(
+        default="",
+        description="OpenAI-compatible /v1 base URL for the Cloudflare Tunnel vLLM guardrail router.",
+    )
+    guardrail_router_model: str = Field(
+        default="guardrail-router-merged",
+        description="Model name served by the guardrail router.",
+    )
+    guardrail_router_api_key: str = Field(
+        default="",
+        description="Bearer token for the OpenAI-compatible guardrail router endpoint.",
+    )
+    guardrail_router_cf_access_client_id: str = Field(
+        default="",
+        description="Cloudflare Access service token client ID for the guardrail router tunnel.",
+    )
+    guardrail_router_cf_access_client_secret: str = Field(
+        default="",
+        description="Cloudflare Access service token client secret for the guardrail router tunnel.",
+    )
+    guardrail_router_timeout_seconds: float = Field(
+        default=2.5,
+        ge=0.1,
+        description="Timeout for each guardrail router endpoint attempt.",
+    )
+    guardrail_router_fallback_provider: str = Field(
+        default="",
+        description="Fallback provider for guardrail routing after the Cloudflare Tunnel vLLM route fails.",
+    )
+    guardrail_router_fallback_model: str = Field(
+        default="",
+        description="Fallback model for guardrail routing after the Cloudflare Tunnel vLLM route fails.",
+    )
+    guardrail_router_max_tokens: int = Field(
+        default=96,
+        ge=1,
+        description="Maximum output tokens for guardrail router JSON decisions.",
+    )
     gemini_requests_per_minute: int = Field(
         default=15,
         ge=1,
