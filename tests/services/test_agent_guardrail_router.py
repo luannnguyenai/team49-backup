@@ -1,8 +1,13 @@
+from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
+from uuid import uuid4
+
 import pytest
 from pydantic import ValidationError
 
 from src.schemas.agent import AgentAnswer, AgentChatRequest, AgentChatResponse
-from src.services.agent_graph_contracts import AgentRouterUnavailableError
+from src.services.agent_graph_contracts import AgentRouterUnavailableError, PendingClarification
 from src.services.agent_graph_service import AgentGraphService
 from src.services.guardrail_router import (
     GuardrailDecision,
@@ -154,6 +159,65 @@ async def test_agent_chat_normalizes_third_language_before_guardrail():
     assert scope.allowed_scope_summary == "Agent guardrail scope: current user query only."
     assert scope.recent_context == []
     assert scope.candidate_kps == []
+
+
+@pytest.mark.asyncio
+async def test_agent_guardrail_scope_includes_pending_retrieval_topic_for_short_detail():
+    guardrail_router = CapturingGuardrailRouter()
+    conversation_id = uuid4()
+    user_id = uuid4()
+    pending = PendingClarification(
+        clarification_id="clar-cnn",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "proposed_raw_topic": "CNN",
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(
+            return_value=SimpleNamespace(
+                summary_json={
+                    "pendingClarification": {
+                        "threadId": "thread-cnn",
+                        "clarification": pending.model_dump(mode="json"),
+                    }
+                }
+            )
+        )
+    )
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=FailingGraphRouter(),
+        guardrail_router=guardrail_router,
+        conversation_repo=conversation_repo,
+    )
+
+    with pytest.raises(AgentRouterUnavailableError):
+        await service.chat(
+            request=AgentChatRequest(
+                message="khái niệm tổng quan đi",
+                incomingMessageId="msg-pending-guardrail",
+            ),
+            conversation_id=str(conversation_id),
+            thread_id="thread-cnn",
+            user_id=str(user_id),
+            allowed_course_ids=["CS231n"],
+        )
+
+    scope = guardrail_router.scopes[0]
+    assert "pending retrieval topic" in scope.allowed_scope_summary
+    assert scope.recent_context == [
+        {
+            "type": "pending_retrieval_query",
+            "proposed_raw_topic": "CNN",
+            "original_intent": "find_content",
+        }
+    ]
 
 
 @pytest.mark.asyncio
