@@ -179,6 +179,22 @@ def test_guardrail_prompt_allows_recent_assistant_followups():
     assert '"unit_name": "Kim CNN for sentence classification"' in prompt
 
 
+def test_guardrail_prompt_allows_safe_assistant_operation_messages():
+    prompt = build_guardrail_prompt(
+        "hello",
+        GuardrailScopePacket(
+            feature="agent",
+            scope_level="query",
+            scope_id="agent",
+            allowed_scope_summary="Agent guardrail scope: current user query only.",
+        ),
+    )
+
+    assert "Safe greetings, assistant-operation questions, and broad help requests" in prompt
+    assert "do not request external facts or lesson-irrelevant content" in prompt
+    assert "pass them to the downstream assistant router" in prompt
+
+
 def test_guardrail_decision_parses_openai_content_blocks():
     decision = parse_guardrail_decision(
         [
