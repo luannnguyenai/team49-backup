@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from src.config import settings
 from src.services.chat_model_factory import build_chat_model_kwargs
+from src.services.agent_prompt_manager import get_agent_prompt_manager
 
 
 SafetyLabel = Literal["SAFE", "HARMFUL"]
@@ -93,28 +94,20 @@ class GuardrailRouterConfig:
     max_tokens: int = 96
 
 
-ROUTER_SYSTEM_RULES = (
-    "You are a lesson-scope safety router.\n"
-    "Return exactly one valid JSON object and nothing else.\n"
-    "Do not use markdown. Do not explain.\n"
-    "Use exactly these 5 keys and no extra keys: "
-    "safety_label, topic_label, action, attack_type, selected_kp_ids.\n"
-    "Allowed safety_label values: SAFE, HARMFUL.\n"
-    "Allowed topic_label values: ON_TOPIC, OFF_TOPIC, AMBIGUOUS, N_A.\n"
-    "Allowed action values: ALLOW_LESSON_ANSWER, SOFT_REFUSE_REDIRECT, ASK_CLARIFY, SAFETY_REFUSE.\n"
-    "If safety_label is HARMFUL, set topic_label=N_A, action=SAFETY_REFUSE, and selected_kp_ids=[].\n"
-    "Safe greetings, assistant-operation questions, and broad help requests are application-scope "
-    "when they do not request external facts or lesson-irrelevant content; classify them as "
-    "ON_TOPIC and ALLOW_LESSON_ANSWER to pass them to the downstream assistant router.\n"
-    "If RECENT_CONTEXT contains pending_retrieval_query and USER_QUERY is a safe short refinement "
-    "of that pending topic, classify it as ON_TOPIC and ALLOW_LESSON_ANSWER.\n"
-    "If RECENT_CONTEXT contains recent_assistant_response and USER_QUERY is a safe follow-up about "
-    "assistant-provided content, classify it as ON_TOPIC and ALLOW_LESSON_ANSWER.\n"
-    "attack_type is auxiliary metadata and must not override the main safety/action decision."
-)
+def guardrail_router_system_rules(prompt_manager=None) -> str:
+    manager = prompt_manager or get_agent_prompt_manager()
+    return manager.get("guardrail_router", "system")
 
 
-def build_guardrail_prompt(message: str, scope: GuardrailScopePacket) -> str:
+ROUTER_SYSTEM_RULES = guardrail_router_system_rules()
+
+
+def build_guardrail_prompt(
+    message: str,
+    scope: GuardrailScopePacket,
+    *,
+    prompt_manager=None,
+) -> str:
     candidate_lines = [
         f"- {item.get('id', '')}: {item.get('text', '')}".strip()
         for item in scope.candidate_kps
@@ -127,7 +120,7 @@ def build_guardrail_prompt(message: str, scope: GuardrailScopePacket) -> str:
     )
     selected_text = scope.selected_text.strip()
     return (
-        f"{ROUTER_SYSTEM_RULES}\n\n"
+        f"{guardrail_router_system_rules(prompt_manager)}\n\n"
         "### TASK\n"
         "You are a lesson-scope safety router. Return only valid JSON.\n\n"
         "### SCOPE\n"
