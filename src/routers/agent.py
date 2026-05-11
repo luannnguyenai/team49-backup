@@ -54,7 +54,10 @@ from src.services.agent_requirement_service import AgentPathRequirementService
 from src.repositories.agent_graph_repo import AgentGraphRepository
 from src.services.agent_path_switch_service import AgentPathSwitchService
 from src.services.agent_response_composer import AgentResponseComposer
-from src.services.agent_router_factory import build_production_agent_router
+from src.services.agent_router_factory import (
+    build_production_agent_response_router,
+    build_production_agent_router,
+)
 from src.services.agent_search_service import AgentUnitSearchService
 from src.services.agent_title_generator import generate_conversation_title
 from src.services.agent_unit_context_service import AgentUnitContextService
@@ -157,6 +160,9 @@ async def agent_chat(
                 search,
                 requirements,
                 router=build_production_agent_router(),
+                response_router=build_production_agent_response_router(
+                    chat_model_id=body.chat_model_id,
+                ),
                 graph_repo=AgentGraphRepository(db),
                 thread_lock=AgentThreadLock(db),
                 conversation_repo=conversation_repo,

@@ -36,6 +36,13 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  CHAT_MODEL_OPTIONS,
+  CHAT_MODEL_STORAGE_KEYS,
+  readStoredChatModelId,
+  writeStoredChatModelId,
+  type ChatModelId,
+} from "@/lib/chat-model-options";
 import { useAuthStore } from "@/stores/authStore";
 import {
   createLearningProfileForPath,
@@ -1552,11 +1559,15 @@ function Composer({
   disabled,
   toolMode,
   onToolModeChange,
+  chatModelId,
+  onChatModelChange,
 }: {
   onSend: (message: string) => void;
   disabled: boolean;
   toolMode: AgentToolMode;
   onToolModeChange: (mode: AgentToolMode) => void;
+  chatModelId: ChatModelId;
+  onChatModelChange: (modelId: ChatModelId) => void;
 }) {
   const [text, setText] = useState("");
   const send = (event?: FormEvent) => {
@@ -1599,6 +1610,32 @@ function Composer({
               </button>
             );
           })}
+          <div
+            className="mt-1 flex flex-wrap items-center gap-2 lg:flex-col lg:items-stretch"
+            data-testid="agent-chat-model-selector"
+          >
+            {CHAT_MODEL_OPTIONS.map((option) => {
+              const isActive = chatModelId === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => onChatModelChange(option.id)}
+                  className={cn(
+                    "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-semibold transition disabled:opacity-60 lg:justify-start",
+                    isActive
+                      ? "border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                      : "border-border-subtle bg-surface-card text-text-muted hover:bg-surface-page hover:text-text-strong",
+                  )}
+                  aria-pressed={isActive}
+                >
+                  <Bot className="h-4 w-4" />
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="min-w-0 flex-1">
@@ -1727,6 +1764,7 @@ export default function AgentChatPage() {
   const [isThinking, setIsThinking] = useState(false);
   const [turnProgressIndex, setTurnProgressIndex] = useState(0);
   const [toolMode, setToolMode] = useState<AgentToolMode>("course");
+  const [chatModelId, setChatModelId] = useState<ChatModelId>("default");
   const [error, setError] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(false);
   const [leftMinimized, setLeftMinimized] = useState(false);
@@ -1745,6 +1783,15 @@ export default function AgentChatPage() {
       setSidebarWidth(parsed);
     }
   }, []);
+
+  useEffect(() => {
+    setChatModelId(readStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.agent));
+  }, []);
+
+  const changeChatModel = (modelId: ChatModelId) => {
+    setChatModelId(modelId);
+    writeStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.agent, modelId);
+  };
 
   useEffect(() => {
     if (!isResizingSidebar) return;
@@ -1996,6 +2043,7 @@ export default function AgentChatPage() {
         conversationId: activeSessionId,
         traceMode: "summary",
         ...(toolMode === "web_papers" ? { toolMode } : {}),
+        ...(chatModelId !== "default" ? { chatModelId } : {}),
       });
       appendAgentResponse(response, { message, incomingMessageId });
     } catch (err) {
@@ -2170,6 +2218,8 @@ export default function AgentChatPage() {
           disabled={isThinking}
           toolMode={toolMode}
           onToolModeChange={setToolMode}
+          chatModelId={chatModelId}
+          onChatModelChange={changeChatModel}
         />
       </section>
 

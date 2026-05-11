@@ -22,6 +22,23 @@ export type CurrentModel = {
   fast_model: string;
 };
 
+export type ModelHealthRow = {
+  id: string;
+  label: string;
+  provider: string;
+  model: string;
+  base_url?: string | null;
+  is_default?: boolean;
+  status: "healthy" | "degraded" | "down" | string;
+  latency_ms: number | null;
+  checked_at: string;
+  error?: string | null;
+};
+
+export type ModelHealthResponse = {
+  models: ModelHealthRow[];
+};
+
 export type AdminUserRow = {
   id: string;
   email: string;
@@ -97,6 +114,7 @@ export type NegativeFeedbackRow = {
 export const adminApi = {
   overview: () => api.get<AdminOverview>("/api/admin/stats/overview").then((r) => r.data),
   currentModel: () => api.get<CurrentModel>("/api/admin/model/current").then((r) => r.data),
+  modelHealth: () => api.get<ModelHealthResponse>("/api/admin/model/health").then((r) => r.data),
   users: (page = 1, size = 20, q?: string) =>
     api
       .get<AdminUsersPage>("/api/admin/users", { params: { page, size, q } })

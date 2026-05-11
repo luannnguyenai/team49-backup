@@ -29,6 +29,7 @@ from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import require_admin
 from src.models.user import User
+from src.services.model_registry import check_all_chat_model_health
 
 try:
     import psutil  # type: ignore
@@ -297,6 +298,11 @@ async def current_model(_admin: User = Depends(require_admin)) -> dict[str, Any]
         "provider": settings.model_provider,
         "fast_model": settings.fast_model,
     }
+
+
+@admin_router.get("/model/health")
+async def model_health(_admin: User = Depends(require_admin)) -> dict[str, Any]:
+    return {"models": await check_all_chat_model_health()}
 
 
 @admin_router.get("/users")

@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import type { ChatModelId } from "@/lib/chat-model-options";
 
 export const AGENT_REQUEST_TIMEOUT_MS = 60_000;
 const AGENT_CHAT_PATH = "/api/agent/chat";
@@ -137,6 +138,7 @@ export interface AgentChatResponse {
 }
 
 export type AgentToolMode = "course" | "web_papers";
+export type AgentChatModelId = ChatModelId;
 
 export interface AgentInProgressResponse {
   status: "in_progress";
@@ -305,6 +307,7 @@ export const agentApi = {
     routeContext?: Record<string, unknown>;
     traceMode?: "none" | "summary" | "full";
     toolMode?: AgentToolMode;
+    chatModelId?: AgentChatModelId;
   }) =>
     api
       .post<AgentChatResponse>(agentRuntimeEndpoint(AGENT_CHAT_PATH), payload, {
