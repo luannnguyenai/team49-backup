@@ -255,11 +255,17 @@ class AgentGraphService:
         sanitized_request = sanitized_request.model_copy(
             update={"message": normalized_language.normalized_text}
         )
+        pending_for_guardrail = await self._load_pending_clarification(
+            conversation_id,
+            user_id,
+            thread_id,
+        )
         guardrail_decision = await self._route_guardrail(
             message=sanitized_request.message,
             route_context=sanitized_request.route_context,
             allowed_course_ids=allowed_course_ids,
             current_path_course_ids=current_path_course_ids,
+            pending_clarification=pending_for_guardrail,
         )
         guardrail_response = self._compose_guardrail_response(
             conversation_id=conversation_id,
@@ -417,6 +423,7 @@ class AgentGraphService:
         route_context,
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None,
+        pending_clarification: PendingClarification | None = None,
     ) -> GuardrailDecision:
         try:
             return await self.guardrail_router.route(
@@ -425,6 +432,7 @@ class AgentGraphService:
                     route_context=route_context,
                     allowed_course_ids=allowed_course_ids,
                     current_path_course_ids=current_path_course_ids,
+                    pending_clarification=pending_clarification,
                 ),
             )
         except GuardrailRouterUnavailableError as exc:
@@ -439,14 +447,38 @@ class AgentGraphService:
         route_context,
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None,
+        pending_clarification: PendingClarification | None = None,
     ) -> GuardrailScopePacket:
+        allowed_scope_summary = "Agent guardrail scope: current user query only."
+        recent_context: list[dict[str, Any]] = []
+        if (
+            pending_clarification is not None
+            and pending_clarification.type == "slot_disambiguation"
+            and pending_clarification.payload.get("kind") == "retrieval_query"
+        ):
+            proposed_topic = str(
+                pending_clarification.payload.get("proposed_raw_topic") or ""
+            ).strip()
+            if proposed_topic:
+                allowed_scope_summary = (
+                    f"{allowed_scope_summary} Active pending retrieval topic is provided only "
+                    "to interpret short follow-up refinements."
+                )
+                recent_context.append(
+                    {
+                        "type": "pending_retrieval_query",
+                        "proposed_raw_topic": proposed_topic,
+                        "original_intent": pending_clarification.payload.get("original_intent")
+                        or "find_content",
+                    }
+                )
         return GuardrailScopePacket(
             feature="agent",
             scope_level="query",
             scope_id="agent",
-            allowed_scope_summary="Agent guardrail scope: current user query only.",
+            allowed_scope_summary=allowed_scope_summary,
             candidate_kps=[],
-            recent_context=[],
+            recent_context=recent_context,
             selected_text="",
         )
 
