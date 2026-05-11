@@ -177,7 +177,11 @@ class Settings(BaseSettings):
 
     # ---- CORS ----
     cors_origins: Annotated[list[str], NoDecode] = Field(
-        default=["http://localhost:3000", "http://localhost:8000"],
+        default=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:8000",
+        ],
         description="Allowed CORS origins. Never use ['*'] with credentials=True.",
     )
 
