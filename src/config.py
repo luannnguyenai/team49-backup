@@ -77,6 +77,11 @@ class Settings(BaseSettings):
         ge=0.1,
         description="Timeout for each guardrail router endpoint attempt.",
     )
+    guardrail_router_unhealthy_cooldown_seconds: float = Field(
+        default=60.0,
+        ge=0.0,
+        description="Seconds to skip the local guardrail router after a failed endpoint attempt.",
+    )
     guardrail_router_fallback_provider: str = Field(
         default="",
         description="Fallback provider for guardrail routing after the Cloudflare Tunnel vLLM route fails.",
