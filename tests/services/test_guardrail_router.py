@@ -159,6 +159,22 @@ def test_guardrail_decision_normalizes_fallback_attack_type_alias():
     assert decision.attack_type == "none"
 
 
+def test_guardrail_decision_normalizes_prompt_injection_attack_alias():
+    decision = parse_guardrail_decision(
+        json.dumps(
+            {
+                "safety_label": "HARMFUL",
+                "topic_label": "N_A",
+                "action": "SAFETY_REFUSE",
+                "attack_type": "PROMPT_INJECTION",
+                "selected_kp_ids": [],
+            }
+        )
+    )
+
+    assert decision.attack_type == "policy_override"
+
+
 def test_guardrail_decision_maps_plaintext_refusal_to_safety_refuse():
     decision = parse_guardrail_decision(
         "I cannot help with that request or reveal hidden system instructions."
