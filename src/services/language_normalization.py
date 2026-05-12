@@ -59,13 +59,15 @@ class GoogleTranslateEnglishTranslator:
 class InputLanguageNormalizer:
     def __init__(self, translator: EnglishTranslator | None = None):
         self.translator = translator or GoogleTranslateEnglishTranslator()
-        self.detector = LanguageDetectorBuilder.from_languages(
+        self.primary_detector = LanguageDetectorBuilder.from_languages(
             Language.ENGLISH,
             Language.VIETNAMESE,
-            Language.FRENCH,
-            Language.SPANISH,
-            Language.GERMAN,
-        ).with_minimum_relative_distance(0.2).build()
+        ).with_minimum_relative_distance(0.1).build()
+        self.all_language_detector = (
+            LanguageDetectorBuilder.from_all_languages()
+            .with_minimum_relative_distance(0.1)
+            .build()
+        )
 
     async def normalize(self, text: str) -> LanguageNormalizationResult:
         detected = self.detect(text)
@@ -93,12 +95,20 @@ class InputLanguageNormalizer:
         stripped = (text or "").strip()
         if not stripped:
             return "en"
-        language = self.detector.detect_language_of(stripped)
-        if language == Language.VIETNAMESE:
-            return "vi"
-        if language == Language.ENGLISH or language is None:
+        broad_language = self.all_language_detector.detect_language_of(stripped)
+        if broad_language == Language.ENGLISH:
             return "en"
-        return "other"
+        if broad_language == Language.VIETNAMESE:
+            return "vi"
+        if broad_language is not None:
+            return "other"
+
+        primary_language = self.primary_detector.detect_language_of(stripped)
+        if primary_language == Language.VIETNAMESE:
+            return "vi"
+        if primary_language == Language.ENGLISH:
+            return "en"
+        return "en"
 
 
 _default_normalizer: InputLanguageNormalizer | None = None
