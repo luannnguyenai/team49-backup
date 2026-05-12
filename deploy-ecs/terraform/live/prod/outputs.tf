@@ -105,3 +105,13 @@ output "frontend_log_group_name" {
 output "migrate_log_group_name" {
   value = module.observability.migrate_log_group_name
 }
+
+# Observability stack (Stage 3, present only when enabled)
+output "observability_repository_urls" {
+  value = module.ecr.observability_repository_urls
+}
+
+output "grafana_url" {
+  description = "Grafana endpoint on the shared ALB (sub-path). null when stack disabled."
+  value       = var.enable_observability_stack ? "http://${module.alb.alb_dns_name}${module.observability_stack[0].grafana_path}" : null
+}

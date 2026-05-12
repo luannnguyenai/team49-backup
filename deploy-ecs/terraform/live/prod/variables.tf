@@ -122,3 +122,33 @@ variable "backend_secret_arn" {
   default     = ""
   description = "Secrets Manager ARN containing DATABASE_URL, REDIS_URL, SECRET_KEY. Required when enable_services=true."
 }
+
+# ----- Observability stack (Stage 3) -----
+
+variable "enable_observability_stack" {
+  type        = bool
+  default     = false
+  description = "Stage 3: deploy Prometheus/Loki/Grafana/exporters on Fargate. Requires observability images already pushed to ECR."
+}
+
+variable "image_prometheus" {
+  type    = string
+  default = ""
+}
+
+variable "image_loki" {
+  type    = string
+  default = ""
+}
+
+variable "image_grafana" {
+  type    = string
+  default = ""
+}
+
+variable "grafana_admin_password" {
+  type        = string
+  default     = ""
+  sensitive   = true
+  description = "Initial Grafana admin password. Set via TF_VAR_grafana_admin_password on apply."
+}

@@ -53,7 +53,7 @@ resource "aws_cloudfront_distribution" "assets" {
   enabled             = true
   comment             = "${var.bucket_name} CDN"
   default_root_object = ""
-  price_class         = "PriceClass_100"  # NA + EU only — cheapest
+  price_class         = "PriceClass_100" # NA + EU only — cheapest
 
   origin {
     domain_name              = aws_s3_bucket.assets.bucket_regional_domain_name
