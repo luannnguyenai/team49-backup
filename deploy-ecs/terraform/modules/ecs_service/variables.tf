@@ -72,15 +72,3 @@ variable "health_check_grace_period_seconds" {
   type    = number
   default = 60
 }
-
-variable "service_registry_arn" {
-  type        = string
-  default     = ""
-  description = "Optional Cloud Map service ARN for ECS service discovery."
-}
-
-variable "service_registry_container_name" {
-  type        = string
-  default     = ""
-  description = "Optional container name for Cloud Map registration."
-}

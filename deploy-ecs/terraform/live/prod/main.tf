@@ -90,22 +90,20 @@ module "backend_service" {
   count  = var.enable_services ? 1 : 0
   source = "../../modules/ecs_service"
 
-  service_name                    = var.backend_service_name
-  cluster_arn                     = module.ecs_cluster.cluster_arn
-  container_image                 = var.backend_image
-  container_port                  = var.backend_container_port
-  cpu                             = var.backend_task_cpu
-  memory                          = var.backend_task_memory
-  desired_count                   = 1
-  task_execution_role_arn         = module.iam_oidc.task_execution_role_arn
-  task_role_arn                   = module.iam_oidc.backend_task_role_arn
-  subnet_ids                      = module.network.private_subnet_ids
-  security_group_id               = module.security.backend_security_group_id
-  target_group_arn                = module.alb.backend_target_group_arn
-  log_group_name                  = "/ecs/${var.backend_service_name}"
-  aws_region                      = var.aws_region
-  service_registry_arn            = var.backend_service_registry_arn
-  service_registry_container_name = var.backend_service_registry_arn != "" ? var.backend_service_name : ""
+  service_name            = var.backend_service_name
+  cluster_arn             = module.ecs_cluster.cluster_arn
+  container_image         = var.backend_image
+  container_port          = var.backend_container_port
+  cpu                     = var.backend_task_cpu
+  memory                  = var.backend_task_memory
+  desired_count           = 1
+  task_execution_role_arn = module.iam_oidc.task_execution_role_arn
+  task_role_arn           = module.iam_oidc.backend_task_role_arn
+  subnet_ids              = module.network.private_subnet_ids
+  security_group_id       = module.security.backend_security_group_id
+  target_group_arn        = module.alb.backend_target_group_arn
+  log_group_name          = "/ecs/${var.backend_service_name}"
+  aws_region              = var.aws_region
 
   health_check_grace_period_seconds = 60
 
@@ -271,8 +269,9 @@ module "observability_stack" {
   observability_secret_arn = "arn:aws:secretsmanager:${var.aws_region}:116533674568:secret:a20/prod/observability-Ea5JOh"
 
   image_prometheus = var.image_prometheus
-  image_loki       = var.image_loki
-  image_grafana    = var.image_grafana
+  image_loki             = var.image_loki
+  image_grafana          = var.image_grafana
+  grafana_admin_password = var.grafana_admin_password
 
   depends_on = [module.alb, module.database, module.cache]
 }

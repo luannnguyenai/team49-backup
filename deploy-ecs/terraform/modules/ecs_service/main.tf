@@ -55,14 +55,6 @@ resource "aws_ecs_service" "this" {
     container_port   = var.container_port
   }
 
-  dynamic "service_registries" {
-    for_each = var.service_registry_arn != "" ? [var.service_registry_arn] : []
-    content {
-      registry_arn   = service_registries.value
-      container_name = var.service_registry_container_name != "" ? var.service_registry_container_name : null
-    }
-  }
-
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
 

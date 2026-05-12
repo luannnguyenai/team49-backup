@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mode="${1:?smoke mode is required: backend|frontend|db|cloudfront|grafana}"
+mode="${1:?smoke mode is required: backend|frontend|db|cloudfront}"
 
 http_code() {
   local url="$1"
@@ -52,10 +52,6 @@ case "$mode" in
       exit 1
     fi
     echo "CloudFront smoke passed: $CLOUDFRONT_SMOKE_URL returned $code"
-    ;;
-  grafana)
-    : "${NEXT_PUBLIC_GRAFANA_HOST:?NEXT_PUBLIC_GRAFANA_HOST is required}"
-    require_200 "${NEXT_PUBLIC_GRAFANA_HOST%/}/api/health"
     ;;
   *)
     echo "Unknown smoke mode: $mode" >&2
