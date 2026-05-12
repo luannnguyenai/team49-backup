@@ -9,6 +9,7 @@ from urllib.parse import quote_plus, urlencode
 from urllib.request import Request, urlopen
 
 from src.schemas.agent import AgentCitation, AgentFallback
+from src.services.agent_external_citation_manager import ExternalCitationManager
 from src.services.agent_graph_contracts import ToolResult
 
 
@@ -20,42 +21,124 @@ class ExternalResearchDocument:
     source: str
 
 
+@dataclass(frozen=True)
+class SearchPlan:
+    tools: tuple[str, ...]
+    queries: tuple[str, ...]
+
+
 class AgentExternalResearchService:
     def __init__(self, *, timeout_s: float = 8.0, max_retries: int = 2, responder=None):
         self.timeout_s = timeout_s
         self.max_retries = max(1, max_retries)
         self.responder = responder
+        self.citation_manager = ExternalCitationManager()
 
     async def answer(
         self, *, message: str, recent_messages: list[dict] | None = None
     ) -> ToolResult:
-        queries = self._plan_queries(message)
-        documents = await self._act(queries)
+        plan = self._plan_search(message)
+        documents = await self._act(plan)
         observed = self._observe(message, documents)
-        return self._respond(message, observed, recent_messages or [])
+        return self._respond(message, observed, recent_messages or [], plan=plan)
+
+    def _plan_search(self, message: str) -> SearchPlan:
+        queries = tuple(self._plan_queries(message))
+        if not queries:
+            return SearchPlan(tools=(), queries=())
+        return SearchPlan(tools=self._select_tools(message), queries=queries)
 
     def _plan_queries(self, message: str) -> list[str]:
         normalized = re.sub(r"\s+", " ", message).strip()
         if not normalized:
             return []
-        cleaned = re.sub(
-            r"^(explain|find|search|look up|what is|giải thích|tìm|tìm kiếm)\s+",
-            "",
-            normalized,
-            flags=re.IGNORECASE,
-        ).strip(" ?.")
-        queries = [normalized]
-        if cleaned and cleaned.lower() != normalized.lower():
-            queries.append(cleaned)
+        cleaned = self._clean_query(normalized)
+        queries = [cleaned]
+        if normalized.casefold() != cleaned.casefold() and not self._looks_like_noisy_query(
+            normalized
+        ):
+            queries.append(normalized)
         return list(dict.fromkeys(queries))[:2]
 
-    async def _act(self, queries: list[str]) -> list[ExternalResearchDocument]:
-        if not queries:
+    def _select_tools(self, message: str) -> tuple[str, ...]:
+        lowered = message.casefold()
+        wants_web = re.search(r"\b(web|website|internet|online|news)\b", lowered) is not None
+        wants_paper = re.search(
+            r"\b(arxiv|paper|papers|publication|publications|research|survey|literature)\b",
+            lowered,
+        ) is not None or any(
+            phrase in lowered
+            for phrase in ("bài báo", "nghiên cứu", "khảo sát", "tài liệu học thuật")
+        )
+        if wants_web and wants_paper:
+            return ("web", "paper")
+        if wants_paper:
+            return ("paper",)
+        return ("web",)
+
+    def _clean_query(self, message: str) -> str:
+        cleaned = message.strip(" ?.")
+        for _ in range(3):
+            previous = cleaned
+            cleaned = re.sub(
+                r"^(please\s+)?(explain|find|search|look up|what is|tell me about|"
+                r"give me information about|giải thích|tìm kiếm|tìm)\s+",
+                "",
+                cleaned,
+                flags=re.IGNORECASE,
+            ).strip(" ?.")
+            cleaned = re.sub(
+                r"^(web\s+and\s+papers?|papers?\s+and\s+web|arxiv\s+papers?|"
+                r"papers?|publications?|research|survey|literature|web|online)"
+                r"(\s+(about|on|for|về))?\s+",
+                "",
+                cleaned,
+                flags=re.IGNORECASE,
+            ).strip(" ?.")
+            cleaned = re.sub(
+                r"^(thông tin|nội dung|kiến thức|bài báo|papers?|information|content)"
+                r"(\s+(về|about))?\s+",
+                "",
+                cleaned,
+                flags=re.IGNORECASE,
+            ).strip(" ?.")
+            cleaned = re.sub(r"^(về|about)\s+", "", cleaned, flags=re.IGNORECASE).strip(" ?.")
+            if cleaned == previous:
+                break
+        return cleaned or message.strip(" ?.")
+
+    def _looks_like_noisy_query(self, query: str) -> bool:
+        lowered = query.casefold()
+        return any(
+            phrase in lowered
+            for phrase in (
+                "thông tin",
+                "nội dung",
+                "kiến thức",
+                "tìm ",
+                "tìm kiếm",
+                "arxiv",
+                "paper",
+                "papers",
+                "publication",
+                "publications",
+                "research",
+                "survey",
+                "literature",
+                "web",
+                "online",
+            )
+        )
+
+    async def _act(self, plan: SearchPlan) -> list[ExternalResearchDocument]:
+        if not plan.queries or not plan.tools:
             return []
         tasks = []
-        for query in queries:
-            tasks.append(self._with_retry(lambda q=query: self._search_web(q)))
-            tasks.append(self._with_retry(lambda q=query: self._search_papers(q)))
+        for query in plan.queries:
+            if "web" in plan.tools:
+                tasks.append(self._with_retry(lambda q=query: self._search_web(q)))
+            if "paper" in plan.tools:
+                tasks.append(self._with_retry(lambda q=query: self._search_papers(q)))
         responses = await asyncio.gather(*tasks, return_exceptions=True)
         documents: list[ExternalResearchDocument] = []
         seen: set[str] = set()
@@ -159,40 +242,31 @@ class AgentExternalResearchService:
     def _observe(
         self, message: str, documents: list[ExternalResearchDocument]
     ) -> list[ExternalResearchDocument]:
-        tokens = {
-            token
-            for token in re.findall(r"[a-zA-Z][a-zA-Z0-9+-]{2,}", message.lower())
-            if token not in {"explain", "search", "find", "about", "what", "papers"}
-        }
-
-        def score(document: ExternalResearchDocument) -> tuple[int, int]:
-            text = f"{document.title} {document.snippet}".lower()
-            token_hits = sum(1 for token in tokens if token in text)
-            source_bonus = 1 if document.source == "paper" else 0
-            return token_hits, source_bonus
-
-        ranked = sorted(documents, key=score, reverse=True)
-        return ranked[:6]
+        return list(self.citation_manager.select_sources(documents))
 
     def _respond(
         self,
         message: str,
         documents: list[ExternalResearchDocument],
         recent_messages: list[dict],
+        *,
+        plan: SearchPlan | None = None,
     ) -> ToolResult:
+        pipeline = ["plan", "search", "consolidate", "respond"]
         if not documents:
             return ToolResult(
                 kind="find_content",
                 answer_markdown="I could not find reliable web or paper sources for that request.",
                 citations=[],
                 fallback=AgentFallback(
-                    reason="no_external_sources",
+                    reason="no_retrieval_result",
                     message="Web and paper search returned no usable sources.",
                 ),
                 requires_evidence=True,
                 metadata={
                     "tool_mode": "web_papers",
-                    "pipeline": ["plan", "act", "observe", "respond"],
+                    "pipeline": pipeline,
+                    "selected_tools": list(plan.tools) if plan else [],
                 },
             )
         citations = self._citations(documents)
@@ -212,7 +286,8 @@ class AgentExternalResearchService:
                 metadata={
                     "tool_mode": "web_papers",
                     "answer_confidence": "grounded",
-                    "pipeline": ["plan", "act", "observe", "respond"],
+                    "pipeline": pipeline,
+                    "selected_tools": list(plan.tools) if plan else [],
                     "external_source_count": len(documents),
                     "response_synthesized": True,
                 },
@@ -238,25 +313,15 @@ class AgentExternalResearchService:
             metadata={
                 "tool_mode": "web_papers",
                 "answer_confidence": "grounded",
-                "pipeline": ["plan", "act", "observe", "respond"],
+                "pipeline": pipeline,
+                "selected_tools": list(plan.tools) if plan else [],
                 "external_source_count": len(documents),
                 "response_synthesized": False,
             },
         )
 
     def _citations(self, documents: list[ExternalResearchDocument]) -> list[AgentCitation]:
-        return [
-            AgentCitation(
-                canonical_unit_id=f"external::{document.source}::{index}",
-                course_id="PAPER" if document.source == "paper" else "WEB",
-                unit_name=document.title,
-                lecture_title="External paper" if document.source == "paper" else "Web source",
-                learn_href=document.url,
-                quote=document.snippet[:700],
-                source=document.source,
-            )
-            for index, document in enumerate(documents[:5], start=1)
-        ]
+        return self.citation_manager.build_citations(documents)
 
     def _synthesize_answer(
         self,
@@ -278,12 +343,13 @@ class AgentExternalResearchService:
                 "kind": "find_content",
                 "external_sources": [
                     {
+                        "source_index": index,
                         "title": document.title,
                         "source": document.source,
                         "url": document.url,
                         "snippet": self._shorten(document.snippet, limit=900),
                     }
-                    for document in documents[:6]
+                    for index, document in enumerate(documents[:6], start=1)
                 ],
                 "citations": [citation.model_dump(mode="json") for citation in citations],
             },
@@ -291,14 +357,16 @@ class AgentExternalResearchService:
         base_thought = {
             "user_goal": message,
             "evidence_need": "external_web_and_papers",
-            "tool_plan": ["search_web", "search_papers", "synthesize_answer"],
+            "tool_plan": ["search_web_or_papers", "consolidate_sources", "synthesize_answer"],
             "answer_requirements": (
                 "Produce a complete user-facing answer before the backend appends sources. "
                 "Prefer 2-4 short paragraphs or 3-5 complete bullets. Do not use a numbered "
                 "section heading unless the answer contains more than one numbered section. "
                 "When a claim comes from an external source, cite it with bracketed source "
                 "numbers like [1] or [2]. Use only citation numbers that appear in the provided "
-                "citations list. Do not write raw URLs or a Sources section."
+                "citations list and match source_index exactly. Every answer using external "
+                "sources must include at least one inline citation marker in [N] format. "
+                "Do not write raw URLs or a Sources section."
             ),
         }
         final = rag_respond(
@@ -346,62 +414,7 @@ class AgentExternalResearchService:
         return False
 
     def _with_numeric_source_links(self, answer: str, citations: list[AgentCitation]) -> str:
-        cleaned = self._strip_existing_source_section(
-            re.sub(r"\s*\[\^[^\]]+\]", "", answer)
-        ).strip()
-        indexed_citations = [
-            (index, citation)
-            for index, citation in enumerate(citations[:5], start=1)
-            if citation.learn_href
-        ]
-        if not indexed_citations:
-            return cleaned
-
-        linked_answer = self._link_numeric_citation_markers(cleaned, indexed_citations)
-        return f"{linked_answer}\n\n{self._source_reference_section(indexed_citations)}"
-
-    def _link_numeric_citation_markers(
-        self,
-        answer: str,
-        indexed_citations: list[tuple[int, AgentCitation]],
-    ) -> str:
-        href_by_index = {
-            index: citation.learn_href
-            for index, citation in indexed_citations
-            if citation.learn_href
-        }
-
-        def replace(match: re.Match[str]) -> str:
-            index = int(match.group(1))
-            href = href_by_index.get(index)
-            if not href:
-                return match.group(0)
-            return f"[{index}]({href})"
-
-        return re.sub(r"(?<!\[)\[(\d{1,2})\](?!\()", replace, answer)
-
-    def _source_reference_section(self, indexed_citations: list[tuple[int, AgentCitation]]) -> str:
-        lines = ["## Sources"]
-        for index, citation in indexed_citations:
-            title = self._markdown_link_label(citation.unit_name)
-            source = "Paper" if str(citation.source or "").lower() == "paper" else "Web"
-            summary = self._shorten(citation.quote or "", limit=180)
-            line = f"{index}. [{title}]({citation.learn_href}) — {source}"
-            if summary:
-                line = f"{line}. {summary}"
-            lines.append(line)
-        return "\n".join(lines)
-
-    @staticmethod
-    def _strip_existing_source_section(answer: str) -> str:
-        return re.split(
-            r"\n\s*(?:#{1,6}\s*)?Sources\s*:?\s*\n", answer, maxsplit=1, flags=re.IGNORECASE
-        )[0]
-
-    @staticmethod
-    def _markdown_link_label(value: str) -> str:
-        cleaned = re.sub(r"\s+", " ", value).strip()
-        return cleaned.replace("\\", "\\\\").replace("[", "\\[").replace("]", "\\]")
+        return self.citation_manager.render_answer(answer, citations)
 
     @staticmethod
     def _xml_text(element) -> str:
