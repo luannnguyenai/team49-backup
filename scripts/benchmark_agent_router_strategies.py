@@ -29,8 +29,10 @@ StrategyName = Literal[
     "deterministic_compact",
     "content_fastpath_compact",
     "compact_all",
+    "compact_labeled_all",
     "retrieval_first",
     "retrieval_first_compact",
+    "retrieval_first_labeled_compact",
 ]
 
 
@@ -38,9 +40,11 @@ def default_strategy_names() -> list[StrategyName]:
     return [
         "baseline_0_8b",
         "compact_all",
+        "compact_labeled_all",
         "deterministic",
         "content_fastpath_compact",
         "retrieval_first_compact",
+        "retrieval_first_labeled_compact",
     ]
 
 
@@ -51,7 +55,9 @@ def needs_compact_model(strategies: list[StrategyName]) -> bool:
             "deterministic_compact",
             "content_fastpath_compact",
             "compact_all",
+            "compact_labeled_all",
             "retrieval_first_compact",
+            "retrieval_first_labeled_compact",
         )
         for item in strategies
     )
@@ -327,27 +333,56 @@ def _build_compact_router_model() -> OpenAICompatibleHTTPChatModel:
     )
 
 
-def compact_router_route(case: BenchmarkCase, model: OpenAICompatibleHTTPChatModel) -> CompactRouteOutput:
-    system = (
-        "Classify one AI/ML learning assistant request. Return only JSON with exactly these keys: "
-        "intent, topic, confidence, clarify. confidence must be a decimal from 0 to 1, not percent. "
-        "intent must be one of: explain_concept, find_content, "
-        "navigate_to_unit, ask_what_next, assess_knowledge, request_replan, "
-        "explain_planner_decision, summarize_progress, general_course_question, "
-        "assistant_help, request_path_switch, clarify. Use topic only for searchable course "
-        "content. Use English or Vietnamese clarify text only."
-    )
+def build_compact_router_messages(
+    case: BenchmarkCase,
+    *,
+    labeled: bool = False,
+) -> list[dict[str, str]]:
+    if labeled:
+        system = (
+            "Classify one AI/ML learning assistant request. Return only JSON with exactly these keys: "
+            "intent, topic, confidence, clarify. confidence must be a decimal from 0 to 1, not percent. "
+            "Allowed intents: explain_concept, find_content, navigate_to_unit, ask_what_next, "
+            "assess_knowledge, request_replan, explain_planner_decision, summarize_progress, "
+            "general_course_question, assistant_help, request_path_switch, clarify. "
+            "Definitions: request_replan means the user asks to rebuild or optimize the learning path; "
+            "request_path_switch means the user asks to switch to another path, track, course, or domain; "
+            "assess_knowledge means the user asks for a quiz, test, or knowledge check; "
+            "assistant_help means greeting or asking what the assistant can do; "
+            "find_content or explain_concept means the user asks for course content or an explanation. "
+            "Examples: 'tối ưu lại lộ trình cho tôi' -> request_replan; "
+            "'chuyển tôi sang lộ trình NLP' -> request_path_switch; "
+            "'quiz me on object detection' -> assess_knowledge. "
+            "Use topic only for searchable course content or assessment topic. Use English or Vietnamese clarify text only."
+        )
+    else:
+        system = (
+            "Classify one AI/ML learning assistant request. Return only JSON with exactly these keys: "
+            "intent, topic, confidence, clarify. confidence must be a decimal from 0 to 1, not percent. "
+            "intent must be one of: explain_concept, find_content, "
+            "navigate_to_unit, ask_what_next, assess_knowledge, request_replan, "
+            "explain_planner_decision, summarize_progress, general_course_question, "
+            "assistant_help, request_path_switch, clarify. Use topic only for searchable course "
+            "content. Use English or Vietnamese clarify text only."
+        )
     user = (
         f"Active topic: {case.active_topic or ''}\n"
         f"Recent messages: {case.recent_messages or []}\n"
         f"Message: {case.message}"
     )
-    response = model.invoke(
-        [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ]
-    )
+    return [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
+
+
+def compact_router_route(
+    case: BenchmarkCase,
+    model: OpenAICompatibleHTTPChatModel,
+    *,
+    labeled: bool = False,
+) -> CompactRouteOutput:
+    response = model.invoke(build_compact_router_messages(case, labeled=labeled))
     content = str(response.content).strip()
     try:
         parsed = json.loads(content)
@@ -424,6 +459,9 @@ async def run_strategy_case(
         elif strategy == "compact_all":
             assert compact_model is not None
             output = compact_router_route(case, compact_model)
+        elif strategy == "compact_labeled_all":
+            assert compact_model is not None
+            output = compact_router_route(case, compact_model, labeled=True)
         elif strategy == "retrieval_first":
             output = deterministic_content_route(case)
             if output.intent == "clarify":
@@ -445,6 +483,18 @@ async def run_strategy_case(
             if output is None:
                 assert compact_model is not None
                 output = compact_router_route(case, compact_model)
+        elif strategy == "retrieval_first_labeled_compact":
+            output = deterministic_content_fast_path(case)
+            if output is None and case.route_context and case.route_context.get("retrieved_topic"):
+                output = CompactRouteOutput(
+                    intent="find_content",
+                    topic=str(case.route_context["retrieved_topic"]),
+                    confidence=0.75,
+                    clarify=None,
+                )
+            if output is None:
+                assert compact_model is not None
+                output = compact_router_route(case, compact_model, labeled=True)
         else:
             raise ValueError(f"unknown strategy: {strategy}")
     except Exception as exc:
