@@ -41,6 +41,16 @@ export SHA=$(git rev-parse --short HEAD)
    ```sh
    aws s3 sync ./data/courses s3://a20-course-assets-prod/courses
    ```
+5. Upload the canonical seed bundle for production init:
+   ```sh
+   export CANONICAL_BUNDLE_VERSION=$(date +%Y-%m-%d)-cs224n-cs231n-cs230-v1
+   aws s3 sync \
+     ./data/final_artifacts/cs224n_cs231n_cs230_v1/canonical \
+     s3://a20-course-assets-prod/canonical-bundles/$CANONICAL_BUNDLE_VERSION/canonical
+   ```
+   The uploaded prefix must contain `manifest.json` at its root because the
+   ECS init tasks materialize this prefix into a local bundle directory before
+   running `scripts/seed.py` / `sync_schema_v2`.
 5. Validate CloudFront delivery for one known asset, including a `Range:` header probe
 
 ## 3. Prepare application deploy
@@ -127,9 +137,21 @@ Do **not** put alembic into the service start command.
 
 ## 6. Run bootstrap/import
 
-1. Either rerun a similar one-off task with `command=["python","-m","scripts.bootstrap"]` or use admin path
-2. Verify catalog row counts
-3. Verify `GET /api/course-sections` returns non-empty array
+Use the `Initialize ECS Production` GitHub Actions workflow so migrations and
+seed phases stay aligned with the production task definitions.
+
+1. Set repository/environment vars from `ENVIRONMENT_MATRIX.md`, especially:
+   - `AWS_S3_BUCKET=a20-course-assets-prod`
+   - `CANONICAL_BUNDLE_PREFIX=canonical-bundles`
+   - `CANONICAL_BUNDLE_VERSION=<uploaded version>`
+2. Dispatch `Initialize ECS Production` with:
+   - `run_seed_core=true`
+   - `run_sync_schema_v2=true`
+   - `run_seed_accounts=true`
+   - optional `canonical_bundle_version=<override>` when rerunning an older bundle
+3. Verify the `seed-core` task downloads `s3://$AWS_S3_BUCKET/$CANONICAL_BUNDLE_PREFIX/$CANONICAL_BUNDLE_VERSION/canonical/`
+4. Verify catalog row counts
+5. Verify `GET /api/course-sections` returns non-empty array
 
 ## 7. Deploy frontend second
 

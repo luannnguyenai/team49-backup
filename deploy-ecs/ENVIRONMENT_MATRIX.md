@@ -56,6 +56,9 @@ frontend image. Restarting the service alone is not enough.
 | `AWS_DEPLOY_ROLE_ARN` | IAM role ARN | OIDC role |
 | `ECR_BACKEND_REPOSITORY` | `a20-backend` | |
 | `ECR_FRONTEND_REPOSITORY` | `a20-frontend` | |
+| `AWS_S3_BUCKET` | `a20-course-assets-prod` | Bucket storing private asset and canonical bundle prefixes |
+| `CANONICAL_BUNDLE_PREFIX` | `canonical-bundles` | Private prefix root for versioned canonical bundles |
+| `CANONICAL_BUNDLE_VERSION` | e.g. `2026-05-12-cs224n-cs231n-cs230-v1` | Init workflow resolves `s3://$AWS_S3_BUCKET/$CANONICAL_BUNDLE_PREFIX/$CANONICAL_BUNDLE_VERSION/canonical/` |
 | `ECS_CLUSTER_NAME` | `a20-prod-cluster` | |
 | `ECS_BACKEND_SERVICE_NAME` | `a20-backend` | |
 | `ECS_FRONTEND_SERVICE_NAME` | `a20-frontend` | |

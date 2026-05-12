@@ -17,3 +17,8 @@ variable "asset_prefix" {
   type    = string
   default = "courses"
 }
+
+variable "canonical_bundle_prefix" {
+  type    = string
+  default = "canonical-bundles"
+}

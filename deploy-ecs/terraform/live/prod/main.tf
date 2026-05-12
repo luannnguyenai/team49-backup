@@ -68,6 +68,7 @@ module "iam_oidc" {
   name_prefix       = local.name_prefix
   asset_bucket_arn  = module.assets.bucket_arn
   asset_prefix      = var.asset_prefix
+  canonical_bundle_prefix = var.canonical_bundle_prefix
 }
 
 module "observability" {
