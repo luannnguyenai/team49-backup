@@ -220,6 +220,35 @@ async def test_external_research_keeps_two_papers_and_three_web_results():
 
 
 @pytest.mark.asyncio
+async def test_external_research_web_search_falls_back_to_provider_ranked_html_results():
+    class HTMLSearchService(AgentExternalResearchService):
+        async def _fetch_web_json(self, url):
+            return {"Heading": "", "RelatedTopics": []}
+
+        async def _fetch_web_html_text(self, url):
+            return """
+            <html>
+              <a class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.com%2Fcnn">
+                Convolutional Neural Networks overview
+              </a>
+              <a class="result__snippet">CNNs are neural networks used in machine learning.</a>
+              <a class="result__a" href="https://example.com/second">Second result</a>
+              <a class="result__snippet">Another provider-ranked result.</a>
+            </html>
+            """
+
+    service = HTMLSearchService()
+
+    documents = await service._search_web("CNN machine learning")
+
+    assert [document.url for document in documents] == [
+        "https://example.com/cnn",
+        "https://example.com/second",
+    ]
+    assert documents[0].title == "Convolutional Neural Networks overview"
+
+
+@pytest.mark.asyncio
 async def test_external_research_uses_semantic_scholar_before_arxiv(monkeypatch):
     monkeypatch.setattr(
         "src.services.agent_external_research_service.settings.semantic_scholar_api_key",
