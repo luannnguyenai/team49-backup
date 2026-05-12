@@ -297,7 +297,12 @@ class AgentGraphService:
                 block_reason=input_guardrail.block_reason or "pii_input_blocked",
                 error_code=input_guardrail.error_code,
             )
-        original_sanitized_message = sanitized_request.message
+        exact_greeting_response = self._compose_exact_greeting_response(
+            conversation_id=conversation_id,
+            message=sanitized_request.message,
+        )
+        if exact_greeting_response is not None:
+            return self._sanitize_response(exact_greeting_response, input_guardrail)
         normalized_language = await self.language_normalizer.normalize(sanitized_request.message)
         sanitized_request = sanitized_request.model_copy(
             update={"message": normalized_language.normalized_text}
@@ -325,12 +330,6 @@ class AgentGraphService:
         )
         if guardrail_response is not None:
             return guardrail_response
-        exact_greeting_response = self._compose_exact_greeting_response(
-            conversation_id=conversation_id,
-            message=original_sanitized_message,
-        )
-        if exact_greeting_response is not None:
-            return self._sanitize_response(exact_greeting_response, input_guardrail)
 
         if self.graph_repo is None:
             response = await self._invoke_graph_and_compose(
