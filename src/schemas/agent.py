@@ -86,7 +86,7 @@ class RetrievalTrace(BaseModel):
 
 
 class AgentChatRequest(BaseModel):
-    message: str = Field(min_length=1)
+    message: str = Field(min_length=1, max_length=2000)
     conversation_id: str | None = Field(default=None, alias="conversationId")
     incoming_message_id: str = Field(
         default_factory=lambda: f"msg_{uuid4()}",

@@ -24,6 +24,20 @@ from src.services.agent_memory_compaction_service import AgentMemoryCompactionSe
 pytestmark = pytest.mark.asyncio
 
 
+@pytest.fixture(autouse=True)
+def allow_guardrail_router_by_default(monkeypatch):
+    class AllowGuardrailRouter:
+        async def route(self, *, message, scope):
+            from src.services.guardrail_router import GuardrailDecision
+
+            return GuardrailDecision.allow()
+
+    monkeypatch.setattr(
+        "src.services.agent_graph_service.build_guardrail_router_client",
+        lambda: AllowGuardrailRouter(),
+    )
+
+
 class EchoSanitizedAgentGraphService(AgentGraphService):
     async def _invoke_graph_and_compose(
         self,
@@ -229,7 +243,11 @@ async def test_graph_uses_response_router_for_grounded_answer_composition():
     assert not any(call[0] == "routing_compose" for call in calls)
 
 
-async def test_graph_routes_web_paper_mode_to_external_research():
+async def test_graph_routes_web_paper_mode_to_external_research(monkeypatch):
+    monkeypatch.setattr(
+        "src.services.agent_graph_service.settings.external_research_enabled",
+        True,
+    )
     calls = []
 
     async def search(request, allowed_course_ids):
@@ -269,6 +287,121 @@ async def test_graph_routes_web_paper_mode_to_external_research():
 
     assert response.answer.markdown == "External web and paper answer."
     assert [call[0] for call in calls] == ["external_research"]
+
+
+async def test_graph_blocks_web_paper_mode_when_external_research_disabled(monkeypatch):
+    monkeypatch.setattr(
+        "src.services.agent_graph_service.settings.external_research_enabled",
+        False,
+    )
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=DeterministicAgentRouter(),
+        external_research_service=object(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="Find recent papers about CNN pruning",
+            incomingMessageId="msg-web-papers-disabled",
+            toolMode="web_papers",
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-disabled",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "fallback"
+    assert response.fallback is not None
+    assert response.fallback.reason == "tool_error"
+    assert response.fallback.error_code == "external_research_disabled"
+
+
+async def test_active_recent_citation_prefers_latest_message_topic_match():
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=DeterministicAgentRouter(),
+    )
+
+    active = service._active_recent_citation(
+        {
+            "message": "à ý tôi là Mask RCNN",
+            "recent_messages": [
+                {
+                    "role": "assistant",
+                    "citations": [
+                        {
+                            "canonical_unit_id": "local::lecture_9::seg3",
+                            "course_id": "CS231n",
+                            "unit_name": "Object detection as classification plus localization and the R-CNN family",
+                            "lecture_title": "Lecture 9: Object Detection, Image Segmentation, Visualizing and Understanding",
+                            "source": "summary",
+                        },
+                        {
+                            "canonical_unit_id": "local::lecture_9::seg5",
+                            "course_id": "CS231n",
+                            "unit_name": "Instance segmentation with Mask R-CNN",
+                            "lecture_title": "Lecture 9: Object Detection, Image Segmentation, Visualizing and Understanding",
+                            "source": "summary",
+                        },
+                    ],
+                }
+            ],
+        }
+    )
+
+    assert active is not None
+    assert active.canonical_unit_id == "local::lecture_9::seg5"
+
+
+async def test_recent_message_context_preserves_persisted_actions():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    conversation_repo = SimpleNamespace(
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mask R-CNN answer.",
+                    citations_json=[],
+                    actions_json=[
+                        {
+                            "type": "review_prerequisite_path",
+                            "label": "Review prerequisite order",
+                            "canonical_unit_id": "local::lecture_9::seg5",
+                            "canonical_unit_ids": [
+                                "local::lecture_9::seg3",
+                                "local::lecture_9::seg5",
+                            ],
+                        }
+                    ],
+                )
+            ]
+        )
+    )
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=DeterministicAgentRouter(),
+        conversation_repo=conversation_repo,
+    )
+
+    context = await service._load_recent_message_context(str(conversation_id), str(user_id))
+
+    assert context[0]["actions"] == [
+        {
+            "type": "review_prerequisite_path",
+            "label": "Review prerequisite order",
+            "canonical_unit_id": "local::lecture_9::seg5",
+            "canonical_unit_ids": [
+                "local::lecture_9::seg3",
+                "local::lecture_9::seg5",
+            ],
+        }
+    ]
 
 
 async def test_graph_chat_sanitizes_input_and_output_for_assistant_flow():
@@ -464,6 +597,115 @@ async def test_graph_delegates_supported_router_to_agentic_rag_pipeline():
         "observe",
         "respond",
     ]
+
+
+async def test_agentic_rag_pins_active_citation_for_short_followup():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="CNN", search_queries=["CNN"]),
+            )
+
+        def rag_think(self, **kwargs):
+            return {"user_goal": "Explain the active CNN unit", "active_topic": "CNN"}
+
+        def rag_act(self, **kwargs):
+            return AgenticRAGToolCall(
+                tool="search_current_path_units",
+                arguments={"query": "CNN", "search_queries": ["CNN"]},
+                rationale="Search the current path.",
+            )
+
+        def rag_observe(self, **kwargs):
+            return kwargs["tool_observation"]
+
+        def rag_respond(self, **kwargs):
+            observation = kwargs["observations"][0]
+            citations = observation["result"]["citations"]
+            return AgenticRAGFinal(
+                answer_markdown=f"Kim CNN detail from {citations[0]['unit_name']}.",
+                evidence_status="grounded",
+                evidence_sufficient=True,
+            )
+
+    async def search(request, allowed_course_ids):
+        results = [
+            UnitSearchResult(
+                canonical_unit_id="unit-kim-cnn",
+                course_id="CS224n",
+                unit_name="Kim CNN for sentence classification",
+                lecture_title="Lecture 16 - ConvNets and TreeRNNs",
+                summary="Yoon Kim's CNN applies filters over n-grams, max-pools, and classifies.",
+                learn_href="/courses/cs224n/learn/lecture17-convnets-seg2",
+                score=5,
+                quiz_available=True,
+            )
+        ]
+        results.extend(
+            UnitSearchResult(
+                canonical_unit_id=f"unit-cnn-{index}",
+                course_id="CS231n",
+                unit_name=f"CNN vision topic {index}",
+                summary="A CNN vision topic.",
+                learn_href=f"/courses/cs231n/learn/cnn-{index}",
+                score=4,
+                quiz_available=True,
+            )
+            for index in range(19)
+        )
+        return UnitSearchResponse(
+            results=results,
+            trace=RetrievalTrace(trace_id="trace-agentic-active-citation", ranking_version="unit_title_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(
+            return_value=[
+                SimpleNamespace(
+                    role="assistant",
+                    markdown="Mình vừa giải thích khái niệm CNN và có nguồn Kim CNN.",
+                    citations_json=[
+                        {
+                            "canonical_unit_id": "unit-kim-cnn",
+                            "course_id": "CS224n",
+                            "lecture_title": "Lecture 16 - ConvNets and TreeRNNs",
+                            "unit_name": "Kim CNN for sentence classification",
+                            "learn_href": "/courses/cs224n/learn/lecture17-convnets-seg2",
+                            "quote": "Kim CNN uses n-gram filters and max pooling.",
+                            "source": "summary",
+                        }
+                    ],
+                    actions_json=[],
+                )
+            ]
+        ),
+        upsert_memory=AsyncMock(),
+        add_message=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="thông tin cụ thể hơn về Kim CNN đi",
+            incomingMessageId="msg-agentic-active-citation",
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-agentic-active-citation",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS224n", "CS231n"],
+        current_path_course_ids=["CS224n", "CS231n"],
+    )
+
+    assert response.answer.markdown == "Kim CNN detail from Kim CNN for sentence classification."
+    assert [citation.canonical_unit_id for citation in response.citations] == ["unit-kim-cnn"]
 
 
 async def test_graph_react_rag_can_ask_clarification_without_searching():
@@ -2543,6 +2785,229 @@ async def test_pending_retrieval_query_confirmation_uses_proposed_topic():
     assert response.answer.confidence == "grounded"
     assert search_requests[0].query == "dependency parsing"
     assert upserts[-1]["summary_json"].get("pendingClarification") is None
+
+
+async def test_pending_retrieval_query_short_detail_refines_proposed_topic_even_if_router_clarifies():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-cnn-detail",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "original_message": "b có thể tìm cho mình nội dung về CNN k?",
+            "proposed_raw_topic": "CNN",
+            "show_top_results_allowed": True,
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn",
+                    course_id="CS231n",
+                    unit_name="Convolutional Neural Networks",
+                    summary="CNN overview content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-cnn", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-cnn-detail",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    upserts = []
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(side_effect=lambda **kwargs: upserts.append(kwargs)),
+    )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=PendingDecisionRouter(
+            action="clarify",
+            clarification_question="Could you clarify how your question relates to the current lesson?",
+        ),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="khái niệm tổng quan đi", incomingMessageId="msg-cnn-detail"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-cnn-detail",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert [request.query for request in search_requests] == ["CNN khái niệm tổng quan đi", "CNN"]
+    assert upserts[-1]["summary_json"].get("pendingClarification") is None
+
+
+async def test_pending_retrieval_query_short_detail_keeps_refined_query_title_level():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-cnn-title-level",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "proposed_raw_topic": "CNN",
+            "show_top_results_allowed": True,
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn",
+                    course_id="CS231n",
+                    unit_name="Convolutional Neural Networks",
+                    summary="CNN overview content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-cnn-title", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-cnn-title-level",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=PendingDecisionRouter(
+            action="refine",
+            refined_query=(
+                "CNN (Convolutional Neural Network) - khái niệm tổng quan: cấu trúc, "
+                "nguyên lý hoạt động, phân loại hình ảnh và ứng dụng cơ bản"
+            ),
+        ),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="khái niệm tổng quan đi", incomingMessageId="msg-cnn-title-level"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-cnn-title-level",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert [request.query for request in search_requests] == ["CNN khái niệm tổng quan đi", "CNN"]
+
+
+async def test_pending_retrieval_query_concise_refinement_keeps_proposed_topic_fallback():
+    conversation_id = uuid4()
+    user_id = uuid4()
+    search_requests = []
+    pending = PendingClarification(
+        clarification_id="clar-cnn-concise-refine",
+        type="slot_disambiguation",
+        status="awaiting_response",
+        payload={
+            "kind": "retrieval_query",
+            "original_intent": "find_content",
+            "proposed_raw_topic": "CNN",
+            "show_top_results_allowed": True,
+        },
+        expires_at=datetime.now(UTC) + timedelta(minutes=5),
+    )
+
+    async def search(request, allowed_course_ids):
+        search_requests.append(request)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn",
+                    course_id="CS231n",
+                    unit_name="Convolutional Neural Networks",
+                    summary="CNN overview content.",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-cnn-concise", ranking_version="unit_search_v1"),
+        )
+
+    memory = SimpleNamespace(
+        summary_status="fresh",
+        recent_message_window=10,
+        summary_json={
+            "memoryRef": f"agent_memory:{conversation_id}:v1",
+            "summaryVersion": 1,
+            "pendingClarification": {
+                "threadId": "thread-cnn-concise-refine",
+                "clarification": pending.model_dump(mode="json"),
+            },
+        },
+    )
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=memory),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=PendingDecisionRouter(
+            action="refine",
+            refined_query="CNN basic concepts",
+        ),
+        conversation_repo=conversation_repo,
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="khái niệm cơ bản", incomingMessageId="msg-cnn-concise-refine"),
+        conversation_id=str(conversation_id),
+        thread_id="thread-cnn-concise-refine",
+        user_id=str(user_id),
+        allowed_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "grounded"
+    assert [request.query for request in search_requests] == [
+        "CNN basic concepts",
+        "CNN",
+    ]
 
 
 async def test_pending_retrieval_query_user_detail_becomes_search_topic():

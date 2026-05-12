@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from src.services.guardrails.guardrails_adapter import GuardrailsPIIDetector, PIIDetectorAdapter
 from src.services.guardrails.pii_policy import get_policy_rule
 from src.services.guardrails.types import GuardrailDetectedEntity, GuardrailResult
@@ -64,6 +66,8 @@ class PIIGuardrailService:
             rule = get_policy_rule(entity.entity_type)
             if rule is None or rule.action != "redact" or not rule.placeholder:
                 continue
+            if self._span_overlaps_url(text, entity.start, entity.end):
+                continue
             redactions.append((entity.start, entity.end, rule.placeholder))
 
         if not redactions:
@@ -83,3 +87,10 @@ class PIIGuardrailService:
             cursor = end
         parts.append(text[cursor:])
         return "".join(parts)
+
+    @staticmethod
+    def _span_overlaps_url(text: str, start: int, end: int) -> bool:
+        for match in re.finditer(r"https?://\S+", text):
+            if start < match.end() and end > match.start():
+                return True
+        return False

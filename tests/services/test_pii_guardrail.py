@@ -60,6 +60,28 @@ def test_sanitize_input_replaces_email_and_phone_with_project_placeholders() -> 
     ]
 
 
+def test_sanitize_output_does_not_redact_numbers_inside_urls() -> None:
+    text = "Source: https://www.semanticscholar.org/paper/0084f3cb0a1754272151c5268a783f24bf5676a0"
+    start = text.index("1754272151")
+    service = PIIGuardrailService(
+        adapter=StubAdapter(
+            entities=[
+                GuardrailDetectedEntity(
+                    entity_type="PHONE_NUMBER",
+                    start=start,
+                    end=start + len("1754272151"),
+                    text="1754272151",
+                )
+            ]
+        )
+    )
+
+    result = service.sanitize_output(text)
+
+    assert result.sanitized_text == text
+    assert result.was_redacted is False
+
+
 def test_sanitize_input_blocks_disallowed_entities() -> None:
     service = PIIGuardrailService(
         adapter=StubAdapter(

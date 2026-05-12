@@ -1,14 +1,32 @@
+import asyncio
+import logging
+
 import pytest
 
+from src.schemas.agent import AgentCitation
 from src.services.agent_external_research_service import (
     AgentExternalResearchService,
     ExternalResearchDocument,
+    SearchPlan,
 )
+from src.services.agent_external_citation_manager import ExternalCitationManager
 from src.services.agentic_rag_contracts import AgenticRAGFinal
 
 
 class FixedExternalResearchService(AgentExternalResearchService):
-    async def _act(self, queries):
+    async def _act(self, plan):
+        if any("rcnn" in query.casefold() for query in plan.queries):
+            return [
+                ExternalResearchDocument(
+                    title="Rich feature hierarchies for accurate object detection and semantic segmentation",
+                    url="https://arxiv.org/abs/1311.2524",
+                    snippet=(
+                        "R-CNN applies region proposals and convolutional neural network features "
+                        "for object detection and semantic segmentation."
+                    ),
+                    source="paper",
+                )
+            ]
         return [
             ExternalResearchDocument(
                 title="CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization",
@@ -70,7 +88,7 @@ async def test_external_research_synthesizes_answer_from_observed_sources():
         "1. [CNN Explainer: Learning Convolutional Neural Networks with Interactive Visualization]"
         "(https://arxiv.org/abs/2004.15004)" in result.answer_markdown
     )
-    assert "— Paper" in result.answer_markdown
+    assert "- Paper" in result.answer_markdown
     assert "[^" not in result.answer_markdown
     assert result.citations[0].source == "paper"
     assert responder.calls
@@ -102,3 +120,284 @@ async def test_external_research_retries_truncated_outline_synthesis():
     assert "RCNN là họ mô hình" in result.answer_markdown
     assert "1) RCNN giải quyết bài toán gì?" not in result.answer_markdown
     assert responder.calls[1]["thought"]["quality_retry"] == "complete_external_answer"
+
+
+def test_external_research_plans_clean_cnn_queries_with_domain_context():
+    service = AgentExternalResearchService()
+
+    plan = service._plan_search("tìm thông tin về CNN")
+
+    assert plan == SearchPlan(tools=("web", "paper"), queries=("CNN machine learning",))
+
+
+def test_semantic_scholar_rate_limit_lock_is_initialized_eagerly():
+    assert isinstance(AgentExternalResearchService._semantic_scholar_lock, asyncio.Lock)
+
+
+def test_external_research_uses_web_and_paper_for_paper_intent():
+    service = AgentExternalResearchService()
+
+    plan = service._plan_search("find arxiv papers about CNN pruning")
+
+    assert plan == SearchPlan(tools=("web", "paper"), queries=("CNN pruning machine learning",))
+
+
+def test_external_research_selects_both_tools_when_user_asks_for_web_and_papers():
+    service = AgentExternalResearchService()
+
+    plan = service._plan_search("search web and papers about CNN pruning")
+
+    assert plan == SearchPlan(tools=("web", "paper"), queries=("CNN pruning machine learning",))
+
+
+@pytest.mark.asyncio
+async def test_external_research_executes_only_selected_provider_tools():
+    class RecordingSearchService(AgentExternalResearchService):
+        def __init__(self):
+            super().__init__()
+            self.called_tools = []
+
+        async def _search_web(self, query):
+            self.called_tools.append(("web", query))
+            return [
+                ExternalResearchDocument(
+                    title="Web result",
+                    url="https://example.com/web",
+                    snippet="Web snippet",
+                    source="web",
+                )
+            ]
+
+        async def _search_papers(self, query):
+            self.called_tools.append(("paper", query))
+            return [
+                ExternalResearchDocument(
+                    title="Paper result",
+                    url="https://example.com/paper",
+                    snippet="Paper snippet",
+                    source="paper",
+                )
+            ]
+
+    service = RecordingSearchService()
+
+    documents = await service._act(SearchPlan(tools=("web", "paper"), queries=("CNN",)))
+
+    assert [document.source for document in documents] == ["paper", "web"]
+    assert service.called_tools == [("web", "CNN"), ("paper", "CNN")]
+
+
+@pytest.mark.asyncio
+async def test_external_research_keeps_two_papers_and_three_web_results():
+    class RankedSearchService(AgentExternalResearchService):
+        async def _search_web(self, query):
+            return [
+                ExternalResearchDocument(
+                    title=f"Web {index}",
+                    url=f"https://example.com/web-{index}",
+                    snippet="Web snippet",
+                    source="web",
+                )
+                for index in range(1, 5)
+            ]
+
+        async def _search_papers(self, query):
+            return [
+                ExternalResearchDocument(
+                    title=f"Paper {index}",
+                    url=f"https://example.com/paper-{index}",
+                    snippet="Paper snippet",
+                    source="paper",
+                    citation_count=100 - index,
+                )
+                for index in range(1, 4)
+            ]
+
+    service = RankedSearchService()
+
+    documents = await service._act(SearchPlan(tools=("web", "paper"), queries=("CNN",)))
+
+    assert [document.title for document in documents] == [
+        "Paper 1",
+        "Paper 2",
+        "Web 1",
+        "Web 2",
+        "Web 3",
+    ]
+
+
+@pytest.mark.asyncio
+async def test_external_research_web_search_falls_back_to_provider_ranked_html_results():
+    class HTMLSearchService(AgentExternalResearchService):
+        async def _fetch_web_json(self, url):
+            return {"Heading": "", "RelatedTopics": []}
+
+        async def _fetch_web_html_text(self, url):
+            return """
+            <html>
+              <a class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.com%2Fcnn">
+                Convolutional Neural Networks overview
+              </a>
+              <a class="result__snippet">CNNs are neural networks used in machine learning.</a>
+              <a class="result__a" href="https://example.com/second">Second result</a>
+              <a class="result__snippet">Another provider-ranked result.</a>
+            </html>
+            """
+
+    service = HTMLSearchService()
+
+    documents = await service._search_web("CNN machine learning")
+
+    assert [document.url for document in documents] == [
+        "https://example.com/cnn",
+        "https://example.com/second",
+    ]
+    assert documents[0].title == "Convolutional Neural Networks overview"
+
+
+@pytest.mark.asyncio
+async def test_external_research_logs_when_duckduckgo_html_shape_changes(caplog):
+    class EmptyHTMLSearchService(AgentExternalResearchService):
+        async def _fetch_web_html_text(self, url):
+            return "<html><a class='renamed-result' href='https://example.com'>CNN</a></html>"
+
+    service = EmptyHTMLSearchService()
+
+    with caplog.at_level(logging.WARNING):
+        documents = await service._search_web_html("CNN machine learning")
+
+    assert documents == []
+    assert "duckduckgo_html_parse_empty" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_external_research_uses_semantic_scholar_before_arxiv(monkeypatch):
+    monkeypatch.setattr(
+        "src.services.agent_external_research_service.settings.semantic_scholar_api_key",
+        "test-key",
+    )
+
+    class SemanticScholarService(AgentExternalResearchService):
+        def __init__(self):
+            super().__init__()
+            self.fetched_urls = []
+
+        async def _wait_for_semantic_scholar_slot(self):
+            return None
+
+        async def _fetch_semantic_scholar_json(self, url, headers):
+            self.fetched_urls.append(url)
+            return {
+                "data": [
+                    {
+                        "title": "Review of deep learning: concepts, CNN architectures, challenges, applications, future directions",
+                        "url": "https://www.semanticscholar.org/paper/cnn-review",
+                        "abstract": "This review covers convolutional neural networks and CNN architectures.",
+                        "year": 2021,
+                        "citationCount": 6436,
+                        "authors": [{"name": "A. Author"}],
+                        "venue": "Journal",
+                        "externalIds": {"DOI": "10.1000/cnn"},
+                    },
+                    {
+                        "title": "Learning to summarize from human feedback",
+                        "url": "https://www.semanticscholar.org/paper/off-topic",
+                        "abstract": "This paper is about language model alignment.",
+                        "year": 2020,
+                        "citationCount": 3094,
+                        "authors": [{"name": "B. Author"}],
+                    },
+                ]
+            }
+
+    service = SemanticScholarService()
+
+    documents = await service._search_papers("CNN machine learning")
+
+    assert [document.title for document in documents] == [
+        "Review of deep learning: concepts, CNN architectures, challenges, applications, future directions"
+    ]
+    assert documents[0].citation_count == 6436
+    assert documents[0].year == 2021
+    assert documents[0].doi == "10.1000/cnn"
+    assert "paper/search/bulk" in service.fetched_urls[0]
+
+
+def test_external_citation_manager_dedupes_and_keeps_provider_rank_order():
+    manager = ExternalCitationManager(top_k=3)
+    documents = [
+        ExternalResearchDocument(
+            title="First provider result",
+            url="https://example.com/first?utm_source=test",
+            snippet="First snippet",
+            source="web",
+        ),
+        ExternalResearchDocument(
+            title="Duplicate URL with later provider rank",
+            url="https://example.com/first",
+            snippet="Duplicate snippet",
+            source="web",
+        ),
+        ExternalResearchDocument(
+            title="Paper Title",
+            url="https://arxiv.org/abs/1",
+            snippet="Paper snippet",
+            source="paper",
+        ),
+        ExternalResearchDocument(
+            title="Paper title",
+            url="https://arxiv.org/abs/1v2",
+            snippet="Duplicate paper snippet",
+            source="paper",
+        ),
+    ]
+
+    selected = manager.select_sources(documents)
+
+    assert [document.title for document in selected] == [
+        "First provider result",
+        "Paper Title",
+    ]
+
+
+def test_external_citation_manager_drops_invalid_citation_markers():
+    manager = ExternalCitationManager()
+    citations = [
+        AgentCitation(
+            canonical_unit_id="external::web::1",
+            course_id="WEB",
+            unit_name="Convolutional neural network",
+            learn_href="https://example.com/cnn",
+            quote="A convolutional neural network is a neural network for visual imagery.",
+            source="web",
+        )
+    ]
+
+    answer = manager.render_answer(
+        "CNN is commonly used for image data. [1] This unsupported claim cites nowhere. [9]",
+        citations,
+    )
+
+    assert "[1](https://example.com/cnn)" in answer
+    assert "[9]" not in answer
+
+
+def test_external_research_adds_first_source_marker_when_answer_omits_citations():
+    service = AgentExternalResearchService()
+    citations = [
+        AgentCitation(
+            canonical_unit_id="external::web::1",
+            course_id="WEB",
+            unit_name="Convolutional neural network",
+            learn_href="https://example.com/cnn",
+            quote="A convolutional neural network is a neural network for visual imagery.",
+            source="web",
+        )
+    ]
+
+    answer = service._with_numeric_source_links(
+        "CNN is a neural network architecture commonly used for images.",
+        citations,
+    )
+
+    assert "[1](https://example.com/cnn)" in answer

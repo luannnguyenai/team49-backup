@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import logging
 import re
 from datetime import UTC, datetime, timedelta
 from inspect import signature
 from types import SimpleNamespace
+from typing import Any
 from uuid import UUID, uuid4
 
 try:
@@ -15,12 +17,15 @@ except ModuleNotFoundError:  # pragma: no cover - dependency exists in productio
     END = START = StateGraph = None
     Command = interrupt = None
 
+from src.config import settings
 from src.schemas.agent import (
     AgentAction,
     AgentActionResumeRequest,
+    AgentAnswer,
     AgentChatRequest,
     AgentChatResponse,
     AgentCitation,
+    AgentFallback,
     AgentGuardrail,
 )
 from src.services.agent_action_commit_service import AgentActionCommitService
@@ -46,13 +51,67 @@ from src.services.agent_thread_memory_state import AgentThreadMemoryStateStore
 from src.services.agent_tool_nodes import AgentToolNodes
 from src.services.agentic_rag_pipeline import AgenticRAGPipeline
 from src.services.agentic_rag_tools import AgenticRAGToolExecutor
+from src.services.guardrail_router import (
+    GuardrailDecision,
+    GuardrailRouterUnavailableError,
+    GuardrailScopePacket,
+    build_guardrail_router_client,
+    guardrail_user_message,
+)
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
+from src.services.language_normalization import (
+    LanguageNormalizationResult,
+    get_input_language_normalizer,
+)
+
+logger = logging.getLogger(__name__)
 
 RAG_AGENT_INTENTS = {
     "find_content",
     "explain_concept",
     "general_course_question",
     "navigate_to_unit",
+}
+
+EXACT_GREETING_RESPONSES = {
+    "Hello": "Hi! What AI/ML topic would you like help with today?",
+    "hello": "Hi! What AI/ML topic would you like help with today?",
+    "Hi": "Hi! What AI/ML topic would you like help with today?",
+    "hi": "Hi! What AI/ML topic would you like help with today?",
+    "Hey": "Hi! What AI/ML topic would you like help with today?",
+    "hey": "Hi! What AI/ML topic would you like help with today?",
+    "Hey there": "Hi! What AI/ML topic would you like help with today?",
+    "hey there": "Hi! What AI/ML topic would you like help with today?",
+    "Yo": "Hi! What AI/ML topic would you like help with today?",
+    "yo": "Hi! What AI/ML topic would you like help with today?",
+    "Xin chào": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "xin chào": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Chào bạn": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "chào bạn": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Chào": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "chào": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Xin chao": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "xin chao": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Chao": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "chao": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Ê": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "ê": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Này": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "này": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Alo": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "alo": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Alô": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "alô": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Bonjour": "Hi! What AI/ML topic would you like help with today?",
+    "bonjour": "Hi! What AI/ML topic would you like help with today?",
+    "Hola": "Hi! What AI/ML topic would you like help with today?",
+    "hola": "Hi! What AI/ML topic would you like help with today?",
+    "Olá": "Hi! What AI/ML topic would you like help with today?",
+    "olá": "Hi! What AI/ML topic would you like help with today?",
+    "Ola": "Hi! What AI/ML topic would you like help with today?",
+    "ola": "Hi! What AI/ML topic would you like help with today?",
+    "你好": "Hi! What AI/ML topic would you like help with today?",
+    "こんにちは": "Hi! What AI/ML topic would you like help with today?",
 }
 
 
@@ -86,6 +145,8 @@ class AgentGraphService:
         checkpointer=None,
         external_research_service=None,
         pii_guardrail_service=None,
+        guardrail_router=None,
+        language_normalizer=None,
         response_router=None,
     ):
         self.search_service = search_service
@@ -118,6 +179,8 @@ class AgentGraphService:
             responder=self.response_router
         )
         self.pii_guardrail = pii_guardrail_service or PIIGuardrailService()
+        self.guardrail_router = guardrail_router or build_guardrail_router_client()
+        self.language_normalizer = language_normalizer or get_input_language_normalizer()
         prerequisite_path_service = None
         if hasattr(search_service, "repo"):
             prerequisite_path_service = AgentPrerequisitePathService(
@@ -241,6 +304,39 @@ class AgentGraphService:
                 block_reason=input_guardrail.block_reason or "pii_input_blocked",
                 error_code=input_guardrail.error_code,
             )
+        exact_greeting_response = self._compose_exact_greeting_response(
+            conversation_id=conversation_id,
+            message=sanitized_request.message,
+        )
+        if exact_greeting_response is not None:
+            return self._sanitize_response(exact_greeting_response, input_guardrail)
+        normalized_language = await self.language_normalizer.normalize(sanitized_request.message)
+        sanitized_request = sanitized_request.model_copy(
+            update={"message": normalized_language.normalized_text}
+        )
+        pending_for_guardrail = await self._load_pending_clarification(
+            conversation_id,
+            user_id,
+            thread_id,
+        )
+        assistant_context_for_guardrail = await self._load_guardrail_assistant_context(
+            conversation_id,
+            user_id,
+        )
+        guardrail_decision = await self._route_guardrail(
+            message=sanitized_request.message,
+            route_context=sanitized_request.route_context,
+            allowed_course_ids=allowed_course_ids,
+            current_path_course_ids=current_path_course_ids,
+            pending_clarification=pending_for_guardrail,
+            assistant_context=assistant_context_for_guardrail,
+        )
+        guardrail_response = self._compose_guardrail_response(
+            conversation_id=conversation_id,
+            decision=guardrail_decision,
+        )
+        if guardrail_response is not None:
+            return guardrail_response
 
         if self.graph_repo is None:
             response = await self._invoke_graph_and_compose(
@@ -251,6 +347,7 @@ class AgentGraphService:
                 allowed_course_ids=allowed_course_ids,
                 current_path_course_ids=current_path_course_ids,
             )
+            response = await self._enforce_response_language(response, normalized_language)
             return self._sanitize_response(response, input_guardrail)
 
         completed = await self.graph_repo.get_completed_response_by_incoming_message(
@@ -329,6 +426,7 @@ class AgentGraphService:
                     allowed_course_ids=allowed_course_ids,
                     current_path_course_ids=current_path_course_ids,
                 )
+                response = await self._enforce_response_language(response, normalized_language)
                 response = self._sanitize_response(response, input_guardrail)
                 if self.conversation_repo is not None:
                     await self.conversation_repo.add_message(
@@ -391,6 +489,198 @@ class AgentGraphService:
         sanitized_request = request.model_copy(update={"message": result.sanitized_text})
         return sanitized_request, result
 
+    async def _route_guardrail(
+        self,
+        *,
+        message: str,
+        route_context,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None,
+        pending_clarification: PendingClarification | None = None,
+        assistant_context: list[dict[str, Any]] | None = None,
+    ) -> GuardrailDecision:
+        try:
+            decision = await self.guardrail_router.route(
+                message=message,
+                scope=self._build_agent_guardrail_scope(
+                    route_context=route_context,
+                    allowed_course_ids=allowed_course_ids,
+                    current_path_course_ids=current_path_course_ids,
+                    pending_clarification=pending_clarification,
+                    assistant_context=assistant_context,
+                ),
+            )
+            if self._should_allow_pending_retrieval_guardrail_followup(
+                message=message,
+                pending_clarification=pending_clarification,
+                decision=decision,
+            ):
+                return GuardrailDecision.allow()
+            if self._should_allow_recent_assistant_guardrail_followup(
+                message=message,
+                assistant_context=assistant_context or [],
+                decision=decision,
+            ):
+                return GuardrailDecision.allow()
+            return decision
+        except GuardrailRouterUnavailableError as exc:
+            raise AgentRouterUnavailableError(
+                "guardrail_router_unavailable",
+                exc.error_code,
+            ) from exc
+
+    @staticmethod
+    def _build_agent_guardrail_scope(
+        *,
+        route_context,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None,
+        pending_clarification: PendingClarification | None = None,
+        assistant_context: list[dict[str, Any]] | None = None,
+    ) -> GuardrailScopePacket:
+        allowed_scope_summary = "Agent guardrail scope: current user query only."
+        recent_context: list[dict[str, Any]] = []
+        if assistant_context:
+            allowed_scope_summary = (
+                f"{allowed_scope_summary} Recent assistant context is provided only "
+                "to interpret safe follow-up questions."
+            )
+            recent_context.extend(assistant_context[:2])
+        if (
+            pending_clarification is not None
+            and pending_clarification.type == "slot_disambiguation"
+            and pending_clarification.payload.get("kind") == "retrieval_query"
+        ):
+            proposed_topic = str(
+                pending_clarification.payload.get("proposed_raw_topic") or ""
+            ).strip()
+            if proposed_topic:
+                allowed_scope_summary = (
+                    f"{allowed_scope_summary} Active pending retrieval topic is provided only "
+                    "to interpret short follow-up refinements."
+                )
+                recent_context.append(
+                    {
+                        "type": "pending_retrieval_query",
+                        "proposed_raw_topic": proposed_topic,
+                        "original_intent": pending_clarification.payload.get("original_intent")
+                        or "find_content",
+                    }
+                )
+        return GuardrailScopePacket(
+            feature="agent",
+            scope_level="query",
+            scope_id="agent",
+            allowed_scope_summary=allowed_scope_summary,
+            candidate_kps=[],
+            recent_context=recent_context,
+            selected_text="",
+        )
+
+    def _should_allow_pending_retrieval_guardrail_followup(
+        self,
+        *,
+        message: str,
+        pending_clarification: PendingClarification | None,
+        decision: GuardrailDecision,
+    ) -> bool:
+        if decision.safety_label != "SAFE" or decision.action != "ASK_CLARIFY":
+            return False
+        if (
+            pending_clarification is None
+            or pending_clarification.type != "slot_disambiguation"
+            or pending_clarification.payload.get("kind") != "retrieval_query"
+        ):
+            return False
+        proposed_topic = str(
+            pending_clarification.payload.get("proposed_raw_topic") or ""
+        ).strip()
+        return (
+            self._coerce_pending_retrieval_detail_refinement(
+                message=message,
+                proposed_topic=proposed_topic,
+                decision_action="clarify",
+            )
+            is not None
+        )
+
+    def _should_allow_recent_assistant_guardrail_followup(
+        self,
+        *,
+        message: str,
+        assistant_context: list[dict[str, Any]],
+        decision: GuardrailDecision,
+    ) -> bool:
+        if decision.safety_label != "SAFE" or decision.action != "ASK_CLARIFY":
+            return False
+        if not assistant_context or len(str(message or "").split()) > 12:
+            return False
+        message_terms = self._normalized_terms(message)
+        if not message_terms:
+            return False
+
+        context_parts: list[str] = []
+        for item in assistant_context[:2]:
+            if not isinstance(item, dict):
+                continue
+            context_parts.append(str(item.get("markdown") or ""))
+            for citation in item.get("citations") or []:
+                if not isinstance(citation, dict):
+                    continue
+                context_parts.extend(
+                    str(citation.get(key) or "")
+                    for key in ("course_id", "unit_name", "lecture_title")
+                )
+            for action in item.get("actions") or []:
+                if not isinstance(action, dict):
+                    continue
+                context_parts.extend(
+                    str(action.get(key) or "")
+                    for key in ("type", "label", "canonical_unit_id")
+                )
+        context_terms = self._normalized_terms(" ".join(context_parts))
+        return bool(message_terms & context_terms)
+
+    @staticmethod
+    def _compose_guardrail_response(
+        *,
+        conversation_id: str,
+        decision: GuardrailDecision,
+    ) -> AgentChatResponse | None:
+        if decision.action == "ALLOW_LESSON_ANSWER":
+            return None
+        return AgentChatResponse(
+            conversation_id=conversation_id,
+            message_id=str(uuid4()),
+            answer=AgentAnswer(
+                markdown=guardrail_user_message(decision),
+                confidence="fallback",
+            ),
+            fallback=AgentFallback(
+                reason="unsafe_action",
+                message="The request was stopped by the guardrail router before agent routing.",
+            ),
+            guardrail=AgentGuardrail(
+                blocked=True,
+                blockReason=decision.action,
+            ),
+        )
+
+    @staticmethod
+    def _compose_exact_greeting_response(
+        *,
+        conversation_id: str,
+        message: str,
+    ) -> AgentChatResponse | None:
+        markdown = EXACT_GREETING_RESPONSES.get(message.strip())
+        if markdown is None:
+            return None
+        return AgentChatResponse(
+            conversation_id=conversation_id,
+            message_id=str(uuid4()),
+            answer=AgentAnswer(markdown=markdown, confidence="fallback"),
+        )
+
     def _sanitize_response(
         self,
         response: AgentChatResponse,
@@ -420,6 +710,40 @@ class AgentGraphService:
                 "answer": sanitized_answer,
                 "guardrail": merged_guardrail,
             }
+        )
+
+    async def _enforce_response_language(
+        self,
+        response: AgentChatResponse,
+        language: LanguageNormalizationResult,
+    ) -> AgentChatResponse:
+        if language.target_language != "en" or not response.answer.markdown.strip():
+            return response
+        detect = getattr(self.language_normalizer, "detect", None)
+        if detect is None:
+            logger.debug("response_language_detection_unavailable")
+            return response
+        try:
+            detected_response_language = detect(response.answer.markdown)
+        except Exception:
+            logger.warning("response_language_detection_failed", exc_info=True)
+            return response
+        if detected_response_language == "en":
+            return response
+        translator = getattr(self.language_normalizer, "translator", None)
+        translate = getattr(translator, "translate_to_english", None)
+        if translate is None:
+            logger.debug("response_language_translation_unavailable")
+            return response
+        try:
+            translated = await translate(response.answer.markdown)
+        except Exception:
+            logger.warning("response_language_translation_failed", exc_info=True)
+            return response
+        if not translated.strip():
+            return response
+        return response.model_copy(
+            update={"answer": response.answer.model_copy(update={"markdown": translated})}
         )
 
     async def _invoke_graph_and_compose(
@@ -454,6 +778,31 @@ class AgentGraphService:
         )
         state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id, thread_id)
         if request.tool_mode == "web_papers":
+            if not settings.external_research_enabled:
+                return self.composer.compose(
+                    conversation_id=conversation_id,
+                    message_id=str(uuid4()),
+                    result=ToolResult(
+                        kind="find_content",
+                        answer_markdown=(
+                            "External web and paper search is temporarily disabled."
+                        ),
+                        citations=[],
+                        fallback=AgentFallback(
+                            reason="tool_error",
+                            message=(
+                                "External web and paper search is disabled until the "
+                                "paper provider key is configured."
+                            ),
+                            errorCode="external_research_disabled",
+                        ),
+                        requires_evidence=False,
+                        metadata={
+                            "tool_mode": "web_papers",
+                            "answer_confidence": "fallback",
+                        },
+                    ),
+                )
             result = await self.external_research.answer(
                 message=request.message,
                 recent_messages=state["recent_messages"],
@@ -657,6 +1006,26 @@ class AgentGraphService:
                     "Okay. Please describe the topic or concept you want me to search for."
                 ),
             }
+        force_short_detail_refinement = decision.action == "clarify" or (
+            decision.action == "refine"
+            and len(str(getattr(decision, "refined_query", "") or "").split()) > 8
+        )
+        forced_refinement = (
+            self._coerce_pending_retrieval_detail_refinement(
+                message=message,
+                proposed_topic=proposed,
+                decision_action=decision.action,
+            )
+            if force_short_detail_refinement
+            else None
+        )
+        short_detail_refinement = bool(forced_refinement and proposed)
+        if forced_refinement:
+            decision = SimpleNamespace(
+                action="refine",
+                refined_query=forced_refinement,
+                clarification_question=None,
+            )
         if decision.action == "clarify":
             return {
                 **state,
@@ -688,23 +1057,45 @@ class AgentGraphService:
         else:
             raw_topic = message
             scope_expansion_approved = False
+        search_queries = [raw_topic] if raw_topic else []
+        if proposed and proposed.casefold() not in {query.casefold() for query in search_queries}:
+            search_queries.append(proposed)
         return {
             **state,
             "intent": payload.get("original_intent") or "find_content",
             "intent_confidence": 1.0,
             "slots": AgentSlots(
                 raw_topic=raw_topic,
+                search_queries=search_queries,
                 target_path=payload.get("target_path"),
                 requested_path_id=payload.get("requested_path_id"),
                 search_scope=payload.get("search_scope") or "current_path",
                 resolved_search_path_ids=payload.get("resolved_search_path_ids") or [],
                 excluded_search_path_ids=payload.get("excluded_search_path_ids") or [],
                 scope_expansion_approved=scope_expansion_approved,
-                show_top_results_approved=decision.action == "approve",
+                show_top_results_approved=decision.action == "approve" or short_detail_refinement,
             ),
             "pending_clarification": None,
             "clarification_question": None,
         }
+
+    def _coerce_pending_retrieval_detail_refinement(
+        self,
+        *,
+        message: str,
+        proposed_topic: str,
+        decision_action: str,
+    ) -> str | None:
+        detail = re.sub(r"\s+", " ", message).strip(" .")
+        if decision_action not in {"clarify", "refine"} or not proposed_topic or not detail:
+            return None
+        if len(detail.split()) > 8:
+            return None
+        if "?" in detail:
+            return None
+        if re.search(r"\b(yes|no|ok|okay|sure|show|see|cancel|stop|retry)\b", detail, re.IGNORECASE):
+            return None
+        return f"{proposed_topic} {detail}"
 
     def _resolve_pending_scope_expansion(
         self,
@@ -917,6 +1308,7 @@ class AgentGraphService:
         slots = state["slots"]
         if isinstance(slots, dict):
             slots = AgentSlots.model_validate(slots)
+        slots = self._slots_with_active_citation_for_followup(state, slots)
         result = await self.agentic_rag.run(
             message=state["message"],
             intent=state["intent"],
@@ -927,6 +1319,41 @@ class AgentGraphService:
         )
         update: dict = {**state, "slots": slots, "tool_result": result}
         return self._attach_rag_pending_clarification(update, result, slots)
+
+    def _slots_with_active_citation_for_followup(
+        self,
+        state: dict,
+        slots: AgentSlots,
+    ) -> AgentSlots:
+        if len(str(state.get("message") or "").split()) > 12:
+            return slots
+        active = self._active_recent_citation(state)
+        if active is None or not active.canonical_unit_id:
+            return slots
+        if self._message_names_unmatched_explicit_topic(state.get("message"), active):
+            return slots
+        if not self._active_citation_matches_rag_query({**state, "slots": slots}, active):
+            return slots
+
+        canonical_unit_ids = [
+            active.canonical_unit_id,
+            *[
+                unit_id
+                for unit_id in slots.canonical_unit_ids
+                if unit_id != active.canonical_unit_id
+            ],
+        ]
+        search_queries = [
+            active.unit_name,
+            *[query for query in slots.search_queries if query != active.unit_name],
+        ]
+        return slots.model_copy(
+            update={
+                "raw_topic": active.unit_name,
+                "search_queries": search_queries[:5],
+                "canonical_unit_ids": canonical_unit_ids[:3],
+            }
+        )
 
     async def _rag_decide_tool(self, state: dict) -> dict:
         slots = state["slots"]
@@ -1487,13 +1914,43 @@ class AgentGraphService:
         return terms
 
     def _active_recent_citation(self, state: dict) -> AgentCitation | None:
+        candidates: list[AgentCitation] = []
         for message in reversed(state.get("recent_messages") or []):
             for citation_payload in message.get("citations") or []:
                 try:
-                    return AgentCitation.model_validate(citation_payload)
+                    candidates.append(AgentCitation.model_validate(citation_payload))
                 except Exception:
                     continue
-        return None
+            if candidates:
+                break
+        if not candidates:
+            return None
+        return max(
+            candidates,
+            key=lambda citation: self._citation_message_match_score(
+                state.get("message"),
+                citation,
+            ),
+        )
+
+    def _citation_message_match_score(
+        self,
+        message: str | None,
+        citation: AgentCitation,
+    ) -> int:
+        message_terms = self._normalized_terms(message)
+        if not message_terms:
+            return 0
+        citation_text = " ".join(
+            part
+            for part in [
+                citation.unit_name,
+                citation.lecture_title,
+            ]
+            if part
+        )
+        citation_terms = self._normalized_terms(citation_text)
+        return len(message_terms.intersection(citation_terms))
 
     def _message_names_unmatched_explicit_topic(
         self,
@@ -2122,10 +2579,59 @@ class AgentGraphService:
                     "role": getattr(message, "role", "unknown"),
                     "markdown": markdown[:1200],
                     "citations": getattr(message, "citations_json", None) or [],
-                    "actions": [],
+                    "actions": getattr(message, "actions_json", None) or [],
                 }
             )
         return context
+
+    async def _load_guardrail_assistant_context(
+        self,
+        conversation_id: str,
+        user_id: str,
+    ) -> list[dict[str, Any]]:
+        if self.conversation_repo is None or not hasattr(self.conversation_repo, "list_messages"):
+            return []
+        messages = await self.conversation_repo.list_messages(
+            UUID(str(conversation_id)),
+            UUID(str(user_id)),
+            limit=4,
+        )
+        context: list[dict] = []
+        for message in reversed(messages):
+            if getattr(message, "role", "") != "assistant":
+                continue
+            markdown = str(getattr(message, "markdown", "") or "").strip()
+            citations = [
+                {
+                    key: citation.get(key)
+                    for key in ("course_id", "unit_name", "lecture_title")
+                    if citation.get(key)
+                }
+                for citation in (getattr(message, "citations_json", None) or [])[:5]
+                if isinstance(citation, dict)
+            ]
+            actions = [
+                {
+                    key: action.get(key)
+                    for key in ("type", "label", "canonical_unit_id")
+                    if action.get(key)
+                }
+                for action in (getattr(message, "actions_json", None) or [])[:5]
+                if isinstance(action, dict)
+            ]
+            if not markdown and not citations and not actions:
+                continue
+            context.append(
+                {
+                    "type": "recent_assistant_response",
+                    "markdown": markdown[:800],
+                    "citations": citations,
+                    "actions": actions,
+                }
+            )
+            if len(context) >= 2:
+                break
+        return list(reversed(context))
 
     def _coerce_pending_clarification(self, value) -> PendingClarification | None:
         return self.thread_memory.coerce_pending_clarification(value)

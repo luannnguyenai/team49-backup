@@ -223,7 +223,7 @@ async def read_root():
 class AskRequest(BaseModel):
     lecture_id: str
     current_timestamp: float
-    question: str
+    question: str = Field(min_length=1, max_length=1500)
     context_binding_id: str | None = None
     image_base64: str | None = None
     chat_model_id: str = Field(default=DEFAULT_CHAT_MODEL_ID, alias="chatModelId")

@@ -18,11 +18,89 @@ def _compact_text(value: str) -> str:
     return re.sub(r"[-_]+", "", value.lower())
 
 
+def _compact_phrase(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", value.lower())
+
+
 def _term_matches(term: str, text: str, compact_text: str) -> bool:
     if term in text:
         return True
     compact_term = _compact_text(term)
     return bool(compact_term and compact_term in compact_text)
+
+
+def _coverage(terms: list[str], text: str, compact_text: str) -> float:
+    if not terms:
+        return 0.0
+    matches = sum(1 for term in terms if _term_matches(term, text, compact_text))
+    return matches / len(terms)
+
+
+def _is_single_technical_query(query: str, terms: list[str]) -> bool:
+    if len(terms) != 1:
+        return False
+    term = terms[0]
+    raw_tokens = re.findall(r"[A-Za-z0-9_-]+", query)
+    return len(term) >= 3 and (
+        any(token.isupper() and len(token) >= 3 for token in raw_tokens)
+        or any(char.isdigit() for char in term)
+        or "-" in query
+        or "_" in query
+    )
+
+
+def _overview_title_score(title_text: str) -> float:
+    title = title_text.lower()
+    markers = (
+        "family",
+        "overview",
+        "introduction",
+        "intro",
+        "foundation",
+        "foundations",
+        "basics",
+        "what ",
+    )
+    return 8.0 if any(marker in title for marker in markers) else 0.0
+
+
+def _rerank_score(query: str, terms: list[str], *, title_text: str, body_text: str) -> float:
+    title = title_text.lower()
+    body = body_text.lower()
+    compact_title = _compact_text(title)
+    compact_body = _compact_text(body)
+    phrase_query = _compact_phrase(query)
+    phrase_title = _compact_phrase(title_text)
+    phrase_body = _compact_phrase(body_text)
+
+    title_coverage = _coverage(terms, title, compact_title)
+    body_coverage = _coverage(terms, body, compact_body)
+    score = title_coverage * 20.0 + body_coverage * 12.0
+
+    if phrase_query and len(phrase_query) >= 3:
+        if len(terms) > 1:
+            title_phrase_match = phrase_query in phrase_title
+            body_phrase_match = phrase_query in phrase_body
+        else:
+            compact_query = _compact_text(query)
+            title_phrase_match = bool(compact_query and compact_query in compact_title)
+            body_phrase_match = bool(compact_query and compact_query in compact_body)
+        if title_phrase_match:
+            score += 22.0
+        elif body_phrase_match:
+            score += 10.0
+        if title_phrase_match or body_phrase_match:
+            score += 20.0
+
+    if _is_single_technical_query(query, terms):
+        score += _overview_title_score(title_text)
+
+    if len(terms) >= 2 and title_coverage < 0.35 and body_coverage < 0.5:
+        score -= 10.0
+    if title_coverage == 0.0 and body_coverage > 0.0:
+        score -= 8.0
+
+    return max(score, 0.0)
 
 
 class AgentUnitSearchService:
@@ -63,15 +141,12 @@ class AgentUnitSearchService:
                     unit.description or "",
                 ]
             ).lower()
-            compact_title = _compact_text(title_haystack)
-            compact_body = _compact_text(body_haystack)
-            title_score = sum(
-                1 for term in terms if _term_matches(term, title_haystack, compact_title)
+            score = _rerank_score(
+                request.query,
+                terms,
+                title_text=title_haystack,
+                body_text=body_haystack,
             )
-            body_score = sum(
-                1 for term in terms if _term_matches(term, body_haystack, compact_body)
-            )
-            score = float(title_score * 3 + body_score)
             nav = nav_by_id.get(unit.unit_id)
             scored.append(
                 UnitSearchResult(
@@ -103,7 +178,7 @@ class AgentUnitSearchService:
                 "allowed_course_intersection",
                 "unit_title_only",
             ],
-            ranking_version="unit_title_search_v1",
+            ranking_version="unit_title_rerank_v1",
             runtime_navigation_resolution=[
                 self.navigation_service.to_trace(nav_by_id[result.canonical_unit_id])
                 for result in results

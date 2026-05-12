@@ -32,3 +32,12 @@ def test_prompt_manager_fails_fast_for_missing_prompt_key(tmp_path: Path):
 
     with pytest.raises(KeyError):
         manager.get("agentic_rag", "acting.system")
+
+
+def test_default_prompt_files_include_guardrail_router_system_prompt():
+    manager = AgentPromptManager()
+
+    prompt = manager.get("guardrail_router", "system")
+
+    assert "Safe greetings, assistant-operation questions, and broad help requests" in prompt
+    assert "Return exactly one valid JSON object and nothing else." in prompt

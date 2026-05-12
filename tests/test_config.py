@@ -34,6 +34,17 @@ def test_settings_parses_json_cors_origins(monkeypatch: pytest.MonkeyPatch):
     ]
 
 
+def test_settings_default_cors_origins_include_loopback_frontend(monkeypatch: pytest.MonkeyPatch):
+    from src.config import Settings
+
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+
+    settings = Settings(_env_file=None)
+
+    assert "http://localhost:3000" in settings.cors_origins
+    assert "http://127.0.0.1:3000" in settings.cors_origins
+
+
 def test_settings_default_tutor_models(monkeypatch: pytest.MonkeyPatch):
     from src.config import Settings
 
@@ -59,6 +70,65 @@ def test_settings_parses_model_extra_kwargs(monkeypatch: pytest.MonkeyPatch):
     settings = Settings(_env_file=None)
 
     assert settings.model_extra_kwargs == {"thinking_budget": 1024}
+
+
+def test_settings_default_guardrail_router_config(monkeypatch: pytest.MonkeyPatch):
+    from src.config import Settings
+
+    for env_name in (
+        "GUARDRAIL_ROUTER_BASE_URL",
+        "GUARDRAIL_ROUTER_MODEL",
+        "GUARDRAIL_ROUTER_API_KEY",
+        "GUARDRAIL_ROUTER_CF_ACCESS_CLIENT_ID",
+        "GUARDRAIL_ROUTER_CF_ACCESS_CLIENT_SECRET",
+        "GUARDRAIL_ROUTER_TIMEOUT_SECONDS",
+        "GUARDRAIL_ROUTER_UNHEALTHY_COOLDOWN_SECONDS",
+        "GUARDRAIL_ROUTER_FALLBACK_PROVIDER",
+        "GUARDRAIL_ROUTER_FALLBACK_MODEL",
+        "GUARDRAIL_ROUTER_MAX_TOKENS",
+    ):
+        monkeypatch.delenv(env_name, raising=False)
+
+    settings = Settings(_env_file=None)
+
+    assert settings.guardrail_router_base_url == ""
+    assert settings.guardrail_router_model == "guardrail-router-merged"
+    assert settings.guardrail_router_api_key == ""
+    assert settings.guardrail_router_cf_access_client_id == ""
+    assert settings.guardrail_router_cf_access_client_secret == ""
+    assert settings.guardrail_router_timeout_seconds == 10.0
+    assert settings.guardrail_router_unhealthy_cooldown_seconds == 60.0
+    assert settings.guardrail_router_fallback_provider == ""
+    assert settings.guardrail_router_fallback_model == ""
+    assert settings.guardrail_router_max_tokens == 96
+
+
+def test_settings_parses_guardrail_router_config(monkeypatch: pytest.MonkeyPatch):
+    from src.config import Settings
+
+    monkeypatch.setenv("GUARDRAIL_ROUTER_BASE_URL", "https://router.example.com/v1")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_MODEL", "guardrail-router-merged")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_API_KEY", "router-token")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_CF_ACCESS_CLIENT_ID", "cf-id")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_CF_ACCESS_CLIENT_SECRET", "cf-secret")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_TIMEOUT_SECONDS", "1.75")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_UNHEALTHY_COOLDOWN_SECONDS", "45")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_FALLBACK_PROVIDER", "openai")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_FALLBACK_MODEL", "gpt-5.4-nano")
+    monkeypatch.setenv("GUARDRAIL_ROUTER_MAX_TOKENS", "80")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.guardrail_router_base_url == "https://router.example.com/v1"
+    assert settings.guardrail_router_model == "guardrail-router-merged"
+    assert settings.guardrail_router_api_key == "router-token"
+    assert settings.guardrail_router_cf_access_client_id == "cf-id"
+    assert settings.guardrail_router_cf_access_client_secret == "cf-secret"
+    assert settings.guardrail_router_timeout_seconds == 1.75
+    assert settings.guardrail_router_unhealthy_cooldown_seconds == 45.0
+    assert settings.guardrail_router_fallback_provider == "openai"
+    assert settings.guardrail_router_fallback_model == "gpt-5.4-nano"
+    assert settings.guardrail_router_max_tokens == 80
 
 
 def test_settings_default_cutover_flags_are_production_canonical(monkeypatch: pytest.MonkeyPatch):

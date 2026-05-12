@@ -10,27 +10,33 @@ from src.services.model_registry import build_chat_model_kwargs_for_option, get_
 from src.services.openai_compatible_http_chat_model import OpenAICompatibleHTTPChatModel
 
 
+def _build_fast_model(*, app_settings=settings, init_model=init_chat_model):
+    provider = str(app_settings.model_provider or "").strip()
+    model = str(app_settings.fast_model or "").strip()
+    if not provider or not model:
+        return None
+    return init_model(
+        **build_chat_model_kwargs(
+            model=model,
+            model_provider=provider,
+            temperature=0,
+            reasoning_effort=getattr(app_settings, "model_reasoning_effort", None),
+            extra_kwargs=getattr(app_settings, "model_extra_kwargs", None),
+        )
+    )
+
+
 def build_production_agent_router(
     *,
     app_settings=settings,
     init_model=init_chat_model,
 ) -> StructuredAgentRouter:
-    provider = str(app_settings.model_provider or "").strip()
-    model = str(app_settings.fast_model or "").strip()
-    if not provider or not model:
-        raise AgentRouterUnavailableError("agent_router_model_not_configured")
     try:
-        chat_model = init_model(
-            **build_chat_model_kwargs(
-                model=model,
-                model_provider=provider,
-                temperature=0,
-                reasoning_effort=getattr(app_settings, "model_reasoning_effort", None),
-                extra_kwargs=getattr(app_settings, "model_extra_kwargs", None),
-            )
-        )
+        chat_model = _build_fast_model(app_settings=app_settings, init_model=init_model)
     except Exception as exc:
         raise AgentRouterUnavailableError("agent_router_model_unavailable") from exc
+    if chat_model is None:
+        raise AgentRouterUnavailableError("agent_router_model_not_configured")
     return StructuredAgentRouter(model=chat_model)
 
 

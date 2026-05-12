@@ -12,6 +12,12 @@ from src.services.agent_structured_router import StructuredAgentRouter
 class Settings:
     model_provider = "openai"
     fast_model = "gpt-5.4-mini"
+    guardrail_router_base_url = "https://router.example.com/v1"
+    guardrail_router_model = "guardrail-router-merged"
+    guardrail_router_api_key = "router-token"
+    guardrail_router_timeout_seconds = 10.0
+    llm_request_timeout_seconds = 30
+    llm_max_retries = 1
 
 
 class FakeChatModel:
@@ -19,7 +25,7 @@ class FakeChatModel:
         return self
 
 
-def test_production_router_factory_builds_structured_router(monkeypatch):
+def test_production_router_factory_uses_fast_model_for_agent_router(monkeypatch):
     monkeypatch.setattr("src.services.chat_model_factory.settings.openai_api_key", "openai-key")
 
     router = build_production_agent_router(
@@ -29,6 +35,7 @@ def test_production_router_factory_builds_structured_router(monkeypatch):
 
     assert isinstance(router, StructuredAgentRouter)
     assert not isinstance(router, DeterministicAgentRouter)
+    assert isinstance(router.model, FakeChatModel)
 
 
 def test_production_response_router_uses_raw_http_model_for_selected_qwen_model(monkeypatch):
@@ -49,6 +56,9 @@ def test_production_router_factory_fails_safe_without_provider():
     class MissingSettings:
         model_provider = ""
         fast_model = "gpt-5.4-mini"
+        guardrail_router_base_url = ""
+        guardrail_router_model = "guardrail-router-merged"
+        guardrail_router_api_key = ""
 
     with pytest.raises(AgentRouterUnavailableError):
         build_production_agent_router(
@@ -61,6 +71,9 @@ def test_production_router_factory_fails_safe_without_model():
     class MissingSettings:
         model_provider = "openai"
         fast_model = ""
+        guardrail_router_base_url = ""
+        guardrail_router_model = "guardrail-router-merged"
+        guardrail_router_api_key = ""
 
     with pytest.raises(AgentRouterUnavailableError):
         build_production_agent_router(
@@ -72,8 +85,11 @@ def test_production_router_factory_fails_safe_without_model():
 def test_production_router_factory_does_not_return_deterministic_router_on_model_error(monkeypatch):
     monkeypatch.setattr("src.services.chat_model_factory.settings.openai_api_key", "openai-key")
 
+    class NoLocalRouterSettings(Settings):
+        guardrail_router_base_url = ""
+
     def fail_model(**kwargs):
         raise RuntimeError("provider unavailable")
 
     with pytest.raises(AgentRouterUnavailableError):
-        build_production_agent_router(app_settings=Settings(), init_model=fail_model)
+        build_production_agent_router(app_settings=NoLocalRouterSettings(), init_model=fail_model)
