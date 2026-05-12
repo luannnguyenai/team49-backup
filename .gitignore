@@ -23,6 +23,7 @@ data/**
 !data/**/
 !data/**/*.dvc
 !data/**/.gitignore
+!data/bootstrap/*.json
 
 # Project local files
 app.db
