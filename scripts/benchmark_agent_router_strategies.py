@@ -31,6 +31,8 @@ StrategyName = Literal[
     "content_fastpath_compact",
     "compact_all",
     "compact_labeled_all",
+    "compact_decision_table_all",
+    "compact_fewshot_all",
     "retrieval_first",
     "retrieval_first_compact",
     "retrieval_first_labeled_compact",
@@ -40,7 +42,11 @@ StrategyName = Literal[
 def default_strategy_names() -> list[StrategyName]:
     return [
         "baseline_fast_model",
-        "deterministic",
+        "baseline_0_8b",
+        "compact_all",
+        "compact_labeled_all",
+        "compact_decision_table_all",
+        "compact_fewshot_all",
     ]
 
 
@@ -52,6 +58,8 @@ def needs_compact_model(strategies: list[StrategyName]) -> bool:
             "content_fastpath_compact",
             "compact_all",
             "compact_labeled_all",
+            "compact_decision_table_all",
+            "compact_fewshot_all",
             "retrieval_first_compact",
             "retrieval_first_labeled_compact",
         )
@@ -333,8 +341,45 @@ def build_compact_router_messages(
     case: BenchmarkCase,
     *,
     labeled: bool = False,
+    variant: str | None = None,
 ) -> list[dict[str, str]]:
-    if labeled:
+    prompt_variant = variant or ("labeled" if labeled else "plain")
+    if prompt_variant == "fewshot":
+        system = (
+            "Classify one AI/ML learning assistant request. Return only compact JSON with keys "
+            "intent, topic, confidence, clarify. No markdown. confidence is 0..1. "
+            "Allowed intents: explain_concept, find_content, navigate_to_unit, ask_what_next, "
+            "assess_knowledge, request_replan, explain_planner_decision, summarize_progress, "
+            "general_course_question, assistant_help, request_path_switch, clarify. "
+            "Choose the action intent before content if the user asks to change workflow. "
+            "Examples:\n"
+            "User: tối ưu lại lộ trình cho tôi\n"
+            '{"intent":"request_replan","topic":null,"confidence":0.92,"clarify":null}\n'
+            "User: chuyển tôi sang lộ trình NLP\n"
+            '{"intent":"request_path_switch","topic":"NLP","confidence":0.92,"clarify":null}\n'
+            "User: quiz me on object detection\n"
+            '{"intent":"assess_knowledge","topic":"object detection","confidence":0.9,"clarify":null}\n'
+            "User: cho tôi thông tin cụ thể hơn về Mask R-CNN\n"
+            '{"intent":"find_content","topic":"Mask R-CNN","confidence":0.9,"clarify":null}'
+        )
+    elif prompt_variant == "decision_table":
+        system = (
+            "Classify one AI/ML learning assistant request. Return only JSON with keys "
+            "intent, topic, confidence, clarify. confidence must be a decimal from 0 to 1. "
+            "Allowed intents: explain_concept, find_content, navigate_to_unit, ask_what_next, "
+            "assess_knowledge, request_replan, explain_planner_decision, summarize_progress, "
+            "general_course_question, assistant_help, request_path_switch, clarify. "
+            "Priority order: "
+            "1 request_path_switch for switching path/track/course/domain. Do not classify path changes as navigate_to_unit. "
+            "2 request_replan for rebuilding or optimizing the learning path. "
+            "3 assess_knowledge for quiz/test/check knowledge. "
+            "4 assistant_help for greeting/help. "
+            "5 find_content or explain_concept for searching/explaining course content. "
+            "6 clarify only when intent or topic is missing. "
+            "Topic rules: path switch topic is the target path; assessment topic is tested topic; content topic is searchable concept. "
+            "Use null for missing topic or clarify."
+        )
+    elif prompt_variant == "labeled":
         system = (
             "Classify one AI/ML learning assistant request. Return only JSON with exactly these keys: "
             "intent, topic, confidence, clarify. confidence must be a decimal from 0 to 1, not percent. "
@@ -377,8 +422,9 @@ def compact_router_route(
     model: OpenAICompatibleHTTPChatModel,
     *,
     labeled: bool = False,
+    variant: str | None = None,
 ) -> CompactRouteOutput:
-    response = model.invoke(build_compact_router_messages(case, labeled=labeled))
+    response = model.invoke(build_compact_router_messages(case, labeled=labeled, variant=variant))
     content = str(response.content).strip()
     try:
         parsed = json.loads(content)
@@ -458,6 +504,12 @@ async def run_strategy_case(
         elif strategy == "compact_labeled_all":
             assert compact_model is not None
             output = compact_router_route(case, compact_model, labeled=True)
+        elif strategy == "compact_decision_table_all":
+            assert compact_model is not None
+            output = compact_router_route(case, compact_model, variant="decision_table")
+        elif strategy == "compact_fewshot_all":
+            assert compact_model is not None
+            output = compact_router_route(case, compact_model, variant="fewshot")
         elif strategy == "retrieval_first":
             output = deterministic_content_route(case)
             if output.intent == "clarify":
@@ -520,9 +572,10 @@ async def run_benchmark(
     *,
     repeat: int,
 ) -> list[StrategyResult]:
-    structured_router = (
-        build_production_agent_router()
-        if "baseline_fast_model" in strategies or "baseline_0_8b" in strategies
+    structured_router = build_production_agent_router() if "baseline_fast_model" in strategies else None
+    guardrail_structured_router = (
+        StructuredAgentRouter(model=_build_compact_router_model())
+        if "baseline_0_8b" in strategies
         else None
     )
     fast_router = _build_fast_model_router() if "fast_model" in strategies else None
@@ -533,11 +586,16 @@ async def run_benchmark(
     for _ in range(repeat):
         for strategy in strategies:
             for case in cases:
+                router = (
+                    guardrail_structured_router
+                    if strategy == "baseline_0_8b"
+                    else structured_router
+                )
                 results.append(
                     await run_strategy_case(
                         strategy,
                         case,
-                        structured_router=structured_router,
+                        structured_router=router,
                         fast_router=fast_router,
                         compact_model=compact_model,
                     )
