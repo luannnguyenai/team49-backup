@@ -3,11 +3,10 @@ import pytest
 from src.services.agent_graph_contracts import AgentRouterUnavailableError
 from src.services.agent_graph_router import DeterministicAgentRouter
 from src.services.agent_router_factory import (
-    _FallbackChatModel,
     build_production_agent_response_router,
     build_production_agent_router,
 )
-from src.services.agent_structured_router import StructuredAgentRouter, StructuredRouteOutput
+from src.services.agent_structured_router import StructuredAgentRouter
 
 
 class Settings:
@@ -26,34 +25,7 @@ class FakeChatModel:
         return self
 
 
-class FailingStructuredModel:
-    def invoke(self, messages):
-        raise RuntimeError("local router down")
-
-
-class SuccessfulStructuredModel:
-    def __init__(self):
-        self.called = False
-
-    def invoke(self, messages):
-        self.called = True
-        return {"ok": True}
-
-
-class FailingModel:
-    def with_structured_output(self, schema):
-        return FailingStructuredModel()
-
-
-class SuccessfulModel:
-    def __init__(self):
-        self.structured = SuccessfulStructuredModel()
-
-    def with_structured_output(self, schema):
-        return self.structured
-
-
-def test_production_router_factory_uses_guardrail_router_before_fast_model(monkeypatch):
+def test_production_router_factory_uses_fast_model_for_agent_router(monkeypatch):
     monkeypatch.setattr("src.services.chat_model_factory.settings.openai_api_key", "openai-key")
 
     router = build_production_agent_router(
@@ -63,39 +35,7 @@ def test_production_router_factory_uses_guardrail_router_before_fast_model(monke
 
     assert isinstance(router, StructuredAgentRouter)
     assert not isinstance(router, DeterministicAgentRouter)
-    assert router.model.primary.model == "guardrail-router-merged"
-    assert router.model.primary.base_url == "https://router.example.com/v1"
-    assert router.model.fallback is not None
-
-
-def test_agent_router_model_falls_back_when_local_structured_call_fails():
-    fallback = SuccessfulModel()
-    model = _FallbackChatModel(
-        primary=FailingModel(),
-        fallback=fallback,
-        primary_schemas=(StructuredRouteOutput,),
-    )
-
-    result = model.with_structured_output(StructuredRouteOutput).invoke(
-        [{"role": "user", "content": "route"}]
-    )
-
-    assert result == {"ok": True}
-    assert fallback.structured.called is True
-
-
-def test_agent_router_model_uses_fallback_directly_for_non_route_schemas():
-    fallback = SuccessfulModel()
-    model = _FallbackChatModel(
-        primary=FailingModel(),
-        fallback=fallback,
-        primary_schemas=(StructuredRouteOutput,),
-    )
-
-    result = model.with_structured_output(dict).invoke([{"role": "user", "content": "think"}])
-
-    assert result == {"ok": True}
-    assert fallback.structured.called is True
+    assert isinstance(router.model, FakeChatModel)
 
 
 def test_production_response_router_uses_raw_http_model_for_selected_qwen_model(monkeypatch):
