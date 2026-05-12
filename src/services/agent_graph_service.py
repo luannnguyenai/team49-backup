@@ -66,6 +66,47 @@ RAG_AGENT_INTENTS = {
     "navigate_to_unit",
 }
 
+EXACT_GREETING_RESPONSES = {
+    "Hello": "Hi! What AI/ML topic would you like help with today?",
+    "hello": "Hi! What AI/ML topic would you like help with today?",
+    "Hi": "Hi! What AI/ML topic would you like help with today?",
+    "hi": "Hi! What AI/ML topic would you like help with today?",
+    "Hey": "Hi! What AI/ML topic would you like help with today?",
+    "hey": "Hi! What AI/ML topic would you like help with today?",
+    "Hey there": "Hi! What AI/ML topic would you like help with today?",
+    "hey there": "Hi! What AI/ML topic would you like help with today?",
+    "Yo": "Hi! What AI/ML topic would you like help with today?",
+    "yo": "Hi! What AI/ML topic would you like help with today?",
+    "Xin chào": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "xin chào": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Chào bạn": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "chào bạn": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Chào": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "chào": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Xin chao": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "xin chao": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Chao": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "chao": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Ê": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "ê": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Này": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "này": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Alo": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "alo": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Alô": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "alô": "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?",
+    "Bonjour": "Hi! What AI/ML topic would you like help with today?",
+    "bonjour": "Hi! What AI/ML topic would you like help with today?",
+    "Hola": "Hi! What AI/ML topic would you like help with today?",
+    "hola": "Hi! What AI/ML topic would you like help with today?",
+    "Olá": "Hi! What AI/ML topic would you like help with today?",
+    "olá": "Hi! What AI/ML topic would you like help with today?",
+    "Ola": "Hi! What AI/ML topic would you like help with today?",
+    "ola": "Hi! What AI/ML topic would you like help with today?",
+    "你好": "Hi! What AI/ML topic would you like help with today?",
+    "こんにちは": "Hi! What AI/ML topic would you like help with today?",
+}
+
 
 class _NoopLock:
     async def __aenter__(self):
@@ -256,6 +297,7 @@ class AgentGraphService:
                 block_reason=input_guardrail.block_reason or "pii_input_blocked",
                 error_code=input_guardrail.error_code,
             )
+        original_sanitized_message = sanitized_request.message
         normalized_language = await self.language_normalizer.normalize(sanitized_request.message)
         sanitized_request = sanitized_request.model_copy(
             update={"message": normalized_language.normalized_text}
@@ -283,6 +325,12 @@ class AgentGraphService:
         )
         if guardrail_response is not None:
             return guardrail_response
+        exact_greeting_response = self._compose_exact_greeting_response(
+            conversation_id=conversation_id,
+            message=original_sanitized_message,
+        )
+        if exact_greeting_response is not None:
+            return self._sanitize_response(exact_greeting_response, input_guardrail)
 
         if self.graph_repo is None:
             response = await self._invoke_graph_and_compose(
@@ -610,6 +658,21 @@ class AgentGraphService:
                 blocked=True,
                 blockReason=decision.action,
             ),
+        )
+
+    @staticmethod
+    def _compose_exact_greeting_response(
+        *,
+        conversation_id: str,
+        message: str,
+    ) -> AgentChatResponse | None:
+        markdown = EXACT_GREETING_RESPONSES.get(message.strip())
+        if markdown is None:
+            return None
+        return AgentChatResponse(
+            conversation_id=conversation_id,
+            message_id=str(uuid4()),
+            answer=AgentAnswer(markdown=markdown, confidence="fallback"),
         )
 
     def _sanitize_response(
