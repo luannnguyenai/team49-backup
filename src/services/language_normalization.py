@@ -6,7 +6,6 @@ from typing import Literal, Protocol
 import httpx
 from lingua import Language, LanguageDetectorBuilder
 
-
 DetectedLanguage = Literal["en", "vi", "other"]
 
 
