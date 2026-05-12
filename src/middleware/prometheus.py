@@ -9,6 +9,7 @@ at GET /metrics for Prometheus scrape.
 Custom counters/histograms specific to LLM and admin domains can be added
 in src/core/observability.py and imported where they fire.
 """
+
 from __future__ import annotations
 
 from fastapi import FastAPI

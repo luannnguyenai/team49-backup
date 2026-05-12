@@ -6,12 +6,12 @@ Business logic for the onboarding flow.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
-import asyncio
 import urllib.request
-from collections.abc import Awaitable, Callable
 from collections import defaultdict
+from collections.abc import Awaitable, Callable
 from uuid import UUID
 
 from langchain.chat_models import init_chat_model
@@ -20,6 +20,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import DEFAULT_MODEL, settings
 from src.config.goal_course_map import GOAL_COURSE_MAP
+from src.core.observability import (
+    build_langfuse_metadata,
+    llm_callbacks,
+    propagate_langfuse_attributes,
+    start_langfuse_root_span,
+)
 from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.schemas.onboarding import (
@@ -36,12 +42,6 @@ from src.schemas.onboarding import (
 )
 from src.services.chat_model_factory import build_chat_model_kwargs
 from src.services.llm_rate_limiter import enforce_llm_rate_limit
-from src.core.observability import (
-    build_langfuse_metadata,
-    llm_callbacks,
-    propagate_langfuse_attributes,
-    start_langfuse_root_span,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +166,9 @@ def _fallback_prior_shortlist(body: PriorAnalysisRequest) -> list[str]:
     ]
 
 
-def _parse_prior_analysis_response(raw: str, valid_ids: set[str]) -> tuple[list[str], dict[str, dict[str, str]]]:
+def _parse_prior_analysis_response(
+    raw: str, valid_ids: set[str]
+) -> tuple[list[str], dict[str, dict[str, str]]]:
     text = raw.strip()
     if text.startswith("```"):
         text = text.split("```")[1]
@@ -287,6 +289,7 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
     try:
         enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
         if settings.model_provider.lower() == "openai":
+
             async def call_model() -> str:
                 with start_langfuse_root_span(
                     name="onboarding-prior-analysis",
@@ -465,9 +468,7 @@ async def get_topics_tree(
         # Sort sections by their sort_order if available
         sections_out.sort(
             key=lambda s: (
-                sections_map[s.section_id].sort_order
-                if s.section_id in sections_map
-                else 0
+                sections_map[s.section_id].sort_order if s.section_id in sections_map else 0
             )
         )
         courses_out.append(
@@ -501,7 +502,9 @@ async def save_known_topics(
         except (json.JSONDecodeError, TypeError):
             existing_notes = {}
 
-    known_ids = list({str(uid) for uid in topic_unit_ids} | set(existing_notes.get("known_unit_ids", [])))
+    known_ids = list(
+        {str(uid) for uid in topic_unit_ids} | set(existing_notes.get("known_unit_ids", []))
+    )
     new_notes = {**existing_notes, "known_unit_ids": known_ids}
 
     await repo.upsert_for_user(user_id, notes=json.dumps(new_notes))

@@ -81,7 +81,7 @@ async def test_model_health_returns_registered_models():
             "id": "qwen35_4b",
             "label": "Qwen 3.5 4B",
             "provider": "openai",
-            "model": "qwen 3.5 4B",
+            "model": "qwen3.5-4b-lora",
             "base_url": "https://vllm.a20-app-049.io.vn/v1",
             "status": "healthy",
             "latency_ms": 80,

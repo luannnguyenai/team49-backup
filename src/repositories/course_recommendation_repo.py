@@ -59,9 +59,7 @@ class CourseRecommendationRepository(BaseRepository[CourseRecommendation]):
         if not filters:
             return set()
 
-        result = await self.session.execute(
-            select(Course.slug).where(or_(*filters))
-        )
+        result = await self.session.execute(select(Course.slug).where(or_(*filters)))
         return {row[0] for row in result.all()}
 
     async def delete_for_user(self, user_id: UUID) -> None:

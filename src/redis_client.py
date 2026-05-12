@@ -9,13 +9,11 @@ Used by:
   - services/token_denylist.py (logout/revoke JWT)
 """
 
-from typing import Optional
-
 import redis.asyncio as aioredis
 
 from src.config import settings
 
-_redis: Optional[aioredis.Redis] = None
+_redis: aioredis.Redis | None = None
 
 
 async def connect_redis() -> aioredis.Redis:

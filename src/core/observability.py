@@ -17,6 +17,7 @@ Usage:
     callbacks = [handler] if handler else []
     response = chain.invoke(input, config={"callbacks": callbacks, "metadata": {...}})
 """
+
 from __future__ import annotations
 
 import logging
@@ -88,9 +89,9 @@ def observe_tutor_stream_first_status(
     route_type: str | None,
     has_image: bool,
 ) -> None:
-    TUTOR_STREAM_FIRST_STATUS_SECONDS.labels(
-        **_tutor_metric_labels(route_type, has_image)
-    ).observe(max(duration_seconds, 0.0))
+    TUTOR_STREAM_FIRST_STATUS_SECONDS.labels(**_tutor_metric_labels(route_type, has_image)).observe(
+        max(duration_seconds, 0.0)
+    )
 
 
 def observe_tutor_stream_first_answer(
@@ -99,9 +100,9 @@ def observe_tutor_stream_first_answer(
     route_type: str | None,
     has_image: bool,
 ) -> None:
-    TUTOR_STREAM_FIRST_ANSWER_SECONDS.labels(
-        **_tutor_metric_labels(route_type, has_image)
-    ).observe(max(duration_seconds, 0.0))
+    TUTOR_STREAM_FIRST_ANSWER_SECONDS.labels(**_tutor_metric_labels(route_type, has_image)).observe(
+        max(duration_seconds, 0.0)
+    )
 
 
 def observe_tutor_stream_total(
@@ -110,9 +111,9 @@ def observe_tutor_stream_total(
     route_type: str | None,
     has_image: bool,
 ) -> None:
-    TUTOR_STREAM_TOTAL_SECONDS.labels(
-        **_tutor_metric_labels(route_type, has_image)
-    ).observe(max(duration_seconds, 0.0))
+    TUTOR_STREAM_TOTAL_SECONDS.labels(**_tutor_metric_labels(route_type, has_image)).observe(
+        max(duration_seconds, 0.0)
+    )
 
 
 def build_langfuse_metadata(

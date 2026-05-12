@@ -86,7 +86,8 @@ async def update_learning_unit_progress(
         progress_status = LearningProgressStatus.completed
         completed_at = (
             existing_learning_progress.completed_at
-            if existing_learning_progress is not None and existing_learning_progress.completed_at is not None
+            if existing_learning_progress is not None
+            and existing_learning_progress.completed_at is not None
             else now
         )
     elif _has_active_inline_quiz(merged_inline_quiz):
@@ -128,7 +129,9 @@ async def update_learning_unit_progress(
     )
 
 
-def _merge_inline_quiz_progress(existing_inline_quiz: dict | None, incoming_inline_quiz: dict | None) -> dict:
+def _merge_inline_quiz_progress(
+    existing_inline_quiz: dict | None, incoming_inline_quiz: dict | None
+) -> dict:
     merged = _sanitize_inline_quiz_progress(existing_inline_quiz)
     sanitized_incoming = _sanitize_inline_quiz_progress(incoming_inline_quiz)
     if not sanitized_incoming:

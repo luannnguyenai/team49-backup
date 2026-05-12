@@ -38,7 +38,9 @@ def _wrap_label(value: str, width: int = 24) -> str:
 
 def _kp_name(kp_index: dict[str, dict[str, Any]], kp_id: str) -> str:
     row = kp_index.get(kp_id, {})
-    return row.get("name") or row.get("canonical_name") or kp_id.removeprefix("kp_").replace("_", " ")
+    return (
+        row.get("name") or row.get("canonical_name") or kp_id.removeprefix("kp_").replace("_", " ")
+    )
 
 
 def _label_index(gpt54_labels: dict[str, Any] | None) -> dict[tuple[str, str], dict[str, Any]]:
@@ -78,7 +80,9 @@ def _edge_style(edge: dict[str, Any], audit_label: dict[str, Any] | None) -> tup
     return ("#4b5563", "solid", "medium")
 
 
-def _ml_edge_style(edge: dict[str, Any], score: dict[str, Any] | None) -> tuple[str, str, str, float]:
+def _ml_edge_style(
+    edge: dict[str, Any], score: dict[str, Any] | None
+) -> tuple[str, str, str, float]:
     if not score:
         return ("#9ca3af", "dotted", "no score", 1.0)
 
@@ -105,14 +109,16 @@ def _render_dot(
     labels: dict[tuple[str, str], dict[str, Any]],
     title: str,
 ) -> str:
-    node_ids = sorted({edge["source_kp_id"] for edge in edges} | {edge["target_kp_id"] for edge in edges})
+    node_ids = sorted(
+        {edge["source_kp_id"] for edge in edges} | {edge["target_kp_id"] for edge in edges}
+    )
     indegree = Counter(edge["target_kp_id"] for edge in edges)
     outdegree = Counter(edge["source_kp_id"] for edge in edges)
 
     lines = [
         "digraph KG {",
         "  graph [",
-        '    rankdir=LR,',
+        "    rankdir=LR,",
         '    bgcolor="white",',
         '    pad="0.35",',
         '    nodesep="0.35",',
@@ -161,14 +167,16 @@ def _render_ml_dot(
     score_index: dict[tuple[str, str], dict[str, Any]],
     title: str,
 ) -> str:
-    node_ids = sorted({edge["source_kp_id"] for edge in edges} | {edge["target_kp_id"] for edge in edges})
+    node_ids = sorted(
+        {edge["source_kp_id"] for edge in edges} | {edge["target_kp_id"] for edge in edges}
+    )
     indegree = Counter(edge["target_kp_id"] for edge in edges)
     outdegree = Counter(edge["source_kp_id"] for edge in edges)
 
     lines = [
         "digraph KG {",
         "  graph [",
-        '    rankdir=LR,',
+        "    rankdir=LR,",
         '    bgcolor="white",',
         '    pad="0.35",',
         '    nodesep="0.35",',
@@ -231,7 +239,9 @@ def build_visualizations(
 ) -> dict[str, Any]:
     p5 = _load_json(p5_path)
     p5_input = _load_json(p5_input_path)
-    gpt54_labels = _load_json(gpt54_labels_path) if gpt54_labels_path and gpt54_labels_path.exists() else None
+    gpt54_labels = (
+        _load_json(gpt54_labels_path) if gpt54_labels_path and gpt54_labels_path.exists() else None
+    )
     modernbert_large_scores = (
         _load_json(modernbert_large_scores_path)
         if modernbert_large_scores_path and modernbert_large_scores_path.exists()
@@ -262,7 +272,11 @@ def build_visualizations(
             audit_edges,
             "P5 prerequisite KG audit view: green=high, gray=medium, orange=low, red dashed=GPT-5.4 prune suggestion",
         ),
-        ("kg_p5_kept_only", kept_only_edges, "P5 prerequisite KG kept-only view after GPT-5.4 audit suggestions"),
+        (
+            "kg_p5_kept_only",
+            kept_only_edges,
+            "P5 prerequisite KG kept-only view after GPT-5.4 audit suggestions",
+        ),
     ]:
         dot_path = output_dir / f"{name}.dot"
         svg_path = output_dir / f"{name}.svg"
@@ -295,13 +309,19 @@ def build_visualizations(
         "source_p5_file": str(p5_path),
         "source_p5_input_file": str(p5_input_path),
         "source_gpt54_labels_file": str(gpt54_labels_path) if gpt54_labels_path else None,
-        "source_modernbert_large_scores_file": str(modernbert_large_scores_path) if modernbert_large_scores_path else None,
+        "source_modernbert_large_scores_file": str(modernbert_large_scores_path)
+        if modernbert_large_scores_path
+        else None,
         "audit_edges": len(audit_edges),
         "kept_only_edges": len(kept_only_edges),
         "gpt54_prune_suggestions": len(audit_edges) - len(kept_only_edges),
-        "audit_nodes": len({edge["source_kp_id"] for edge in audit_edges} | {edge["target_kp_id"] for edge in audit_edges}),
+        "audit_nodes": len(
+            {edge["source_kp_id"] for edge in audit_edges}
+            | {edge["target_kp_id"] for edge in audit_edges}
+        ),
         "kept_only_nodes": len(
-            {edge["source_kp_id"] for edge in kept_only_edges} | {edge["target_kp_id"] for edge in kept_only_edges}
+            {edge["source_kp_id"] for edge in kept_only_edges}
+            | {edge["target_kp_id"] for edge in kept_only_edges}
         ),
         "artifacts": artifacts,
     }

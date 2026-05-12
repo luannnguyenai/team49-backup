@@ -57,15 +57,13 @@ async def generate_conversation_title(
                 max_tokens=40,
             )
         )
-        prompt = (
-            f"User message:\n{user_excerpt}\n\n"
-            f"Assistant reply:\n{assistant_excerpt}\n\n"
-            "Title:"
+        prompt = f"User message:\n{user_excerpt}\n\nAssistant reply:\n{assistant_excerpt}\n\nTitle:"
+        response = await llm.ainvoke(
+            [
+                SystemMessage(content=_SYSTEM_PROMPT),
+                HumanMessage(content=prompt),
+            ]
         )
-        response = await llm.ainvoke([
-            SystemMessage(content=_SYSTEM_PROMPT),
-            HumanMessage(content=prompt),
-        ])
         content = getattr(response, "content", None)
         if isinstance(content, list):
             content = "".join(part if isinstance(part, str) else str(part) for part in content)

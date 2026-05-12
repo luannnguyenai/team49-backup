@@ -10,8 +10,6 @@ Onboarding flow endpoints:
 
 from __future__ import annotations
 
-from typing import List
-
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -57,7 +55,7 @@ async def set_onboarding_goals(
     response_model=TopicsResponse,
 )
 async def get_onboarding_topics(
-    goal: List[str] = Query(default=[]),
+    goal: list[str] = Query(default=[]),
     db: AsyncSession = Depends(get_async_db),
 ) -> TopicsResponse:
     return await get_topics_tree(db, goal_ids=goal)
@@ -72,9 +70,7 @@ async def set_known_topics(
     db: AsyncSession = Depends(get_async_db),
     current_user: User = Depends(get_current_user),
 ) -> KnownTopicsResponse:
-    return await save_known_topics(
-        db, user_id=current_user.id, topic_unit_ids=body.topic_unit_ids
-    )
+    return await save_known_topics(db, user_id=current_user.id, topic_unit_ids=body.topic_unit_ids)
 
 
 @onboarding_router.post(

@@ -22,7 +22,7 @@ def test_tutor_llm_factory_uses_selected_qwen_chat_model(monkeypatch) -> None:
 
     llm_service._get_llm_with_tools("qwen35_4b")
 
-    assert captured_kwargs["model"] == "qwen 3.5 4B"
+    assert captured_kwargs["model"] == "qwen3.5-4b-lora"
     assert captured_kwargs["base_url"] == "https://vllm.a20-app-049.io.vn/v1"
     assert captured_kwargs["api_key"] == "EMPTY"
 
@@ -47,7 +47,7 @@ def test_tutor_call_model_uses_selected_chat_model_id(monkeypatch) -> None:
     result = llm_service.call_model({"messages": [], "chat_model_id": "qwen35_4b"})
 
     assert captured["chat_model_id"] == "qwen35_4b"
-    assert captured["rate_limit"] == {"model": "qwen 3.5 4B", "model_provider": "openai"}
+    assert captured["rate_limit"] == {"model": "qwen3.5-4b-lora", "model_provider": "openai"}
     assert result["messages"][0].content == "answer"
 
 

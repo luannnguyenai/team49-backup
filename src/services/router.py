@@ -18,7 +18,7 @@ from functools import lru_cache
 from typing import Any
 
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from src.config import FAST_MODEL, settings
 from src.services.chat_model_factory import build_chat_model_kwargs
@@ -31,6 +31,7 @@ def _fmt_ts(seconds: float) -> str:
     h, rem = divmod(s, 3600)
     m, sec = divmod(rem, 60)
     return f"{h:02d}:{m:02d}:{sec:02d}"
+
 
 logger = logging.getLogger("SmartRouter")
 
@@ -45,6 +46,7 @@ def _get_router_llm():
             max_tokens=1200,
         )
     )
+
 
 # --- Router Prompt -----------------------------------------------------------
 _ROUTER_SYSTEM = """\
@@ -115,7 +117,7 @@ def _build_out_of_scope_message(lecture_title: str, current_chapter: str) -> str
     if current_chapter:
         return (
             "📚 Câu hỏi này nằm ngoài phạm vi bài học hiện tại. "
-            f"Hãy quay lại chapter \"{current_chapter}\" của {lecture_title} để mình hỗ trợ đúng ngữ cảnh hơn nhé!"
+            f'Hãy quay lại chapter "{current_chapter}" của {lecture_title} để mình hỗ trợ đúng ngữ cảnh hơn nhé!'
         )
     return (
         "📚 Câu hỏi này nằm ngoài phạm vi bài học hiện tại. "
@@ -159,10 +161,12 @@ def route_question(
             user_text += f"\n\nLecture outline:\n{context_summary}\n"
         user_text += f'\nStudent question: "{question}"'
 
-        response = _get_router_llm().invoke([
-            SystemMessage(content=_ROUTER_SYSTEM),
-            HumanMessage(content=user_text),
-        ])
+        response = _get_router_llm().invoke(
+            [
+                SystemMessage(content=_ROUTER_SYSTEM),
+                HumanMessage(content=user_text),
+            ]
+        )
 
         raw = response.content.strip()
 

@@ -9,7 +9,6 @@ to test based on their claim.
 """
 
 import logging
-from typing import Literal
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -23,22 +22,22 @@ log = logging.getLogger(__name__)
 
 class UnitRecommendation(BaseModel):
     """Single unit recommendation."""
+
     unit_id: str = Field(description="Canonical unit ID to recommend")
     reason: str = Field(description="Why this unit should be tested")
 
 
 class UnitRecommendationResult(BaseModel):
     """LLM recommendation result."""
+
     recommendations: list[UnitRecommendation] = Field(
         description="List of recommended units to test"
     )
     should_skip_all: bool = Field(
-        default=False,
-        description="True if user's intent doesn't match any available units"
+        default=False, description="True if user's intent doesn't match any available units"
     )
     skip_reason: str = Field(
-        default="",
-        description="Reason for skipping if should_skip_all is True"
+        default="", description="Reason for skipping if should_skip_all is True"
     )
 
     model_config = ConfigDict(populate_by_name=True)
@@ -91,7 +90,9 @@ class ReplanUnitRecommender:
     async def recommend(
         self,
         user_claim: str,
-        available_units: list[dict],  # [{"unit_id": str, "title": str, "summary": str, "key_points": list[str]}]
+        available_units: list[
+            dict
+        ],  # [{"unit_id": str, "title": str, "summary": str, "key_points": list[str]}]
     ) -> UnitRecommendationResult:
         """Recommend which units to test based on user claim.
 
@@ -110,26 +111,32 @@ class ReplanUnitRecommender:
             )
 
         # Build unit context for LLM
-        units_context = "\n".join([
-            f"- {u['unit_id']}: {u['title']}\n  Summary: {(u.get('summary') or 'N/A')[:150]}\n  Key Points: {', '.join(u.get('key_points', [])[:3])}"
-            for u in available_units[:20]  # Limit to 20 units
-        ])
+        units_context = "\n".join(
+            [
+                f"- {u['unit_id']}: {u['title']}\n  Summary: {(u.get('summary') or 'N/A')[:150]}\n  Key Points: {', '.join(u.get('key_points', [])[:3])}"
+                for u in available_units[:20]  # Limit to 20 units
+            ]
+        )
 
         messages = [
             SystemMessage(content=_SYSTEM_PROMPT),
-            HumanMessage(content=f"""**User's Claim:**
+            HumanMessage(
+                content=f"""**User's Claim:**
 "{user_claim}"
 
 **Available Units in Learning Path:**
 {units_context}
 
-Analyze and recommend which units this user should test. Be strict - only recommend if there's a genuine conceptual match."""),
+Analyze and recommend which units this user should test. Be strict - only recommend if there's a genuine conceptual match."""
+            ),
         ]
 
         try:
             structured_model = self.model.with_structured_output(UnitRecommendationResult)
             response = await structured_model.ainvoke(messages)
-            log.info(f"LLM recommend: {len(response.recommendations)} units, skip_all={response.should_skip_all}")
+            log.info(
+                f"LLM recommend: {len(response.recommendations)} units, skip_all={response.should_skip_all}"
+            )
             return response
 
         except Exception as e:
@@ -137,10 +144,7 @@ Analyze and recommend which units this user should test. Be strict - only recomm
             # Fallback: return all units (conservative approach)
             return UnitRecommendationResult(
                 recommendations=[
-                    UnitRecommendation(
-                        unit_id=u['unit_id'],
-                        reason=f"Matched keywords (fallback)"
-                    )
+                    UnitRecommendation(unit_id=u["unit_id"], reason="Matched keywords (fallback)")
                     for u in available_units
                 ],
                 should_skip_all=False,

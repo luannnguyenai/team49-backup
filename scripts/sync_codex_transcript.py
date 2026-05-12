@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -37,7 +37,7 @@ def repo_metadata() -> dict[str, str]:
 
 def parse_ts(raw: str) -> str:
     if not raw:
-        return datetime.now(timezone.utc).isoformat()
+        return datetime.now(UTC).isoformat()
     try:
         return datetime.fromisoformat(raw.replace("Z", "+00:00")).isoformat()
     except ValueError:
@@ -153,9 +153,7 @@ def sync_transcript_to_log(
     return len(pending)
 
 
-def find_latest_codex_transcript_for_repo(
-    *, sessions_root: Path, repo_root: Path
-) -> Path | None:
+def find_latest_codex_transcript_for_repo(*, sessions_root: Path, repo_root: Path) -> Path | None:
     latest: tuple[float, Path] | None = None
     for transcript_path in sessions_root.rglob("*.jsonl"):
         try:

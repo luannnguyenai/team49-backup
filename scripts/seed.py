@@ -15,12 +15,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.database import async_session  # noqa: E402
 from scripts.seed_lectures import seed as seed_lectures_runtime  # noqa: E402
+from src.database import async_session  # noqa: E402
 from src.scripts.pipeline.check_canonical_runtime_parity import build_parity_report  # noqa: E402
 from src.scripts.pipeline.import_canonical_artifacts_to_db import (  # noqa: E402
     DEFAULT_INPUT_DIR,
@@ -33,7 +32,9 @@ from src.scripts.pipeline.import_product_shell_to_db import (  # noqa: E402
 )
 
 
-async def run_seed(*, input_dir: Path = DEFAULT_INPUT_DIR, validate_only: bool = False) -> dict[str, Any]:
+async def run_seed(
+    *, input_dir: Path = DEFAULT_INPUT_DIR, validate_only: bool = False
+) -> dict[str, Any]:
     """Import canonical content and product shell, or validate both without writes."""
     if validate_only:
         canonical_report = validate_canonical_artifacts(input_dir)

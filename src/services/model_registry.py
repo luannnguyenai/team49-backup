@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
 from src.config import settings
 from src.services.chat_model_factory import build_chat_model_kwargs
-
 
 DEFAULT_CHAT_MODEL_ID = "default"
 QWEN35_4B_CHAT_MODEL_ID = "qwen35_4b"
@@ -131,7 +130,7 @@ def _health_payload(
         {
             "status": status,
             "latency_ms": latency_ms,
-            "checked_at": datetime.now(timezone.utc).isoformat(),
+            "checked_at": datetime.now(UTC).isoformat(),
             "error": error,
         }
     )
@@ -141,10 +140,13 @@ def _health_payload(
 async def check_chat_model_health(
     model_id: str | None,
     *,
-    timeout_s: float = 4.0,
+    timeout_s: float | None = None,
     client=None,
 ) -> dict:
     option = get_chat_model_option(model_id)
+    effective_timeout_s = (
+        timeout_s if timeout_s is not None else settings.chat_model_health_timeout_seconds
+    )
     base_url = _model_health_base_url(option)
     if not base_url:
         return _health_payload(
@@ -171,16 +173,14 @@ async def check_chat_model_health(
         response = await http_client.get(
             f"{base_url}/models",
             headers=headers,
-            timeout=timeout_s,
+            timeout=effective_timeout_s,
         )
         latency_ms = int((time.perf_counter() - started) * 1000)
         response.raise_for_status()
         payload = response.json()
         data = payload.get("data") if isinstance(payload, dict) else None
         model_ids = {
-            str(item.get("id"))
-            for item in data or []
-            if isinstance(item, dict) and item.get("id")
+            str(item.get("id")) for item in data or [] if isinstance(item, dict) and item.get("id")
         }
         status = "healthy"
         error = None
@@ -201,7 +201,7 @@ async def check_chat_model_health(
             await http_client.aclose()
 
 
-async def check_all_chat_model_health(*, timeout_s: float = 4.0, client=None) -> list[dict]:
+async def check_all_chat_model_health(*, timeout_s: float | None = None, client=None) -> list[dict]:
     return [
         await check_chat_model_health(option.id, timeout_s=timeout_s, client=client)
         for option in list_chat_model_options()
@@ -219,7 +219,9 @@ def _availability_payload(health: dict) -> dict:
     }
 
 
-async def check_all_chat_model_availability(*, timeout_s: float = 4.0, client=None) -> list[dict]:
+async def check_all_chat_model_availability(
+    *, timeout_s: float | None = None, client=None
+) -> list[dict]:
     return [
         _availability_payload(health)
         for health in await check_all_chat_model_health(timeout_s=timeout_s, client=client)
@@ -229,7 +231,7 @@ async def check_all_chat_model_availability(*, timeout_s: float = 4.0, client=No
 async def ensure_chat_model_available(
     model_id: str | None,
     *,
-    timeout_s: float = 4.0,
+    timeout_s: float | None = None,
     client=None,
 ) -> ChatModelOption:
     option = get_chat_model_option(model_id)

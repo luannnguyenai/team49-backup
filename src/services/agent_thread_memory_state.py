@@ -17,7 +17,9 @@ class AgentThreadMemoryStateStore:
         self.memory_compaction = memory_compaction
         self._pending_clarifications: dict[str, PendingClarification] = {}
 
-    async def load_memory_ref(self, conversation_id: str, user_id: str, thread_id: str) -> str | None:
+    async def load_memory_ref(
+        self, conversation_id: str, user_id: str, thread_id: str
+    ) -> str | None:
         if self.conversation_repo is None:
             return None
         memory = await self.conversation_repo.get_memory(
@@ -97,7 +99,9 @@ class AgentThreadMemoryStateStore:
             user_uuid,
             thread_id=thread_id,
         )
-        summary = dict(memory.summary_json) if memory and isinstance(memory.summary_json, dict) else {}
+        summary = (
+            dict(memory.summary_json) if memory and isinstance(memory.summary_json, dict) else {}
+        )
         summary.setdefault("summaryVersion", 1)
         summary["memoryRef"] = self._memory_ref(thread_id, summary)
         if pending is None:
@@ -133,7 +137,9 @@ class AgentThreadMemoryStateStore:
             return
         conversation_uuid = UUID(str(conversation_id))
         user_uuid = UUID(str(user_id))
-        messages = await self.conversation_repo.list_messages(conversation_uuid, user_uuid, limit=200)
+        messages = await self.conversation_repo.list_messages(
+            conversation_uuid, user_uuid, limit=200
+        )
         if not self.memory_compaction.should_compact(messages):
             return
         memory = await self.conversation_repo.get_memory(
@@ -141,7 +147,9 @@ class AgentThreadMemoryStateStore:
             user_uuid,
             thread_id=thread_id,
         )
-        previous_summary = memory.summary_json if memory and isinstance(memory.summary_json, dict) else {}
+        previous_summary = (
+            memory.summary_json if memory and isinstance(memory.summary_json, dict) else {}
+        )
         pending_clarification = previous_summary.get("pendingClarification")
         compacted = self.memory_compaction.compact(
             messages,

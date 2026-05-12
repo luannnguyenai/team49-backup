@@ -6,18 +6,17 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 from src.schemas.agent import (
+    AgentAction,
     AgentAnswer,
     AgentChatResponse,
     AgentCitation,
     AgentFallback,
     AgentIntent,
-    AgentAction,
-    RetrievalTrace,
     AgentWarning,
+    RetrievalTrace,
     RouteContext,
 )
 from src.services.agent_error_codes import agent_system_error_message
-
 
 AGENT_INTENT_NODE_REGISTRY: dict[AgentIntent, str] = {
     "explain_concept": "explain_concept_node",
@@ -71,7 +70,11 @@ class AgentInProgressError(RuntimeError):
 
 
 class AgentRouterUnavailableError(RuntimeError):
-    def __init__(self, message: str = "agent_router_unavailable", error_code: str = "AGENT_ROUTER_UNAVAILABLE"):
+    def __init__(
+        self,
+        message: str = "agent_router_unavailable",
+        error_code: str = "AGENT_ROUTER_UNAVAILABLE",
+    ):
         super().__init__(message)
         self.error_code = error_code
 

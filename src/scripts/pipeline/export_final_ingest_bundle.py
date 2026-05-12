@@ -53,7 +53,9 @@ def _load_p1_units(course_id: str, sanitized_dir: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def _p4_rows(course_id: str, p4_root: Path) -> tuple[
+def _p4_rows(
+    course_id: str, p4_root: Path
+) -> tuple[
     list[dict[str, Any]],
     list[dict[str, Any]],
     list[dict[str, Any]],
@@ -125,7 +127,9 @@ def _p4_rows(course_id: str, p4_root: Path) -> tuple[
     return question_rows, calibration_rows, phase_rows, skipped_unit_rows
 
 
-def _final_edges(p5: dict[str, Any], gpt54: dict[str, Any] | None) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def _final_edges(
+    p5: dict[str, Any], gpt54: dict[str, Any] | None
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     labels = {}
     if gpt54:
         labels = {
@@ -238,9 +242,12 @@ def export_bundle(
         "question_phase_count_match": len(question_bank) == len(item_phase_map),
         "edge_count_source": {
             "p5_clean": len(p5.get("clean_candidate_edges", [])),
-            "gpt54_prune_suggestions_applied": len(p5.get("clean_candidate_edges", [])) - len(prerequisite_edges),
+            "gpt54_prune_suggestions_applied": len(p5.get("clean_candidate_edges", []))
+            - len(prerequisite_edges),
         },
-        "question_item_type_distribution": dict(Counter(row.get("item_type") for row in question_bank)),
+        "question_item_type_distribution": dict(
+            Counter(row.get("item_type") for row in question_bank)
+        ),
     }
     _write_json(output_dir / "manifest.json", manifest)
     return manifest
@@ -248,7 +255,9 @@ def export_bundle(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=Path("data/final_artifacts_export/cs224n_cs231n_v1"))
+    parser.add_argument(
+        "--output-dir", type=Path, default=Path("data/final_artifacts_export/cs224n_cs231n_v1")
+    )
     parser.add_argument("--p2", type=Path, default=P2_OUTPUT_FILE)
     parser.add_argument("--p5", type=Path, default=P5_TRANSITIVE_PRUNED_FILE)
     parser.add_argument("--gpt54", type=Path, default=GPT54_EDGE_LABELS_FILE)

@@ -18,10 +18,10 @@ import uuid
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
-from src.config import settings
-from src.exceptions import ForbiddenError, NotFoundError, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
+from src.exceptions import ForbiddenError, NotFoundError, ValidationError
 from src.models.course import LearningProgressStatus
 from src.models.learning import (
     PathAction,
@@ -209,7 +209,9 @@ def classify_schema_v2_unit_priority(
     derived_salience = _derive_salience_from_kp_rows(unit_kp_rows)
     salience_score = getattr(unit, "salience_score", None) or derived_salience
     has_quiz_items = bool(getattr(unit, "has_quiz_items", False) or quiz_item_count > 0)
-    override_critical = bool(getattr(unit, "override_critical_kp", False)) or _has_critical_gateway_kp(
+    override_critical = bool(
+        getattr(unit, "override_critical_kp", False)
+    ) or _has_critical_gateway_kp(
         unit_kp_rows,
         kp_by_id,
     )
@@ -316,7 +318,9 @@ async def _generate_canonical_learning_path(
                 selected_course_ids=selected_course_ids,
             )
     else:
-        selected_course_ids = list(goal.selected_course_ids) if goal and goal.selected_course_ids else []
+        selected_course_ids = (
+            list(goal.selected_course_ids) if goal and goal.selected_course_ids else []
+        )
     if not selected_course_ids:
         raise ValidationError(
             "Canonical planner requires selected_course_ids or goal_preferences.selected_course_ids."
@@ -364,9 +368,7 @@ async def _generate_canonical_learning_path(
 
     for order_index, unit in enumerate(units):
         canonical_unit = (
-            canonical_unit_by_id.get(unit.canonical_unit_id)
-            if unit.canonical_unit_id
-            else None
+            canonical_unit_by_id.get(unit.canonical_unit_id) if unit.canonical_unit_id else None
         )
         current_unit_kp_rows = unit_kp_rows_by_unit_id.get(unit.canonical_unit_id or "", [])
         unit_kps = [row.kp_id for row in current_unit_kp_rows]
@@ -376,7 +378,9 @@ async def _generate_canonical_learning_path(
             if kp_id in mastery_by_kp
         ]
         mastery_lcb = min(mastery_values) if mastery_values else 0.0
-        decision = placement_by_unit.get(unit.id) if has_placement and not placement_skipped else None
+        decision = (
+            placement_by_unit.get(unit.id) if has_placement and not placement_skipped else None
+        )
         if decision == "skip":
             action_value = PathAction.skip.value
         elif decision == "review":
@@ -397,7 +401,9 @@ async def _generate_canonical_learning_path(
         if segment_policy == "hidden":
             estimated_hours = 0.0
         else:
-            estimated_hours = 0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
+            estimated_hours = (
+                0.0 if action == PathAction.skip else ((unit.estimated_minutes or 30) / 60.0)
+            )
 
         # Determine Phase A/B tag and rationale
         if placement_skipped:
@@ -503,7 +509,9 @@ async def _generate_canonical_learning_path(
         _serialize_plan_item(
             item,
             kp_ids=list(plan_metadata_by_unit.get(item.learning_unit_id, {}).get("kp_ids", [])),
-            mastery_lcb=float(plan_metadata_by_unit.get(item.learning_unit_id, {}).get("mastery_lcb", 0.0)),
+            mastery_lcb=float(
+                plan_metadata_by_unit.get(item.learning_unit_id, {}).get("mastery_lcb", 0.0)
+            ),
         )
         for item in items
     ]
@@ -669,7 +677,9 @@ async def _get_canonical_learning_path_rows(
 
     content_repo = CanonicalContentRepository(db)
     unit_by_id = await content_repo.get_learning_units_by_ids(learning_unit_ids)
-    course_by_id = await content_repo.get_courses_by_ids([unit.course_id for unit in unit_by_id.values()])
+    course_by_id = await content_repo.get_courses_by_ids(
+        [unit.course_id for unit in unit_by_id.values()]
+    )
     section_by_id = await content_repo.get_sections_by_ids(
         [unit.section_id for unit in unit_by_id.values()]
     )
@@ -714,11 +724,7 @@ async def _get_canonical_learning_path_rows(
             phase_tag=item.get("phase_tag"),
             is_locked=bool(item.get("is_locked", False)),
             rationale_log=item.get("rationale_log"),
-            unit_slug=(
-                getattr(unit, "slug", None)
-                if unit is not None
-                else item.get("unit_slug")
-            ),
+            unit_slug=(getattr(unit, "slug", None) if unit is not None else item.get("unit_slug")),
         )
         section_title = None
         course_title = item.get("course_title")
@@ -740,9 +746,7 @@ async def _get_canonical_learning_path_rows(
         )
 
     # Fix 3: Dynamic gate — recompute is_locked for Phase B based on current Phase A mastery
-    phase_a_unit_ids = [
-        row[0].learning_unit_id for row in rows if row[0].phase_tag == "phase_a"
-    ]
+    phase_a_unit_ids = [row[0].learning_unit_id for row in rows if row[0].phase_tag == "phase_a"]
     phase_b_unlocked = await _phase_b_unlocked(
         db,
         user_id=user_id,
@@ -900,7 +904,8 @@ async def _get_canonical_path_status_map(
     waived_by_unit = await waived_repo.list_for_user_units(user_id, learning_unit_ids)
     placement_results = await PlacementAssessmentRepository(db).get_by_user_id(user_id)
     placement_skipped_units = {
-        row.topic_unit_id for row in placement_results
+        row.topic_unit_id
+        for row in placement_results
         if row.topic_unit_id in learning_unit_ids and row.decision == "skip"
     }
 

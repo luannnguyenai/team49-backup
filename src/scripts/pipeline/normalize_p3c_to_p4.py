@@ -14,7 +14,6 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-
 PHASE_MULTIPLIERS = {
     "placement": 1.0,
     "mini_quiz": 0.8,
@@ -99,7 +98,9 @@ def _extract_choices(question: dict[str, Any]) -> tuple[list[str], list[str]]:
     return choices, ids
 
 
-def _answer_index(question: dict[str, Any], choices: list[str], option_ids: list[str]) -> int | None:
+def _answer_index(
+    question: dict[str, Any], choices: list[str], option_ids: list[str]
+) -> int | None:
     raw_index = question.get("answer_index")
     if isinstance(raw_index, int) and 0 <= raw_index < len(choices):
         return raw_index
@@ -150,7 +151,9 @@ def _discrimination_prior(intent: str | None) -> float:
     return 0.85
 
 
-def _normalize_video_clip_ref(source_ref: dict[str, Any], p3b_clip: dict[str, Any] | None) -> dict[str, Any] | None:
+def _normalize_video_clip_ref(
+    source_ref: dict[str, Any], p3b_clip: dict[str, Any] | None
+) -> dict[str, Any] | None:
     raw_ref = source_ref.get("video_clip_ref")
     if isinstance(raw_ref, dict):
         return raw_ref
@@ -176,7 +179,11 @@ def _normalize_source_ref(
     source_ref.setdefault("unit_id", unit_id)
     source_ref.setdefault("multimodal_signals_used", [])
 
-    signals = set(str(signal) for signal in source_ref.get("multimodal_signals_used", []) if str(signal).strip())
+    signals = set(
+        str(signal)
+        for signal in source_ref.get("multimodal_signals_used", [])
+        if str(signal).strip()
+    )
     if source_ref.get("evidence_span"):
         signals.add("transcript")
     video_clip_ref = _normalize_video_clip_ref(source_ref, p3b_clip)
@@ -250,7 +257,9 @@ def _normalize_question(
         "provenance": question.get("provenance") or "vlm_grounded",
         "difficulty_prior": difficulty_prior,
         "question_intent": intent,
-        "secondary_kp_ids": question.get("secondary_kp_ids") or question.get("related_kp_ids") or [],
+        "secondary_kp_ids": question.get("secondary_kp_ids")
+        or question.get("related_kp_ids")
+        or [],
     }
 
 
@@ -263,7 +272,9 @@ def _normalize_role(raw_role: Any, *, is_primary: bool = False) -> str:
     return "secondary"
 
 
-def _normalize_item_kp_map(raw_maps: list[dict[str, Any]], questions: list[dict[str, Any]]) -> list[dict[str, str]]:
+def _normalize_item_kp_map(
+    raw_maps: list[dict[str, Any]], questions: list[dict[str, Any]]
+) -> list[dict[str, str]]:
     question_by_id = {question["item_id"]: question for question in questions}
     rows: dict[tuple[str, str, str], dict[str, str]] = {}
 
@@ -289,7 +300,9 @@ def _normalize_item_kp_map(raw_maps: list[dict[str, Any]], questions: list[dict[
         kp_id = raw.get("global_kp_id")
         question = question_by_id.get(item_id, {})
         role = raw.get("role") or raw.get("map_role") or raw.get("planner_role")
-        add(item_id, kp_id, _normalize_role(role, is_primary=kp_id == question.get("primary_kp_id")))
+        add(
+            item_id, kp_id, _normalize_role(role, is_primary=kp_id == question.get("primary_kp_id"))
+        )
 
     for question in questions:
         item_id = question["item_id"]
@@ -367,7 +380,11 @@ def _phase_row(question: dict[str, Any]) -> dict[str, Any]:
     return {
         "item_id": question["item_id"],
         "primary_phase": primary_phase,
-        "secondary_phases": [phase for phase in ALLOWED_PHASES if phase != primary_phase and suitability[phase] != "low"],
+        "secondary_phases": [
+            phase
+            for phase in ALLOWED_PHASES
+            if phase != primary_phase and suitability[phase] != "low"
+        ],
         "suitability_by_phase": suitability,
         "phase_multiplier_by_phase": PHASE_MULTIPLIERS,
         "phase_rationale": "Deterministic phase mapping from P3c question intent and difficulty prior.",
@@ -422,7 +439,11 @@ def normalize_course_p3c_to_p4(
             )
             for question in questions_raw
         ]
-        item_kp_map = _normalize_item_kp_map(artifact.get("item_kp_map") or [], questions) if questions else []
+        item_kp_map = (
+            _normalize_item_kp_map(artifact.get("item_kp_map") or [], questions)
+            if questions
+            else []
+        )
 
         output = {
             "run_id": f"p4_deterministic_{course_dir.name.lower()}",
@@ -435,7 +456,8 @@ def normalize_course_p3c_to_p4(
             "grounding_mode": "transcript_and_video_clip",
             "grounding_confidence": "high" if questions else "not_applicable",
             "needs_video_clip": bool(questions),
-            "question_intent": (salience or {}).get("question_intent") or (questions[0].get("question_intent") if questions else None),
+            "question_intent": (salience or {}).get("question_intent")
+            or (questions[0].get("question_intent") if questions else None),
             "target_item_count": len(questions),
             "review_summary": {
                 "source_p3c_file": str(path),

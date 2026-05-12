@@ -10,7 +10,6 @@ from src.database import async_session
 from src.models.user import User
 from src.services.auth_service import hash_password
 
-
 OUTPUT_CSV = Path("remaining tasks/cicd/admin_test_accounts.csv")
 SHARED_PASSWORD = "AdminTest123!"
 

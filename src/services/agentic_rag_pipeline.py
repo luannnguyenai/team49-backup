@@ -129,7 +129,9 @@ class AgenticRAGPipeline:
                     },
                 }
             )
-        answer_markdown = final.answer_markdown or final.clarification_question or result.answer_markdown
+        answer_markdown = (
+            final.answer_markdown or final.clarification_question or result.answer_markdown
+        )
         answer_markdown = self._strip_hidden_stage_text(answer_markdown or "")
         if final.evidence_sufficient and result.citations:
             return result.model_copy(

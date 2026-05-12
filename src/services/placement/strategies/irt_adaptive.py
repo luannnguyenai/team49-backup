@@ -6,7 +6,7 @@ import random
 from typing import Any
 
 from src.models.canonical import QuestionBankItem
-from src.services.placement.strategies import STRATEGY_REGISTRY, register
+from src.services.placement.strategies import register
 
 log = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ def _fisher_info_3pl(
             return 0.0
 
         # I = a^2 * (1-c)^2 * p_star * (1-p_star) / (p * (1-p))
-        numerator = (a ** 2) * ((1.0 - c) ** 2) * p_star * (1.0 - p_star)
+        numerator = (a**2) * ((1.0 - c) ** 2) * p_star * (1.0 - p_star)
         denominator = p * (1.0 - p)
         if denominator <= 0:
             return 0.0
@@ -126,7 +126,7 @@ class IRTAdaptiveStrategy:
 
         if not calibrated_pool:
             log.warning(
-                f"IRTAdaptiveStrategy: no items pass calibration gate; falling back to spread_by_prior"
+                "IRTAdaptiveStrategy: no items pass calibration gate; falling back to spread_by_prior"
             )
             # Fallback: spread_by_prior (NOT random_uniform per §13.6)
             from src.services.placement.strategies import STRATEGY_REGISTRY

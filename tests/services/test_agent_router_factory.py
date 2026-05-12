@@ -31,12 +31,9 @@ def test_production_router_factory_builds_structured_router(monkeypatch):
     assert not isinstance(router, DeterministicAgentRouter)
 
 
-def test_production_response_router_uses_selected_qwen_model(monkeypatch):
-    captured_kwargs = {}
-
-    def init_model(**kwargs):
-        captured_kwargs.update(kwargs)
-        return FakeChatModel()
+def test_production_response_router_uses_raw_http_model_for_selected_qwen_model(monkeypatch):
+    def init_model(**_kwargs):
+        raise AssertionError("self-hosted Qwen must not use the OpenAI SDK client")
 
     router = build_production_agent_response_router(
         chat_model_id="qwen35_4b",
@@ -44,10 +41,8 @@ def test_production_response_router_uses_selected_qwen_model(monkeypatch):
     )
 
     assert isinstance(router, StructuredAgentRouter)
-    assert captured_kwargs["model"] == "qwen 3.5 4B"
-    assert captured_kwargs["model_provider"] == "openai"
-    assert captured_kwargs["base_url"] == "https://vllm.a20-app-049.io.vn/v1"
-    assert captured_kwargs["api_key"] == "EMPTY"
+    assert router.model.model == "qwen3.5-4b-lora"
+    assert router.model.base_url == "https://vllm.a20-app-049.io.vn/v1"
 
 
 def test_production_router_factory_fails_safe_without_provider():

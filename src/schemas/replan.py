@@ -15,7 +15,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from src.schemas.assessment import QuestionForAssessment
 
-
 # ===========================================================================
 # Shared types
 # ===========================================================================

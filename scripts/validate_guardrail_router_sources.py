@@ -9,14 +9,13 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import requests
 from huggingface_hub import HfApi, hf_hub_download
-
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "data" / "guardrail_router" / "source_validation"
@@ -144,12 +143,21 @@ def validate_local_eduvidqa() -> dict[str, Any]:
         "sample_file": str(sample_path.relative_to(ROOT)) if sample_path.exists() else None,
         "sample_columns": columns,
         "sample_rows": sample_rows,
-        "feasibility": "usable_for_on_topic" if summary.get("valid_context_samples_window_120", 0) >= 4000 else "needs_review",
+        "feasibility": "usable_for_on_topic"
+        if summary.get("valid_context_samples_window_120", 0) >= 4000
+        else "needs_review",
     }
 
 
 def validate_local_question_bank() -> dict[str, Any]:
-    path = ROOT / "data" / "final_artifacts" / "cs224n_cs231n_cs230_v1" / "canonical" / "question_bank.jsonl"
+    path = (
+        ROOT
+        / "data"
+        / "final_artifacts"
+        / "cs224n_cs231n_cs230_v1"
+        / "canonical"
+        / "question_bank.jsonl"
+    )
     rows = []
     counts = {
         "total": 0,
@@ -262,7 +270,9 @@ def validate_hf_dataset(target: HFDatasetTarget, api: HfApi) -> dict[str, Any]:
         return result
 
     try:
-        split_payload = requests_get_json(f"{HF_DATASET_SERVER}/splits", {"dataset": target.repo_id})
+        split_payload = requests_get_json(
+            f"{HF_DATASET_SERVER}/splits", {"dataset": target.repo_id}
+        )
         splits = split_payload.get("splits", [])
         result["splits"] = splits
         chosen_split = pick_split(splits, target.preferred_splits)
@@ -303,7 +313,9 @@ def validate_hf_dataset(target: HFDatasetTarget, api: HfApi) -> dict[str, Any]:
             ]
             if not parquet_files and "files_preview" in result:
                 full_files = [s.rfilename for s in api.dataset_info(target.repo_id).siblings]
-                parquet_files = [file_name for file_name in full_files if file_name.endswith(".parquet")]
+                parquet_files = [
+                    file_name for file_name in full_files if file_name.endswith(".parquet")
+                ]
             chosen_file = None
             for preferred in target.preferred_splits:
                 for file_name in parquet_files:
@@ -332,11 +344,15 @@ def validate_hf_dataset(target: HFDatasetTarget, api: HfApi) -> dict[str, Any]:
                         "sample_columns": sample_columns,
                         "missing_expected_columns_in_sample": missing_columns,
                         "sample_rows": rows,
-                        "feasibility": "schema_ok" if not missing_columns else "schema_needs_mapping",
+                        "feasibility": "schema_ok"
+                        if not missing_columns
+                        else "schema_needs_mapping",
                     }
                 )
                 if target.name == "multijail" and chosen_file.startswith("data/"):
-                    result["derived_language_from_split"] = chosen_file.removeprefix("data/").split("-", 1)[0]
+                    result["derived_language_from_split"] = chosen_file.removeprefix("data/").split(
+                        "-", 1
+                    )[0]
                 write_json(dataset_dir / "sample_rows.json", rows)
         except Exception as exc:  # noqa: BLE001 - report external dataset failures.
             result["errors"].append(f"parquet_fallback: {type(exc).__name__}: {exc}")
@@ -365,7 +381,9 @@ def validate_clinc() -> dict[str, Any]:
             response.raise_for_status()
             payload = response.json()
             raw_path = out_dir / "data_full.json"
-            raw_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            raw_path.write_text(
+                json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
             result["downloaded"] = True
             result["url"] = url
             result["raw_path"] = str(raw_path.relative_to(ROOT))
@@ -378,11 +396,11 @@ def validate_clinc() -> dict[str, Any]:
                     split_counts[key] = sum(len(v) for v in value.values() if isinstance(v, list))
             result["split_counts"] = split_counts
             result["sample"] = {
-                key: value[:3]
-                for key, value in payload.items()
-                if isinstance(value, list)
+                key: value[:3] for key, value in payload.items() if isinstance(value, list)
             }
-            result["feasibility"] = "usable_for_safe_off_topic" if split_counts else "needs_mapping_review"
+            result["feasibility"] = (
+                "usable_for_safe_off_topic" if split_counts else "needs_mapping_review"
+            )
             break
         except Exception as exc:  # noqa: BLE001 - report external dataset failures.
             result["errors"].append(f"{url}: {type(exc).__name__}: {exc}")
@@ -404,7 +422,7 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
             }
         )
     return {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "output_dir": str(OUT_DIR.relative_to(ROOT)),
         "results": summary_rows,
     }

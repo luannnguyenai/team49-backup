@@ -1,9 +1,10 @@
-import sys
+import logging
+import os
 import re
 import subprocess
+import sys
 import tempfile
-import os
-import logging
+
 try:
     import resource
 except ImportError:
@@ -67,12 +68,14 @@ BLOCKED_PATTERNS = [
     r"\bsys\.modules\b",
 ]
 
+
 def _is_safe_code(code: str) -> tuple[bool, str]:
     """Returns (is_safe, reason) after checking code against blocklist."""
     for pattern in BLOCKED_PATTERNS:
         if re.search(pattern, code):
             return False, f"Blocked pattern detected: `{pattern}`"
     return True, ""
+
 
 def _set_resource_limits():
     """Called in child process to restrict CPU time and open file descriptors.
@@ -83,6 +86,7 @@ def _set_resource_limits():
     resource.setrlimit(resource.RLIMIT_CPU, (12, 15))
     # Max open file descriptors: 50 (prevents fork bombs and excessive file I/O)
     resource.setrlimit(resource.RLIMIT_NOFILE, (50, 50))
+
 
 def run_python_code(code: str, timeout: int = 15) -> str:
     """

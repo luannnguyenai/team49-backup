@@ -67,7 +67,9 @@ def _dedupe_candidate_edges(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             merged = dict(existing)
             previous_rationale = row.get("candidate_rationale")
         if previous_rationale and previous_rationale not in str(merged.get("candidate_rationale")):
-            merged["candidate_rationale"] = f"{merged.get('candidate_rationale')} Additional duplicate-scope rationale: {previous_rationale}"
+            merged["candidate_rationale"] = (
+                f"{merged.get('candidate_rationale')} Additional duplicate-scope rationale: {previous_rationale}"
+            )
         by_pair[pair] = merged
     return sorted(by_pair.values(), key=_edge_pair)
 
@@ -86,7 +88,9 @@ def _has_alternative_path(source: str, target: str, adjacency: dict[str, set[str
     return False
 
 
-def _transitive_prune(clean_edges: list[dict[str, Any]], pruned_edges: list[dict[str, Any]], run_id: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+def _transitive_prune(
+    clean_edges: list[dict[str, Any]], pruned_edges: list[dict[str, Any]], run_id: str
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
     kept_by_pair = {_edge_pair(row): row for row in clean_edges}
     newly_pruned: list[dict[str, Any]] = []
 
@@ -146,13 +150,15 @@ def build_append_bootstrap(
         if isinstance(row, dict) and row.get("source_kp_id") and row.get("target_kp_id")
     }
     new_kps = _new_source_kps(p2_output, new_course_id)
-    new_candidates = _dedupe_candidate_edges([
-        row
-        for row in p2_output.get("candidate_prerequisite_edges", [])
-        if isinstance(row, dict)
-        and _edge_pair(row) not in existing_pairs
-        and (row.get("source_kp_id") in new_kps or row.get("target_kp_id") in new_kps)
-    ])
+    new_candidates = _dedupe_candidate_edges(
+        [
+            row
+            for row in p2_output.get("candidate_prerequisite_edges", [])
+            if isinstance(row, dict)
+            and _edge_pair(row) not in existing_pairs
+            and (row.get("source_kp_id") in new_kps or row.get("target_kp_id") in new_kps)
+        ]
+    )
 
     clean_edges = list(base_p5.get("clean_candidate_edges", []))
     pruned_edges = list(base_p5.get("pruned_edges", []))
@@ -175,7 +181,9 @@ def build_append_bootstrap(
             }
         )
 
-    clean_edges, pruned_edges, transitive_summary = _transitive_prune(clean_edges, pruned_edges, run_id)
+    clean_edges, pruned_edges, transitive_summary = _transitive_prune(
+        clean_edges, pruned_edges, run_id
+    )
 
     output = {
         "run_id": run_id,
@@ -198,9 +206,23 @@ def build_append_bootstrap(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--p2-output", type=Path, default=Path("data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json"))
-    parser.add_argument("--base-p5", type=Path, default=Path("data/final_artifacts/cs224n_cs231n_v1/p5_output_transitive_pruned.json"))
-    parser.add_argument("--output", type=Path, default=Path("data/final_artifacts/cs224n_cs231n_cs230_v1/p5_output_transitive_pruned.json"))
+    parser.add_argument(
+        "--p2-output",
+        type=Path,
+        default=Path("data/final_artifacts/cs224n_cs231n_cs230_v1/p2_output_manual_append.json"),
+    )
+    parser.add_argument(
+        "--base-p5",
+        type=Path,
+        default=Path("data/final_artifacts/cs224n_cs231n_v1/p5_output_transitive_pruned.json"),
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path(
+            "data/final_artifacts/cs224n_cs231n_cs230_v1/p5_output_transitive_pruned.json"
+        ),
+    )
     parser.add_argument("--new-course-id", default="CS230")
     parser.add_argument("--run-id", default="p5_cs224n_cs231n_cs230_append_bootstrap")
     args = parser.parse_args()

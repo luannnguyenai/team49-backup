@@ -4,7 +4,7 @@ import logging
 import os
 import re
 
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import async_session as _async_session
@@ -169,11 +169,13 @@ async def ingest_lecture(
 
 
 if __name__ == "__main__":
-    asyncio.run(ingest_lecture(
-        "lecture-1",
-        "data/cs231n/ToC_Summary/lecture-1.json",
-        [
-            "data/cs231n/transcripts/Stanford_CS231N_Deep_Learning_for_Computer_Vision__Spring_2025__Lecture_1_Introduction_transcript.txt"
-        ],
-        video_rel_path="cs231n/videos/Stanford CS231N Deep Learning for Computer Vision ｜ Spring 2025 ｜ Lecture 1： Introduction.mp4",
-    ))
+    asyncio.run(
+        ingest_lecture(
+            "lecture-1",
+            "data/cs231n/ToC_Summary/lecture-1.json",
+            [
+                "data/cs231n/transcripts/Stanford_CS231N_Deep_Learning_for_Computer_Vision__Spring_2025__Lecture_1_Introduction_transcript.txt"
+            ],
+            video_rel_path="cs231n/videos/Stanford CS231N Deep Learning for Computer Vision ｜ Spring 2025 ｜ Lecture 1： Introduction.mp4",
+        )
+    )

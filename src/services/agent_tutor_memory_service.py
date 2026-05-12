@@ -28,6 +28,5 @@ class AgentTutorMemoryService:
         )
         rows = list(result.scalars().all())
         return [
-            {"question": row.question or "", "answer": row.answer or ""}
-            for row in reversed(rows)
+            {"question": row.question or "", "answer": row.answer or ""} for row in reversed(rows)
         ]

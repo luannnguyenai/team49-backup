@@ -27,7 +27,9 @@ class AgentUnitContextService:
             raise PermissionError("unit_out_of_scope")
         kp_rows = await self.repo.get_unit_kp_rows([canonical_unit_id])
         quiz_counts = await self.repo.get_quiz_item_counts_by_unit_ids([canonical_unit_id])
-        nav = (await self.navigation_service.resolve_many([canonical_unit_id])).get(canonical_unit_id)
+        nav = (await self.navigation_service.resolve_many([canonical_unit_id])).get(
+            canonical_unit_id
+        )
         snippets = await self.get_transcript_snippets(
             canonical_unit_id,
             allowed_course_ids=allowed_course_ids,

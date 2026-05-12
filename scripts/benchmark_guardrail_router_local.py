@@ -17,7 +17,6 @@ import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, PreTrainedTokenizerFast
 
-
 ROOT = Path(__file__).resolve().parents[1]
 ADAPTER_DIR = (
     ROOT

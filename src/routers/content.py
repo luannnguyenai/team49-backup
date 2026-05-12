@@ -9,6 +9,7 @@ Content management API:
 """
 
 import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -64,6 +65,7 @@ async def api_get_course_section(
             detail=f"Course section {section_id} not found.",
         )
     return result
+
 
 # ---------------------------------------------------------------------------
 # GET /api/learning-units/{learning_unit_id}/content

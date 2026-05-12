@@ -9,7 +9,7 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
@@ -90,12 +90,12 @@ class Session(UUIDPrimaryKeyMixin, Base):
     session_type: Mapped[SessionType] = mapped_column(
         Enum(SessionType, name="session_type_enum"), nullable=False
     )
-    topic_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    topic_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         nullable=True,
         comment="Archived legacy compatibility field; no active FK/runtime reads.",
     )
-    module_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    module_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         nullable=True,
         comment="Archived legacy compatibility field; no active FK/runtime reads.",
@@ -103,41 +103,41 @@ class Session(UUIDPrimaryKeyMixin, Base):
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     total_questions: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     correct_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    score_percent: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    canonical_phase: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
-    selection_strategy: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
-    calibration_mode: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
-    theta_initial: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    theta_final: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    theta_sigma_initial: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    theta_sigma_final: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    target_se: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    stop_reason: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
-    canonical_unit_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    score_percent: Mapped[float | None] = mapped_column(Float, nullable=True)
+    canonical_phase: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    selection_strategy: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    calibration_mode: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    theta_initial: Mapped[float | None] = mapped_column(Float, nullable=True)
+    theta_final: Mapped[float | None] = mapped_column(Float, nullable=True)
+    theta_sigma_initial: Mapped[float | None] = mapped_column(Float, nullable=True)
+    theta_sigma_final: Mapped[float | None] = mapped_column(Float, nullable=True)
+    target_se: Mapped[float | None] = mapped_column(Float, nullable=True)
+    stop_reason: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    canonical_unit_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("learning_units.id", ondelete="SET NULL"),
         nullable=True,
     )
-    canonical_section_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    canonical_section_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("course_sections.id", ondelete="SET NULL"),
         nullable=True,
     )
     # Commit C: audit fields for strategy and theta tracking
-    selection_strategy: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
-    calibration_mode: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
-    theta_initial: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    theta_final: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    theta_sigma_initial: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    theta_sigma_final: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    target_se: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    stop_reason: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    selection_strategy: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    calibration_mode: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    theta_initial: Mapped[float | None] = mapped_column(Float, nullable=True)
+    theta_final: Mapped[float | None] = mapped_column(Float, nullable=True)
+    theta_sigma_initial: Mapped[float | None] = mapped_column(Float, nullable=True)
+    theta_sigma_final: Mapped[float | None] = mapped_column(Float, nullable=True)
+    target_se: Mapped[float | None] = mapped_column(Float, nullable=True)
+    stop_reason: Mapped[str | None] = mapped_column(String(80), nullable=True)
 
-    user: Mapped["User"] = relationship("User", back_populates="sessions")  # type: ignore[name-defined]
-    interactions: Mapped[list["Interaction"]] = relationship(
+    user: Mapped[User] = relationship("User", back_populates="sessions")  # type: ignore[name-defined]
+    interactions: Mapped[list[Interaction]] = relationship(
         "Interaction", back_populates="session", lazy="select"
     )
 
@@ -166,23 +166,23 @@ class Interaction(UUIDPrimaryKeyMixin, Base):
         ForeignKey("sessions.id", ondelete="CASCADE"),
         nullable=False,
     )
-    question_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    question_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         nullable=True,
         comment="Archived legacy compatibility field; canonical_item_id is authoritative.",
     )
-    canonical_item_id: Mapped[Optional[str]] = mapped_column(
+    canonical_item_id: Mapped[str | None] = mapped_column(
         String(180),
         ForeignKey("question_bank.item_id", ondelete="RESTRICT"),
         nullable=True,
     )
     sequence_position: Mapped[int] = mapped_column(Integer, nullable=False)
     global_sequence_position: Mapped[int] = mapped_column(Integer, nullable=False)
-    selected_answer: Mapped[Optional["SelectedAnswer"]] = mapped_column(
+    selected_answer: Mapped[SelectedAnswer | None] = mapped_column(
         Enum(SelectedAnswer, name="selected_answer_enum"), nullable=True
     )
     is_correct: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    response_time_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
     changed_answer: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     hint_used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     explanation_viewed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -190,19 +190,19 @@ class Interaction(UUIDPrimaryKeyMixin, Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     # Commit C: audit fields for strategy and IRT theta snapshot
-    selection_strategy: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
-    theta_before: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    theta_after: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    theta_sigma_before: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    theta_sigma_after: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    predicted_probability: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    item_information: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    item_difficulty_at_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    item_discrimination_at_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    item_guessing_at_time: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    selection_strategy: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    theta_before: Mapped[float | None] = mapped_column(Float, nullable=True)
+    theta_after: Mapped[float | None] = mapped_column(Float, nullable=True)
+    theta_sigma_before: Mapped[float | None] = mapped_column(Float, nullable=True)
+    theta_sigma_after: Mapped[float | None] = mapped_column(Float, nullable=True)
+    predicted_probability: Mapped[float | None] = mapped_column(Float, nullable=True)
+    item_information: Mapped[float | None] = mapped_column(Float, nullable=True)
+    item_difficulty_at_time: Mapped[float | None] = mapped_column(Float, nullable=True)
+    item_discrimination_at_time: Mapped[float | None] = mapped_column(Float, nullable=True)
+    item_guessing_at_time: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    user: Mapped["User"] = relationship("User", back_populates="interactions")  # type: ignore[name-defined]
-    session: Mapped["Session"] = relationship("Session", back_populates="interactions")
+    user: Mapped[User] = relationship("User", back_populates="interactions")  # type: ignore[name-defined]
+    session: Mapped[Session] = relationship("Session", back_populates="interactions")
 
     __table_args__ = (
         Index("ix_interactions_user_id", "user_id"),
@@ -229,9 +229,9 @@ class LearnerMasteryKP(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     theta_sigma: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
     mastery_mean_cached: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     n_items_observed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    updated_by: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    updated_by: Mapped[str | None] = mapped_column(String(80), nullable=True)
 
-    user: Mapped["User"] = relationship("User", back_populates="learner_mastery_kp", lazy="select")  # type: ignore[name-defined]
+    user: Mapped[User] = relationship("User", back_populates="learner_mastery_kp", lazy="select")  # type: ignore[name-defined]
 
     __table_args__ = (
         UniqueConstraint("user_id", "kp_id", name="uq_learner_mastery_kp_user_kp"),
@@ -260,18 +260,18 @@ class GoalPreference(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
         unique=True,
     )
-    goal_weights_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    selected_course_ids: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
-    goal_embedding: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
-    goal_embedding_version: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
-    derived_from_course_set_hash: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    goal_weights_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    selected_course_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    goal_embedding: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    goal_embedding_version: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    derived_from_course_set_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     # 'pending' = not yet assessed, 'completed' = finished placement test,
     # 'skipped' = user clicked "I'm a newcomer — skip". NULL = legacy row.
-    placement_status: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    experience_level: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    placement_status: Mapped[str | None] = mapped_column(Text, nullable=True)
+    experience_level: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    user: Mapped["User"] = relationship("User", back_populates="goal_preferences", lazy="select")  # type: ignore[name-defined]
+    user: Mapped[User] = relationship("User", back_populates="goal_preferences", lazy="select")  # type: ignore[name-defined]
 
     __table_args__ = (
         Index("ix_goal_preferences_user", "user_id"),
@@ -294,11 +294,11 @@ class WaivedUnit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("learning_units.id", ondelete="CASCADE"),
         nullable=False,
     )
-    evidence_items: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
-    mastery_lcb_at_waive: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    skip_quiz_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    evidence_items: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    mastery_lcb_at_waive: Mapped[float | None] = mapped_column(Float, nullable=True)
+    skip_quiz_score: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    user: Mapped["User"] = relationship("User", back_populates="waived_units", lazy="select")  # type: ignore[name-defined]
+    user: Mapped[User] = relationship("User", back_populates="waived_units", lazy="select")  # type: ignore[name-defined]
 
     __table_args__ = (
         UniqueConstraint("user_id", "learning_unit_id", name="uq_waived_units_user_unit"),
@@ -325,18 +325,18 @@ class PlanHistory(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
-    parent_plan_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    parent_plan_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("plan_history.id", ondelete="SET NULL"),
         nullable=True,
     )
     trigger: Mapped[str] = mapped_column(String(80), nullable=False)
-    recommended_path_json: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
-    goal_snapshot_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    weights_used_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    recommended_path_json: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    goal_snapshot_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    weights_used_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
-    user: Mapped["User"] = relationship("User", back_populates="plan_histories", lazy="select")  # type: ignore[name-defined]
-    parent_plan: Mapped[Optional["PlanHistory"]] = relationship(
+    user: Mapped[User] = relationship("User", back_populates="plan_histories", lazy="select")  # type: ignore[name-defined]
+    parent_plan: Mapped[PlanHistory | None] = relationship(
         "PlanHistory",
         remote_side="PlanHistory.id",
         lazy="select",
@@ -359,15 +359,15 @@ class RationaleLog(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("plan_history.id", ondelete="CASCADE"),
         nullable=False,
     )
-    learning_unit_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    learning_unit_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("learning_units.id", ondelete="SET NULL"),
         nullable=True,
     )
     rank: Mapped[int] = mapped_column(Integer, nullable=False)
     reason_code: Mapped[str] = mapped_column(String(80), nullable=False)
-    term_breakdown_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    rationale_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    term_breakdown_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    rationale_text: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     __table_args__ = (
         Index("ix_rationale_log_plan", "plan_history_id"),
@@ -387,24 +387,26 @@ class PlannerSessionState(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     session_id: Mapped[str] = mapped_column(String(120), nullable=False)
-    last_plan_history_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    last_plan_history_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("plan_history.id", ondelete="SET NULL"),
         nullable=True,
     )
     bridge_chain_depth: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     consecutive_bridge_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    current_unit_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    current_unit_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("learning_units.id", ondelete="SET NULL"),
         nullable=True,
     )
-    current_stage: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
-    current_progress: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    last_activity: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    state_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    current_stage: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    current_progress: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    last_activity: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    state_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
-    user: Mapped["User"] = relationship("User", back_populates="planner_session_states", lazy="select")  # type: ignore[name-defined]
+    user: Mapped[User] = relationship(
+        "User", back_populates="planner_session_states", lazy="select"
+    )  # type: ignore[name-defined]
 
     __table_args__ = (
         UniqueConstraint("user_id", "session_id", name="uq_planner_session_state_user_session"),

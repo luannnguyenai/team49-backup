@@ -116,7 +116,7 @@ class ChatModelFactoryTests(unittest.TestCase):
             "",
         ):
             kwargs = build_chat_model_kwargs(
-                model="qwen 3.5 4B",
+                model="qwen3.5-4b-lora",
                 temperature=0.2,
                 extra_kwargs={
                     "base_url": "https://vllm.a20-app-049.io.vn/v1",

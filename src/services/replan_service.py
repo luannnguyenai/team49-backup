@@ -18,15 +18,10 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.canonical import (
-    CanonicalUnit,
     ItemPhaseMap,
-    PrerequisiteEdge,
     QuestionBankItem,
-    UnitKPMap,
 )
-from src.models.course import LearningUnit
 from src.repositories.canonical_content_repo import CanonicalContentRepository
-from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.placement_assessment_repo import PlacementAssessmentRepository
 from src.repositories.planner_audit_repo import PlannerAuditRepository
 from src.schemas.assessment import QuestionForAssessment
@@ -119,26 +114,20 @@ async def analyze_replan(
 
         # 3. Build unit candidates from real path data
         canonical_unit_ids = [
-        item["canonical_unit_id"]
-        for item in path_items
-        if item.get("canonical_unit_id")
-    ]
+            item["canonical_unit_id"] for item in path_items if item.get("canonical_unit_id")
+        ]
 
         content_repo = CanonicalContentRepository(db)
         canonical_units = await content_repo.get_canonical_units_by_ids(canonical_unit_ids)
 
         # Get question counts by difficulty for each unit
-        question_counts_by_unit = await _get_question_counts_by_difficulty(
-            db, canonical_unit_ids
-        )
+        question_counts_by_unit = await _get_question_counts_by_difficulty(db, canonical_unit_ids)
 
         # Get handled state (placement decisions)
         placement_repo = PlacementAssessmentRepository(db)
         placement_results = await placement_repo.get_by_user_id(user_id)
         handled_unit_ids = {
-            str(row.topic_unit_id)
-            for row in placement_results
-            if row.decision in ("skip",)
+            str(row.topic_unit_id) for row in placement_results if row.decision in ("skip",)
         }
 
         # Build learning_unit_id -> canonical_unit_id mapping
@@ -165,7 +154,9 @@ async def analyze_replan(
                 for kp in raw_key_points:
                     if isinstance(kp, dict):
                         # Extract text from dict (try common keys)
-                        key_points_strs.append(kp.get("text") or kp.get("name") or kp.get("kp_name") or str(kp))
+                        key_points_strs.append(
+                            kp.get("text") or kp.get("name") or kp.get("kp_name") or str(kp)
+                        )
                     elif isinstance(kp, str):
                         key_points_strs.append(kp)
 
@@ -189,7 +180,8 @@ async def analyze_replan(
         # If no units matched, return early with helpful message
         if not discovery_result.selected_units:
             mastered_matches = [
-                unit for unit in discovery_result.dropped_units
+                unit
+                for unit in discovery_result.dropped_units
                 if unit.reason == "Unit is already mastered or skipped."
             ]
             if mastered_matches:
@@ -247,12 +239,17 @@ async def analyze_replan(
                 units=[],
                 prerequisites=[],
                 keywordPlanSpecificity=keyword_plan.specificity,
-                guardrailFlags=[*keyword_plan.guardrail_flags, "no_matching_units", recommendation.skip_reason],
+                guardrailFlags=[
+                    *keyword_plan.guardrail_flags,
+                    "no_matching_units",
+                    recommendation.skip_reason,
+                ],
                 status="no_matching_units",
                 popup=ReplanPopup(
                     kind="no_matching_units",
                     title="No matching units",
-                    message=recommendation.skip_reason or "No units in your learning path match this description.",
+                    message=recommendation.skip_reason
+                    or "No units in your learning path match this description.",
                 ),
             )
 
@@ -261,7 +258,8 @@ async def analyze_replan(
         valid_recommended_unit_ids = recommended_unit_ids & set(selected_unit_ids)
         if valid_recommended_unit_ids:
             discovery_result.selected_units = [
-                u for u in discovery_result.selected_units
+                u
+                for u in discovery_result.selected_units
                 if u.canonical_unit_id in valid_recommended_unit_ids
             ]
         elif recommended_unit_ids:
@@ -384,12 +382,8 @@ async def analyze_replan(
             prereq_kps = unit_kp_names_map.get(s.canonical_unit_id, [])
 
             # Find the title of the unit this is a prerequisite for
-            suggested_for_candidate = candidate_by_id.get(
-                s.suggested_for_canonical_unit_id
-            )
-            suggested_for_title = (
-                suggested_for_candidate.title if suggested_for_candidate else None
-            )
+            suggested_for_candidate = candidate_by_id.get(s.suggested_for_canonical_unit_id)
+            suggested_for_title = suggested_for_candidate.title if suggested_for_candidate else None
 
             prerequisite_responses.append(
                 ReplanPrerequisiteSuggestionResponse(
@@ -416,7 +410,9 @@ async def analyze_replan(
             status="ready",
         )
     except Exception as e:
-        log.error(f"Error in analyze_replan for user {user_id}: {type(e).__name__}: {e}", exc_info=True)
+        log.error(
+            f"Error in analyze_replan for user {user_id}: {type(e).__name__}: {e}", exc_info=True
+        )
         # Return safe fallback response with error details in guardrail flag
         error_msg = f"{type(e).__name__}: {str(e)[:200]}"  # Truncate long errors
         return ReplanAnalyzeResponse(
@@ -448,9 +444,7 @@ async def start_replan_assessment(
     canonical_unit_ids = [u.canonical_unit_id for u in selected_units]
 
     # Build difficulty filter map
-    difficulty_by_unit = {
-        u.canonical_unit_id: u.difficulty_filter for u in selected_units
-    }
+    difficulty_by_unit = {u.canonical_unit_id: u.difficulty_filter for u in selected_units}
 
     # Load unit names for the response
     content_repo = CanonicalContentRepository(db)
@@ -686,7 +680,7 @@ async def _build_unit_prerequisite_edges_with_kp_names(
     def get_kp_name(kp_id: str) -> str:
         """Get KP name from kp_by_id dict."""
         kp = kp_by_id.get(kp_id)
-        if kp and hasattr(kp, 'name'):
+        if kp and hasattr(kp, "name"):
             return kp.name
         return kp_id
 

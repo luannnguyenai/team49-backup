@@ -16,7 +16,7 @@ def _normalize_asset_path(asset_path: str) -> str:
 
 def _build_signature(asset_path: str, expires_at: int) -> str:
     normalized_path = _normalize_asset_path(asset_path)
-    payload = f"{_ASSET_SIGNATURE_CONTEXT}:{normalized_path}:{expires_at}".encode("utf-8")
+    payload = f"{_ASSET_SIGNATURE_CONTEXT}:{normalized_path}:{expires_at}".encode()
     secret = settings.secret_key.encode("utf-8")
     return hmac.new(secret, payload, hashlib.sha256).hexdigest()
 

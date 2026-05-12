@@ -57,7 +57,9 @@ async def start_review_session(
     else:
         goal = await GoalPreferenceRepository(db).get_by_user_id(user_id)
         if goal is None or not goal.selected_course_ids:
-            raise ValidationError("Review requires learning_unit_ids or goal_preferences.selected_course_ids.")
+            raise ValidationError(
+                "Review requires learning_unit_ids or goal_preferences.selected_course_ids."
+            )
         units = await content_repo.get_linked_learning_units(goal.selected_course_ids)
 
     canonical_unit_ids = [unit.canonical_unit_id for unit in units if unit.canonical_unit_id]

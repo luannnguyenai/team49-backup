@@ -13,7 +13,9 @@ class AgentPolicyService:
         allowed_course_ids: list[str],
     ) -> PolicyDecision:
         if slots.course_ids:
-            blocked = [course_id for course_id in slots.course_ids if course_id not in allowed_course_ids]
+            blocked = [
+                course_id for course_id in slots.course_ids if course_id not in allowed_course_ids
+            ]
             if blocked:
                 return PolicyDecision(
                     allow=False,

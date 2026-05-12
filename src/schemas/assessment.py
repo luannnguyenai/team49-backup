@@ -114,11 +114,11 @@ class LearningUnitResult(BaseModel):
 class TopicDecisionResult(BaseModel):
     """Per-unit placement decision exposed in AssessmentResultResponse."""
 
-    topic_unit_id: str   # learning_unit.id (UUID as string)
+    topic_unit_id: str  # learning_unit.id (UUID as string)
     topic_unit_name: str  # learning_unit.title
-    score_pct: float      # 0–100
-    decision: str         # "skip" | "review" | "relearn"
-    mastery_level: str    # derived label
+    score_pct: float  # 0–100
+    decision: str  # "skip" | "review" | "relearn"
+    mastery_level: str  # derived label
     questions_total: int
     questions_correct: int
 

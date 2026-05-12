@@ -17,16 +17,13 @@ from __future__ import annotations
 
 import gzip
 import json
-import math
 import re
-from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 from huggingface_hub import hf_hub_download
-
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATION_DIR = ROOT / "data" / "guardrail_router" / "source_validation"
@@ -207,7 +204,8 @@ def review_clinc() -> dict[str, Any]:
             "split": value_counts(df["split"]),
             "intent_top": value_counts(df["intent"], limit=30),
             "excluded_lesson_overlap_intents": {
-                key: int((df["intent"] == key).sum()) for key in sorted(LESSON_OVERLAP_CLINC_INTENTS)
+                key: int((df["intent"] == key).sum())
+                for key in sorted(LESSON_OVERLAP_CLINC_INTENTS)
             },
         },
         "recommended_quota_v1": 700,
@@ -224,10 +222,11 @@ def review_wildguard() -> dict[str, Any]:
     train_path = download_hf("allenai/wildguardmix", "train/wildguard_train.parquet")
     test_path = download_hf("allenai/wildguardmix", "test/wildguard_test.parquet")
     df = pd.concat([pd.read_parquet(train_path), pd.read_parquet(test_path)], ignore_index=True)
-    prompt = df["prompt"].fillna("").astype(str)
     labeled = df[df["prompt_harm_label"].isin(["harmful", "unharmful"])].copy()
     agreement_available = labeled[labeled["prompt_harm_agreement"].notna()].copy()
-    high_agreement = agreement_available[agreement_available["prompt_harm_agreement"].fillna(0) >= 2]
+    high_agreement = agreement_available[
+        agreement_available["prompt_harm_agreement"].fillna(0) >= 2
+    ]
     harmful = labeled[labeled["prompt_harm_label"] == "harmful"]
     safe = labeled[labeled["prompt_harm_label"] == "unharmful"]
     harmful_clean = harmful[harmful["prompt"].fillna("").astype(str).map(words).between(5, 220)]
@@ -236,7 +235,9 @@ def review_wildguard() -> dict[str, Any]:
         (high_agreement["prompt_harm_label"] == "harmful")
         & high_agreement["prompt"].fillna("").astype(str).map(words).between(5, 220)
     ]
-    harmful_bypass = harmful_clean[harmful_clean["prompt"].fillna("").astype(str).str.contains(BYPASS_PATTERNS)]
+    harmful_bypass = harmful_clean[
+        harmful_clean["prompt"].fillna("").astype(str).str.contains(BYPASS_PATTERNS)
+    ]
     harmful_non_bypass = harmful_clean[
         ~harmful_clean["prompt"].fillna("").astype(str).str.contains(BYPASS_PATTERNS)
     ]
@@ -420,7 +421,9 @@ def review_beavertails() -> dict[str, Any]:
         },
         "distributions": {
             "is_safe": value_counts(df["is_safe"]),
-            "unsafe_category_top": value_counts(cat_df["category"], limit=30) if len(cat_df) else {},
+            "unsafe_category_top": value_counts(cat_df["category"], limit=30)
+            if len(cat_df)
+            else {},
         },
         "recommended_quota_v1": {
             "unsafe": 0,
@@ -445,7 +448,7 @@ def main() -> None:
         review_multijail(),
     ]
     payload = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "excluded": ["EduVidQA", "PolyGuardPrompts", "BeaverTails"],
         "reviews": reviews,
     }

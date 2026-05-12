@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
-from typing import Any, Callable, TypedDict
+from typing import Any, TypedDict
 from uuid import uuid4
 
 from langgraph.graph import END, START, StateGraph
@@ -89,7 +90,9 @@ class AgentAssessmentWorkflowService:
 
     def _cleanup_expired_states(self) -> None:
         now = self._now()
-        expired = [workflow_id for workflow_id, expires_at in self._expires_at.items() if expires_at <= now]
+        expired = [
+            workflow_id for workflow_id, expires_at in self._expires_at.items() if expires_at <= now
+        ]
         for workflow_id in expired:
             self._states.pop(workflow_id, None)
             self._expires_at.pop(workflow_id, None)
@@ -203,7 +206,9 @@ class AgentAssessmentWorkflowService:
             "message": "Approve or reduce the assessment before starting.",
         }
 
-    def _response_from_state(self, state: AssessmentWorkflowState) -> AgentAssessmentWorkflowResponse:
+    def _response_from_state(
+        self, state: AssessmentWorkflowState
+    ) -> AgentAssessmentWorkflowResponse:
         return AgentAssessmentWorkflowResponse(
             workflowId=state["workflow_id"],
             status=state["status"],

@@ -48,7 +48,9 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional canonical bundle dir to import before Schema v2 backfill.",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Print commands without running them.")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print commands without running them."
+    )
     return parser.parse_args()
 
 

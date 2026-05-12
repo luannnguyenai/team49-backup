@@ -137,7 +137,9 @@ def item_parameters_from_calibration(calibration: ItemCalibration | None) -> Ite
     method = "irt_calibrated" if use_calibrated else "2pl_lite_prior"
     return ItemScoringParameters(
         difficulty=float(difficulty if difficulty is not None else 0.0),
-        discrimination=_clamp(float(discrimination if discrimination is not None else 1.0), 0.25, 3.0),
+        discrimination=_clamp(
+            float(discrimination if discrimination is not None else 1.0), 0.25, 3.0
+        ),
         guessing=_clamp(float(guessing if guessing is not None else 0.25), 0.0, 0.35),
         method=method,
     )

@@ -9,13 +9,13 @@ from src.schemas.agent import AgentIntent, RouteContext
 from src.services.agent_error_codes import classify_agent_error
 from src.services.agent_graph_contracts import AgentRoute, AgentRouterUnavailableError, AgentSlots
 from src.services.agent_prompt_manager import get_agent_prompt_manager
-from src.services.agentic_rag_tools import AgentRAGToolRegistry
 from src.services.agentic_rag_contracts import (
     AgenticRAGFinal,
     AgenticRAGObservation,
     AgenticRAGThought,
     AgenticRAGToolCall,
 )
+from src.services.agentic_rag_tools import AgentRAGToolRegistry
 
 
 class StructuredRouteOutput(BaseModel):
@@ -110,7 +110,11 @@ class StructuredAgentRouter:
         effective_target_path = result.target_path
         if intent != "request_path_switch" and not result.explicit_scope_requested:
             effective_target_path = None
-        search_scope = "explicit_path" if effective_target_path and intent != "request_path_switch" else "current_path"
+        search_scope = (
+            "explicit_path"
+            if effective_target_path and intent != "request_path_switch"
+            else "current_path"
+        )
         search_queries = result.search_queries
         if recent_messages and len(message.split()) <= 8 and result.raw_topic:
             search_queries = [result.raw_topic]
@@ -121,8 +125,12 @@ class StructuredAgentRouter:
                 raw_topic=result.raw_topic,
                 search_queries=search_queries,
                 target_path=effective_target_path,
-                requested_path_id=effective_target_path if search_scope == "explicit_path" else None,
-                resolved_search_path_ids=[effective_target_path] if search_scope == "explicit_path" else [],
+                requested_path_id=effective_target_path
+                if search_scope == "explicit_path"
+                else None,
+                resolved_search_path_ids=[effective_target_path]
+                if search_scope == "explicit_path"
+                else [],
                 search_scope=search_scope,
             ),
             rationale=result.rationale,
@@ -286,9 +294,7 @@ class StructuredAgentRouter:
         if final.evidence_sufficient:
             return final.model_copy(
                 update={
-                    "answer_markdown": self._strip_trailing_followup_question(
-                        final.answer_markdown
-                    )
+                    "answer_markdown": self._strip_trailing_followup_question(final.answer_markdown)
                 }
             )
         return final
@@ -572,6 +578,10 @@ class StructuredAgentRouter:
             answer = GroundedAnswerOutput.model_validate(response.model_dump())
         if answer.evidence_sufficient:
             return answer.model_copy(
-                update={"answer_markdown": self._strip_trailing_followup_question(answer.answer_markdown)}
+                update={
+                    "answer_markdown": self._strip_trailing_followup_question(
+                        answer.answer_markdown
+                    )
+                }
             )
         return answer

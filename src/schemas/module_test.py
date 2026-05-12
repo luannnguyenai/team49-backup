@@ -26,9 +26,7 @@ from src.models.learning import SelectedAnswer
 
 
 class ModuleTestStartRequest(BaseModel):
-    section_id: uuid.UUID = Field(
-        validation_alias=AliasChoices("section_id", "module_id")
-    )
+    section_id: uuid.UUID = Field(validation_alias=AliasChoices("section_id", "module_id"))
 
 
 class QuestionForModuleTest(BaseModel):

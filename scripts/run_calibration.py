@@ -14,18 +14,15 @@ import argparse
 import asyncio
 import logging
 import math
-import sys
-import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select, text
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.config import Settings
 from src.models.calibration import CalibrationRun, ItemCalibrationHistory
-from src.models.canonical import ItemCalibration, QuestionBankItem
-from src.models.learning import Interaction
+from src.models.canonical import ItemCalibration
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 log = logging.getLogger(__name__)
@@ -93,10 +90,12 @@ async def run_calibration(
         since: ISO date filter (YYYY-MM-DD)
         dry_run: if True, print plan without committing
     """
-    log.info(f"Starting calibration: method={method}, min_responses={min_responses}, dry_run={dry_run}")
+    log.info(
+        f"Starting calibration: method={method}, min_responses={min_responses}, dry_run={dry_run}"
+    )
 
-    run_id = f"cal_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
-    dataset_version = datetime.now(timezone.utc).isoformat()
+    run_id = f"cal_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
+    dataset_version = datetime.now(UTC).isoformat()
 
     # Create calibration run record
     cal_run = CalibrationRun(
@@ -169,7 +168,7 @@ async def run_calibration(
         c_est = 0.0 if method == "2pl" else 0.25
 
         # Standard errors (Commit E scaffold: placeholder)
-        se_b = math.sqrt(1.0 / (a_est ** 2 * n_resp * p_obs * (1.0 - p_obs)))
+        se_b = math.sqrt(1.0 / (a_est**2 * n_resp * p_obs * (1.0 - p_obs)))
         se_a = math.sqrt(1.0 / (n_resp * p_obs * (1.0 - p_obs)))  # Placeholder
         se_c = 0.0 if method == "2pl" else 0.05  # Placeholder
 
@@ -191,8 +190,10 @@ async def run_calibration(
     if dry_run:
         log.info("=== DRY-RUN: Would perform the following updates ===")
         for item_fit in fitted_items[:5]:  # Show first 5
-            log.info(f"  item_id={item_fit['item_id']} b={item_fit['difficulty_b']} "
-                    f"se_b={item_fit['standard_error_b']} n={item_fit['n_responses']}")
+            log.info(
+                f"  item_id={item_fit['item_id']} b={item_fit['difficulty_b']} "
+                f"se_b={item_fit['standard_error_b']} n={item_fit['n_responses']}"
+            )
         if len(fitted_items) > 5:
             log.info(f"  ... and {len(fitted_items) - 5} more items")
         log.info(f"Total items to fit: {len(fitted_items)}")
@@ -240,7 +241,7 @@ async def run_calibration(
 
     # Finalize calibration run
     cal_run.status = "passed"
-    cal_run.finished_at = datetime.now(timezone.utc)
+    cal_run.finished_at = datetime.now(UTC)
     cal_run.real_response_count = sum(f["n_responses"] for f in fitted_items)
 
     # Deactivate old runs and activate new run
@@ -253,7 +254,9 @@ async def run_calibration(
     db.add(cal_run)
     await db.commit()
 
-    log.info(f"Calibration complete: {len(fitted_items)} items fitted, run_id={run_id}, active=true")
+    log.info(
+        f"Calibration complete: {len(fitted_items)} items fitted, run_id={run_id}, active=true"
+    )
 
 
 if __name__ == "__main__":

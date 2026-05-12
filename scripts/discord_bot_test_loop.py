@@ -11,23 +11,26 @@ Repeatedly:
 This script tests whether a Discord bot correctly detects PR creation and push events.
 """
 
-import subprocess
 import datetime
-import time
+import subprocess
 import sys
+import time
 
 # Configuration
 TARGET_FILE = "tests/test_constants.py"
 DELAY_SECONDS = 10
 MAX_ITERATIONS = None  # None = infinite, set to int to limit
 
+
 def run(cmd, check=True):
     """Execute shell command."""
     return subprocess.run(cmd, shell=True, check=check, capture_output=False)
 
+
 def run_output(cmd):
     """Execute shell command and return output."""
     return subprocess.check_output(cmd, shell=True, text=True).strip()
+
 
 def main():
     iteration = 0
@@ -40,9 +43,9 @@ def main():
             iteration += 1
             ts = datetime.datetime.now().isoformat()
 
-            print(f"\n{'='*70}")
+            print(f"\n{'=' * 70}")
             print(f"[Iteration {iteration}] {ts}")
-            print(f"{'='*70}")
+            print(f"{'=' * 70}")
 
             # Step 1: Modify file
             print(f"[Step 1] Adding comment to {TARGET_FILE}...")
@@ -51,20 +54,22 @@ def main():
             print("✓ File modified")
 
             # Step 2: Commit
-            print(f"[Step 2] Committing changes...")
-            run(f'git add {TARGET_FILE}')
+            print("[Step 2] Committing changes...")
+            run(f"git add {TARGET_FILE}")
             run(f'git commit -m "test: bot trigger #{iteration} - {ts}"')
             print("✓ Committed")
 
             # Step 3: Push
-            print(f"[Step 3] Pushing to origin/save-ui...")
-            run('git push origin save-ui')
+            print("[Step 3] Pushing to origin/save-ui...")
+            run("git push origin save-ui")
             print("✓ Pushed")
 
             # Step 4: PR check/create
-            print(f"[Step 4] Checking for existing PR...")
+            print("[Step 4] Checking for existing PR...")
             try:
-                existing = run_output('gh pr list --head save-ui --base main --json number --jq "length"')
+                existing = run_output(
+                    'gh pr list --head save-ui --base main --json number --jq "length"'
+                )
                 pr_count = int(existing)
             except Exception as e:
                 print(f"⚠ Warning: Could not check PR status: {e}")
@@ -72,9 +77,11 @@ def main():
 
             if pr_count == 0:
                 print("No existing PR found. Creating new PR...")
-                run(f'gh pr create --base main --head save-ui '
+                run(
+                    f"gh pr create --base main --head save-ui "
                     f'--title "test: Discord bot test #{iteration}" '
-                    f'--body "Automated test loop iteration {iteration}"')
+                    f'--body "Automated test loop iteration {iteration}"'
+                )
                 print("✓ PR created")
             else:
                 print(f"✓ PR already open ({pr_count} found). Push will re-trigger bot.")
@@ -84,13 +91,14 @@ def main():
             time.sleep(DELAY_SECONDS)
 
     except KeyboardInterrupt:
-        print(f"\n\n{'='*70}")
+        print(f"\n\n{'=' * 70}")
         print(f"Test loop stopped by user after {iteration} iteration(s).")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         sys.exit(0)
     except Exception as e:
         print(f"\n\n❌ Error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

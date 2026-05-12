@@ -5,7 +5,6 @@ Re-export every model so that Alembic env.py only needs to import this
 package to discover all tables.
 """
 
-from src.models.base import Base  # noqa: F401
 from src.models.agent_conversation import (  # noqa: F401
     AgentConversation,
     AgentConversationMemory,
@@ -17,6 +16,7 @@ from src.models.agent_graph import (  # noqa: F401
     AgentResponsePayload,
     AgentTraceEvent,
 )
+from src.models.base import Base  # noqa: F401
 from src.models.canonical import (  # noqa: F401
     CanonicalUnit,
     ConceptKP,
@@ -50,8 +50,8 @@ from src.models.learning import (  # noqa: F401
     Session,
     WaivedUnit,
 )
-from src.models.placement import PlacementAssessmentResult  # noqa: F401
 from src.models.password_reset import PasswordResetToken  # noqa: F401
+from src.models.placement import PlacementAssessmentResult  # noqa: F401
 
 # Original lecture models
 from src.models.store import Chapter, Lecture, QAHistory, TranscriptLine  # noqa: F401

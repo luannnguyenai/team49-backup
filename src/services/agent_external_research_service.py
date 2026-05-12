@@ -5,8 +5,7 @@ import json
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from urllib.parse import urlencode
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlencode
 from urllib.request import Request, urlopen
 
 from src.schemas.agent import AgentCitation, AgentFallback
@@ -27,7 +26,9 @@ class AgentExternalResearchService:
         self.max_retries = max(1, max_retries)
         self.responder = responder
 
-    async def answer(self, *, message: str, recent_messages: list[dict] | None = None) -> ToolResult:
+    async def answer(
+        self, *, message: str, recent_messages: list[dict] | None = None
+    ) -> ToolResult:
         queries = self._plan_queries(message)
         documents = await self._act(queries)
         observed = self._observe(message, documents)
@@ -88,10 +89,10 @@ class AgentExternalResearchService:
             "https://api.duckduckgo.com/?"
             + urlencode(
                 {
-                "q": query,
-                "format": "json",
-                "no_html": "1",
-                "skip_disambig": "1",
+                    "q": query,
+                    "format": "json",
+                    "no_html": "1",
+                    "skip_disambig": "1",
                 }
             ),
         )
@@ -100,7 +101,9 @@ class AgentExternalResearchService:
         snippet = str(payload.get("AbstractText") or "").strip()
         url = str(payload.get("AbstractURL") or "").strip()
         if title and snippet and url:
-            documents.append(ExternalResearchDocument(title=title, url=url, snippet=snippet, source="web"))
+            documents.append(
+                ExternalResearchDocument(title=title, url=url, snippet=snippet, source="web")
+            )
         for topic in payload.get("RelatedTopics") or []:
             if "Topics" in topic:
                 nested = topic.get("Topics") or []
@@ -153,7 +156,9 @@ class AgentExternalResearchService:
         with urlopen(request, timeout=self.timeout_s) as response:
             return response.read().decode("utf-8", errors="replace")
 
-    def _observe(self, message: str, documents: list[ExternalResearchDocument]) -> list[ExternalResearchDocument]:
+    def _observe(
+        self, message: str, documents: list[ExternalResearchDocument]
+    ) -> list[ExternalResearchDocument]:
         tokens = {
             token
             for token in re.findall(r"[a-zA-Z][a-zA-Z0-9+-]{2,}", message.lower())
@@ -185,7 +190,10 @@ class AgentExternalResearchService:
                     message="Web and paper search returned no usable sources.",
                 ),
                 requires_evidence=True,
-                metadata={"tool_mode": "web_papers", "pipeline": ["plan", "act", "observe", "respond"]},
+                metadata={
+                    "tool_mode": "web_papers",
+                    "pipeline": ["plan", "act", "observe", "respond"],
+                },
             )
         citations = self._citations(documents)
         synthesized_answer = self._synthesize_answer(
@@ -338,7 +346,9 @@ class AgentExternalResearchService:
         return False
 
     def _with_numeric_source_links(self, answer: str, citations: list[AgentCitation]) -> str:
-        cleaned = self._strip_existing_source_section(re.sub(r"\s*\[\^[^\]]+\]", "", answer)).strip()
+        cleaned = self._strip_existing_source_section(
+            re.sub(r"\s*\[\^[^\]]+\]", "", answer)
+        ).strip()
         indexed_citations = [
             (index, citation)
             for index, citation in enumerate(citations[:5], start=1)
@@ -355,7 +365,11 @@ class AgentExternalResearchService:
         answer: str,
         indexed_citations: list[tuple[int, AgentCitation]],
     ) -> str:
-        href_by_index = {index: citation.learn_href for index, citation in indexed_citations if citation.learn_href}
+        href_by_index = {
+            index: citation.learn_href
+            for index, citation in indexed_citations
+            if citation.learn_href
+        }
 
         def replace(match: re.Match[str]) -> str:
             index = int(match.group(1))
@@ -380,7 +394,9 @@ class AgentExternalResearchService:
 
     @staticmethod
     def _strip_existing_source_section(answer: str) -> str:
-        return re.split(r"\n\s*(?:#{1,6}\s*)?Sources\s*:?\s*\n", answer, maxsplit=1, flags=re.IGNORECASE)[0]
+        return re.split(
+            r"\n\s*(?:#{1,6}\s*)?Sources\s*:?\s*\n", answer, maxsplit=1, flags=re.IGNORECASE
+        )[0]
 
     @staticmethod
     def _markdown_link_label(value: str) -> str:

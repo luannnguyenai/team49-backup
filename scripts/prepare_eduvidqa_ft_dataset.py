@@ -13,7 +13,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 YOUTUBE_ID_RE = re.compile(r"(?<![A-Za-z0-9_-])([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])")
 TIMESTAMP_TEXT_RE = re.compile(r"(?<!\d)(\d{1,2}:\d{1,2}(?::\d{1,2})?)(?!\d)")
 
@@ -197,11 +196,7 @@ def safe_stem(value: str) -> str:
 
 def frame_relative_path(row: QARow, sample_index: int) -> Path:
     seconds = int(row.timestamp_seconds)
-    return (
-        Path("frames")
-        / row.split
-        / f"{row.video_id}_{seconds:06d}_{sample_index:06d}.jpg"
-    )
+    return Path("frames") / row.split / f"{row.video_id}_{seconds:06d}_{sample_index:06d}.jpg"
 
 
 def find_video_path(raw_root: Path, video_id: str) -> Path | None:
@@ -415,7 +410,9 @@ def main(argv: list[str] | None = None) -> int:
         transcript_path = raw_root / "transcripts" / f"{row.video_id}.json"
         video_path = find_video_path(raw_root, row.video_id)
         if not transcript_path.exists():
-            skipped.append({"id": row.row_id, "reason": "missing_transcript", "video_id": row.video_id})
+            skipped.append(
+                {"id": row.row_id, "reason": "missing_transcript", "video_id": row.video_id}
+            )
             continue
         if video_path is None:
             skipped.append({"id": row.row_id, "reason": "missing_video", "video_id": row.video_id})
@@ -480,7 +477,9 @@ def main(argv: list[str] | None = None) -> int:
         if index == 1 or index % 100 == 0:
             print(f"[{index}/{len(rows)}] prepared {row.row_id}")
 
-    all_records = [record for split in sorted(records_by_split) for record in records_by_split[split]]
+    all_records = [
+        record for split in sorted(records_by_split) for record in records_by_split[split]
+    ]
     if not args.dry_run:
         for split, records in records_by_split.items():
             write_jsonl(output_root / f"{split}.jsonl", records)

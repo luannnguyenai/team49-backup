@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 DATA_DIR = Path("data")
 
 BOOTSTRAP_DIR = DATA_DIR / "bootstrap"
@@ -34,7 +33,9 @@ GPT54_EDGE_LABELS_FILE = FINAL_ARTIFACTS_DIR / "gpt54_edge_labels.json"
 MODEL_EXPERIMENTS_DIR = FINAL_ARTIFACTS_DIR / "model_experiments"
 MODERNBERT_EDGE_SCORES_FILE = MODEL_EXPERIMENTS_DIR / "modernbert_edge_scores.json"
 MODERNBERT_MASKED_V2_FILE = MODEL_EXPERIMENTS_DIR / "modernbert_edge_scores_masked_v2.json"
-MODERNBERT_LARGE_MASKED_V2_FILE = MODEL_EXPERIMENTS_DIR / "modernbert_large_edge_scores_masked_v2.json"
+MODERNBERT_LARGE_MASKED_V2_FILE = (
+    MODEL_EXPERIMENTS_DIR / "modernbert_large_edge_scores_masked_v2.json"
+)
 SCIBERT_MASKED_V2_FILE = MODEL_EXPERIMENTS_DIR / "scibert_edge_scores_masked_v2.json"
 EDGE_SCORING_INPUT_BUNDLE_FILE = MODEL_EXPERIMENTS_DIR / "edge_scoring_input_bundle.json"
 EDGE_SCORING_INPUT_COMBO_FILE = MODEL_EXPERIMENTS_DIR / "edge_scoring_input_bundle_for_combo.json"

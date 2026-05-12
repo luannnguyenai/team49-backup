@@ -3,7 +3,6 @@
 from src.models.canonical import QuestionBankItem
 from src.services.placement.strategies import register
 
-
 _DIFFICULTY_ORDER = {"medium": 0, "easy": 1, "hard": 2}
 
 

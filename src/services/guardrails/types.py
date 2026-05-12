@@ -15,7 +15,9 @@ class GuardrailDetectedEntity(BaseModel):
 
 class GuardrailResult(BaseModel):
     sanitized_text: str = Field(alias="sanitizedText")
-    detected_entities: list[GuardrailDetectedEntity] = Field(default_factory=list, alias="detectedEntities")
+    detected_entities: list[GuardrailDetectedEntity] = Field(
+        default_factory=list, alias="detectedEntities"
+    )
     was_redacted: bool = Field(default=False, alias="wasRedacted")
     should_block: bool = Field(default=False, alias="shouldBlock")
     block_reason: str | None = Field(default=None, alias="blockReason")

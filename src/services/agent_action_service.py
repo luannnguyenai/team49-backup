@@ -7,8 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.exceptions import NotFoundError, ValidationError
 from src.schemas.learning_path import GeneratePathRequest
-from src.services.assessment_service import start_assessment
-from src.services.assessment_service import get_assessment_results
+from src.services.assessment_service import get_assessment_results, start_assessment
 from src.services.recommendation_engine import generate_learning_path
 
 
@@ -78,7 +77,9 @@ async def validate_replan_request(db: AsyncSession, request, user) -> ActionVali
     try:
         assessment_result = await get_assessment_results(db, user.id, session_id)
     except NotFoundError:
-        return ActionValidationResult(accepted=False, rejected_reason="assessment_not_completed_or_missing")
+        return ActionValidationResult(
+            accepted=False, rejected_reason="assessment_not_completed_or_missing"
+        )
 
     impact = {
         "assessmentSessionId": str(assessment_result.session_id),

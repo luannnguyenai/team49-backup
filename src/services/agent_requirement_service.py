@@ -4,13 +4,12 @@ from uuid import uuid4
 
 from src.repositories.canonical_content_repo import CanonicalContentRepository
 from src.schemas.agent import (
-    PathRequirementUnit,
     PathRequirementsRequest,
     PathRequirementsResponse,
+    PathRequirementUnit,
     RetrievalTrace,
 )
 from src.services.agent_navigation_service import AgentNavigationService
-
 
 PATH_COURSES = {
     "computer_vision": ["CS231n"],
@@ -33,19 +32,39 @@ class AgentPathRequirementService:
         allowed_course_ids: list[str],
         user_id=None,
     ) -> PathRequirementsResponse:
-        target_courses = request.target_course_ids or PATH_COURSES.get(request.target_path_key or "", [])
-        target_courses = [course_id for course_id in target_courses if course_id in allowed_course_ids]
+        target_courses = request.target_course_ids or PATH_COURSES.get(
+            request.target_path_key or "", []
+        )
+        target_courses = [
+            course_id for course_id in target_courses if course_id in allowed_course_ids
+        ]
         target_units = await self.repo.search_canonical_units(
-            ["foundation", "neural", "optimization", "embedding", "sequence", "cnn", "classification"],
+            [
+                "foundation",
+                "neural",
+                "optimization",
+                "embedding",
+                "sequence",
+                "cnn",
+                "classification",
+            ],
             target_courses,
             limit=40,
         )
         target_unit_ids = [unit.unit_id for unit in target_units]
         target_kp_rows = await self.repo.get_unit_kp_rows(target_unit_ids)
-        target_kp_ids = sorted({row.kp_id for row in target_kp_rows if row.planner_role in {"main", "prereq", None}})
+        target_kp_ids = sorted(
+            {row.kp_id for row in target_kp_rows if row.planner_role in {"main", "prereq", None}}
+        )
         edges = await self.repo.get_prerequisite_edges_for_kps(target_kp_ids)
-        prereq_kp_ids = sorted({edge.source_kp_id for edge in edges if edge.target_kp_id in target_kp_ids})
-        candidate_rows = await self.repo.get_unit_kp_rows_by_kp_ids(prereq_kp_ids) if hasattr(self.repo, "get_unit_kp_rows_by_kp_ids") else []
+        prereq_kp_ids = sorted(
+            {edge.source_kp_id for edge in edges if edge.target_kp_id in target_kp_ids}
+        )
+        candidate_rows = (
+            await self.repo.get_unit_kp_rows_by_kp_ids(prereq_kp_ids)
+            if hasattr(self.repo, "get_unit_kp_rows_by_kp_ids")
+            else []
+        )
         if not candidate_rows:
             candidate_rows = await self.repo.get_unit_kp_rows(target_unit_ids)
 
@@ -68,8 +87,12 @@ class AgentPathRequirementService:
             if not self._eligible_unit(unit):
                 continue
             unit_kp_ids = [row.kp_id for row in candidate_rows if row.unit_id == unit_id]
-            mastery_lcb = min((mastery_by_kp.get(kp_id, 0.0) for kp_id in unit_kp_ids), default=None)
-            status = "already_mastered" if mastery_lcb is not None and mastery_lcb >= 0.8 else "unknown"
+            mastery_lcb = min(
+                (mastery_by_kp.get(kp_id, 0.0) for kp_id in unit_kp_ids), default=None
+            )
+            status = (
+                "already_mastered" if mastery_lcb is not None and mastery_lcb >= 0.8 else "unknown"
+            )
             nav = nav_by_id.get(unit_id)
             required_units.append(
                 PathRequirementUnit(

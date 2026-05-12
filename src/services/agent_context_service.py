@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.learning import GoalPreference
 from src.models.user import User
 from src.repositories.canonical_content_repo import CanonicalContentRepository
-
 
 DEFAULT_AGENT_COURSES = ["CS230", "CS231n", "CS224n"]
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from src.services.agent_path_catalog import AGENT_PATH_CATALOG, fallback_path_label
 from src.services.agent_graph_contracts import AgentSlots
+from src.services.agent_path_catalog import AGENT_PATH_CATALOG, fallback_path_label
 
 
 class AgentSearchScopeService:

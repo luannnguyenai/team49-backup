@@ -6,43 +6,42 @@ Unified FastAPI application:
 - Auth & Learning routes (async)
 """
 
-import asyncio
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
+from src.core.observability import score_trace
 from src.database import (
     engine as async_engine,
+)
+from src.database import (
     get_async_db,
     tutor_thread_async_session_factory,
     tutor_thread_engine,
 )
+from src.dependencies.auth import get_current_user_from_request
 from src.exception_handlers import domain_exception_handler
 from src.exceptions import DomainError
-from src.dependencies.auth import get_current_user_from_request
-from src.redis_client import connect_redis, disconnect_redis
-from src.models.store import Lecture, Chapter, QAHistory, LearningProgress
+from src.middleware.prometheus import setup_prometheus
+from src.middleware.request_logger import AccessLogMiddleware
 from src.models.course import LearningUnit
-from src.services.asset_signing import verify_signed_asset_url
-from src.services.llm_service import get_context_and_stream_langgraph
-from src.services.model_registry import (
-    ChatModelUnavailableError,
-    DEFAULT_CHAT_MODEL_ID,
-    ensure_chat_model_available,
-    get_chat_model_option,
-)
-from src.routers.auth import auth_router, users_router
-from src.routers.assessment import assessment_router, _deprecated_router as placement_deprecated_router
+from src.models.store import Chapter, LearningProgress, Lecture, QAHistory
+from src.redis_client import connect_redis, disconnect_redis
+from src.routers.admin import admin_router
 from src.routers.agent import agent_router
 from src.routers.agent_ops import agent_ops_router
+from src.routers.assessment import _deprecated_router as placement_deprecated_router
+from src.routers.assessment import assessment_router
+from src.routers.auth import auth_router, users_router
 from src.routers.chat_models import chat_models_router
 from src.routers.content import content_router
 from src.routers.courses import courses_router
@@ -56,11 +55,14 @@ from src.routers.quiz import quiz_router
 from src.routers.replan import replan_router
 from src.routers.review import review_router
 from src.routers.test_support import test_support_router
-from src.routers.admin import admin_router
-from src.middleware.prometheus import setup_prometheus
-from src.middleware.request_logger import AccessLogMiddleware
-from src.config import settings
-from src.core.observability import score_trace
+from src.services.asset_signing import verify_signed_asset_url
+from src.services.llm_service import get_context_and_stream_langgraph
+from src.services.model_registry import (
+    DEFAULT_CHAT_MODEL_ID,
+    ChatModelUnavailableError,
+    ensure_chat_model_available,
+    get_chat_model_option,
+)
 
 logger = logging.getLogger(__name__)
 DATA_ROOT = Path("data").resolve()
@@ -75,6 +77,7 @@ PROTECTED_DATA_PREFIXES = (
     "courses/CS231n/slides/",
     "courses/CS231n/transcripts/",
 )
+
 
 # ---------------------------------------------------------------------------
 # Lifespan — startup / shutdown
@@ -216,6 +219,7 @@ async def read_root():
 # Lecture Q&A routes (async — uses get_async_db)
 # ---------------------------------------------------------------------------
 
+
 class AskRequest(BaseModel):
     lecture_id: str
     current_timestamp: float
@@ -238,9 +242,7 @@ async def _ensure_lecture_exists(
     db: AsyncSession | None = None,
 ) -> None:
     if db is not None:
-        result = await db.execute(
-            select(Lecture.id).where(Lecture.id == lecture_id).limit(1)
-        )
+        result = await db.execute(select(Lecture.id).where(Lecture.id == lecture_id).limit(1))
         lecture = result.scalar_one_or_none()
         if lecture:
             return
@@ -249,9 +251,7 @@ async def _ensure_lecture_exists(
         raise HTTPException(status_code=404, detail="Lecture not found")
 
     async with tutor_thread_async_session_factory() as session:
-        result = await session.execute(
-            select(Lecture.id).where(Lecture.id == lecture_id).limit(1)
-        )
+        result = await session.execute(select(Lecture.id).where(Lecture.id == lecture_id).limit(1))
         lecture = result.scalar_one_or_none()
         if lecture:
             return
@@ -289,9 +289,7 @@ async def list_lectures(db: AsyncSession = Depends(get_async_db)):
 @app.get("/api/lectures/{lecture_id}/toc", tags=["Lectures"])
 async def get_toc(lecture_id: str, db: AsyncSession = Depends(get_async_db)):
     result = await db.execute(
-        select(Chapter)
-        .where(Chapter.lecture_id == lecture_id)
-        .order_by(Chapter.start_time)
+        select(Chapter).where(Chapter.lecture_id == lecture_id).order_by(Chapter.start_time)
     )
     chapters = result.scalars().all()
     if not chapters:
@@ -407,6 +405,7 @@ async def rate_answer(qa_id: int, req: RateRequest, db: AsyncSession = Depends(g
 # ---------------------------------------------------------------------------
 # Learning Progress routes (async)
 # ---------------------------------------------------------------------------
+
 
 class ProgressRequest(BaseModel):
     session_id: str

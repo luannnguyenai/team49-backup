@@ -12,13 +12,12 @@ import json
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 from huggingface_hub import hf_hub_download
-
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "data" / "guardrail_router" / "source_review"
@@ -94,7 +93,14 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def review_question_bank() -> SourceReview:
-    path = ROOT / "data" / "final_artifacts" / "cs224n_cs231n_cs230_v1" / "canonical" / "question_bank.jsonl"
+    path = (
+        ROOT
+        / "data"
+        / "final_artifacts"
+        / "cs224n_cs231n_cs230_v1"
+        / "canonical"
+        / "question_bank.jsonl"
+    )
     rows = read_jsonl(path)
     df = pd.DataFrame(rows)
     gated = df[df["qa_gate_passed"] == True]  # noqa: E712 - pandas comparison.
@@ -241,7 +247,9 @@ def review_wildguard() -> SourceReview:
     unharmful = df[df["prompt_harm_label"] == "unharmful"]
     bypass = df[prompt.str.contains(BYPASS_PATTERNS)]
     harmful_bypass = harmful[harmful["prompt"].fillna("").astype(str).str.contains(BYPASS_PATTERNS)]
-    safe_prompt_only = unharmful[unharmful["prompt"].fillna("").astype(str).str.len().between(8, 1200)]
+    safe_prompt_only = unharmful[
+        unharmful["prompt"].fillna("").astype(str).str.len().between(8, 1200)
+    ]
     return SourceReview(
         name="wildguardmix",
         total_rows=len(df),
@@ -280,7 +288,11 @@ def review_jailbreakv() -> SourceReview:
         & (df["transfer_from_llm"] == True)  # noqa: E712
     ]
     no_image_dependency = text_subset[
-        ~text_subset["format"].fillna("").astype(str).str.lower().isin({"figstep", "query-relevant"})
+        ~text_subset["format"]
+        .fillna("")
+        .astype(str)
+        .str.lower()
+        .isin({"figstep", "query-relevant"})
     ]
     return SourceReview(
         name="jailbreakv_28k",
@@ -365,7 +377,9 @@ def review_polyguard() -> SourceReview:
             "adversarial_harmful": int(len(adversarial_harmful)),
             "languages": int(df["language"].nunique()),
             "safe_prompt_only_len_8_1200": int(
-                len(unharmful[unharmful["prompt"].fillna("").astype(str).str.len().between(8, 1200)])
+                len(
+                    unharmful[unharmful["prompt"].fillna("").astype(str).str.len().between(8, 1200)]
+                )
             ),
         },
         distributions={
@@ -451,7 +465,7 @@ def main() -> None:
         review_beavertails(),
     ]
     payload = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "excluded": ["EduVidQA"],
         "reviews": [to_dict(review) for review in reviews],
     }

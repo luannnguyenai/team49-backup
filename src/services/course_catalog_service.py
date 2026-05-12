@@ -14,7 +14,15 @@ from typing import TYPE_CHECKING
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
-from src.models.course import Course, CourseOverview, LearningProgressRecord, LearningProgressStatus, LearningUnit
+from src.models.course import (
+    Course,
+    CourseOverview,
+    LearningProgressRecord,
+    LearningProgressStatus,
+    LearningUnit,
+)
+from src.repositories.course_recommendation_repo import CourseRecommendationRepository
+from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.schemas.course import (
     CourseCatalogItem,
     CourseCatalogResponse,
@@ -22,8 +30,6 @@ from src.schemas.course import (
     CourseOverviewResponse,
     StartLearningDecisionResponse,
 )
-from src.repositories.course_recommendation_repo import CourseRecommendationRepository
-from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.services.course_bootstrap_service import (
     get_bootstrap_course,
     get_bootstrap_overview,

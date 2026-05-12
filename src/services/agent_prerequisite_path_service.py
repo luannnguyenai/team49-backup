@@ -50,11 +50,7 @@ class AgentPrerequisitePathService:
 
         candidate_rows = await self.repo.get_unit_kp_rows_by_kp_ids(prerequisite_kp_ids)
         candidate_unit_ids = sorted(
-            {
-                row.unit_id
-                for row in candidate_rows
-                if row.unit_id != target_canonical_unit_id
-            }
+            {row.unit_id for row in candidate_rows if row.unit_id != target_canonical_unit_id}
         )
         if not candidate_unit_ids:
             return None
@@ -88,10 +84,9 @@ class AgentPrerequisitePathService:
                 source_counts[source_unit_id] += 1
                 edge_reasons_by_pair[(source_unit_id, target_canonical_unit_id)].append(reason)
 
-        ordered_prereq_ids = [
-            unit_id
-            for unit_id, _count in source_counts.most_common()
-        ][:max_prerequisite_units]
+        ordered_prereq_ids = [unit_id for unit_id, _count in source_counts.most_common()][
+            :max_prerequisite_units
+        ]
         if not ordered_prereq_ids:
             return None
 
@@ -145,7 +140,9 @@ class AgentPrerequisitePathService:
             AgentPrerequisitePathEdge(
                 fromCanonicalUnitId=unit_id,
                 toCanonicalUnitId=target_canonical_unit_id,
-                reason="; ".join(edge_reasons_by_pair.get((unit_id, target_canonical_unit_id), [])[:2])
+                reason="; ".join(
+                    edge_reasons_by_pair.get((unit_id, target_canonical_unit_id), [])[:2]
+                )
                 or None,
             )
             for unit_id in ordered_prereq_ids

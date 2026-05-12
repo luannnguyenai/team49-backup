@@ -17,10 +17,7 @@ from sqlalchemy import text
 
 from src.database import async_session
 
-
-DEFAULT_OUTPUT_DIR = Path(
-    "data/final_artifacts/cs224n_cs231n_cs230_v1/eval_aihub_dataset"
-)
+DEFAULT_OUTPUT_DIR = Path("data/final_artifacts/cs224n_cs231n_cs230_v1/eval_aihub_dataset")
 
 
 def _as_int(value: Any) -> int | None:

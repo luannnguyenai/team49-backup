@@ -41,7 +41,9 @@ def classify_rag_error(exc: BaseException, default: str = "RAG_RETRIEVAL_ERROR")
         return "RAG_PROVIDER_RATE_LIMIT"
     if "timeout" in combined or "timed out" in combined:
         return "RAG_TIMEOUT"
-    if "index" in combined and any(token in combined for token in ("missing", "not found", "invalid")):
+    if "index" in combined and any(
+        token in combined for token in ("missing", "not found", "invalid")
+    ):
         return "RAG_INDEX_INVALID"
     if "database" in combined or "asyncpg" in combined or "sqlalchemy" in combined:
         return "RAG_DATABASE_ERROR"

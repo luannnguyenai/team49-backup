@@ -19,8 +19,8 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import select
 
-from src.models.course import Course, CourseSection, LearningUnit
 from src.exceptions import ForbiddenError, NotFoundError
+from src.models.course import Course, CourseSection, LearningUnit
 from src.schemas.course import StartLearningDecisionResponse
 from src.services.course_bootstrap_service import get_bootstrap_course
 from src.services.learning_unit_service import get_first_unit_slug
@@ -136,7 +136,9 @@ async def assert_learning_access(
     has_completed_skill_test = await _check_skill_test_completed(user.id)
     placement_skipped = await _check_placement_skipped(user.id)
     if not has_completed_skill_test and not placement_skipped:
-        raise ForbiddenError("Please complete the skill assessment before accessing this learning content.")
+        raise ForbiddenError(
+            "Please complete the skill assessment before accessing this learning content."
+        )
 
 
 async def _check_skill_test_completed(user_id: uuid.UUID) -> bool:
@@ -148,8 +150,9 @@ async def _check_skill_test_completed(user_id: uuid.UUID) -> bool:
     sessions table for a completed assessment.
     """
     try:
-        from src.database import async_session_factory
         from sqlalchemy import select
+
+        from src.database import async_session_factory
         from src.models.learning import Session, SessionType
 
         async with async_session_factory() as db:

@@ -6,14 +6,17 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-
 _PLACEHOLDER_PATTERN = re.compile(r"<[^>]+>")
 _LOCAL_ID_PATTERN = re.compile(r"^local::([^:]+)::")
 _YOUTUBE_ID_PATTERN = re.compile(r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{6,})")
 
 
 def _is_missing_or_placeholder(value: Any) -> bool:
-    return not isinstance(value, str) or not value.strip() or _PLACEHOLDER_PATTERN.search(value) is not None
+    return (
+        not isinstance(value, str)
+        or not value.strip()
+        or _PLACEHOLDER_PATTERN.search(value) is not None
+    )
 
 
 def _normalize_youtube_url(raw_url: Any) -> str | None:
@@ -76,7 +79,9 @@ def _infer_lecture_id(payload: dict[str, Any], file_path: Path) -> str:
 
     units = payload.get("units")
     if isinstance(units, list) and units:
-        token = _extract_local_token(units[0].get("unit_id")) if isinstance(units[0], dict) else None
+        token = (
+            _extract_local_token(units[0].get("unit_id")) if isinstance(units[0], dict) else None
+        )
         if token:
             return token
 
@@ -94,7 +99,9 @@ def _repair_unit_id(raw_unit_id: Any, *, lecture_id: str) -> Any:
     return raw_unit_id.replace("<lecture_id>", lecture_id)
 
 
-def sanitize_p3a_payload(payload: dict[str, Any], *, file_path: Path) -> tuple[dict[str, Any], list[str]]:
+def sanitize_p3a_payload(
+    payload: dict[str, Any], *, file_path: Path
+) -> tuple[dict[str, Any], list[str]]:
     sanitized = deepcopy(payload)
     changes: list[str] = []
 
@@ -110,7 +117,10 @@ def sanitize_p3a_payload(payload: dict[str, Any], *, file_path: Path) -> tuple[d
         changes.append("lecture_context.lecture_id")
 
     normalized_lecture_url = _normalize_youtube_url(lecture_context.get("youtube_url"))
-    if normalized_lecture_url is not None and lecture_context.get("youtube_url") != normalized_lecture_url:
+    if (
+        normalized_lecture_url is not None
+        and lecture_context.get("youtube_url") != normalized_lecture_url
+    ):
         lecture_context["youtube_url"] = normalized_lecture_url
         changes.append("lecture_context.youtube_url")
 
@@ -131,7 +141,10 @@ def sanitize_p3a_payload(payload: dict[str, Any], *, file_path: Path) -> tuple[d
             content_ref = unit.get("content_ref")
             if isinstance(content_ref, dict):
                 normalized_video_url = _normalize_youtube_url(content_ref.get("video_url"))
-                if normalized_video_url is not None and content_ref.get("video_url") != normalized_video_url:
+                if (
+                    normalized_video_url is not None
+                    and content_ref.get("video_url") != normalized_video_url
+                ):
                     content_ref["video_url"] = normalized_video_url
                     changes.append(f"units[{index}].content_ref.video_url")
 

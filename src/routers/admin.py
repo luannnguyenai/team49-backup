@@ -11,17 +11,18 @@ Admin dashboard API. All endpoints require role='admin' via require_admin dep.
     GET /api/admin/system/health         — CPU/RAM/DB/Redis snapshot
     GET /api/admin/traffic/summary       — Prometheus rate snapshot
 """
+
 from __future__ import annotations
 
 import json
 import os
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -40,7 +41,7 @@ LOG_DIR = Path("logs")
 QA_LOG = LOG_DIR / "qa_history.jsonl"
 ACCESS_LOG = LOG_DIR / "access.jsonl"
 PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
-APP_BOOT_TS = datetime.now(timezone.utc)
+APP_BOOT_TS = datetime.now(UTC)
 
 admin_router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -119,7 +120,7 @@ async def _prom_query_range(
         series: list[tuple[datetime, float]] = []
         for ts_raw, value_raw in values:
             try:
-                point_ts = datetime.fromtimestamp(float(ts_raw), tz=timezone.utc)
+                point_ts = datetime.fromtimestamp(float(ts_raw), tz=UTC)
                 point_value = float(value_raw)
             except Exception:
                 continue
@@ -154,30 +155,28 @@ async def _load_tutor_latency_timeseries(
     *,
     hours: int,
 ) -> list[dict[str, Any]]:
-    end = datetime.now(timezone.utc)
+    end = datetime.now(UTC)
     start = end - timedelta(hours=hours)
     step_seconds = 3600
 
     metric_queries = {
         "first_status_p50_ms": (
-            '1000 * histogram_quantile(0.50, '
-            'sum by (le) (rate(tutor_stream_first_status_seconds_bucket[1h])))'
+            "1000 * histogram_quantile(0.50, "
+            "sum by (le) (rate(tutor_stream_first_status_seconds_bucket[1h])))"
         ),
         "first_status_p95_ms": (
-            '1000 * histogram_quantile(0.95, '
-            'sum by (le) (rate(tutor_stream_first_status_seconds_bucket[1h])))'
+            "1000 * histogram_quantile(0.95, "
+            "sum by (le) (rate(tutor_stream_first_status_seconds_bucket[1h])))"
         ),
         "first_answer_p50_ms": (
-            '1000 * histogram_quantile(0.50, '
-            'sum by (le) (rate(tutor_stream_first_answer_seconds_bucket[1h])))'
+            "1000 * histogram_quantile(0.50, "
+            "sum by (le) (rate(tutor_stream_first_answer_seconds_bucket[1h])))"
         ),
         "first_answer_p95_ms": (
-            '1000 * histogram_quantile(0.95, '
-            'sum by (le) (rate(tutor_stream_first_answer_seconds_bucket[1h])))'
+            "1000 * histogram_quantile(0.95, "
+            "sum by (le) (rate(tutor_stream_first_answer_seconds_bucket[1h])))"
         ),
-        "sample_count": (
-            'sum(increase(tutor_stream_total_seconds_count[1h]))'
-        ),
+        "sample_count": ("sum(increase(tutor_stream_total_seconds_count[1h]))"),
     }
 
     metric_series: dict[str, list[tuple[datetime, float]]] = {}
@@ -201,7 +200,7 @@ async def stats_overview(
     _admin: User = Depends(require_admin),
     db: AsyncSession = Depends(get_async_db),
 ) -> dict[str, Any]:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     day_ago = now - timedelta(days=1)
     week_ago = now - timedelta(days=7)
     month_ago = now - timedelta(days=30)
@@ -218,17 +217,13 @@ async def stats_overview(
     try:
         dau = (
             await db.execute(
-                text(
-                    "SELECT COUNT(DISTINCT user_id) FROM sessions WHERE started_at >= :since"
-                ),
+                text("SELECT COUNT(DISTINCT user_id) FROM sessions WHERE started_at >= :since"),
                 {"since": day_ago},
             )
         ).scalar_one() or 0
         mau = (
             await db.execute(
-                text(
-                    "SELECT COUNT(DISTINCT user_id) FROM sessions WHERE started_at >= :since"
-                ),
+                text("SELECT COUNT(DISTINCT user_id) FROM sessions WHERE started_at >= :since"),
                 {"since": month_ago},
             )
         ).scalar_one() or 0
@@ -346,7 +341,7 @@ async def signups_timeseries(
     db: AsyncSession = Depends(get_async_db),
     days: int = Query(30, ge=1, le=365),
 ) -> list[dict[str, Any]]:
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    since = datetime.now(UTC) - timedelta(days=days)
     rows = (
         await db.execute(
             text(
@@ -380,7 +375,7 @@ async def llm_stats(
     _admin: User = Depends(require_admin),
     hours: int = Query(24, ge=1, le=24 * 30),
 ) -> dict[str, Any]:
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+    cutoff = datetime.now(UTC) - timedelta(hours=hours)
     entries = _read_jsonl_tail(QA_LOG, limit=5000)
 
     calls_per_hour: Counter[str] = Counter()
@@ -413,12 +408,8 @@ async def llm_stats(
         "window_hours": hours,
         "total_calls": total,
         "errors": errors,
-        "calls_per_hour": [
-            {"hour": h, "count": c} for h, c in sorted(calls_per_hour.items())
-        ],
-        "top_users": [
-            {"user_id": u, "count": c} for u, c in user_calls.most_common(5)
-        ],
+        "calls_per_hour": [{"hour": h, "count": c} for h, c in sorted(calls_per_hour.items())],
+        "top_users": [{"user_id": u, "count": c} for u, c in user_calls.most_common(5)],
         "tutor_latency_per_hour": tutor_latency_per_hour,
     }
 
@@ -432,7 +423,7 @@ async def feedback_stats(
     db: AsyncSession = Depends(get_async_db),
     days: int = Query(14, ge=1, le=180),
 ) -> dict[str, Any]:
-    since_naive = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
+    since_naive = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=days)
     rollup = (
         await db.execute(
             text(
@@ -578,7 +569,7 @@ async def system_health(
         "disk_pct": disk_pct,
         "db_connections": db_connections,
         "redis_hit_rate": redis_hit_rate,
-        "uptime_seconds": int((datetime.now(timezone.utc) - APP_BOOT_TS).total_seconds()),
+        "uptime_seconds": int((datetime.now(UTC) - APP_BOOT_TS).total_seconds()),
         "services": [
             {"name": "fastapi", "status": "healthy"},
             {"name": "postgres", "status": db_status},
@@ -592,9 +583,7 @@ async def traffic_summary(
     _admin: User = Depends(require_admin),
 ) -> dict[str, Any]:
     async with httpx.AsyncClient() as client:
-        rps = await _prom_query(
-            client, 'sum(rate(http_requests_total{job="fastapi"}[1m]))'
-        )
+        rps = await _prom_query(client, 'sum(rate(http_requests_total{job="fastapi"}[1m]))')
         p50 = await _prom_query(
             client,
             'histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{job="fastapi"}[5m])))',

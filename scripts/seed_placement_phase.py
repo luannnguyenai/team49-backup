@@ -76,7 +76,9 @@ _COUNT_SQL = text(
 async def seed(dry_run: bool = False) -> None:
     async with async_session() as session:
         # Count before
-        row = (await session.execute(_COUNT_SQL, {"phase": PHASE, "courses": list(PLACEMENT_COURSES)})).one()
+        row = (
+            await session.execute(_COUNT_SQL, {"phase": PHASE, "courses": list(PLACEMENT_COURSES)})
+        ).one()
         before = row.n
         print(f"[seed_placement_phase] existing rows: {before}")
 
@@ -108,7 +110,9 @@ async def seed(dry_run: bool = False) -> None:
         inserted = len(result.fetchall())
         await session.commit()
 
-        row = (await session.execute(_COUNT_SQL, {"phase": PHASE, "courses": list(PLACEMENT_COURSES)})).one()
+        row = (
+            await session.execute(_COUNT_SQL, {"phase": PHASE, "courses": list(PLACEMENT_COURSES)})
+        ).one()
         after = row.n
         print(
             f"[seed_placement_phase] inserted={inserted}  total_after={after}  "
@@ -118,7 +122,9 @@ async def seed(dry_run: bool = False) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed placement_assessment phase tags")
-    parser.add_argument("--dry-run", action="store_true", help="Count eligible items without writing")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Count eligible items without writing"
+    )
     args = parser.parse_args()
     asyncio.run(seed(dry_run=args.dry_run))
 

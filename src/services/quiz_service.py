@@ -17,8 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.models.canonical import ConceptKP, ItemKPMap, QuestionBankItem
 from src.models.content import DifficultyBucket
-from src.models.course import LearningProgressStatus
-from src.models.course import LearningUnit
+from src.models.course import LearningProgressStatus, LearningUnit
 from src.models.learning import (
     Interaction,
     SelectedAnswer,
@@ -46,8 +45,8 @@ from src.services.canonical_assessor_compat import (
 )
 from src.services.canonical_mastery_service import update_kp_mastery_from_item
 from src.services.canonical_question_selector import CanonicalQuestionSelector
-from src.services.mastery_evaluator import classify_mastery
 from src.services.learning_session_service import CANONICAL_SESSION_ID
+from src.services.mastery_evaluator import classify_mastery
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +72,9 @@ async def start_quiz(
     exclude_item_ids: list[str] | None = None,
 ) -> QuizStartResponse:
     if source == "standalone" and (count is not None or checkpoint is not None or exclude_item_ids):
-        raise ValidationError("Standalone quiz does not accept inline-only count/checkpoint/exclude options.")
+        raise ValidationError(
+            "Standalone quiz does not accept inline-only count/checkpoint/exclude options."
+        )
     if source == "standalone":
         return await _start_canonical_quiz(db, user_id, learning_unit_id)
     if source != "inline_video":
@@ -240,7 +241,8 @@ async def _start_inline_video_quiz(
     )
     inline_quiz_state = (
         current_progress.get("inline_quiz")
-        if isinstance(current_progress, dict) and isinstance(current_progress.get("inline_quiz"), dict)
+        if isinstance(current_progress, dict)
+        and isinstance(current_progress.get("inline_quiz"), dict)
         else {}
     )
     canonical_unit_ids = await _inline_quiz_canonical_unit_scope(db, unit)
@@ -253,7 +255,9 @@ async def _start_inline_video_quiz(
         and midpoint_state.get("active_session_id")
         and current_progress.get("learning_unit_id") == str(unit.id)
     ):
-        raise ConflictError("Cannot start end checkpoint while midpoint inline quiz is in progress.")
+        raise ConflictError(
+            "Cannot start end checkpoint while midpoint inline quiz is in progress."
+        )
 
     if (
         isinstance(checkpoint_state, dict)
@@ -262,7 +266,9 @@ async def _start_inline_video_quiz(
     ):
         session_id = checkpoint_state.get("active_session_id")
         if session_id:
-            session = await _get_existing_inline_quiz_session(db, user_id, uuid.UUID(str(session_id)))
+            session = await _get_existing_inline_quiz_session(
+                db, user_id, uuid.UUID(str(session_id))
+            )
             if session is not None and session.completed_at is None:
                 item_ids = [str(item_id) for item_id in checkpoint_state.get("item_ids") or []]
                 items = await _get_quiz_items_by_ids(db, unit, item_ids)
@@ -320,7 +326,9 @@ async def _start_inline_video_quiz(
         session_id=session.id,
         learning_unit_id=unit.id,
         total_questions=len(items),
-        questions=[canonical_item_to_quiz_question(item, learning_unit_id=unit.id) for item in items],
+        questions=[
+            canonical_item_to_quiz_question(item, learning_unit_id=unit.id) for item in items
+        ],
         source="inline_video",
         checkpoint=checkpoint,
     )
@@ -385,7 +393,9 @@ async def _answer_canonical_quiz_question(
         )
 
     is_correct = item.answer_index == selected_answer_to_index(req.selected_answer.value)
-    count_result = await db.execute(select(func.count()).where(Interaction.session_id == session.id))
+    count_result = await db.execute(
+        select(func.count()).where(Interaction.session_id == session.id)
+    )
     seq_pos: int = (count_result.scalar() or 0) + 1
     max_global_result = await db.execute(
         select(func.max(Interaction.global_sequence_position)).where(Interaction.user_id == user_id)
@@ -421,7 +431,9 @@ async def _answer_canonical_quiz_question(
         str(item_id) for item_id in answered_result.scalars().all() if item_id is not None
     ]
     if not item_ids_for_session:
-        item_ids_for_session = await _fallback_quiz_item_ids_for_session(db, session=session, unit=unit)
+        item_ids_for_session = await _fallback_quiz_item_ids_for_session(
+            db, session=session, unit=unit
+        )
     await _sync_quiz_progress_state(
         db,
         user_id=user_id,
@@ -489,7 +501,9 @@ async def _complete_canonical_quiz(
     )
     rows = rows_result.all()
     if not rows:
-        raise ValidationError("Không có câu trả lời nào trong phiên quiz. Hãy trả lời ít nhất 1 câu trước khi hoàn thành.")
+        raise ValidationError(
+            "Không có câu trả lời nào trong phiên quiz. Hãy trả lời ít nhất 1 câu trước khi hoàn thành."
+        )
 
     item_ids = [item.item_id for _, item in rows]
     mastery_before = await _canonical_mastery_percent_for_items(db, user_id, item_ids)
@@ -700,7 +714,9 @@ async def _current_quiz_item_ids(
     if item_ids:
         return item_ids
     unit_item_result = await db.execute(
-        select(QuestionBankItem.item_id).where(QuestionBankItem.unit_id == fallback_unit_canonical_id)
+        select(QuestionBankItem.item_id).where(
+            QuestionBankItem.unit_id == fallback_unit_canonical_id
+        )
     )
     return [str(item_id) for item_id in unit_item_result.scalars().all()]
 
@@ -783,7 +799,7 @@ async def _sync_quiz_progress_state(
     existing_progress = (
         dict(existing_progress)
         if isinstance(existing_progress, dict)
-        else dict((await _current_quiz_progress_state(db, user_id)))
+        else dict(await _current_quiz_progress_state(db, user_id))
     )
     progress = {
         **existing_progress,

@@ -48,8 +48,8 @@ async def _get_optional_user(
         return None
 
     try:
-        from src.services.auth_service import decode_token, get_user_by_id
         from src.database import async_session_factory
+        from src.services.auth_service import decode_token, get_user_by_id
 
         payload = decode_token(credentials.credentials)
         if payload.type != "access":

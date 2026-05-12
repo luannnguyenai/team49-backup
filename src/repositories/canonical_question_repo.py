@@ -55,9 +55,7 @@ class CanonicalQuestionRepository:
         stmt = (
             select(QuestionBankItem, ItemCalibration.difficulty_prior)
             .join(ItemPhaseMap, ItemPhaseMap.item_id == QuestionBankItem.item_id)
-            .outerjoin(
-                ItemCalibration, ItemCalibration.item_id == QuestionBankItem.item_id
-            )
+            .outerjoin(ItemCalibration, ItemCalibration.item_id == QuestionBankItem.item_id)
             .where(
                 ItemPhaseMap.phase == phase,
                 QuestionBankItem.unit_id.in_(canonical_unit_ids),

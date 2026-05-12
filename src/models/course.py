@@ -9,7 +9,7 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
@@ -117,51 +117,51 @@ class Course(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=CourseVisibility.public,
         server_default=CourseVisibility.public.value,
     )
-    cover_image_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    hero_badge: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    primary_subject: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    hero_badge: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    primary_subject: Mapped[str | None] = mapped_column(String(120), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    canonical_course_id: Mapped[Optional[str]] = mapped_column(String(80), nullable=True, index=True)
-    course_config: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    canonical_course_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    course_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
-    overview: Mapped[Optional["CourseOverview"]] = relationship(
+    overview: Mapped[CourseOverview | None] = relationship(
         "CourseOverview",
         back_populates="course",
         uselist=False,
         cascade="all, delete-orphan",
         lazy="select",
     )
-    sections: Mapped[list["CourseSection"]] = relationship(
+    sections: Mapped[list[CourseSection]] = relationship(
         "CourseSection",
         back_populates="course",
         cascade="all, delete-orphan",
         lazy="select",
     )
-    learning_units: Mapped[list["LearningUnit"]] = relationship(
+    learning_units: Mapped[list[LearningUnit]] = relationship(
         "LearningUnit",
         back_populates="course",
         cascade="all, delete-orphan",
         lazy="select",
     )
-    assets: Mapped[list["CourseAsset"]] = relationship(
+    assets: Mapped[list[CourseAsset]] = relationship(
         "CourseAsset",
         back_populates="course",
         cascade="all, delete-orphan",
         lazy="select",
     )
-    recommendations: Mapped[list["CourseRecommendation"]] = relationship(
+    recommendations: Mapped[list[CourseRecommendation]] = relationship(
         "CourseRecommendation",
         back_populates="course",
         cascade="all, delete-orphan",
         lazy="select",
     )
-    progress_records: Mapped[list["LearningProgressRecord"]] = relationship(
+    progress_records: Mapped[list[LearningProgressRecord]] = relationship(
         "LearningProgressRecord",
         back_populates="course",
         cascade="all, delete-orphan",
         lazy="select",
     )
-    legacy_lecture_mappings: Mapped[list["LegacyLectureMapping"]] = relationship(
+    legacy_lecture_mappings: Mapped[list[LegacyLectureMapping]] = relationship(
         "LegacyLectureMapping",
         back_populates="course",
         cascade="all, delete-orphan",
@@ -184,16 +184,16 @@ class CourseOverview(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         unique=True,
     )
     headline: Mapped[str] = mapped_column(String(255), nullable=False)
-    subheadline: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    subheadline: Mapped[str | None] = mapped_column(String(255), nullable=True)
     summary_markdown: Mapped[str] = mapped_column(Text, nullable=False)
     learning_outcomes: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
-    target_audience: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    prerequisites_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    estimated_duration_text: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
-    structure_snapshot: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    cta_label: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    target_audience: Mapped[str | None] = mapped_column(Text, nullable=True)
+    prerequisites_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    estimated_duration_text: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    structure_snapshot: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    cta_label: Mapped[str | None] = mapped_column(String(120), nullable=True)
 
-    course: Mapped["Course"] = relationship("Course", back_populates="overview", lazy="select")
+    course: Mapped[Course] = relationship("Course", back_populates="overview", lazy="select")
 
 
 class CourseSection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -204,7 +204,7 @@ class CourseSection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("courses.id", ondelete="CASCADE"),
         nullable=False,
     )
-    parent_section_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    parent_section_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("course_sections.id", ondelete="SET NULL"),
         nullable=True,
@@ -222,19 +222,19 @@ class CourseSection(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default="false",
     )
 
-    course: Mapped["Course"] = relationship("Course", back_populates="sections", lazy="select")
-    parent_section: Mapped[Optional["CourseSection"]] = relationship(
+    course: Mapped[Course] = relationship("Course", back_populates="sections", lazy="select")
+    parent_section: Mapped[CourseSection | None] = relationship(
         "CourseSection",
         remote_side="CourseSection.id",
         back_populates="child_sections",
         lazy="select",
     )
-    child_sections: Mapped[list["CourseSection"]] = relationship(
+    child_sections: Mapped[list[CourseSection]] = relationship(
         "CourseSection",
         back_populates="parent_section",
         lazy="select",
     )
-    learning_units: Mapped[list["LearningUnit"]] = relationship(
+    learning_units: Mapped[list[LearningUnit]] = relationship(
         "LearningUnit",
         back_populates="section",
         cascade="all, delete-orphan",
@@ -273,17 +273,17 @@ class LearningUnit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default=LearningUnitStatus.metadata_partial.value,
     )
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    content_source_type: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
-    content_body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    estimated_minutes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    canonical_unit_id: Mapped[Optional[str]] = mapped_column(String(220), nullable=True, index=True)
+    content_source_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    content_body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    estimated_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    canonical_unit_id: Mapped[str | None] = mapped_column(String(220), nullable=True, index=True)
     has_quiz_items: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
         default=False,
         server_default="false",
     )
-    salience_decision: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    salience_decision: Mapped[str | None] = mapped_column(String(40), nullable=True)
     entry_mode: Mapped[LearningUnitEntryMode] = mapped_column(
         Enum(LearningUnitEntryMode, name="learning_unit_entry_mode_enum"),
         nullable=False,
@@ -291,31 +291,31 @@ class LearningUnit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default=LearningUnitEntryMode.hybrid.value,
     )
 
-    course: Mapped["Course"] = relationship("Course", back_populates="learning_units", lazy="select")
-    section: Mapped["CourseSection"] = relationship(
+    course: Mapped[Course] = relationship("Course", back_populates="learning_units", lazy="select")
+    section: Mapped[CourseSection] = relationship(
         "CourseSection",
         back_populates="learning_units",
         lazy="select",
     )
-    assets: Mapped[list["CourseAsset"]] = relationship(
+    assets: Mapped[list[CourseAsset]] = relationship(
         "CourseAsset",
         back_populates="learning_unit",
         cascade="all, delete-orphan",
         lazy="select",
     )
-    tutor_context_bindings: Mapped[list["TutorContextBinding"]] = relationship(
+    tutor_context_bindings: Mapped[list[TutorContextBinding]] = relationship(
         "TutorContextBinding",
         back_populates="learning_unit",
         cascade="all, delete-orphan",
         lazy="select",
     )
-    progress_records: Mapped[list["LearningProgressRecord"]] = relationship(
+    progress_records: Mapped[list[LearningProgressRecord]] = relationship(
         "LearningProgressRecord",
         back_populates="learning_unit",
         cascade="all, delete-orphan",
         lazy="select",
     )
-    legacy_lecture_mappings: Mapped[list["LegacyLectureMapping"]] = relationship(
+    legacy_lecture_mappings: Mapped[list[LegacyLectureMapping]] = relationship(
         "LegacyLectureMapping",
         back_populates="learning_unit",
         cascade="all, delete-orphan",
@@ -337,7 +337,7 @@ class CourseAsset(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("courses.id", ondelete="CASCADE"),
         nullable=False,
     )
-    learning_unit_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    learning_unit_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("learning_units.id", ondelete="SET NULL"),
         nullable=True,
@@ -347,17 +347,17 @@ class CourseAsset(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=False,
     )
     storage_key: Mapped[str] = mapped_column(String(500), nullable=False)
-    delivery_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    delivery_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     availability_status: Mapped[CourseAssetAvailabilityStatus] = mapped_column(
         Enum(CourseAssetAvailabilityStatus, name="course_asset_availability_status_enum"),
         nullable=False,
         default=CourseAssetAvailabilityStatus.processing,
         server_default=CourseAssetAvailabilityStatus.processing.value,
     )
-    metadata_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    metadata_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
-    course: Mapped["Course"] = relationship("Course", back_populates="assets", lazy="select")
-    learning_unit: Mapped[Optional["LearningUnit"]] = relationship(
+    course: Mapped[Course] = relationship("Course", back_populates="assets", lazy="select")
+    learning_unit: Mapped[LearningUnit | None] = relationship(
         "LearningUnit",
         back_populates="assets",
         lazy="select",
@@ -384,8 +384,8 @@ class LearnerAssessmentProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=False,
         server_default="false",
     )
-    skill_test_completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    assessment_session_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    skill_test_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    assessment_session_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("sessions.id", ondelete="SET NULL"),
         nullable=True,
@@ -397,7 +397,7 @@ class LearnerAssessmentProfile(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default="false",
     )
 
-    user: Mapped["User"] = relationship("User", lazy="select")  # type: ignore[name-defined]
+    user: Mapped[User] = relationship("User", lazy="select")  # type: ignore[name-defined]
 
 
 class CourseRecommendation(UUIDPrimaryKeyMixin, Base):
@@ -414,15 +414,15 @@ class CourseRecommendation(UUIDPrimaryKeyMixin, Base):
         nullable=False,
     )
     rank: Mapped[int] = mapped_column(Integer, nullable=False)
-    reason_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    reason_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     generated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
     )
 
-    user: Mapped["User"] = relationship("User", lazy="select")  # type: ignore[name-defined]
-    course: Mapped["Course"] = relationship("Course", back_populates="recommendations", lazy="select")
+    user: Mapped[User] = relationship("User", lazy="select")  # type: ignore[name-defined]
+    course: Mapped[Course] = relationship("Course", back_populates="recommendations", lazy="select")
 
     __table_args__ = (
         UniqueConstraint("user_id", "course_id", name="uq_course_recommendations_user_course"),
@@ -455,17 +455,19 @@ class LearningProgressRecord(UUIDPrimaryKeyMixin, Base):
         default=LearningProgressStatus.not_started,
         server_default=LearningProgressStatus.not_started.value,
     )
-    last_position_seconds: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    last_position_seconds: Mapped[float | None] = mapped_column(Float, nullable=True)
     last_opened_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
     )
-    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    user: Mapped["User"] = relationship("User", lazy="select")  # type: ignore[name-defined]
-    course: Mapped["Course"] = relationship("Course", back_populates="progress_records", lazy="select")
-    learning_unit: Mapped["LearningUnit"] = relationship(
+    user: Mapped[User] = relationship("User", lazy="select")  # type: ignore[name-defined]
+    course: Mapped[Course] = relationship(
+        "Course", back_populates="progress_records", lazy="select"
+    )
+    learning_unit: Mapped[LearningUnit] = relationship(
         "LearningUnit",
         back_populates="progress_records",
         lazy="select",
@@ -491,7 +493,7 @@ class TutorContextBinding(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     context_type: Mapped[str] = mapped_column(String(120), nullable=False)
     source_ref: Mapped[str] = mapped_column(String(255), nullable=False)
-    context_window_rule: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    context_window_rule: Mapped[str | None] = mapped_column(String(120), nullable=True)
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
@@ -499,13 +501,15 @@ class TutorContextBinding(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default="true",
     )
 
-    learning_unit: Mapped["LearningUnit"] = relationship(
+    learning_unit: Mapped[LearningUnit] = relationship(
         "LearningUnit",
         back_populates="tutor_context_bindings",
         lazy="select",
     )
 
-    __table_args__ = (Index("ix_tutor_context_bindings_unit_active", "learning_unit_id", "is_active"),)
+    __table_args__ = (
+        Index("ix_tutor_context_bindings_unit_active", "learning_unit_id", "is_active"),
+    )
 
 
 class LegacyLectureMapping(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -534,17 +538,17 @@ class LegacyLectureMapping(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default=LegacyLectureMigrationState.pending.value,
     )
 
-    learning_unit: Mapped["LearningUnit"] = relationship(
+    learning_unit: Mapped[LearningUnit] = relationship(
         "LearningUnit",
         back_populates="legacy_lecture_mappings",
         lazy="select",
     )
-    course: Mapped["Course"] = relationship(
+    course: Mapped[Course] = relationship(
         "Course",
         back_populates="legacy_lecture_mappings",
         lazy="select",
     )
-    lecture: Mapped["Lecture"] = relationship("Lecture", lazy="select")  # type: ignore[name-defined]
+    lecture: Mapped[Lecture] = relationship("Lecture", lazy="select")  # type: ignore[name-defined]
 
     __table_args__ = (
         UniqueConstraint("learning_unit_id", name="uq_legacy_lecture_mappings_learning_unit"),

@@ -4,7 +4,12 @@ import re
 from uuid import uuid4
 
 from src.repositories.canonical_content_repo import CanonicalContentRepository
-from src.schemas.agent import RetrievalTrace, UnitSearchRequest, UnitSearchResponse, UnitSearchResult
+from src.schemas.agent import (
+    RetrievalTrace,
+    UnitSearchRequest,
+    UnitSearchResponse,
+    UnitSearchResult,
+)
 from src.services.agent_navigation_service import AgentNavigationService
 from src.services.agent_query_normalizer import normalize_query
 
@@ -60,8 +65,12 @@ class AgentUnitSearchService:
             ).lower()
             compact_title = _compact_text(title_haystack)
             compact_body = _compact_text(body_haystack)
-            title_score = sum(1 for term in terms if _term_matches(term, title_haystack, compact_title))
-            body_score = sum(1 for term in terms if _term_matches(term, body_haystack, compact_body))
+            title_score = sum(
+                1 for term in terms if _term_matches(term, title_haystack, compact_title)
+            )
+            body_score = sum(
+                1 for term in terms if _term_matches(term, body_haystack, compact_body)
+            )
             score = float(title_score * 3 + body_score)
             nav = nav_by_id.get(unit.unit_id)
             scored.append(

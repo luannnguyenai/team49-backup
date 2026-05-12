@@ -23,9 +23,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import settings
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
+from src.middleware.rate_limit import check_rate_limit
 from src.models.canonical import ConceptKP
 from src.models.learning import LearnerMasteryKP
-from src.middleware.rate_limit import check_rate_limit
 from src.models.user import User
 from src.redis_client import get_redis
 from src.schemas.auth import (
@@ -42,7 +42,6 @@ from src.schemas.auth import (
     UserSkillOverview,
     UserSkillSnapshot,
 )
-from src.services.mastery_evaluator import classify_mastery
 from src.services.auth_service import (
     authenticate_user,
     create_access_token,
@@ -54,6 +53,7 @@ from src.services.auth_service import (
     update_onboarding,
 )
 from src.services.email_service import send_password_reset_email
+from src.services.mastery_evaluator import classify_mastery
 from src.services.password_reset_service import (
     PasswordResetError,
     confirm_password_reset,
@@ -142,7 +142,9 @@ _SKILL_LABELS = [
 
 def _resolve_skill_bucket(*parts: str | None) -> str | None:
     text = " ".join(part or "" for part in parts).lower()
-    if any(token in text for token in ("computer vision", "3d vision", "vision and language", "vision")):
+    if any(
+        token in text for token in ("computer vision", "3d vision", "vision and language", "vision")
+    ):
         return "Computer Vision"
     if any(token in text for token in ("natural language", "nlp", "language processing")):
         return "NLP"

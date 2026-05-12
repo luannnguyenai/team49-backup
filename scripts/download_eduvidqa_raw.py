@@ -16,10 +16,10 @@ import re
 import subprocess
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, NamedTuple
+from typing import Any, NamedTuple
 from urllib.parse import parse_qs, urlparse
-
 
 VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 VIDEO_COLUMNS = (
@@ -181,7 +181,9 @@ def load_video_records(path: Path) -> list[VideoRecord]:
                 continue
             video_id = extract_video_id(value)
             if video_id:
-                add(VideoRecord(video_id=video_id, source=f"{path}:{line_no}", row={"input": value}))
+                add(
+                    VideoRecord(video_id=video_id, source=f"{path}:{line_no}", row={"input": value})
+                )
     return records
 
 
@@ -239,7 +241,9 @@ def default_transcript_fetcher(video_id: str, languages: list[str]) -> list[dict
     api = YouTubeTranscriptApi()
     if hasattr(api, "fetch"):
         return _transcript_to_raw_data(api.fetch(video_id, languages=languages))
-    return _transcript_to_raw_data(YouTubeTranscriptApi.get_transcript(video_id, languages=languages))
+    return _transcript_to_raw_data(
+        YouTubeTranscriptApi.get_transcript(video_id, languages=languages)
+    )
 
 
 def normalize_ytdlp_json3(payload: dict[str, Any]) -> list[dict[str, Any]]:
@@ -582,7 +586,7 @@ def download_transcript_with_ytdlp_cache(
                     log_handle.write(line)
                     log_handle.flush()
                 return_code = process.wait()
-        except FileNotFoundError as exc:
+        except FileNotFoundError:
             message = "yt-dlp not found. Install with: pip install yt-dlp"
             print(message)
             write_ytdlp_log(log_path=log_path, command=command, error=message)
@@ -1033,7 +1037,9 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 append_jsonl(manifest_log, payload)
             if result.status == "blocked" and not args.continue_on_block:
-                print("Transcript fetch blocked; stopping early. Use --continue-on-block to override.")
+                print(
+                    "Transcript fetch blocked; stopping early. Use --continue-on-block to override."
+                )
                 return 2
 
         if args.mode in {"both", "videos"}:

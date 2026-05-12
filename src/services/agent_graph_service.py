@@ -15,13 +15,20 @@ except ModuleNotFoundError:  # pragma: no cover - dependency exists in productio
     END = START = StateGraph = None
     Command = interrupt = None
 
-from src.schemas.agent import AgentAction, AgentActionResumeRequest, AgentChatRequest, AgentChatResponse, AgentCitation
-from src.schemas.agent import AgentGuardrail
+from src.schemas.agent import (
+    AgentAction,
+    AgentActionResumeRequest,
+    AgentChatRequest,
+    AgentChatResponse,
+    AgentCitation,
+    AgentGuardrail,
+)
 from src.services.agent_action_commit_service import AgentActionCommitService
 from src.services.agent_external_research_service import AgentExternalResearchService
 from src.services.agent_graph_contracts import (
     AgentCheckpointState,
     AgentInProgressError,
+    AgentRoute,
     AgentRouterUnavailableError,
     AgentSlots,
     PendingClarification,
@@ -40,7 +47,6 @@ from src.services.agent_tool_nodes import AgentToolNodes
 from src.services.agentic_rag_pipeline import AgenticRAGPipeline
 from src.services.agentic_rag_tools import AgenticRAGToolExecutor
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
-
 
 RAG_AGENT_INTENTS = {
     "find_content",
@@ -130,7 +136,9 @@ class AgentGraphService:
             tool_executor=self.agentic_rag_tools,
             response_router=self.response_router,
         )
-        self._checkpointer = checkpointer or (InMemorySaver() if InMemorySaver is not None else None)
+        self._checkpointer = checkpointer or (
+            InMemorySaver() if InMemorySaver is not None else None
+        )
         self._graph = self._build_graph() if StateGraph is not None else None
         self._latest_checkpoint_ids: dict[str, str | None] = {}
 
@@ -272,7 +280,10 @@ class AgentGraphService:
             graph_run_id=lock_graph_run_id,
         ):
             retrying_failed_run = False
-            if existing_run is not None and getattr(existing_run, "status", None) == "failed_retryable":
+            if (
+                existing_run is not None
+                and getattr(existing_run, "status", None) == "failed_retryable"
+            ):
                 active_run = await self.graph_repo.get_active_run(thread_id=thread_id)
                 if active_run is not None and active_run.graph_run_id != str(existing_run.id):
                     raise AgentInProgressError(conversation_id, thread_id, active_run.graph_run_id)
@@ -289,8 +300,12 @@ class AgentGraphService:
                     incoming_message_id=sanitized_request.incoming_message_id,
                 )
                 if getattr(run, "existing", False):
-                    if getattr(run, "status", None) == "succeeded" and getattr(run, "response_ref", None):
-                        completed_after_race = await self.graph_repo.load_response_payload(run.response_ref)
+                    if getattr(run, "status", None) == "succeeded" and getattr(
+                        run, "response_ref", None
+                    ):
+                        completed_after_race = await self.graph_repo.load_response_payload(
+                            run.response_ref
+                        )
                         if completed_after_race is not None:
                             return completed_after_race
                     if getattr(run, "status", None) == "failed_retryable":
@@ -321,7 +336,9 @@ class AgentGraphService:
                         user_id=UUID(str(user_id)),
                         role="assistant",
                         markdown=response.answer.markdown,
-                        citations=[citation.model_dump(mode="json") for citation in response.citations],
+                        citations=[
+                            citation.model_dump(mode="json") for citation in response.citations
+                        ],
                         actions=[action.model_dump(mode="json") for action in response.actions],
                     )
                     await self._compact_thread_memory_if_needed(
@@ -380,16 +397,21 @@ class AgentGraphService:
         input_guardrail,
     ) -> AgentChatResponse:
         output_guardrail = self.pii_guardrail.sanitize_output(response.answer.markdown)
-        sanitized_answer = response.answer.model_copy(update={"markdown": output_guardrail.sanitized_text})
+        sanitized_answer = response.answer.model_copy(
+            update={"markdown": output_guardrail.sanitized_text}
+        )
 
         existing_guardrail = response.guardrail or AgentGuardrail()
         merged_guardrail = existing_guardrail.model_copy(
             update={
                 "input_redacted": existing_guardrail.input_redacted or input_guardrail.was_redacted,
-                "output_redacted": existing_guardrail.output_redacted or output_guardrail.was_redacted,
+                "output_redacted": existing_guardrail.output_redacted
+                or output_guardrail.was_redacted,
                 "blocked": existing_guardrail.blocked or output_guardrail.should_block,
                 "block_reason": existing_guardrail.block_reason or output_guardrail.block_reason,
-                "error_code": existing_guardrail.error_code or input_guardrail.error_code or output_guardrail.error_code,
+                "error_code": existing_guardrail.error_code
+                or input_guardrail.error_code
+                or output_guardrail.error_code,
             }
         )
 
@@ -695,7 +717,8 @@ class AgentGraphService:
             return self._route_new_request_after_pending(state)
         if decision.action == "approve":
             slots = AgentSlots(
-                raw_topic=payload.get("raw_topic") or payload.get("original_message", state["message"]),
+                raw_topic=payload.get("raw_topic")
+                or payload.get("original_message", state["message"]),
                 search_queries=[query for query in [payload.get("raw_topic")] if query],
                 search_scope="expanded_paths",
                 scope_expansion_approved=True,
@@ -874,7 +897,7 @@ class AgentGraphService:
                 intent=state["intent"],
                 allowed_course_ids=state["allowed_course_ids"],
                 current_path_course_ids=state.get("current_path_course_ids"),
-            )
+            ),
         }
 
     async def _policy_guard(self, state: dict) -> dict:
@@ -887,7 +910,7 @@ class AgentGraphService:
                 intent=state["intent"],
                 slots=slots,
                 allowed_course_ids=state["allowed_course_ids"],
-            )
+            ),
         }
 
     async def _agentic_rag(self, state: dict) -> dict:
@@ -1039,7 +1062,8 @@ class AgentGraphService:
                         "actions": [
                             action
                             for action in result.actions
-                            if not action.canonical_unit_id or action.canonical_unit_id in matched_ids
+                            if not action.canonical_unit_id
+                            or action.canonical_unit_id in matched_ids
                         ][:3],
                         "metadata": {
                             **result.metadata,
@@ -1332,7 +1356,9 @@ class AgentGraphService:
             },
         ]
 
-    def _recent_citation_result(self, state: dict, original_result: ToolResult) -> ToolResult | None:
+    def _recent_citation_result(
+        self, state: dict, original_result: ToolResult
+    ) -> ToolResult | None:
         if len(str(state.get("message") or "").split()) > 8:
             return None
         active = self._active_recent_citation(state)
@@ -1452,7 +1478,9 @@ class AgentGraphService:
             raw = raw_term.lower()
             if len(raw) > 3 or (len(raw) > 2 and raw_term.isupper()):
                 terms.add(raw)
-        for compactable in re.findall(r"[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)+", str(text or "").lower()):
+        for compactable in re.findall(
+            r"[a-zA-Z0-9]+(?:[-_][a-zA-Z0-9]+)+", str(text or "").lower()
+        ):
             compacted = re.sub(r"[^a-z0-9]+", "", compactable)
             if len(compacted) > 2:
                 terms.add(compacted)
@@ -1516,7 +1544,12 @@ class AgentGraphService:
             update = {**state, "tool_result": result}
             if (
                 state.get("candidate_intent")
-                in {"find_content", "explain_concept", "general_course_question", "navigate_to_unit"}
+                in {
+                    "find_content",
+                    "explain_concept",
+                    "general_course_question",
+                    "navigate_to_unit",
+                }
                 and not (slots.raw_topic or "").strip()
             ):
                 update["pending_clarification"] = self._build_retrieval_query_clarification(
@@ -1573,7 +1606,8 @@ class AgentGraphService:
                 state["allowed_course_ids"],
             )
             if result.citations and (
-                result.requires_evidence or result.metadata.get("evidence_verdict") == "related_match"
+                result.requires_evidence
+                or result.metadata.get("evidence_verdict") == "related_match"
             ):
                 compose_grounded = getattr(self.response_router, "compose_grounded_answer", None)
                 if compose_grounded is not None:
@@ -1605,9 +1639,9 @@ class AgentGraphService:
                                     },
                                 }
                             )
-                        elif slots.search_scope == "current_path" and len(state["allowed_course_ids"]) > len(
-                            state.get("current_path_course_ids") or []
-                        ):
+                        elif slots.search_scope == "current_path" and len(
+                            state["allowed_course_ids"]
+                        ) > len(state.get("current_path_course_ids") or []):
                             result = ToolResult(
                                 kind="clarification",
                                 answer_markdown=(
@@ -1721,7 +1755,9 @@ class AgentGraphService:
                         "excluded_search_path_ids": slots.excluded_search_path_ids,
                         "topic_options": [action.canonical_unit_id for action in topic_actions],
                         "topic_names": {
-                            action.canonical_unit_id: action.label.removeprefix("Learn about ").strip()
+                            action.canonical_unit_id: action.label.removeprefix(
+                                "Learn about "
+                            ).strip()
                             for action in topic_actions
                             if action.canonical_unit_id
                         },
@@ -1760,7 +1796,9 @@ class AgentGraphService:
             return {**state, "tool_result": result}
         if state["intent"] == "assess_knowledge":
             result = await self.tools.assessment_proposal(slots)
-            result = await self._persist_pending_action_for_result(state, result, "start_assessment")
+            result = await self._persist_pending_action_for_result(
+                state, result, "start_assessment"
+            )
             return {**state, "tool_result": result}
         if state["intent"] == "request_replan":
             result = await self.tools.replan_proposal()
@@ -1781,7 +1819,9 @@ class AgentGraphService:
                     )
                     return {**state, "tool_result": result}
             result = await self.tools.path_switch_proposal(slots)
-            result = await self._persist_pending_action_for_result(state, result, "request_path_switch")
+            result = await self._persist_pending_action_for_result(
+                state, result, "request_path_switch"
+            )
             return {**state, "tool_result": result}
 
         return {**state, "tool_result": await self.tools.clarify(state["message"])}
@@ -1947,7 +1987,9 @@ class AgentGraphService:
                 payload["target_path_id"] = slots.target_path
         return payload
 
-    async def resume_action(self, request: AgentActionResumeRequest, user_id: str) -> AgentChatResponse:
+    async def resume_action(
+        self, request: AgentActionResumeRequest, user_id: str
+    ) -> AgentChatResponse:
         if self.graph_repo is None:
             return AgentChatResponse(
                 conversation_id=request.conversation_id,
@@ -1964,7 +2006,9 @@ class AgentGraphService:
         )
         if completed is not None:
             return completed
-        active_run = await self.graph_repo.get_active_non_interrupted_run(thread_id=str(pending.thread_id))
+        active_run = await self.graph_repo.get_active_non_interrupted_run(
+            thread_id=str(pending.thread_id)
+        )
         if active_run is not None:
             raise AgentInProgressError(
                 str(pending.conversation_id),
@@ -1981,7 +2025,9 @@ class AgentGraphService:
                     message_id=str(uuid4()),
                     answer={"markdown": "Action was already completed.", "confidence": "partial"},
                 )
-            return self.composer.compose_action_error(request.conversation_id, f"invalid_status:{pending.status}")
+            return self.composer.compose_action_error(
+                request.conversation_id, f"invalid_status:{pending.status}"
+            )
         run = await self.graph_repo.create_run(
             conversation_id=str(pending.conversation_id),
             thread_id=str(pending.thread_id),
@@ -2006,9 +2052,9 @@ class AgentGraphService:
                         ),
                         config={"configurable": {"thread_id": str(pending.thread_id)}},
                     )
-                    self._latest_checkpoint_ids[str(pending.thread_id)] = await self._capture_checkpoint_id(
+                    self._latest_checkpoint_ids[
                         str(pending.thread_id)
-                    )
+                    ] = await self._capture_checkpoint_id(str(pending.thread_id))
                     response = self.composer.compose(
                         conversation_id=str(pending.conversation_id),
                         message_id=str(uuid4()),
@@ -2054,7 +2100,9 @@ class AgentGraphService:
     async def _resolve_pending_action_decision(self, pending, decision: dict) -> ToolResult:
         return await self.action_decisions.resolve(pending, decision)
 
-    async def _load_memory_ref(self, conversation_id: str, user_id: str, thread_id: str) -> str | None:
+    async def _load_memory_ref(
+        self, conversation_id: str, user_id: str, thread_id: str
+    ) -> str | None:
         return await self.thread_memory.load_memory_ref(conversation_id, user_id, thread_id)
 
     async def _load_recent_message_context(self, conversation_id: str, user_id: str) -> list[dict]:

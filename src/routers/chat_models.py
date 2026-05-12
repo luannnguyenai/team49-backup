@@ -6,7 +6,6 @@ from fastapi import APIRouter
 
 from src.services.model_registry import check_all_chat_model_availability
 
-
 chat_models_router = APIRouter(prefix="/api/chat-models", tags=["chat-models"])
 
 

@@ -14,16 +14,17 @@ connect unit slugs to legacy lecture IDs and video files.
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from functools import lru_cache
 from pathlib import Path
-import re
 from typing import Any
 
 from sqlalchemy import select
 
-from src.data_paths import CS231N_DIR, UNITS_FILE as BOOTSTRAP_UNITS_FILE
-from src.data_paths import CS224N_DIR, CS230_DIR
+from src.config import settings
+from src.data_paths import CS224N_DIR, CS230_DIR, CS231N_DIR
+from src.data_paths import UNITS_FILE as BOOTSTRAP_UNITS_FILE
 from src.models.canonical import CanonicalUnit
 from src.models.course import (
     Course,
@@ -39,15 +40,13 @@ from src.schemas.course import (
     LearningUnitSummary,
     TutorContextPayload,
 )
-from src.config import settings
 from src.services.asset_delivery import AssetDeliveryConfigError, build_cloudfront_url
 from src.services.asset_signing import build_signed_asset_url
+from src.services.course_bootstrap_service import get_bootstrap_course
 from src.services.legacy_lecture_adapter import (
     build_course_runtime_lecture_id,
     build_tutor_bridge_payload,
-    normalize_legacy_lecture_id,
 )
-from src.services.course_bootstrap_service import get_bootstrap_course
 
 # ---------------------------------------------------------------------------
 # Asset URL resolution (local /data signed URL vs AWS CloudFront URL)
@@ -125,10 +124,7 @@ def _manifest_lookup(kind: str, course_slug: str, lecture_num: int) -> str | Non
 
 
 def _manifest_available_lectures(kind: str, course_slug: str) -> set[int]:
-    return {
-        int(k)
-        for k in _load_asset_manifest().get(kind, {}).get(course_slug, {})
-    }
+    return {int(k) for k in _load_asset_manifest().get(kind, {}).get(course_slug, {})}
 
 
 def _read_json(path: Path) -> Any:
@@ -315,7 +311,9 @@ async def get_learning_unit_payload(
             local_disk_path=CS231N_DIR / "videos" / video_filename,
         )
     if video_url is None:
-        fallback_video_filename = _find_course_video_filename(course_slug, unit_row.get("order_index"))
+        fallback_video_filename = _find_course_video_filename(
+            course_slug, unit_row.get("order_index")
+        )
         if fallback_video_filename:
             course_dir = _course_dir_for_slug(course_slug)
             if course_dir is not None:
@@ -338,9 +336,7 @@ async def get_learning_unit_payload(
         video_filename=video_filename or fallback_video_filename,
     )
     tutor_enabled = (
-        unit_row["status"] == "ready"
-        and video_url is not None
-        and runtime_lecture_id is not None
+        unit_row["status"] == "ready" and video_url is not None and runtime_lecture_id is not None
     )
     tutor_bridge = build_tutor_bridge_payload(
         tutor_enabled=tutor_enabled,
@@ -529,13 +525,12 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
             runtime_lecture_id = build_course_runtime_lecture_id(
                 course_slug=course_slug,
                 lecture_order=lecture_num,
-                explicit_lecture_id=canonical_unit.lecture_id if canonical_unit is not None else None,
+                explicit_lecture_id=canonical_unit.lecture_id
+                if canonical_unit is not None
+                else None,
                 video_filename=video_filename,
             )
-            tutor_enabled = (
-                video_url is not None
-                and runtime_lecture_id is not None
-            )
+            tutor_enabled = video_url is not None and runtime_lecture_id is not None
 
             tutor_bridge = build_tutor_bridge_payload(
                 tutor_enabled=tutor_enabled,
@@ -552,7 +547,9 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
                     "id": str(unit.id),
                     "slug": unit.slug,
                     "title": unit.title,
-                    "lecture_title": canonical_unit.lecture_title if canonical_unit is not None else section.title,
+                    "lecture_title": canonical_unit.lecture_title
+                    if canonical_unit is not None
+                    else section.title,
                     "lecture_order": lecture_num,
                     "start_seconds": content_ref.get("start_s") if content_ref else None,
                     "unit_type": unit.unit_type.value,
@@ -592,12 +589,12 @@ async def get_lecture_toc(course_slug: str, lecture_order: int) -> dict | None:
     """
     try:
         from sqlalchemy import func
+
         from src.database import async_session_factory
 
         async with async_session_factory() as db:
             result = await db.execute(
-                select(CanonicalUnit)
-                .where(
+                select(CanonicalUnit).where(
                     func.lower(CanonicalUnit.course_id) == course_slug.lower(),
                     CanonicalUnit.lecture_order == lecture_order,
                 )

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from uuid import UUID, uuid4
-
 from datetime import UTC, datetime
+from uuid import UUID, uuid4
 
 from sqlalchemy import delete, desc, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,7 +27,9 @@ class AgentConversationRepository:
         )
         return list(result.scalars().all())
 
-    async def create_conversation(self, user_id: UUID, title: str = "New chat") -> AgentConversation:
+    async def create_conversation(
+        self, user_id: UUID, title: str = "New chat"
+    ) -> AgentConversation:
         row = AgentConversation(
             user_id=user_id,
             title=title,
@@ -54,7 +55,9 @@ class AgentConversationRepository:
         await self.session.refresh(memory)
         return row
 
-    async def get_conversation(self, conversation_id: UUID, user_id: UUID) -> AgentConversation | None:
+    async def get_conversation(
+        self, conversation_id: UUID, user_id: UUID
+    ) -> AgentConversation | None:
         result = await self.session.execute(
             select(AgentConversation).where(
                 AgentConversation.id == conversation_id,
@@ -87,7 +90,9 @@ class AgentConversationRepository:
         await self.session.flush()
         return bool(result.rowcount)
 
-    async def clear_conversation(self, conversation_id: UUID, user_id: UUID) -> AgentConversation | None:
+    async def clear_conversation(
+        self, conversation_id: UUID, user_id: UUID
+    ) -> AgentConversation | None:
         conversation = await self.get_conversation(conversation_id, user_id)
         if conversation is None:
             return None
@@ -171,7 +176,7 @@ class AgentConversationRepository:
         if role == "user":
             conversation = await self.get_conversation(conversation_id, user_id)
             if conversation is not None and (conversation.title or "").strip() in ("", "New chat"):
-                values["title"] = (preview[:60] or "New chat")
+                values["title"] = preview[:60] or "New chat"
         await self.session.execute(
             update(AgentConversation)
             .where(AgentConversation.id == conversation_id, AgentConversation.user_id == user_id)
@@ -192,9 +197,7 @@ class AgentConversationRepository:
         ]
         if thread_id is not None:
             filters.append(AgentConversationMemory.thread_id == thread_id)
-        result = await self.session.execute(
-            select(AgentConversationMemory).where(*filters)
-        )
+        result = await self.session.execute(select(AgentConversationMemory).where(*filters))
         return result.scalar_one_or_none()
 
     async def upsert_memory(
@@ -230,7 +233,9 @@ class AgentConversationRepository:
         await self.session.flush()
         return memory
 
-    async def clear_memory(self, conversation_id: UUID, user_id: UUID) -> AgentConversationMemory | None:
+    async def clear_memory(
+        self, conversation_id: UUID, user_id: UUID
+    ) -> AgentConversationMemory | None:
         conversation = await self.get_conversation(conversation_id, user_id)
         if conversation is None:
             return None
