@@ -111,6 +111,10 @@ class Settings(BaseSettings):
         default=False,
         description="Enable the experimental external web/paper search mode.",
     )
+    semantic_scholar_api_key: str = Field(
+        default="",
+        description="Optional Semantic Scholar API key for external paper search.",
+    )
     chat_model_health_timeout_seconds: float = Field(
         default=8.0,
         ge=1.0,
