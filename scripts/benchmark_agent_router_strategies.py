@@ -27,9 +27,34 @@ StrategyName = Literal[
     "fast_model",
     "deterministic",
     "deterministic_compact",
+    "content_fastpath_compact",
     "compact_all",
     "retrieval_first",
+    "retrieval_first_compact",
 ]
+
+
+def default_strategy_names() -> list[StrategyName]:
+    return [
+        "baseline_0_8b",
+        "compact_all",
+        "deterministic",
+        "content_fastpath_compact",
+        "retrieval_first_compact",
+    ]
+
+
+def needs_compact_model(strategies: list[StrategyName]) -> bool:
+    return any(
+        item
+        in (
+            "deterministic_compact",
+            "content_fastpath_compact",
+            "compact_all",
+            "retrieval_first_compact",
+        )
+        for item in strategies
+    )
 
 
 @dataclass(frozen=True)
@@ -223,6 +248,35 @@ def deterministic_content_route(case: BenchmarkCase) -> CompactRouteOutput:
     )
 
 
+def deterministic_content_fast_path(case: BenchmarkCase) -> CompactRouteOutput | None:
+    message = case.message.strip()
+    lowered = message.casefold()
+    if any(
+        re.search(rf"(?<!\w){re.escape(needle)}(?!\w)", lowered)
+        for _, needles in CONTROL_PATTERNS
+        for needle in needles
+    ):
+        return None
+
+    if case.active_topic and len(message.split()) <= 8:
+        return CompactRouteOutput(
+            intent="find_content",
+            topic=_clean_topic(f"{case.active_topic} {message}"),
+            confidence=0.88,
+            clarify=None,
+        )
+
+    topic = _extract_content_topic(message)
+    if topic:
+        return CompactRouteOutput(
+            intent="find_content",
+            topic=topic,
+            confidence=0.86,
+            clarify=None,
+        )
+    return None
+
+
 def route_quality(case: BenchmarkCase, output: CompactRouteOutput) -> dict[str, Any]:
     intent_ok = output.intent == case.expected_intent or (
         case.expected_intent == "find_content" and output.intent == "explain_concept"
@@ -362,6 +416,11 @@ async def run_strategy_case(
             if output.intent == "clarify" and output.confidence < 0.65:
                 assert compact_model is not None
                 output = compact_router_route(case, compact_model)
+        elif strategy == "content_fastpath_compact":
+            output = deterministic_content_fast_path(case)
+            if output is None:
+                assert compact_model is not None
+                output = compact_router_route(case, compact_model)
         elif strategy == "compact_all":
             assert compact_model is not None
             output = compact_router_route(case, compact_model)
@@ -374,6 +433,18 @@ async def run_strategy_case(
                     confidence=0.7,
                     clarify=None,
                 )
+        elif strategy == "retrieval_first_compact":
+            output = deterministic_content_fast_path(case)
+            if output is None and case.route_context and case.route_context.get("retrieved_topic"):
+                output = CompactRouteOutput(
+                    intent="find_content",
+                    topic=str(case.route_context["retrieved_topic"]),
+                    confidence=0.75,
+                    clarify=None,
+                )
+            if output is None:
+                assert compact_model is not None
+                output = compact_router_route(case, compact_model)
         else:
             raise ValueError(f"unknown strategy: {strategy}")
     except Exception as exc:
@@ -405,7 +476,7 @@ async def run_benchmark(
 ) -> list[StrategyResult]:
     structured_router = build_production_agent_router() if "baseline_0_8b" in strategies else None
     fast_router = _build_fast_model_router() if "fast_model" in strategies else None
-    needs_compact = any(item in strategies for item in ("deterministic_compact", "compact_all"))
+    needs_compact = needs_compact_model(strategies)
     compact_model = _build_compact_router_model() if needs_compact else None
 
     results: list[StrategyResult] = []
@@ -456,7 +527,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repeat", type=int, default=1)
     parser.add_argument(
         "--strategies",
-        default="baseline_0_8b,fast_model,deterministic,deterministic_compact,compact_all,retrieval_first",
+        default=",".join(default_strategy_names()),
     )
     parser.add_argument("--output", default=None, help="Optional JSON output path.")
     return parser.parse_args()
