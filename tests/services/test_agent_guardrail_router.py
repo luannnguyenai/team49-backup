@@ -214,7 +214,7 @@ async def test_agent_chat_exact_greeting_returns_template_after_guardrail_withou
 
     assert response.answer.markdown == "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?"
     assert response.answer.confidence == "fallback"
-    assert guardrail_router.messages == ["Xin chào"]
+    assert guardrail_router.messages == []
     assert graph_router.messages == []
 
 
@@ -239,7 +239,7 @@ async def test_agent_chat_exact_third_language_greeting_returns_english_template
     )
 
     assert response.answer.markdown == "Hi! What AI/ML topic would you like help with today?"
-    assert guardrail_router.messages == ["Bonjour"]
+    assert guardrail_router.messages == []
     assert graph_router.messages == []
 
 
