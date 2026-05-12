@@ -11,9 +11,8 @@ from langchain.chat_models import init_chat_model
 from pydantic import BaseModel, Field, ValidationError
 
 from src.config import settings
-from src.services.chat_model_factory import build_chat_model_kwargs
 from src.services.agent_prompt_manager import get_agent_prompt_manager
-
+from src.services.chat_model_factory import build_chat_model_kwargs
 
 SafetyLabel = Literal["SAFE", "HARMFUL"]
 TopicLabel = Literal["ON_TOPIC", "OFF_TOPIC", "AMBIGUOUS", "N_A"]
@@ -69,7 +68,7 @@ class GuardrailDecision(BaseModel):
     selected_kp_ids: list[str] = Field(default_factory=list)
 
     @classmethod
-    def allow(cls) -> "GuardrailDecision":
+    def allow(cls) -> GuardrailDecision:
         return cls(
             safety_label="SAFE",
             topic_label="ON_TOPIC",
