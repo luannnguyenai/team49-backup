@@ -5,6 +5,7 @@ import re
 from datetime import UTC, datetime, timedelta
 from inspect import signature
 from types import SimpleNamespace
+from typing import Any
 from uuid import UUID, uuid4
 
 try:
@@ -16,6 +17,7 @@ except ModuleNotFoundError:  # pragma: no cover - dependency exists in productio
     END = START = StateGraph = None
     Command = interrupt = None
 
+from src.config import settings
 from src.schemas.agent import (
     AgentAction,
     AgentActionResumeRequest,
@@ -26,7 +28,6 @@ from src.schemas.agent import (
     AgentFallback,
     AgentGuardrail,
 )
-from src.config import settings
 from src.services.agent_action_commit_service import AgentActionCommitService
 from src.services.agent_external_research_service import AgentExternalResearchService
 from src.services.agent_graph_contracts import (
@@ -58,8 +59,10 @@ from src.services.guardrail_router import (
     guardrail_user_message,
 )
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
-from src.services.language_normalization import get_input_language_normalizer
-from src.services.language_normalization import LanguageNormalizationResult
+from src.services.language_normalization import (
+    LanguageNormalizationResult,
+    get_input_language_normalizer,
+)
 
 logger = logging.getLogger(__name__)
 
