@@ -201,37 +201,45 @@ async def _build_canonical_user_skill_overview(
 
 async def _is_login_allowed(client_ip: str) -> bool:
     try:
-        redis = get_redis()
-    except RuntimeError:
-        return _login_limiter.is_allowed(client_ip)
+        try:
+            redis = get_redis()
+        except RuntimeError:
+            return _login_limiter.is_allowed(client_ip)
 
-    return await check_rate_limit(
-        redis,
-        f"rl:login:{client_ip}",
-        limit=settings.rate_limit_login_per_minute,
-        window_sec=60,
-    )
+        return await check_rate_limit(
+            redis,
+            f"rl:login:{client_ip}",
+            limit=settings.rate_limit_login_per_minute,
+            window_sec=60,
+        )
+    except Exception:
+        # Fallback to in-memory limiter if Redis call fails
+        return _login_limiter.is_allowed(client_ip)
 
 
 async def _is_forgot_password_allowed(client_ip: str, email: str) -> bool:
     try:
-        redis = get_redis()
-    except RuntimeError:
-        return _forgot_ip_limiter.is_allowed(client_ip) and _forgot_email_limiter.is_allowed(email)
+        try:
+            redis = get_redis()
+        except RuntimeError:
+            return _forgot_ip_limiter.is_allowed(client_ip) and _forgot_email_limiter.is_allowed(email)
 
-    ip_allowed = await check_rate_limit(
-        redis,
-        f"rl:forgot-password:ip:{client_ip}",
-        limit=settings.rate_limit_forgot_password_per_hour,
-        window_sec=3600,
-    )
-    email_allowed = await check_rate_limit(
-        redis,
-        f"rl:forgot-password:email:{email}",
-        limit=settings.rate_limit_forgot_password_per_hour,
-        window_sec=3600,
-    )
-    return ip_allowed and email_allowed
+        ip_allowed = await check_rate_limit(
+            redis,
+            f"rl:forgot-password:ip:{client_ip}",
+            limit=settings.rate_limit_forgot_password_per_hour,
+            window_sec=3600,
+        )
+        email_allowed = await check_rate_limit(
+            redis,
+            f"rl:forgot-password:email:{email}",
+            limit=settings.rate_limit_forgot_password_per_hour,
+            window_sec=3600,
+        )
+        return ip_allowed and email_allowed
+    except Exception:
+        # Fallback to in-memory limiter if Redis call fails
+        return _forgot_ip_limiter.is_allowed(client_ip) and _forgot_email_limiter.is_allowed(email)
 
 
 # ---------------------------------------------------------------------------
@@ -251,12 +259,30 @@ async def register(
 ) -> TokenPair:
     try:
         user = await register_user(db, body)
+        return _build_token_pair(user)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         )
-    return _build_token_pair(user)
+    except Exception as exc:
+        # Handle IntegrityError (duplicate email from race condition) or other system errors
+        from sqlalchemy.exc import IntegrityError
+
+        if isinstance(exc, IntegrityError):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="An account with this email already exists.",
+            )
+
+        # Log unexpected errors to help debugging
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Registration failed: {str(exc)}",
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -285,13 +311,22 @@ async def login(
 
     try:
         user = await authenticate_user(db, body.email, body.password)
+        return _build_token_pair(user)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(exc),
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return _build_token_pair(user)
+    except Exception as exc:
+        # Log unexpected errors (e.g. bcrypt or JWT issues) to help debugging
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(exc)}",
+        )
 
 
 @auth_router.post(
