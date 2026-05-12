@@ -21,7 +21,6 @@ from src.services.chat_model_factory import build_chat_model_kwargs
 from src.services.model_registry import DEFAULT_CHAT_MODEL_ID
 from src.services.openai_compatible_http_chat_model import OpenAICompatibleHTTPChatModel
 
-
 StrategyName = Literal[
     "baseline_fast_model",
     "baseline_0_8b",
