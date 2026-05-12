@@ -119,12 +119,12 @@ async def test_external_research_retries_truncated_outline_synthesis():
     assert responder.calls[1]["thought"]["quality_retry"] == "complete_external_answer"
 
 
-def test_external_research_plans_clean_cnn_queries_for_vietnamese_request():
+def test_external_research_plans_clean_cnn_queries_with_domain_context():
     service = AgentExternalResearchService()
 
     plan = service._plan_search("tìm thông tin về CNN")
 
-    assert plan == SearchPlan(tools=("web",), queries=("CNN",))
+    assert plan == SearchPlan(tools=("web",), queries=("CNN machine learning",))
 
 
 def test_external_research_selects_paper_tool_only_for_paper_intent():
