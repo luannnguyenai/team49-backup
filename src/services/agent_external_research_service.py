@@ -43,22 +43,43 @@ class AgentExternalResearchService:
         return self._respond(message, observed, recent_messages or [], plan=plan)
 
     def _plan_search(self, message: str) -> SearchPlan:
-        queries = tuple(self._plan_queries(message))
+        tools = self._select_tools(message)
+        queries = tuple(self._plan_queries(message, tools=tools))
         if not queries:
             return SearchPlan(tools=(), queries=())
-        return SearchPlan(tools=self._select_tools(message), queries=queries)
+        return SearchPlan(tools=tools, queries=queries)
 
-    def _plan_queries(self, message: str) -> list[str]:
+    def _plan_queries(self, message: str, *, tools: tuple[str, ...] | None = None) -> list[str]:
         normalized = re.sub(r"\s+", " ", message).strip()
         if not normalized:
             return []
         cleaned = self._clean_query(normalized)
+        if tools == ("web",):
+            cleaned = self._with_domain_context(cleaned)
         queries = [cleaned]
         if normalized.casefold() != cleaned.casefold() and not self._looks_like_noisy_query(
             normalized
         ):
             queries.append(normalized)
         return list(dict.fromkeys(queries))[:2]
+
+    def _with_domain_context(self, query: str) -> str:
+        if self._has_domain_context(query):
+            return query
+        tokens = re.findall(r"[A-Za-z0-9][A-Za-z0-9+-]*", query)
+        if len(tokens) <= 2:
+            return f"{query} machine learning"
+        return query
+
+    @staticmethod
+    def _has_domain_context(query: str) -> bool:
+        return re.search(
+            r"\b(ai|artificial intelligence|machine learning|deep learning|ml|"
+            r"neural network|computer vision|nlp|natural language processing|"
+            r"model|models|training|inference)\b",
+            query,
+            flags=re.IGNORECASE,
+        ) is not None
 
     def _select_tools(self, message: str) -> tuple[str, ...]:
         lowered = message.casefold()
