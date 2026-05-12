@@ -23,17 +23,6 @@ from langgraph.prebuilt import ToolNode
 from sqlalchemy import or_, select
 
 from src.config import settings
-from src.services.guardrail_router import (
-    GuardrailDecision,
-    GuardrailScopePacket,
-    build_guardrail_router_client,
-    guardrail_user_message,
-)
-from src.services.language_normalization import (
-    InputLanguageNormalizer,
-    LanguageNormalizationResult,
-    get_input_language_normalizer,
-)
 from src.core.observability import (
     build_langfuse_metadata,
     get_langfuse_client,
@@ -49,7 +38,18 @@ from src.database import tutor_thread_async_session_factory
 from src.models.canonical import CanonicalUnit
 from src.models.course import Course, LearningUnit
 from src.models.store import Chapter, Lecture, QAHistory, TranscriptLine
+from src.services.guardrail_router import (
+    GuardrailDecision,
+    GuardrailScopePacket,
+    build_guardrail_router_client,
+    guardrail_user_message,
+)
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
+from src.services.language_normalization import (
+    InputLanguageNormalizer,
+    LanguageNormalizationResult,
+    get_input_language_normalizer,
+)
 from src.services.lecture_scope_service import get_lecture_scope_metadata
 from src.services.llm_rate_limiter import enforce_llm_rate_limit
 from src.services.model_registry import (
