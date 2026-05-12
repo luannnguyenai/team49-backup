@@ -93,7 +93,9 @@ function getTutorAskUrl(): string {
       return directUrl.pathname;
     }
 
-    return directUrl.toString();
+    // Keep browser traffic on the current origin so auth cookies and stream
+    // proxying continue to work even when NEXT_PUBLIC_API_URL points elsewhere.
+    return "/api/lectures/ask";
   } catch {
     return "/api/lectures/ask";
   }

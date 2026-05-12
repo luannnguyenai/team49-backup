@@ -39,8 +39,8 @@ describe("agent api", () => {
     );
   });
 
-  it("uses the public backend URL for browser chat requests when configured", async () => {
-    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://localhost:8000/");
+  it("falls back to the same-origin proxy for browser chat requests when the public backend URL is cross-origin", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://api.example.com/");
     const { AGENT_REQUEST_TIMEOUT_MS, agentApi } = await import("@/features/agent/api");
     postMock.mockResolvedValueOnce({ data: { ok: true } });
 
@@ -51,7 +51,7 @@ describe("agent api", () => {
     });
 
     expect(postMock).toHaveBeenCalledWith(
-      "http://localhost:8000/api/agent/chat",
+      "/api/agent/chat",
       {
         message: "find RCNN",
         incomingMessageId: "msg-3",
