@@ -107,6 +107,10 @@ class Settings(BaseSettings):
         ge=1,
         description="Maximum output tokens for guardrail router JSON decisions.",
     )
+    external_research_enabled: bool = Field(
+        default=False,
+        description="Enable the experimental external web/paper search mode.",
+    )
     chat_model_health_timeout_seconds: float = Field(
         default=8.0,
         ge=1.0,
