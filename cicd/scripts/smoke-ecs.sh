@@ -8,6 +8,15 @@ http_code() {
   curl --silent --show-error --location --output /tmp/smoke-body --write-out "%{http_code}" "$url"
 }
 
+normalize_route() {
+  local route="$1"
+  if [[ "$route" =~ ^[A-Za-z]:/ ]] && [[ "$route" == *"/api/"* ]]; then
+    route="/${route#*/api/}"
+    route="/api/${route#/}"
+  fi
+  printf '%s\n' "$route"
+}
+
 require_200() {
   local url="$1"
   local code
@@ -32,7 +41,8 @@ case "$mode" in
   db)
     : "${PRODUCTION_BACKEND_URL:?PRODUCTION_BACKEND_URL is required}"
     : "${SMOKE_DB_ROUTE:?SMOKE_DB_ROUTE is required}"
-    require_200 "${PRODUCTION_BACKEND_URL%/}${SMOKE_DB_ROUTE}"
+    normalized_db_route="$(normalize_route "$SMOKE_DB_ROUTE")"
+    require_200 "${PRODUCTION_BACKEND_URL%/}${normalized_db_route}"
     ;;
   cloudfront)
     : "${CLOUDFRONT_SMOKE_URL:?CLOUDFRONT_SMOKE_URL is required}"
