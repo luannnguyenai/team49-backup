@@ -7,6 +7,7 @@ import { BookOpen, TrendingUp, Clock, Play } from "lucide-react";
 
 import CourseStatusBadge from "@/components/course/CourseStatusBadge";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import SegmentedControl from "@/components/ui/SegmentedControl";
 import {
   buildDashboardCourseCardModel,
   filterDashboardCourses,
@@ -41,12 +42,12 @@ function StatCard({
   label: string;
 }) {
   return (
-    <div className="card flex items-center gap-4">
-      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
+    <div className="card flex items-center gap-3 p-4 sm:gap-4">
+      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconBg} sm:h-12 sm:w-12`}>
         {icon}
       </div>
       <div>
-        <p className="text-2xl font-bold text-text-strong">{value}</p>
+        <p className="text-xl font-bold text-text-strong sm:text-2xl">{value}</p>
         <p className="text-sm text-text-body">{label}</p>
       </div>
     </div>
@@ -57,9 +58,9 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
   const model = buildDashboardCourseCardModel(course);
 
   return (
-    <div className="card flex flex-col overflow-hidden p-0 transition-shadow group hover:shadow-brand-soft">
+    <div className="card group flex flex-col overflow-hidden p-0 transition-shadow hover:shadow-brand-soft">
       <div
-        className={`relative flex h-36 items-center justify-center hero-gradient`}
+        className="relative flex h-28 items-center justify-center hero-gradient sm:h-32 lg:h-36"
       >
         <BookOpen className="h-12 w-12 text-white opacity-30" />
         <div className="absolute right-3 top-3">
@@ -67,7 +68,7 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
         <div>
           <h3 className="line-clamp-2 font-semibold leading-snug text-text-strong">
             {course.title}
@@ -95,10 +96,7 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
           </div>
         ) : null}
 
-        <Link
-          href={model.href}
-          className="btn-primary mt-auto"
-        >
+        <Link href={model.href} className="btn-primary mt-auto justify-center">
           <Play className="h-3.5 w-3.5" />
           {model.ctaLabel}
         </Link>
@@ -137,8 +135,8 @@ export default function DashboardPage() {
   const noRecommendations = activeTab === "for-you" && filteredByTab.length === 0;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 animate-fade-in">
-      <div>
+    <div className="mx-auto max-w-7xl space-y-6 animate-fade-in sm:space-y-8">
+      <div className="space-y-3">
         <h1 className="text-2xl font-bold text-text-strong">
           Welcome back, {firstName}! 👋
         </h1>
@@ -147,53 +145,21 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {loading ? (
-        <div className="flex h-24 items-center justify-center">
-          <LoadingSpinner size="md" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <StatCard
-            icon={<BookOpen className="h-6 w-6 text-stat-courses" />}
-            iconBg="bg-stat-courses-soft"
-            value={String(courses.length)}
-            label="Courses in catalog"
-          />
-          <StatCard
-            icon={<TrendingUp className="h-6 w-6 text-stat-progress" />}
-            iconBg="bg-stat-progress-soft"
-            value={`${avgScore}%`}
-            label="Average progress"
-          />
-          <StatCard
-            icon={<Clock className="h-6 w-6 text-stat-time" />}
-            iconBg="bg-stat-time-soft"
-            value={`${totalHours}h`}
-            label="Total study time"
-          />
-        </div>
-      )}
-
       <div>
-        <div className="mb-4">
+        <div className="mb-4 space-y-2">
           <h2 className="text-lg font-bold text-text-strong">Explore courses</h2>
+          <p className="text-sm text-text-body">
+            Start with the clearest next step, then branch into the wider catalog.
+          </p>
         </div>
 
-        <div className="mb-6 flex gap-1 rounded-xl bg-surface-page p-1 w-fit">
-          {TABS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
-                activeTab === key
-                  ? "bg-surface-card text-primary-700 shadow-sm dark:text-primary-300"
-                  : "text-text-body hover:bg-surface-card/60"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          ariaLabel="Course filters"
+          className="mb-6 w-full max-w-full overflow-x-auto sm:w-auto"
+          value={activeTab}
+          onChange={setActiveTab}
+          options={TABS.map(({ key, label }) => ({ value: key, label }))}
+        />
 
         {loading ? (
           <div className="flex h-40 items-center justify-center">
@@ -228,6 +194,33 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {loading ? (
+        <div className="flex h-24 items-center justify-center">
+          <LoadingSpinner size="md" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+          <StatCard
+            icon={<BookOpen className="h-6 w-6 text-stat-courses" />}
+            iconBg="bg-stat-courses-soft"
+            value={String(courses.length)}
+            label="Courses in catalog"
+          />
+          <StatCard
+            icon={<TrendingUp className="h-6 w-6 text-stat-progress" />}
+            iconBg="bg-stat-progress-soft"
+            value={`${avgScore}%`}
+            label="Average progress"
+          />
+          <StatCard
+            icon={<Clock className="h-6 w-6 text-stat-time" />}
+            iconBg="bg-stat-time-soft"
+            value={`${totalHours}h`}
+            label="Total study time"
+          />
+        </div>
+      )}
     </div>
   );
 }

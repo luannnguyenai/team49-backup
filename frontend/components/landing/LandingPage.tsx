@@ -80,7 +80,7 @@ export default function LandingPage() {
           className="landing-panel relative overflow-hidden border-b border-border-subtle dark:border-slate-800 md:snap-start"
         >
           <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_45%,#ecfeff_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.24),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.2),_transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_48%,#082f49_100%)]" />
-          <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl gap-14 px-4 pb-16 pt-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-center lg:pb-20 lg:pt-10">
+          <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl gap-10 px-4 pb-12 pt-5 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-center lg:gap-14 lg:pb-20 lg:pt-10">
             <ScrollReveal className="space-y-8">
               <SectionLabel>Structured learning experience</SectionLabel>
 
@@ -94,17 +94,17 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/register"
-                  className="btn-primary px-6 py-3"
+                  className="btn-primary w-full justify-center px-6 py-3 sm:w-auto"
                 >
                   Create your account
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/login"
-                  className="btn-secondary px-6 py-3"
+                  className="btn-secondary w-full justify-center px-6 py-3 sm:w-auto"
                 >
                   Sign in
                 </Link>
@@ -116,7 +116,7 @@ export default function LandingPage() {
                     as="article"
                     key={title}
                     delayMs={80}
-                    className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.35)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/75"
+                    className="rounded-3xl border border-white/70 bg-white/70 p-4 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.35)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/75 sm:p-5"
                   >
                     <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl hero-gradient text-white">
                       <Icon className="h-5 w-5" />

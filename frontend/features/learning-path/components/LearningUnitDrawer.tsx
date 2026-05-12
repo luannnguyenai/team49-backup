@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
+import BottomSheet from "@/components/ui/BottomSheet";
 import { learningUnitApi } from "@/lib/api";
 import type { LearningUnitContentById } from "@/types";
 import { formatDurationFromHours } from "../lib/duration";
@@ -33,6 +34,7 @@ export default function LearningUnitDrawer() {
 
   const [content, setContent] = useState<LearningUnitContentById | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const lastActiveRef = useRef<Element | null>(null);
 
@@ -44,11 +46,28 @@ export default function LearningUnitDrawer() {
   const previous = selectedIndex > 0 ? ordered[selectedIndex - 1] : null;
   const next = selectedIndex >= 0 && selectedIndex < ordered.length - 1 ? ordered[selectedIndex + 1] : null;
   const isOpen = Boolean(selectedItem || selectedSection);
+  const title = selectedSection?.title ?? selectedItem?.learning_unit_title ?? "Lesson details";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const updateIsMobile = () => setIsMobile(mediaQuery.matches);
+
+    updateIsMobile();
+    mediaQuery.addEventListener("change", updateIsMobile);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateIsMobile);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
     lastActiveRef.current = document.activeElement;
-    closeButtonRef.current?.focus();
+    if (!isMobile) {
+      closeButtonRef.current?.focus();
+    }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeDrawer();
     };
@@ -57,7 +76,7 @@ export default function LearningUnitDrawer() {
       window.removeEventListener("keydown", onKeyDown);
       if (lastActiveRef.current instanceof HTMLElement) lastActiveRef.current.focus();
     };
-  }, [closeDrawer, isOpen]);
+  }, [closeDrawer, isMobile, isOpen]);
 
   useEffect(() => {
     if (!selectedItem) {
@@ -82,6 +101,100 @@ export default function LearningUnitDrawer() {
 
   if (!isOpen) return null;
 
+  const drawerContent = selectedSection ? (
+    <div className="space-y-3">
+      <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+        {selectedSection.items.length} lessons in this group.
+      </p>
+      {selectedSection.items.map((item) => (
+        <button key={item.id} type="button" onClick={() => selectItem(item.id)} className="w-full rounded-xl border p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-900" style={{ borderColor: "var(--border)" }}>
+          <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{item.learning_unit_title}</p>
+          <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>{getStatusLabel(item.status)}</p>
+        </button>
+      ))}
+    </div>
+  ) : selectedItem ? (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
+          <p style={{ color: "var(--text-muted)" }}>Group</p>
+          <p className="font-medium" style={{ color: "var(--text-primary)" }}>{selectedItem.section_title ?? "Other"}</p>
+        </div>
+        <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
+          <p style={{ color: "var(--text-muted)" }}>Week / duration</p>
+          <p className="font-medium" style={{ color: "var(--text-primary)" }}>
+            Week {selectedItem.week_number ?? 1} · {formatDurationFromHours(selectedItem.estimated_hours) ?? "0 min"}
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Status</p>
+        <span
+          className="inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium"
+          style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+        >
+          {getStatusLabel(selectedItem.status)}
+        </span>
+      </div>
+
+      <div className="min-h-[7rem]">
+        <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Description</p>
+        {contentError ? (
+          <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-200">{contentError}</p>
+        ) : content ? (
+          <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
+            {summarizeMarkdown(content.content_markdown) ?? "No detailed description is available yet."}
+          </p>
+        ) : (
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading description...</p>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between gap-2">
+        {previous ? (
+          <button
+            type="button"
+            className="rounded-lg border px-3 py-2 text-sm"
+            style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+            onClick={() => selectItem(previous.id)}
+          >
+            Previous lesson
+          </button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
+        {next ? (
+          <button
+            type="button"
+            className="rounded-lg border px-3 py-2 text-sm"
+            style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+            onClick={() => selectItem(next.id)}
+          >
+            Next lesson
+          </button>
+        ) : (
+          <span aria-hidden="true" />
+        )}
+      </div>
+
+      <Link
+        href={learningPlayerHref(selectedItem)}
+        className="flex w-full items-center justify-center rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+      >
+        Start learning
+      </Link>
+    </div>
+  ) : null;
+
+  if (isMobile) {
+    return (
+      <BottomSheet open={isOpen} onOpenChange={(open) => { if (!open) closeDrawer(); }} title={title}>
+        {drawerContent}
+      </BottomSheet>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <button className="absolute inset-0 bg-slate-950/30" aria-label="Close details panel" onClick={closeDrawer} />
@@ -92,99 +205,14 @@ export default function LearningUnitDrawer() {
               {selectedSection ? "Lesson group" : "Lesson"}
             </p>
             <h2 className="mt-1 text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-              {selectedSection?.title ?? selectedItem?.learning_unit_title}
+              {title}
             </h2>
           </div>
           <button ref={closeButtonRef} type="button" onClick={closeDrawer} className="rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close">
             <X className="h-5 w-5" />
           </button>
         </div>
-
-        {selectedSection ? (
-          <div className="space-y-3">
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {selectedSection.items.length} lessons in this group.
-            </p>
-            {selectedSection.items.map((item) => (
-              <button key={item.id} type="button" onClick={() => selectItem(item.id)} className="w-full rounded-xl border p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-900" style={{ borderColor: "var(--border)" }}>
-                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{item.learning_unit_title}</p>
-                <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>{getStatusLabel(item.status)}</p>
-              </button>
-            ))}
-          </div>
-        ) : selectedItem ? (
-          <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
-                <p style={{ color: "var(--text-muted)" }}>Group</p>
-                <p className="font-medium" style={{ color: "var(--text-primary)" }}>{selectedItem.section_title ?? "Other"}</p>
-              </div>
-              <div className="rounded-xl border p-3" style={{ borderColor: "var(--border)" }}>
-                <p style={{ color: "var(--text-muted)" }}>Week / duration</p>
-                <p className="font-medium" style={{ color: "var(--text-primary)" }}>
-                  Week {selectedItem.week_number ?? 1} · {formatDurationFromHours(selectedItem.estimated_hours) ?? "0 min"}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Status</p>
-              <span
-                className="inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium"
-                style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
-              >
-                {getStatusLabel(selectedItem.status)}
-              </span>
-            </div>
-
-            <div className="min-h-[7rem]">
-              <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Description</p>
-              {contentError ? (
-                <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-200">{contentError}</p>
-              ) : content ? (
-                <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
-                  {summarizeMarkdown(content.content_markdown) ?? "No detailed description is available yet."}
-                </p>
-              ) : (
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading description...</p>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between gap-2">
-              {previous ? (
-                <button
-                  type="button"
-                  className="rounded-lg border px-3 py-2 text-sm"
-                  style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
-                  onClick={() => selectItem(previous.id)}
-                >
-                  Previous lesson
-                </button>
-              ) : (
-                <span aria-hidden="true" />
-              )}
-              {next ? (
-                <button
-                  type="button"
-                  className="rounded-lg border px-3 py-2 text-sm"
-                  style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
-                  onClick={() => selectItem(next.id)}
-                >
-                  Next lesson
-                </button>
-              ) : (
-                <span aria-hidden="true" />
-              )}
-            </div>
-
-            <Link
-              href={learningPlayerHref(selectedItem)}
-              className="flex w-full items-center justify-center rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
-            >
-              Start learning
-            </Link>
-          </div>
-        ) : null}
+        {drawerContent}
       </aside>
     </div>
   );

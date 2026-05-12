@@ -17,4 +17,16 @@ describe("Decorative tokens are wired in Tailwind class names", () => {
 
     expect(container.children).toHaveLength(7);
   });
+
+  it("accepts mobile safe-area and sheet utility class names", () => {
+    const { container } = render(
+      <>
+        <div className="mobile-safe-bottom mobile-bottom-nav-offset" />
+        <div className="mobile-sheet-backdrop mobile-sheet-panel" />
+        <div className="mobile-sheet-header mobile-sheet-body mobile-sheet-footer" />
+      </>,
+    );
+
+    expect(container.children).toHaveLength(3);
+  });
 });

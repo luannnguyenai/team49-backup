@@ -1,9 +1,12 @@
 import json
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 from src.scripts.schema_v2.apply_reviewed_unit_labels import apply_labels
 from src.scripts.schema_v2.backfill_schema_v2 import (
     BackfillReport,
+    _backfill_calibration_and_interactions,
     build_default_course_config,
     derive_salience_decision,
     sha256_json,
@@ -171,3 +174,20 @@ def test_schema_v2_validation_result_exit_codes() -> None:
     assert result.warnings == ["soft"]
     assert fail_if_any_errors(result) == 1
     assert fail_if_any_errors(ValidationResult(errors=[], warnings=["soft"])) == 0
+
+
+async def test_schema_v2_backfill_uses_column_names_for_interaction_null_counts() -> None:
+    session = SimpleNamespace()
+    session.execute = AsyncMock(return_value=SimpleNamespace(scalar_one=lambda: 0))
+    report = BackfillReport(dry_run=True)
+
+    await _backfill_calibration_and_interactions(session, report)
+
+    executed_sql = [
+        call.args[0].text if hasattr(call.args[0], "text") else str(call.args[0])
+        for call in session.execute.await_args_list
+    ]
+
+    assert any("interactions WHERE theta_before IS NULL" in sql for sql in executed_sql)
+    assert any("interactions WHERE theta_after IS NULL" in sql for sql in executed_sql)
+    assert not any("<function field" in sql for sql in executed_sql)

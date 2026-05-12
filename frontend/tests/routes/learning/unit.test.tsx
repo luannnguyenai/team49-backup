@@ -329,7 +329,30 @@ describe("learning unit page (US3)", () => {
     );
     navigationMock.pathname = "/";
     navigationMock.searchParams = new URLSearchParams();
+    vi.stubGlobal("matchMedia", vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })));
   });
+
+  function stubMobileViewport() {
+    vi.stubGlobal("matchMedia", vi.fn().mockImplementation((query: string) => ({
+      matches: query === "(max-width: 767px)",
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })));
+  }
 
   it("renders route loading state while the server component is resolving", () => {
     render(<LearningUnitLoading />);
@@ -412,6 +435,71 @@ describe("learning unit page (US3)", () => {
       expect(screen.getByRole("button", { name: "Hide lessons panel" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Close tutor" })).toBeInTheDocument();
     });
+  });
+
+  it("renders the mobile study toolbar and opens lesson plus tutor sheets", async () => {
+    stubMobileViewport();
+    courseApiMock.listUnits.mockResolvedValue([
+      {
+        slug: "lecture-1-introduction",
+        title: "Introduction",
+        status: "ready",
+        unit_type: "lecture",
+        order_index: 1,
+        lecture_label: "Lecture 01",
+        is_completed: true,
+      },
+      {
+        slug: "lecture-2-linear-classifiers",
+        title: "Linear Classifiers",
+        status: "ready",
+        unit_type: "lecture",
+        order_index: 2,
+        lecture_label: "Lecture 02",
+        is_completed: false,
+      },
+    ]);
+
+    render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    expect(await screen.findByRole("button", { name: "Lessons" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tutor" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Key ideas" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Lessons" }));
+    expect(await screen.findByRole("dialog", { name: "Lessons" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Lecture 02 Linear Classifiers/i })).toHaveAttribute(
+      "href",
+      "/courses/cs231n/learn/lecture-2-linear-classifiers",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Tutor" }));
+    expect(await screen.findByRole("dialog", { name: "AI Tutor" })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Ask about this lecture...")).toBeInTheDocument();
+  });
+
+  it("opens a mobile key ideas sheet with the active takeaways and timestamps", async () => {
+    stubMobileViewport();
+
+    render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={LECTURE_1_UNIT}
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Key ideas" }));
+
+    expect(await screen.findByRole("dialog", { name: "Key ideas" })).toBeInTheDocument();
+    expect(screen.getByText("Neural networks learn layered visual features.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /00:05:00 Course Logistics/i })).toBeInTheDocument();
   });
 
   it("ignores stale toc summary responses when switching lectures quickly", async () => {

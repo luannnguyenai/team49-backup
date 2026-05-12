@@ -13,4 +13,12 @@ describe("Landing CTA contract", () => {
     const signInLinks = screen.getAllByRole("link", { name: /^sign in$/i });
     expect(signInLinks[0].className).toContain("btn-secondary");
   });
+
+  it("stacks the hero CTAs for narrow screens before expanding horizontally", () => {
+    render(<LandingPage />);
+
+    const createLink = screen.getAllByRole("link", { name: /create your account/i })[0];
+    expect(createLink.parentElement?.className).toContain("flex-col");
+    expect(createLink.parentElement?.className).toContain("sm:flex-row");
+  });
 });

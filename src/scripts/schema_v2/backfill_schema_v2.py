@@ -340,7 +340,7 @@ async def _backfill_calibration_and_interactions(
     ]:
         report.note_null(
             f"interactions.{col_name}",
-            await _scalar_int(session, f"SELECT COUNT(*) FROM interactions WHERE {field} IS NULL"),
+            await _scalar_int(session, f"SELECT COUNT(*) FROM interactions WHERE {col_name} IS NULL"),
         )
 
 

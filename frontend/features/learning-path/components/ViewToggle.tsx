@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
+import SegmentedControl from "@/components/ui/SegmentedControl";
 
 export type LearnView = "graph" | "timeline";
 
@@ -39,24 +39,15 @@ export function usePersistedLearnView(): [LearnView, (view: LearnView) => void] 
 
 export default function ViewToggle({ view, onChange }: { view: LearnView; onChange: (view: LearnView) => void }) {
   return (
-    <div className="flex rounded-xl p-1" style={{ backgroundColor: "var(--bg-page)" }}>
-      {([
-        ["graph", "Plan"],
-        ["timeline", "Weekly"],
-      ] as const).map(([key, label]) => (
-        <button
-          key={key}
-          type="button"
-          onClick={() => onChange(key)}
-          className={cn(
-            "rounded-lg px-4 py-1.5 text-sm font-medium transition-colors",
-            view === key ? "bg-white text-primary-600 shadow-sm dark:bg-slate-800" : "hover:bg-white/60 dark:hover:bg-slate-800/60",
-          )}
-          style={view !== key ? { color: "var(--text-secondary)" } : undefined}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
+    <SegmentedControl
+      ariaLabel="Planner view"
+      value={view}
+      onChange={onChange}
+      options={[
+        { value: "graph", label: "Plan" },
+        { value: "timeline", label: "Weekly" },
+      ]}
+      className="w-full sm:w-auto"
+    />
   );
 }

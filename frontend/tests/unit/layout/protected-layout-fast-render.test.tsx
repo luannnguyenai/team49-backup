@@ -55,4 +55,14 @@ describe("ProtectedLayout", () => {
 
     expect(screen.getByText("Protected content")).toBeInTheDocument();
   });
+
+  it("keeps reserved mobile-safe bottom spacing on the main shell", () => {
+    const { container } = render(
+      <ProtectedLayout>
+        <div>Protected content</div>
+      </ProtectedLayout>,
+    );
+
+    expect(container.querySelector("main")?.className).toContain("mobile-bottom-nav-offset");
+  });
 });

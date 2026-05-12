@@ -81,6 +81,11 @@ describe("course overview routes", () => {
     expect(screen.getByText("Build deep intuition for modern vision systems")).toBeInTheDocument();
     expect(screen.getByText("What you will learn")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start learning" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Start learning" }).compareDocumentPosition(
+        screen.getByText("Learning outcomes"),
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("shows a startable overview for CS224n", () => {

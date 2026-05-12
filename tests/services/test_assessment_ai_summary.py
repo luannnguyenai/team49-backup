@@ -45,6 +45,28 @@ def test_parse_assessment_ai_summary_accepts_single_quoted_model_payload():
     assert response.next_step == "Start with the weakest unit."
 
 
+def test_parse_assessment_ai_summary_accepts_langchain_content_blocks():
+    response = _parse_assessment_ai_summary(
+        [
+            {
+                "type": "text",
+                "text": """
+                {
+                  "summary": "You should review activation functions before moving on.",
+                  "highlights": ["1 unit needs review"],
+                  "next_step": "Start with the weakest unit."
+                }
+                """,
+            }
+        ]
+    )
+
+    assert response.available is True
+    assert response.summary == "You should review activation functions before moving on."
+    assert response.highlights == ["1 unit needs review"]
+    assert response.next_step == "Start with the weakest unit."
+
+
 class AssessmentAISummaryTracingTests(unittest.IsolatedAsyncioTestCase):
     async def test_generate_assessment_ai_summary_passes_langfuse_callbacks_and_metadata(self):
         from src.services.assessment_service import generate_assessment_ai_summary

@@ -498,7 +498,21 @@ async def get_assessment_results(
     )
 
 
-def _parse_assessment_ai_summary(raw: str) -> AssessmentAISummaryResponse:
+def _assessment_ai_summary_text(raw: object) -> str:
+    if isinstance(raw, str):
+        return raw
+    if isinstance(raw, list):
+        chunks: list[str] = []
+        for block in raw:
+            if isinstance(block, dict):
+                text = block.get("text")
+                if isinstance(text, str) and text.strip():
+                    chunks.append(text)
+        return "\n".join(chunks)
+    return str(raw)
+
+
+def _parse_assessment_ai_summary(raw: object) -> AssessmentAISummaryResponse:
     def unavailable() -> AssessmentAISummaryResponse:
         return AssessmentAISummaryResponse(
             available=False,
@@ -506,7 +520,9 @@ def _parse_assessment_ai_summary(raw: str) -> AssessmentAISummaryResponse:
             provider=settings.model_provider,
         )
 
-    text = raw.strip()
+    text = _assessment_ai_summary_text(raw).strip()
+    if not text:
+        return unavailable()
     if text.startswith("```"):
         text = text.split("```")[1]
         if text.startswith("json"):
@@ -647,7 +663,7 @@ async def generate_assessment_ai_summary(
                         "metadata": trace_metadata,
                     },
                 )
-        parsed = _parse_assessment_ai_summary(str(response.content))
+        parsed = _parse_assessment_ai_summary(response.content)
         return parsed
     except Exception as exc:
         log.warning("assessment AI summary unavailable: %s", exc)

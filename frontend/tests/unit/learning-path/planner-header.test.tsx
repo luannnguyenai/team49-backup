@@ -60,4 +60,23 @@ describe("PlannerHeader", () => {
       "/replan?source=learn&returnTo=%2Flearn",
     );
   });
+
+  it("renders the view switcher as a tablist with the current view selected", () => {
+    const profile = createLearningProfileForPath("computer_vision", {
+      weeklyHours: 5,
+      source: "manual",
+    });
+
+    render(
+      <PlannerHeader
+        profile={profile}
+        summary={{ total_units: 12, completed_units: 2, in_progress_units: 1 }}
+        view="timeline"
+        onViewChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("tablist", { name: "Planner view" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Weekly" })).toHaveAttribute("aria-selected", "true");
+  });
 });
