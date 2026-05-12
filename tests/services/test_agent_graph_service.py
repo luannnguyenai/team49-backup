@@ -243,7 +243,11 @@ async def test_graph_uses_response_router_for_grounded_answer_composition():
     assert not any(call[0] == "routing_compose" for call in calls)
 
 
-async def test_graph_routes_web_paper_mode_to_external_research():
+async def test_graph_routes_web_paper_mode_to_external_research(monkeypatch):
+    monkeypatch.setattr(
+        "src.services.agent_graph_service.settings.external_research_enabled",
+        True,
+    )
     calls = []
 
     async def search(request, allowed_course_ids):
@@ -283,6 +287,36 @@ async def test_graph_routes_web_paper_mode_to_external_research():
 
     assert response.answer.markdown == "External web and paper answer."
     assert [call[0] for call in calls] == ["external_research"]
+
+
+async def test_graph_blocks_web_paper_mode_when_external_research_disabled(monkeypatch):
+    monkeypatch.setattr(
+        "src.services.agent_graph_service.settings.external_research_enabled",
+        False,
+    )
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=DeterministicAgentRouter(),
+        external_research_service=object(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="Find recent papers about CNN pruning",
+            incomingMessageId="msg-web-papers-disabled",
+            toolMode="web_papers",
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-disabled",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS224n"],
+    )
+
+    assert response.answer.confidence == "fallback"
+    assert response.fallback is not None
+    assert response.fallback.reason == "tool_error"
+    assert response.fallback.error_code == "external_research_disabled"
 
 
 async def test_active_recent_citation_prefers_latest_message_topic_match():
