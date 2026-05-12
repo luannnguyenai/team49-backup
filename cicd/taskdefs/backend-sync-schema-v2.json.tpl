@@ -13,8 +13,9 @@
       "essential": true,
       "command": [
         "sh",
-        "-lc",
-        "set -euo pipefail; uv run python scripts/materialize_canonical_bundle.py --s3-uri \"$CANONICAL_BUNDLE_S3_URI\" --output-dir \"$CANONICAL_BUNDLE_LOCAL_DIR\"; uv run python -m src.scripts.schema_v2.sync_schema_v2 --import-bundle \"$CANONICAL_BUNDLE_LOCAL_DIR\""
+        "-eu",
+        "-c",
+        "uv run python scripts/materialize_canonical_bundle.py --s3-uri \"$CANONICAL_BUNDLE_S3_URI\" --output-dir \"$CANONICAL_BUNDLE_LOCAL_DIR\"; uv run python -m src.scripts.schema_v2.sync_schema_v2 --import-bundle \"$CANONICAL_BUNDLE_LOCAL_DIR\""
       ],
       "environment": [
         { "name": "PYTHONPATH", "value": "/app" },
