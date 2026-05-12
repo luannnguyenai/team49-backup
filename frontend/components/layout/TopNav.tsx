@@ -5,24 +5,31 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Moon, Sun, Bell, LogOut, Search, Menu, X } from "lucide-react";
+import { Moon, Sun, Bell, Search, Menu, LogOut, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import BrandLogo from "@/components/layout/BrandLogo";
-import { NAV_ITEMS, type NavItem } from "@/components/layout/navItems";
+import {
+  getVisibleNavItems,
+  type NavItem,
+} from "@/components/layout/navItems";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
+import MobileMenuSheet from "@/components/layout/MobileMenuSheet";
+import MobileSearchSheet from "@/components/layout/MobileSearchSheet";
 import { getCachedAllCourseCatalog } from "@/lib/course-catalog-cache";
 import { filterCoursesByQuery, normalizeCourseSearchQuery } from "@/lib/course-search";
 import type { CourseCatalogItem } from "@/types";
 
 const MIN_SEARCH_QUERY_LENGTH = 2;
 const MAX_DROPDOWN_RESULTS = 6;
+const MOBILE_MEDIA_QUERY = "(max-width: 767px)";
 
 function getCourseHref(courseSlug: string) {
   return `/courses/${courseSlug}`;
 }
 
-function TopNavSearch({ pathname }: { pathname: string }) {
+function TopNavSearch({ pathname, className }: { pathname: string; className?: string }) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mountedRef = useRef(true);
@@ -108,7 +115,7 @@ function TopNavSearch({ pathname }: { pathname: string }) {
   const hasDraftQuery = draftQuery.length > 0;
 
   return (
-    <div ref={containerRef} className="min-w-0 flex-1">
+    <div ref={containerRef} className={cn("min-w-0 flex-1", className)}>
       <div className="relative mx-auto max-w-md">
         <label
           className="flex items-center gap-2 rounded-full border px-3 py-2"
@@ -252,12 +259,32 @@ function TopNavFallback() {
 }
 
 function TopNavContent() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { resolvedTheme, setTheme } = useTheme();
   const isAuthenticated = user !== null;
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
+    const updateViewport = () => {
+      setIsMobileViewport(mediaQuery.matches);
+    };
+
+    updateViewport();
+    mediaQuery.addEventListener?.("change", updateViewport);
+
+    return () => {
+      mediaQuery.removeEventListener?.("change", updateViewport);
+    };
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -280,9 +307,7 @@ function TopNavContent() {
         ? pathname === navItem.href
         : pathname === navItem.href || pathname.startsWith(`${navItem.href}/`);
 
-  const visibleNavItems = isAuthenticated
-    ? NAV_ITEMS.filter((navItem) => navItem.label !== "Courses")
-    : NAV_ITEMS;
+  const visibleNavItems = getVisibleNavItems(isAuthenticated);
   const navItemsWithResolvedHref = useMemo(
     () =>
       visibleNavItems.map((navItem) => ({
@@ -304,8 +329,8 @@ function TopNavContent() {
             <BrandLogo compact />
           </div>
 
-          <Suspense fallback={<div className="min-w-0 flex-1" />}>
-            <TopNavSearch pathname={pathname} />
+          <Suspense fallback={<div className="hidden min-w-0 flex-1 md:block" />}>
+            <TopNavSearch pathname={pathname} className="hidden md:block" />
           </Suspense>
 
           {/* Desktop nav links */}
@@ -334,10 +359,22 @@ function TopNavContent() {
 
           {/* Right actions */}
           <div className="flex items-center gap-1">
+            {isMobileViewport ? (
+              <button
+                type="button"
+                onClick={() => setMobileSearchOpen(true)}
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                style={{ color: "var(--text-secondary)" }}
+                aria-label="Open course search"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            ) : null}
+
             {/* Dark mode toggle */}
             <button
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="hidden h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 md:flex"
               style={{ color: "var(--text-secondary)" }}
               aria-label="Toggle theme"
             >
@@ -350,7 +387,7 @@ function TopNavContent() {
 
             {/* Notifications */}
             <button
-              className="relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="relative hidden h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 md:flex"
               style={{ color: "var(--text-secondary)" }}
               aria-label="Notifications"
             >
@@ -364,7 +401,7 @@ function TopNavContent() {
                 {/* Avatar */}
                 <Link
                   href="/profile"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300 text-sm font-semibold transition-opacity hover:opacity-80"
+                  className="hidden h-9 w-9 items-center justify-center rounded-full bg-surface-accent-soft text-sm font-semibold text-primary-700 transition-opacity hover:opacity-80 dark:bg-surface-accent-soft dark:text-primary-300 md:flex"
                 >
                   {initials}
                 </Link>
@@ -389,65 +426,36 @@ function TopNavContent() {
             )}
 
             {/* Mobile hamburger */}
-            <button
-              onClick={() => setMobileOpen((o) => !o)}
-              className="flex md:hidden h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-              style={{ color: "var(--text-secondary)" }}
-              aria-label="Menu"
-            >
-              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </button>
+            {isMobileViewport ? (
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                style={{ color: "var(--text-secondary)" }}
+                aria-label="Menu"
+              >
+                <Menu className="h-4 w-4" />
+              </button>
+            ) : null}
           </div>
         </div>
-
-        {/* Mobile dropdown */}
-        {mobileOpen && (
-          <div
-            className="md:hidden border-t px-4 py-3 space-y-1"
-            style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
-          >
-            {navItemsWithResolvedHref.map((navItem) => {
-              const { href, label, icon: Icon, resolvedHref } = navItem;
-              const active = isNavItemActive(navItem);
-              return (
-                <Link
-                  key={href}
-                  href={resolvedHref}
-                  onClick={() => setMobileOpen(false)}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                    active
-                      ? "bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
-                      : "text-text-body hover:bg-surface-page dark:hover:bg-slate-800"
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </Link>
-              );
-            })}
-            {isAuthenticated ? (
-              <button
-                onClick={handleLogout}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </button>
-            ) : (
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="flex w-full items-center justify-center rounded-lg bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-              >
-                Sign in
-              </Link>
-            )}
-          </div>
-        )}
       </header>
+      {isMobileViewport ? (
+        <MobileSearchSheet open={mobileSearchOpen} onOpenChange={setMobileSearchOpen} />
+      ) : null}
+      {isMobileViewport ? (
+        <MobileMenuSheet
+          open={mobileMenuOpen}
+          onOpenChange={setMobileMenuOpen}
+          navItems={navItemsWithResolvedHref}
+          pathname={pathname}
+          isAuthenticated={isAuthenticated}
+          initials={initials}
+          resolvedTheme={resolvedTheme}
+          onToggleTheme={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          onLogout={handleLogout}
+        />
+      ) : null}
+      {isAuthenticated && isMobileViewport ? <MobileBottomNav pathname={pathname} /> : null}
     </>
   );
 }

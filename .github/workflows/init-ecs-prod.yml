@@ -31,6 +31,10 @@ on:
         default: "true"
         type: choice
         options: ["true", "false"]
+      canonical_bundle_version:
+        description: Optional canonical bundle version/prefix leaf to fetch from S3
+        required: false
+        default: ""
       image_tag:
         description: Optional existing backend image tag to use
         required: false
@@ -59,6 +63,9 @@ jobs:
       AWS_REGION: ${{ vars.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
       ECR_BACKEND_REPOSITORY: ${{ vars.ECR_BACKEND_REPOSITORY }}
+      AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
+      CANONICAL_BUNDLE_PREFIX: ${{ vars.CANONICAL_BUNDLE_PREFIX }}
+      CANONICAL_BUNDLE_VERSION: ${{ vars.CANONICAL_BUNDLE_VERSION }}
       ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
       ECS_BACKEND_SERVICE_NAME: ${{ vars.ECS_BACKEND_SERVICE_NAME }}
       BACKEND_TASK_FAMILY: ${{ vars.BACKEND_TASK_FAMILY }}
@@ -92,12 +99,14 @@ jobs:
             run_sync_schema_v2="${{ inputs.run_sync_schema_v2 }}"
             run_seed_accounts="${{ inputs.run_seed_accounts }}"
             smoke_after_init="${{ inputs.smoke_after_init }}"
+            requested_bundle_version="${{ inputs.canonical_bundle_version }}"
             requested_tag="${{ inputs.image_tag }}"
           else
             run_seed_core="true"
             run_sync_schema_v2="true"
             run_seed_accounts="true"
             smoke_after_init="true"
+            requested_bundle_version=""
             requested_tag=""
           fi
 
@@ -119,6 +128,23 @@ jobs:
             image_tag="${backend_image##*:}"
           fi
 
+          bundle_version="${requested_bundle_version:-}"
+          if [ -z "$bundle_version" ]; then
+            bundle_version="${CANONICAL_BUNDLE_VERSION:-}"
+          fi
+
+          if [ "$run_seed_core" = "true" ] || [ "$run_sync_schema_v2" = "true" ]; then
+            : "${AWS_S3_BUCKET:?AWS_S3_BUCKET is required when canonical bundle tasks run}"
+            : "${CANONICAL_BUNDLE_PREFIX:?CANONICAL_BUNDLE_PREFIX is required when canonical bundle tasks run}"
+            : "${bundle_version:?canonical bundle version is required when canonical bundle tasks run}"
+            bundle_prefix="${CANONICAL_BUNDLE_PREFIX%/}/${bundle_version}/canonical"
+            canonical_bundle_s3_uri="s3://${AWS_S3_BUCKET}/${bundle_prefix}"
+            canonical_bundle_local_dir="/tmp/canonical-bundle"
+            echo "canonical_bundle_version=${bundle_version}" >> "$GITHUB_OUTPUT"
+            echo "CANONICAL_BUNDLE_S3_URI=${canonical_bundle_s3_uri}" >> "$GITHUB_ENV"
+            echo "CANONICAL_BUNDLE_LOCAL_DIR=${canonical_bundle_local_dir}" >> "$GITHUB_ENV"
+          fi
+
           echo "image_tag=${image_tag}" >> "$GITHUB_OUTPUT"
           echo "run_seed_core=${run_seed_core}" >> "$GITHUB_OUTPUT"
           echo "run_sync_schema_v2=${run_sync_schema_v2}" >> "$GITHUB_OUTPUT"
@@ -135,6 +161,8 @@ jobs:
         run: |
           set -euo pipefail
           IMAGE_URI="$BACKEND_IMAGE" \
+          CANONICAL_BUNDLE_S3_URI="$CANONICAL_BUNDLE_S3_URI" \
+          CANONICAL_BUNDLE_LOCAL_DIR="$CANONICAL_BUNDLE_LOCAL_DIR" \
           LOG_GROUP="/ecs/${SEED_CORE_TASK_FAMILY}" \
           bash cicd/scripts/render-taskdef.sh \
             cicd/taskdefs/backend-seed-core.json.tpl \
@@ -145,6 +173,7 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)"
 
+          LOG_GROUP="/ecs/${SEED_CORE_TASK_FAMILY}" \
           bash cicd/scripts/run-ecs-task.sh "$task_definition_arn"
 
       - name: Run Schema v2 sync
@@ -153,6 +182,8 @@ jobs:
         run: |
           set -euo pipefail
           IMAGE_URI="$BACKEND_IMAGE" \
+          CANONICAL_BUNDLE_S3_URI="$CANONICAL_BUNDLE_S3_URI" \
+          CANONICAL_BUNDLE_LOCAL_DIR="$CANONICAL_BUNDLE_LOCAL_DIR" \
           LOG_GROUP="/ecs/${SYNC_SCHEMA_V2_TASK_FAMILY}" \
           bash cicd/scripts/render-taskdef.sh \
             cicd/taskdefs/backend-sync-schema-v2.json.tpl \
@@ -163,6 +194,7 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)"
 
+          LOG_GROUP="/ecs/${SYNC_SCHEMA_V2_TASK_FAMILY}" \
           bash cicd/scripts/run-ecs-task.sh "$task_definition_arn"
 
       - name: Run seed accounts
@@ -181,6 +213,7 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)"
 
+          LOG_GROUP="/ecs/${SEED_ACCOUNTS_TASK_FAMILY}" \
           bash cicd/scripts/run-ecs-task.sh "$task_definition_arn"
 
       - name: Smoke initialized backend data

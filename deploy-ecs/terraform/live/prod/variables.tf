@@ -80,6 +80,11 @@ variable "asset_prefix" {
   type = string
 }
 
+variable "canonical_bundle_prefix" {
+  type    = string
+  default = "canonical-bundles"
+}
+
 variable "rds_identifier" {
   type = string
 }

@@ -21,6 +21,7 @@ import {
   learningSessionApi,
   quizApi,
 } from "@/lib/api";
+import MobileKeyIdeasSheet from "@/components/learn/MobileKeyIdeasSheet";
 import type {
   CourseUnitListItem,
   InlineQuizStartPayload,
@@ -33,6 +34,9 @@ import type {
   SelectedAnswer,
 } from "@/types";
 import InContextTutor from "@/components/learn/InContextTutor";
+import MobileLessonSheet from "./MobileLessonSheet";
+import MobileStudyToolbar from "./MobileStudyToolbar";
+import MobileTutorSheet from "./MobileTutorSheet";
 
 interface TocSummarySection {
   section_number: number;
@@ -607,12 +611,14 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   const { course, unit, content, tutor } = data;
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const [lectureList, setLectureList] = useState<CourseUnitListItem[]>([]);
   const [tocSummary, setTocSummary] = useState<TocSummaryPayload | null>(null);
   const [leftPanelWidth, setLeftPanelWidth] = useState(LEFT_PANEL_DEFAULT_WIDTH);
   const [rightPanelWidth, setRightPanelWidth] = useState(RIGHT_PANEL_DEFAULT_WIDTH);
   const [leftPanelHidden, setLeftPanelHidden] = useState(false);
   const [rightPanelHidden, setRightPanelHidden] = useState(false);
+  const [mobileSheet, setMobileSheet] = useState<"lessons" | "tutor" | "key-ideas" | null>(null);
   const [inlineQuizProgress, setInlineQuizProgress] = useState<InlineQuizProgress>({});
   const [dismissedPrompts, setDismissedPrompts] = useState<
     Record<InlineQuizCheckpointKey, boolean>
@@ -643,6 +649,25 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
     setLeftPanelWidth(leftPref.width);
     setRightPanelHidden(rightPref.hidden);
     setRightPanelWidth(rightPref.width);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const updateIsMobile = () => {
+      const mobile = mediaQuery.matches;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setMobileSheet(null);
+      }
+    };
+
+    updateIsMobile();
+    mediaQuery.addEventListener("change", updateIsMobile);
+    return () => {
+      mediaQuery.removeEventListener("change", updateIsMobile);
+    };
   }, []);
 
   useEffect(() => {
@@ -1208,10 +1233,12 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
     const rightWidth = rightPanelHidden ? "0px" : `${rightPanelWidth}px`;
     return `${leftWidth} ${leftHandle} minmax(0,1fr) ${rightHandle} ${rightWidth}`;
   }, [leftPanelHidden, leftPanelWidth, rightPanelHidden, rightPanelWidth]);
+  const currentTimeLabel = formatSeconds(currentTime);
+  const durationLabel = formatSeconds(duration);
 
   return (
     <div
-      className="h-[calc(100vh-4.5rem)] overflow-hidden rounded-card-lg border shadow-card"
+      className="min-h-[calc(100vh-4.5rem)] overflow-visible rounded-card-lg border shadow-card md:h-[calc(100vh-4.5rem)] md:overflow-hidden"
       style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}
     >
       <div className="flex h-full flex-col">
@@ -1236,90 +1263,94 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
           className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[var(--learning-shell-grid)]"
           style={{ ["--learning-shell-grid" as string]: gridTemplateColumns }}
         >
-          <aside
-            className={[
-              "hidden min-h-0 overflow-hidden border-r md:flex md:flex-col",
-              leftPanelHidden ? "pointer-events-none opacity-0" : "",
-            ].join(" ")}
-            style={{
-              borderColor: "var(--border)",
-              backgroundColor: "var(--bg-sidebar, var(--bg-card))",
-            }}
-          >
-            <div className="flex items-center justify-between gap-3 border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
-              <p className="text-xs font-semibold uppercase tracking-widest-sm" style={{ color: "var(--text-muted)" }}>
-                Lessons
-              </p>
-              <button
-                aria-label="Hide lessons panel"
-                className="rounded-full p-1.5 transition-colors hover:bg-slate-100"
-                onClick={() => setLeftPanelHidden(true)}
-                type="button"
-              >
-                <ChevronsLeft className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto px-3 py-3">
-              {lectureList.map((lecture) => {
-                const isActive =
-                  lecture.order_index === unit.lecture_order || lecture.slug === unit.slug;
-                return (
-                  <Link
-                    key={`${lecture.order_index}-${lecture.slug}`}
-                    href={`/courses/${courseSlug}/learn/${lecture.slug}`}
-                    className="mb-2 block rounded-2xl border px-4 py-3 transition-colors"
-                    style={{
-                      borderColor: isActive ? "rgba(37,99,235,0.28)" : "var(--border)",
-                      backgroundColor: isActive ? "rgba(37,99,235,0.08)" : "transparent",
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-widest-sm text-blue-600">
-                        {formatLectureLabel(lecture.order_index, lecture.lecture_label)}
+          {!isMobile ? (
+            <aside
+              className={[
+                "hidden min-h-0 overflow-hidden border-r md:flex md:flex-col",
+                leftPanelHidden ? "pointer-events-none opacity-0" : "",
+              ].join(" ")}
+              style={{
+                borderColor: "var(--border)",
+                backgroundColor: "var(--bg-sidebar, var(--bg-card))",
+              }}
+            >
+              <div className="flex items-center justify-between gap-3 border-b px-5 py-4" style={{ borderColor: "var(--border)" }}>
+                <p className="text-xs font-semibold uppercase tracking-widest-sm" style={{ color: "var(--text-muted)" }}>
+                  Lessons
+                </p>
+                <button
+                  aria-label="Hide lessons panel"
+                  className="rounded-full p-1.5 transition-colors hover:bg-slate-100"
+                  onClick={() => setLeftPanelHidden(true)}
+                  type="button"
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto px-3 py-3">
+                {lectureList.map((lecture) => {
+                  const isActive =
+                    lecture.order_index === unit.lecture_order || lecture.slug === unit.slug;
+                  return (
+                    <Link
+                      key={`${lecture.order_index}-${lecture.slug}`}
+                      href={`/courses/${courseSlug}/learn/${lecture.slug}`}
+                      className="mb-2 block rounded-2xl border px-4 py-3 transition-colors"
+                      style={{
+                        borderColor: isActive ? "rgba(37,99,235,0.28)" : "var(--border)",
+                        backgroundColor: isActive ? "rgba(37,99,235,0.08)" : "transparent",
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-widest-sm text-blue-600">
+                          {formatLectureLabel(lecture.order_index, lecture.lecture_label)}
+                        </p>
+                        {lecture.is_completed ? (
+                          <span
+                            aria-label={`${formatLectureLabel(
+                              lecture.order_index,
+                              lecture.lecture_label,
+                            )} completed`}
+                            className="text-emerald-500"
+                          >
+                            <CheckCircle2 className="h-4 w-4" />
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                        {lecture.title}
                       </p>
-                      {lecture.is_completed ? (
-                        <span
-                          aria-label={`${formatLectureLabel(
-                            lecture.order_index,
-                            lecture.lecture_label,
-                          )} completed`}
-                          className="text-emerald-500"
-                        >
-                          <CheckCircle2 className="h-4 w-4" />
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-1 text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                      {lecture.title}
-                    </p>
-                  </Link>
-                );
-              })}
-            </div>
-          </aside>
+                    </Link>
+                  );
+                })}
+              </div>
+            </aside>
+          ) : null}
 
-          <div
-            aria-label="Resize lessons panel"
-            className={[
-              "relative hidden cursor-col-resize items-center justify-center md:flex",
-              leftPanelHidden ? "pointer-events-none opacity-0" : "",
-            ].join(" ")}
-            data-testid="left-panel-resize-handle"
-            onMouseDown={(event) => {
-              resizeStateRef.current = {
-                side: "left",
-                startX: event.clientX,
-                startWidth: leftPanelWidth,
-              };
-            }}
-          >
-            <div className="flex h-16 w-3 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-              <GripVertical className="h-4 w-4" />
+          {!isMobile ? (
+            <div
+              aria-label="Resize lessons panel"
+              className={[
+                "relative hidden cursor-col-resize items-center justify-center md:flex",
+                leftPanelHidden ? "pointer-events-none opacity-0" : "",
+              ].join(" ")}
+              data-testid="left-panel-resize-handle"
+              onMouseDown={(event) => {
+                resizeStateRef.current = {
+                  side: "left",
+                  startX: event.clientX,
+                  startWidth: leftPanelWidth,
+                };
+              }}
+            >
+              <div className="flex h-16 w-3 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <GripVertical className="h-4 w-4" />
+              </div>
             </div>
-          </div>
+          ) : null}
 
-          <main className="relative min-h-0 overflow-y-auto p-5 md:p-6">
-            {leftPanelHidden ? (
+          <main className="relative min-h-0 overflow-visible p-4 md:overflow-y-auto md:p-6">
+            {!isMobile && leftPanelHidden ? (
               <button
                 aria-label="Open lessons panel"
                 className="absolute left-0 top-6 z-20 hidden -translate-x-1/2 rounded-full border bg-white px-3 py-2 shadow-md md:inline-flex"
@@ -1330,7 +1361,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
               </button>
             ) : null}
 
-            {rightPanelHidden && tutor.enabled ? (
+            {!isMobile && rightPanelHidden && tutor.enabled ? (
               <button
                 aria-label="Open AI Tutor panel"
                 className="absolute right-0 top-6 z-20 hidden translate-x-1/2 rounded-full border bg-white px-3 py-2 shadow-md md:inline-flex"
@@ -1393,6 +1424,15 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                 markers={allRailMarkers}
                 onSeek={handleSeek}
               />
+
+              {isMobile ? (
+                <MobileStudyToolbar
+                  tutorEnabled={tutor.enabled}
+                  onOpenLessons={() => setMobileSheet("lessons")}
+                  onOpenTutor={() => setMobileSheet("tutor")}
+                  onOpenKeyIdeas={() => setMobileSheet("key-ideas")}
+                />
+              ) : null}
 
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {checkpointStatus.map((entry) => {
@@ -1523,7 +1563,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
               ) : null}
             </div>
 
-            {activeChapter && activeChapter.key_takeaways.length > 0 && (
+            {!isMobile && activeChapter && activeChapter.key_takeaways.length > 0 && (
               <section className="mt-6 rounded-card border px-5 py-5" style={{ borderColor: "var(--border)" }}>
                 <div className="mb-4 flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-500 shadow-sm">
@@ -1558,7 +1598,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
               </section>
             )}
 
-            {chapters.length > 0 && (
+            {!isMobile && chapters.length > 0 && (
               <section className="mt-6 rounded-card border px-5 py-5" style={{ borderColor: "var(--border)" }}>
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
@@ -1570,7 +1610,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
                     </p>
                   </div>
                   <span className="text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
-                    {formatSeconds(currentTime)} / {formatSeconds(duration)}
+                    {currentTimeLabel} / {durationLabel}
                   </span>
                 </div>
 
@@ -1602,50 +1642,93 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
             )}
           </main>
 
-          <div
-            aria-label="Resize AI Tutor panel"
-            className={[
-              "relative hidden cursor-col-resize items-center justify-center md:flex",
-              rightPanelHidden || !tutor.enabled ? "pointer-events-none opacity-0" : "",
-            ].join(" ")}
-            data-testid="right-panel-resize-handle"
-            onMouseDown={(event) => {
-              resizeStateRef.current = {
-                side: "right",
-                startX: event.clientX,
-                startWidth: rightPanelWidth,
-              };
-            }}
-          >
-            <div className="flex h-16 w-3 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-              <GripVertical className="h-4 w-4" />
-            </div>
-          </div>
-
-          <aside
-            className={[
-              "hidden min-h-0 overflow-hidden border-l md:flex",
-              rightPanelHidden || !tutor.enabled ? "pointer-events-none opacity-0" : "",
-            ].join(" ")}
-            style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
-          >
-            {tutor.enabled ? (
-              <div className="min-h-0 flex-1">
-                <InContextTutor
-                  lessonKey={unit.id}
-                  lectureId={tutor.legacy_lecture_id ?? ""}
-                  currentTime={currentTime}
-                  captureFrame={captureFrame}
-                  contextBindingId={tutor.context_binding_id ?? undefined}
-                  onClose={() => setRightPanelHidden(true)}
-                  suggestions={tutorSuggestions}
-                  unitTitle={lectureHeading}
-                />
+          {!isMobile ? (
+            <div
+              aria-label="Resize AI Tutor panel"
+              className={[
+                "relative hidden cursor-col-resize items-center justify-center md:flex",
+                rightPanelHidden || !tutor.enabled ? "pointer-events-none opacity-0" : "",
+              ].join(" ")}
+              data-testid="right-panel-resize-handle"
+              onMouseDown={(event) => {
+                resizeStateRef.current = {
+                  side: "right",
+                  startX: event.clientX,
+                  startWidth: rightPanelWidth,
+                };
+              }}
+            >
+              <div className="flex h-16 w-3 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <GripVertical className="h-4 w-4" />
               </div>
-            ) : null}
-          </aside>
+            </div>
+          ) : null}
+
+          {!isMobile ? (
+            <aside
+              className={[
+                "hidden min-h-0 overflow-hidden border-l md:flex",
+                rightPanelHidden || !tutor.enabled ? "pointer-events-none opacity-0" : "",
+              ].join(" ")}
+              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
+            >
+              {tutor.enabled ? (
+                <div className="min-h-0 flex-1">
+                  <InContextTutor
+                    lessonKey={unit.id}
+                    lectureId={tutor.legacy_lecture_id ?? ""}
+                    currentTime={currentTime}
+                    captureFrame={captureFrame}
+                    contextBindingId={tutor.context_binding_id ?? undefined}
+                    onClose={() => setRightPanelHidden(true)}
+                    suggestions={tutorSuggestions}
+                    unitTitle={lectureHeading}
+                  />
+                </div>
+              ) : null}
+            </aside>
+          ) : null}
         </div>
       </div>
+      {isMobile ? (
+        <>
+          <MobileLessonSheet
+            open={mobileSheet === "lessons"}
+            onOpenChange={(open) => setMobileSheet(open ? "lessons" : null)}
+            lectures={lectureList}
+            courseSlug={courseSlug}
+            activeLectureOrder={unit.lecture_order}
+            activeUnitSlug={unit.slug}
+            formatLectureLabel={formatLectureLabel}
+          />
+          {tutor.enabled ? (
+            <MobileTutorSheet
+              open={mobileSheet === "tutor"}
+              onOpenChange={(open) => setMobileSheet(open ? "tutor" : null)}
+            >
+              <InContextTutor
+                lessonKey={unit.id}
+                lectureId={tutor.legacy_lecture_id ?? ""}
+                currentTime={currentTime}
+                captureFrame={captureFrame}
+                contextBindingId={tutor.context_binding_id ?? undefined}
+                onClose={() => setMobileSheet(null)}
+                suggestions={tutorSuggestions}
+                unitTitle={lectureHeading}
+              />
+            </MobileTutorSheet>
+          ) : null}
+          <MobileKeyIdeasSheet
+            open={mobileSheet === "key-ideas"}
+            onOpenChange={(open) => setMobileSheet(open ? "key-ideas" : null)}
+            activeChapter={activeChapter}
+            chapters={chapters}
+            currentTimeLabel={currentTimeLabel}
+            durationLabel={durationLabel}
+            onSeek={handleSeek}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

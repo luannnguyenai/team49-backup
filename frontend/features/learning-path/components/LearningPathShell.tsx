@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -49,6 +49,7 @@ function TimelineSkeleton() {
 
 export default function LearningPathShell() {
   const [view, setView] = usePersistedLearnView();
+  const [isMobile, setIsMobile] = useState(false);
   const profile = useLearningPathStore((s) => s.profile);
   const previousProfile = useLearningPathStore((s) => s.previousProfile);
   const generatedTopologyHash = useLearningPathStore((s) => s.generatedTopologyHash);
@@ -65,6 +66,20 @@ export default function LearningPathShell() {
     }
   }, [loadPath, profile]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const updateIsMobile = () => setIsMobile(mediaQuery.matches);
+
+    updateIsMobile();
+    mediaQuery.addEventListener("change", updateIsMobile);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateIsMobile);
+    };
+  }, []);
+
   if (!profile) {
     return (
       <div className="mx-auto max-w-7xl animate-fade-in">
@@ -80,6 +95,8 @@ export default function LearningPathShell() {
       </div>
     );
   }
+
+  const shouldUseTimelineFallback = isMobile && view === "graph";
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 animate-fade-in">
@@ -99,7 +116,7 @@ export default function LearningPathShell() {
       />
 
       {loading ? (
-        view === "graph" ? <CanvasSkeleton /> : <TimelineSkeleton />
+        !shouldUseTimelineFallback && view === "graph" ? <CanvasSkeleton /> : <TimelineSkeleton />
       ) : error ? (
         <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border p-8 text-center" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}>
           <AlertCircle className="h-10 w-10 text-red-500" />
@@ -108,10 +125,33 @@ export default function LearningPathShell() {
             <RefreshCw className="h-4 w-4" /> Retry
           </button>
         </div>
-      ) : view === "graph" ? (
+      ) : !shouldUseTimelineFallback && view === "graph" ? (
         <RoadmapCanvas />
       ) : (
-        <TimelineBoard />
+        <div className="space-y-4">
+          {shouldUseTimelineFallback ? (
+            <section
+              className="rounded-2xl border px-4 py-4 shadow-sm sm:px-5"
+              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
+            >
+              <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                Graph view works best on a larger screen.
+              </p>
+              <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+                Weekly view keeps the planner readable and actionable on phones.
+              </p>
+              <button
+                type="button"
+                onClick={() => setView("timeline")}
+                className="mt-3 inline-flex items-center rounded-full border px-3 py-2 text-sm font-semibold text-primary-600 transition hover:bg-primary-50 dark:hover:bg-primary-950/30"
+                style={{ borderColor: "var(--border)" }}
+              >
+                Switch to weekly view
+              </button>
+            </section>
+          ) : null}
+          <TimelineBoard />
+        </div>
       )}
 
       {loading && (

@@ -178,9 +178,9 @@ describe("InContextTutor", () => {
     expect(screen.queryByText("...")).not.toBeInTheDocument();
   });
 
-  it("uses the direct backend tutor stream URL when NEXT_PUBLIC_API_URL is configured", async () => {
+  it("falls back to the same-origin tutor stream URL when NEXT_PUBLIC_API_URL is cross-origin", async () => {
     const originalApiUrl = process.env.NEXT_PUBLIC_API_URL;
-    process.env.NEXT_PUBLIC_API_URL = "http://localhost:8000";
+    process.env.NEXT_PUBLIC_API_URL = "http://api.example.com";
 
     try {
       mockTutorFetch({
@@ -206,10 +206,7 @@ describe("InContextTutor", () => {
         expect(screen.getByText("Direct stream response.")).toBeInTheDocument();
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(
-        "http://localhost:8000/api/lectures/ask",
-        expect.objectContaining({ method: "POST" }),
-      );
+      expect(fetchMock).toHaveBeenCalledWith("/api/lectures/ask", expect.objectContaining({ method: "POST" }));
     } finally {
       if (originalApiUrl === undefined) {
         delete process.env.NEXT_PUBLIC_API_URL;

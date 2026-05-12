@@ -173,7 +173,10 @@ resource "aws_iam_role_policy" "backend_task_s3" {
       {
         Effect   = "Allow"
         Action   = ["s3:GetObject", "s3:PutObject"]
-        Resource = "${var.asset_bucket_arn}/${var.asset_prefix}/*"
+        Resource = [
+          "${var.asset_bucket_arn}/${var.asset_prefix}/*",
+          "${var.asset_bucket_arn}/${var.canonical_bundle_prefix}/*"
+        ]
       },
       {
         Effect   = "Allow"

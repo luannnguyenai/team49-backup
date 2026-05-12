@@ -18,10 +18,10 @@ export default function CourseOverview({
   const model = buildCourseOverviewViewModel({ data, isStarting });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <section className="card overflow-hidden rounded-card-lg border p-0 shadow-card">
         <div className="grid gap-0 lg:grid-cols-[minmax(0,1.25fr)_minmax(300px,0.85fr)]">
-          <div className="space-y-6 p-6 md:p-8">
+          <div className="space-y-5 p-5 sm:p-6 md:p-8">
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-xs font-semibold uppercase tracking-widest-md text-primary-700 dark:text-primary-300">
                 Course overview
@@ -30,7 +30,7 @@ export default function CourseOverview({
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl font-semibold leading-tight text-slate-950 dark:text-white lg:text-4xl">
+              <h1 className="text-2xl font-semibold leading-tight text-slate-950 dark:text-white sm:text-3xl lg:text-4xl">
                 {data.overview.headline}
               </h1>
               {data.overview.subheadline && (
@@ -59,7 +59,7 @@ export default function CourseOverview({
             </div>
           </div>
 
-          <aside className="border-t bg-slate-50/80 p-6 dark:bg-slate-900 lg:border-l lg:border-t-0 md:p-8">
+          <aside className="border-t bg-slate-50/80 p-5 dark:bg-slate-900 sm:p-6 lg:border-l lg:border-t-0 md:p-8">
             <div className="space-y-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest-sm text-slate-500 dark:text-slate-300">
@@ -91,7 +91,7 @@ export default function CourseOverview({
                 onClick={onStart}
                 disabled={model.cta.disabled}
                 loading={model.cta.loading}
-                className="w-full rounded-full"
+                className="w-full rounded-full py-3"
               >
                 {model.cta.label}
               </Button>
@@ -100,8 +100,8 @@ export default function CourseOverview({
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
-        <article className="card rounded-card p-7">
+      <section className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)] lg:gap-6">
+        <article className="card rounded-card p-5 sm:p-6 lg:p-7">
           <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700 dark:text-primary-300">
             Learning outcomes
           </p>
@@ -118,7 +118,7 @@ export default function CourseOverview({
           </ul>
         </article>
 
-        <article className="card rounded-card p-7">
+        <article className="card rounded-card p-5 sm:p-6 lg:p-7">
           <p className="text-xs font-semibold uppercase tracking-widest-sm text-primary-700 dark:text-primary-300">
             Course structure
           </p>

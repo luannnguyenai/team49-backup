@@ -10,9 +10,21 @@ const AGENT_CHAT_PATH = "/api/agent/chat";
 const AGENT_ACTION_CONTINUE_PATH = "/api/agent/actions/continue";
 
 function agentRuntimeEndpoint(path: string) {
-  const publicApiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
-  if (typeof window !== "undefined" && publicApiUrl) {
-    return `${publicApiUrl}${path}`;
+  if (typeof window !== "undefined") {
+    const publicApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+    if (!publicApiUrl) {
+      return path;
+    }
+
+    try {
+      const normalizedBase = publicApiUrl.endsWith("/") ? publicApiUrl : `${publicApiUrl}/`;
+      const directUrl = new URL(path.replace(/^\//, ""), normalizedBase);
+      if (directUrl.origin === window.location.origin) {
+        return directUrl.pathname;
+      }
+    } catch {
+      return path;
+    }
   }
   return path;
 }

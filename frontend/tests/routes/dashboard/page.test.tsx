@@ -17,6 +17,11 @@ const historyApiMock = vi.hoisted(() => ({
   list: vi.fn(),
 }));
 
+const catalogCacheMock = vi.hoisted(() => ({
+  getCachedAllCourseCatalog: vi.fn(),
+  resetCachedAllCourseCatalog: vi.fn(),
+}));
+
 const authStoreMock = vi.hoisted(() => ({
   user: {
     id: "user_1",
@@ -51,6 +56,11 @@ vi.mock("@/stores/authStore", () => ({
   },
 }));
 
+vi.mock("@/lib/course-catalog-cache", () => ({
+  getCachedAllCourseCatalog: (...args: unknown[]) => catalogCacheMock.getCachedAllCourseCatalog(...args),
+  resetCachedAllCourseCatalog: () => catalogCacheMock.resetCachedAllCourseCatalog(),
+}));
+
 vi.mock("next/navigation", async () => {
   const actual = await vi.importActual<typeof import("next/navigation")>("next/navigation");
   return {
@@ -62,11 +72,10 @@ vi.mock("next/navigation", async () => {
 describe("dashboard search", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { resetCachedAllCourseCatalog } = await import("@/lib/course-catalog-cache");
-    resetCachedAllCourseCatalog();
+    catalogCacheMock.resetCachedAllCourseCatalog();
     navigationMock.searchParams = new URLSearchParams();
 
-    courseApiMock.catalog.mockResolvedValue({
+    const catalogResponse = {
       items: [
         CS231N_RECOMMENDED,
         CS224N_ITEM,
@@ -76,7 +85,9 @@ describe("dashboard search", () => {
           short_description: "Production readiness for AI systems.",
         },
       ],
-    });
+    };
+    courseApiMock.catalog.mockResolvedValue(catalogResponse);
+    catalogCacheMock.getCachedAllCourseCatalog.mockResolvedValue(catalogResponse);
 
     historyApiMock.list.mockResolvedValue({
       summary: {
@@ -100,10 +111,18 @@ describe("dashboard search", () => {
 
     expect(await screen.findByText("Explore courses")).toBeInTheDocument();
 
-    fireEvent.click(await screen.findByRole("button", { name: "All" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "All" }));
 
     expect(await screen.findByText(CS224N_ITEM.title)).toBeInTheDocument();
     expect(screen.queryByText(CS231N_ITEM.title)).not.toBeInTheDocument();
+  });
+
+  it("renders the dashboard filters as a segmented tablist", async () => {
+    render(<DashboardPage />);
+
+    const tablist = await screen.findByRole("tablist", { name: "Course filters" });
+    expect(tablist).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "For you" })).toHaveAttribute("aria-selected", "true");
   });
 
   it("sets the browser tab title for the dashboard route", async () => {
@@ -117,7 +136,7 @@ describe("dashboard search", () => {
   it("does not show overlapping ready-state helper text for available courses", async () => {
     render(<DashboardPage />);
 
-    fireEvent.click(await screen.findByRole("button", { name: "Ready" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "Ready" }));
 
     expect(await screen.findByText(CS231N_ITEM.title)).toBeInTheDocument();
     expect(screen.queryByText("Ready to learn")).not.toBeInTheDocument();
@@ -129,7 +148,7 @@ describe("dashboard search", () => {
 
     render(<DashboardPage />);
 
-    fireEvent.click(await screen.findByRole("button", { name: "Coming soon" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "Coming soon" }));
 
     expect(await screen.findByText("Upcoming AI Operations")).toBeInTheDocument();
     expect(screen.queryByText(CS231N_ITEM.title)).not.toBeInTheDocument();
@@ -146,9 +165,11 @@ describe("dashboard search", () => {
   });
 
   it("shows a recommendation-specific empty state on the default for-you tab", async () => {
-    courseApiMock.catalog.mockResolvedValue({
+    const catalogResponse = {
       items: [CS231N_ITEM, CS224N_ITEM],
-    });
+    };
+    courseApiMock.catalog.mockResolvedValue(catalogResponse);
+    catalogCacheMock.getCachedAllCourseCatalog.mockResolvedValue(catalogResponse);
 
     render(<DashboardPage />);
 
@@ -162,7 +183,7 @@ describe("dashboard search", () => {
   it("does not show fake in-progress state for coming-soon courses", async () => {
     render(<DashboardPage />);
 
-    fireEvent.click(await screen.findByRole("button", { name: "Coming soon" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "Coming soon" }));
 
     expect(await screen.findByText("Upcoming AI Operations")).toBeInTheDocument();
     expect(screen.queryByText("In progress")).not.toBeInTheDocument();
