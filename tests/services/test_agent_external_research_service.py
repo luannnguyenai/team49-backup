@@ -1,3 +1,6 @@
+import asyncio
+import logging
+
 import pytest
 
 from src.schemas.agent import AgentCitation
@@ -127,6 +130,10 @@ def test_external_research_plans_clean_cnn_queries_with_domain_context():
     assert plan == SearchPlan(tools=("web", "paper"), queries=("CNN machine learning",))
 
 
+def test_semantic_scholar_rate_limit_lock_is_initialized_eagerly():
+    assert isinstance(AgentExternalResearchService._semantic_scholar_lock, asyncio.Lock)
+
+
 def test_external_research_uses_web_and_paper_for_paper_intent():
     service = AgentExternalResearchService()
 
@@ -246,6 +253,21 @@ async def test_external_research_web_search_falls_back_to_provider_ranked_html_r
         "https://example.com/second",
     ]
     assert documents[0].title == "Convolutional Neural Networks overview"
+
+
+@pytest.mark.asyncio
+async def test_external_research_logs_when_duckduckgo_html_shape_changes(caplog):
+    class EmptyHTMLSearchService(AgentExternalResearchService):
+        async def _fetch_web_html_text(self, url):
+            return "<html><a class='renamed-result' href='https://example.com'>CNN</a></html>"
+
+    service = EmptyHTMLSearchService()
+
+    with caplog.at_level(logging.WARNING):
+        documents = await service._search_web_html("CNN machine learning")
+
+    assert documents == []
+    assert "duckduckgo_html_parse_empty" in caplog.text
 
 
 @pytest.mark.asyncio

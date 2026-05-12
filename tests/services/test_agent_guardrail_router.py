@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
@@ -105,6 +106,15 @@ class OutputTranslatingLanguageNormalizer:
 
     async def translate_to_english(self, text):
         return "Would you like to narrow the topic?"
+
+
+class FailingOutputTranslatingLanguageNormalizer(OutputTranslatingLanguageNormalizer):
+    @property
+    def translator(self):
+        return self
+
+    async def translate_to_english(self, text):
+        raise RuntimeError("translator unavailable")
 
 
 def test_agent_chat_request_limits_message_to_2000_chars():
@@ -521,3 +531,32 @@ async def test_agent_chat_translates_non_english_output_for_english_target():
     updated = await service._enforce_response_language(response, language)
 
     assert updated.answer.markdown == "Would you like to narrow the topic?"
+
+
+@pytest.mark.asyncio
+async def test_agent_chat_logs_response_language_translation_failures(caplog):
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=FailingGraphRouter(),
+        guardrail_router=CapturingGuardrailRouter(),
+        language_normalizer=FailingOutputTranslatingLanguageNormalizer(),
+    )
+    response = AgentChatResponse(
+        conversation_id="conv-1",
+        message_id="msg-1",
+        answer=AgentAnswer(markdown="Bạn muốn thu hẹp chủ đề không?", confidence="partial"),
+    )
+    language = LanguageNormalizationResult(
+        original_text="Explain attention.",
+        normalized_text="Explain attention.",
+        detected_language="en",
+        target_language="en",
+        translated=False,
+    )
+
+    with caplog.at_level(logging.WARNING):
+        updated = await service._enforce_response_language(response, language)
+
+    assert updated.answer.markdown == response.answer.markdown
+    assert "response_language_translation_failed" in caplog.text

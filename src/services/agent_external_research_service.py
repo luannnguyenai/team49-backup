@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import re
 import time
 import xml.etree.ElementTree as ET
@@ -15,6 +16,8 @@ from src.config import settings
 from src.schemas.agent import AgentCitation, AgentFallback
 from src.services.agent_external_citation_manager import ExternalCitationManager
 from src.services.agent_graph_contracts import ToolResult
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -75,7 +78,7 @@ class _DuckDuckGoHTMLParser(HTMLParser):
 
 
 class AgentExternalResearchService:
-    _semantic_scholar_lock: ClassVar[asyncio.Lock | None] = None
+    _semantic_scholar_lock: ClassVar[asyncio.Lock] = asyncio.Lock()
     _semantic_scholar_last_request_at: ClassVar[float] = 0.0
 
     def __init__(self, *, timeout_s: float = 8.0, max_retries: int = 2, responder=None):
@@ -294,6 +297,8 @@ class AgentExternalResearchService:
                 )
             if len(documents) >= 4:
                 break
+        if text.strip() and not documents:
+            logger.warning("duckduckgo_html_parse_empty")
         return documents
 
     async def _fetch_web_html_text(self, url: str) -> str:
@@ -383,8 +388,6 @@ class AgentExternalResearchService:
 
     async def _wait_for_semantic_scholar_slot(self) -> None:
         cls = type(self)
-        if cls._semantic_scholar_lock is None:
-            cls._semantic_scholar_lock = asyncio.Lock()
         async with cls._semantic_scholar_lock:
             elapsed = time.monotonic() - cls._semantic_scholar_last_request_at
             if elapsed < 1.0:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 from datetime import UTC, datetime, timedelta
 from inspect import signature
@@ -59,6 +60,8 @@ from src.services.guardrail_router import (
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
 from src.services.language_normalization import get_input_language_normalizer
 from src.services.language_normalization import LanguageNormalizationResult
+
+logger = logging.getLogger(__name__)
 
 RAG_AGENT_INTENTS = {
     "find_content",
@@ -714,15 +717,25 @@ class AgentGraphService:
         if language.target_language != "en" or not response.answer.markdown.strip():
             return response
         detect = getattr(self.language_normalizer, "detect", None)
-        if detect is None or detect(response.answer.markdown) == "en":
+        if detect is None:
+            logger.debug("response_language_detection_unavailable")
+            return response
+        try:
+            detected_response_language = detect(response.answer.markdown)
+        except Exception:
+            logger.warning("response_language_detection_failed", exc_info=True)
+            return response
+        if detected_response_language == "en":
             return response
         translator = getattr(self.language_normalizer, "translator", None)
         translate = getattr(translator, "translate_to_english", None)
         if translate is None:
+            logger.debug("response_language_translation_unavailable")
             return response
         try:
             translated = await translate(response.answer.markdown)
         except Exception:
+            logger.warning("response_language_translation_failed", exc_info=True)
             return response
         if not translated.strip():
             return response
