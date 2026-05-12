@@ -3,11 +3,14 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+import time
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import ClassVar
 from urllib.parse import quote_plus, urlencode
 from urllib.request import Request, urlopen
 
+from src.config import settings
 from src.schemas.agent import AgentCitation, AgentFallback
 from src.services.agent_external_citation_manager import ExternalCitationManager
 from src.services.agent_graph_contracts import ToolResult
@@ -19,6 +22,11 @@ class ExternalResearchDocument:
     url: str
     snippet: str
     source: str
+    citation_count: int | None = None
+    year: int | None = None
+    authors: tuple[str, ...] = field(default_factory=tuple)
+    venue: str | None = None
+    doi: str | None = None
 
 
 @dataclass(frozen=True)
@@ -28,6 +36,9 @@ class SearchPlan:
 
 
 class AgentExternalResearchService:
+    _semantic_scholar_lock: ClassVar[asyncio.Lock | None] = None
+    _semantic_scholar_last_request_at: ClassVar[float] = 0.0
+
     def __init__(self, *, timeout_s: float = 8.0, max_retries: int = 2, responder=None):
         self.timeout_s = timeout_s
         self.max_retries = max(1, max_retries)
@@ -54,7 +65,7 @@ class AgentExternalResearchService:
         if not normalized:
             return []
         cleaned = self._clean_query(normalized)
-        if tools == ("web",):
+        if "web" in (tools or ()):
             cleaned = self._with_domain_context(cleaned)
         queries = [cleaned]
         if normalized.casefold() != cleaned.casefold() and not self._looks_like_noisy_query(
@@ -82,20 +93,7 @@ class AgentExternalResearchService:
         ) is not None
 
     def _select_tools(self, message: str) -> tuple[str, ...]:
-        lowered = message.casefold()
-        wants_web = re.search(r"\b(web|website|internet|online|news)\b", lowered) is not None
-        wants_paper = re.search(
-            r"\b(arxiv|paper|papers|publication|publications|research|survey|literature)\b",
-            lowered,
-        ) is not None or any(
-            phrase in lowered
-            for phrase in ("bài báo", "nghiên cứu", "khảo sát", "tài liệu học thuật")
-        )
-        if wants_web and wants_paper:
-            return ("web", "paper")
-        if wants_paper:
-            return ("paper",)
-        return ("web",)
+        return ("web", "paper")
 
     def _clean_query(self, message: str) -> str:
         cleaned = message.strip(" ?.")
@@ -161,7 +159,8 @@ class AgentExternalResearchService:
             if "paper" in plan.tools:
                 tasks.append(self._with_retry(lambda q=query: self._search_papers(q)))
         responses = await asyncio.gather(*tasks, return_exceptions=True)
-        documents: list[ExternalResearchDocument] = []
+        web_documents: list[ExternalResearchDocument] = []
+        paper_documents: list[ExternalResearchDocument] = []
         seen: set[str] = set()
         for response in responses:
             if isinstance(response, Exception):
@@ -171,8 +170,11 @@ class AgentExternalResearchService:
                 if key in seen:
                     continue
                 seen.add(key)
-                documents.append(document)
-        return documents
+                if document.source == "paper":
+                    paper_documents.append(document)
+                else:
+                    web_documents.append(document)
+        return paper_documents[:2] + web_documents[:3]
 
     async def _with_retry(self, operation):
         last_error: Exception | None = None
@@ -230,6 +232,13 @@ class AgentExternalResearchService:
         return documents
 
     async def _search_papers(self, query: str) -> list[ExternalResearchDocument]:
+        if settings.semantic_scholar_api_key.strip():
+            try:
+                documents = await self._search_semantic_scholar_papers(query)
+                if documents:
+                    return documents
+            except Exception:
+                pass
         text = await asyncio.to_thread(
             self._fetch_text,
             f"https://export.arxiv.org/api/query?search_query=all:{quote_plus(query)}&start=0&max_results=4",
@@ -252,11 +261,140 @@ class AgentExternalResearchService:
                 )
         return documents
 
+    async def _search_semantic_scholar_papers(
+        self, query: str
+    ) -> list[ExternalResearchDocument]:
+        await self._wait_for_semantic_scholar_slot()
+        fields = ",".join(
+            (
+                "paperId",
+                "title",
+                "year",
+                "citationCount",
+                "authors",
+                "venue",
+                "url",
+                "abstract",
+                "openAccessPdf",
+                "externalIds",
+            )
+        )
+        url = "https://api.semanticscholar.org/graph/v1/paper/search/bulk?" + urlencode(
+            {
+                "query": query,
+                "limit": "8",
+                "fields": fields,
+                "sort": "citationCount:desc",
+            }
+        )
+        payload = await self._fetch_semantic_scholar_json(
+            url,
+            {
+                "User-Agent": "AI-Learning-Copilot/1.0",
+                "x-api-key": settings.semantic_scholar_api_key.strip(),
+            },
+        )
+        return self._semantic_scholar_documents(query, payload)
+
+    async def _fetch_semantic_scholar_json(
+        self, url: str, headers: dict[str, str]
+    ) -> dict:
+        return await asyncio.to_thread(self._fetch_json_with_headers, url, headers)
+
+    async def _wait_for_semantic_scholar_slot(self) -> None:
+        cls = type(self)
+        if cls._semantic_scholar_lock is None:
+            cls._semantic_scholar_lock = asyncio.Lock()
+        async with cls._semantic_scholar_lock:
+            elapsed = time.monotonic() - cls._semantic_scholar_last_request_at
+            if elapsed < 1.0:
+                await asyncio.sleep(1.0 - elapsed)
+            cls._semantic_scholar_last_request_at = time.monotonic()
+
+    def _semantic_scholar_documents(
+        self, query: str, payload: dict
+    ) -> list[ExternalResearchDocument]:
+        query_terms = self._distinctive_query_terms(query)
+        documents: list[ExternalResearchDocument] = []
+        for item in payload.get("data") or []:
+            if not isinstance(item, dict):
+                continue
+            title = str(item.get("title") or "").strip()
+            url = str(item.get("url") or "").strip()
+            abstract = str(item.get("abstract") or "").strip()
+            text = f"{title} {abstract}".casefold()
+            if query_terms and not any(term in text for term in query_terms):
+                continue
+            authors = tuple(
+                str(author.get("name") or "").strip()
+                for author in item.get("authors") or []
+                if isinstance(author, dict) and str(author.get("name") or "").strip()
+            )
+            year = item.get("year")
+            citation_count = item.get("citationCount")
+            venue = str(item.get("venue") or "").strip() or None
+            doi = (item.get("externalIds") or {}).get("DOI")
+            metadata_bits = []
+            if isinstance(year, int):
+                metadata_bits.append(str(year))
+            if isinstance(citation_count, int):
+                metadata_bits.append(f"{citation_count} citations")
+            if venue:
+                metadata_bits.append(venue)
+            if authors:
+                metadata_bits.append(", ".join(authors[:3]))
+            snippet = abstract or title
+            if metadata_bits:
+                snippet = f"{' | '.join(metadata_bits)}. {snippet}"
+            if title and url:
+                documents.append(
+                    ExternalResearchDocument(
+                        title=title,
+                        url=url,
+                        snippet=snippet,
+                        source="paper",
+                        citation_count=citation_count if isinstance(citation_count, int) else None,
+                        year=year if isinstance(year, int) else None,
+                        authors=authors,
+                        venue=venue,
+                        doi=str(doi).strip() if doi else None,
+                    )
+                )
+            if len(documents) >= 4:
+                break
+        return documents
+
+    @staticmethod
+    def _distinctive_query_terms(query: str) -> set[str]:
+        stop_terms = {
+            "ai",
+            "artificial",
+            "deep",
+            "learning",
+            "machine",
+            "ml",
+            "model",
+            "models",
+            "network",
+            "neural",
+        }
+        return {
+            token.casefold()
+            for token in re.findall(r"[A-Za-z][A-Za-z0-9+-]{2,}", query)
+            if token.casefold() not in stop_terms
+        }
+
     def _fetch_json(self, url: str) -> dict:
         return json.loads(self._fetch_text(url))
 
+    def _fetch_json_with_headers(self, url: str, headers: dict[str, str]) -> dict:
+        return json.loads(self._fetch_text_with_headers(url, headers))
+
     def _fetch_text(self, url: str) -> str:
-        request = Request(url, headers={"User-Agent": "AI-Learning-Copilot/1.0"})
+        return self._fetch_text_with_headers(url, {"User-Agent": "AI-Learning-Copilot/1.0"})
+
+    def _fetch_text_with_headers(self, url: str, headers: dict[str, str]) -> str:
+        request = Request(url, headers=headers)
         with urlopen(request, timeout=self.timeout_s) as response:
             return response.read().decode("utf-8", errors="replace")
 
