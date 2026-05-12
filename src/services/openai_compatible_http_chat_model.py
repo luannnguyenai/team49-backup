@@ -3,15 +3,10 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Callable
-from dataclasses import dataclass
 from typing import Any
 
 import httpx
-
-
-@dataclass(frozen=True)
-class ChatMessageResponse:
-    content: str
+from langchain_core.messages import AIMessage
 
 
 class OpenAICompatibleHTTPChatModel:
@@ -34,14 +29,14 @@ class OpenAICompatibleHTTPChatModel:
         self.max_retries = max_retries
         self._client_factory = client_factory or httpx.Client
 
-    def invoke(self, messages: list[Any]) -> ChatMessageResponse:
+    def invoke(self, messages: list[Any], config: dict | None = None, **_kwargs: Any) -> AIMessage:
         payload = {
             "model": self.model,
             "messages": self._normalize_messages(messages),
             "temperature": self.temperature,
             "stream": False,
         }
-        return ChatMessageResponse(content=self._post_chat_completions(payload))
+        return AIMessage(content=self._post_chat_completions(payload))
 
     def with_structured_output(self, schema, method: str | None = None, **_kwargs: Any):
         return _StructuredHTTPChatModel(self, schema)

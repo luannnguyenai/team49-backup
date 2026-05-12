@@ -73,7 +73,7 @@ describe("admin llm page", () => {
           id: "qwen35_4b",
           label: "Qwen 3.5 4B",
           provider: "openai",
-          model: "qwen 3.5 4B",
+          model: "qwen3.5-4b-lora",
           base_url: "https://vllm.a20-app-049.io.vn/v1",
           status: "down",
           latency_ms: 195,

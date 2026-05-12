@@ -22,6 +22,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 from sqlalchemy import or_, select
 
+from src.config import settings
 from src.core.observability import (
     build_langfuse_metadata,
     get_langfuse_client,
@@ -45,6 +46,7 @@ from src.services.model_registry import (
     build_chat_model_kwargs_for_option,
     get_chat_model_option,
 )
+from src.services.openai_compatible_http_chat_model import OpenAICompatibleHTTPChatModel
 from src.services.router import route_question
 from src.services.sandbox import run_python_code
 
@@ -362,6 +364,16 @@ tool_node = ToolNode(tools)
 @lru_cache(maxsize=4)
 def _get_llm_with_tools(chat_model_id: str = DEFAULT_CHAT_MODEL_ID):
     """Lazily create the main tutor LLM so FastAPI can import without secrets."""
+    option = get_chat_model_option(chat_model_id)
+    if option.base_url:
+        return OpenAICompatibleHTTPChatModel(
+            model=option.model,
+            base_url=option.base_url,
+            api_key=option.api_key or "EMPTY",
+            temperature=0.2,
+            timeout=settings.llm_request_timeout_seconds,
+            max_retries=settings.llm_max_retries,
+        )
     llm = init_chat_model(
         **build_chat_model_kwargs_for_option(
             chat_model_id,
@@ -853,6 +865,44 @@ def get_context_and_stream_langgraph(
                         if text_chunk:
                             if not has_streamed_answer and not sandbox_output:
                                 yield emit_status(STATUS_FINALIZING_ANSWER)
+                            if first_answer_at is None:
+                                first_answer_at = time.perf_counter()
+                            has_streamed_answer = True
+                            sanitized_chunk = _sanitize_tutor_output_text(text_chunk).sanitized_text
+                            full_answer += sanitized_chunk
+                            yield (
+                                json.dumps(
+                                    {
+                                        "a": sanitized_chunk,
+                                        "guardrail": {
+                                            "input_redacted": input_guardrail.was_redacted,
+                                            "output_redacted": sanitized_chunk != text_chunk,
+                                        },
+                                    }
+                                )
+                                + "\n"
+                            )
+
+                    if (
+                        isinstance(chunk, AIMessage)
+                        and not isinstance(chunk, BaseMessageChunk)
+                        and not getattr(chunk, "tool_calls", None)
+                        and chunk.content
+                        != "Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy."
+                    ):
+                        raw = chunk.content
+                        if isinstance(raw, str):
+                            text_chunk = raw
+                        elif isinstance(raw, list):
+                            text_chunk = "".join(
+                                b.get("text", "")
+                                for b in raw
+                                if isinstance(b, dict) and b.get("type") == "text"
+                            )
+                        else:
+                            text_chunk = ""
+                        if text_chunk and not has_streamed_answer:
+                            yield emit_status(STATUS_FINALIZING_ANSWER)
                             if first_answer_at is None:
                                 first_answer_at = time.perf_counter()
                             has_streamed_answer = True
