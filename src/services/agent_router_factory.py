@@ -4,16 +4,17 @@ from langchain.chat_models import init_chat_model
 
 from src.config import settings
 from src.services.agent_graph_contracts import AgentRouterUnavailableError
-from src.services.agent_structured_router import StructuredAgentRouter
+from src.services.agent_structured_router import StructuredAgentRouter, StructuredRouteOutput
 from src.services.chat_model_factory import build_chat_model_kwargs
 from src.services.model_registry import build_chat_model_kwargs_for_option, get_chat_model_option
 from src.services.openai_compatible_http_chat_model import OpenAICompatibleHTTPChatModel
 
 
 class _FallbackChatModel:
-    def __init__(self, *, primary, fallback=None):
+    def __init__(self, *, primary, fallback=None, primary_schemas=()):
         self.primary = primary
         self.fallback = fallback
+        self.primary_schemas = tuple(primary_schemas)
 
     def invoke(self, messages, **kwargs):
         try:
@@ -24,11 +25,17 @@ class _FallbackChatModel:
             return self.fallback.invoke(messages, **kwargs)
 
     def with_structured_output(self, schema, method: str | None = None, **kwargs):
-        primary = _with_structured_output(self.primary, schema, method=method, **kwargs)
-        fallback = (
-            _with_structured_output(self.fallback, schema, method=method, **kwargs)
-            if self.fallback is not None
+        use_primary = not self.primary_schemas or schema in self.primary_schemas
+        primary = (
+            _with_structured_output(self.primary, schema, method=method, **kwargs)
+            if use_primary
             else None
+        )
+        fallback = _with_structured_output(
+            self.fallback or self.primary,
+            schema,
+            method=method,
+            **kwargs,
         )
         return _FallbackStructuredChatModel(primary=primary, fallback=fallback)
 
@@ -40,6 +47,8 @@ class _FallbackStructuredChatModel:
 
     def invoke(self, messages):
         try:
+            if self.primary is None:
+                raise RuntimeError("primary_structured_model_not_configured")
             return self.primary.invoke(messages)
         except Exception:
             if self.fallback is None:
@@ -100,7 +109,11 @@ def build_production_agent_router(
     if primary_model is None and fallback_model is None:
         raise AgentRouterUnavailableError("agent_router_model_not_configured")
     chat_model = (
-        _FallbackChatModel(primary=primary_model, fallback=fallback_model)
+        _FallbackChatModel(
+            primary=primary_model,
+            fallback=fallback_model,
+            primary_schemas=(StructuredRouteOutput,),
+        )
         if primary_model is not None
         else fallback_model
     )
