@@ -145,6 +145,7 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)"
 
+          LOG_GROUP="/ecs/${SEED_CORE_TASK_FAMILY}" \
           bash cicd/scripts/run-ecs-task.sh "$task_definition_arn"
 
       - name: Run Schema v2 sync
@@ -163,6 +164,7 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)"
 
+          LOG_GROUP="/ecs/${SYNC_SCHEMA_V2_TASK_FAMILY}" \
           bash cicd/scripts/run-ecs-task.sh "$task_definition_arn"
 
       - name: Run seed accounts
@@ -181,6 +183,7 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)"
 
+          LOG_GROUP="/ecs/${SEED_ACCOUNTS_TASK_FAMILY}" \
           bash cicd/scripts/run-ecs-task.sh "$task_definition_arn"
 
       - name: Smoke initialized backend data

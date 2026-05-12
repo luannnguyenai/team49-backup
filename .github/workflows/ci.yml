@@ -188,6 +188,9 @@ jobs:
     runs-on: [self-hosted, phoenix-runner]
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      API_INTERNAL_URL: http://localhost:8000
 
     defaults:
       run:
@@ -213,6 +216,9 @@ jobs:
     runs-on: [self-hosted, phoenix-runner]
     needs: [changes, lint-frontend]
     if: needs.changes.outputs.frontend == 'true'
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      API_INTERNAL_URL: http://localhost:8000
 
     defaults:
       run:
@@ -234,8 +240,6 @@ jobs:
         run: npm run type-check
 
       - name: Next.js build (dry-run)
-        env:
-          NEXT_PUBLIC_API_URL: http://localhost:8000
         run: npm run build
 
   ci-status:
