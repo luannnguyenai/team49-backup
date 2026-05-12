@@ -95,12 +95,6 @@ variable "image_redis_exporter" {
   default = "oliver006/redis_exporter:v1.66.0"
 }
 
-variable "grafana_admin_password" {
-  description = "Initial Grafana admin password. Override via Secrets Manager in v2."
-  type        = string
-  sensitive   = true
-}
-
 variable "log_retention_days" {
   type    = number
   default = 7

@@ -21,12 +21,6 @@ on:
         default: "true"
         type: choice
         options: ["true", "false"]
-      run_bootstrap:
-        description: Run backend bootstrap one-off task
-        required: true
-        default: "false"
-        type: choice
-        options: ["false", "true"]
       smoke_cloudfront:
         description: Smoke test CloudFront known asset
         required: true
@@ -72,7 +66,6 @@ jobs:
       BACKEND_TASK_FAMILY: ${{ vars.BACKEND_TASK_FAMILY }}
       FRONTEND_TASK_FAMILY: ${{ vars.FRONTEND_TASK_FAMILY }}
       MIGRATE_TASK_FAMILY: ${{ vars.MIGRATE_TASK_FAMILY }}
-      BOOTSTRAP_TASK_FAMILY: ${{ vars.BOOTSTRAP_TASK_FAMILY }}
       PRODUCTION_BACKEND_URL: ${{ vars.PRODUCTION_BACKEND_URL }}
       PRODUCTION_FRONTEND_URL: ${{ vars.PRODUCTION_FRONTEND_URL }}
       NEXT_PUBLIC_GRAFANA_HOST: ${{ vars.NEXT_PUBLIC_GRAFANA_HOST }}
@@ -110,21 +103,18 @@ jobs:
             deploy_backend="${{ inputs.deploy_backend }}"
             deploy_frontend="${{ inputs.deploy_frontend }}"
             run_migrations="${{ inputs.run_migrations }}"
-            run_bootstrap="${{ inputs.run_bootstrap }}"
             smoke_cloudfront="${{ inputs.smoke_cloudfront }}"
             requested_tag="${{ inputs.image_tag }}"
           elif [ "${{ github.event_name }}" = "workflow_run" ]; then
             deploy_backend="true"
             deploy_frontend="true"
             run_migrations="true"
-            run_bootstrap="false"
             smoke_cloudfront="false"
             requested_tag="${{ github.event.workflow_run.head_sha }}"
           else
             deploy_backend="true"
             deploy_frontend="true"
             run_migrations="true"
-            run_bootstrap="false"
             smoke_cloudfront="false"
             requested_tag=""
           fi
@@ -139,7 +129,6 @@ jobs:
           echo "deploy_backend=${deploy_backend}" >> "$GITHUB_OUTPUT"
           echo "deploy_frontend=${deploy_frontend}" >> "$GITHUB_OUTPUT"
           echo "run_migrations=${run_migrations}" >> "$GITHUB_OUTPUT"
-          echo "run_bootstrap=${run_bootstrap}" >> "$GITHUB_OUTPUT"
           echo "smoke_cloudfront=${smoke_cloudfront}" >> "$GITHUB_OUTPUT"
           echo "BACKEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_BACKEND_REPOSITORY}:${tag}" >> "$GITHUB_ENV"
           echo "FRONTEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_FRONTEND_REPOSITORY}:${tag}" >> "$GITHUB_ENV"
@@ -193,26 +182,6 @@ jobs:
           bash cicd/scripts/run-ecs-task.sh "$migrate_task_definition_arn"
           bash cicd/scripts/smoke-ecs.sh db
           echo "MIGRATE_TASK_DEFINITION_ARN=$migrate_task_definition_arn" >> "$GITHUB_ENV"
-
-      - name: Run bootstrap
-        if: ${{ steps.tag.outputs.run_bootstrap == 'true' && steps.tag.outputs.deploy_backend == 'true' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          IMAGE_URI="$BACKEND_IMAGE" \
-          LOG_GROUP="/ecs/${BOOTSTRAP_TASK_FAMILY}" \
-          bash cicd/scripts/render-taskdef.sh \
-            cicd/taskdefs/backend-bootstrap.json.tpl \
-            /tmp/backend-bootstrap.json
-
-          bootstrap_task_definition_arn="$(aws ecs register-task-definition \
-            --cli-input-json file:///tmp/backend-bootstrap.json \
-            --query 'taskDefinition.taskDefinitionArn' \
-            --output text)"
-
-          bash cicd/scripts/run-ecs-task.sh "$bootstrap_task_definition_arn"
-          bash cicd/scripts/smoke-ecs.sh db
-          echo "BOOTSTRAP_TASK_DEFINITION_ARN=$bootstrap_task_definition_arn" >> "$GITHUB_ENV"
 
       - name: Deploy frontend service
         if: ${{ steps.tag.outputs.deploy_frontend == 'true' }}

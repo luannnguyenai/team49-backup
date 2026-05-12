@@ -313,17 +313,17 @@ resource "aws_ecs_task_definition" "grafana" {
       mountPoints  = [{ sourceVolume = "grafana-data", containerPath = "/var/lib/grafana" }]
       environment = [
         { name = "GF_SECURITY_ADMIN_USER", value = "admin" },
-        { name = "GF_SECURITY_ADMIN_PASSWORD", value = var.grafana_admin_password },
         { name = "GF_SERVER_ROOT_URL", value = "%(protocol)s://%(domain)s${var.grafana_root_url_path}" },
         { name = "GF_SERVER_SERVE_FROM_SUB_PATH", value = "true" },
         { name = "GF_SECURITY_ALLOW_EMBEDDING", value = "true" },
         { name = "GF_SECURITY_COOKIE_SAMESITE", value = "none" },
-        # Anonymous OFF; admin pages iframe will need a logged-in Grafana session.
-        { name = "GF_AUTH_ANONYMOUS_ENABLED", value = "false" },
+        { name = "GF_AUTH_ANONYMOUS_ENABLED", value = "true" },
+        { name = "GF_AUTH_ANONYMOUS_ORG_ROLE", value = "Viewer" },
         # Allow Grafana provisioning files to interpolate ${VAR}-style refs from env.
         { name = "GF_AUTH_BASIC_ENABLED", value = "true" }
       ]
       secrets = [
+        { name = "GF_SECURITY_ADMIN_PASSWORD", valueFrom = "${var.observability_secret_arn}:GRAFANA_ADMIN_PASSWORD::" },
         { name = "POSTGRES_HOST", valueFrom = "${var.observability_secret_arn}:POSTGRES_HOST::" },
         { name = "POSTGRES_PORT", valueFrom = "${var.observability_secret_arn}:POSTGRES_PORT::" },
         { name = "POSTGRES_USER", valueFrom = "${var.observability_secret_arn}:POSTGRES_USER::" },
@@ -425,7 +425,6 @@ resource "aws_ecs_service" "prometheus" {
     registry_arn = aws_service_discovery_service.this["prometheus"].arn
   }
 
-  lifecycle { ignore_changes = [task_definition] }
 }
 
 resource "aws_ecs_service" "loki" {
@@ -445,7 +444,6 @@ resource "aws_ecs_service" "loki" {
     registry_arn = aws_service_discovery_service.this["loki"].arn
   }
 
-  lifecycle { ignore_changes = [task_definition] }
 }
 
 resource "aws_ecs_service" "grafana" {
@@ -472,7 +470,6 @@ resource "aws_ecs_service" "grafana" {
     registry_arn = aws_service_discovery_service.this["grafana"].arn
   }
 
-  lifecycle { ignore_changes = [task_definition] }
 }
 
 resource "aws_ecs_service" "postgres_exporter" {
@@ -492,7 +489,6 @@ resource "aws_ecs_service" "postgres_exporter" {
     registry_arn = aws_service_discovery_service.this["postgres-exporter"].arn
   }
 
-  lifecycle { ignore_changes = [task_definition] }
 }
 
 resource "aws_ecs_service" "redis_exporter" {
@@ -512,7 +508,6 @@ resource "aws_ecs_service" "redis_exporter" {
     registry_arn = aws_service_discovery_service.this["redis-exporter"].arn
   }
 
-  lifecycle { ignore_changes = [task_definition] }
 }
 
 # =============================================================================

@@ -9,7 +9,7 @@ import KpiGroup from "@/components/admin/KpiGroup";
 import { adminApi, TrafficSummary } from "@/lib/admin-api";
 import { trafficTooltips } from "@/lib/admin-tooltips";
 
-const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST?.trim() || null;
+const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST?.trim() || "/grafana";
 const TRAFFIC_DASHBOARD_UID = "a20-api-traffic";
 
 function fmtSec(s: number | null | undefined): string {

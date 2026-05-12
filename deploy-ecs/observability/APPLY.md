@@ -51,10 +51,12 @@ docker push      "$REGISTRY/a20-grafana:11.3.0"
 
 ## Phase 3 — apply the observability stack (~3 min)
 
-Set the Grafana admin password (via env var so it isn't recorded in tfvars):
+Ensure the observability secret contains `GRAFANA_ADMIN_PASSWORD` along with the Postgres / Redis fields used by exporters:
 
 ```powershell
-$env:TF_VAR_grafana_admin_password = "REPLACE_ME"
+aws secretsmanager get-secret-value `
+  --secret-id arn:aws:secretsmanager:ap-southeast-1:116533674568:secret:a20/prod/observability-Ea5JOh `
+  --query SecretString --output text
 ```
 
 Apply with the stack enabled:
@@ -93,7 +95,7 @@ curl http://<alb-dns>/grafana/api/health
 # {"database":"ok","version":"11.3.0"}
 ```
 
-Login Grafana at `<alb-dns>/grafana/` with admin + the password you set. Datasources Prometheus and Loki should be auto-provisioned. The 3 dashboards (api-traffic, system-health, user-activity) should appear under the "A20 Admin" folder.
+Grafana iframes in the admin dashboard use anonymous Viewer access. For full Grafana administration, log in at `<alb-dns>/grafana/` with `admin` plus the password stored in `GRAFANA_ADMIN_PASSWORD` inside the observability secret. Datasources Prometheus, Loki, and Postgres should be auto-provisioned. The 3 dashboards (api-traffic, system-health, user-activity) should appear under the "A20 Admin" folder.
 
 ## Rollback
 

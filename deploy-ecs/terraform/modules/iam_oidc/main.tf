@@ -88,6 +88,15 @@ resource "aws_iam_role_policy" "deploy" {
         Resource = "*"
       },
       {
+        Sid    = "CloudWatchLogsRead"
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogStreams",
+          "logs:GetLogEvents"
+        ]
+        Resource = "*"
+      },
+      {
         Sid      = "PassRoleToTasks"
         Effect   = "Allow"
         Action   = "iam:PassRole"

@@ -123,6 +123,12 @@ variable "backend_secret_arn" {
   description = "Secrets Manager ARN containing DATABASE_URL, REDIS_URL, SECRET_KEY. Required when enable_services=true."
 }
 
+variable "backend_service_registry_arn" {
+  type        = string
+  default     = ""
+  description = "Existing Cloud Map service ARN used for backend metrics/service discovery."
+}
+
 # ----- Observability stack (Stage 3) -----
 
 variable "enable_observability_stack" {
@@ -144,11 +150,4 @@ variable "image_loki" {
 variable "image_grafana" {
   type    = string
   default = ""
-}
-
-variable "grafana_admin_password" {
-  type        = string
-  default     = ""
-  sensitive   = true
-  description = "Initial Grafana admin password. Set via TF_VAR_grafana_admin_password on apply."
 }

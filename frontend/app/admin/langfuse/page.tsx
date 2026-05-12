@@ -1,9 +1,9 @@
 "use client";
 
-const LANGFUSE_HOST = process.env.NEXT_PUBLIC_LANGFUSE_HOST || "";
+const LANGFUSE_HOST = process.env.NEXT_PUBLIC_LANGFUSE_HOST?.trim() || "https://cloud.langfuse.com";
 
 export default function AdminLangfusePage() {
-  const hasHost = LANGFUSE_HOST.trim().length > 0;
+  const hasHost = LANGFUSE_HOST.length > 0;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
