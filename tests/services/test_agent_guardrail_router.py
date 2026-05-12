@@ -64,6 +64,15 @@ class FailingGraphRouter:
         raise RuntimeError("stop after guardrail")
 
 
+class CapturingGraphRouter:
+    def __init__(self):
+        self.messages = []
+
+    def route(self, message, route_context, recent_messages=None):
+        self.messages.append(message)
+        raise RuntimeError("router was called")
+
+
 class TranslatingLanguageNormalizer:
     async def normalize(self, text):
         return LanguageNormalizationResult(
@@ -72,6 +81,17 @@ class TranslatingLanguageNormalizer:
             detected_language="other",
             target_language="en",
             translated=True,
+        )
+
+
+class PassthroughLanguageNormalizer:
+    async def normalize(self, text):
+        return LanguageNormalizationResult(
+            original_text=text,
+            normalized_text=text,
+            detected_language="en",
+            target_language="en",
+            translated=False,
         )
 
 
@@ -170,6 +190,85 @@ async def test_agent_chat_normalizes_third_language_before_guardrail():
     assert scope.allowed_scope_summary == "Agent guardrail scope: current user query only."
     assert scope.recent_context == []
     assert scope.candidate_kps == []
+
+
+@pytest.mark.asyncio
+async def test_agent_chat_exact_greeting_returns_template_after_guardrail_without_router():
+    guardrail_router = CapturingGuardrailRouter()
+    graph_router = CapturingGraphRouter()
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=graph_router,
+        guardrail_router=guardrail_router,
+        language_normalizer=PassthroughLanguageNormalizer(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Xin chào", incomingMessageId="msg-exact-greeting"),
+        conversation_id="conv-1",
+        thread_id="thread-1",
+        user_id="00000000-0000-0000-0000-000000000001",
+        allowed_course_ids=["CS224n"],
+    )
+
+    assert response.answer.markdown == "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?"
+    assert response.answer.confidence == "fallback"
+    assert guardrail_router.messages == ["Xin chào"]
+    assert graph_router.messages == []
+
+
+@pytest.mark.asyncio
+async def test_agent_chat_exact_third_language_greeting_returns_english_template():
+    guardrail_router = CapturingGuardrailRouter()
+    graph_router = CapturingGraphRouter()
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=graph_router,
+        guardrail_router=guardrail_router,
+        language_normalizer=PassthroughLanguageNormalizer(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Bonjour", incomingMessageId="msg-exact-bonjour"),
+        conversation_id="conv-1",
+        thread_id="thread-1",
+        user_id="00000000-0000-0000-0000-000000000001",
+        allowed_course_ids=["CS224n"],
+    )
+
+    assert response.answer.markdown == "Hi! What AI/ML topic would you like help with today?"
+    assert guardrail_router.messages == ["Bonjour"]
+    assert graph_router.messages == []
+
+
+@pytest.mark.parametrize(
+    ("message", "expected"),
+    [
+        ("hey", "Hi! What AI/ML topic would you like help with today?"),
+        ("ê", "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?"),
+        ("này", "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?"),
+        ("alo", "Chào bạn! Bạn muốn mình hỗ trợ nội dung AI/ML nào hôm nay?"),
+    ],
+)
+def test_exact_greeting_template_includes_short_common_greetings(message, expected):
+    response = AgentGraphService._compose_exact_greeting_response(
+        conversation_id="conv-1",
+        message=message,
+    )
+
+    assert response is not None
+    assert response.answer.markdown == expected
+
+
+def test_greeting_with_extra_request_does_not_match_exact_template():
+    response = AgentGraphService._compose_exact_greeting_response(
+        conversation_id="conv-1",
+        message="Xin chào, có thể giúp tôi tìm CNN k",
+    )
+
+    assert response is None
 
 
 @pytest.mark.asyncio
