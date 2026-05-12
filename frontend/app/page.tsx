@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 
-import LandingPage from "@/components/landing/LandingPage";
+import NewLandingPage from "@/components/landing/NewLandingPage";
 
 export const metadata: Metadata = {
-  title: {
-    absolute: "AI Learning Hub - Home",
-  },
+  title: "AI Learning Hub - Your Personal Path to Mastery",
   description:
-    "A structured learning experience that helps beginners and self-learners study AI with more clarity and less scattered effort.",
+    "Adaptive, tailored learning modules created just for your goals. Start your structured AI learning journey today.",
 };
 
 export default function RootPage() {
-  return <LandingPage />;
+  return <NewLandingPage />;
 }
