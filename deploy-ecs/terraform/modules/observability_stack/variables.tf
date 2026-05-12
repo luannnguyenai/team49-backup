@@ -63,7 +63,12 @@ variable "cache_security_group_id" {
 }
 
 variable "backend_secret_arn" {
-  description = "Backend secret ARN (Secrets Manager). Exporters pull DATABASE_URL / REDIS_URL from it."
+  description = "Backend secret ARN (Secrets Manager). Kept for backwards-compat; exporters now use observability_secret_arn."
+  type        = string
+}
+
+variable "observability_secret_arn" {
+  description = "Cleaned DSNs (POSTGRES_DSN without driver suffix, REDIS_URL) for exporters."
   type        = string
 }
 

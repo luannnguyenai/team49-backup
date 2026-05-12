@@ -350,7 +350,7 @@ resource "aws_ecs_task_definition" "postgres_exporter" {
       essential    = true
       portMappings = [{ containerPort = 9187, protocol = "tcp" }]
       secrets = [
-        { name = "DATA_SOURCE_NAME", valueFrom = "${var.backend_secret_arn}:DATABASE_URL::" }
+        { name = "DATA_SOURCE_NAME", valueFrom = "${var.observability_secret_arn}:POSTGRES_DSN::" }
       ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -381,7 +381,7 @@ resource "aws_ecs_task_definition" "redis_exporter" {
       essential    = true
       portMappings = [{ containerPort = 9121, protocol = "tcp" }]
       secrets = [
-        { name = "REDIS_ADDR", valueFrom = "${var.backend_secret_arn}:REDIS_URL::" }
+        { name = "REDIS_ADDR", valueFrom = "${var.observability_secret_arn}:REDIS_URL::" }
       ]
       logConfiguration = {
         logDriver = "awslogs"

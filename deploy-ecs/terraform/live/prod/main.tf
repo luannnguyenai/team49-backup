@@ -265,9 +265,10 @@ module "observability_stack" {
   database_security_group_id = module.security.database_security_group_id
   cache_security_group_id    = module.security.cache_security_group_id
 
-  backend_secret_arn = var.backend_secret_arn
+  backend_secret_arn       = var.backend_secret_arn
+  observability_secret_arn = "arn:aws:secretsmanager:${var.aws_region}:116533674568:secret:a20/prod/observability-Ea5JOh"
 
-  image_prometheus       = var.image_prometheus
+  image_prometheus = var.image_prometheus
   image_loki             = var.image_loki
   image_grafana          = var.image_grafana
   grafana_admin_password = var.grafana_admin_password

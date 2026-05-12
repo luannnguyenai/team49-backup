@@ -10,19 +10,14 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
-  - job_name: fastapi
-    metrics_path: /metrics
-    static_configs:
-      - targets: ["backend.a20.internal:8000"]
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: instance
-        replacement: backend
+  # Backend /metrics scrape is deferred. Backend ECS service has no Cloud Map
+  # registration yet, and ALB does not route /metrics. To enable: register
+  # backend in the obs namespace OR add an internal ALB rule for /metrics.
 
   - job_name: postgres
     static_configs:
-      - targets: ["postgres-exporter.obs.a20.internal:9187"]
+      - targets: ["postgres-exporter.obs.a20-prod.internal:9187"]
 
   - job_name: redis
     static_configs:
-      - targets: ["redis-exporter.obs.a20.internal:9121"]
+      - targets: ["redis-exporter.obs.a20-prod.internal:9121"]

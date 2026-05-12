@@ -5,7 +5,7 @@ datasources:
     uid: PBFA97CFB590B2093
     type: prometheus
     access: proxy
-    url: http://prometheus.obs.a20.internal:9090
+    url: http://prometheus.obs.a20-prod.internal:9090
     isDefault: true
     editable: true
     jsonData:
@@ -15,5 +15,5 @@ datasources:
     uid: Loki
     type: loki
     access: proxy
-    url: http://loki.obs.a20.internal:3100
+    url: http://loki.obs.a20-prod.internal:3100
     editable: true
