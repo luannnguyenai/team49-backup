@@ -23,6 +23,7 @@ from src.services.openai_compatible_http_chat_model import OpenAICompatibleHTTPC
 
 
 StrategyName = Literal[
+    "baseline_fast_model",
     "baseline_0_8b",
     "fast_model",
     "deterministic",
@@ -38,13 +39,8 @@ StrategyName = Literal[
 
 def default_strategy_names() -> list[StrategyName]:
     return [
-        "baseline_0_8b",
-        "compact_all",
-        "compact_labeled_all",
+        "baseline_fast_model",
         "deterministic",
-        "content_fastpath_compact",
-        "retrieval_first_compact",
-        "retrieval_first_labeled_compact",
     ]
 
 
@@ -430,7 +426,7 @@ async def run_strategy_case(
     started = time.perf_counter()
     error: str | None = None
     try:
-        if strategy == "baseline_0_8b":
+        if strategy in ("baseline_fast_model", "baseline_0_8b"):
             assert structured_router is not None
             output = _from_agent_route(
                 structured_router.route(
@@ -524,7 +520,11 @@ async def run_benchmark(
     *,
     repeat: int,
 ) -> list[StrategyResult]:
-    structured_router = build_production_agent_router() if "baseline_0_8b" in strategies else None
+    structured_router = (
+        build_production_agent_router()
+        if "baseline_fast_model" in strategies or "baseline_0_8b" in strategies
+        else None
+    )
     fast_router = _build_fast_model_router() if "fast_model" in strategies else None
     needs_compact = needs_compact_model(strategies)
     compact_model = _build_compact_router_model() if needs_compact else None
