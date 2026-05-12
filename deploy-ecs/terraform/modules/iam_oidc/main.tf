@@ -80,6 +80,14 @@ resource "aws_iam_role_policy" "deploy" {
         Resource = "*"
       },
       {
+        Sid    = "ELBTargetHealthRead"
+        Effect = "Allow"
+        Action = [
+          "elasticloadbalancing:DescribeTargetHealth"
+        ]
+        Resource = "*"
+      },
+      {
         Sid      = "PassRoleToTasks"
         Effect   = "Allow"
         Action   = "iam:PassRole"
