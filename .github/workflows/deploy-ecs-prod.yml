@@ -74,6 +74,8 @@ jobs:
       BOOTSTRAP_TASK_FAMILY: ${{ vars.BOOTSTRAP_TASK_FAMILY }}
       PRODUCTION_BACKEND_URL: ${{ vars.PRODUCTION_BACKEND_URL }}
       PRODUCTION_FRONTEND_URL: ${{ vars.PRODUCTION_FRONTEND_URL }}
+      NEXT_PUBLIC_GRAFANA_HOST: ${{ vars.NEXT_PUBLIC_GRAFANA_HOST }}
+      NEXT_PUBLIC_LANGFUSE_HOST: ${{ vars.NEXT_PUBLIC_LANGFUSE_HOST }}
       SMOKE_DB_ROUTE: ${{ vars.SMOKE_DB_ROUTE }}
       CLOUDFRONT_DOMAIN: ${{ vars.CLOUDFRONT_DOMAIN }}
       CLOUDFRONT_SMOKE_URL: ${{ vars.CLOUDFRONT_SMOKE_URL }}
@@ -151,6 +153,8 @@ jobs:
           docker build -f frontend/Dockerfile \
             --build-arg NEXT_PUBLIC_API_URL="$PRODUCTION_BACKEND_URL" \
             --build-arg API_INTERNAL_URL="$PRODUCTION_BACKEND_URL" \
+            --build-arg NEXT_PUBLIC_GRAFANA_HOST="${NEXT_PUBLIC_GRAFANA_HOST:-}" \
+            --build-arg NEXT_PUBLIC_LANGFUSE_HOST="${NEXT_PUBLIC_LANGFUSE_HOST:-https://cloud.langfuse.com}" \
             -t "$FRONTEND_IMAGE" frontend
           docker push "$FRONTEND_IMAGE"
 
