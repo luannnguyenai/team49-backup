@@ -1,6 +1,7 @@
 from scripts.benchmark_agent_router_strategies import (
     BenchmarkCase,
     CompactRouteOutput,
+    build_compact_router_messages,
     default_strategy_names,
     deterministic_content_fast_path,
     deterministic_content_route,
@@ -56,7 +57,23 @@ def test_default_strategies_are_self_host_only():
 
     assert "fast_model" not in strategies
     assert "baseline_0_8b" in strategies
+    assert "compact_labeled_all" in strategies
     assert needs_compact_model(strategies) is True
+
+
+def test_labeled_compact_prompt_defines_control_actions():
+    case = BenchmarkCase(
+        name="request_replan",
+        message="tôi đã biết CNN rồi, tối ưu lại lộ trình cho tôi",
+        expected_intent="request_replan",
+    )
+
+    messages = build_compact_router_messages(case, labeled=True)
+
+    system_prompt = messages[0]["content"]
+    assert "request_replan" in system_prompt
+    assert "request_path_switch" in system_prompt
+    assert "assess_knowledge" in system_prompt
 
 
 def test_route_quality_scores_expected_intent_and_topic():
