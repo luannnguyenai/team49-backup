@@ -6,8 +6,9 @@ import re
 import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
+from html.parser import HTMLParser
 from typing import ClassVar
-from urllib.parse import quote_plus, urlencode
+from urllib.parse import parse_qs, quote_plus, unquote, urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 from src.config import settings
@@ -33,6 +34,44 @@ class ExternalResearchDocument:
 class SearchPlan:
     tools: tuple[str, ...]
     queries: tuple[str, ...]
+
+
+class _DuckDuckGoHTMLParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.results: list[dict[str, str]] = []
+        self._capture: str | None = None
+        self._href = ""
+        self._text_parts: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs):
+        if tag != "a":
+            return
+        attr_map = {name: value or "" for name, value in attrs}
+        classes = set(attr_map.get("class", "").split())
+        if "result__a" in classes:
+            self._capture = "title"
+            self._href = attr_map.get("href", "")
+            self._text_parts = []
+        elif "result__snippet" in classes:
+            self._capture = "snippet"
+            self._text_parts = []
+
+    def handle_data(self, data: str):
+        if self._capture:
+            self._text_parts.append(data)
+
+    def handle_endtag(self, tag: str):
+        if tag != "a" or not self._capture:
+            return
+        text = re.sub(r"\s+", " ", "".join(self._text_parts)).strip()
+        if self._capture == "title" and text and self._href:
+            self.results.append({"title": text, "url": self._href, "snippet": ""})
+        elif self._capture == "snippet" and text and self.results:
+            self.results[-1]["snippet"] = text
+        self._capture = None
+        self._href = ""
+        self._text_parts = []
 
 
 class AgentExternalResearchService:
@@ -190,18 +229,15 @@ class AgentExternalResearchService:
         return []
 
     async def _search_web(self, query: str) -> list[ExternalResearchDocument]:
-        payload = await asyncio.to_thread(
-            self._fetch_json,
-            "https://api.duckduckgo.com/?"
-            + urlencode(
-                {
-                    "q": query,
-                    "format": "json",
-                    "no_html": "1",
-                    "skip_disambig": "1",
-                }
-            ),
+        instant_url = "https://api.duckduckgo.com/?" + urlencode(
+            {
+                "q": query,
+                "format": "json",
+                "no_html": "1",
+                "skip_disambig": "1",
+            }
         )
+        payload = await self._fetch_web_json(instant_url)
         documents: list[ExternalResearchDocument] = []
         title = str(payload.get("Heading") or "").strip()
         snippet = str(payload.get("AbstractText") or "").strip()
@@ -229,7 +265,51 @@ class AgentExternalResearchService:
                     )
                 if len(documents) >= 4:
                     return documents
+        if documents:
+            return documents
+        return await self._search_web_html(query)
+
+    async def _fetch_web_json(self, url: str) -> dict:
+        return await asyncio.to_thread(self._fetch_json, url)
+
+    async def _search_web_html(self, query: str) -> list[ExternalResearchDocument]:
+        text = await self._fetch_web_html_text(
+            "https://html.duckduckgo.com/html/?" + urlencode({"q": query})
+        )
+        parser = _DuckDuckGoHTMLParser()
+        parser.feed(text)
+        documents: list[ExternalResearchDocument] = []
+        for item in parser.results:
+            title = item.get("title", "").strip()
+            url = self._resolve_duckduckgo_result_url(item.get("url", ""))
+            snippet = item.get("snippet", "").strip()
+            if title and url:
+                documents.append(
+                    ExternalResearchDocument(
+                        title=title,
+                        url=url,
+                        snippet=snippet or title,
+                        source="web",
+                    )
+                )
+            if len(documents) >= 4:
+                break
         return documents
+
+    async def _fetch_web_html_text(self, url: str) -> str:
+        return await asyncio.to_thread(self._fetch_text, url)
+
+    @staticmethod
+    def _resolve_duckduckgo_result_url(value: str) -> str:
+        if not value:
+            return ""
+        if value.startswith("//"):
+            value = f"https:{value}"
+        parsed = urlsplit(value)
+        if "duckduckgo.com" in parsed.netloc and parsed.path.startswith("/l/"):
+            target = parse_qs(parsed.query).get("uddg", [""])[0]
+            return unquote(target)
+        return value
 
     async def _search_papers(self, query: str) -> list[ExternalResearchDocument]:
         if settings.semantic_scholar_api_key.strip():
