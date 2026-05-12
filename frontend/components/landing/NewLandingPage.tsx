@@ -115,30 +115,18 @@ export default function NewLandingPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <Link
                 href="/onboarding"
-                className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-full bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 active:scale-[0.98]"
+                className="group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-full bg-blue-600 px-8 text-lg font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 active:scale-[0.98] sm:w-[280px]"
               >
-                <span>Get Your Own Learning Path</span>
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <span className="whitespace-nowrap">Get Your Learning Path</span>
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
               </Link>
               
               <Link
                 href="/how-it-works"
-                className="flex items-center justify-center gap-2 rounded-full border-2 border-slate-200 bg-white px-8 py-4 text-lg font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
+                className="flex h-14 w-full items-center justify-center gap-2 rounded-full border-2 border-slate-200 bg-white px-8 text-lg font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] sm:w-[280px]"
               >
-                <PlayCircle className="h-5 w-5" />
-                <span>See How It Works</span>
+                <span className="whitespace-nowrap">See How It Works</span>
               </Link>
-            </div>
-            
-            {/* Subtle Social Proof or Detail */}
-            <div className="flex items-center gap-4 pt-4 text-sm font-medium text-slate-400">
-              <div className="flex -space-x-2">
-                {[1,2,3].map(i => (
-                  <div key={i} className="h-8 w-8 rounded-full border-2 border-white bg-slate-100" />
-                ))}
-              </div>
-              <p>Joined by 500+ AI enthusiasts this week</p>
             </div>
           </motion.div>
         </div>
