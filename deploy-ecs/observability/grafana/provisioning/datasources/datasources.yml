@@ -17,3 +17,17 @@ datasources:
     access: proxy
     url: http://loki.obs.a20-prod.internal:3100
     editable: true
+
+  - name: Postgres
+    uid: Postgres
+    type: postgres
+    access: proxy
+    url: $POSTGRES_HOST:$POSTGRES_PORT
+    user: $POSTGRES_USER
+    secureJsonData:
+      password: $POSTGRES_PASSWORD
+    jsonData:
+      database: $POSTGRES_DB
+      sslmode: require
+      postgresVersion: 1600
+    editable: true

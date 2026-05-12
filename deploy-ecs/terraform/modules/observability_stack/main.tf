@@ -318,8 +318,17 @@ resource "aws_ecs_task_definition" "grafana" {
         { name = "GF_SERVER_SERVE_FROM_SUB_PATH", value = "true" },
         { name = "GF_SECURITY_ALLOW_EMBEDDING", value = "true" },
         { name = "GF_SECURITY_COOKIE_SAMESITE", value = "none" },
-        { name = "GF_AUTH_ANONYMOUS_ENABLED", value = "true" },
-        { name = "GF_AUTH_ANONYMOUS_ORG_ROLE", value = "Viewer" }
+        # Anonymous OFF; admin pages iframe will need a logged-in Grafana session.
+        { name = "GF_AUTH_ANONYMOUS_ENABLED", value = "false" },
+        # Allow Grafana provisioning files to interpolate ${VAR}-style refs from env.
+        { name = "GF_AUTH_BASIC_ENABLED", value = "true" }
+      ]
+      secrets = [
+        { name = "POSTGRES_HOST", valueFrom = "${var.observability_secret_arn}:POSTGRES_HOST::" },
+        { name = "POSTGRES_PORT", valueFrom = "${var.observability_secret_arn}:POSTGRES_PORT::" },
+        { name = "POSTGRES_USER", valueFrom = "${var.observability_secret_arn}:POSTGRES_USER::" },
+        { name = "POSTGRES_PASSWORD", valueFrom = "${var.observability_secret_arn}:POSTGRES_PASSWORD::" },
+        { name = "POSTGRES_DB", valueFrom = "${var.observability_secret_arn}:POSTGRES_DB::" }
       ]
       logConfiguration = {
         logDriver = "awslogs"
