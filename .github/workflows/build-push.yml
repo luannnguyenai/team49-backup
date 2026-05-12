@@ -1,0 +1,114 @@
+name: Build & Push to ECR
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_backend:
+        description: Build backend image
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      build_frontend:
+        description: Build frontend image
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      image_tag:
+        description: Optional image tag override
+        required: false
+        default: ""
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: read
+
+concurrency:
+  group: build-push-${{ github.event.workflow_run.head_branch || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build And Push Images
+    runs-on: [self-hosted, phoenix-runner]
+    environment: production
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+      ECR_BACKEND_REPOSITORY: ${{ vars.ECR_BACKEND_REPOSITORY }}
+      ECR_FRONTEND_REPOSITORY: ${{ vars.ECR_FRONTEND_REPOSITORY }}
+      PRODUCTION_BACKEND_URL: ${{ vars.PRODUCTION_BACKEND_URL }}
+      NEXT_PUBLIC_GRAFANA_HOST: ${{ vars.NEXT_PUBLIC_GRAFANA_HOST }}
+      NEXT_PUBLIC_LANGFUSE_HOST: ${{ vars.NEXT_PUBLIC_LANGFUSE_HOST }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Resolve build scope and tag
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            build_backend="${{ inputs.build_backend }}"
+            build_frontend="${{ inputs.build_frontend }}"
+            requested_tag="${{ inputs.image_tag }}"
+          else
+            build_backend="true"
+            build_frontend="true"
+            requested_tag="${{ github.event.workflow_run.head_sha }}"
+          fi
+
+          if [ -n "$requested_tag" ]; then
+            tag="$requested_tag"
+          else
+            tag="${GITHUB_SHA}"
+          fi
+
+          echo "build_backend=${build_backend}" >> "$GITHUB_OUTPUT"
+          echo "build_frontend=${build_frontend}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "BACKEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_BACKEND_REPOSITORY}:${tag}" >> "$GITHUB_ENV"
+          echo "FRONTEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_FRONTEND_REPOSITORY}:${tag}" >> "$GITHUB_ENV"
+
+      - name: Build and push backend image
+        if: ${{ steps.build.outputs.build_backend == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build -t "$BACKEND_IMAGE" .
+          docker push "$BACKEND_IMAGE"
+
+      - name: Build and push frontend image
+        if: ${{ steps.build.outputs.build_frontend == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build -f frontend/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL="$PRODUCTION_BACKEND_URL" \
+            --build-arg API_INTERNAL_URL="$PRODUCTION_BACKEND_URL" \
+            --build-arg NEXT_PUBLIC_GRAFANA_HOST="${NEXT_PUBLIC_GRAFANA_HOST:-}" \
+            --build-arg NEXT_PUBLIC_LANGFUSE_HOST="${NEXT_PUBLIC_LANGFUSE_HOST:-https://cloud.langfuse.com}" \
+            -t "$FRONTEND_IMAGE" frontend
+          docker push "$FRONTEND_IMAGE"
