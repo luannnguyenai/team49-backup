@@ -25,6 +25,7 @@ from src.schemas.agent import (
     AgentFallback,
     AgentGuardrail,
 )
+from src.config import settings
 from src.services.agent_action_commit_service import AgentActionCommitService
 from src.services.agent_external_research_service import AgentExternalResearchService
 from src.services.agent_graph_contracts import (
@@ -761,6 +762,31 @@ class AgentGraphService:
         )
         state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id, thread_id)
         if request.tool_mode == "web_papers":
+            if not settings.external_research_enabled:
+                return self.composer.compose(
+                    conversation_id=conversation_id,
+                    message_id=str(uuid4()),
+                    result=ToolResult(
+                        kind="find_content",
+                        answer_markdown=(
+                            "External web and paper search is temporarily disabled."
+                        ),
+                        citations=[],
+                        fallback=AgentFallback(
+                            reason="tool_error",
+                            message=(
+                                "External web and paper search is disabled until the "
+                                "paper provider key is configured."
+                            ),
+                            errorCode="external_research_disabled",
+                        ),
+                        requires_evidence=False,
+                        metadata={
+                            "tool_mode": "web_papers",
+                            "answer_confidence": "fallback",
+                        },
+                    ),
+                )
             result = await self.external_research.answer(
                 message=request.message,
                 recent_messages=state["recent_messages"],
