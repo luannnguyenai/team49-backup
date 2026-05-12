@@ -56,10 +56,13 @@ def test_default_strategies_use_fast_model_router_two_baseline():
     strategies = default_strategy_names()
 
     assert "baseline_fast_model" in strategies
-    assert "baseline_0_8b" not in strategies
-    assert "compact_all" not in strategies
-    assert "compact_labeled_all" not in strategies
-    assert needs_compact_model(strategies) is False
+    assert "baseline_0_8b" in strategies
+    assert "compact_all" in strategies
+    assert "compact_labeled_all" in strategies
+    assert "compact_decision_table_all" in strategies
+    assert "compact_fewshot_all" in strategies
+    assert "deterministic" not in strategies
+    assert needs_compact_model(strategies) is True
 
 
 def test_labeled_compact_prompt_defines_control_actions():
@@ -75,6 +78,35 @@ def test_labeled_compact_prompt_defines_control_actions():
     assert "request_replan" in system_prompt
     assert "request_path_switch" in system_prompt
     assert "assess_knowledge" in system_prompt
+
+
+def test_decision_table_prompt_prioritizes_control_actions():
+    case = BenchmarkCase(
+        name="path_switch",
+        message="chuyển tôi sang lộ trình NLP",
+        expected_intent="request_path_switch",
+    )
+
+    messages = build_compact_router_messages(case, variant="decision_table")
+
+    system_prompt = messages[0]["content"]
+    assert "Priority order" in system_prompt
+    assert "request_path_switch" in system_prompt
+    assert "Do not classify path changes as navigate_to_unit" in system_prompt
+
+
+def test_fewshot_prompt_contains_expected_json_examples():
+    case = BenchmarkCase(
+        name="assessment",
+        message="quiz me on object detection",
+        expected_intent="assess_knowledge",
+    )
+
+    messages = build_compact_router_messages(case, variant="fewshot")
+
+    system_prompt = messages[0]["content"]
+    assert '{"intent":"assess_knowledge"' in system_prompt
+    assert '{"intent":"request_replan"' in system_prompt
 
 
 def test_route_quality_scores_expected_intent_and_topic():
