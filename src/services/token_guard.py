@@ -16,11 +16,14 @@ from src.services.token_denylist import is_token_revoked, revoke_token
 
 async def is_payload_revoked(payload: TokenPayload) -> bool:
     try:
-        redis = get_redis()
-    except RuntimeError:
+        try:
+            redis = get_redis()
+        except RuntimeError:
+            return False
+        return await is_token_revoked(redis, payload.jti)
+    except Exception:
+        # Graceful fallback: if Redis is down/misconfigured, treat as not revoked
         return False
-
-    return await is_token_revoked(redis, payload.jti)
 
 
 async def revoke_payload(payload: TokenPayload) -> None:
