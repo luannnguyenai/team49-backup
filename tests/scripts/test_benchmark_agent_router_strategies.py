@@ -52,13 +52,14 @@ def test_content_fast_path_leaves_control_actions_for_compact_router():
     assert result is None
 
 
-def test_default_strategies_are_self_host_only():
+def test_default_strategies_use_fast_model_router_two_baseline():
     strategies = default_strategy_names()
 
-    assert "fast_model" not in strategies
-    assert "baseline_0_8b" in strategies
-    assert "compact_labeled_all" in strategies
-    assert needs_compact_model(strategies) is True
+    assert "baseline_fast_model" in strategies
+    assert "baseline_0_8b" not in strategies
+    assert "compact_all" not in strategies
+    assert "compact_labeled_all" not in strategies
+    assert needs_compact_model(strategies) is False
 
 
 def test_labeled_compact_prompt_defines_control_actions():
