@@ -7,7 +7,7 @@ from src.services.agent_router_factory import (
     build_production_agent_response_router,
     build_production_agent_router,
 )
-from src.services.agent_structured_router import StructuredAgentRouter
+from src.services.agent_structured_router import StructuredAgentRouter, StructuredRouteOutput
 
 
 class Settings:
@@ -70,9 +70,29 @@ def test_production_router_factory_uses_guardrail_router_before_fast_model(monke
 
 def test_agent_router_model_falls_back_when_local_structured_call_fails():
     fallback = SuccessfulModel()
-    model = _FallbackChatModel(primary=FailingModel(), fallback=fallback)
+    model = _FallbackChatModel(
+        primary=FailingModel(),
+        fallback=fallback,
+        primary_schemas=(StructuredRouteOutput,),
+    )
 
-    result = model.with_structured_output(dict).invoke([{"role": "user", "content": "route"}])
+    result = model.with_structured_output(StructuredRouteOutput).invoke(
+        [{"role": "user", "content": "route"}]
+    )
+
+    assert result == {"ok": True}
+    assert fallback.structured.called is True
+
+
+def test_agent_router_model_uses_fallback_directly_for_non_route_schemas():
+    fallback = SuccessfulModel()
+    model = _FallbackChatModel(
+        primary=FailingModel(),
+        fallback=fallback,
+        primary_schemas=(StructuredRouteOutput,),
+    )
+
+    result = model.with_structured_output(dict).invoke([{"role": "user", "content": "think"}])
 
     assert result == {"ok": True}
     assert fallback.structured.called is True
