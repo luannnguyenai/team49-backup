@@ -13,11 +13,11 @@ Both strategies:
   - Edge case pool < k: take all available items (no fail, no skip)
   - Edge case pool = 0: skip that unit, log INFO warning
 """
+
 from __future__ import annotations
 
 import logging
 import random
-from collections import defaultdict
 
 from src.models.canonical import QuestionBankItem
 

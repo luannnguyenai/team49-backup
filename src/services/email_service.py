@@ -24,11 +24,12 @@ async def send_password_reset_email(email: str, token: str) -> None:
     msg["Subject"] = "Reset your password"
     msg["From"] = settings.email_from
     msg["To"] = email
-    msg.attach(MIMEText(
-        f"Use this link to reset your password. "
-        f"The link expires in {ttl} minutes: {reset_url}",
-        "plain",
-    ))
+    msg.attach(
+        MIMEText(
+            f"Use this link to reset your password. The link expires in {ttl} minutes: {reset_url}",
+            "plain",
+        )
+    )
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>

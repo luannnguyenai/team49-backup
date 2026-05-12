@@ -9,13 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import Settings
 from src.exceptions import ValidationError
 from src.models.learning import Session, SessionType
-from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.canonical_content_repo import CanonicalContentRepository
+from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.schemas.placement_lite import PlacementLiteStartResponse
 from src.services.assessment_service import _canonical_item_to_assessment_question
-from src.services.placement.strategy_selector import get_strategy
 from src.services.placement.strategies.legacy_selector import LegacySelectorStrategy  # noqa: F401
+from src.services.placement.strategy_selector import get_strategy
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +51,9 @@ async def start_placement_lite_session(
 
     units = await CanonicalContentRepository(db).get_linked_learning_units(course_ids)
     sampled_units = select_placement_units(units, max_units=max_units)
-    canonical_unit_ids = [unit.canonical_unit_id for unit in sampled_units if unit.canonical_unit_id]
+    canonical_unit_ids = [
+        unit.canonical_unit_id for unit in sampled_units if unit.canonical_unit_id
+    ]
     if not canonical_unit_ids:
         raise ValidationError("Placement-lite could not find canonical units for selected courses.")
 

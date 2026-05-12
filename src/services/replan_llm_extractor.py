@@ -7,10 +7,8 @@ Uses the configured default model (settings.default_model) to analyze
 knowledge claims and extract structured keyword plans.
 """
 
-import json
 import logging
 import os
-import re
 from typing import Literal
 
 from langchain.chat_models import init_chat_model

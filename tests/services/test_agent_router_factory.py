@@ -2,7 +2,10 @@ import pytest
 
 from src.services.agent_graph_contracts import AgentRouterUnavailableError
 from src.services.agent_graph_router import DeterministicAgentRouter
-from src.services.agent_router_factory import build_production_agent_router
+from src.services.agent_router_factory import (
+    build_production_agent_response_router,
+    build_production_agent_router,
+)
 from src.services.agent_structured_router import StructuredAgentRouter
 
 
@@ -26,6 +29,20 @@ def test_production_router_factory_builds_structured_router(monkeypatch):
 
     assert isinstance(router, StructuredAgentRouter)
     assert not isinstance(router, DeterministicAgentRouter)
+
+
+def test_production_response_router_uses_raw_http_model_for_selected_qwen_model(monkeypatch):
+    def init_model(**_kwargs):
+        raise AssertionError("self-hosted Qwen must not use the OpenAI SDK client")
+
+    router = build_production_agent_response_router(
+        chat_model_id="qwen35_4b",
+        init_model=init_model,
+    )
+
+    assert isinstance(router, StructuredAgentRouter)
+    assert router.model.model == "qwen3.5-4b-lora"
+    assert router.model.base_url == "https://vllm.a20-app-049.io.vn/v1"
 
 
 def test_production_router_factory_fails_safe_without_provider():

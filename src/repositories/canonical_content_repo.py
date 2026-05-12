@@ -20,7 +20,9 @@ class CanonicalContentRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_linked_learning_units(self, selected_course_ids: list[str | UUID]) -> list[LearningUnit]:
+    async def get_linked_learning_units(
+        self, selected_course_ids: list[str | UUID]
+    ) -> list[LearningUnit]:
         if not selected_course_ids:
             return []
         selected = [str(course_id) for course_id in selected_course_ids]
@@ -48,7 +50,9 @@ class CanonicalContentRepository:
         )
         return list(result.scalars().all())
 
-    async def get_learning_units_by_ids(self, learning_unit_ids: list[UUID]) -> dict[UUID, LearningUnit]:
+    async def get_learning_units_by_ids(
+        self, learning_unit_ids: list[UUID]
+    ) -> dict[UUID, LearningUnit]:
         if not learning_unit_ids:
             return {}
         result = await self.session.execute(
@@ -81,12 +85,12 @@ class CanonicalContentRepository:
     async def get_unit_kp_rows_by_kp_ids(self, kp_ids: list[str]) -> list[UnitKPMap]:
         if not kp_ids:
             return []
-        result = await self.session.execute(
-            select(UnitKPMap).where(UnitKPMap.kp_id.in_(kp_ids))
-        )
+        result = await self.session.execute(select(UnitKPMap).where(UnitKPMap.kp_id.in_(kp_ids)))
         return list(result.scalars().all())
 
-    async def get_canonical_units_by_ids(self, canonical_unit_ids: list[str]) -> dict[str, CanonicalUnit]:
+    async def get_canonical_units_by_ids(
+        self, canonical_unit_ids: list[str]
+    ) -> dict[str, CanonicalUnit]:
         if not canonical_unit_ids:
             return {}
         result = await self.session.execute(
@@ -97,9 +101,7 @@ class CanonicalContentRepository:
     async def get_concepts_by_ids(self, kp_ids: list[str]) -> dict[str, ConceptKP]:
         if not kp_ids:
             return {}
-        result = await self.session.execute(
-            select(ConceptKP).where(ConceptKP.kp_id.in_(kp_ids))
-        )
+        result = await self.session.execute(select(ConceptKP).where(ConceptKP.kp_id.in_(kp_ids)))
         return {concept.kp_id: concept for concept in result.scalars().all()}
 
     async def get_quiz_item_counts_by_unit_ids(
@@ -204,7 +206,9 @@ class CanonicalContentRepository:
         result = await self.session.execute(
             select(CanonicalUnit)
             .where(*content_filters, or_(*like_filters))
-            .order_by(CanonicalUnit.course_id, CanonicalUnit.lecture_order, CanonicalUnit.ordering_index)
+            .order_by(
+                CanonicalUnit.course_id, CanonicalUnit.lecture_order, CanonicalUnit.ordering_index
+            )
             .limit(limit)
         )
         return list(result.scalars().all())
@@ -240,7 +244,9 @@ class CanonicalContentRepository:
         )
         mastery = {}
         for row in result.scalars().all():
-            mastery[row.kp_id] = max(0.0, float(row.mastery_mean_cached) - float(row.theta_sigma) * 0.5)
+            mastery[row.kp_id] = max(
+                0.0, float(row.mastery_mean_cached) - float(row.theta_sigma) * 0.5
+            )
         return mastery
 
     async def get_user_learning_status_by_canonical_ids(

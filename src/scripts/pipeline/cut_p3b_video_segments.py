@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 _TIMESTAMP_LINE_PATTERN = re.compile(r"^(\d{2}):(\d{2}):(\d{2})$")
 _YOUTUBE_ID_PATTERN = re.compile(r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{6,})")
 
@@ -196,7 +195,9 @@ def cut_segments(
         manifests.append(str(manifest_path))
 
     if missing_videos:
-        raise RuntimeError(f"Missing source videos for {len(missing_videos)} lectures: {missing_videos}")
+        raise RuntimeError(
+            f"Missing source videos for {len(missing_videos)} lectures: {missing_videos}"
+        )
 
     return {
         "course_id": course_id,
@@ -209,7 +210,9 @@ def cut_segments(
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Cut P3b video segment clips from local lecture videos.")
+    parser = argparse.ArgumentParser(
+        description="Cut P3b video segment clips from local lecture videos."
+    )
     parser.add_argument("--course-dir", required=True)
     parser.add_argument("--p3b-input-dir", required=True)
     parser.add_argument("--output-clip-dir", required=True)

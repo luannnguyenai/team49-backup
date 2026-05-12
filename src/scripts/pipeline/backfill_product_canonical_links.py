@@ -32,7 +32,9 @@ def _lecture_number(value: str | None) -> int | None:
     return int(match.group(1)) if match else None
 
 
-def match_canonical_unit(product_unit, canonical_course_id: str, canonical_units: Iterable) -> str | None:
+def match_canonical_unit(
+    product_unit, canonical_course_id: str, canonical_units: Iterable
+) -> str | None:
     product_lecture = _lecture_number(getattr(product_unit, "slug", None)) or _lecture_number(
         getattr(product_unit, "title", None)
     )
@@ -110,7 +112,9 @@ async def _run(*, dry_run: bool) -> dict[str, int]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Backfill product rows with canonical course/unit IDs.")
+    parser = argparse.ArgumentParser(
+        description="Backfill product rows with canonical course/unit IDs."
+    )
     parser.add_argument("--apply", action="store_true", help="Write updates. Omit for dry-run.")
     args = parser.parse_args()
 

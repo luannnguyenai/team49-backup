@@ -9,9 +9,10 @@ from src.services.agentic_rag_contracts import AgenticRAGFinal, AgenticRAGObserv
 
 
 class AgenticRAGPipeline:
-    def __init__(self, router, tool_executor):
+    def __init__(self, router, tool_executor, response_router=None):
         self.router = router
         self.tool_executor = tool_executor
+        self.response_router = response_router or router
 
     async def run(
         self,
@@ -57,7 +58,7 @@ class AgenticRAGPipeline:
         except AgentRouterUnavailableError:
             observation = tool_observation
         observation = self._validated_observation(observation, tool_observation)
-        final = self.router.rag_respond(
+        final = self.response_router.rag_respond(
             message=message,
             thought=thought,
             observations=[observation.model_dump(mode="json")],
@@ -128,7 +129,9 @@ class AgenticRAGPipeline:
                     },
                 }
             )
-        answer_markdown = final.answer_markdown or final.clarification_question or result.answer_markdown
+        answer_markdown = (
+            final.answer_markdown or final.clarification_question or result.answer_markdown
+        )
         answer_markdown = self._strip_hidden_stage_text(answer_markdown or "")
         if final.evidence_sufficient and result.citations:
             return result.model_copy(

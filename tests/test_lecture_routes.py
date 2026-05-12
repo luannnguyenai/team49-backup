@@ -8,6 +8,7 @@ from httpx import ASGITransport, AsyncClient
 
 from src.api.app import app
 from src.api.app import AskRequest, RateRequest, ask_question, rate_answer
+from src.services.model_registry import ChatModelUnavailableError
 
 
 class _FakeDb:
@@ -60,6 +61,7 @@ class LectureRouteTests(unittest.IsolatedAsyncioTestCase):
             image_base64=None,
             context_binding_id=f"ctx_{canonical_unit_id}",
             user_id=None,
+            chat_model_id="default",
         )
 
     async def test_ask_question_forwards_context_binding_id_to_tutor_service(self):
@@ -92,10 +94,71 @@ class LectureRouteTests(unittest.IsolatedAsyncioTestCase):
             image_base64=None,
             context_binding_id="ctx_unit_lecture_01",
             user_id=None,
+            chat_model_id="default",
         )
         self.assertEqual(response.headers["content-type"], "application/x-ndjson")
         self.assertEqual(response.headers["cache-control"], "no-cache, no-transform")
         self.assertEqual(response.headers["x-accel-buffering"], "no")
+
+    async def test_ask_question_forwards_chat_model_id_to_tutor_service(self):
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            with (
+                patch("src.api.app._ensure_lecture_exists", new=AsyncMock()),
+                patch(
+                    "src.api.app.get_context_and_stream_langgraph",
+                    return_value=iter(['{"a":"ok"}\n']),
+                ) as mock_stream,
+                patch("src.api.app.ensure_chat_model_available", new=AsyncMock()),
+            ):
+                response = await client.post(
+                    "/api/lectures/ask",
+                    json={
+                        "lecture_id": "cs231n-lecture-1",
+                        "current_timestamp": 12,
+                        "question": "Explain this part",
+                        "chatModelId": "qwen35_4b",
+                    },
+                )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mock_stream.call_args.kwargs["chat_model_id"], "qwen35_4b")
+
+    async def test_ask_question_rejects_unavailable_chat_model(self):
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+            with (
+                patch("src.api.app._ensure_lecture_exists", new=AsyncMock()),
+                patch(
+                    "src.api.app.ensure_chat_model_available",
+                    new=AsyncMock(
+                        side_effect=ChatModelUnavailableError(
+                            model_id="qwen35_4b",
+                            label="Qwen 3.5 4B",
+                            status="down",
+                        )
+                    ),
+                ),
+                patch("src.api.app.get_context_and_stream_langgraph") as mock_stream,
+            ):
+                response = await client.post(
+                    "/api/lectures/ask",
+                    json={
+                        "lecture_id": "cs231n-lecture-1",
+                        "current_timestamp": 12,
+                        "question": "Explain this part",
+                        "chatModelId": "qwen35_4b",
+                    },
+                )
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"]["code"], "chat_model_unavailable")
+        self.assertEqual(response.json()["detail"]["modelId"], "qwen35_4b")
+        mock_stream.assert_not_called()
 
     async def test_ask_question_forwards_authenticated_user_id_to_tutor_service(self):
         fake_user = SimpleNamespace(id=uuid.uuid4())

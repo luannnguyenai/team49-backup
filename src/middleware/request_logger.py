@@ -22,6 +22,7 @@ Notes:
 - The middleware is fail-safe: any logging error is swallowed so the request
   pipeline is never broken.
 """
+
 from __future__ import annotations
 
 import logging
@@ -48,7 +49,7 @@ if not _logger.handlers:
     try:
         _handler = RotatingFileHandler(
             LOG_FILE,
-            maxBytes=20 * 1024 * 1024,   # 20 MB
+            maxBytes=20 * 1024 * 1024,  # 20 MB
             backupCount=5,
             encoding="utf-8",
         )

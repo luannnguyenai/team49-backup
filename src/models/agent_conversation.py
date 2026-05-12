@@ -21,7 +21,9 @@ class AgentConversation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False, default="New chat")
     preview: Mapped[str] = mapped_column(String(500), nullable=False, default="")
-    message_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    message_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     thread_id: Mapped[str] = mapped_column(String(120), nullable=False, unique=True, index=True)
 
     __table_args__ = (Index("ix_agent_conversations_user_updated", "user_id", "updated_at"),)
@@ -46,10 +48,14 @@ class AgentConversationMessage(UUIDPrimaryKeyMixin, Base):
     markdown: Mapped[str] = mapped_column(Text, nullable=False)
     citations_json: Mapped[list | None] = mapped_column(JSON, nullable=True)
     actions_json: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     __table_args__ = (
-        Index("ix_agent_conversation_messages_conversation_created", "conversation_id", "created_at"),
+        Index(
+            "ix_agent_conversation_messages_conversation_created", "conversation_id", "created_at"
+        ),
     )
 
 

@@ -23,7 +23,7 @@ import { CHART_GRID, CHART_PALETTE } from "@/lib/admin/chart-theme";
 
 type SeriesPoint = { t: number; cpu: number | null; ram: number | null };
 
-const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST?.trim() || null;
+const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST?.trim() || "/grafana";
 
 function fmtPct(p: number | null | undefined): string {
   if (p === null || p === undefined) return "—";

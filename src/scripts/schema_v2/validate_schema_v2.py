@@ -62,7 +62,9 @@ async def validate_database() -> ValidationResult:
             """,
         )
         if unresolved_interactions:
-            result.error(f"{unresolved_interactions} interactions have unresolved canonical_item_id")
+            result.error(
+                f"{unresolved_interactions} interactions have unresolved canonical_item_id"
+            )
 
         bad_item_weights = await _scalar_int(
             session,
@@ -110,9 +112,13 @@ async def validate_database() -> ValidationResult:
         if unresolved_edges:
             result.error(f"{unresolved_edges} active prerequisite edges have unresolved KP IDs")
 
-        null_content_type = await _scalar_int(session, "SELECT COUNT(*) FROM units WHERE content_type IS NULL")
+        null_content_type = await _scalar_int(
+            session, "SELECT COUNT(*) FROM units WHERE content_type IS NULL"
+        )
         if null_content_type:
-            result.warning(f"{null_content_type} units have null content_type; expected until semantic ingest updates")
+            result.warning(
+                f"{null_content_type} units have null content_type; expected until semantic ingest updates"
+            )
 
     return result
 
@@ -127,7 +133,9 @@ def main() -> int:
     args = parse_args()
     result = asyncio.run(validate_database())
     write_validation_report(result, args.report_path)
-    print(json.dumps({"errors": result.errors, "warnings": result.warnings}, indent=2, sort_keys=True))
+    print(
+        json.dumps({"errors": result.errors, "warnings": result.warnings}, indent=2, sort_keys=True)
+    )
     return fail_if_any_errors(result)
 
 

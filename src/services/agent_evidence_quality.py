@@ -6,7 +6,6 @@ from typing import Literal
 
 from src.schemas.agent import UnitSearchResult
 
-
 EvidenceLabel = Literal["direct_match", "related_match", "weak_match", "no_match"]
 
 
@@ -91,7 +90,9 @@ class AgentEvidenceQualityService:
                 related_matches.append(
                     (title_coverage, body_coverage, index, result.canonical_unit_id)
                 )
-                match_reasons[result.canonical_unit_id] = "Related result with partial topic overlap."
+                match_reasons[result.canonical_unit_id] = (
+                    "Related result with partial topic overlap."
+                )
 
         if direct_matches:
             direct_matches.sort(key=lambda item: (-item[0], -item[1], item[2]))
@@ -138,12 +139,7 @@ class AgentEvidenceQualityService:
         return sorted(set(terms))
 
     def _acronym_terms(self, query: str) -> list[str]:
-        return sorted(
-            {
-                raw_term.lower()
-                for raw_term in re.findall(r"[A-Z][A-Z0-9]{2,}", query)
-            }
-        )
+        return sorted({raw_term.lower() for raw_term in re.findall(r"[A-Z][A-Z0-9]{2,}", query)})
 
     def _has_parenthetical_acronym_expansion(self, query: str, acronym_terms: list[str]) -> bool:
         if not acronym_terms:

@@ -220,40 +220,58 @@ def _validate_spec(spec: SyntheticUserSpec) -> None:
 
 async def load_catalog(session: AsyncSession) -> SyntheticCatalog:
     course_rows = (
-        await session.execute(select(Course).order_by(Course.sort_order, Course.slug))
-    ).scalars().all()
+        (await session.execute(select(Course).order_by(Course.sort_order, Course.slug)))
+        .scalars()
+        .all()
+    )
     unit_rows = (
-        await session.execute(
-            select(LearningUnit)
-            .join(Course, LearningUnit.course_id == Course.id)
-            .join(CourseSection, LearningUnit.section_id == CourseSection.id)
-            .order_by(
-                Course.sort_order,
-                CourseSection.sort_order,
-                LearningUnit.sort_order,
-                LearningUnit.slug,
+        (
+            await session.execute(
+                select(LearningUnit)
+                .join(Course, LearningUnit.course_id == Course.id)
+                .join(CourseSection, LearningUnit.section_id == CourseSection.id)
+                .order_by(
+                    Course.sort_order,
+                    CourseSection.sort_order,
+                    LearningUnit.sort_order,
+                    LearningUnit.slug,
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     question_rows = (
-        await session.execute(
-            select(QuestionBankItem).order_by(
-                QuestionBankItem.unit_id,
-                QuestionBankItem.item_id,
+        (
+            await session.execute(
+                select(QuestionBankItem).order_by(
+                    QuestionBankItem.unit_id,
+                    QuestionBankItem.item_id,
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     phase_rows = (
-        await session.execute(
-            select(ItemPhaseMap).order_by(ItemPhaseMap.item_id, ItemPhaseMap.phase)
+        (
+            await session.execute(
+                select(ItemPhaseMap).order_by(ItemPhaseMap.item_id, ItemPhaseMap.phase)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     item_kp_rows = (
-        await session.execute(select(ItemKPMap).order_by(ItemKPMap.item_id, ItemKPMap.kp_id))
-    ).scalars().all()
+        (await session.execute(select(ItemKPMap).order_by(ItemKPMap.item_id, ItemKPMap.kp_id)))
+        .scalars()
+        .all()
+    )
     unit_kp_rows = (
-        await session.execute(select(UnitKPMap).order_by(UnitKPMap.unit_id, UnitKPMap.kp_id))
-    ).scalars().all()
+        (await session.execute(select(UnitKPMap).order_by(UnitKPMap.unit_id, UnitKPMap.kp_id)))
+        .scalars()
+        .all()
+    )
 
     phases_by_item: dict[str, list[str]] = defaultdict(list)
     for row in phase_rows:
@@ -299,10 +317,7 @@ async def load_catalog(session: AsyncSession) -> SyntheticCatalog:
             )
             for row in question_rows
         ),
-        unit_kp_ids={
-            unit_id: tuple(kp_ids)
-            for unit_id, kp_ids in sorted(kp_by_unit.items())
-        },
+        unit_kp_ids={unit_id: tuple(kp_ids) for unit_id, kp_ids in sorted(kp_by_unit.items())},
     )
 
 
@@ -403,7 +418,9 @@ def _append_user_rows(
         selected_units,
         created_at,
     )
-    plan_id = _append_planner_rows(rows, spec, user_id, selected_units, selected_courses, created_at)
+    plan_id = _append_planner_rows(
+        rows, spec, user_id, selected_units, selected_courses, created_at
+    )
     _append_session_state(rows, spec, user_id, selected_units, session_ids, plan_id)
 
 
@@ -418,11 +435,7 @@ def _select_courses(catalog: SyntheticCatalog, course_scope: tuple[str, ...]) ->
             scope_values.difference_update(SPECIALIZATION_COURSE_SCOPES)
             scope_values.add(DEFAULT_SPECIALIZATION_COURSE_SCOPE)
         scope_values.add(FOUNDATION_COURSE_SCOPE)
-    matched = [
-        course
-        for course in catalog.courses
-        if _course_in_scope(course, scope_values)
-    ]
+    matched = [course for course in catalog.courses if _course_in_scope(course, scope_values)]
     return matched or list(catalog.courses[:1])
 
 
@@ -538,14 +551,14 @@ def _append_session_and_interaction_rows(
             continue
         items = items[: session_spec.item_count]
         completed_at = (
-            created_at + timedelta(days=phase_index, hours=2)
-            if session_spec.completed
-            else None
+            created_at + timedelta(days=phase_index, hours=2) if session_spec.completed else None
         )
 
         session_id = _stable_uuid("session", f"{spec.email}:{phase}")
         session_ids[phase] = session_id
-        correct_flags = [answer == "correct" for answer in session_spec.answer_pattern[: len(items)]]
+        correct_flags = [
+            answer == "correct" for answer in session_spec.answer_pattern[: len(items)]
+        ]
         rows["sessions"].append(
             {
                 "id": session_id,
@@ -557,7 +570,9 @@ def _append_session_and_interaction_rows(
                 "completed_at": completed_at,
                 "total_questions": len(items),
                 "correct_count": sum(1 for value in correct_flags if value),
-                "score_percent": round(100 * sum(1 for value in correct_flags if value) / len(items), 2),
+                "score_percent": round(
+                    100 * sum(1 for value in correct_flags if value) / len(items), 2
+                ),
                 "canonical_phase": phase,
                 "canonical_unit_id": units[0].id,
                 "canonical_section_id": units[0].section_id,
@@ -578,11 +593,14 @@ def _append_session_and_interaction_rows(
                     "global_sequence_position": sequence_global,
                     "selected_answer": selected_answer,
                     "is_correct": is_correct,
-                    "response_time_ms": int(session_spec.response_time_ms or 0) + (item_index * 1000),
+                    "response_time_ms": int(session_spec.response_time_ms or 0)
+                    + (item_index * 1000),
                     "changed_answer": spec.proficiency_band == "beginner" and not is_correct,
-                    "hint_used": spec.proficiency_band in {"beginner", "developing"} and not is_correct,
+                    "hint_used": spec.proficiency_band in {"beginner", "developing"}
+                    and not is_correct,
                     "explanation_viewed": not is_correct,
-                    "timestamp": created_at + timedelta(days=phase_index, hours=1, minutes=item_index),
+                    "timestamp": created_at
+                    + timedelta(days=phase_index, hours=1, minutes=item_index),
                 }
             )
             sequence_global += 1
@@ -592,17 +610,17 @@ def _append_session_and_interaction_rows(
 
 def _select_items(catalog: SyntheticCatalog, units: list[UnitRef], phase: str) -> list[ItemRef]:
     unit_ids = {unit.canonical_unit_id for unit in units}
-    return [
-        item
-        for item in catalog.items
-        if item.unit_id in unit_ids and phase in item.phases
-    ]
+    return [item for item in catalog.items if item.unit_id in unit_ids and phase in item.phases]
 
 
 def _selected_answer(item: ItemRef, is_correct: bool) -> str:
-    answer_index = item.answer_index if is_correct else (item.answer_index + 1) % max(item.choice_count, 4)
+    answer_index = (
+        item.answer_index if is_correct else (item.answer_index + 1) % max(item.choice_count, 4)
+    )
     answer_index = min(answer_index, 3)
-    return (SelectedAnswer.A, SelectedAnswer.B, SelectedAnswer.C, SelectedAnswer.D)[answer_index].value
+    return (SelectedAnswer.A, SelectedAnswer.B, SelectedAnswer.C, SelectedAnswer.D)[
+        answer_index
+    ].value
 
 
 def _append_planner_rows(
@@ -657,7 +675,9 @@ def _append_planner_rows(
                 "term_breakdown_json": {
                     "need": round(0.9 - index * 0.06, 2),
                     "interest": 0.7,
-                    "unlock_gain": 0.5 if spec.proficiency_band in {"proficient", "advanced"} else 0.25,
+                    "unlock_gain": 0.5
+                    if spec.proficiency_band in {"proficient", "advanced"}
+                    else 0.25,
                     "difficulty_fit": spec.proficiency_band,
                 },
                 "rationale_text": f"Synthetic {spec.synthetic_case} plan row for {spec.proficiency_band} learner.",
@@ -776,10 +796,7 @@ def split_rows_by_dataset(
     specs: list[SyntheticUserSpec] | None = None,
 ) -> dict[str, dict[str, list[dict[str, Any]]]]:
     specs = specs or build_user_specs()
-    dataset_by_user_id = {
-        _stable_uuid("user", spec.email): spec.dataset
-        for spec in specs
-    }
+    dataset_by_user_id = {_stable_uuid("user", spec.email): spec.dataset for spec in specs}
     dataset_by_plan_id = {
         row["id"]: dataset_by_user_id[row["user_id"]]
         for row in rows.get("plan_history", [])

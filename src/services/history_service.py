@@ -27,11 +27,13 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.exceptions import ConflictError, NotFoundError
 from src.models.learning import (
     Interaction,
     Session,
     SessionType,
 )
+from src.repositories.history_repo import HistoryRepository
 from src.schemas.history import (
     HistoryItem,
     HistoryResponse,
@@ -40,8 +42,6 @@ from src.schemas.history import (
     ScoreTrendPoint,
     SessionDetailResponse,
 )
-from src.exceptions import ConflictError, NotFoundError
-from src.repositories.history_repo import HistoryRepository
 
 # ---------------------------------------------------------------------------
 # GET /api/history

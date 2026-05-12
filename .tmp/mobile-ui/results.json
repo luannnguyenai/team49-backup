@@ -1,0 +1,156 @@
+[
+  {
+    "route": "/",
+    "metrics": {
+      "url": "http://localhost:3281/login?from=%2Fagent",
+      "vw": 390,
+      "docW": 390,
+      "bodyW": 390,
+      "overflowX": 0,
+      "wide": [],
+      "visibleFixed": [
+        {
+          "tag": "div",
+          "className": "pointer-events-none fixed inset-0 overflow-hidden",
+          "top": 0,
+          "bottom": 844,
+          "height": 844
+        }
+      ]
+    },
+    "consoleErrors": []
+  },
+  {
+    "route": "/courses/rag-production-systems",
+    "metrics": {
+      "url": "http://127.0.0.1:3281/courses/rag-production-systems",
+      "vw": 390,
+      "docW": 390,
+      "bodyW": 390,
+      "overflowX": 0,
+      "wide": [],
+      "visibleFixed": [
+        {
+          "tag": "header",
+          "className": "sticky top-0 z-30 border-b",
+          "top": 0,
+          "bottom": 65,
+          "height": 65
+        }
+      ]
+    },
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "metrics": {
+      "url": "http://127.0.0.1:3281/dashboard",
+      "vw": 390,
+      "docW": 390,
+      "bodyW": 390,
+      "overflowX": 0,
+      "wide": [],
+      "visibleFixed": [
+        {
+          "tag": "header",
+          "className": "sticky top-0 z-30 border-b",
+          "top": 0,
+          "bottom": 65,
+          "height": 65
+        }
+      ]
+    },
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  {
+    "route": "/agent",
+    "metrics": {
+      "url": "http://127.0.0.1:3281/agent",
+      "vw": 390,
+      "docW": 390,
+      "bodyW": 390,
+      "overflowX": 0,
+      "wide": [
+        {
+          "tag": "button",
+          "className": "btn-secondary shrink-0 px-3 py-2 text-xs disabled:opacity-60",
+          "left": 222,
+          "right": 394,
+          "width": 173,
+          "text": "What should I learn next?"
+        },
+        {
+          "tag": "button",
+          "className": "btn-secondary shrink-0 px-3 py-2 text-xs disabled:opacity-60",
+          "left": 402,
+          "right": 632,
+          "width": 229,
+          "text": "Can I skip the units I already know?"
+        },
+        {
+          "tag": "button",
+          "className": "btn-secondary shrink-0 px-3 py-2 text-xs disabled:opacity-60",
+          "left": 640,
+          "right": 880,
+          "width": 241,
+          "text": "Which DL parts are required for NLP?"
+        }
+      ],
+      "visibleFixed": [
+        {
+          "tag": "header",
+          "className": "sticky top-0 z-30 border-b",
+          "top": 0,
+          "bottom": 65,
+          "height": 65
+        }
+      ]
+    },
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  {
+    "route": "/admin",
+    "metrics": {
+      "url": "http://127.0.0.1:3281/admin",
+      "vw": 390,
+      "docW": 390,
+      "bodyW": 390,
+      "overflowX": 0,
+      "wide": [],
+      "visibleFixed": [
+        {
+          "tag": "header",
+          "className": "sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200/70 bg-white/70 px-6 backdrop-blur-md ",
+          "top": 0,
+          "bottom": 64,
+          "height": 64
+        }
+      ]
+    },
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  }
+]

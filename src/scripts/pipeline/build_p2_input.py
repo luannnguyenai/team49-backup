@@ -192,11 +192,15 @@ def _repair_identifier(value: Any, *, source_lecture_id: str) -> Any:
     return value
 
 
-def _repair_units(units: list[dict[str, Any]], *, source_lecture_id: str, source_course_id: str) -> list[dict[str, Any]]:
+def _repair_units(
+    units: list[dict[str, Any]], *, source_lecture_id: str, source_course_id: str
+) -> list[dict[str, Any]]:
     repaired: list[dict[str, Any]] = []
     for unit in units:
         copy = dict(unit)
-        copy["unit_id"] = _repair_identifier(copy.get("unit_id"), source_lecture_id=source_lecture_id)
+        copy["unit_id"] = _repair_identifier(
+            copy.get("unit_id"), source_lecture_id=source_lecture_id
+        )
         if copy.get("course_id") == "<course_id>":
             copy["course_id"] = source_course_id
         repaired.append(copy)
@@ -207,7 +211,9 @@ def _repair_kps(concepts: list[dict[str, Any]], *, source_lecture_id: str) -> li
     repaired: list[dict[str, Any]] = []
     for kp in concepts:
         copy = dict(kp)
-        copy["local_kp_id"] = _repair_identifier(copy.get("local_kp_id"), source_lecture_id=source_lecture_id)
+        copy["local_kp_id"] = _repair_identifier(
+            copy.get("local_kp_id"), source_lecture_id=source_lecture_id
+        )
         repaired.append(copy)
     return repaired
 
@@ -216,8 +222,12 @@ def _repair_maps(mappings: list[dict[str, Any]], *, source_lecture_id: str) -> l
     repaired: list[dict[str, Any]] = []
     for mapping in mappings:
         copy = dict(mapping)
-        copy["unit_id"] = _repair_identifier(copy.get("unit_id"), source_lecture_id=source_lecture_id)
-        copy["local_kp_id"] = _repair_identifier(copy.get("local_kp_id"), source_lecture_id=source_lecture_id)
+        copy["unit_id"] = _repair_identifier(
+            copy.get("unit_id"), source_lecture_id=source_lecture_id
+        )
+        copy["local_kp_id"] = _repair_identifier(
+            copy.get("local_kp_id"), source_lecture_id=source_lecture_id
+        )
         repaired.append(copy)
     return repaired
 
@@ -241,7 +251,9 @@ def _derive_source_lecture_id(
                 if token and "<lecture_id>" not in token:
                     return token
 
-    repaired = _resolve_placeholder_lecture_id(artifact=artifact, source_file=source_file, video_lookup=video_lookup)
+    repaired = _resolve_placeholder_lecture_id(
+        artifact=artifact, source_file=source_file, video_lookup=video_lookup
+    )
     if repaired:
         return repaired
 
@@ -276,7 +288,9 @@ def _normalize_video_label(path: Path) -> str:
 
 def _build_course_metadata(course_dir: Path) -> dict[str, Any]:
     videos_dir = course_dir / "videos"
-    video_files = sorted(videos_dir.glob("*"), key=_parse_video_order) if videos_dir.exists() else []
+    video_files = (
+        sorted(videos_dir.glob("*"), key=_parse_video_order) if videos_dir.exists() else []
+    )
 
     return {
         "id": course_dir.name,
@@ -286,7 +300,9 @@ def _build_course_metadata(course_dir: Path) -> dict[str, Any]:
     }
 
 
-def _project_local_kp(kp: dict[str, Any], *, source_course_id: str, source_lecture_id: str) -> dict[str, Any]:
+def _project_local_kp(
+    kp: dict[str, Any], *, source_course_id: str, source_lecture_id: str
+) -> dict[str, Any]:
     return {
         "local_kp_id": kp.get("local_kp_id"),
         "name": kp.get("name"),
@@ -331,7 +347,9 @@ def _validate_artifact_contract(
         unit_id = row.get("unit_id")
         local_kp_id = row.get("local_kp_id")
         if isinstance(local_kp_id, str) and local_kp_id not in known_local_kp_ids:
-            errors.append(f"{source_file.name}: orphan local_kp_id `{local_kp_id}` in local_unit_kp_map")
+            errors.append(
+                f"{source_file.name}: orphan local_kp_id `{local_kp_id}` in local_unit_kp_map"
+            )
         if isinstance(unit_id, str):
             unit_to_roles.setdefault(unit_id, []).append(str(row.get("planner_role")))
 
@@ -343,9 +361,13 @@ def _validate_artifact_contract(
     for unit in units:
         unit_id = unit.get("unit_id", "<unknown>")
         summary = unit.get("summary")
-        timestamp_count = len(_TIMESTAMP_PATTERN.findall(summary)) if isinstance(summary, str) else 0
+        timestamp_count = (
+            len(_TIMESTAMP_PATTERN.findall(summary)) if isinstance(summary, str) else 0
+        )
         if timestamp_count < 2:
-            errors.append(f"{source_file.name}: unit `{unit_id}` summary must contain at least 2 timestamps")
+            errors.append(
+                f"{source_file.name}: unit `{unit_id}` summary must contain at least 2 timestamps"
+            )
 
     return errors
 
@@ -383,7 +405,12 @@ def _dedupe_local_maps(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]]
     for row in rows:
         unit_id = row.get("unit_id")
         local_kp_id = row.get("local_kp_id")
-        if not isinstance(unit_id, str) or not isinstance(local_kp_id, str) or not unit_id or not local_kp_id:
+        if (
+            not isinstance(unit_id, str)
+            or not isinstance(local_kp_id, str)
+            or not unit_id
+            or not local_kp_id
+        ):
             errors.append("Encountered local_unit_kp_map row without valid unit_id/local_kp_id")
             continue
         key = (unit_id, local_kp_id)
@@ -392,7 +419,9 @@ def _dedupe_local_maps(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]]
             deduped[key] = row
             continue
         if existing != row:
-            errors.append(f"Conflicting duplicate local_unit_kp_map row for unit `{unit_id}` and kp `{local_kp_id}`")
+            errors.append(
+                f"Conflicting duplicate local_unit_kp_map row for unit `{unit_id}` and kp `{local_kp_id}`"
+            )
     return list(deduped.values()), errors
 
 
@@ -453,10 +482,7 @@ def build_p2_input(
                 )
                 for row in concepts
             ]
-            projected_maps = [
-                _project_local_map(row)
-                for row in mappings
-            ]
+            projected_maps = [_project_local_map(row) for row in mappings]
 
             validation_errors.extend(
                 _validate_artifact_contract(
@@ -562,11 +588,15 @@ def main(
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build lean Prompt 2 input artifacts from sanitized P1 outputs.")
+    parser = argparse.ArgumentParser(
+        description="Build lean Prompt 2 input artifacts from sanitized P1 outputs."
+    )
     parser.add_argument("--course-dir", action="append", required=True, dest="course_dirs")
     parser.add_argument("--output-dir")
     parser.add_argument("--run-id")
-    parser.add_argument("--p2-mode", choices=["batch_initial", "append_incremental"], default="batch_initial")
+    parser.add_argument(
+        "--p2-mode", choices=["batch_initial", "append_incremental"], default="batch_initial"
+    )
     parser.add_argument("--snapshot-dir")
     parser.add_argument("--tag-registry-file")
     parser.add_argument("--template-file")

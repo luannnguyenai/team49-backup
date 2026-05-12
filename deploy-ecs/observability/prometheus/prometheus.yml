@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    app: a20-app-049
+    env: prod
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: fastapi
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["backend.obs.a20-prod.internal:8000"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: backend
+
+  - job_name: postgres
+    static_configs:
+      - targets: ["postgres-exporter.obs.a20-prod.internal:9187"]
+
+  - job_name: redis
+    static_configs:
+      - targets: ["redis-exporter.obs.a20-prod.internal:9121"]

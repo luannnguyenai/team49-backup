@@ -11,7 +11,6 @@ import json
 import sys
 from typing import Any
 
-
 LEGACY_CLEANUP_ALLOWLIST: frozenset[str] = frozenset(
     {
         "modules",

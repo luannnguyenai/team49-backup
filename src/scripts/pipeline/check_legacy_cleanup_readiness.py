@@ -117,7 +117,9 @@ def build_cleanup_readiness_report(
         "target_report": target_report,
         "usage_report": usage_report,
         "usage_classification": usage_classification,
-        "required_next_steps": [] if not blockers else [
+        "required_next_steps": []
+        if not blockers
+        else [
             "Do not run destructive rename/drop migrations.",
             "Migrate or guard remaining unguarded runtime legacy references.",
             "Run archive exporter and parity checks before retrying.",

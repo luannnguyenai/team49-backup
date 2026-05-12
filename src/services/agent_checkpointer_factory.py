@@ -70,7 +70,9 @@ async def build_agent_graph_checkpointer(
     try:
         from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
     except ModuleNotFoundError as exc:  # pragma: no cover - depends on optional production package
-        raise AgentCheckpointerUnavailableError("langgraph_postgres_checkpointer_not_installed") from exc
+        raise AgentCheckpointerUnavailableError(
+            "langgraph_postgres_checkpointer_not_installed"
+        ) from exc
 
     db_uri = langgraph_postgres_url(app_settings.database_url)
     async with AsyncPostgresSaver.from_conn_string(db_uri) as checkpointer:

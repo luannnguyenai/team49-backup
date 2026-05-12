@@ -42,6 +42,18 @@ class Settings(BaseSettings):
         default_factory=dict,
         description="Provider-specific chat model kwargs, parsed from JSON.",
     )
+    qwen35_4b_model: str = Field(
+        default="qwen3.5-4b-lora",
+        description="OpenAI-compatible local Qwen chat model id.",
+    )
+    qwen35_4b_base_url: str = Field(
+        default="https://vllm.a20-app-049.io.vn/v1",
+        description="OpenAI-compatible local Qwen API base URL.",
+    )
+    qwen35_4b_api_key: str = Field(
+        default="EMPTY",
+        description="API key placeholder for local OpenAI-compatible Qwen servers.",
+    )
     llm_request_timeout_seconds: int = Field(
         default=30,
         ge=1,
@@ -95,6 +107,11 @@ class Settings(BaseSettings):
         ge=1,
         description="Maximum output tokens for guardrail router JSON decisions.",
     )
+    chat_model_health_timeout_seconds: float = Field(
+        default=8.0,
+        ge=1.0,
+        description="Timeout for lightweight chat model health checks.",
+    )
     gemini_requests_per_minute: int = Field(
         default=15,
         ge=1,
@@ -146,7 +163,9 @@ class Settings(BaseSettings):
         description="Asset delivery mode: 'local' for /data/* signed URLs, 's3' for CloudFront URLs.",
     )
     aws_region: str = Field(default="", description="AWS region for the S3 asset bucket.")
-    aws_s3_bucket: str = Field(default="", description="Private S3 bucket name holding course assets.")
+    aws_s3_bucket: str = Field(
+        default="", description="Private S3 bucket name holding course assets."
+    )
     aws_s3_prefix: str = Field(
         default="courses",
         description="Key prefix inside the S3 bucket where course assets live.",

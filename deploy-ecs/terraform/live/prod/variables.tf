@@ -122,3 +122,32 @@ variable "backend_secret_arn" {
   default     = ""
   description = "Secrets Manager ARN containing DATABASE_URL, REDIS_URL, SECRET_KEY. Required when enable_services=true."
 }
+
+variable "backend_service_registry_arn" {
+  type        = string
+  default     = ""
+  description = "Existing Cloud Map service ARN used for backend metrics/service discovery."
+}
+
+# ----- Observability stack (Stage 3) -----
+
+variable "enable_observability_stack" {
+  type        = bool
+  default     = false
+  description = "Stage 3: deploy Prometheus/Loki/Grafana/exporters on Fargate. Requires observability images already pushed to ECR."
+}
+
+variable "image_prometheus" {
+  type    = string
+  default = ""
+}
+
+variable "image_loki" {
+  type    = string
+  default = ""
+}
+
+variable "image_grafana" {
+  type    = string
+  default = ""
+}

@@ -9,10 +9,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_db
 from src.dependencies.auth import get_current_user
+from src.exceptions import ValidationError
 from src.models.user import User
 from src.repositories.agent_conversation_repo import AgentConversationRepository
-from src.repositories.goal_preference_repo import GoalPreferenceRepository
+from src.repositories.agent_graph_repo import AgentGraphRepository
 from src.repositories.canonical_content_repo import CanonicalContentRepository
+from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.schemas.agent import (
     AgentActionResponse,
     AgentActionResumeRequest,
@@ -20,9 +22,9 @@ from src.schemas.agent import (
     AgentAssessmentWorkflowResponse,
     AgentChatRequest,
     AgentChatResponse,
-    AgentConversationMutationResponse,
     AgentConversationMemory,
     AgentConversationMessage,
+    AgentConversationMutationResponse,
     AgentConversationSummary,
     AgentConversationUpdateRequest,
     PathRequirementsRequest,
@@ -38,7 +40,6 @@ from src.services.agent_action_service import (
     start_agent_assessment,
     validate_replan_request,
 )
-from src.exceptions import ValidationError
 from src.services.agent_assessment_workflow import AgentAssessmentWorkflowService
 from src.services.agent_checkpointer_factory import (
     AgentCheckpointerUnavailableError,
@@ -46,22 +47,24 @@ from src.services.agent_checkpointer_factory import (
 )
 from src.services.agent_context_service import AgentContextResolver
 from src.services.agent_conversation_service import AgentConversationService
+from src.services.agent_error_codes import classify_agent_error
 from src.services.agent_graph_contracts import AgentInProgressError, AgentRouterUnavailableError
 from src.services.agent_graph_service import AgentGraphService
 from src.services.agent_lock_service import AgentThreadLock
 from src.services.agent_navigation_service import AgentNavigationService
-from src.services.agent_requirement_service import AgentPathRequirementService
-from src.repositories.agent_graph_repo import AgentGraphRepository
 from src.services.agent_path_switch_service import AgentPathSwitchService
+from src.services.agent_requirement_service import AgentPathRequirementService
 from src.services.agent_response_composer import AgentResponseComposer
-from src.services.agent_router_factory import build_production_agent_router
+from src.services.agent_router_factory import (
+    build_production_agent_response_router,
+    build_production_agent_router,
+)
 from src.services.agent_search_service import AgentUnitSearchService
 from src.services.agent_title_generator import generate_conversation_title
 from src.services.agent_unit_context_service import AgentUnitContextService
-from src.services.agent_error_codes import classify_agent_error
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
+from src.services.model_registry import ChatModelUnavailableError, ensure_chat_model_available
 from src.services.recommendation_engine import generate_learning_path
-
 
 logger = logging.getLogger(__name__)
 agent_router = APIRouter(prefix="/api/agent", tags=["agent"])
@@ -88,12 +91,18 @@ async def _safe_rollback(db: AsyncSession) -> None:
         logger.exception("agent_db_rollback_failed")
 
 
-def _agent_system_error_response(conversation_id: str, error_code: str, exc: Exception) -> AgentChatResponse:
+def _agent_system_error_response(
+    conversation_id: str, error_code: str, exc: Exception
+) -> AgentChatResponse:
     logger.exception("agent_request_failed code=%s conversation_id=%s", error_code, conversation_id)
     return AgentResponseComposer().compose_system_error(
         conversation_id=conversation_id,
         error_code=error_code,
     )
+
+
+def _chat_model_unavailable_http_error(exc: ChatModelUnavailableError) -> HTTPException:
+    return HTTPException(status_code=503, detail=exc.public_detail())
 
 
 async def _maybe_generate_conversation_title(
@@ -120,8 +129,12 @@ async def _maybe_generate_conversation_title(
         if not assistant_markdown.strip():
             return
         sanitized_user_message = pii_guardrail_service.sanitize_input(user_message).sanitized_text
-        sanitized_assistant_markdown = pii_guardrail_service.sanitize_output(assistant_markdown).sanitized_text
-        title = await generate_conversation_title(sanitized_user_message, sanitized_assistant_markdown)
+        sanitized_assistant_markdown = pii_guardrail_service.sanitize_output(
+            assistant_markdown
+        ).sanitized_text
+        title = await generate_conversation_title(
+            sanitized_user_message, sanitized_assistant_markdown
+        )
         if not title:
             return
         await conversation_repo.rename_conversation(conversation_id, user.id, title)
@@ -137,6 +150,11 @@ async def agent_chat(
 ) -> AgentChatResponse:
     error_conversation_id = body.conversation_id or ""
     try:
+        try:
+            await ensure_chat_model_available(body.chat_model_id)
+        except ChatModelUnavailableError as exc:
+            raise _chat_model_unavailable_http_error(exc) from exc
+
         context = await _agent_context_for_user(user, db)
         _repo, _navigation, search, requirements = _services(db)
         conversation_repo = AgentConversationRepository(db)
@@ -157,6 +175,9 @@ async def agent_chat(
                 search,
                 requirements,
                 router=build_production_agent_router(),
+                response_router=build_production_agent_response_router(
+                    chat_model_id=body.chat_model_id,
+                ),
                 graph_repo=AgentGraphRepository(db),
                 thread_lock=AgentThreadLock(db),
                 conversation_repo=conversation_repo,
@@ -314,7 +335,9 @@ async def agent_list_conversations(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> list[AgentConversationSummary]:
-    return await AgentConversationService(AgentConversationRepository(db)).list_conversations(user.id)
+    return await AgentConversationService(AgentConversationRepository(db)).list_conversations(
+        user.id
+    )
 
 
 @agent_router.post("/conversations", response_model=AgentConversationSummary)
@@ -322,7 +345,9 @@ async def agent_create_conversation(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AgentConversationSummary:
-    result = await AgentConversationService(AgentConversationRepository(db)).create_conversation(user.id)
+    result = await AgentConversationService(AgentConversationRepository(db)).create_conversation(
+        user.id
+    )
     await db.commit()
     return result
 
@@ -335,7 +360,9 @@ async def agent_rename_conversation(
     db: AsyncSession = Depends(get_async_db),
 ) -> AgentConversationSummary:
     try:
-        result = await AgentConversationService(AgentConversationRepository(db)).rename_conversation(
+        result = await AgentConversationService(
+            AgentConversationRepository(db)
+        ).rename_conversation(
             conversation_id,
             user.id,
             body.title,
@@ -346,14 +373,18 @@ async def agent_rename_conversation(
     return result
 
 
-@agent_router.delete("/conversations/{conversation_id}", response_model=AgentConversationMutationResponse)
+@agent_router.delete(
+    "/conversations/{conversation_id}", response_model=AgentConversationMutationResponse
+)
 async def agent_delete_conversation(
     conversation_id: UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_async_db),
 ) -> AgentConversationMutationResponse:
     try:
-        result = await AgentConversationService(AgentConversationRepository(db)).delete_conversation(
+        result = await AgentConversationService(
+            AgentConversationRepository(db)
+        ).delete_conversation(
             conversation_id,
             user.id,
         )
@@ -363,7 +394,9 @@ async def agent_delete_conversation(
     return result
 
 
-@agent_router.post("/conversations/{conversation_id}/clear", response_model=AgentConversationSummary)
+@agent_router.post(
+    "/conversations/{conversation_id}/clear", response_model=AgentConversationSummary
+)
 async def agent_clear_conversation(
     conversation_id: UUID,
     user: User = Depends(get_current_user),
@@ -410,7 +443,9 @@ async def agent_conversation_memory(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@agent_router.post("/conversations/{conversation_id}/memory/clear", response_model=AgentConversationMemory)
+@agent_router.post(
+    "/conversations/{conversation_id}/memory/clear", response_model=AgentConversationMemory
+)
 async def agent_clear_conversation_memory(
     conversation_id: UUID,
     user: User = Depends(get_current_user),

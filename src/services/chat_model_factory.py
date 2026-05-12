@@ -65,7 +65,7 @@ def build_chat_model_kwargs(
     if extra_kwargs:
         kwargs.update(extra_kwargs)
 
-    api_key = _resolve_api_key(provider)
+    api_key = str(kwargs.get("api_key") or _resolve_api_key(provider) or "")
     provider_key_label = _CLOUD_PROVIDER_KEY_LABELS.get(provider.lower())
     if provider_key_label and not api_key:
         raise MissingModelCredentialError(

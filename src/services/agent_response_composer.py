@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from src.schemas.agent import AgentAnswer, AgentChatResponse, AgentFallback, AgentGuardrail, AgentWarning
+from src.schemas.agent import (
+    AgentAnswer,
+    AgentChatResponse,
+    AgentFallback,
+    AgentGuardrail,
+    AgentWarning,
+)
 from src.services.agent_error_codes import agent_system_error_message
 from src.services.agent_graph_contracts import ToolResult
 
@@ -40,7 +46,8 @@ class AgentResponseComposer:
             answer=AgentAnswer(
                 markdown=result.answer_markdown or "Could you clarify what you want help with?",
                 confidence=result.metadata.get("answer_confidence")
-                if result.metadata.get("answer_confidence") in {"grounded", "partial", "no_source", "fallback"}
+                if result.metadata.get("answer_confidence")
+                in {"grounded", "partial", "no_source", "fallback"}
                 else ("grounded" if result.citations else "partial"),
             ),
             citations=result.citations,
@@ -57,7 +64,9 @@ class AgentResponseComposer:
         return AgentChatResponse(
             conversation_id=conversation_id,
             message_id=str(uuid4()),
-            answer=AgentAnswer(markdown="That action can no longer be completed.", confidence="fallback"),
+            answer=AgentAnswer(
+                markdown="That action can no longer be completed.", confidence="fallback"
+            ),
             fallback=AgentFallback(reason="action_error", message=reason),
         )
 

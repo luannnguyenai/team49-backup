@@ -35,14 +35,18 @@ async def build_parity_report(session: AsyncSession) -> dict[str, Any]:
     linked_units = int(
         (
             await session.execute(
-                select(func.count()).select_from(LearningUnit).where(LearningUnit.canonical_unit_id.isnot(None))
+                select(func.count())
+                .select_from(LearningUnit)
+                .where(LearningUnit.canonical_unit_id.isnot(None))
             )
         ).scalar_one()
     )
     unlinked_units = int(
         (
             await session.execute(
-                select(func.count()).select_from(LearningUnit).where(LearningUnit.canonical_unit_id.is_(None))
+                select(func.count())
+                .select_from(LearningUnit)
+                .where(LearningUnit.canonical_unit_id.is_(None))
             )
         ).scalar_one()
     )
@@ -81,16 +85,18 @@ async def build_parity_report(session: AsyncSession) -> dict[str, Any]:
     canonical_planner_plan_count = int(
         (
             await session.execute(
-                select(func.count()).select_from(PlanHistory).where(
-                    PlanHistory.trigger == "generate_canonical_learning_path"
-                )
+                select(func.count())
+                .select_from(PlanHistory)
+                .where(PlanHistory.trigger == "generate_canonical_learning_path")
             )
         ).scalar_one()
     )
     canonical_interaction_count = int(
         (
             await session.execute(
-                select(func.count()).select_from(Interaction).where(
+                select(func.count())
+                .select_from(Interaction)
+                .where(
                     Interaction.canonical_item_id.isnot(None),
                 )
             )

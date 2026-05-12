@@ -88,7 +88,11 @@ class ReplanPrerequisiteSuggester:
 
         ranked = sorted(
             suggestions.values(),
-            key=lambda suggestion: (suggestion.depth, suggestion.path_order, suggestion.canonical_unit_id),
+            key=lambda suggestion: (
+                suggestion.depth,
+                suggestion.path_order,
+                suggestion.canonical_unit_id,
+            ),
         )
         return ranked[:max_suggestions]
 
@@ -115,10 +119,7 @@ class ReplanPrerequisiteSuggester:
         # Build reason with specific KP pairs
         # Show up to 2 KP pairs to keep it concise
         shown_kp_pairs = kp_edges[:2]
-        kp_reasons = [
-            f"{source_kp} → {target_kp}"
-            for source_kp, target_kp in shown_kp_pairs
-        ]
+        kp_reasons = [f"{source_kp} → {target_kp}" for source_kp, target_kp in shown_kp_pairs]
 
         if len(kp_edges) > 2:
             kp_reasons.append(f"and {len(kp_edges) - 2} more")

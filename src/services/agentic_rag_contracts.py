@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 
 from src.services.agent_graph_contracts import ToolResult
 
-
 AgenticRAGToolName = Literal[
     "search_current_path_units",
     "get_unit_summary",

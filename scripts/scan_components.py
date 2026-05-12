@@ -11,8 +11,8 @@ Usage:
 
 import re
 import sys
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FRONTEND = ROOT / "frontend"
@@ -23,36 +23,33 @@ MAX_DEPTH = 3  # max component nesting levels to follow
 
 # Layout-relevant Tailwind classes only (skip color, font, etc.)
 LAYOUT_RE = re.compile(
-    r'(?<![a-zA-Z:-])('
-    r'flex(?:-(?:col|row|wrap|nowrap|1|auto|none))?'
-    r'|grid(?:-cols-\w+)?'
-    r'|inline-flex|inline-block|block|hidden'
-    r'|absolute|relative|fixed|sticky'
-    r'|(?:w|h|min-h|max-h|max-w|min-w)-[\w\[\]\.%/:+()-]+'
-    r'|(?:mt|mb|ml|mr|mx|my|pt|pb|pl|pr|px|py)-[\w\[\]\.+-]+'
-    r'|gap(?:-[xy])?-[\w\[\]\.+-]+'
-    r'|z-\d+'
-    r'|(?:top|bottom|left|right)-[\w\[\]\.+-]+'
-    r'|justify-\w+|items-\w+'
-    r'|overflow(?:-[xy])?-\w+'
-    r'|grow|shrink|basis-\w+'
-    r')(?![a-zA-Z:-])'
+    r"(?<![a-zA-Z:-])("
+    r"flex(?:-(?:col|row|wrap|nowrap|1|auto|none))?"
+    r"|grid(?:-cols-\w+)?"
+    r"|inline-flex|inline-block|block|hidden"
+    r"|absolute|relative|fixed|sticky"
+    r"|(?:w|h|min-h|max-h|max-w|min-w)-[\w\[\]\.%/:+()-]+"
+    r"|(?:mt|mb|ml|mr|mx|my|pt|pb|pl|pr|px|py)-[\w\[\]\.+-]+"
+    r"|gap(?:-[xy])?-[\w\[\]\.+-]+"
+    r"|z-\d+"
+    r"|(?:top|bottom|left|right)-[\w\[\]\.+-]+"
+    r"|justify-\w+|items-\w+"
+    r"|overflow(?:-[xy])?-\w+"
+    r"|grow|shrink|basis-\w+"
+    r")(?![a-zA-Z:-])"
 )
 
 # import { Foo, Bar } from './x'  OR  import Foo from './x'
-IMPORT_RE = re.compile(
-    r'import\s+(?:\{([^}]+)\}|([A-Z]\w*))\s+from\s+[\'"]([^\'"]+)[\'"]'
-)
+IMPORT_RE = re.compile(r'import\s+(?:\{([^}]+)\}|([A-Z]\w*))\s+from\s+[\'"]([^\'"]+)[\'"]')
 
 # JSX component usage: <ComponentName
-COMP_USE_RE = re.compile(r'<([A-Z][A-Za-z0-9_]*)\b')
+COMP_USE_RE = re.compile(r"<([A-Z][A-Za-z0-9_]*)\b")
 
 # className extraction (covers string literals and template literals)
-CN_RE = re.compile(
-    r'className=(?:"([^"]+)"|\'([^\']+)\'|\{`([^`]*)`\}|\{["\']([^"\']+)["\']\})'
-)
+CN_RE = re.compile(r'className=(?:"([^"]+)"|\'([^\']+)\'|\{`([^`]*)`\}|\{["\']([^"\']+)["\']\})')
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
+
 
 def read(path: Path) -> str:
     try:
@@ -148,7 +145,9 @@ def extract_classnames_per_component(content: str) -> dict[str, list[str]]:
                     break
     return result
 
+
 # ─── Tree rendering ───────────────────────────────────────────────────────────
+
 
 def render_tree(
     file_path: Path,
@@ -189,7 +188,9 @@ def render_tree(
 
     return lines
 
+
 # ─── Page discovery ───────────────────────────────────────────────────────────
+
 
 def find_pages() -> list[tuple[str, Path]]:
     """Return (route, page.tsx path) for every Next.js page."""
@@ -204,7 +205,9 @@ def find_pages() -> list[tuple[str, Path]]:
         pages.append((route, p))
     return pages
 
+
 # ─── Tree generation ──────────────────────────────────────────────────────────
+
 
 def build_registry() -> dict[str, Path]:
     """Map PascalCase stem → file path for quick lookup (not used in traversal)."""
@@ -222,7 +225,8 @@ def generate() -> str:
     pages = find_pages()
 
     tsx_count = sum(
-        1 for p in FRONTEND.rglob("*.tsx")
+        1
+        for p in FRONTEND.rglob("*.tsx")
         if not any(x in p.parts for x in ("node_modules", ".next"))
     )
 
@@ -232,7 +236,7 @@ def generate() -> str:
         "",
         f"> Generated: {date.today()}  ",
         f"> Scanned {tsx_count} TSX files across {len(pages)} routes.  ",
-        f"> Layout classes shown: flex · grid · position · sizing · spacing · z-index",
+        "> Layout classes shown: flex · grid · position · sizing · spacing · z-index",
         "",
     ]
 
@@ -268,6 +272,7 @@ def generate() -> str:
 
     return "\n".join(lines)
 
+
 # ─── UI-REVIEW.md update ──────────────────────────────────────────────────────
 
 SECTION_MARKER = "## Component Hierarchy Map"
@@ -286,7 +291,9 @@ def update_review(tree_text: str) -> None:
     REVIEW_FILE.write_text(updated, encoding="utf-8")
     print(f"✓ Updated {rel(REVIEW_FILE)}")
 
+
 # ─── Main ─────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     print_only = "--print-only" in sys.argv

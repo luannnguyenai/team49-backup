@@ -119,7 +119,9 @@ class ReplanKeywordPlanner:
                 guardrailFlags=[],
             )
 
-        if any(term in lower for term in ("object detection", "computer vision", "machine learning")):
+        if any(
+            term in lower for term in ("object detection", "computer vision", "machine learning")
+        ):
             return ReplanKeywordPlan(
                 primaryKeywords=[
                     ReplanKeyword(

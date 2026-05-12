@@ -14,10 +14,9 @@ import argparse
 import asyncio
 import logging
 import sys
-from datetime import datetime, timezone
 
-from sqlalchemy import select, text
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.config import Settings
@@ -29,9 +28,7 @@ log = logging.getLogger(__name__)
 
 
 async def main():
-    parser = argparse.ArgumentParser(
-        description="Rollback IRT calibration to a prior run"
-    )
+    parser = argparse.ArgumentParser(description="Rollback IRT calibration to a prior run")
     parser.add_argument(
         "--to-run-id",
         type=str,
@@ -120,9 +117,7 @@ async def rollback_calibration(
 
     # Restore parameters from history to item_calibration
     for history in history_rows:
-        stmt = select(ItemCalibration).where(
-            ItemCalibration.item_id == history.item_id
-        )
+        stmt = select(ItemCalibration).where(ItemCalibration.item_id == history.item_id)
         result = await db.execute(stmt)
         ic = result.scalar_one_or_none()
 

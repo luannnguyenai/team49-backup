@@ -7,7 +7,6 @@ from typing import Any
 
 from src.scripts.schema_v2.backfill_schema_v2 import sha256_json
 
-
 DEFAULT_CANONICAL_DIR = Path("data/final_artifacts/cs224n_cs231n_cs230_v1/canonical")
 DEFAULT_LABELS_FILE = DEFAULT_CANONICAL_DIR / "schema_v2_reviewed_unit_labels.jsonl"
 
@@ -26,7 +25,9 @@ UNIT_FIELDS = {
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
 
 
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -84,7 +85,9 @@ def apply_labels(input_dir: Path, labels_file: Path) -> dict[str, Any]:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Apply reviewed Schema v2 unit labels to canonical units.jsonl.")
+    parser = argparse.ArgumentParser(
+        description="Apply reviewed Schema v2 unit labels to canonical units.jsonl."
+    )
     parser.add_argument("--input-dir", type=Path, default=DEFAULT_CANONICAL_DIR)
     parser.add_argument("--labels-file", type=Path, default=DEFAULT_LABELS_FILE)
     return parser.parse_args()

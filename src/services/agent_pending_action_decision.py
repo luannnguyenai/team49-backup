@@ -112,7 +112,8 @@ class AgentPendingActionDecisionService:
                 if not decision_result.allow:
                     return ToolResult(
                         kind="clarification",
-                        answer_markdown=decision_result.user_safe_message or "That learning path is not available.",
+                        answer_markdown=decision_result.user_safe_message
+                        or "That learning path is not available.",
                         fallback={
                             "reason": "action_error",
                             "message": ",".join(decision_result.codes) or "path_switch_rejected",

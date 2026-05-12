@@ -84,14 +84,14 @@ class SpreadByPriorStrategy:
 
         if not valid_pool:
             # Fallback: use entire pool if no items pass validity filter
-            log.warning("No items pass validity filter (qa_gate_passed=true, review_status in (approved,final))")
+            log.warning(
+                "No items pass validity filter (qa_gate_passed=true, review_status in (approved,final))"
+            )
             valid_pool = pool
 
         # Check pool size
         if len(valid_pool) < n:
-            log.warning(
-                f"Pool size {len(valid_pool)} < target {n}, falling back to random_uniform"
-            )
+            log.warning(f"Pool size {len(valid_pool)} < target {n}, falling back to random_uniform")
             strategy = STRATEGY_REGISTRY.get("random_uniform")
             if strategy:
                 return await strategy.select(valid_pool, n)

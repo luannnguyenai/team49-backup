@@ -97,7 +97,9 @@ class AgentRAGToolRegistry:
     def build_prompt_text(self) -> str:
         lines = []
         for spec in self.list_specs():
-            evidence = "requires evidence" if spec.requires_evidence else "does not require evidence"
+            evidence = (
+                "requires evidence" if spec.requires_evidence else "does not require evidence"
+            )
             args = ", ".join(
                 f"{name}: {description}" for name, description in spec.input_schema.items()
             )

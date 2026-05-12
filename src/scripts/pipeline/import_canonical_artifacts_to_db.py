@@ -111,14 +111,10 @@ def validate_rows(table_name: str, rows: list[dict[str, Any]], spec: ImportSpec)
     for index, row in enumerate(rows):
         unknown = set(row) - known_columns
         if unknown:
-            raise ValueError(
-                f"{table_name}[{index}] has unknown columns: {sorted(unknown)}"
-            )
+            raise ValueError(f"{table_name}[{index}] has unknown columns: {sorted(unknown)}")
         missing_pk = [column for column in spec.pk_columns if row.get(column) in (None, "")]
         if missing_pk:
-            raise ValueError(
-                f"{table_name}[{index}] missing primary key columns: {missing_pk}"
-            )
+            raise ValueError(f"{table_name}[{index}] missing primary key columns: {missing_pk}")
 
 
 def _chunks(rows: list[dict[str, Any]], size: int) -> list[list[dict[str, Any]]]:
@@ -147,9 +143,7 @@ async def import_table(
         stmt = pg_insert(spec.model).values(chunk)
         excluded = stmt.excluded
         update_values = {
-            column: getattr(excluded, column)
-            for column in update_columns
-            if column != "updated_at"
+            column: getattr(excluded, column) for column in update_columns if column != "updated_at"
         }
         if "updated_at" in update_columns:
             update_values["updated_at"] = func.now()
@@ -174,9 +168,7 @@ def _check_manifest_counts(
         expected = manifest_counts.get(key)
         actual = loaded_counts.get(key)
         if expected != actual:
-            raise ValueError(
-                f"count mismatch for {key}: manifest={expected} loaded={actual}"
-            )
+            raise ValueError(f"count mismatch for {key}: manifest={expected} loaded={actual}")
 
 
 async def import_canonical_artifacts(
@@ -223,9 +215,7 @@ async def verify_table_counts(
         db_counts[table_name] = count
         expected = expected_counts.get(table_name)
         if expected != count:
-            raise ValueError(
-                f"DB count mismatch for {table_name}: expected={expected} db={count}"
-            )
+            raise ValueError(f"DB count mismatch for {table_name}: expected={expected} db={count}")
     return db_counts
 
 

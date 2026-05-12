@@ -110,6 +110,23 @@ class ChatModelFactoryTests(unittest.TestCase):
 
         self.assertEqual(kwargs["thinking_budget"], 1024)
 
+    def test_openai_compatible_extra_api_key_satisfies_known_provider_requirement(self):
+        with patch("src.services.chat_model_factory.settings.model_provider", "openai"), patch(
+            "src.services.chat_model_factory.settings.openai_api_key",
+            "",
+        ):
+            kwargs = build_chat_model_kwargs(
+                model="qwen3.5-4b-lora",
+                temperature=0.2,
+                extra_kwargs={
+                    "base_url": "https://vllm.a20-app-049.io.vn/v1",
+                    "api_key": "EMPTY",
+                },
+            )
+
+        self.assertEqual(kwargs["api_key"], "EMPTY")
+        self.assertEqual(kwargs["base_url"], "https://vllm.a20-app-049.io.vn/v1")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -145,9 +145,7 @@ def build_product_shell_bundle(
                 "target_audience": bootstrap_overview.get("target_audience"),
                 "prerequisites_summary": bootstrap_overview.get("prerequisites_summary"),
                 "estimated_duration_text": bootstrap_overview.get("estimated_duration_text"),
-                "structure_snapshot": {
-                    "summary": bootstrap_overview.get("structure_snapshot")
-                },
+                "structure_snapshot": {"summary": bootstrap_overview.get("structure_snapshot")},
                 "cta_label": bootstrap_overview.get("cta_label"),
             }
         )
@@ -252,10 +250,7 @@ def rebind_bundle_foreign_keys(
     existing_section_ids_by_identity = existing_section_ids_by_identity or {}
     rebound = {table_name: [dict(row) for row in rows] for table_name, rows in bundle.items()}
 
-    source_course_slug_by_id = {
-        row["id"]: row["slug"]
-        for row in bundle["courses"]
-    }
+    source_course_slug_by_id = {row["id"]: row["slug"] for row in bundle["courses"]}
 
     for table_name in ("course_overviews", "course_sections", "learning_units"):
         for row in rebound[table_name]:
@@ -266,7 +261,9 @@ def rebind_bundle_foreign_keys(
     section_id_map: dict[uuid.UUID, uuid.UUID] = {}
     for row in rebound["course_sections"]:
         source_section_id = row["id"]
-        actual_section_id = existing_section_ids_by_identity.get(_section_identity(row), source_section_id)
+        actual_section_id = existing_section_ids_by_identity.get(
+            _section_identity(row), source_section_id
+        )
         row["id"] = actual_section_id
         section_id_map[source_section_id] = actual_section_id
 
@@ -301,9 +298,7 @@ async def _import_table(
         stmt = pg_insert(spec.model).values(chunk)
         excluded = stmt.excluded
         update_values = {
-            column: getattr(excluded, column)
-            for column in update_columns
-            if column != "updated_at"
+            column: getattr(excluded, column) for column in update_columns if column != "updated_at"
         }
         if "updated_at" in update_columns:
             update_values["updated_at"] = func.now()
@@ -323,9 +318,7 @@ async def load_actual_course_ids(
     course_slugs: list[str],
 ) -> dict[str, uuid.UUID]:
     rows = (
-        await session.execute(
-            select(Course.slug, Course.id).where(Course.slug.in_(course_slugs))
-        )
+        await session.execute(select(Course.slug, Course.id).where(Course.slug.in_(course_slugs)))
     ).all()
     return {slug: course_id for slug, course_id in rows}
 
@@ -420,7 +413,9 @@ async def _run(*, validate_only: bool) -> dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Import product course shell rows into PostgreSQL.")
+    parser = argparse.ArgumentParser(
+        description="Import product course shell rows into PostgreSQL."
+    )
     parser.add_argument("--validate-only", action="store_true")
     args = parser.parse_args()
     print(json.dumps(asyncio.run(_run(validate_only=args.validate_only)), indent=2, default=str))

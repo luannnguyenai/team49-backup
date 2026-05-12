@@ -12,7 +12,6 @@ from typing import Any
 
 from src.services.p3_input_sanitizer import sanitize_p3a_payload
 
-
 _LOCAL_ID_PATTERN = re.compile(r"^local::([^:]+)::")
 _YOUTUBE_ID_PATTERN = re.compile(r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{6,})")
 _TIMESTAMP_LINE_PATTERN = re.compile(r"^(\d{2}):(\d{2}):(\d{2})$")
@@ -133,7 +132,9 @@ def _format_seconds(second: int) -> str:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def _extract_transcript_slice(document: TranscriptDocument | None, *, start_s: int, end_s: int) -> str:
+def _extract_transcript_slice(
+    document: TranscriptDocument | None, *, start_s: int, end_s: int
+) -> str:
     if document is None:
         return ""
     lines = [
@@ -155,7 +156,9 @@ def _derive_lecture_id(artifact: dict[str, Any], source_file: Path) -> str:
 
     units = artifact.get("units")
     if isinstance(units, list) and units:
-        token = _extract_local_token(units[0].get("unit_id")) if isinstance(units[0], dict) else None
+        token = (
+            _extract_local_token(units[0].get("unit_id")) if isinstance(units[0], dict) else None
+        )
         if token:
             return token
 
@@ -210,7 +213,11 @@ def _relevant_kp_catalog(
         global_kp_id = row.get("global_kp_id")
         if isinstance(global_kp_id, str) and global_kp_id not in ordered_ids:
             ordered_ids.append(global_kp_id)
-    return [global_kp_index[global_kp_id] for global_kp_id in ordered_ids if global_kp_id in global_kp_index]
+    return [
+        global_kp_index[global_kp_id]
+        for global_kp_id in ordered_ids
+        if global_kp_id in global_kp_index
+    ]
 
 
 def _fallback_target_kp_ids(unit_rows: list[dict[str, Any]]) -> list[str]:
@@ -234,7 +241,9 @@ def _difficulty_window(value: Any) -> list[float] | None:
     return [lower, upper]
 
 
-def _find_processed_p3_artifact(course_dir: Path, source_file: Path, lecture_id: str) -> Path | None:
+def _find_processed_p3_artifact(
+    course_dir: Path, source_file: Path, lecture_id: str
+) -> Path | None:
     stem = source_file.stem.removesuffix("_p1")
     for stage_dir_name in ("P3", "P3a"):
         stage_dir = course_dir / "processed" / stage_dir_name
@@ -255,7 +264,9 @@ def _find_processed_p3_artifact(course_dir: Path, source_file: Path, lecture_id:
     return None
 
 
-def _load_learning_salience_index(course_dir: Path, source_file: Path, lecture_id: str) -> dict[str, dict[str, Any]]:
+def _load_learning_salience_index(
+    course_dir: Path, source_file: Path, lecture_id: str
+) -> dict[str, dict[str, Any]]:
     processed_p3_path = _find_processed_p3_artifact(course_dir, source_file, lecture_id)
     if processed_p3_path is None:
         return {}
@@ -275,8 +286,12 @@ def _load_learning_salience_index(course_dir: Path, source_file: Path, lecture_i
     return index
 
 
-def _load_video_clip_index(course_dir: Path, source_file: Path, lecture_id: str) -> dict[str, dict[str, Any]]:
-    processed_p3b_path = course_dir / "processed" / "P3b" / f"{source_file.stem.removesuffix('_p1')}.json"
+def _load_video_clip_index(
+    course_dir: Path, source_file: Path, lecture_id: str
+) -> dict[str, dict[str, Any]]:
+    processed_p3b_path = (
+        course_dir / "processed" / "P3b" / f"{source_file.stem.removesuffix('_p1')}.json"
+    )
     if not processed_p3b_path.exists():
         stage_dir = course_dir / "processed" / "P3b"
         if stage_dir.exists():
@@ -369,7 +384,9 @@ def build_p3_inputs(
             unit_kp_map_local = [
                 row for row in artifact.get("unit_kp_map_local", []) if isinstance(row, dict)
             ]
-            unit_kp_map_global = _globalize_unit_kp_map(unit_kp_map_local, local_to_global=local_to_global)
+            unit_kp_map_global = _globalize_unit_kp_map(
+                unit_kp_map_local, local_to_global=local_to_global
+            )
             kp_catalog = _relevant_kp_catalog(unit_kp_map_global, global_kp_index=global_kp_index)
             lecture_context = {
                 "course_id": course_dir.name,
@@ -382,7 +399,9 @@ def build_p3_inputs(
                 "p2_output": str(p2_output_path),
                 "transcript_file": str(transcript_doc.path) if transcript_doc else None,
             }
-            learning_salience_index = _load_learning_salience_index(course_dir, source_file, lecture_id)
+            learning_salience_index = _load_learning_salience_index(
+                course_dir, source_file, lecture_id
+            )
             video_clip_index = _load_video_clip_index(course_dir, source_file, lecture_id)
 
             p3a_payload = {
@@ -402,7 +421,9 @@ def build_p3_inputs(
                 },
                 "source_trace": source_trace,
             }
-            p3a_payload, _ = sanitize_p3a_payload(p3a_payload, file_path=output_dir / "p3a" / course_dir.name / source_file.name)
+            p3a_payload, _ = sanitize_p3a_payload(
+                p3a_payload, file_path=output_dir / "p3a" / course_dir.name / source_file.name
+            )
             _dump_json(output_dir / "p3a" / course_dir.name / source_file.name, p3a_payload)
             p3a_count += 1
 
@@ -438,8 +459,12 @@ def build_p3_inputs(
                 )
                 salience_row = learning_salience_index.get(unit_id, {})
                 clip_row = video_clip_index.get(unit_id, {})
-                video_clip_ref = clip_row.get("video_clip_ref") if isinstance(clip_row, dict) else None
-                video_clip_url = video_clip_ref.get("local_path") if isinstance(video_clip_ref, dict) else None
+                video_clip_ref = (
+                    clip_row.get("video_clip_ref") if isinstance(clip_row, dict) else None
+                )
+                video_clip_url = (
+                    video_clip_ref.get("local_path") if isinstance(video_clip_ref, dict) else None
+                )
                 if not isinstance(video_clip_url, str) or not video_clip_url:
                     video_clip_url = youtube_url
                 allow_code_mcq = _looks_code_oriented(unit, transcript_slice)
@@ -463,13 +488,22 @@ def build_p3_inputs(
                     "target_item_count": salience_row.get("expected_item_count"),
                     "target_difficulty_range": _difficulty_window(unit.get("difficulty")),
                     "allow_code_mcq": allow_code_mcq,
-                    "allowed_item_types": ["concept_mcq", "code_mcq"] if allow_code_mcq else ["concept_mcq"],
+                    "allowed_item_types": ["concept_mcq", "code_mcq"]
+                    if allow_code_mcq
+                    else ["concept_mcq"],
                     "forbidden_question_patterns": [],
                     "code_evidence": [],
                     "source_trace": source_trace,
                 }
                 unit_filename = _slugify_filename(unit_id).replace("local-", "local--")
-                _dump_json(output_dir / "p3c" / course_dir.name / source_file.stem / f"{unit_filename}.json", p3c_payload)
+                _dump_json(
+                    output_dir
+                    / "p3c"
+                    / course_dir.name
+                    / source_file.stem
+                    / f"{unit_filename}.json",
+                    p3c_payload,
+                )
                 p3c_count += 1
 
     return {
@@ -483,12 +517,16 @@ def build_p3_inputs(
 
 
 def main(*, course_dirs: list[Path], p2_output_path: Path, output_dir: Path) -> None:
-    report = build_p3_inputs(course_dirs=course_dirs, p2_output_path=p2_output_path, output_dir=output_dir)
+    report = build_p3_inputs(
+        course_dirs=course_dirs, p2_output_path=p2_output_path, output_dir=output_dir
+    )
     print(json.dumps(report["summary"], ensure_ascii=False))
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Build Prompt 3 input artifacts from P1/P2 outputs.")
+    parser = argparse.ArgumentParser(
+        description="Build Prompt 3 input artifacts from P1/P2 outputs."
+    )
     parser.add_argument("--course-dir", action="append", required=True, dest="course_dirs")
     parser.add_argument("--p2-output", required=True)
     parser.add_argument("--output-dir", required=True)

@@ -183,6 +183,66 @@ async def test_graph_returns_grounded_find_content_from_search():
     assert response.trace.selected_unit_ids == ["unit-attn"]
 
 
+async def test_graph_uses_response_router_for_grounded_answer_composition():
+    calls: list[tuple[str, str]] = []
+
+    class RoutingRouter(DeterministicAgentRouter):
+        def route(self, message, route_context):
+            calls.append(("routing_route", message))
+            return super().route(message, route_context)
+
+        def compose_grounded_answer(self, message, citations):
+            calls.append(("routing_compose", message))
+            return "Wrong router answer."
+
+    class ResponseRouter:
+        def compose_grounded_answer(self, message, citations):
+            calls.append(("response_compose", message))
+            return f"Selected model answer for {citations[0]['unit_name']}"
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-attn",
+                    course_id="CS224n",
+                    unit_name="Attention",
+                    summary="Attention content.",
+                    learn_href="/courses/cs224n/learn/attention",
+                    score=3,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(
+                trace_id="trace-response-router",
+                intent="find_content",
+                selected_path="current_path",
+                candidate_courses=["CS224n"],
+                ranking_version="unit_search_v1",
+            ),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=RoutingRouter(),
+        response_router=ResponseRouter(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Tìm attention", incomingMessageId="msg-response-router"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-response-router",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS224n"],
+    )
+
+    assert response.answer.markdown == "Selected model answer for Attention"
+    assert ("routing_route", "Tìm attention") in calls
+    assert ("response_compose", "Tìm attention") in calls
+    assert not any(call[0] == "routing_compose" for call in calls)
+
+
 async def test_graph_routes_web_paper_mode_to_external_research():
     calls = []
 

@@ -47,7 +47,7 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> dict[str, Any]:
     with path.open("w", encoding="utf-8") as handle:
         for row in rows:
             line = encode_json_line(row)
-            encoded = f"{line}\n".encode("utf-8")
+            encoded = f"{line}\n".encode()
             digest.update(encoded)
             handle.write(line)
             handle.write("\n")
@@ -105,7 +105,9 @@ async def _run(output_dir: Path, tables: tuple[str, ...]) -> dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Export legacy runtime tables to JSONL archive files.")
+    parser = argparse.ArgumentParser(
+        description="Export legacy runtime tables to JSONL archive files."
+    )
     parser.add_argument(
         "--output-dir",
         type=Path,

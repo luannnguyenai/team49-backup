@@ -4,9 +4,17 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Numeric, Text, UniqueConstraint, text
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Numeric,
+    Text,
+    UniqueConstraint,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -35,11 +43,11 @@ class PlacementAssessmentResult(UUIDPrimaryKeyMixin, Base):
     )
     score_pct: Mapped[Decimal] = mapped_column(Numeric(precision=5, scale=2), nullable=False)
     decision: Mapped[str] = mapped_column(Text, nullable=False)
-    user_choice: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    user_choice: Mapped[str | None] = mapped_column(Text, nullable=True)
     raw_answers: Mapped[list] = mapped_column(
         JSONB, nullable=False, default=list, server_default=text("'[]'")
     )
-    theta_estimate: Mapped[Optional[Decimal]] = mapped_column(
+    theta_estimate: Mapped[Decimal | None] = mapped_column(
         Numeric(precision=8, scale=4), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(

@@ -36,6 +36,18 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  CHAT_MODEL_OPTIONS,
+  CHAT_MODEL_STORAGE_KEYS,
+  DEFAULT_CHAT_MODEL_AVAILABILITY,
+  fallbackUnavailableChatModel,
+  getChatModelAvailability,
+  isChatModelAvailable,
+  readStoredChatModelId,
+  writeStoredChatModelId,
+  type ChatModelAvailability,
+  type ChatModelId,
+} from "@/lib/chat-model-options";
 import { useAuthStore } from "@/stores/authStore";
 import {
   createLearningProfileForPath,
@@ -1552,11 +1564,17 @@ function Composer({
   disabled,
   toolMode,
   onToolModeChange,
+  chatModelId,
+  onChatModelChange,
+  chatModelAvailability,
 }: {
   onSend: (message: string) => void;
   disabled: boolean;
   toolMode: AgentToolMode;
   onToolModeChange: (mode: AgentToolMode) => void;
+  chatModelId: ChatModelId;
+  onChatModelChange: (modelId: ChatModelId) => void;
+  chatModelAvailability: ChatModelAvailability[];
 }) {
   const [text, setText] = useState("");
   const send = (event?: FormEvent) => {
@@ -1599,6 +1617,41 @@ function Composer({
               </button>
             );
           })}
+          <div
+            className="mt-1 flex flex-wrap items-center gap-2 lg:flex-col lg:items-stretch"
+            data-testid="agent-chat-model-selector"
+          >
+            {CHAT_MODEL_OPTIONS.map((option) => {
+              const availability = getChatModelAvailability(chatModelAvailability, option.id);
+              const isActive = chatModelId === option.id;
+              const isUnavailable = !availability.available;
+              const statusLabel = isUnavailable ? availability.status : null;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  disabled={disabled || isUnavailable}
+                  onClick={() => onChatModelChange(option.id)}
+                  title={isUnavailable ? `${option.label} is ${availability.status}` : option.label}
+                  className={cn(
+                    "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-semibold transition disabled:opacity-60 lg:justify-start",
+                    isActive
+                      ? "border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                      : "border-border-subtle bg-surface-card text-text-muted hover:bg-surface-page hover:text-text-strong",
+                  )}
+                  aria-pressed={isActive}
+                >
+                  <Bot className="h-4 w-4" />
+                  <span>{option.label}</span>
+                  {statusLabel ? (
+                    <span className="rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-rose-700 dark:text-rose-300">
+                      {statusLabel}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="min-w-0 flex-1">
@@ -1727,6 +1780,10 @@ export default function AgentChatPage() {
   const [isThinking, setIsThinking] = useState(false);
   const [turnProgressIndex, setTurnProgressIndex] = useState(0);
   const [toolMode, setToolMode] = useState<AgentToolMode>("course");
+  const [chatModelId, setChatModelId] = useState<ChatModelId>("default");
+  const [chatModelAvailability, setChatModelAvailability] = useState<ChatModelAvailability[]>(
+    DEFAULT_CHAT_MODEL_AVAILABILITY,
+  );
   const [error, setError] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(false);
   const [leftMinimized, setLeftMinimized] = useState(false);
@@ -1745,6 +1802,37 @@ export default function AgentChatPage() {
       setSidebarWidth(parsed);
     }
   }, []);
+
+  useEffect(() => {
+    setChatModelId(readStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.agent));
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    agentApi
+      .modelAvailability()
+      .then(({ models }) => {
+        if (!active) return;
+        setChatModelAvailability(models);
+        setChatModelId((current) => {
+          const next = fallbackUnavailableChatModel(models, current);
+          if (next !== current) {
+            writeStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.agent, next);
+          }
+          return next;
+        });
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const changeChatModel = (modelId: ChatModelId) => {
+    if (!isChatModelAvailable(chatModelAvailability, modelId)) return;
+    setChatModelId(modelId);
+    writeStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.agent, modelId);
+  };
 
   useEffect(() => {
     if (!isResizingSidebar) return;
@@ -1990,12 +2078,18 @@ export default function AgentChatPage() {
     setTurnProgressIndex(0);
     setIsThinking(true);
     try {
+      const safeChatModelId = fallbackUnavailableChatModel(chatModelAvailability, chatModelId);
+      if (safeChatModelId !== chatModelId) {
+        setChatModelId(safeChatModelId);
+        writeStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.agent, safeChatModelId);
+      }
       const response = await agentApi.chat({
         message,
         incomingMessageId,
         conversationId: activeSessionId,
         traceMode: "summary",
         ...(toolMode === "web_papers" ? { toolMode } : {}),
+        ...(safeChatModelId !== "default" ? { chatModelId: safeChatModelId } : {}),
       });
       appendAgentResponse(response, { message, incomingMessageId });
     } catch (err) {
@@ -2170,6 +2264,9 @@ export default function AgentChatPage() {
           disabled={isThinking}
           toolMode={toolMode}
           onToolModeChange={setToolMode}
+          chatModelId={chatModelId}
+          onChatModelChange={changeChatModel}
+          chatModelAvailability={chatModelAvailability}
         />
       </section>
 

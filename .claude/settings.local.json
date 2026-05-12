@@ -14,7 +14,9 @@
       "Bash(rtk ls *)",
       "Bash(rtk find *)",
       "PowerShell(aws ecs wait tasks-stopped *)",
-      "PowerShell(aws ecs describe-tasks *)"
+      "PowerShell(aws ecs describe-tasks *)",
+      "Bash(aws secretsmanager list-secrets *)",
+      "Bash(aws ecs *)"
     ]
   },
   "disabledMcpjsonServers": [

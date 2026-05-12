@@ -4,7 +4,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 Difficulty = Literal["easy", "medium", "hard", "application"]
 
 
@@ -57,7 +56,9 @@ class ReplanQuestionScopeBuilder:
                     unit_kp_map.get(unit.canonical_unit_id, []),
                     unit.key_points,
                 ),
-                question_counts=self._question_counts(questions_by_unit.get(unit.canonical_unit_id, [])),
+                question_counts=self._question_counts(
+                    questions_by_unit.get(unit.canonical_unit_id, [])
+                ),
             )
             for unit in units
         ]
@@ -69,10 +70,7 @@ class ReplanQuestionScopeBuilder:
         canonical_points: list[str],
     ) -> list[str]:
         question_points = _dedupe(
-            point
-            for question in questions
-            for point in question.knowledge_points
-            if point
+            point for question in questions for point in question.knowledge_points if point
         )
         if question_points:
             return question_points

@@ -1,9 +1,8 @@
 import asyncio
-import os
-import base64
 import json
 import logging
 import operator
+import os
 import time
 import uuid
 from datetime import datetime, timedelta
@@ -11,29 +10,25 @@ from functools import lru_cache
 from typing import Annotated, TypedDict
 
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessageChunk, ToolMessage
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessageChunk,
+    HumanMessage,
+    SystemMessage,
+    ToolMessage,
+)
 from langchain_core.tools import tool
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 from sqlalchemy import or_, select
 
-from src.models.canonical import CanonicalUnit
-from src.models.course import Course, LearningUnit
-from src.config import DEFAULT_MODEL, settings
-from src.database import tutor_thread_async_session_factory
-from src.models.store import Lecture, Chapter, TranscriptLine, QAHistory
-from src.services.chat_model_factory import build_chat_model_kwargs
+from src.config import settings
 from src.services.guardrail_router import (
     GuardrailDecision,
     GuardrailScopePacket,
     build_guardrail_router_client,
     guardrail_user_message,
 )
-from src.services.lecture_scope_service import get_lecture_scope_metadata
-from src.services.llm_rate_limiter import enforce_llm_rate_limit
-from src.services.sandbox import run_python_code
-from src.services.router import route_question
-from src.services.guardrails.pii_guardrail import PIIGuardrailService
 from src.services.language_normalization import (
     InputLanguageNormalizer,
     LanguageNormalizationResult,
@@ -50,6 +45,21 @@ from src.core.observability import (
     start_langfuse_observation,
     start_langfuse_root_span,
 )
+from src.database import tutor_thread_async_session_factory
+from src.models.canonical import CanonicalUnit
+from src.models.course import Course, LearningUnit
+from src.models.store import Chapter, Lecture, QAHistory, TranscriptLine
+from src.services.guardrails.pii_guardrail import PIIGuardrailService
+from src.services.lecture_scope_service import get_lecture_scope_metadata
+from src.services.llm_rate_limiter import enforce_llm_rate_limit
+from src.services.model_registry import (
+    DEFAULT_CHAT_MODEL_ID,
+    build_chat_model_kwargs_for_option,
+    get_chat_model_option,
+)
+from src.services.openai_compatible_http_chat_model import OpenAICompatibleHTTPChatModel
+from src.services.router import route_question
+from src.services.sandbox import run_python_code
 
 # Configure File Logging
 LOG_DIR = "logs"
@@ -57,14 +67,14 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 qa_logger = logging.getLogger("QA_Tutor")
 qa_logger.setLevel(logging.INFO)
-file_handler = logging.FileHandler(os.path.join(LOG_DIR, "qa_history.log"), encoding='utf-8')
-file_handler.setFormatter(logging.Formatter('%(message)s'))
+file_handler = logging.FileHandler(os.path.join(LOG_DIR, "qa_history.log"), encoding="utf-8")
+file_handler.setFormatter(logging.Formatter("%(message)s"))
 qa_logger.addHandler(file_handler)
 
 jsonl_logger = logging.getLogger("QA_Tutor_JSONL")
 jsonl_logger.setLevel(logging.INFO)
-jsonl_handler = logging.FileHandler(os.path.join(LOG_DIR, "qa_history.jsonl"), encoding='utf-8')
-jsonl_handler.setFormatter(logging.Formatter('%(message)s'))
+jsonl_handler = logging.FileHandler(os.path.join(LOG_DIR, "qa_history.jsonl"), encoding="utf-8")
+jsonl_handler.setFormatter(logging.Formatter("%(message)s"))
 jsonl_logger.addHandler(jsonl_handler)
 
 STATUS_READING_CONTEXT = "Reading lecture context..."
@@ -104,18 +114,22 @@ def _status_event(message: str) -> str:
 
 def _build_tutor_system_instruction(*, has_image: bool) -> str:
     visual_layer = (
-        "\n[VISUAL CONTEXT]\n"
-        "A screenshot of the video frame at the student's current timestamp is attached.\n"
-        "- Use it to identify diagrams, slides, equations, or figures being discussed.\n"
-        "- If the question is about what's shown on screen, describe and explain the visual.\n"
-        "- Prioritize visual content when it directly answers the question.\n"
-    ) if has_image else ""
+        (
+            "\n[VISUAL CONTEXT]\n"
+            "A screenshot of the video frame at the student's current timestamp is attached.\n"
+            "- Use it to identify diagrams, slides, equations, or figures being discussed.\n"
+            "- If the question is about what's shown on screen, describe and explain the visual.\n"
+            "- Prioritize visual content when it directly answers the question.\n"
+        )
+        if has_image
+        else ""
+    )
 
     return f"""[ROLE]
 You are an intelligent AI Tutor for university lecture videos.
 {visual_layer}
 [TASK]
-Answer the student's question using ONLY the provided lecture context (transcript window + table of contents{', and the attached video frame' if has_image else ''}).
+Answer the student's question using ONLY the provided lecture context (transcript window + table of contents{", and the attached video frame" if has_image else ""}).
 
 [RULES]
 1. STRICT SCOPE: Only answer questions related to the current lecture. Politely refuse off-topic questions.
@@ -227,15 +241,14 @@ def _sanitize_tutor_output_text(text: str):
 # reused across different event loops in the threadpool streaming path.
 # ---------------------------------------------------------------------------
 
+
 async def _fetch_lecture_context(lecture_id: str) -> tuple:
     """Fetch lecture, chapters, and recent QA history in one session."""
     async with tutor_thread_async_session_factory() as db:
         result = await db.execute(select(Lecture).where(Lecture.id == lecture_id))
         lecture = result.scalar_one_or_none()
 
-        result = await db.execute(
-            select(Chapter).where(Chapter.lecture_id == lecture_id)
-        )
+        result = await db.execute(select(Chapter).where(Chapter.lecture_id == lecture_id))
         chapters = list(result.scalars().all())
 
         result = await db.execute(
@@ -367,9 +380,7 @@ async def _fetch_canonical_tutor_context(
     }
 
 
-async def _fetch_transcript_window(
-    lecture_id: str, start_window: float, end_window: float
-) -> list:
+async def _fetch_transcript_window(lecture_id: str, start_window: float, end_window: float) -> list:
     async with tutor_thread_async_session_factory() as db:
         result = await db.execute(
             select(TranscriptLine)
@@ -418,8 +429,10 @@ async def _save_qa_history(
 # LangGraph Setup
 # ---------------------------------------------------------------------------
 
+
 class AgentState(TypedDict):
     messages: Annotated[list, operator.add]
+    chat_model_id: str
 
 
 @tool
@@ -432,12 +445,23 @@ def execute_python(code: str) -> str:
 tools = [execute_python]
 tool_node = ToolNode(tools)
 
-@lru_cache(maxsize=1)
-def _get_llm_with_tools():
+
+@lru_cache(maxsize=4)
+def _get_llm_with_tools(chat_model_id: str = DEFAULT_CHAT_MODEL_ID):
     """Lazily create the main tutor LLM so FastAPI can import without secrets."""
+    option = get_chat_model_option(chat_model_id)
+    if option.base_url:
+        return OpenAICompatibleHTTPChatModel(
+            model=option.model,
+            base_url=option.base_url,
+            api_key=option.api_key or "EMPTY",
+            temperature=0.2,
+            timeout=settings.llm_request_timeout_seconds,
+            max_retries=settings.llm_max_retries,
+        )
     llm = init_chat_model(
-        **build_chat_model_kwargs(
-            model=DEFAULT_MODEL,
+        **build_chat_model_kwargs_for_option(
+            chat_model_id,
             temperature=0.2,
         )
     )
@@ -449,8 +473,10 @@ def _get_llm_with_tools():
 
 
 def call_model(state: AgentState):
-    enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
-    response = _get_llm_with_tools().invoke(
+    chat_model_id = state.get("chat_model_id") or DEFAULT_CHAT_MODEL_ID
+    option = get_chat_model_option(chat_model_id)
+    enforce_llm_rate_limit(model=option.model, model_provider=option.provider)
+    response = _get_llm_with_tools(chat_model_id).invoke(
         state["messages"],
         config={"callbacks": llm_callbacks(), "metadata": {"node": "call_model"}},
     )
@@ -469,7 +495,11 @@ def should_continue(state: AgentState):
 
 
 def give_up_node(state: AgentState):
-    return {"messages": [AIMessage(content="Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy.")]}
+    return {
+        "messages": [
+            AIMessage(content="Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy.")
+        ]
+    }
 
 
 graph_builder = StateGraph(AgentState)
@@ -487,6 +517,7 @@ compiled_graph = graph_builder.compile()
 # Logging helper
 # ---------------------------------------------------------------------------
 
+
 def _log_qa(
     lecture_id: str,
     current_timestamp: float,
@@ -496,30 +527,38 @@ def _log_qa(
 ) -> None:
     curr_ts_str = format_timestamp(current_timestamp)
     qa_logger.info(
-        f"\n{'='*60}\n"
+        f"\n{'=' * 60}\n"
         f"[Time]    : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         f"[Lecture] : {lecture_id}\n"
         f"[At]      : {current_timestamp:.1f}s ({curr_ts_str})\n"
-        f"[Route]   : {thoughts.split(']')[0].replace('[','') if thoughts.startswith('[') else 'COMPLEX'}\n"
+        f"[Route]   : {thoughts.split(']')[0].replace('[', '') if thoughts.startswith('[') else 'COMPLEX'}\n"
         f"\n[Question]:\n{user_question}\n"
         f"\n[Answer]:\n{full_answer}\n"
-        f"{'='*60}"
+        f"{'=' * 60}"
     )
-    jsonl_logger.info(json.dumps({
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "lecture": lecture_id,
-        "at_seconds": current_timestamp,
-        "at_formatted": curr_ts_str,
-        "question": user_question,
-        "route": thoughts.split(']')[0].replace('[', '').strip() if thoughts.startswith('[') else "COMPLEX",
-        "tool_used": "[SANDBOX]" in thoughts,
-        "answer": full_answer,
-    }, ensure_ascii=False))
+    jsonl_logger.info(
+        json.dumps(
+            {
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "lecture": lecture_id,
+                "at_seconds": current_timestamp,
+                "at_formatted": curr_ts_str,
+                "question": user_question,
+                "route": thoughts.split("]")[0].replace("[", "").strip()
+                if thoughts.startswith("[")
+                else "COMPLEX",
+                "tool_used": "[SANDBOX]" in thoughts,
+                "answer": full_answer,
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 # ---------------------------------------------------------------------------
 # Main streaming generator (sync — runs in FastAPI threadpool)
 # ---------------------------------------------------------------------------
+
 
 def get_context_and_stream_langgraph(
     lecture_id: str,
@@ -528,6 +567,7 @@ def get_context_and_stream_langgraph(
     image_base64: str | None = None,
     context_binding_id: str | None = None,
     user_id: str | None = None,
+    chat_model_id: str = DEFAULT_CHAT_MODEL_ID,
 ):
     """
     Main tutor streaming function.
@@ -553,17 +593,20 @@ def get_context_and_stream_langgraph(
     sanitized_user_question = input_guardrail.sanitized_text
 
     if input_guardrail.should_block:
-        yield json.dumps(
-            {
-                "blocked": True,
-                "message": "Please remove sensitive personal information and try again.",
-                "guardrail": {
+        yield (
+            json.dumps(
+                {
                     "blocked": True,
-                    "block_reason": input_guardrail.block_reason,
-                    "error_code": input_guardrail.error_code,
-                },
-            }
-        ) + "\n"
+                    "message": "Please remove sensitive personal information and try again.",
+                    "guardrail": {
+                        "blocked": True,
+                        "block_reason": input_guardrail.block_reason,
+                        "error_code": input_guardrail.error_code,
+                    },
+                }
+            )
+            + "\n"
+        )
         return
 
     language_normalization = normalize_tutor_question_for_model(sanitized_user_question)
@@ -725,7 +768,9 @@ def get_context_and_stream_langgraph(
                     },
                 ):
                     routing = route_question(
-                        sanitized_user_question, lecture_title, context_summary,
+                        sanitized_user_question,
+                        lecture_title,
+                        context_summary,
                         current_timestamp=current_timestamp,
                         current_chapter=current_chapter,
                         lecture_scope=lecture_scope,
@@ -733,15 +778,27 @@ def get_context_and_stream_langgraph(
                 route = routing.get("route", "COMPLEX")
 
                 if route == "BLOCKED":
-                    yield json.dumps({"blocked": True, "message": routing.get("message", "Câu hỏi ngoài phạm vi.")}) + "\n"
+                    yield (
+                        json.dumps(
+                            {
+                                "blocked": True,
+                                "message": routing.get("message", "Câu hỏi ngoài phạm vi."),
+                            }
+                        )
+                        + "\n"
+                    )
                     qa_logger.info(
-                        f"\n{'='*60}\n[BLOCKED] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"\n{'=' * 60}\n[BLOCKED] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
                         f"[Lecture] : {lecture_id}\n[Question]: {sanitized_user_question}\n"
-                        f"[Reason]  : {routing.get('reason')}\n{'='*60}"
+                        f"[Reason]  : {routing.get('reason')}\n{'=' * 60}"
                     )
                     return
 
-                if route == "SIMPLE" and not image_base64:
+                if (
+                    route == "SIMPLE"
+                    and not image_base64
+                    and chat_model_id == DEFAULT_CHAT_MODEL_ID
+                ):
                     direct_answer = routing.get("direct_answer", "")
                     language_answer = enforce_tutor_response_language(
                         direct_answer,
@@ -750,15 +807,18 @@ def get_context_and_stream_langgraph(
                     sanitized_answer = _sanitize_tutor_output_text(language_answer).sanitized_text
                     if first_answer_at is None:
                         first_answer_at = time.perf_counter()
-                    yield json.dumps(
-                        {
-                            "a": sanitized_answer,
-                            "guardrail": {
-                                "input_redacted": input_guardrail.was_redacted,
-                                "output_redacted": sanitized_answer != language_answer,
-                            },
-                        }
-                    ) + "\n"
+                    yield (
+                        json.dumps(
+                            {
+                                "a": sanitized_answer,
+                                "guardrail": {
+                                    "input_redacted": input_guardrail.was_redacted,
+                                    "output_redacted": sanitized_answer != language_answer,
+                                },
+                            }
+                        )
+                        + "\n"
+                    )
                     thoughts = f"[SIMPLE] {routing.get('reason', '')}"
                     _log_qa(
                         lecture_id,
@@ -781,17 +841,19 @@ def get_context_and_stream_langgraph(
                             "route": route,
                         },
                     ):
-                        qa_id = asyncio.run(_save_qa_history(
-                            persisted_lecture_id,
-                            sanitized_user_question,
-                            sanitized_answer,
-                            thoughts,
-                            current_timestamp,
-                            context_binding_id,
-                            image_base64,
-                            langfuse_trace_id=langfuse_trace_id,
-                            langfuse_observation_id=langfuse_observation_id,
-                        ))
+                        qa_id = asyncio.run(
+                            _save_qa_history(
+                                persisted_lecture_id,
+                                sanitized_user_question,
+                                sanitized_answer,
+                                thoughts,
+                                current_timestamp,
+                                context_binding_id,
+                                image_base64,
+                                langfuse_trace_id=langfuse_trace_id,
+                                langfuse_observation_id=langfuse_observation_id,
+                            )
+                        )
                     yield json.dumps({"qa_id": qa_id}) + "\n"
                     return
 
@@ -814,7 +876,9 @@ def get_context_and_stream_langgraph(
                     },
                 ):
                     if transcript_line_dicts is None:
-                        lines = asyncio.run(_fetch_transcript_window(lecture_id, start_window, end_window))
+                        lines = asyncio.run(
+                            _fetch_transcript_window(lecture_id, start_window, end_window)
+                        )
                         transcript_line_dicts = [
                             {"start_time": line.start_time, "content": line.content}
                             for line in lines
@@ -848,15 +912,17 @@ def get_context_and_stream_langgraph(
                     f"Lecture Content:\n{lecture_scope_context}{toc_context}\n\n"
                     f"Current Time Window ({curr_ts_str}):\n{transcript_context}\n\n"
                     f"Current Chapter: {current_chapter or 'Unknown'}\n\n"
-                    f"Student Question: \"{sanitized_user_question}\""
+                    f'Student Question: "{sanitized_user_question}"'
                 )
 
                 content_list = [{"type": "text", "text": user_prompt}]
                 if image_base64:
-                    content_list.append({
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
-                    })
+                    content_list.append(
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"},
+                        }
+                    )
 
                 history_messages = []
                 for qa in past_qas:
@@ -874,7 +940,10 @@ def get_context_and_stream_langgraph(
                 in_tool_call = False
                 has_streamed_answer = False
 
-                inputs = {"messages": [sys_msg] + history_messages + [human_msg]}
+                inputs = {
+                    "messages": [sys_msg] + history_messages + [human_msg],
+                    "chat_model_id": chat_model_id,
+                }
 
                 yield emit_status(STATUS_THINKING_ANSWER)
 
@@ -889,11 +958,15 @@ def get_context_and_stream_langgraph(
                         route="tutor.stream",
                     ),
                 }
-                for chunk, metadata in compiled_graph.stream(inputs, stream_mode="messages", config=stream_config):
+                for chunk, metadata in compiled_graph.stream(
+                    inputs, stream_mode="messages", config=stream_config
+                ):
                     if hasattr(chunk, "tool_calls") and chunk.tool_calls:
                         if not in_tool_call:
                             in_tool_call = True
-                            status = STATUS_TOOL_RUNNING if attempt_count == 0 else STATUS_TOOL_RETRY
+                            status = (
+                                STATUS_TOOL_RUNNING if attempt_count == 0 else STATUS_TOOL_RETRY
+                            )
                             yield emit_status(status)
                             attempt_count += 1
 
@@ -904,13 +977,16 @@ def get_context_and_stream_langgraph(
                         if "ExitCode:0" in tool_content:
                             yield emit_status(STATUS_FINALIZING_ANSWER)
 
-                    if isinstance(chunk, BaseMessageChunk) and not getattr(chunk, "tool_calls", None):
+                    if isinstance(chunk, BaseMessageChunk) and not getattr(
+                        chunk, "tool_calls", None
+                    ):
                         raw = chunk.content
                         if isinstance(raw, str):
                             text_chunk = raw
                         elif isinstance(raw, list):
                             text_chunk = "".join(
-                                b.get("text", "") for b in raw
+                                b.get("text", "")
+                                for b in raw
                                 if isinstance(b, dict) and b.get("type") == "text"
                             )
                         else:
@@ -923,37 +999,91 @@ def get_context_and_stream_langgraph(
                             has_streamed_answer = True
                             sanitized_chunk = _sanitize_tutor_output_text(text_chunk).sanitized_text
                             full_answer += sanitized_chunk
-                            yield json.dumps(
-                                {
-                                    "a": sanitized_chunk,
-                                    "guardrail": {
-                                        "input_redacted": input_guardrail.was_redacted,
-                                        "output_redacted": sanitized_chunk != text_chunk,
-                                    },
-                                }
-                            ) + "\n"
+                            yield (
+                                json.dumps(
+                                    {
+                                        "a": sanitized_chunk,
+                                        "guardrail": {
+                                            "input_redacted": input_guardrail.was_redacted,
+                                            "output_redacted": sanitized_chunk != text_chunk,
+                                        },
+                                    }
+                                )
+                                + "\n"
+                            )
 
-                    if isinstance(chunk, AIMessage) and chunk.content == "Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy.":
+                    if (
+                        isinstance(chunk, AIMessage)
+                        and not isinstance(chunk, BaseMessageChunk)
+                        and not getattr(chunk, "tool_calls", None)
+                        and chunk.content
+                        != "Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy."
+                    ):
+                        raw = chunk.content
+                        if isinstance(raw, str):
+                            text_chunk = raw
+                        elif isinstance(raw, list):
+                            text_chunk = "".join(
+                                b.get("text", "")
+                                for b in raw
+                                if isinstance(b, dict) and b.get("type") == "text"
+                            )
+                        else:
+                            text_chunk = ""
+                        if text_chunk and not has_streamed_answer:
+                            yield emit_status(STATUS_FINALIZING_ANSWER)
+                            if first_answer_at is None:
+                                first_answer_at = time.perf_counter()
+                            has_streamed_answer = True
+                            sanitized_chunk = _sanitize_tutor_output_text(text_chunk).sanitized_text
+                            full_answer += sanitized_chunk
+                            yield (
+                                json.dumps(
+                                    {
+                                        "a": sanitized_chunk,
+                                        "guardrail": {
+                                            "input_redacted": input_guardrail.was_redacted,
+                                            "output_redacted": sanitized_chunk != text_chunk,
+                                        },
+                                    }
+                                )
+                                + "\n"
+                            )
+
+                    if (
+                        isinstance(chunk, AIMessage)
+                        and chunk.content
+                        == "Tôi chưa thể hoàn tất phần suy luận này một cách đáng tin cậy."
+                    ):
                         if not has_streamed_answer:
                             yield emit_status(STATUS_FINALIZING_ANSWER)
                             if first_answer_at is None:
                                 first_answer_at = time.perf_counter()
-                            sanitized_chunk = _sanitize_tutor_output_text(chunk.content).sanitized_text
-                            yield json.dumps(
-                                {
-                                    "a": sanitized_chunk,
-                                    "guardrail": {
-                                        "input_redacted": input_guardrail.was_redacted,
-                                        "output_redacted": sanitized_chunk != chunk.content,
+                            sanitized_chunk = _sanitize_tutor_output_text(
+                                chunk.content
+                            ).sanitized_text
+                            yield (
+                                json.dumps(
+                                    {
+                                        "a": sanitized_chunk,
+                                        "guardrail": {
+                                            "input_redacted": input_guardrail.was_redacted,
+                                            "output_redacted": sanitized_chunk != chunk.content,
+                                        },
                                     },
-                                },
-                                ensure_ascii=False,
-                            ) + "\n"
+                                    ensure_ascii=False,
+                                )
+                                + "\n"
+                            )
                             has_streamed_answer = True
                         full_answer += _sanitize_tutor_output_text(chunk.content).sanitized_text
 
-                thoughts = f"[COMPLEX] [SANDBOX]\n{sandbox_output}" if sandbox_output else "[COMPLEX]"
-                _log_qa(lecture_id, current_timestamp, sanitized_user_question, full_answer, thoughts)
+                thoughts = (
+                    f"[COMPLEX] [SANDBOX]\n{sandbox_output}" if sandbox_output else "[COMPLEX]"
+                )
+                _log_qa(
+                    lecture_id, current_timestamp, sanitized_user_question, full_answer, thoughts
+                )
                 with start_langfuse_observation(
                     name="tutor-persist-qa",
                     input={
@@ -968,17 +1098,19 @@ def get_context_and_stream_langgraph(
                         "route": route,
                     },
                 ):
-                    qa_id = asyncio.run(_save_qa_history(
-                        persisted_lecture_id,
-                        sanitized_user_question,
-                        full_answer,
-                        thoughts,
-                        current_timestamp,
-                        context_binding_id,
-                        image_base64,
-                        langfuse_trace_id=langfuse_trace_id,
-                        langfuse_observation_id=langfuse_observation_id,
-                    ))
+                    qa_id = asyncio.run(
+                        _save_qa_history(
+                            persisted_lecture_id,
+                            sanitized_user_question,
+                            full_answer,
+                            thoughts,
+                            current_timestamp,
+                            context_binding_id,
+                            image_base64,
+                            langfuse_trace_id=langfuse_trace_id,
+                            langfuse_observation_id=langfuse_observation_id,
+                        )
+                    )
                 yield json.dumps({"qa_id": qa_id}) + "\n"
 
         except Exception as e:

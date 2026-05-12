@@ -4,6 +4,7 @@ exception_handlers.py
 FastAPI exception handlers — register in app.py via:
     app.add_exception_handler(DomainError, domain_exception_handler)
 """
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
 

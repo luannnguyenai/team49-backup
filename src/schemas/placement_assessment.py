@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
 
 class PlacementStartRequest(BaseModel):
     """POST /api/placement-assessment/start"""
+
     topic_unit_ids: list[uuid.UUID] = Field(
         min_length=1,
         description="learning_units.id values selected at onboarding Step 2",
@@ -33,7 +33,7 @@ class PlacementStartResponse(BaseModel):
     questions: list[PlacementQuestion]
     topic_unit_ids: list[uuid.UUID]
     skipped_topics: list[uuid.UUID] = []  # units with no placement items
-    should_skip_step: bool = False         # True when ALL requested units have no items
+    should_skip_step: bool = False  # True when ALL requested units have no items
 
 
 class PlacementAnswerInput(BaseModel):
@@ -44,6 +44,7 @@ class PlacementAnswerInput(BaseModel):
 
 class PlacementSubmitRequest(BaseModel):
     """POST /api/placement-assessment/submit"""
+
     session_id: uuid.UUID
     answers: list[PlacementAnswerInput] = Field(min_length=1)
 
@@ -52,7 +53,7 @@ class TopicDecision(BaseModel):
     topic_unit_id: uuid.UUID
     score_pct: float
     decision: Literal["skip", "review", "relearn"]
-    user_choice: Optional[str] = None
+    user_choice: str | None = None
 
 
 class PlacementSubmitResponse(BaseModel):
@@ -70,5 +71,6 @@ class PlacementResultsResponse(BaseModel):
 
 class TopicUserChoiceRequest(BaseModel):
     """PATCH /api/placement-assessment/topic-decision"""
+
     topic_unit_id: uuid.UUID
     user_choice: str = Field(pattern="^(skip|review)$")

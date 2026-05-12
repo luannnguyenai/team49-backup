@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.agent_graph import AgentGraphRun, AgentPendingAction, AgentResponsePayload
 from src.schemas.agent import AgentChatResponse
 
-
 ACTIVE_RUN_STATUSES = {"created", "running"}
 REPLAYABLE_RESPONSE_STATUSES = {"succeeded", "interrupted"}
 
@@ -54,7 +53,9 @@ class AgentGraphRepository:
     async def get_active_run(self, *, thread_id: str) -> SimpleNamespace | None:
         result = await self.session.execute(
             select(AgentGraphRun)
-            .where(AgentGraphRun.thread_id == thread_id, AgentGraphRun.status.in_(ACTIVE_RUN_STATUSES))
+            .where(
+                AgentGraphRun.thread_id == thread_id, AgentGraphRun.status.in_(ACTIVE_RUN_STATUSES)
+            )
             .order_by(AgentGraphRun.created_at.desc())
             .limit(1)
         )
@@ -66,7 +67,10 @@ class AgentGraphRepository:
     async def get_active_non_interrupted_run(self, *, thread_id: str) -> SimpleNamespace | None:
         result = await self.session.execute(
             select(AgentGraphRun)
-            .where(AgentGraphRun.thread_id == thread_id, AgentGraphRun.status.in_({"created", "running"}))
+            .where(
+                AgentGraphRun.thread_id == thread_id,
+                AgentGraphRun.status.in_({"created", "running"}),
+            )
             .order_by(AgentGraphRun.created_at.desc())
             .limit(1)
         )

@@ -36,7 +36,9 @@ def _extract_url(raw: str) -> str | None:
     return match.group(0).rstrip("),")
 
 
-def _sanitize_unit(unit: dict[str, Any], *, unit_index: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def _sanitize_unit(
+    unit: dict[str, Any], *, unit_index: int
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     sanitized = deepcopy(unit)
     issues: list[dict[str, Any]] = []
 
@@ -243,7 +245,10 @@ def sanitize_p1_artifacts(*, input_dir: Path, output_dir: Path) -> dict[str, Any
         issues.extend(_validate_artifact(sanitized))
         output_path = output_dir / input_path.name
 
-        if any(issue["code"] not in {"unit_video_url_sanitized", "unit_is_template_key_recovered"} for issue in issues):
+        if any(
+            issue["code"] not in {"unit_video_url_sanitized", "unit_is_template_key_recovered"}
+            for issue in issues
+        ):
             invalid_files += 1
             files_report.append(
                 {
@@ -282,4 +287,3 @@ def sanitize_p1_artifacts(*, input_dir: Path, output_dir: Path) -> dict[str, Any
         },
         "files": files_report,
     }
-

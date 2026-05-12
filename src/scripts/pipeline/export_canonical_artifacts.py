@@ -6,7 +6,6 @@ import argparse
 import hashlib
 import json
 import shutil
-import sys
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -17,12 +16,10 @@ from src.data_paths import (
     CANONICAL_MANIFEST_FILE,
     CANONICAL_VALIDATION_REPORT_FILE,
     COURSES_DIR,
-    FINAL_ARTIFACTS_DIR,
     GPT54_EDGE_LABELS_FILE,
     P2_OUTPUT_FILE,
     P5_TRANSITIVE_PRUNED_FILE,
 )
-
 
 PHASE_ENUM = {
     "placement",
@@ -225,9 +222,13 @@ def _select_segment(
 
     window_segments = [segment for segment in segments if in_window(segment)] or segments
 
-    normalized_quotes = [(quote, _normalize_text(quote)) for quote in transcript_quotes if quote.strip()]
+    normalized_quotes = [
+        (quote, _normalize_text(quote)) for quote in transcript_quotes if quote.strip()
+    ]
     for pool in (window_segments, segments):
-        for original_quote, normalized_quote in sorted(normalized_quotes, key=lambda item: len(item[1]), reverse=True):
+        for original_quote, normalized_quote in sorted(
+            normalized_quotes, key=lambda item: len(item[1]), reverse=True
+        ):
             if not normalized_quote:
                 continue
             for segment in pool:
@@ -265,7 +266,9 @@ def _select_segment(
     return None
 
 
-def _build_course_context(courses_dir: Path, selected_courses: list[str] | None) -> tuple[list[dict[str, Any]], dict[tuple[str, int], dict[str, Any]]]:
+def _build_course_context(
+    courses_dir: Path, selected_courses: list[str] | None
+) -> tuple[list[dict[str, Any]], dict[tuple[str, int], dict[str, Any]]]:
     course_rows: list[dict[str, Any]] = []
     lecture_index: dict[tuple[str, int], dict[str, Any]] = {}
 
@@ -296,7 +299,8 @@ def _build_course_context(courses_dir: Path, selected_courses: list[str] | None)
             if order is None:
                 continue
             lecture_index[(course_dir.name, int(order))] = {
-                "lecture_id": lecture.get("lecture_id") or f"{course_dir.name.lower()}-lecture-{order}",
+                "lecture_id": lecture.get("lecture_id")
+                or f"{course_dir.name.lower()}-lecture-{order}",
                 "lecture_order": int(order),
                 "lecture_title": _first_non_empty(
                     lecture.get("title"),
@@ -331,7 +335,9 @@ def _build_concepts_rows(p2: dict[str, Any], source_file: str) -> list[dict[str,
                 "importance_scope": item.get("importance_scope"),
                 "importance_source": item.get("importance_source"),
                 "source_course_ids": item.get("source_course_ids", []),
-                "importance": _importance_score(item.get("importance_level"), item.get("importance_confidence")),
+                "importance": _importance_score(
+                    item.get("importance_level"), item.get("importance_confidence")
+                ),
                 "description_embedding": None,
                 "source_file": source_file,
             }
@@ -344,7 +350,9 @@ def _build_unit_tables(
     courses_dir: Path,
     lecture_index: dict[tuple[str, int], dict[str, Any]],
     local_to_global: dict[str, str],
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, dict[str, Any]], list[dict[str, Any]]]:
+) -> tuple[
+    list[dict[str, Any]], list[dict[str, Any]], dict[str, dict[str, Any]], list[dict[str, Any]]
+]:
     unit_rows: list[dict[str, Any]] = []
     unit_kp_candidates: dict[tuple[str, str], dict[str, Any]] = {}
     unit_index: dict[str, dict[str, Any]] = {}
@@ -371,9 +379,13 @@ def _build_unit_tables(
                 row = {
                     "unit_id": unit_id,
                     "course_id": course_dir.name,
-                    "lecture_id": _first_non_empty(lecture_meta.get("lecture_id"), artifact.get("lecture_id"), p1_path.stem),
+                    "lecture_id": _first_non_empty(
+                        lecture_meta.get("lecture_id"), artifact.get("lecture_id"), p1_path.stem
+                    ),
                     "lecture_order": lecture_order,
-                    "lecture_title": _first_non_empty(lecture_meta.get("lecture_title"), artifact.get("lecture_title")),
+                    "lecture_title": _first_non_empty(
+                        lecture_meta.get("lecture_title"), artifact.get("lecture_title")
+                    ),
                     "unit_name": unit.get("name"),
                     "description": unit.get("description"),
                     "summary": unit.get("summary"),
@@ -388,7 +400,9 @@ def _build_unit_tables(
                     "video_clip_ref": None,
                     "topic_embedding": None,
                     "source_file": _relative(p1_path, repo_root),
-                    "transcript_path": str(lecture_meta.get("transcript_path")) if lecture_meta.get("transcript_path") else None,
+                    "transcript_path": str(lecture_meta.get("transcript_path"))
+                    if lecture_meta.get("transcript_path")
+                    else None,
                 }
                 unit_rows.append(row)
                 unit_index[unit_id] = row
@@ -401,7 +415,7 @@ def _build_unit_tables(
                     rejected.append(
                         {
                             "row_kind": "unit_kp_map",
-                            "row_id": f'{local_row.get("unit_id")}::{local_row.get("local_kp_id")}',
+                            "row_id": f"{local_row.get('unit_id')}::{local_row.get('local_kp_id')}",
                             "hard_fail_reason": "missing_global_kp_mapping",
                             "source_file": _relative(p1_path, repo_root),
                             "payload": local_row,
@@ -425,7 +439,9 @@ def _build_unit_tables(
                     "source_file": _relative(p1_path, repo_root),
                 }
                 existing = unit_kp_candidates.get(key)
-                if existing is None or (candidate["coverage_weight"] or 0.0) > (existing["coverage_weight"] or 0.0):
+                if existing is None or (candidate["coverage_weight"] or 0.0) > (
+                    existing["coverage_weight"] or 0.0
+                ):
                     if existing:
                         candidate["source_local_kp_ids"] = sorted(
                             set(existing["source_local_kp_ids"] + candidate["source_local_kp_ids"])
@@ -436,7 +452,9 @@ def _build_unit_tables(
                         set(existing["source_local_kp_ids"] + candidate["source_local_kp_ids"])
                     )
 
-    unit_kp_rows = sorted(unit_kp_candidates.values(), key=lambda row: (row["unit_id"], row["kp_id"]))
+    unit_kp_rows = sorted(
+        unit_kp_candidates.values(), key=lambda row: (row["unit_id"], row["kp_id"])
+    )
     return unit_rows, unit_kp_rows, unit_index, rejected
 
 
@@ -460,7 +478,9 @@ def _derive_source_ref(
 ) -> dict[str, Any]:
     raw_source_ref = item.get("source_ref") if isinstance(item.get("source_ref"), dict) else {}
     evidence = item.get("evidence") or {}
-    transcript_quotes = [quote.strip() for quote in evidence.get("transcript_quotes", []) if str(quote).strip()]
+    transcript_quotes = [
+        quote.strip() for quote in evidence.get("transcript_quotes", []) if str(quote).strip()
+    ]
     if raw_source_ref.get("evidence_span"):
         transcript_quotes.append(str(raw_source_ref["evidence_span"]).strip())
     timestamp_values = [
@@ -481,7 +501,9 @@ def _derive_source_ref(
     window_start = content_ref.get("start_s")
     window_end = content_ref.get("end_s")
     exact_timestamps = [
-        ts for ts in timestamp_values if window_start is None or window_end is None or (window_start <= ts <= window_end)
+        ts
+        for ts in timestamp_values
+        if window_start is None or window_end is None or (window_start <= ts <= window_end)
     ]
     segment_match = _select_segment(
         _transcript_segments(transcript_bundle),
@@ -522,11 +544,15 @@ def _derive_source_ref(
         "evidence_span": evidence_span,
         "multimodal_signals_used": multimodal_signals,
         "video_clip_ref": raw_source_ref.get("video_clip_ref"),
-        "video_url": _first_non_empty(artifact.get("youtube_url"), unit_row.get("content_ref", {}).get("video_url")),
+        "video_url": _first_non_empty(
+            artifact.get("youtube_url"), unit_row.get("content_ref", {}).get("video_url")
+        ),
     }
 
 
-def _expand_phase_rows(item_id: str, row: dict[str, Any], common: dict[str, Any]) -> list[dict[str, Any]]:
+def _expand_phase_rows(
+    item_id: str, row: dict[str, Any], common: dict[str, Any]
+) -> list[dict[str, Any]]:
     suitability = row.get("suitability_by_phase", {})
     multipliers = row.get("phase_multiplier_by_phase", {})
     if not suitability and isinstance(row.get("eligible_phases"), list):
@@ -559,7 +585,13 @@ def _build_question_tables(
     courses_dir: Path,
     unit_index: dict[str, dict[str, Any]],
     transcript_cache: dict[str, str],
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+) -> tuple[
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]:
     question_rows: list[dict[str, Any]] = []
     calibration_rows: list[dict[str, Any]] = []
     phase_rows: list[dict[str, Any]] = []
@@ -794,7 +826,15 @@ def _build_edge_tables(
     return keep_rows, pruned_rows
 
 
-def _reject_row(rejected: list[dict[str, Any]], *, row_kind: str, row_id: str, reason: str, source_file: str, payload: Any) -> None:
+def _reject_row(
+    rejected: list[dict[str, Any]],
+    *,
+    row_kind: str,
+    row_id: str,
+    reason: str,
+    source_file: str,
+    payload: Any,
+) -> None:
     rejected.append(
         {
             "row_kind": row_kind,
@@ -838,9 +878,21 @@ def validate_canonical_tables(
     transcript_cache: dict[str, str],
 ) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]], dict[str, Any]]:
     rejected: list[dict[str, Any]] = list(tables.get("rejected_items", []))
-    unit_rows = _dedupe_rows(tables["units"], key_fn=lambda row: row["unit_id"], row_kind="units", rejected=rejected)
-    concept_rows = _dedupe_rows(tables["concepts_kp"], key_fn=lambda row: row["kp_id"], row_kind="concepts_kp", rejected=rejected)
-    question_rows = _dedupe_rows(tables["question_bank"], key_fn=lambda row: row["item_id"], row_kind="question_bank", rejected=rejected)
+    unit_rows = _dedupe_rows(
+        tables["units"], key_fn=lambda row: row["unit_id"], row_kind="units", rejected=rejected
+    )
+    concept_rows = _dedupe_rows(
+        tables["concepts_kp"],
+        key_fn=lambda row: row["kp_id"],
+        row_kind="concepts_kp",
+        rejected=rejected,
+    )
+    question_rows = _dedupe_rows(
+        tables["question_bank"],
+        key_fn=lambda row: row["item_id"],
+        row_kind="question_bank",
+        rejected=rejected,
+    )
     unit_kp_rows = _dedupe_rows(
         tables["unit_kp_map"],
         key_fn=lambda row: (row["unit_id"], row["kp_id"]),
@@ -868,7 +920,14 @@ def validate_canonical_tables(
     validated_units = []
     for row in unit_rows:
         if row["course_id"] not in valid_course_ids:
-            _reject_row(rejected, row_kind="units", row_id=row["unit_id"], reason="unknown_course_id", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="units",
+                row_id=row["unit_id"],
+                reason="unknown_course_id",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         content_ref = row.get("content_ref") or {}
         start_s = content_ref.get("start_s")
@@ -882,7 +941,7 @@ def validate_canonical_tables(
                     _reject_row(
                         rejected,
                         row_kind="unit_key_point",
-                        row_id=f'{row["unit_id"]}::{ts}',
+                        row_id=f"{row['unit_id']}::{ts}",
                         reason="key_point_timestamp_out_of_bounds",
                         source_file=row["source_file"],
                         payload=point,
@@ -899,10 +958,24 @@ def validate_canonical_tables(
     validated_unit_kp = []
     for row in unit_kp_rows:
         if row["unit_id"] not in valid_unit_ids:
-            _reject_row(rejected, row_kind="unit_kp_map", row_id=f'{row["unit_id"]}::{row["kp_id"]}', reason="unknown_unit_id", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="unit_kp_map",
+                row_id=f"{row['unit_id']}::{row['kp_id']}",
+                reason="unknown_unit_id",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if row["kp_id"] not in valid_kp_ids:
-            _reject_row(rejected, row_kind="unit_kp_map", row_id=f'{row["unit_id"]}::{row["kp_id"]}', reason="unknown_kp_id", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="unit_kp_map",
+                row_id=f"{row['unit_id']}::{row['kp_id']}",
+                reason="unknown_kp_id",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         validated_unit_kp.append(row)
     unit_kp_rows = validated_unit_kp
@@ -911,32 +984,92 @@ def validate_canonical_tables(
     for row in question_rows:
         item_id = row["item_id"]
         if row["unit_id"] not in valid_unit_ids:
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="unknown_unit_id", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="unknown_unit_id",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if row["primary_kp_id"] not in valid_kp_ids:
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="unknown_primary_kp_id", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="unknown_primary_kp_id",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if row.get("question_intent") and row["question_intent"] not in QUESTION_INTENT_ENUM:
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="invalid_question_intent", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="invalid_question_intent",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if row.get("review_status") not in REVIEW_STATUS_ENUM:
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="invalid_review_status", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="invalid_review_status",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if row.get("provenance") not in PROVENANCE_ENUM:
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="invalid_provenance", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="invalid_provenance",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         source_ref = row.get("source_ref")
         if not isinstance(source_ref, dict):
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="missing_source_ref", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="missing_source_ref",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if "transcript" not in set(source_ref.get("multimodal_signals_used") or []):
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="missing_transcript_signal", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="missing_transcript_signal",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         evidence_span = source_ref.get("evidence_span")
         unit_row = unit_index[row["unit_id"]]
-        transcript_text = _transcript_text(transcript_cache.get(unit_row.get("transcript_path") or ""))
-        if not evidence_span or _normalize_text(evidence_span) not in _normalize_text(transcript_text):
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="evidence_span_not_in_transcript", source_file=row["source_file"], payload=row)
+        transcript_text = _transcript_text(
+            transcript_cache.get(unit_row.get("transcript_path") or "")
+        )
+        if not evidence_span or _normalize_text(evidence_span) not in _normalize_text(
+            transcript_text
+        ):
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="evidence_span_not_in_transcript",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         content_ref = unit_row.get("content_ref") or {}
         start_s = content_ref.get("start_s")
@@ -944,26 +1077,56 @@ def validate_canonical_tables(
         timestamp_start = source_ref.get("timestamp_start")
         timestamp_end = source_ref.get("timestamp_end")
         if None in (timestamp_start, timestamp_end) or start_s is None or end_s is None:
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="missing_source_timestamps", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="missing_source_timestamps",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if not (start_s <= timestamp_start <= end_s and start_s <= timestamp_end <= end_s):
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="source_timestamps_out_of_bounds", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="source_timestamps_out_of_bounds",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if row.get("qa_gate_passed") is False and len(row.get("repair_history") or []) >= 2:
-            _reject_row(rejected, row_kind="question_bank", row_id=item_id, reason="qa_failed_after_repairs", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="question_bank",
+                row_id=item_id,
+                reason="qa_failed_after_repairs",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         valid_item_ids.add(item_id)
         validated_questions.append(row)
     question_rows = validated_questions
 
-    calibration_rows = [row for row in tables["item_calibration"] if row["item_id"] in valid_item_ids]
+    calibration_rows = [
+        row for row in tables["item_calibration"] if row["item_id"] in valid_item_ids
+    ]
 
     validated_phase_rows = []
     for row in tables["item_phase_map"]:
         if row["item_id"] not in valid_item_ids:
             continue
         if row.get("phase") not in PHASE_ENUM:
-            _reject_row(rejected, row_kind="item_phase_map", row_id=f'{row["item_id"]}::{row.get("phase")}', reason="invalid_phase", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="item_phase_map",
+                row_id=f"{row['item_id']}::{row.get('phase')}",
+                reason="invalid_phase",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         validated_phase_rows.append(row)
 
@@ -972,36 +1135,78 @@ def validate_canonical_tables(
         if row["item_id"] not in valid_item_ids:
             continue
         if row.get("kp_id") not in valid_kp_ids:
-            _reject_row(rejected, row_kind="item_kp_map", row_id=f'{row["item_id"]}::{row.get("kp_id")}', reason="unknown_kp_id", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="item_kp_map",
+                row_id=f"{row['item_id']}::{row.get('kp_id')}",
+                reason="unknown_kp_id",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         validated_kp_rows.append(row)
 
     validated_edges = []
     for row in prerequisite_rows:
         if row["source_kp_id"] not in valid_kp_ids or row["target_kp_id"] not in valid_kp_ids:
-            _reject_row(rejected, row_kind="prerequisite_edges", row_id=f'{row["source_kp_id"]}->{row["target_kp_id"]}', reason="unknown_kp_id", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="prerequisite_edges",
+                row_id=f"{row['source_kp_id']}->{row['target_kp_id']}",
+                reason="unknown_kp_id",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if row.get("review_status") not in REVIEW_STATUS_ENUM:
-            _reject_row(rejected, row_kind="prerequisite_edges", row_id=f'{row["source_kp_id"]}->{row["target_kp_id"]}', reason="invalid_review_status", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="prerequisite_edges",
+                row_id=f"{row['source_kp_id']}->{row['target_kp_id']}",
+                reason="invalid_review_status",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if row.get("provenance") not in PROVENANCE_ENUM:
-            _reject_row(rejected, row_kind="prerequisite_edges", row_id=f'{row["source_kp_id"]}->{row["target_kp_id"]}', reason="invalid_provenance", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="prerequisite_edges",
+                row_id=f"{row['source_kp_id']}->{row['target_kp_id']}",
+                reason="invalid_provenance",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         validated_edges.append(row)
 
     validated_pruned = []
     for row in pruned_rows:
         if row["source_kp_id"] not in valid_kp_ids or row["target_kp_id"] not in valid_kp_ids:
-            _reject_row(rejected, row_kind="pruned_edges", row_id=f'{row["source_kp_id"]}->{row["target_kp_id"]}', reason="unknown_kp_id", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="pruned_edges",
+                row_id=f"{row['source_kp_id']}->{row['target_kp_id']}",
+                reason="unknown_kp_id",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         if row.get("provenance") not in PROVENANCE_ENUM:
-            _reject_row(rejected, row_kind="pruned_edges", row_id=f'{row["source_kp_id"]}->{row["target_kp_id"]}', reason="invalid_provenance", source_file=row["source_file"], payload=row)
+            _reject_row(
+                rejected,
+                row_kind="pruned_edges",
+                row_id=f"{row['source_kp_id']}->{row['target_kp_id']}",
+                reason="invalid_provenance",
+                source_file=row["source_file"],
+                payload=row,
+            )
             continue
         validated_pruned.append(row)
 
-    overlap = {
-        (row["source_kp_id"], row["target_kp_id"]) for row in validated_edges
-    } & {(row["source_kp_id"], row["target_kp_id"]) for row in validated_pruned}
+    overlap = {(row["source_kp_id"], row["target_kp_id"]) for row in validated_edges} & {
+        (row["source_kp_id"], row["target_kp_id"]) for row in validated_pruned
+    }
     for source_kp_id, target_kp_id in sorted(overlap):
         _reject_row(
             rejected,
@@ -1013,7 +1218,9 @@ def validate_canonical_tables(
         )
     if overlap:
         validated_edges = [
-            row for row in validated_edges if (row["source_kp_id"], row["target_kp_id"]) not in overlap
+            row
+            for row in validated_edges
+            if (row["source_kp_id"], row["target_kp_id"]) not in overlap
         ]
 
     hard_counts = Counter(row["hard_fail_reason"] for row in rejected)
@@ -1096,10 +1303,12 @@ def export_canonical_artifacts(
         local_to_global=local_to_global,
     )
     transcript_cache = _load_transcript_cache(unit_rows)
-    question_rows, calibration_rows, phase_rows, item_kp_rows, rejected_from_questions = _build_question_tables(
-        courses_dir=courses_dir,
-        unit_index=unit_index,
-        transcript_cache=transcript_cache,
+    question_rows, calibration_rows, phase_rows, item_kp_rows, rejected_from_questions = (
+        _build_question_tables(
+            courses_dir=courses_dir,
+            unit_index=unit_index,
+            transcript_cache=transcript_cache,
+        )
     )
     prerequisite_rows, pruned_rows = _build_edge_tables(
         p5=p5,
@@ -1149,9 +1358,7 @@ def export_canonical_artifacts(
 
     _write_json(tmp_dir / CANONICAL_VALIDATION_REPORT_FILE.name, validation_report)
     checksums = {
-        path.name: _sha256_file(path)
-        for path in sorted(tmp_dir.iterdir())
-        if path.is_file()
+        path.name: _sha256_file(path) for path in sorted(tmp_dir.iterdir()) if path.is_file()
     }
     manifest = {
         "bundle_id": output_dir.name,

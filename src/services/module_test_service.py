@@ -20,12 +20,12 @@ from src.models.course import CourseSection, LearningUnit
 from src.models.learning import Interaction, SelectedAnswer, Session, SessionType
 from src.repositories.canonical_question_repo import CanonicalQuestionRepository
 from src.schemas.module_test import (
+    LearningUnitQuestionsGroup,
+    LearningUnitTestResult,
     ModuleTestResultResponse,
     ModuleTestStartResponse,
     ModuleTestSubmitRequest,
     NextSectionInfo,
-    LearningUnitQuestionsGroup,
-    LearningUnitTestResult,
     ReviewLearningUnitSuggestion,
     WrongAnswerDetail,
 )
@@ -37,7 +37,6 @@ from src.services.canonical_assessor_compat import (
 )
 from src.services.canonical_mastery_service import update_kp_mastery_from_item
 from src.services.canonical_question_selector import CanonicalQuestionSelector
-
 
 _MODULE_TEST_SLOTS: list[tuple[DifficultyBucket, int]] = [
     (DifficultyBucket.easy, 2),
@@ -112,7 +111,9 @@ async def _start_canonical_module_test(
             count=5,
         )
         if not items:
-            raise ValidationError(f"Không tìm thấy câu hỏi final_quiz cho learning unit '{unit.title}'.")
+            raise ValidationError(
+                f"Không tìm thấy câu hỏi final_quiz cho learning unit '{unit.title}'."
+            )
         total_question_count += len(items)
         learning_unit_groups.append(
             LearningUnitQuestionsGroup(
@@ -209,7 +210,9 @@ async def _build_canonical_module_test_result(
 ) -> ModuleTestResultResponse:
     section = await _get_canonical_section_or_404(db, session.canonical_section_id)
     units = await _get_canonical_units_for_section(db, section.id)
-    unit_by_canonical_id = {unit.canonical_unit_id: unit for unit in units if unit.canonical_unit_id}
+    unit_by_canonical_id = {
+        unit.canonical_unit_id: unit for unit in units if unit.canonical_unit_id
+    }
     rows_result = await db.execute(
         select(Interaction, QuestionBankItem)
         .join(QuestionBankItem, Interaction.canonical_item_id == QuestionBankItem.item_id)
@@ -241,7 +244,9 @@ async def _build_canonical_module_test_result(
         unit_total = len(unit_rows)
         unit_correct = sum(1 for interaction, _ in unit_rows if interaction.is_correct)
         unit_pct = round(unit_correct / unit_total * 100, 1)
-        wrong_item_ids = [item.item_id for interaction, item in unit_rows if not interaction.is_correct]
+        wrong_item_ids = [
+            item.item_id for interaction, item in unit_rows if not interaction.is_correct
+        ]
         weak_kcs = await _canonical_kp_names(db, wrong_item_ids)
         per_learning_unit.append(
             LearningUnitTestResult(
@@ -267,9 +272,7 @@ async def _build_canonical_module_test_result(
         for interaction, item in unit_rows:
             if interaction.is_correct or interaction.selected_answer is None:
                 continue
-            question = canonical_item_to_module_test_question(
-                item, learning_unit_id=unit.id
-            )
+            question = canonical_item_to_module_test_question(item, learning_unit_id=unit.id)
             wrong_answers.append(
                 WrongAnswerDetail(
                     question_id=question.id,

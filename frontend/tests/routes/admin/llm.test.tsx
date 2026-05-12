@@ -6,6 +6,7 @@ import AdminLlmPage from "@/app/admin/llm/page";
 const adminApiMock = vi.hoisted(() => ({
   llmStats: vi.fn(),
   llmRecent: vi.fn(),
+  modelHealth: vi.fn(),
   feedbackStats: vi.fn(),
   feedbackNegative: vi.fn(),
 }));
@@ -14,13 +15,14 @@ vi.mock("@/lib/admin-api", async () => {
   const actual = await vi.importActual<typeof import("@/lib/admin-api")>("@/lib/admin-api");
   return {
     ...actual,
-    adminApi: {
-      ...actual.adminApi,
-      llmStats: adminApiMock.llmStats,
-      llmRecent: adminApiMock.llmRecent,
-      feedbackStats: adminApiMock.feedbackStats,
-      feedbackNegative: adminApiMock.feedbackNegative,
-    },
+      adminApi: {
+        ...actual.adminApi,
+        llmStats: adminApiMock.llmStats,
+        llmRecent: adminApiMock.llmRecent,
+        modelHealth: adminApiMock.modelHealth,
+        feedbackStats: adminApiMock.feedbackStats,
+        feedbackNegative: adminApiMock.feedbackNegative,
+      },
   };
 });
 
@@ -55,6 +57,31 @@ describe("admin llm page", () => {
       ],
     });
     adminApiMock.llmRecent.mockResolvedValue([]);
+    adminApiMock.modelHealth.mockResolvedValue({
+      models: [
+        {
+          id: "default",
+          label: "Default",
+          provider: "openai",
+          model: "gpt-5.4-mini",
+          status: "healthy",
+          latency_ms: 120,
+          checked_at: "2026-05-11T00:00:00+00:00",
+          error: null,
+        },
+        {
+          id: "qwen35_4b",
+          label: "Qwen 3.5 4B",
+          provider: "openai",
+          model: "qwen3.5-4b-lora",
+          base_url: "https://vllm.a20-app-049.io.vn/v1",
+          status: "down",
+          latency_ms: 195,
+          checked_at: "2026-05-11T00:00:00+00:00",
+          error: "Server error 530",
+        },
+      ],
+    });
     adminApiMock.feedbackStats.mockResolvedValue({
       total_ratings: 2,
       positive: 1,
@@ -77,5 +104,24 @@ describe("admin llm page", () => {
     expect(screen.getByText("420 ms")).toBeInTheDocument();
     expect(screen.getByText("First answer p95")).toBeInTheDocument();
     expect(screen.getByText("920 ms")).toBeInTheDocument();
+    expect(screen.getByText("Model health")).toBeInTheDocument();
+    expect(screen.getByText("Configured models")).toBeInTheDocument();
+    expect(screen.getByText("Qwen 3.5 4B")).toBeInTheDocument();
+    expect(screen.getAllByText("healthy").length).toBeGreaterThan(0);
+    expect(screen.getByText("down")).toBeInTheDocument();
+    expect(screen.getByText("https://vllm.a20-app-049.io.vn/v1")).toBeInTheDocument();
+    expect(screen.getByText("Server error 530")).toBeInTheDocument();
+  });
+
+  it("shows a model health error instead of silently hiding the model list", async () => {
+    adminApiMock.modelHealth.mockRejectedValue(new Error("health endpoint unavailable"));
+
+    render(<AdminLlmPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Model health unavailable")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("health endpoint unavailable")).toBeInTheDocument();
   });
 });

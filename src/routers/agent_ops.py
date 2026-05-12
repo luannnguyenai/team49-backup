@@ -9,7 +9,6 @@ from src.database import get_async_db
 from src.repositories.agent_graph_repo import AgentGraphRepository
 from src.services.agent_pending_action_janitor import AgentPendingActionJanitor
 
-
 agent_ops_router = APIRouter(prefix="/api/agent/ops", tags=["agent-ops"])
 
 

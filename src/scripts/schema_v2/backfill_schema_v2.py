@@ -32,7 +32,9 @@ class BackfillReport:
 
 
 def sha256_json(value: Any) -> str:
-    payload = json.dumps(value, sort_keys=True, ensure_ascii=True, separators=(",", ":"), default=str)
+    payload = json.dumps(
+        value, sort_keys=True, ensure_ascii=True, separators=(",", ":"), default=str
+    )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -45,7 +47,9 @@ def build_default_course_config() -> dict[str, Any]:
     }
 
 
-def derive_salience_decision(*, has_quiz_items: bool, override_critical_kp: bool) -> dict[str, str | bool | None]:
+def derive_salience_decision(
+    *, has_quiz_items: bool, override_critical_kp: bool
+) -> dict[str, str | bool | None]:
     if has_quiz_items or override_critical_kp:
         return {
             "is_worth_learning": True,
@@ -235,7 +239,9 @@ async def _backfill_unit_salience(session: AsyncSession, report: BackfillReport)
         WHERE has_quiz_items = true OR override_critical_kp = true
         """,
     )
-    null_content_type = await _scalar_int(session, "SELECT COUNT(*) FROM units WHERE content_type IS NULL")
+    null_content_type = await _scalar_int(
+        session, "SELECT COUNT(*) FROM units WHERE content_type IS NULL"
+    )
     report.note_null("units.content_type", null_content_type)
 
 
@@ -271,7 +277,9 @@ async def _backfill_learning_units(session: AsyncSession, report: BackfillReport
     )
 
 
-async def _backfill_calibration_and_interactions(session: AsyncSession, report: BackfillReport) -> None:
+async def _backfill_calibration_and_interactions(
+    session: AsyncSession, report: BackfillReport
+) -> None:
     await _execute_counted(
         session,
         report,
@@ -322,7 +330,7 @@ async def _backfill_calibration_and_interactions(session: AsyncSession, report: 
         WHERE i.canonical_item_id = ic.item_id
         """,
     )
-    for field in [
+    for col_name in [
         "theta_before",
         "theta_after",
         "theta_sigma_before",
@@ -331,7 +339,7 @@ async def _backfill_calibration_and_interactions(session: AsyncSession, report: 
         "item_information",
     ]:
         report.note_null(
-            f"interactions.{field}",
+            f"interactions.{col_name}",
             await _scalar_int(session, f"SELECT COUNT(*) FROM interactions WHERE {field} IS NULL"),
         )
 

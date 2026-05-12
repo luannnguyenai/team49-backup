@@ -68,7 +68,6 @@ class ReplanCurrentPathUnitDiscovery:
             title = _normalize(candidate.title)
             summary = _normalize(candidate.summary)
             key_points = [_normalize(kp) for kp in candidate.key_points]
-            haystack = _normalize(" ".join([candidate.title, candidate.summary, *candidate.key_points]))
 
             match_score = 0
             matched_terms = []
@@ -113,7 +112,9 @@ class ReplanCurrentPathUnitDiscovery:
                         ),
                     )
                     continue
-                log.info(f"[Replan Discovery] SELECTED: {candidate.title} (score: {match_score}, matches: {matched_terms})")
+                log.info(
+                    f"[Replan Discovery] SELECTED: {candidate.title} (score: {match_score}, matches: {matched_terms})"
+                )
                 result.selected_units.append(
                     ReplanSelectedUnit(
                         canonical_unit_id=candidate.canonical_unit_id,
@@ -123,7 +124,9 @@ class ReplanCurrentPathUnitDiscovery:
                 continue
             else:
                 if matched_terms:
-                    log.debug(f"[Replan Discovery] SKIPPED (low score {match_score} < {MIN_SCORE}): {candidate.title} (matches: {matched_terms})")
+                    log.debug(
+                        f"[Replan Discovery] SKIPPED (low score {match_score} < {MIN_SCORE}): {candidate.title} (matches: {matched_terms})"
+                    )
                 else:
                     log.debug(f"[Replan Discovery] SKIPPED (no match): {candidate.title}")
 

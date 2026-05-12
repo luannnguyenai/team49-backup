@@ -13,12 +13,11 @@ import random
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
-
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "data" / "guardrail_router" / "v1"
@@ -335,7 +334,9 @@ def build_eduvidqa_samples(seed: int, limit: int = 4000) -> list[RouterSample]:
     samples = []
     for index, row in enumerate(rows):
         video_id = str(row.get("video_id") or row.get("id") or index)
-        text_input_context, text_input_question = split_eduvidqa_text_input(row.get("text_input", ""))
+        text_input_context, text_input_question = split_eduvidqa_text_input(
+            row.get("text_input", "")
+        )
         question = row.get("question") or row.get("user_query") or text_input_question
         context = row.get("transcript_context") or row.get("context") or text_input_context
         scope = {
@@ -352,14 +353,27 @@ def build_eduvidqa_samples(seed: int, limit: int = 4000) -> list[RouterSample]:
                 split=split_by_video[video_id],
                 input_text=build_input_text(scope, [], question),
                 target=target,
-                metadata={"route_group": "ON_TOPIC", "source_row": row.get("row_id"), "video_id": video_id},
+                metadata={
+                    "route_group": "ON_TOPIC",
+                    "source_row": row.get("row_id"),
+                    "video_id": video_id,
+                },
             )
         )
     return samples
 
 
-def build_openqa_samples(seed: int, limit: int = 950) -> tuple[list[RouterSample], list[dict[str, Any]]]:
-    path = ROOT / "data" / "final_artifacts" / "cs224n_cs231n_cs230_v1" / "eval_aihub_dataset" / "open_qa_eval.jsonl"
+def build_openqa_samples(
+    seed: int, limit: int = 950
+) -> tuple[list[RouterSample], list[dict[str, Any]]]:
+    path = (
+        ROOT
+        / "data"
+        / "final_artifacts"
+        / "cs224n_cs231n_cs230_v1"
+        / "eval_aihub_dataset"
+        / "open_qa_eval.jsonl"
+    )
     rows = read_jsonl(path)
     usable = [
         row
@@ -399,7 +413,9 @@ def build_openqa_samples(seed: int, limit: int = 950) -> tuple[list[RouterSample
     return samples, usable
 
 
-def build_cross_pair_samples(seed: int, openqa_rows: list[dict[str, Any]], limit: int = 2800) -> list[RouterSample]:
+def build_cross_pair_samples(
+    seed: int, openqa_rows: list[dict[str, Any]], limit: int = 2800
+) -> list[RouterSample]:
     rng = random.Random(seed)
     rows = list(openqa_rows)
     split_by_context_unit = allocate_splits([row["metadata"]["unit_id"] for row in rows], seed)
@@ -412,7 +428,11 @@ def build_cross_pair_samples(seed: int, openqa_rows: list[dict[str, Any]], limit
 
     samples = []
     attempts = 0
-    target_counts = {"hard": int(limit * 0.45), "medium": int(limit * 0.35), "easy": limit - int(limit * 0.45) - int(limit * 0.35)}
+    target_counts = {
+        "hard": int(limit * 0.45),
+        "medium": int(limit * 0.35),
+        "easy": limit - int(limit * 0.45) - int(limit * 0.35),
+    }
     for level, count in target_counts.items():
         made = 0
         shuffled = stable_shuffle(rows, seed + len(level))
@@ -433,7 +453,9 @@ def build_cross_pair_samples(seed: int, openqa_rows: list[dict[str, Any]], limit
                     if row["metadata"]["lecture_id"] != meta["lecture_id"]
                 ]
             else:
-                candidates = [row for row in rows if row["metadata"]["course_id"] != meta["course_id"]]
+                candidates = [
+                    row for row in rows if row["metadata"]["course_id"] != meta["course_id"]
+                ]
             if not candidates:
                 continue
             context_row = rng.choice(candidates)
@@ -444,7 +466,9 @@ def build_cross_pair_samples(seed: int, openqa_rows: list[dict[str, Any]], limit
                     sample_id=f"cross_pair_{level}_{made:05d}",
                     source="cross_pair_openqa",
                     split=split_by_context_unit[context_row["metadata"]["unit_id"]],
-                    input_text=build_input_text(scope, candidate_kps, query_row["input"]["question"]),
+                    input_text=build_input_text(
+                        scope, candidate_kps, query_row["input"]["question"]
+                    ),
                     target=target,
                     metadata={
                         "route_group": "OFF_TOPIC",
@@ -462,8 +486,14 @@ def build_cross_pair_samples(seed: int, openqa_rows: list[dict[str, Any]], limit
 
 def build_canttalk_samples(seed: int, quota: int = 800) -> list[RouterSample]:
     paths = [
-        download_hf("nvidia/CantTalkAboutThis-Topic-Control-Dataset", "canttalkaboutthis_topic_control_mixtral.jsonl"),
-        download_hf("nvidia/CantTalkAboutThis-Topic-Control-Dataset", "canttalkaboutthis_topic_control_human_test_set.jsonl"),
+        download_hf(
+            "nvidia/CantTalkAboutThis-Topic-Control-Dataset",
+            "canttalkaboutthis_topic_control_mixtral.jsonl",
+        ),
+        download_hf(
+            "nvidia/CantTalkAboutThis-Topic-Control-Dataset",
+            "canttalkaboutthis_topic_control_human_test_set.jsonl",
+        ),
     ]
     records = []
     for path in paths:
@@ -491,14 +521,22 @@ def build_canttalk_samples(seed: int, quota: int = 800) -> list[RouterSample]:
                 split=split_by_domain[str(row["domain"])],
                 input_text=build_input_text(public_scope("topic_control"), [], row["prompt"]),
                 target=target,
-                metadata={"route_group": "OFF_TOPIC", "domain": row["domain"], "scenario": row["scenario"]},
+                metadata={
+                    "route_group": "OFF_TOPIC",
+                    "domain": row["domain"],
+                    "scenario": row["scenario"],
+                },
             )
         )
     return samples
 
 
 def build_clinc_samples(seed: int, quota: int = 700) -> list[RouterSample]:
-    payload = json.loads((VALIDATION_DIR / "github" / "clinc_oos_eval" / "data_full.json").read_text(encoding="utf-8"))
+    payload = json.loads(
+        (VALIDATION_DIR / "github" / "clinc_oos_eval" / "data_full.json").read_text(
+            encoding="utf-8"
+        )
+    )
     records = []
     for split, rows in payload.items():
         for text, intent in rows:
@@ -509,7 +547,11 @@ def build_clinc_samples(seed: int, quota: int = 700) -> list[RouterSample]:
     oos = df[df["intent"] == "oos"].sample(frac=1, random_state=seed).head(250)
     non_oos = df[df["intent"] != "oos"]
     per_intent = cap_by_group(non_oos, ["intent"], 4, seed)
-    selected = pd.concat([oos, per_intent], ignore_index=True).sample(frac=1, random_state=seed).head(quota)
+    selected = (
+        pd.concat([oos, per_intent], ignore_index=True)
+        .sample(frac=1, random_state=seed)
+        .head(quota)
+    )
     split_by_intent = allocate_splits(selected["intent"].astype(str).tolist(), seed)
     samples = []
     for _, row in selected.iterrows():
@@ -521,7 +563,11 @@ def build_clinc_samples(seed: int, quota: int = 700) -> list[RouterSample]:
                 split=split_by_intent[str(row["intent"])],
                 input_text=build_input_text(public_scope("intent_oos"), [], row["prompt"]),
                 target=target,
-                metadata={"route_group": "OFF_TOPIC", "intent": row["intent"], "source_split": row["split"]},
+                metadata={
+                    "route_group": "OFF_TOPIC",
+                    "intent": row["intent"],
+                    "source_split": row["split"],
+                },
             )
         )
     return samples
@@ -538,7 +584,9 @@ def classify_attack_type(prompt: str, fallback: str = "unknown") -> str:
     return fallback
 
 
-def build_wildguard_samples(seed: int, unsafe_quota: int = 1200, jailbreak_quota: int = 300) -> list[RouterSample]:
+def build_wildguard_samples(
+    seed: int, unsafe_quota: int = 1200, jailbreak_quota: int = 300
+) -> list[RouterSample]:
     train = download_hf("allenai/wildguardmix", "train/wildguard_train.parquet")
     test = download_hf("allenai/wildguardmix", "test/wildguard_test.parquet")
     df = pd.concat([pd.read_parquet(train), pd.read_parquet(test)], ignore_index=True)
@@ -550,10 +598,19 @@ def build_wildguard_samples(seed: int, unsafe_quota: int = 1200, jailbreak_quota
     unsafe = harmful[~bypass_mask]
     jailbreak = harmful[bypass_mask]
 
-    unsafe_selected = cap_by_group(unsafe, ["subcategory"], 120, seed).sample(frac=1, random_state=seed).head(unsafe_quota)
-    jailbreak_selected = cap_by_group(jailbreak, ["subcategory"], 80, seed).sample(frac=1, random_state=seed).head(jailbreak_quota)
+    unsafe_selected = (
+        cap_by_group(unsafe, ["subcategory"], 120, seed)
+        .sample(frac=1, random_state=seed)
+        .head(unsafe_quota)
+    )
+    jailbreak_selected = (
+        cap_by_group(jailbreak, ["subcategory"], 80, seed)
+        .sample(frac=1, random_state=seed)
+        .head(jailbreak_quota)
+    )
     split_by_subcat = allocate_splits(
-        list(unsafe_selected["subcategory"].astype(str)) + list(jailbreak_selected["subcategory"].astype(str)),
+        list(unsafe_selected["subcategory"].astype(str))
+        + list(jailbreak_selected["subcategory"].astype(str)),
         seed,
     )
     samples = []
@@ -567,7 +624,11 @@ def build_wildguard_samples(seed: int, unsafe_quota: int = 1200, jailbreak_quota
                 split=split_by_subcat[subcat],
                 input_text=build_input_text(public_scope("safety"), [], row["prompt_text"]),
                 target=target,
-                metadata={"route_group": "UNSAFE", "subcategory": subcat, "adversarial": bool(row.get("adversarial"))},
+                metadata={
+                    "route_group": "UNSAFE",
+                    "subcategory": subcat,
+                    "adversarial": bool(row.get("adversarial")),
+                },
             )
         )
     jailbreak_start = len(samples)
@@ -582,7 +643,11 @@ def build_wildguard_samples(seed: int, unsafe_quota: int = 1200, jailbreak_quota
                 split=split_by_subcat[subcat],
                 input_text=build_input_text(public_scope("safety"), [], row["prompt_text"]),
                 target=target,
-                metadata={"route_group": "JAILBREAK", "subcategory": subcat, "adversarial": bool(row.get("adversarial"))},
+                metadata={
+                    "route_group": "JAILBREAK",
+                    "subcategory": subcat,
+                    "adversarial": bool(row.get("adversarial")),
+                },
             )
         )
     return samples
@@ -598,11 +663,17 @@ def build_jailbreakv_samples(seed: int, quota: int = 900) -> list[RouterSample]:
     ].copy()
     df["prompt_text"] = df["jailbreak_query"].fillna("").astype(str).map(clean_text)
     df = df[df["prompt_text"].map(words).between(8, 350)]
-    selected = cap_by_group(df, ["format", "policy"], 35, seed).sample(frac=1, random_state=seed).head(quota)
+    selected = (
+        cap_by_group(df, ["format", "policy"], 35, seed)
+        .sample(frac=1, random_state=seed)
+        .head(quota)
+    )
     split_by_policy = allocate_splits(selected["policy"].astype(str).tolist(), seed)
     samples = []
     for _, row in selected.iterrows():
-        attack = "jailbreak_template" if str(row["format"]).lower() == "template" else "prompt_injection"
+        attack = (
+            "jailbreak_template" if str(row["format"]).lower() == "template" else "prompt_injection"
+        )
         target = build_target("JAILBREAK", "N_A", "SAFETY_REFUSE", attack_type=attack)
         policy = str(row.get("policy", "unknown"))
         samples.append(
@@ -629,7 +700,9 @@ def listish(value: Any) -> list[Any]:
     return [value]
 
 
-def build_multijail_samples(seed: int, unsafe_quota: int = 500, jailbreak_quota: int = 200) -> list[RouterSample]:
+def build_multijail_samples(
+    seed: int, unsafe_quota: int = 500, jailbreak_quota: int = 200
+) -> list[RouterSample]:
     languages = ["ar", "bn", "en", "it", "jv", "ko", "sw", "th", "vi", "zh"]
     frames = []
     for lang in languages:
@@ -643,7 +716,11 @@ def build_multijail_samples(seed: int, unsafe_quota: int = 500, jailbreak_quota:
     selected = cap_by_group(df, ["language"], 90, seed).sample(frac=1, random_state=seed)
     vi = selected[selected["language"] == "vi"].head(150)
     non_vi = selected[selected["language"] != "vi"].head(max(0, unsafe_quota - len(vi)))
-    unsafe_selected = pd.concat([vi, non_vi], ignore_index=True).sample(frac=1, random_state=seed).head(unsafe_quota)
+    unsafe_selected = (
+        pd.concat([vi, non_vi], ignore_index=True)
+        .sample(frac=1, random_state=seed)
+        .head(unsafe_quota)
+    )
     split_by_language = allocate_splits(unsafe_selected["language"].astype(str).tolist(), seed)
     samples = []
     for _, row in unsafe_selected.iterrows():
@@ -654,7 +731,9 @@ def build_multijail_samples(seed: int, unsafe_quota: int = 500, jailbreak_quota:
                 sample_id=f"multijail_unsafe_{len(samples):05d}",
                 source="MultiJail",
                 split=split_by_language[language],
-                input_text=build_input_text(public_scope("safety_multilingual"), [], row["prompt_text"]),
+                input_text=build_input_text(
+                    public_scope("safety_multilingual"), [], row["prompt_text"]
+                ),
                 target=target,
                 metadata={
                     "route_group": "UNSAFE",
@@ -679,13 +758,19 @@ def build_multijail_samples(seed: int, unsafe_quota: int = 500, jailbreak_quota:
                 split=split_by_language.get(language, "train"),
                 input_text=build_input_text(public_scope("safety_multilingual"), [], query),
                 target=target,
-                metadata={"route_group": "JAILBREAK", "language": language, "derived_wrapper": True},
+                metadata={
+                    "route_group": "JAILBREAK",
+                    "language": language,
+                    "derived_wrapper": True,
+                },
             )
         )
     return samples
 
 
-def build_ambiguous_samples(seed: int, openqa_rows: list[dict[str, Any]], quota: int = 500) -> list[RouterSample]:
+def build_ambiguous_samples(
+    seed: int, openqa_rows: list[dict[str, Any]], quota: int = 500
+) -> list[RouterSample]:
     rng = random.Random(seed)
     rows = stable_shuffle(openqa_rows, seed)
     samples = []
@@ -710,7 +795,9 @@ def build_ambiguous_samples(seed: int, openqa_rows: list[dict[str, Any]], quota:
         row = rows[(index + no_context_count) % len(rows)]
         scope, candidate_kps = lesson_scope_from_openqa(row)
         query = rng.choice(AMBIGUOUS_QUERIES)
-        selected_text = clean_text(row["input"]["context"].get("source_evidence_span") or candidate_kps[0]["description"])
+        selected_text = clean_text(
+            row["input"]["context"].get("source_evidence_span") or candidate_kps[0]["description"]
+        )
         target = build_target(
             "SAFE",
             "ON_TOPIC",
@@ -722,7 +809,9 @@ def build_ambiguous_samples(seed: int, openqa_rows: list[dict[str, Any]], quota:
                 sample_id=f"ambiguous_contextual_{index:05d}",
                 source="ambiguous_template",
                 split="train" if index % 10 else "validation",
-                input_text=build_input_text(scope, candidate_kps, query, selected_text=selected_text),
+                input_text=build_input_text(
+                    scope, candidate_kps, query, selected_text=selected_text
+                ),
                 target=target,
                 metadata={"route_group": "ON_TOPIC_SHORT_CONTEXTUAL", "has_selected_text": True},
             )
@@ -737,10 +826,20 @@ def validate_samples(samples: list[RouterSample]) -> None:
             raise ValueError(f"duplicate sample_id: {sample.sample_id}")
         seen.add(sample.sample_id)
         target = sample.target
-        if set(target) != {"safety_label", "topic_label", "action", "attack_type", "selected_kp_ids"}:
+        if set(target) != {
+            "safety_label",
+            "topic_label",
+            "action",
+            "attack_type",
+            "selected_kp_ids",
+        }:
             raise ValueError(f"target has invalid keys: {sample.sample_id}")
         if target["safety_label"] in {"UNSAFE", "JAILBREAK"}:
-            if target["topic_label"] != "N_A" or target["action"] != "SAFETY_REFUSE" or target["selected_kp_ids"]:
+            if (
+                target["topic_label"] != "N_A"
+                or target["action"] != "SAFETY_REFUSE"
+                or target["selected_kp_ids"]
+            ):
                 raise ValueError(f"unsafe invariant failed: {sample.sample_id}")
         if "answer_text" in sample.input_text or "### REFERENCE" in sample.input_text:
             raise ValueError(f"answer/reference leaked into input: {sample.sample_id}")
@@ -769,14 +868,20 @@ def write_outputs(samples: list[RouterSample], output_dir: Path) -> dict[str, An
 
     for split in ["train", "validation", "test"]:
         write_jsonl(output_dir / f"{split}.jsonl", rows_by_split.get(split, []))
-    all_rows = [row for split in ["train", "validation", "test"] for row in rows_by_split.get(split, [])]
+    all_rows = [
+        row for split in ["train", "validation", "test"] for row in rows_by_split.get(split, [])
+    ]
     write_jsonl(output_dir / "all.jsonl", all_rows)
     manifest = {
         "dataset_name": "guardrail_router_v1_label_only",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "output_dir": str(output_dir.relative_to(ROOT) if output_dir.is_relative_to(ROOT) else output_dir),
+        "generated_at": datetime.now(UTC).isoformat(),
+        "output_dir": str(
+            output_dir.relative_to(ROOT) if output_dir.is_relative_to(ROOT) else output_dir
+        ),
         "total_samples": len(samples),
-        "counts_by_split": {split: len(rows_by_split.get(split, [])) for split in ["train", "validation", "test"]},
+        "counts_by_split": {
+            split: len(rows_by_split.get(split, [])) for split in ["train", "validation", "test"]
+        },
         "counts_by_source": dict(counts_by_source),
         "counts_by_route_group": dict(counts_by_route_group),
         "counts_by_action": dict(counts_by_action),
@@ -794,7 +899,9 @@ def write_outputs(samples: list[RouterSample], output_dir: Path) -> dict[str, An
             "Unsafe and jailbreak rows force topic_label=N_A, action=SAFETY_REFUSE, selected_kp_ids=[].",
         ],
     }
-    (output_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (output_dir / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     return manifest
 
 

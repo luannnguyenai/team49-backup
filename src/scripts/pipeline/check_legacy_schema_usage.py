@@ -208,7 +208,9 @@ def _should_skip(path: Path, *, roots: tuple[Path, ...], excluded_parts: set[str
     if path.suffix != ".py":
         return True
     try:
-        relative_parts = next(path.relative_to(root).parts for root in roots if path.is_relative_to(root))
+        relative_parts = next(
+            path.relative_to(root).parts for root in roots if path.is_relative_to(root)
+        )
     except StopIteration:
         relative_parts = path.parts
     return bool(set(relative_parts) & excluded_parts)

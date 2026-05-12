@@ -7,8 +7,6 @@ Replan Production E2E API:
     POST /api/replan/assessment/start  Start assessment with exact unit+difficulty filters
 """
 
-import uuid
-
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 

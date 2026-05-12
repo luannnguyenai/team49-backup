@@ -4,8 +4,9 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from src.services.model_registry import DEFAULT_CHAT_MODEL_ID, get_chat_model_option
 
 AgentScope = Literal[
     "current_unit",
@@ -98,8 +99,14 @@ class AgentChatRequest(BaseModel):
     )
     trace_mode: Literal["none", "summary", "full"] = Field(default="summary", alias="traceMode")
     tool_mode: Literal["course", "web_papers"] = Field(default="course", alias="toolMode")
+    chat_model_id: str = Field(default=DEFAULT_CHAT_MODEL_ID, alias="chatModelId")
 
     model_config = ConfigDict(populate_by_name=True)
+
+    @field_validator("chat_model_id")
+    @classmethod
+    def validate_chat_model_id(cls, value: str) -> str:
+        return get_chat_model_option(value).id
 
 
 class AgentAnswer(BaseModel):
@@ -208,14 +215,17 @@ class AgentAction(BaseModel):
     ]
     label: str
     action_id: str | None = Field(default=None, alias="actionId")
-    status: Literal[
-        "proposed",
-        "awaiting_confirmation",
-        "confirmed",
-        "cancelled",
-        "committed",
-        "expired",
-    ] | None = None
+    status: (
+        Literal[
+            "proposed",
+            "awaiting_confirmation",
+            "confirmed",
+            "cancelled",
+            "committed",
+            "expired",
+        ]
+        | None
+    ) = None
     expires_at: datetime | None = Field(default=None, alias="expiresAt")
     learn_href: str | None = None
     workflow_id: str | None = Field(default=None, alias="workflowId")
@@ -224,13 +234,16 @@ class AgentAction(BaseModel):
     default_phase: AssessmentPhase | None = None
     question_budget: int | None = Field(default=None, ge=1, le=70, alias="questionBudget")
     eligible: bool | None = None
-    disabled_reason: Literal[
-        "no_eligible_questions",
-        "unsupported_phase",
-        "out_of_scope",
-        "requires_login",
-        "not_implemented",
-    ] | None = Field(default=None, alias="disabledReason")
+    disabled_reason: (
+        Literal[
+            "no_eligible_questions",
+            "unsupported_phase",
+            "out_of_scope",
+            "requires_login",
+            "not_implemented",
+        ]
+        | None
+    ) = Field(default=None, alias="disabledReason")
     current_plan_id: str | None = Field(default=None, alias="currentPlanId")
     planner_session_id: str | None = Field(default=None, alias="plannerSessionId")
     assessment_session_id: str | None = Field(default=None, alias="assessmentSessionId")
@@ -442,7 +455,9 @@ class StartAssessmentActionRequest(BaseModel):
 
 class RequestReplanActionRequest(BaseModel):
     assessment_session_id: str | None = Field(default=None, alias="assessmentSessionId")
-    source_canonical_unit_ids: list[str] = Field(default_factory=list, alias="sourceCanonicalUnitIds")
+    source_canonical_unit_ids: list[str] = Field(
+        default_factory=list, alias="sourceCanonicalUnitIds"
+    )
     reason: str
     dry_run: bool = Field(default=True, alias="dryRun")
 

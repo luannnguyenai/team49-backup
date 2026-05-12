@@ -14,14 +14,20 @@ import ast
 import json
 import logging
 import uuid
-from dataclasses import dataclass
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import DEFAULT_MODEL, settings
+from src.core.observability import (
+    build_langfuse_metadata,
+    llm_callbacks,
+    propagate_langfuse_attributes,
+    start_langfuse_root_span,
+)
 from src.exceptions import ConflictError, NotFoundError, ValidationError
 from src.models.canonical import ConceptKP, ItemKPMap, QuestionBankItem
 from src.models.content import DifficultyBucket
@@ -41,12 +47,6 @@ from src.services.assessment_strategies import UnitPools
 from src.services.canonical_mastery_service import update_kp_mastery_from_item
 from src.services.mastery_evaluator import classify_mastery
 from src.services.strategy_router import pick_strategy
-from src.core.observability import (
-    build_langfuse_metadata,
-    llm_callbacks,
-    propagate_langfuse_attributes,
-    start_langfuse_root_span,
-)
 
 log = logging.getLogger(__name__)
 
@@ -167,6 +167,7 @@ def _classify_decision(score_pct: float) -> str:
 
 def _canonical_item_to_assessment_question(item: QuestionBankItem):
     from src.schemas.assessment import QuestionForAssessment
+
     choices = list(item.choices or [])
     padded_choices = (choices + ["", "", "", ""])[:4]
     difficulty_bucket = None
@@ -219,9 +220,7 @@ async def start_assessment(
             phase=phase,
         )
         unit_pools[unit_id] = pairs
-        log.info(
-            "assessment_start: unit=%s candidates=%d", unit_id, len(pairs)
-        )
+        log.info("assessment_start: unit=%s candidates=%d", unit_id, len(pairs))
 
     policy = _assessment_budget_policy(assessment_depth, question_budget)
     filtered_unit_pools = _filter_unit_pools_for_depth(unit_pools, policy)
@@ -273,13 +272,9 @@ async def _resolve_canonical_unit_ids(
         return list(dict.fromkeys(str(unit_id) for unit_id in canonical_unit_ids))
 
     if not learning_unit_ids:
-        raise ValidationError(
-            "Assessment requires canonical_unit_ids or learning_unit_ids."
-        )
+        raise ValidationError("Assessment requires canonical_unit_ids or learning_unit_ids.")
 
-    result = await db.execute(
-        select(LearningUnit).where(LearningUnit.id.in_(learning_unit_ids))
-    )
+    result = await db.execute(select(LearningUnit).where(LearningUnit.id.in_(learning_unit_ids)))
     units = result.scalars().all()
     unit_by_id = {unit.id: unit for unit in units if unit.canonical_unit_id}
     missing = [str(unit_id) for unit_id in learning_unit_ids if unit_id not in unit_by_id]
@@ -332,7 +327,9 @@ async def _submit_canonical_assessment(
     if not settings.write_canonical_interactions_enabled:
         raise ValidationError("Canonical assessment submit is not enabled.")
 
-    canonical_item_ids = [str(answer.canonical_item_id) for answer in answers if answer.canonical_item_id]
+    canonical_item_ids = [
+        str(answer.canonical_item_id) for answer in answers if answer.canonical_item_id
+    ]
     if len(canonical_item_ids) != len(set(canonical_item_ids)):
         raise ValidationError("Duplicate canonical_item_id entries in answers.")
 
@@ -345,6 +342,7 @@ async def _submit_canonical_assessment(
         raise ValidationError(f"Unknown canonical item IDs: {missing}")
 
     from sqlalchemy import func
+
     base_global_result = await db.execute(
         select(func.max(Interaction.global_sequence_position)).where(Interaction.user_id == user_id)
     )
@@ -424,7 +422,9 @@ async def _submit_canonical_assessment(
             )
             log.info(
                 "assessment_submit: unit=%s score=%.1f decision=%s",
-                c_unit_id, score_pct, decision,
+                c_unit_id,
+                score_pct,
+                decision,
             )
 
     # Build rows for response (transient objects, not added to DB)
@@ -438,7 +438,8 @@ async def _submit_canonical_assessment(
                 sequence_position=index,
                 global_sequence_position=base_global + index,
                 selected_answer=SelectedAnswer(answer.selected_answer.value),
-                is_correct=int(item.answer_index) == _selected_answer_to_index(answer.selected_answer),
+                is_correct=int(item.answer_index)
+                == _selected_answer_to_index(answer.selected_answer),
                 response_time_ms=answer.response_time_ms,
                 changed_answer=False,
                 hint_used=False,
@@ -486,9 +487,7 @@ async def get_assessment_results(
 
     # Load any user-override decisions from placement_assessment_results
     placement_rows = await PlacementAssessmentRepository(db).get_by_user_id(user_id)
-    placement_overrides = {
-        str(row.topic_unit_id): str(row.decision) for row in placement_rows
-    }
+    placement_overrides = {str(row.topic_unit_id): str(row.decision) for row in placement_rows}
 
     return await _build_canonical_assessment_response(
         db=db,
@@ -527,9 +526,7 @@ def _parse_assessment_ai_summary(raw: str) -> AssessmentAISummaryResponse:
     next_step = payload.get("next_step")
     highlights_payload = payload.get("highlights", [])
     highlights = [
-        item.strip()
-        for item in highlights_payload
-        if isinstance(item, str) and item.strip()
+        item.strip() for item in highlights_payload if isinstance(item, str) and item.strip()
     ][:3]
 
     if not isinstance(summary, str) or not summary.strip():
@@ -684,9 +681,7 @@ async def update_topic_decision(
     await db.flush()
 
     # Load unit title for response
-    unit_result = await db.execute(
-        select(LearningUnit).where(LearningUnit.id == topic_unit_id)
-    )
+    unit_result = await db.execute(select(LearningUnit).where(LearningUnit.id == topic_unit_id))
     unit = unit_result.scalar_one_or_none()
     score_pct = float(row.score_pct)
 
@@ -719,7 +714,9 @@ async def _build_canonical_assessment_response(
         select(LearningUnit).where(LearningUnit.canonical_unit_id.in_(unit_ids))
     )
     unit_by_canonical_id = {
-        str(unit.canonical_unit_id): unit for unit in unit_result.scalars().all() if unit.canonical_unit_id
+        str(unit.canonical_unit_id): unit
+        for unit in unit_result.scalars().all()
+        if unit.canonical_unit_id
     }
 
     wrong_item_ids = [item.item_id for interaction, item in rows if not interaction.is_correct]
@@ -744,7 +741,9 @@ async def _build_canonical_assessment_response(
 
         learning_unit_results.append(
             LearningUnitResult(
-                learning_unit_id=unit.id if unit is not None else uuid.uuid5(uuid.NAMESPACE_URL, unit_id),
+                learning_unit_id=unit.id
+                if unit is not None
+                else uuid.uuid5(uuid.NAMESPACE_URL, unit_id),
                 learning_unit_title=unit.title if unit is not None else unit_id,
                 score_percent=score_percent,
                 mastery_level=mastery,

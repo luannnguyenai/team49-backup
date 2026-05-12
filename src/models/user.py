@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import enum
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Date, DateTime, Enum, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -40,13 +40,13 @@ class User(UUIDPrimaryKeyMixin, Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    available_hours_per_week: Mapped[Optional[float]] = mapped_column(
+    available_hours_per_week: Mapped[float | None] = mapped_column(
         nullable=True, comment="Self-reported hours available per week"
     )
-    target_deadline: Mapped[Optional[date]] = mapped_column(
+    target_deadline: Mapped[date | None] = mapped_column(
         Date, nullable=True, comment="When the user wants to finish the curriculum"
     )
-    preferred_method: Mapped[Optional[PreferredMethod]] = mapped_column(
+    preferred_method: Mapped[PreferredMethod | None] = mapped_column(
         Enum(PreferredMethod, name="preferred_method_enum"),
         nullable=True,
     )
@@ -65,7 +65,7 @@ class User(UUIDPrimaryKeyMixin, Base):
         index=True,
         comment="RBAC role: 'user' (default) or 'admin' (admin dashboard access)",
     )
-    password_changed_at: Mapped[Optional[datetime]] = mapped_column(
+    password_changed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )
@@ -76,24 +76,24 @@ class User(UUIDPrimaryKeyMixin, Base):
     )
 
     # ---- relationships ----
-    sessions: Mapped[list["Session"]] = relationship(  # type: ignore[name-defined]
+    sessions: Mapped[list[Session]] = relationship(  # type: ignore[name-defined]
         "Session", back_populates="user", lazy="select"
     )
-    interactions: Mapped[list["Interaction"]] = relationship(  # type: ignore[name-defined]
+    interactions: Mapped[list[Interaction]] = relationship(  # type: ignore[name-defined]
         "Interaction", back_populates="user", lazy="select"
     )
-    learner_mastery_kp: Mapped[list["LearnerMasteryKP"]] = relationship(  # type: ignore[name-defined]
+    learner_mastery_kp: Mapped[list[LearnerMasteryKP]] = relationship(  # type: ignore[name-defined]
         "LearnerMasteryKP", lazy="select"
     )
-    goal_preferences: Mapped[list["GoalPreference"]] = relationship(  # type: ignore[name-defined]
+    goal_preferences: Mapped[list[GoalPreference]] = relationship(  # type: ignore[name-defined]
         "GoalPreference", lazy="select"
     )
-    waived_units: Mapped[list["WaivedUnit"]] = relationship(  # type: ignore[name-defined]
+    waived_units: Mapped[list[WaivedUnit]] = relationship(  # type: ignore[name-defined]
         "WaivedUnit", lazy="select"
     )
-    plan_histories: Mapped[list["PlanHistory"]] = relationship(  # type: ignore[name-defined]
+    plan_histories: Mapped[list[PlanHistory]] = relationship(  # type: ignore[name-defined]
         "PlanHistory", lazy="select"
     )
-    planner_session_states: Mapped[list["PlannerSessionState"]] = relationship(  # type: ignore[name-defined]
+    planner_session_states: Mapped[list[PlannerSessionState]] = relationship(  # type: ignore[name-defined]
         "PlannerSessionState", lazy="select"
     )

@@ -11,8 +11,7 @@ from src.schemas.agent import (
     PathRequirementsRequest,
     UnitSearchRequest,
 )
-from src.services.agent_evidence_quality import AgentEvidenceQualityService
-from src.services.agent_evidence_quality import EvidenceQualityVerdict
+from src.services.agent_evidence_quality import AgentEvidenceQualityService, EvidenceQualityVerdict
 from src.services.agent_graph_contracts import AgentSlots, ToolResult
 from src.services.agent_search_scope_service import AgentSearchScopeService
 
@@ -66,7 +65,9 @@ class AgentToolNodes:
             await self.search_service.search(
                 UnitSearchRequest(
                     query=query,
-                    scope="global_catalog" if slots.search_scope == "expanded_paths" else "current_path",
+                    scope="global_catalog"
+                    if slots.search_scope == "expanded_paths"
+                    else "current_path",
                     courseIds=course_ids,
                     intent=intent,
                     limit=20,
@@ -131,7 +132,9 @@ class AgentToolNodes:
             )
             return ToolResult(
                 kind="clarification",
-                answer_markdown=self._topic_choice_message(message, slots.raw_topic or search_queries[0]),
+                answer_markdown=self._topic_choice_message(
+                    message, slots.raw_topic or search_queries[0]
+                ),
                 actions=topic_choice_actions,
                 warning=AgentWarning(
                     type="ambiguous_target",
@@ -173,7 +176,11 @@ class AgentToolNodes:
                 },
                 trace=trace,
             )
-        if verdict.label == "weak_match" and slots.search_scope == "current_path" and len(allowed_course_ids) > len(course_ids):
+        if (
+            verdict.label == "weak_match"
+            and slots.search_scope == "current_path"
+            and len(allowed_course_ids) > len(course_ids)
+        ):
             trace = search.trace.model_copy(
                 update={
                     "intent": intent,
@@ -202,9 +209,9 @@ class AgentToolNodes:
                 trace=trace,
             )
         selected_ids = set(verdict.selected_unit_ids)
-        results = [
-            result for result in all_results if result.canonical_unit_id in selected_ids
-        ][:3] or all_results[:3]
+        results = [result for result in all_results if result.canonical_unit_id in selected_ids][
+            :3
+        ] or all_results[:3]
         citations = [
             AgentCitation(
                 canonical_unit_id=result.canonical_unit_id,
@@ -314,9 +321,7 @@ class AgentToolNodes:
                     path_hits = non_current_path_hits
                 if len(path_hits) < 3:
                     allowed_course_ids_for_path = {
-                        citation.course_id
-                        for hits in path_hits.values()
-                        for citation in hits
+                        citation.course_id for hits in path_hits.values() for citation in hits
                     }
                     citations = [
                         citation
@@ -433,9 +438,7 @@ class AgentToolNodes:
     @staticmethod
     def _specific_target_result(all_results, selected_unit_ids: list[str]):
         selected = [
-            result
-            for result in all_results
-            if result.canonical_unit_id in set(selected_unit_ids)
+            result for result in all_results if result.canonical_unit_id in set(selected_unit_ids)
         ]
         if not selected:
             return None
@@ -479,7 +482,10 @@ class AgentToolNodes:
         )
         return bool(
             any(marker in lowered for marker in vietnamese_markers)
-            or any(char in lowered for char in "ăâđêôơưáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ")
+            or any(
+                char in lowered
+                for char in "ăâđêôơưáàảãạấầẩẫậắằẳẵặéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ"
+            )
         )
 
     async def planner_decision(

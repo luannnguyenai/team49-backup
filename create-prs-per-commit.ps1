@@ -1,10 +1,15 @@
 $baseBranch = "main"
-$sourceBranch = "feat-terraform-aws"
+$sourceBranch = "feat-chat-model-selector-health"
 $remote = "origin"
 $progressFile = Join-Path ".git" "pr-cherry-pick-progress.json"
 # Paste list từ git cherry -v vào đây
 $commitLines = @"
-+ a98a7cd305003e2d88179ab2311d42472d0790e2 infra: add aws terraform foundation
++ d5d0f69035dfd0c13164ceea51eeb06db25d8a4a update select model
++ 62ed779d0bcecd47fae760b4c804498c97deb08a update health check in admin
++ fb1ba76157048c7346e91e22d4eea4c398777159 fix agent down time 1
++ 7abf2408efee56eb5475859a13a1300d1f884af3 fix agent down time 2
++ 058a009d11b62a7ec5457c18ded1a0df34682787 fix agent down time 3
++ 0f90733ed64a4539ea90abfb7526bce3cdf62f10 fix agent down time 4
 "@
 
 

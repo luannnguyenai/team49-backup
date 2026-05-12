@@ -14,7 +14,7 @@ Important boundary:
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, DateTime, UniqueConstraint
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from src.models.base import Base
@@ -31,7 +31,9 @@ class Lecture(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     chapters = relationship("Chapter", back_populates="lecture", cascade="all, delete-orphan")
-    transcript_lines = relationship("TranscriptLine", back_populates="lecture", cascade="all, delete-orphan")
+    transcript_lines = relationship(
+        "TranscriptLine", back_populates="lecture", cascade="all, delete-orphan"
+    )
 
 
 class Chapter(Base):
@@ -42,7 +44,7 @@ class Chapter(Base):
     title = Column(String)
     summary = Column(Text)
     start_time = Column(Float)  # seconds
-    end_time = Column(Float)    # seconds
+    end_time = Column(Float)  # seconds
 
     lecture = relationship("Lecture", back_populates="chapters")
 
@@ -76,19 +78,15 @@ class QAHistory(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
-
-
 class LearningProgress(Base):
     __tablename__ = "learning_progress"
 
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(String, index=True, nullable=False)
     lecture_id = Column(String, ForeignKey("lectures.id"), nullable=False)
-    last_timestamp = Column(Float, default=0.0)       # seconds into video
+    last_timestamp = Column(Float, default=0.0)  # seconds into video
     # "unwatched" | "watched" | "quiz_completed"
     checkpoint_state = Column(String, nullable=False, default="unwatched")
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    __table_args__ = (
-        UniqueConstraint("session_id", "lecture_id", name="uq_session_lecture"),
-    )
+    __table_args__ = (UniqueConstraint("session_id", "lecture_id", name="uq_session_lecture"),)

@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const postMock = vi.hoisted(() => vi.fn());
+const getMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/api", () => ({
   api: {
+    get: getMock,
     post: postMock,
   },
 }));
@@ -12,6 +14,7 @@ describe("agent api", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllEnvs();
+    getMock.mockReset();
     postMock.mockReset();
   });
 
@@ -79,6 +82,50 @@ describe("agent api", () => {
       },
       { timeout: AGENT_REQUEST_TIMEOUT_MS },
     );
+  });
+
+  it("passes the selected chat model through chat requests", async () => {
+    const { AGENT_REQUEST_TIMEOUT_MS, agentApi } = await import("@/features/agent/api");
+    postMock.mockResolvedValueOnce({ data: { ok: true } });
+
+    await agentApi.chat({
+      message: "explain CNNs",
+      incomingMessageId: "msg-qwen",
+      traceMode: "summary",
+      chatModelId: "qwen35_4b",
+    });
+
+    expect(postMock).toHaveBeenCalledWith(
+      "/api/agent/chat",
+      {
+        message: "explain CNNs",
+        incomingMessageId: "msg-qwen",
+        traceMode: "summary",
+        chatModelId: "qwen35_4b",
+      },
+      { timeout: AGENT_REQUEST_TIMEOUT_MS },
+    );
+  });
+
+  it("loads chat model availability from the shared safe endpoint", async () => {
+    const { agentApi } = await import("@/features/agent/api");
+    getMock.mockResolvedValueOnce({
+      data: {
+        models: [
+          { id: "default", label: "Default", status: "healthy", available: true },
+          { id: "qwen35_4b", label: "Qwen 3.5 4B", status: "down", available: false },
+        ],
+      },
+    });
+
+    const result = await agentApi.modelAvailability();
+
+    expect(getMock).toHaveBeenCalledWith("/api/chat-models/availability");
+    expect(result.models[1]).toMatchObject({
+      id: "qwen35_4b",
+      status: "down",
+      available: false,
+    });
   });
 
   it("uses an agent-specific timeout for action continuations", async () => {

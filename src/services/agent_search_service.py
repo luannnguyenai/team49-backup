@@ -4,7 +4,12 @@ import re
 from uuid import uuid4
 
 from src.repositories.canonical_content_repo import CanonicalContentRepository
-from src.schemas.agent import RetrievalTrace, UnitSearchRequest, UnitSearchResponse, UnitSearchResult
+from src.schemas.agent import (
+    RetrievalTrace,
+    UnitSearchRequest,
+    UnitSearchResponse,
+    UnitSearchResult,
+)
 from src.services.agent_navigation_service import AgentNavigationService
 from src.services.agent_query_normalizer import normalize_query
 

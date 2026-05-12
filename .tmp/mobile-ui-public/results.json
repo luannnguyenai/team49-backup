@@ -1,0 +1,38 @@
+[
+  {
+    "route": "/",
+    "metrics": {
+      "url": "http://127.0.0.1:3282/",
+      "vw": 390,
+      "docW": 390,
+      "bodyW": 390,
+      "overflowX": 0,
+      "wide": []
+    },
+    "consoleErrors": []
+  },
+  {
+    "route": "/login",
+    "metrics": {
+      "url": "http://127.0.0.1:3282/login",
+      "vw": 390,
+      "docW": 390,
+      "bodyW": 390,
+      "overflowX": 0,
+      "wide": []
+    },
+    "consoleErrors": []
+  },
+  {
+    "route": "/register",
+    "metrics": {
+      "url": "http://127.0.0.1:3282/register",
+      "vw": 390,
+      "docW": 390,
+      "bodyW": 390,
+      "overflowX": 0,
+      "wide": []
+    },
+    "consoleErrors": []
+  }
+]

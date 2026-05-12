@@ -1,12 +1,10 @@
 import logging
 from typing import Any
 
-from sqlalchemy import and_, func, select, text
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import Settings
-from src.models.canonical import ItemCalibration, QuestionBankItem
-from src.models.learning import Interaction
 from src.services.placement.strategies import STRATEGY_REGISTRY, PlacementStrategy
 
 log = logging.getLogger(__name__)
@@ -16,10 +14,16 @@ _CALIBRATION_SUMMARY_CACHE: dict[str, dict[str, Any]] = {}
 _CALIBRATION_SUMMARY_CACHE_TTL = 300  # 5 minutes
 
 # Ensure strategies are registered on import
-from src.services.placement.strategies.legacy_selector import LegacySelectorStrategy  # noqa: F401, E402
-from src.services.placement.strategies.random_uniform import RandomUniformStrategy  # noqa: F401, E402
-from src.services.placement.strategies.spread_by_prior import SpreadByPriorStrategy  # noqa: F401, E402
 from src.services.placement.strategies.irt_adaptive import IRTAdaptiveStrategy  # noqa: F401, E402
+from src.services.placement.strategies.legacy_selector import (
+    LegacySelectorStrategy,  # noqa: F401, E402
+)
+from src.services.placement.strategies.random_uniform import (
+    RandomUniformStrategy,  # noqa: F401, E402
+)
+from src.services.placement.strategies.spread_by_prior import (
+    SpreadByPriorStrategy,  # noqa: F401, E402
+)
 
 
 def get_strategy(
@@ -41,7 +45,9 @@ def get_strategy(
         KeyError if mode not in STRATEGY_REGISTRY.
     """
     if not STRATEGY_REGISTRY:
-        raise RuntimeError("No strategies registered. Import strategies before calling get_strategy.")
+        raise RuntimeError(
+            "No strategies registered. Import strategies before calling get_strategy."
+        )
 
     if mode is None:
         settings = Settings()
@@ -135,7 +141,9 @@ async def _unit_calibration_summary(
 
     summary = {}
     for row in rows:
-        unit_id, total_items, calibrated_items, is_calibrated_ratio, avg_responses, median_se_b = row
+        unit_id, total_items, calibrated_items, is_calibrated_ratio, avg_responses, median_se_b = (
+            row
+        )
         # Check all gates (Commit C: assume no active calibration run yet)
         pass_all_gates = (
             is_calibrated_ratio >= min_calibrated_ratio

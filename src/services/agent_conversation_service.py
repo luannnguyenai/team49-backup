@@ -4,9 +4,9 @@ from uuid import UUID
 
 from src.repositories.agent_conversation_repo import AgentConversationRepository
 from src.schemas.agent import (
-    AgentConversationMutationResponse,
     AgentConversationMemory,
     AgentConversationMessage,
+    AgentConversationMutationResponse,
     AgentConversationSummary,
 )
 
@@ -81,7 +81,9 @@ class AgentConversationService:
             messageCount=row.message_count,
         )
 
-    async def get_messages(self, conversation_id: UUID, user_id: UUID) -> list[AgentConversationMessage]:
+    async def get_messages(
+        self, conversation_id: UUID, user_id: UUID
+    ) -> list[AgentConversationMessage]:
         conversation = await self.repo.get_conversation(conversation_id, user_id)
         if not conversation:
             raise ValueError("conversation_not_found")

@@ -5,7 +5,6 @@ from src.models.content import BloomLevel, CorrectAnswer, DifficultyBucket
 from src.schemas.module_test import QuestionForModuleTest
 from src.schemas.quiz import QuestionForQuiz
 
-
 _CANONICAL_QUESTION_UUID_NAMESPACE = uuid.UUID("6bf5d76f-fab9-48d4-903e-d0fd13a7d767")
 _ANSWER_BY_INDEX = {
     0: CorrectAnswer.A,

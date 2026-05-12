@@ -30,8 +30,10 @@ class DeterministicAgentRouter:
         elif (
             "replan" in text
             or "tính lại lộ trình" in text
-            or "tối ưu" in text and "lộ trình" in text
-            or "optimize" in text and ("path" in text or "plan" in text)
+            or "tối ưu" in text
+            and "lộ trình" in text
+            or "optimize" in text
+            and ("path" in text or "plan" in text)
         ):
             intent = "request_replan"
 
@@ -46,7 +48,9 @@ class DeterministicAgentRouter:
             elif slug == "cs231n":
                 target_path = "computer_vision"
 
-        search_scope = "explicit_path" if target_path and intent != "request_path_switch" else "current_path"
+        search_scope = (
+            "explicit_path" if target_path and intent != "request_path_switch" else "current_path"
+        )
         return AgentRoute(
             intent=intent,
             confidence=0.75 if intent != "clarify" else 0.4,
