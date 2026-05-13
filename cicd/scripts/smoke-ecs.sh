@@ -29,6 +29,29 @@ require_200() {
   echo "Smoke passed: $url"
 }
 
+resolve_grafana_url() {
+  local configured="${NEXT_PUBLIC_GRAFANA_HOST:-}"
+
+  if [ -z "$configured" ]; then
+    : "${PRODUCTION_FRONTEND_URL:?PRODUCTION_FRONTEND_URL is required when NEXT_PUBLIC_GRAFANA_HOST is unset}"
+    printf '%s/grafana\n' "${PRODUCTION_FRONTEND_URL%/}"
+    return
+  fi
+
+  if [[ "$configured" == /* ]]; then
+    : "${PRODUCTION_FRONTEND_URL:?PRODUCTION_FRONTEND_URL is required when NEXT_PUBLIC_GRAFANA_HOST is a relative path}"
+    printf '%s%s\n' "${PRODUCTION_FRONTEND_URL%/}" "$configured"
+    return
+  fi
+
+  if [[ "$configured" == http://* ]] && [[ "${PRODUCTION_FRONTEND_URL:-}" == https://* ]]; then
+    printf '%s/grafana\n' "${PRODUCTION_FRONTEND_URL%/}"
+    return
+  fi
+
+  printf '%s\n' "${configured%/}"
+}
+
 case "$mode" in
   backend)
     : "${PRODUCTION_BACKEND_URL:?PRODUCTION_BACKEND_URL is required}"
@@ -54,8 +77,8 @@ case "$mode" in
     echo "CloudFront smoke passed: $CLOUDFRONT_SMOKE_URL returned $code"
     ;;
   grafana)
-    : "${NEXT_PUBLIC_GRAFANA_HOST:?NEXT_PUBLIC_GRAFANA_HOST is required}"
-    require_200 "${NEXT_PUBLIC_GRAFANA_HOST%/}/api/health"
+    grafana_url="$(resolve_grafana_url)"
+    require_200 "${grafana_url%/}/api/health"
     ;;
   *)
     echo "Unknown smoke mode: $mode" >&2
