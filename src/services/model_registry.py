@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -11,6 +12,11 @@ from src.services.chat_model_factory import build_chat_model_kwargs
 
 DEFAULT_CHAT_MODEL_ID = "default"
 QWEN35_4B_CHAT_MODEL_ID = "qwen35_4b"
+QWEN35_08B_MODEL_ID = "qwen35_08b"
+
+_HEALTH_CACHE_TTL_SECONDS = 60.0
+_health_cache: dict[str, tuple[float, dict]] = {}
+_health_cache_lock = threading.Lock()
 
 
 class ChatModelUnavailableError(Exception):
@@ -38,6 +44,7 @@ class ChatModelOption:
     base_url: str | None = None
     api_key: str | None = None
     is_default: bool = False
+    user_selectable: bool = True
 
     def public_dict(self) -> dict[str, str | bool | None]:
         return {
@@ -50,8 +57,8 @@ class ChatModelOption:
         }
 
 
-def list_chat_model_options() -> list[ChatModelOption]:
-    return [
+def list_chat_model_options(*, include_non_selectable: bool = False) -> list[ChatModelOption]:
+    options: list[ChatModelOption] = [
         ChatModelOption(
             id=DEFAULT_CHAT_MODEL_ID,
             label="Default",
@@ -68,11 +75,31 @@ def list_chat_model_options() -> list[ChatModelOption]:
             api_key=settings.qwen35_4b_api_key or "EMPTY",
         ),
     ]
+    if include_non_selectable:
+        guardrail_base_url = settings.guardrail_router_base_url.strip().rstrip("/")
+        guardrail_api_key = settings.guardrail_router_api_key or "EMPTY"
+        if guardrail_base_url:
+            options.append(
+                ChatModelOption(
+                    id=QWEN35_08B_MODEL_ID,
+                    label="Qwen 3.5 0.8B (Guardrail)",
+                    provider="openai",
+                    model=settings.guardrail_router_model,
+                    base_url=guardrail_base_url,
+                    api_key=guardrail_api_key,
+                    user_selectable=False,
+                )
+            )
+    return options
+
+
+def list_user_selectable_model_options() -> list[ChatModelOption]:
+    return [opt for opt in list_chat_model_options() if opt.user_selectable]
 
 
 def get_chat_model_option(model_id: str | None) -> ChatModelOption:
     normalized = (model_id or DEFAULT_CHAT_MODEL_ID).strip() or DEFAULT_CHAT_MODEL_ID
-    for option in list_chat_model_options():
+    for option in list_chat_model_options(include_non_selectable=True):
         if option.id == normalized:
             return option
     raise ValueError(f"unsupported_chat_model:{normalized}")
@@ -132,6 +159,7 @@ def _health_payload(
             "latency_ms": latency_ms,
             "checked_at": datetime.now(UTC).isoformat(),
             "error": error,
+            "user_selectable": option.user_selectable,
         }
     )
     return payload
@@ -204,7 +232,7 @@ async def check_chat_model_health(
 async def check_all_chat_model_health(*, timeout_s: float | None = None, client=None) -> list[dict]:
     return [
         await check_chat_model_health(option.id, timeout_s=timeout_s, client=client)
-        for option in list_chat_model_options()
+        for option in list_chat_model_options(include_non_selectable=True)
     ]
 
 
@@ -216,6 +244,7 @@ def _availability_payload(health: dict) -> dict:
         "status": status,
         "available": status != "down",
         "checked_at": health.get("checked_at"),
+        "user_selectable": health.get("user_selectable", True),
     }
 
 
@@ -228,6 +257,33 @@ async def check_all_chat_model_availability(
     ]
 
 
+def _cached_health(model_id: str) -> dict | None:
+    now = time.monotonic()
+    with _health_cache_lock:
+        entry = _health_cache.get(model_id)
+        if entry is None:
+            return None
+        cached_at, cached_health = entry
+        if now - cached_at > _HEALTH_CACHE_TTL_SECONDS:
+            del _health_cache[model_id]
+            return None
+        return cached_health
+
+
+def _store_cached_health(model_id: str, health: dict) -> None:
+    with _health_cache_lock:
+        _health_cache[model_id] = (time.monotonic(), health)
+
+
+async def _check_health_cached(model_id: str) -> dict:
+    cached = _cached_health(model_id)
+    if cached is not None:
+        return cached
+    health = await check_chat_model_health(model_id)
+    _store_cached_health(model_id, health)
+    return health
+
+
 async def ensure_chat_model_available(
     model_id: str | None,
     *,
@@ -235,11 +291,22 @@ async def ensure_chat_model_available(
     client=None,
 ) -> ChatModelOption:
     option = get_chat_model_option(model_id)
-    health = await check_chat_model_health(option.id, timeout_s=timeout_s, client=client)
-    if health.get("status") == "down":
-        raise ChatModelUnavailableError(
-            model_id=option.id,
-            label=option.label,
-            status=str(health.get("status") or "down"),
-        )
-    return option
+    health = await _check_health_cached(option.id)
+    if health.get("status") != "down":
+        return option
+
+    tried = {option.id}
+    for fallback_option in list_chat_model_options(include_non_selectable=False):
+        if fallback_option.id in tried:
+            continue
+        if not fallback_option.user_selectable:
+            continue
+        fallback_health = await _check_health_cached(fallback_option.id)
+        if fallback_health.get("status") != "down":
+            return fallback_option
+
+    raise ChatModelUnavailableError(
+        model_id=option.id,
+        label=option.label,
+        status=str(health.get("status") or "down"),
+    )

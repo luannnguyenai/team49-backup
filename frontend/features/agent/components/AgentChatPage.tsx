@@ -214,9 +214,9 @@ function buildAgentClientErrorMessage(
 
 const QUICK_PROMPTS = [
   "Where should I review CNNs?",
-  "What should I learn next?",
-  "Can I skip the units I already know?",
-  "Which DL parts are required for NLP?",
+  "Show me the prerequisite chain for Mask R-CNN",
+  "Send me replan link",
+  "I wanna switch to another path",
 ];
 
 const COPILOT_BENEFITS = ["Path-aware", "Source-backed", "Actionable next steps"];
@@ -534,13 +534,13 @@ function PrerequisitePath({
     path?.nodes && path.nodes.length > 0
       ? path.nodes
       : getActionCanonicalIds(action).map(
-          (unitId): AgentPrerequisitePathNode => ({
-            canonicalUnitId: unitId,
-            unitName: unitId,
-            role: "prerequisite",
-            status: "needs_review",
-          }),
-        );
+        (unitId): AgentPrerequisitePathNode => ({
+          canonicalUnitId: unitId,
+          unitName: unitId,
+          role: "prerequisite",
+          status: "needs_review",
+        }),
+      );
 
   if (nodes.length === 0) return null;
   return (
@@ -1531,7 +1531,7 @@ function EmptyState({ onPrompt }: { onPrompt: (prompt: string) => void }) {
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl hero-gradient text-white shadow-brand-soft">
           <Bot className="h-10 w-10" />
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight text-text-strong">AI Learning Copilot</h1>
+        <h1 className="font-serif text-[36px] font-medium tracking-[-0.01em] text-text-strong">AI Learning Copilot</h1>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-text-body">
           Get grounded help from your current learning path. Ask about prerequisites, weak areas, or the next best step.
         </p>
@@ -1586,115 +1586,114 @@ function Composer({
   };
 
   return (
-    <div className="border-t border-border-subtle bg-white/80 p-4 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 lg:flex-row lg:items-start">
-        <div
-          className="flex shrink-0 flex-wrap items-center gap-2 lg:w-60 lg:flex-col lg:items-stretch"
-          data-testid="agent-tool-mode-selector"
-        >
-          {[
-            { value: "course" as const, label: "Course", icon: BookOpen },
-            { value: "web_papers" as const, label: "Search Web & Papers", icon: Search },
-          ].map((mode) => {
-            const Icon = mode.icon;
-            const isActive = toolMode === mode.value;
-            return (
-              <button
-                key={mode.value}
-                type="button"
-                disabled={disabled}
-                onClick={() => onToolModeChange(mode.value)}
-                className={cn(
-                  "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-semibold transition disabled:opacity-60 lg:justify-start",
-                  isActive
-                    ? "border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
-                    : "border-border-subtle bg-surface-card text-text-muted hover:bg-surface-page hover:text-text-strong",
-                )}
-                aria-pressed={isActive}
-              >
-                <Icon className="h-4 w-4" />
-                {mode.label}
-              </button>
-            );
-          })}
-          <div
-            className="mt-1 flex flex-wrap items-center gap-2 lg:flex-col lg:items-stretch"
-            data-testid="agent-chat-model-selector"
-          >
-            {CHAT_MODEL_OPTIONS.map((option) => {
-              const availability = getChatModelAvailability(chatModelAvailability, option.id);
-              const isActive = chatModelId === option.id;
-              const isUnavailable = !availability.available;
-              const statusLabel = isUnavailable ? availability.status : null;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  disabled={disabled || isUnavailable}
-                  onClick={() => onChatModelChange(option.id)}
-                  title={isUnavailable ? `${option.label} is ${availability.status}` : option.label}
-                  className={cn(
-                    "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-semibold transition disabled:opacity-60 lg:justify-start",
-                    isActive
-                      ? "border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
-                      : "border-border-subtle bg-surface-card text-text-muted hover:bg-surface-page hover:text-text-strong",
-                  )}
-                  aria-pressed={isActive}
-                >
-                  <Bot className="h-4 w-4" />
-                  <span>{option.label}</span>
-                  {statusLabel ? (
-                    <span className="rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-rose-700 dark:text-rose-300">
-                      {statusLabel}
-                    </span>
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
+    <div className="border-t border-border-subtle bg-surface-page/80 p-4 backdrop-blur">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+          {QUICK_PROMPTS.map((prompt) => (
+            <button
+              key={prompt}
+              type="button"
+              disabled={disabled}
+              onClick={() => onSend(prompt)}
+              className="shrink-0 rounded-full border border-border-subtle bg-surface-card px-3 py-1.5 text-[11px] font-semibold text-text-muted transition hover:border-primary-200 hover:bg-surface-accent-soft hover:text-primary-700 disabled:opacity-60"
+            >
+              {prompt}
+            </button>
+          ))}
         </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-            {QUICK_PROMPTS.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                disabled={disabled}
-                onClick={() => onSend(prompt)}
-                className="btn-secondary shrink-0 px-3 py-2 text-xs disabled:opacity-60"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-          <form onSubmit={send} className="relative flex items-end">
+        <div className="overflow-hidden rounded-2xl border border-border-subtle bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+          <form onSubmit={send}>
             <label htmlFor="agent-message" className="sr-only">
               Message AI Assistant
             </label>
-            <div className="relative flex w-full flex-1 items-center">
-              <textarea
-                id="agent-message"
-                value={text}
-                onChange={(event) => setText(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && !event.shiftKey) {
-                    event.preventDefault();
-                    send(event);
-                  }
-                }}
-                placeholder="Ask about your learning path..."
-                rows={1}
-                className="input-base max-h-32 min-h-[52px] resize-none rounded-2xl py-3 pl-4 pr-14 text-[15px] leading-relaxed"
-              />
-              <button
-                type="submit"
-                disabled={disabled || !text.trim()}
-                className="btn-primary absolute right-1.5 z-10 h-10 w-10 p-0 disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Send message"
-              >
-                <Send className="h-[18px] w-[18px]" />
-              </button>
+            <textarea
+              id="agent-message"
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  send(event);
+                }
+              }}
+              placeholder="Ask about your learning path..."
+              rows={1}
+              className="w-full resize-none bg-transparent px-4 pt-3.5 pb-2 text-[15px] leading-relaxed text-text-strong outline-none placeholder:text-text-muted min-h-[52px] max-h-[200px]"
+            />
+            <div className="flex items-center gap-2 border-t border-border-subtle/35 px-3 py-2">
+              <div className="flex items-center gap-1.5" data-testid="agent-tool-mode-selector">
+                {[
+                  { value: "course" as const, label: "Course", icon: BookOpen },
+                  { value: "web_papers" as const, label: "Search", icon: Search },
+                ].map((mode) => {
+                  const Icon = mode.icon;
+                  const isActive = toolMode === mode.value;
+                  return (
+                    <button
+                      key={mode.value}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => onToolModeChange(mode.value)}
+                      className={cn(
+                        "inline-flex h-[28px] items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium transition disabled:opacity-60",
+                        isActive
+                          ? "border border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                          : "text-text-muted hover:text-text-strong",
+                      )}
+                      aria-pressed={isActive}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      <span>{mode.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="h-3.5 w-px bg-border-subtle/30" />
+              <div className="flex items-center gap-1.5" data-testid="agent-chat-model-selector">
+                {CHAT_MODEL_OPTIONS.map((option) => {
+                  const availability = getChatModelAvailability(chatModelAvailability, option.id);
+                  const isActive = chatModelId === option.id;
+                  const isUnavailable = !availability.available;
+                  const statusLabel = isUnavailable ? availability.status : null;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      disabled={disabled || isUnavailable}
+                      onClick={() => onChatModelChange(option.id)}
+                      title={isUnavailable ? `${option.label} is ${availability.status}` : option.label}
+                      className={cn(
+                        "inline-flex h-[28px] max-w-[150px] items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium transition disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-[210px]",
+                        isActive
+                          ? "border border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                          : "border border-border-subtle/40 text-text-muted hover:border-border-subtle hover:text-text-strong",
+                      )}
+                      aria-pressed={isActive}
+                    >
+                      <Bot className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{option.label}</span>
+                      {statusLabel ? (
+                        <span className="shrink-0 rounded-full bg-rose-500/10 px-1 py-px text-[9px] uppercase tracking-wide text-rose-700 dark:text-rose-300">
+                          {statusLabel}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="ml-auto">
+                <button
+                  type="submit"
+                  disabled={disabled || !text.trim()}
+                  className={cn(
+                    "flex h-[29px] w-[29px] items-center justify-center rounded-full p-0 text-white transition disabled:cursor-not-allowed disabled:opacity-25 disabled:shadow-none",
+                    "bg-primary-600 shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.22)]",
+                  )}
+                  aria-label="Send message"
+                >
+                  <Send className="h-[15px] w-[15px]" strokeWidth={2.5} />
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -1844,7 +1843,7 @@ export default function AgentChatPage() {
       setIsResizingSidebar(false);
       try {
         window.localStorage.setItem("agent.sidebarWidth", String(sidebarWidth));
-      } catch {}
+      } catch { }
     };
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
@@ -2160,7 +2159,7 @@ export default function AgentChatPage() {
               setSidebarWidth(SIDEBAR_DEFAULT);
               try {
                 window.localStorage.setItem("agent.sidebarWidth", String(SIDEBAR_DEFAULT));
-              } catch {}
+              } catch { }
             }}
             className={cn(
               "group absolute top-0 -right-1 z-10 flex h-full w-2 cursor-col-resize items-center justify-center",
@@ -2219,7 +2218,7 @@ export default function AgentChatPage() {
           </div>
         </header>
 
-        <main ref={scrollRef} className="relative flex-1 overflow-y-auto">
+        <main ref={scrollRef} className="relative flex-1 overflow-y-auto" style={{ maskImage: "linear-gradient(to bottom, transparent 0px, #000 32px, #000 calc(100% - 40px), transparent 100%)" }}>
           <div className="pointer-events-none absolute inset-0 opacity-[0.035]" style={{ backgroundImage: "radial-gradient(circle, var(--text-strong) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
           <div className="relative mx-auto max-w-4xl space-y-6 px-4 py-8">
             {error ? (

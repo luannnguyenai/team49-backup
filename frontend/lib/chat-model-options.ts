@@ -6,12 +6,13 @@ export const CHAT_MODEL_OPTIONS: Array<{ id: ChatModelId; label: string }> = [
 ];
 
 export type ChatModelAvailability = {
-  id: ChatModelId;
+  id: string;
   label: string;
   status: string;
   available: boolean;
   checkedAt?: string | null;
   checked_at?: string | null;
+  user_selectable?: boolean;
 };
 
 export type ChatModelAvailabilityResponse = {
@@ -66,7 +67,9 @@ export function normalizeChatModelAvailability(
         },
       ]),
   );
-  return CHAT_MODEL_OPTIONS.map((option) => byId.get(option.id) ?? { ...option, status: "unknown", available: true });
+  const selectable = CHAT_MODEL_OPTIONS.map((option) => byId.get(option.id) ?? { ...option, status: "unknown", available: true });
+  const nonSelectable = models.filter((model) => !isChatModelId(model?.id) && model.user_selectable === false);
+  return [...selectable, ...nonSelectable];
 }
 
 export function getChatModelAvailability(
