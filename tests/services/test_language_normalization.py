@@ -19,6 +19,7 @@ class FakeTranslator:
     ("text", "expected_language"),
     [
         ("Giải thích attention mechanism trong neural network.", "vi"),
+        ("Tìm attention", "vi"),
         ("Explain attention mechanisms in neural networks.", "en"),
     ],
 )
