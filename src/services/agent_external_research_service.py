@@ -577,40 +577,8 @@ class AgentExternalResearchService:
         rag_respond = getattr(responder, "rag_respond", None)
         if rag_respond is None:
             return None
-        observation = {
-            "tool": "search_web_papers",
-            "success": True,
-            "evidence_status": "grounded",
-            "result": {
-                "kind": "find_content",
-                "external_sources": [
-                    {
-                        "source_index": index,
-                        "title": document.title,
-                        "source": document.source,
-                        "url": document.url,
-                        "snippet": self._shorten(document.snippet, limit=900),
-                    }
-                    for index, document in enumerate(documents[:6], start=1)
-                ],
-                "citations": [citation.model_dump(mode="json") for citation in citations],
-            },
-        }
-        base_thought = {
-            "user_goal": message,
-            "evidence_need": "external_web_and_papers",
-            "tool_plan": ["search_web_or_papers", "consolidate_sources", "synthesize_answer"],
-            "answer_requirements": (
-                "Produce a complete user-facing answer before the backend appends sources. "
-                "Prefer 2-4 short paragraphs or 3-5 complete bullets. Do not use a numbered "
-                "section heading unless the answer contains more than one numbered section. "
-                "When a claim comes from an external source, cite it with bracketed source "
-                "numbers like [1] or [2]. Use only citation numbers that appear in the provided "
-                "citations list and match source_index exactly. Every answer using external "
-                "sources must include at least one inline citation marker in [N] format. "
-                "Do not write raw URLs or a Sources section."
-            ),
-        }
+        observation = self._build_external_observation(documents, citations)
+        base_thought = self._build_external_thought(message)
         final = rag_respond(
             message=message,
             thought=base_thought,
@@ -641,6 +609,185 @@ class AgentExternalResearchService:
         if not answer:
             return None
         return answer
+
+    def _synthesize_answer_stream(
+        self,
+        *,
+        message: str,
+        documents: list[ExternalResearchDocument],
+        citations: list[AgentCitation],
+        recent_messages: list[dict],
+    ):
+        from collections.abc import Generator
+
+        responder = self.responder
+        rag_respond_stream = getattr(responder, "rag_respond_stream", None)
+        if rag_respond_stream is None:
+            return None
+        observation = self._build_external_observation(documents, citations)
+        base_thought = self._build_external_thought(message)
+
+        def _generate() -> Generator[str, None, None]:
+            for token in rag_respond_stream(
+                message=message,
+                thought=base_thought,
+                observations=[observation],
+                route_context=None,
+                recent_messages=recent_messages,
+            ):
+                yield token
+
+        return _generate()
+
+    def _build_external_observation(
+        self,
+        documents: list[ExternalResearchDocument],
+        citations: list[AgentCitation],
+    ) -> dict:
+        return {
+            "tool": "search_web_papers",
+            "success": True,
+            "evidence_status": "grounded",
+            "result": {
+                "kind": "find_content",
+                "external_sources": [
+                    {
+                        "source_index": index,
+                        "title": document.title,
+                        "source": document.source,
+                        "url": document.url,
+                        "snippet": self._shorten(document.snippet, limit=900),
+                    }
+                    for index, document in enumerate(documents[:6], start=1)
+                ],
+                "citations": [citation.model_dump(mode="json") for citation in citations],
+            },
+        }
+
+    @staticmethod
+    def _build_external_thought(message: str) -> dict:
+        return {
+            "user_goal": message,
+            "evidence_need": "external_web_and_papers",
+            "tool_plan": ["search_web_or_papers", "consolidate_sources", "synthesize_answer"],
+            "answer_requirements": (
+                "Produce a complete user-facing answer before the backend appends sources. "
+                "Prefer 2-4 short paragraphs or 3-5 complete bullets. Do not use a numbered "
+                "section heading unless the answer contains more than one numbered section. "
+                "When a claim comes from an external source, cite it with bracketed source "
+                "numbers like [1] or [2]. Use only citation numbers that appear in the provided "
+                "citations list and match source_index exactly. Every answer using external "
+                "sources must include at least one inline citation marker in [N] format. "
+                "Do not write raw URLs or a Sources section."
+            ),
+        }
+
+    async def answer_stream(
+        self, *, message: str, recent_messages: list[dict] | None = None
+    ):
+        import json as _json
+        from collections.abc import AsyncGenerator
+
+        async def _generate() -> AsyncGenerator[str, None]:
+            plan = self._plan_search(message)
+
+            yield _json.dumps({"status": "Searching web and papers"}) + "\n"
+            documents = await self._act(plan)
+            observed = self._observe(message, documents)
+
+            pipeline = ["plan", "search", "consolidate", "respond"]
+            if not documents:
+                result = ToolResult(
+                    kind="find_content",
+                    answer_markdown="I could not find reliable web or paper sources for that request.",
+                    citations=[],
+                    fallback=AgentFallback(
+                        reason="no_retrieval_result",
+                        message="Web and paper search returned no usable sources.",
+                    ),
+                    requires_evidence=True,
+                    metadata={
+                        "tool_mode": "web_papers",
+                        "pipeline": pipeline,
+                        "selected_tools": list(plan.tools),
+                    },
+                )
+                yield _json.dumps({"done": result.model_dump(mode="json")}) + "\n"
+                return
+
+            citations = self._citations(documents)
+            yield _json.dumps({"status": "Composing answer"}) + "\n"
+
+            stream = self._synthesize_answer_stream(
+                message=message,
+                documents=documents,
+                citations=citations,
+                recent_messages=recent_messages or [],
+            )
+
+            answer = ""
+            if stream is not None:
+                accumulated: list[str] = []
+                for token in stream:
+                    accumulated.append(token)
+                    yield _json.dumps({"chunk": token}) + "\n"
+                answer = "".join(accumulated).strip()
+            else:
+                answer = self._synthesize_answer(
+                    message=message,
+                    documents=documents,
+                    citations=citations,
+                    recent_messages=recent_messages or [],
+                ) or ""
+
+            if answer:
+                answer = self._with_numeric_source_links(answer, citations)
+                result = ToolResult(
+                    kind="find_content",
+                    answer_markdown=answer,
+                    citations=citations,
+                    requires_evidence=False,
+                    metadata={
+                        "tool_mode": "web_papers",
+                        "answer_confidence": "grounded",
+                        "pipeline": pipeline,
+                        "selected_tools": list(plan.tools),
+                        "external_source_count": len(documents),
+                        "response_synthesized": stream is not None,
+                    },
+                )
+            else:
+                source_lines = [
+                    f"{index}. **{document.title}** ({'paper' if document.source == 'paper' else 'web'}): "
+                    f"{self._shorten(document.snippet)}"
+                    for index, document in enumerate(documents[:4], start=1)
+                ]
+                result = ToolResult(
+                    kind="find_content",
+                    answer_markdown=self._with_numeric_source_links(
+                        (
+                            f"I searched web and paper sources for: **{message.strip()}**\n\n"
+                            "Most relevant evidence:\n"
+                            + "\n".join(source_lines)
+                            + "\n\nUse the linked sources below to inspect the original material before relying on it."
+                        ),
+                        citations,
+                    ),
+                    citations=citations,
+                    requires_evidence=False,
+                    metadata={
+                        "tool_mode": "web_papers",
+                        "answer_confidence": "grounded",
+                        "pipeline": pipeline,
+                        "selected_tools": list(plan.tools),
+                        "external_source_count": len(documents),
+                        "response_synthesized": False,
+                    },
+                )
+
+            yield _json.dumps({"done": result.model_dump(mode="json")}) + "\n"
+
+        return _generate()
 
     def _looks_like_incomplete_synthesis(self, answer: str) -> bool:
         cleaned = re.sub(r"\s*\[\^[^\]]+\]", "", answer).strip()
