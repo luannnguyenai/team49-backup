@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import {
   AlertTriangle,
   ArrowRight,
+  ArrowUp,
   BarChart3,
   BookOpen,
   Bot,
@@ -20,7 +21,6 @@ import {
   Loader2,
   Map,
   Menu,
-  MessageSquare,
   MoreVertical,
   PanelLeftClose,
   PanelLeftOpen,
@@ -28,8 +28,8 @@ import {
   Plus,
   RotateCcw,
   Search,
-  Send,
   Sparkles,
+  Square,
   Target,
   Trash2,
   User,
@@ -87,6 +87,10 @@ import {
   getUnitContextUnitName,
   getUpdatedAt,
   getWorkflowId,
+  isStreamChunk,
+  isStreamDone,
+  isStreamStatus,
+  isStreamThought,
   type AgentAction,
   type AgentPrerequisitePathNode,
   type AgentAssessmentWorkflowResponse,
@@ -99,6 +103,15 @@ import {
   type AgentWarning,
   type AssessmentProposal,
 } from "@/features/agent/api";
+import {
+  applyAgentActivityStatus,
+  applyAgentActivityThought,
+  completeAgentActivity,
+  createAgentActivity,
+  getAgentActivityElapsedMs,
+  getAgentActivityHeader,
+  type AgentActivitySnapshot,
+} from "@/features/agent/lib/activity";
 import { learningPathApi } from "@/features/learning-path/api";
 import { getStatusLabel } from "@/features/learning-path/lib/status";
 import { writeStartedCanonicalAssessment } from "@/lib/canonical-assessment-session";
@@ -117,6 +130,7 @@ type UiMessage = {
   fallback?: AgentChatResponse["fallback"];
   retryMessage?: string;
   retryIncomingMessageId?: string;
+  activity?: AgentActivitySnapshot;
 };
 
 function createIncomingMessageId() {
@@ -215,39 +229,11 @@ function buildAgentClientErrorMessage(
 const QUICK_PROMPTS = [
   "Where should I review CNNs?",
   "Show me the prerequisite chain for Mask R-CNN",
-  "Send me replan link",
-  "I wanna switch to another path",
+  "I want to optimize my learning path",
+  "Can I switch to another path?",
 ];
 
 const COPILOT_BENEFITS = ["Path-aware", "Source-backed", "Actionable next steps"];
-
-const TURN_PROGRESS_STEPS = [
-  {
-    label: "Preparing request",
-    detail: "Securing the chat context before the model starts.",
-    icon: Clock,
-  },
-  {
-    label: "Routing learning intent",
-    detail: "Classifying whether this needs path search, source reading, or an action.",
-    icon: ArrowRight,
-  },
-  {
-    label: "Searching current path",
-    detail: "Prioritizing units from your active learning path.",
-    icon: Search,
-  },
-  {
-    label: "Reading source evidence",
-    detail: "Checking course material before drafting the answer.",
-    icon: BookOpen,
-  },
-  {
-    label: "Composing grounded answer",
-    detail: "Writing the response with citations and next-step actions.",
-    icon: MessageSquare,
-  },
-];
 
 function formatDateLabel(value: string) {
   if (!value) return "";
@@ -336,6 +322,21 @@ function isExternalCitation(citation: AgentCitation) {
   );
 }
 
+function getCitationPathTags(citation: AgentCitation) {
+  const courseId = getCitationCourseId(citation).toLowerCase();
+  if (courseId === "cs230") return ["CV", "NLP"];
+  if (courseId === "cs231n") return ["CV"];
+  if (courseId === "cs224n") return ["NLP"];
+  return [];
+}
+
+function getCitationPathTagClass(tag: string) {
+  if (tag === "CV") {
+    return "border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200";
+  }
+  return "border-sky-200 bg-sky-100 text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-200";
+}
+
 function CitationCard({
   citation,
   isSelected,
@@ -345,6 +346,7 @@ function CitationCard({
   isSelected: boolean;
   onSelect: (citation: AgentCitation) => void;
 }) {
+  const pathTags = getCitationPathTags(citation);
   return (
     <button
       type="button"
@@ -361,6 +363,17 @@ function CitationCard({
             <span className="rounded-md bg-surface-accent-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-700 dark:text-primary-300">
               {getCitationCourseId(citation)}
             </span>
+            {pathTags.map((pathTag) => (
+              <span
+                key={pathTag}
+                className={cn(
+                  "rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase",
+                  getCitationPathTagClass(pathTag),
+                )}
+              >
+                {pathTag}
+              </span>
+            ))}
           </div>
           <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-text-strong group-hover:text-primary-700 dark:group-hover:text-primary-300">
             {getCitationUnitName(citation)}
@@ -1244,7 +1257,8 @@ function ChatMessageItem({
           <Bot className="h-5 w-5" />
         </div>
       ) : null}
-      <div className={cn("max-w-[92%] md:max-w-[78%]", isUser && "order-first")}>
+      <div className={cn("max-w-[92%] md:max-w-[78%]", !isUser && "space-y-3", isUser && "order-first")}>
+        {!isUser && message.activity ? <AgentActivityCard activity={message.activity} /> : null}
         <div
           className={cn(
             "rounded-3xl px-4 py-3 text-[15px] leading-7 shadow-sm",
@@ -1562,6 +1576,8 @@ function EmptyState({ onPrompt }: { onPrompt: (prompt: string) => void }) {
 function Composer({
   onSend,
   disabled,
+  isStreaming,
+  onStop,
   toolMode,
   onToolModeChange,
   chatModelId,
@@ -1570,6 +1586,8 @@ function Composer({
 }: {
   onSend: (message: string) => void;
   disabled: boolean;
+  isStreaming: boolean;
+  onStop: () => void;
   toolMode: AgentToolMode;
   onToolModeChange: (mode: AgentToolMode) => void;
   chatModelId: ChatModelId;
@@ -1682,17 +1700,28 @@ function Composer({
                 })}
               </div>
               <div className="ml-auto">
-                <button
-                  type="submit"
-                  disabled={disabled || !text.trim()}
-                  className={cn(
-                    "flex h-[29px] w-[29px] items-center justify-center rounded-full p-0 text-white transition disabled:cursor-not-allowed disabled:opacity-25 disabled:shadow-none",
-                    "bg-primary-600 shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.22)]",
-                  )}
-                  aria-label="Send message"
-                >
-                  <Send className="h-[15px] w-[15px]" strokeWidth={2.5} />
-                </button>
+                {isStreaming ? (
+                  <button
+                    type="button"
+                    onClick={onStop}
+                    className="flex h-[29px] w-[29px] items-center justify-center rounded-full border border-border-subtle bg-surface-card p-0 text-text-muted transition hover:bg-surface-page hover:text-text-strong"
+                    aria-label="Stop generating"
+                  >
+                    <Square className="h-[12px] w-[12px]" fill="currentColor" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={disabled || !text.trim()}
+                    className={cn(
+                      "flex h-[29px] w-[29px] items-center justify-center rounded-full p-0 text-white transition disabled:cursor-not-allowed disabled:opacity-25 disabled:shadow-none",
+                      "bg-primary-600 shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.22)]",
+                    )}
+                    aria-label="Send message"
+                  >
+                    <ArrowUp className="h-[15px] w-[15px]" strokeWidth={2.5} />
+                  </button>
+                )}
               </div>
             </div>
           </form>
@@ -1702,64 +1731,93 @@ function Composer({
   );
 }
 
-function TurnProgress({ stepIndex }: { stepIndex: number }) {
+function getCurrentActivityLine(activity: AgentActivitySnapshot) {
+  const step = activity.steps[activity.steps.length - 1];
+  if (!step) return "Preparing request";
+  return step.detail ? `${step.title} · ${step.detail}` : step.title;
+}
+
+function AgentActivityCard({ activity }: { activity: AgentActivitySnapshot }) {
+  const [now, setNow] = useState(Date.now());
   const [isExpanded, setIsExpanded] = useState(false);
-  const activeIndex = Math.min(stepIndex, TURN_PROGRESS_STEPS.length - 1);
-  const activeStep = TURN_PROGRESS_STEPS[activeIndex];
-  const ActiveIcon = activeStep.icon;
+  const completed = activity.completedAt !== undefined;
+  const elapsedMs = getAgentActivityElapsedMs(activity, now);
+  const header = getAgentActivityHeader({ elapsedMs, completed });
+  const currentLine = getCurrentActivityLine(activity);
+
+  useEffect(() => {
+    if (activity.completedAt !== undefined || typeof window === "undefined") return;
+    const intervalId = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(intervalId);
+  }, [activity.completedAt]);
+
+  useEffect(() => {
+    if (activity.completedAt !== undefined) {
+      setIsExpanded(false);
+    }
+  }, [activity.completedAt]);
 
   return (
-    <div className="flex gap-3">
-      <div className="hero-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white">
+    <div className="w-full max-w-xl rounded-2xl border border-border-subtle/70 bg-surface-card/55 px-3 py-2.5 text-text-muted shadow-sm backdrop-blur-sm">
+      <button
+        type="button"
+        onClick={() => setIsExpanded((current) => !current)}
+        className="flex w-full items-center justify-between gap-3 text-left"
+        aria-expanded={isExpanded}
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span
+            className={cn(
+              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border-subtle bg-surface-page text-primary-700",
+              !completed && "border-primary-200 text-primary-700 dark:text-primary-300",
+            )}
+          >
+            {completed ? <Check className="h-3.5 w-3.5" /> : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-text-body">{header}</span>
+            {!completed ? <span className="mt-0.5 block truncate text-xs text-text-muted">{currentLine}</span> : null}
+          </span>
+        </span>
+        <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", isExpanded && "rotate-180")} />
+      </button>
+
+      {isExpanded ? (
+        <div className="mt-3 border-l border-border-subtle pl-4">
+          <div className="space-y-3">
+            {activity.steps.map((step) => (
+              <div key={step.id} className="relative">
+                <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-text-muted" />
+                <p className="text-sm font-semibold text-text-body">{step.title}</p>
+                {step.detail ? <p className="mt-0.5 text-sm leading-6 text-text-muted">{step.detail}</p> : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function StreamingTurn({
+  markdown,
+  activity,
+}: {
+  markdown: string | null;
+  activity: AgentActivitySnapshot | null;
+}) {
+  return (
+    <div className="flex w-full gap-3">
+      <div className="hero-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-sm">
         <Bot className="h-5 w-5" />
       </div>
-      <div className="min-w-[280px] max-w-xl rounded-3xl rounded-tl-md border border-border-subtle bg-surface-card px-4 py-3 shadow-sm">
-        <button
-          type="button"
-          onClick={() => setIsExpanded((current) => !current)}
-          className="flex w-full items-center justify-between gap-3 text-left"
-          aria-expanded={isExpanded}
-          aria-controls="agent-thinking-steps"
-        >
-          <span className="flex min-w-0 items-center gap-3">
-            <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-surface-accent-soft text-primary-700 dark:text-primary-300">
-              <ActiveIcon className="h-4 w-4" />
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-surface-card">
-                <Loader2 className="h-3 w-3 animate-spin text-primary-700" />
-              </span>
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold text-text-strong">{activeStep.label}</span>
-              <span className="block truncate text-xs font-medium text-text-muted">AI is thinking · view progress</span>
-            </span>
-          </span>
-          <ChevronDown className={cn("h-4 w-4 shrink-0 text-text-muted transition-transform", isExpanded && "rotate-180")} />
-        </button>
-        {isExpanded ? (
-          <div id="agent-thinking-steps" className="mt-4">
-            <div className="space-y-2 border-t border-border-subtle pt-3">
-              {TURN_PROGRESS_STEPS.map((step, index) => {
-                const state = index < stepIndex ? "done" : index === activeIndex ? "active" : "pending";
-                const StepIcon = step.icon;
-                return (
-                  <div key={step.label} className="flex gap-3 text-xs">
-                    <span
-                      className={cn(
-                        "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-xl border",
-                        state === "done" && "state-success border",
-                        state === "active" && "border-primary-200 bg-surface-accent-soft text-primary-700",
-                        state === "pending" && "border-border-subtle bg-surface-page text-text-muted",
-                      )}
-                    >
-                      {state === "done" ? <Check className="h-3.5 w-3.5" /> : <StepIcon className="h-3.5 w-3.5" />}
-                    </span>
-                    <span className="min-w-0">
-                      <span className={cn("block font-semibold", state === "pending" ? "text-text-muted" : "text-text-body")}>{step.label}</span>
-                      <span className="block leading-5 text-text-muted">{step.detail}</span>
-                    </span>
-                  </div>
-                );
-              })}
+      <div className="max-w-[92%] space-y-3 md:max-w-[78%]">
+        {activity ? <AgentActivityCard activity={activity} /> : null}
+        {markdown !== null ? (
+          <div className="rounded-3xl rounded-tl-md border border-border-subtle bg-surface-card px-4 py-3 text-[15px] leading-7 shadow-sm">
+            <div className="prose prose-sm prose-slate max-w-none leading-7 dark:prose-invert">
+              <AssistantMarkdown markdown={markdown} />
+              <span className="inline-block h-5 w-1 animate-pulse rounded-sm bg-primary-400 align-text-bottom" />
             </div>
           </div>
         ) : null}
@@ -1777,7 +1835,10 @@ export default function AgentChatPage() {
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const [turnProgressIndex, setTurnProgressIndex] = useState(0);
+  const [streamActivity, setStreamActivity] = useState<AgentActivitySnapshot | null>(null);
+  const [streamingText, setStreamingText] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const streamActivityRef = useRef<AgentActivitySnapshot | null>(null);
   const [toolMode, setToolMode] = useState<AgentToolMode>("course");
   const [chatModelId, setChatModelId] = useState<ChatModelId>("default");
   const [chatModelAvailability, setChatModelAvailability] = useState<ChatModelAvailability[]>(
@@ -1935,19 +1996,14 @@ export default function AgentChatPage() {
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, isThinking]);
+  }, [messages, isThinking, streamingText, streamActivity]);
 
   useEffect(() => {
     if (!isThinking) {
-      setTurnProgressIndex(0);
-      return;
+      setStreamActivity(null);
+      streamActivityRef.current = null;
+      setStreamingText(null);
     }
-    const startedAt = Date.now();
-    const timer = window.setInterval(() => {
-      const elapsed = Date.now() - startedAt;
-      setTurnProgressIndex(Math.min(TURN_PROGRESS_STEPS.length - 1, Math.floor(elapsed / 1200)));
-    }, 350);
-    return () => window.clearInterval(timer);
   }, [isThinking]);
 
   const activeSession = useMemo(
@@ -2013,7 +2069,7 @@ export default function AgentChatPage() {
 
   const appendAgentResponse = (
     response: AgentChatResponse,
-    retry?: { message: string; incomingMessageId: string },
+    retry?: { message: string; incomingMessageId: string; activity?: AgentActivitySnapshot },
   ) => {
     const conversationId = getConversationId(response);
     if (conversationId && conversationId !== activeSessionId) {
@@ -2034,6 +2090,7 @@ export default function AgentChatPage() {
         fallback: response.fallback,
         retryMessage: getFallbackErrorCode(response.fallback) ? retry?.message : undefined,
         retryIncomingMessageId: getFallbackErrorCode(response.fallback) ? retry?.incomingMessageId : undefined,
+        activity: retry?.activity,
       },
     ]);
     refreshSessions();
@@ -2056,6 +2113,22 @@ export default function AgentChatPage() {
     }
   };
 
+  const stopStream = () => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setIsThinking(false);
+  };
+
+  const updateStreamActivity = (updater: (activity: AgentActivitySnapshot) => AgentActivitySnapshot) => {
+    setStreamActivity((current) => {
+      const base = current ?? streamActivityRef.current;
+      if (!base) return current;
+      const next = updater(base);
+      streamActivityRef.current = next;
+      return next;
+    });
+  };
+
   const sendMessage = async (
     message: string,
     options: { incomingMessageId?: string; appendUser?: boolean } = {},
@@ -2073,30 +2146,97 @@ export default function AgentChatPage() {
         actions: [],
       };
       setMessages((current) => [...current, userMessage]);
+    } else {
+      setMessages((current) =>
+        current.filter(
+          (item) =>
+            item.role !== "assistant" ||
+            !getFallbackErrorCode(item.fallback) ||
+            item.retryIncomingMessageId !== incomingMessageId,
+        ),
+      );
     }
-    setTurnProgressIndex(0);
+    const initialActivity = createAgentActivity({ message, startedAt: Date.now() });
+    streamActivityRef.current = applyAgentActivityStatus(initialActivity, "Preparing request");
+    setStreamActivity(streamActivityRef.current);
+    setStreamingText(null);
     setIsThinking(true);
+
+    let fullText = "";
+
     try {
       const safeChatModelId = fallbackUnavailableChatModel(chatModelAvailability, chatModelId);
       if (safeChatModelId !== chatModelId) {
         setChatModelId(safeChatModelId);
         writeStoredChatModelId(CHAT_MODEL_STORAGE_KEYS.agent, safeChatModelId);
       }
-      const response = await agentApi.chat({
-        message,
-        incomingMessageId,
-        conversationId: activeSessionId,
-        traceMode: "summary",
-        ...(toolMode === "web_papers" ? { toolMode } : {}),
-        ...(safeChatModelId !== "default" ? { chatModelId: safeChatModelId } : {}),
-      });
-      appendAgentResponse(response, { message, incomingMessageId });
+
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      const stream = await agentApi.chatStream(
+        {
+          message,
+          incomingMessageId,
+          conversationId: activeSessionId,
+          traceMode: "summary",
+          ...(toolMode === "web_papers" ? { toolMode } : {}),
+          ...(safeChatModelId !== "default" ? { chatModelId: safeChatModelId } : {}),
+        },
+        controller.signal,
+      );
+
+      for await (const event of stream) {
+        if (controller.signal.aborted) break;
+        if (isStreamStatus(event)) {
+          updateStreamActivity((activity) => applyAgentActivityStatus(activity, event.status));
+        } else if (isStreamThought(event)) {
+          updateStreamActivity((activity) => applyAgentActivityThought(activity, event.thought));
+        } else if (isStreamChunk(event)) {
+          fullText += event.chunk;
+          setStreamingText(fullText);
+        } else if (isStreamDone(event)) {
+          const completedActivity = completeAgentActivity(streamActivityRef.current ?? initialActivity, {
+            completedAt: Date.now(),
+            citationCount: event.done.citations?.length ?? 0,
+          });
+          streamActivityRef.current = completedActivity;
+          setStreamingText(null);
+          setStreamActivity(null);
+          appendAgentResponse(event.done, { message, incomingMessageId, activity: completedActivity });
+        }
+      }
     } catch (err) {
-      setMessages((current) => [
-        ...current,
-        buildAgentClientErrorMessage(err, { message, incomingMessageId }),
-      ]);
+      console.error("[stream] error:", err);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        if (fullText) {
+          const completedActivity = completeAgentActivity(streamActivityRef.current ?? initialActivity, {
+            completedAt: Date.now(),
+          });
+          setMessages((current) => [
+            ...current,
+            {
+              id: `assistant-stream-${Date.now()}`,
+              role: "assistant",
+              markdown: fullText,
+              createdAt: new Date().toISOString(),
+              confidence: "partial",
+              citations: [],
+              actions: [],
+              activity: completedActivity,
+            },
+          ]);
+        }
+        setStreamingText(null);
+      } else {
+        setStreamingText(null);
+        setMessages((current) => [
+          ...current,
+          buildAgentClientErrorMessage(err, { message, incomingMessageId }),
+        ]);
+      }
     } finally {
+      abortControllerRef.current = null;
       setIsThinking(false);
     }
   };
@@ -2250,8 +2390,8 @@ export default function AgentChatPage() {
                     }
                   />
                 ))}
-                {isThinking ? (
-                  <TurnProgress stepIndex={turnProgressIndex} />
+                {isThinking || streamingText !== null || streamActivity ? (
+                  <StreamingTurn markdown={streamingText} activity={streamActivity} />
                 ) : null}
               </>
             )}
@@ -2261,6 +2401,8 @@ export default function AgentChatPage() {
         <Composer
           onSend={sendMessage}
           disabled={isThinking}
+          isStreaming={isThinking}
+          onStop={stopStream}
           toolMode={toolMode}
           onToolModeChange={setToolMode}
           chatModelId={chatModelId}
