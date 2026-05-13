@@ -21,12 +21,40 @@ on:
         default: "true"
         type: choice
         options: ["true", "false"]
+      run_seed_core:
+        description: Import canonical content, product shell, and runtime lecture tables
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      run_sync_schema_v2:
+        description: Backfill, validate, and parity-check Schema v2
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      run_seed_accounts:
+        description: Upsert admin and demo accounts
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      smoke_after_init:
+        description: Smoke test backend data and Grafana after initialization
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
       smoke_cloudfront:
         description: Smoke test CloudFront known asset
         required: true
         default: "false"
         type: choice
         options: ["false", "true"]
+      canonical_bundle_version:
+        description: Optional canonical bundle version/prefix leaf to fetch from S3
+        required: false
+        default: ""
       image_tag:
         description: Optional existing image tag for rollback/redeploy
         required: false
@@ -60,6 +88,9 @@ jobs:
       AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
       ECR_BACKEND_REPOSITORY: ${{ vars.ECR_BACKEND_REPOSITORY }}
       ECR_FRONTEND_REPOSITORY: ${{ vars.ECR_FRONTEND_REPOSITORY }}
+      AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
+      CANONICAL_BUNDLE_PREFIX: ${{ vars.CANONICAL_BUNDLE_PREFIX }}
+      CANONICAL_BUNDLE_VERSION: ${{ vars.CANONICAL_BUNDLE_VERSION }}
       ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
       ECS_BACKEND_SERVICE_NAME: ${{ vars.ECS_BACKEND_SERVICE_NAME }}
       ECS_FRONTEND_SERVICE_NAME: ${{ vars.ECS_FRONTEND_SERVICE_NAME }}
@@ -81,6 +112,7 @@ jobs:
       BACKEND_SECURITY_GROUP_ID: ${{ secrets.BACKEND_SECURITY_GROUP_ID }}
       BACKEND_TARGET_GROUP_ARN: ${{ secrets.BACKEND_TARGET_GROUP_ARN }}
       FRONTEND_TARGET_GROUP_ARN: ${{ secrets.FRONTEND_TARGET_GROUP_ARN }}
+      RUN_TASK_TIMEOUT_SECONDS: "1800"
 
     steps:
       - uses: actions/checkout@v4
@@ -103,19 +135,34 @@ jobs:
             deploy_backend="${{ inputs.deploy_backend }}"
             deploy_frontend="${{ inputs.deploy_frontend }}"
             run_migrations="${{ inputs.run_migrations }}"
+            run_seed_core="${{ inputs.run_seed_core }}"
+            run_sync_schema_v2="${{ inputs.run_sync_schema_v2 }}"
+            run_seed_accounts="${{ inputs.run_seed_accounts }}"
+            smoke_after_init="${{ inputs.smoke_after_init }}"
             smoke_cloudfront="${{ inputs.smoke_cloudfront }}"
+            requested_bundle_version="${{ inputs.canonical_bundle_version }}"
             requested_tag="${{ inputs.image_tag }}"
           elif [ "${{ github.event_name }}" = "workflow_run" ]; then
             deploy_backend="true"
             deploy_frontend="true"
             run_migrations="true"
+            run_seed_core="true"
+            run_sync_schema_v2="true"
+            run_seed_accounts="true"
+            smoke_after_init="true"
             smoke_cloudfront="false"
+            requested_bundle_version=""
             requested_tag="${{ github.event.workflow_run.head_sha }}"
           else
             deploy_backend="true"
             deploy_frontend="true"
             run_migrations="true"
+            run_seed_core="true"
+            run_sync_schema_v2="true"
+            run_seed_accounts="true"
+            smoke_after_init="true"
             smoke_cloudfront="false"
+            requested_bundle_version=""
             requested_tag=""
           fi
 
@@ -129,9 +176,33 @@ jobs:
           echo "deploy_backend=${deploy_backend}" >> "$GITHUB_OUTPUT"
           echo "deploy_frontend=${deploy_frontend}" >> "$GITHUB_OUTPUT"
           echo "run_migrations=${run_migrations}" >> "$GITHUB_OUTPUT"
+          echo "run_seed_core=${run_seed_core}" >> "$GITHUB_OUTPUT"
+          echo "run_sync_schema_v2=${run_sync_schema_v2}" >> "$GITHUB_OUTPUT"
+          echo "run_seed_accounts=${run_seed_accounts}" >> "$GITHUB_OUTPUT"
+          echo "smoke_after_init=${smoke_after_init}" >> "$GITHUB_OUTPUT"
           echo "smoke_cloudfront=${smoke_cloudfront}" >> "$GITHUB_OUTPUT"
           echo "BACKEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_BACKEND_REPOSITORY}:${tag}" >> "$GITHUB_ENV"
           echo "FRONTEND_IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_FRONTEND_REPOSITORY}:${tag}" >> "$GITHUB_ENV"
+          echo "SEED_CORE_TASK_FAMILY=${BACKEND_TASK_FAMILY}-seed-core" >> "$GITHUB_ENV"
+          echo "SYNC_SCHEMA_V2_TASK_FAMILY=${BACKEND_TASK_FAMILY}-sync-schema-v2" >> "$GITHUB_ENV"
+          echo "SEED_ACCOUNTS_TASK_FAMILY=${BACKEND_TASK_FAMILY}-seed-accounts" >> "$GITHUB_ENV"
+
+          bundle_version="${requested_bundle_version:-}"
+          if [ -z "$bundle_version" ]; then
+            bundle_version="${CANONICAL_BUNDLE_VERSION:-}"
+          fi
+
+          if [ "$run_seed_core" = "true" ] || [ "$run_sync_schema_v2" = "true" ]; then
+            : "${AWS_S3_BUCKET:?AWS_S3_BUCKET is required when canonical bundle tasks run}"
+            : "${CANONICAL_BUNDLE_PREFIX:?CANONICAL_BUNDLE_PREFIX is required when canonical bundle tasks run}"
+            : "${bundle_version:?canonical bundle version is required when canonical bundle tasks run}"
+            bundle_prefix="${CANONICAL_BUNDLE_PREFIX%/}/${bundle_version}/canonical"
+            canonical_bundle_s3_uri="s3://${AWS_S3_BUCKET}/${bundle_prefix}"
+            canonical_bundle_local_dir="/tmp/canonical-bundle"
+            echo "canonical_bundle_version=${bundle_version}" >> "$GITHUB_OUTPUT"
+            echo "CANONICAL_BUNDLE_S3_URI=${canonical_bundle_s3_uri}" >> "$GITHUB_ENV"
+            echo "CANONICAL_BUNDLE_LOCAL_DIR=${canonical_bundle_local_dir}" >> "$GITHUB_ENV"
+          fi
 
       - name: Deploy backend service
         if: ${{ steps.tag.outputs.deploy_backend == 'true' }}
@@ -182,6 +253,77 @@ jobs:
           bash cicd/scripts/run-ecs-task.sh "$migrate_task_definition_arn"
           bash cicd/scripts/smoke-ecs.sh db
           echo "MIGRATE_TASK_DEFINITION_ARN=$migrate_task_definition_arn" >> "$GITHUB_ENV"
+
+      - name: Run seed core
+        if: ${{ steps.tag.outputs.run_seed_core == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$BACKEND_IMAGE" \
+          CANONICAL_BUNDLE_S3_URI="$CANONICAL_BUNDLE_S3_URI" \
+          CANONICAL_BUNDLE_LOCAL_DIR="$CANONICAL_BUNDLE_LOCAL_DIR" \
+          LOG_GROUP="/ecs/${SEED_CORE_TASK_FAMILY}" \
+          bash cicd/scripts/render-taskdef.sh \
+            cicd/taskdefs/backend-seed-core.json.tpl \
+            /tmp/backend-seed-core.json
+
+          task_definition_arn="$(aws ecs register-task-definition \
+            --cli-input-json file:///tmp/backend-seed-core.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+
+          LOG_GROUP="/ecs/${SEED_CORE_TASK_FAMILY}" \
+          bash cicd/scripts/run-ecs-task.sh "$task_definition_arn"
+
+      - name: Run Schema v2 sync
+        if: ${{ steps.tag.outputs.run_sync_schema_v2 == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$BACKEND_IMAGE" \
+          CANONICAL_BUNDLE_S3_URI="$CANONICAL_BUNDLE_S3_URI" \
+          CANONICAL_BUNDLE_LOCAL_DIR="$CANONICAL_BUNDLE_LOCAL_DIR" \
+          LOG_GROUP="/ecs/${SYNC_SCHEMA_V2_TASK_FAMILY}" \
+          bash cicd/scripts/render-taskdef.sh \
+            cicd/taskdefs/backend-sync-schema-v2.json.tpl \
+            /tmp/backend-sync-schema-v2.json
+
+          task_definition_arn="$(aws ecs register-task-definition \
+            --cli-input-json file:///tmp/backend-sync-schema-v2.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+
+          LOG_GROUP="/ecs/${SYNC_SCHEMA_V2_TASK_FAMILY}" \
+          bash cicd/scripts/run-ecs-task.sh "$task_definition_arn"
+
+      - name: Run seed accounts
+        if: ${{ steps.tag.outputs.run_seed_accounts == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$BACKEND_IMAGE" \
+          LOG_GROUP="/ecs/${SEED_ACCOUNTS_TASK_FAMILY}" \
+          bash cicd/scripts/render-taskdef.sh \
+            cicd/taskdefs/backend-seed-accounts.json.tpl \
+            /tmp/backend-seed-accounts.json
+
+          task_definition_arn="$(aws ecs register-task-definition \
+            --cli-input-json file:///tmp/backend-seed-accounts.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)"
+
+          LOG_GROUP="/ecs/${SEED_ACCOUNTS_TASK_FAMILY}" \
+          bash cicd/scripts/run-ecs-task.sh "$task_definition_arn"
+
+      - name: Smoke initialized backend data
+        if: ${{ steps.tag.outputs.smoke_after_init == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash cicd/scripts/smoke-ecs.sh db
+          if [ -n "${NEXT_PUBLIC_GRAFANA_HOST:-}" ]; then
+            bash cicd/scripts/smoke-ecs.sh grafana
+          fi
 
       - name: Deploy frontend service
         if: ${{ steps.tag.outputs.deploy_frontend == 'true' }}

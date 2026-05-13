@@ -1,10 +1,6 @@
-name: Initialize ECS Production
+name: Initialize ECS Production (Manual Fallback)
 
 on:
-  workflow_run:
-    workflows: ["Deploy ECS Production"]
-    types: [completed]
-    branches: [main]
   workflow_dispatch:
     inputs:
       run_seed_core:
@@ -54,10 +50,7 @@ jobs:
     name: Initialize Production Data
     runs-on: [self-hosted, phoenix-runner-02]
     environment: production
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success')
+    if: github.event_name == 'workflow_dispatch'
 
     env:
       AWS_REGION: ${{ vars.AWS_REGION }}
@@ -102,12 +95,8 @@ jobs:
             requested_bundle_version="${{ inputs.canonical_bundle_version }}"
             requested_tag="${{ inputs.image_tag }}"
           else
-            run_seed_core="true"
-            run_sync_schema_v2="true"
-            run_seed_accounts="true"
-            smoke_after_init="true"
-            requested_bundle_version=""
-            requested_tag="${{ github.event.workflow_run.head_sha }}"
+            echo "Unsupported event: ${{ github.event_name }}" >&2
+            exit 2
           fi
 
           if [ -n "$requested_tag" ]; then
