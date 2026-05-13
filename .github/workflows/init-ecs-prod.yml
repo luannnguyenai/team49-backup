@@ -107,7 +107,7 @@ jobs:
             run_seed_accounts="true"
             smoke_after_init="true"
             requested_bundle_version=""
-            requested_tag=""
+            requested_tag="${{ github.event.workflow_run.head_sha }}"
           fi
 
           if [ -n "$requested_tag" ]; then
