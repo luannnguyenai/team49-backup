@@ -11,6 +11,11 @@ import {
   MessagesSquare,
   Network,
   Sparkles,
+  TrendingUp,
+  Target,
+  MapPin,
+  Flag,
+  Search,
 } from "lucide-react";
 
 import PublicTopNav from "@/components/layout/PublicTopNav";
@@ -85,28 +90,24 @@ export default function LandingPage() {
               <SectionLabel>Structured learning experience</SectionLabel>
 
               <div className="space-y-5">
-                <h1 className="max-w-4xl text-4xl font-semibold leading-tight text-slate-950 dark:text-white md:text-5xl lg:text-6xl">
-                  A clearer path to learning AI
+                <h1 className="text-5xl font-extrabold leading-[1.1] tracking-tight text-slate-900 dark:text-white md:text-6xl lg:text-7xl">
+                  Your Personal <br />
+                  <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                    Path to Mastery
+                  </span>
                 </h1>
-                <p className="max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-200 md:text-lg">
-                  Start with a structured path that helps you focus, build momentum, and keep
-                  moving without piecing everything together on your own.
+                <p className="max-w-lg text-lg leading-relaxed text-slate-600 dark:text-slate-300 md:text-xl">
+                  Adaptive, tailored learning modules created just for your goals.
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <div className="flex justify-center">
                 <Link
-                  href="/register"
-                  className="btn-primary w-full justify-center px-6 py-3 sm:w-auto"
+                  href="/onboarding"
+                  className="btn-primary group flex h-14 w-full items-center justify-center gap-3 rounded-full bg-blue-600 px-8 text-lg font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 active:scale-[0.98] sm:w-auto min-w-[280px]"
                 >
-                  Create your account
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="/login"
-                  className="btn-secondary w-full justify-center px-6 py-3 sm:w-auto"
-                >
-                  Sign in
+                  Get Your Own Learning Path
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
 
@@ -129,60 +130,41 @@ export default function LandingPage() {
             </ScrollReveal>
 
             <ScrollReveal className="relative" delayMs={120}>
-              <div className="absolute inset-x-6 top-10 h-32 rounded-full bg-cyan-400/25 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[32px] border border-slate-200/80 bg-slate-950 p-6 text-white shadow-[0_30px_80px_-40px_rgba(8,145,178,0.65)]">
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">AI Learning Hub</p>
-                    <p className="mt-1 text-sm text-slate-200">A guided learning path</p>
-                  </div>
-                  <div className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-200">
-                    Ready to start
-                  </div>
+              <div className="relative aspect-square w-full max-w-[600px] flex items-center justify-center mx-auto lg:ml-auto">
+                {/* Enhanced Background Glows for deeper colors */}
+                <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_rgba(34,211,238,0.4)_0%,_transparent_70%)] blur-3xl" />
+                <div className="absolute -inset-4 -z-10 bg-[radial-gradient(circle_at_top_right,_rgba(99,102,241,0.3)_0%,_transparent_60%)] blur-2xl" />
+                
+                <div className="relative z-0 h-full w-full overflow-hidden rounded-[3rem] shadow-[0_32px_64px_-16px_rgba(8,145,178,0.3)] border border-white/20">
+                  <img 
+                    src="/images/landing-hero.png" 
+                    alt="AI Learning Path Illustration" 
+                    className="h-full w-full object-cover brightness-[1.02] contrast-[1.05] saturate-[1.1]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent mix-blend-overlay" />
+                  <div className="absolute inset-0 bg-cyan-900/5 mix-blend-multiply" />
                 </div>
-
-                <div className="mt-6 space-y-4">
-                  <div className="rounded-3xl hero-gradient p-[1px]">
-                    <div className="rounded-[calc(1.5rem-1px)] bg-slate-950/90 p-5">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-semibold">Recommended path</p>
-                          <p className="mt-1 text-xs text-slate-300">
-                            Foundations → Core concepts → Applied practice
-                          </p>
-                        </div>
-                        <Network className="h-5 w-5 text-cyan-200" />
-                      </div>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-                        <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-cyan-300 via-cyan-400 to-teal-300" />
-                      </div>
-                    </div>
+                
+                {/* Floating Badges */}
+                <div className="absolute top-[15%] left-[-5%] z-10 flex items-center gap-2 rounded-2xl border border-white bg-white/80 p-3 shadow-lg backdrop-blur-md">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <TrendingUp className="h-4 w-4" />
                   </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                      <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">Roadmap</p>
-                      <p className="mt-3 text-lg font-semibold">Personalized to your starting point</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">
-                        Get a suggested path that helps you begin in the right place instead of studying at random.
-                      </p>
-                    </div>
-                    <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                      <p className="text-xs uppercase tracking-[0.22em] text-cyan-200">AI Tutor</p>
-                      <p className="mt-3 text-lg font-semibold">Support when you get stuck</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">
-                        Ask questions in the middle of studying so confusion does not break your flow.
-                      </p>
-                    </div>
+                  <span className="pr-2 text-sm font-bold text-slate-700">Skill</span>
+                </div>
+                
+                <div className="absolute bottom-[25%] left-[5%] z-10 flex items-center gap-2 rounded-2xl border border-white bg-white/80 p-3 shadow-lg backdrop-blur-md">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <Sparkles className="h-4 w-4" />
                   </div>
-
-                  <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                    <p className="text-sm font-semibold">Built for clearer learning, not more noise</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">
-                      This experience is designed to make self-study feel more ordered, more manageable,
-                      and easier to continue.
-                    </p>
+                  <span className="pr-2 text-sm font-bold text-slate-700">Current Level</span>
+                </div>
+                
+                <div className="absolute top-[30%] right-[-5%] z-10 flex items-center gap-2 rounded-2xl border border-orange-100 bg-orange-50 p-3 shadow-lg backdrop-blur-md">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+                    <Target className="h-4 w-4" />
                   </div>
+                  <span className="pr-2 text-sm font-bold text-orange-700">Goal Achieved</span>
                 </div>
               </div>
             </ScrollReveal>
@@ -208,39 +190,75 @@ export default function LandingPage() {
               <BulletList items={roadmapPoints} />
             </ScrollReveal>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <ScrollReveal
-                as="article"
-                className="rounded-[28px] border border-border-subtle bg-surface-card p-5 shadow-card dark:border-slate-800 dark:bg-slate-900"
-              >
-                <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">01</p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Direction</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
-                  Start with a learning direction that fits what you need right now.
-                </p>
-              </ScrollReveal>
-              <ScrollReveal
-                as="article"
-                delayMs={80}
-                className="rounded-[28px] border border-cyan-200 bg-cyan-50 p-5 shadow-sm dark:border-cyan-500/30 dark:bg-cyan-950/20"
-              >
-                <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">02</p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Baseline assessment</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
-                  Find a starting point that matches your foundation so you can avoid unnecessary detours.
-                </p>
-              </ScrollReveal>
-              <ScrollReveal
-                as="article"
-                delayMs={160}
-                className="rounded-[28px] border border-border-subtle bg-surface-card p-5 shadow-card dark:border-slate-800 dark:bg-slate-900"
-              >
-                <p className="text-xs uppercase tracking-[0.2em] text-cyan-700">03</p>
-                <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Clear progression</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">
-                  Move through an ordered path instead of hopping between disconnected topics.
-                </p>
-              </ScrollReveal>
+            <div className="relative">
+              {/* Connecting Line (Horizontal on desktop) */}
+              <div className="absolute left-0 top-12 hidden h-0.5 w-full bg-slate-100 dark:bg-slate-800 lg:block" />
+              
+              <div className="relative grid gap-8 md:grid-cols-3 lg:gap-12">
+                {/* Step 01 */}
+                <ScrollReveal
+                  as="article"
+                  className="group relative flex flex-col items-center text-center"
+                >
+                  <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-slate-50 text-slate-400 shadow-sm transition-all group-hover:scale-110 group-hover:border-cyan-100 group-hover:text-cyan-500 dark:border-slate-900 dark:bg-slate-800">
+                    <Compass className="h-7 w-7" />
+                    <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-white dark:text-slate-900">
+                      01
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Direction</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-300">
+                    Start with a learning direction that fits what you need right now.
+                  </p>
+                </ScrollReveal>
+
+                {/* Step 02 - Highlighted */}
+                <ScrollReveal
+                  as="article"
+                  delayMs={80}
+                  className="group relative flex flex-col items-center text-center"
+                >
+                  {/* Connecting Line (Mobile/Tablet vertical) */}
+                  <div className="absolute -top-8 left-1/2 h-8 w-0.5 -translate-x-1/2 bg-slate-100 dark:bg-slate-800 md:hidden" />
+                  
+                  <div className="relative z-10 mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] border-4 border-cyan-50 bg-cyan-100 text-cyan-600 shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all scale-110 group-hover:scale-125 dark:border-cyan-900/50 dark:bg-cyan-900/30 dark:text-cyan-400">
+                    <Search className="h-9 w-9" />
+                    <div className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-cyan-600 text-[11px] font-bold text-white shadow-lg">
+                      02
+                    </div>
+                    {/* Pulsing Highlight */}
+                    <div className="absolute inset-0 -z-10 animate-ping rounded-[2rem] bg-cyan-400 opacity-20" />
+                  </div>
+                  
+                  <div className="rounded-3xl border border-cyan-100 bg-cyan-50/50 p-4 backdrop-blur-sm dark:border-cyan-900/30 dark:bg-cyan-950/20">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Baseline assessment</h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300 font-medium">
+                      Find a starting point that matches your foundation so you can avoid unnecessary detours.
+                    </p>
+                  </div>
+                </ScrollReveal>
+
+                {/* Step 03 */}
+                <ScrollReveal
+                  as="article"
+                  delayMs={160}
+                  className="group relative flex flex-col items-center text-center"
+                >
+                  {/* Connecting Line (Mobile/Tablet vertical) */}
+                  <div className="absolute -top-8 left-1/2 h-8 w-0.5 -translate-x-1/2 bg-slate-100 dark:bg-slate-800 md:hidden" />
+
+                  <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-slate-50 text-slate-400 shadow-sm transition-all group-hover:scale-110 group-hover:border-cyan-100 group-hover:text-cyan-500 dark:border-slate-900 dark:bg-slate-800">
+                    <Flag className="h-7 w-7" />
+                    <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-white dark:text-slate-900">
+                      03
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Clear progression</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-300">
+                    Move through an ordered path instead of hopping between disconnected topics.
+                  </p>
+                </ScrollReveal>
+              </div>
             </div>
           </div>
         </section>
@@ -381,19 +399,13 @@ export default function LandingPage() {
               Built for beginners and self-learners who want to study with more structure, less
               guesswork, and a clearer sense of what comes next.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-8 flex justify-center">
               <Link
-                href="/register"
-                className="btn-primary px-6 py-3"
+                href="/onboarding"
+                className="btn-primary group flex h-14 w-full items-center justify-center gap-3 rounded-full bg-blue-600 px-8 text-lg font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 active:scale-[0.98] sm:w-auto min-w-[280px]"
               >
-                Create your account
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/login"
-                className="btn-secondary px-6 py-3"
-              >
-                Sign in
+                Get Your Own Learning Path
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
           </ScrollReveal>

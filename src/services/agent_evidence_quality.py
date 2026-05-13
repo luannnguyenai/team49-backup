@@ -37,6 +37,11 @@ class AgentEvidenceQualityService:
                 reason_codes=["empty_query_terms"],
             )
         acronym_terms = self._acronym_terms(query)
+        acronym_qualifier_terms = self._meaningful_acronym_qualifier_terms(
+            query,
+            acronym_terms,
+        )
+        acronym_expansion_query = self._has_parenthetical_acronym_expansion(query, acronym_terms)
 
         match_reasons: dict[str, str] = {}
         direct_matches: list[tuple[float, float, int, str]] = []
@@ -62,6 +67,12 @@ class AgentEvidenceQualityService:
                 and (
                     self._coverage(acronym_terms, title_text) > 0
                     or self._coverage(acronym_terms, body_text) > 0
+                )
+                and (
+                    not acronym_qualifier_terms
+                    or acronym_expansion_query
+                    or self._coverage(acronym_qualifier_terms, title_text) > 0
+                    or self._coverage(acronym_qualifier_terms, body_text) >= 0.5
                 )
             )
             title_direct = self._has_phrase_match(query_terms, title_text) or title_coverage >= 0.75
@@ -129,6 +140,49 @@ class AgentEvidenceQualityService:
 
     def _acronym_terms(self, query: str) -> list[str]:
         return sorted({raw_term.lower() for raw_term in re.findall(r"[A-Z][A-Z0-9]{2,}", query)})
+
+    def _has_parenthetical_acronym_expansion(self, query: str, acronym_terms: list[str]) -> bool:
+        if not acronym_terms:
+            return False
+        for acronym in acronym_terms:
+            if re.search(rf"\b{re.escape(acronym)}\b\s*\(", query, re.IGNORECASE):
+                return True
+        return False
+
+    def _meaningful_acronym_qualifier_terms(
+        self,
+        query: str,
+        acronym_terms: list[str],
+    ) -> list[str]:
+        if not acronym_terms:
+            return []
+        first_acronym = None
+        for match in re.finditer(r"[A-Z][A-Z0-9]{2,}", query):
+            if match.group(0).lower() in acronym_terms:
+                first_acronym = match
+                break
+        if first_acronym is None:
+            return []
+        qualifier_terms = self._terms(query[: first_acronym.start()])
+        generic_refinement_terms = {
+            "basic",
+            "basics",
+            "concept",
+            "concepts",
+            "detail",
+            "details",
+            "general",
+            "intro",
+            "introduction",
+            "overview",
+            "specific",
+        }
+        meaningful = []
+        for term in qualifier_terms:
+            if term in generic_refinement_terms:
+                continue
+            meaningful.append(term)
+        return meaningful
 
     def _coverage(self, terms: list[str], text: str) -> float:
         normalized = text.lower()

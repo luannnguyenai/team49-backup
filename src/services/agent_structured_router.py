@@ -325,9 +325,13 @@ class StructuredAgentRouter:
                             "itself instead of an answer to the pending clarification, set action=new_request. "
                             "If the user provides more detail for a retrieval query, set action=refine and return a "
                             "single BM25-ready refined_query that combines the pending topic with the new detail. "
+                            "For retrieval_query payloads with proposed_raw_topic, a short aspect/detail reply "
+                            "should refine the pending topic: combine proposed_raw_topic with the user's detail "
+                            "and do not ask how it relates to the current lesson. "
                             "If the user approves showing offered top results or expanding search scope, set "
                             "action=approve and leave refined_query empty. If the reply is unclear, set action=clarify "
-                            "with one concise clarification_question."
+                            "with one concise clarification_question, matching the latest user message or visible "
+                            "conversation style in English or Vietnamese only."
                         ),
                     },
                     {
@@ -369,7 +373,9 @@ class StructuredAgentRouter:
                         "content": (
                             "You are the AI Learning Hub assistant. "
                             "The catalog search found many title-level learning units for the user's topic. "
-                            "Write one concise, natural clarification in the user's language. "
+                            "Write one concise, natural clarification in English or Vietnamese, matching the "
+                            "latest user message or visible conversation style. Do not switch to a third language. "
+                            "If the latest message is neither English nor Vietnamese, answer in English. "
                             "Ask whether they want to narrow the topic with more detail or see the strongest "
                             "current results. Do not invent course facts and do not mention implementation details. "
                             "Do not mention examples, versions, subtypes, rankings, or choice dimensions that are "
@@ -480,18 +486,7 @@ class StructuredAgentRouter:
                 [
                     {
                         "role": "system",
-                        "content": (
-                            "You are the AI Learning Hub assistant for AI/ML course learning. "
-                            "Most indexed course material is English; do not force the reply language. "
-                            "Reply naturally and briefly. Use clean markdown when structure helps. "
-                            "For simple greetings, greet briefly and ask what the user needs. "
-                            "For broad help requests, answer directly "
-                            "and explain what you can help with: finding course content, suggesting what to "
-                            "review next, explaining planner decisions, proposing assessments, and helping with replans. "
-                            "When the user asks what the current topic is, answer from recent visible thread "
-                            "messages instead of asking them to clarify. "
-                            "Do not invent course facts or claim tool results."
-                        ),
+                        "content": self._agentic_prompt("assistant_help.system"),
                     },
                     {
                         "role": "user",
@@ -520,10 +515,11 @@ class StructuredAgentRouter:
                         "content": (
                             "Answer as the AI Learning Hub assistant. "
                             "Use only these retrieved learning units as evidence. "
-                            "Most indexed course material is English, but the answer language must match "
-                            "the user's latest message. If the latest message is Vietnamese, answer in "
-                            "Vietnamese; if it is English, answer in English; if it is mixed, follow the "
-                            "dominant language. Do not switch to an unrelated language. "
+                            "Answer in English or Vietnamese only; the answer language must match "
+                            "the user's latest message or visible conversation style. If the latest message "
+                            "is Vietnamese, answer in Vietnamese; if it is English, answer in English. "
+                            "Do not switch to a third language. "
+                            "If the latest message is neither English nor Vietnamese, answer in English. "
                             "Use clean markdown with short paragraphs or bullets when helpful, and write math "
                             "with standard LaTeX delimiters only when the answer needs formulas. "
                             "Do not include raw URLs, course hrefs, or source links in the answer text; "

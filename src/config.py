@@ -64,6 +64,57 @@ class Settings(BaseSettings):
         ge=0,
         description="Maximum provider retry attempts for LLM requests.",
     )
+    guardrail_router_base_url: str = Field(
+        default="",
+        description="OpenAI-compatible /v1 base URL for the Cloudflare Tunnel vLLM guardrail router.",
+    )
+    guardrail_router_model: str = Field(
+        default="guardrail-router-merged",
+        description="Model name served by the guardrail router.",
+    )
+    guardrail_router_api_key: str = Field(
+        default="",
+        description="Bearer token for the OpenAI-compatible guardrail router endpoint.",
+    )
+    guardrail_router_cf_access_client_id: str = Field(
+        default="",
+        description="Cloudflare Access service token client ID for the guardrail router tunnel.",
+    )
+    guardrail_router_cf_access_client_secret: str = Field(
+        default="",
+        description="Cloudflare Access service token client secret for the guardrail router tunnel.",
+    )
+    guardrail_router_timeout_seconds: float = Field(
+        default=10.0,
+        ge=0.1,
+        description="Timeout for each guardrail router endpoint attempt.",
+    )
+    guardrail_router_unhealthy_cooldown_seconds: float = Field(
+        default=60.0,
+        ge=0.0,
+        description="Seconds to skip the local guardrail router after a failed endpoint attempt.",
+    )
+    guardrail_router_fallback_provider: str = Field(
+        default="",
+        description="Fallback provider for guardrail routing after the Cloudflare Tunnel vLLM route fails.",
+    )
+    guardrail_router_fallback_model: str = Field(
+        default="",
+        description="Fallback model for guardrail routing after the Cloudflare Tunnel vLLM route fails.",
+    )
+    guardrail_router_max_tokens: int = Field(
+        default=96,
+        ge=1,
+        description="Maximum output tokens for guardrail router JSON decisions.",
+    )
+    external_research_enabled: bool = Field(
+        default=False,
+        description="Enable the experimental external web/paper search mode.",
+    )
+    semantic_scholar_api_key: str = Field(
+        default="",
+        description="Optional Semantic Scholar API key for external paper search.",
+    )
     chat_model_health_timeout_seconds: float = Field(
         default=8.0,
         ge=1.0,
@@ -153,7 +204,11 @@ class Settings(BaseSettings):
 
     # ---- CORS ----
     cors_origins: Annotated[list[str], NoDecode] = Field(
-        default=["http://localhost:3000", "http://localhost:8000"],
+        default=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:8000",
+        ],
         description="Allowed CORS origins. Never use ['*'] with credentials=True.",
     )
 

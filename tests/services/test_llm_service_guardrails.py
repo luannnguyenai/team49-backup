@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 from langchain_core.messages import AIMessage
 
+from src.services.guardrail_router import GuardrailDecision
 from src.services import llm_service
 
 
@@ -87,6 +88,11 @@ def test_tutor_simple_route_sanitizes_streamed_answer_and_persisted_payload(monk
     monkeypatch.setattr(llm_service, "_save_qa_history", fake_save_qa_history)
     monkeypatch.setattr(llm_service, "_log_qa", fake_log_qa)
     monkeypatch.setattr(llm_service, "get_lecture_scope_metadata", lambda lecture_id: {})
+    monkeypatch.setattr(
+        llm_service,
+        "build_guardrail_router_client",
+        lambda: SimpleNamespace(route_sync=lambda **_kwargs: GuardrailDecision.allow()),
+    )
     monkeypatch.setattr(
         llm_service,
         "route_question",

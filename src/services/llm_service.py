@@ -38,7 +38,18 @@ from src.database import tutor_thread_async_session_factory
 from src.models.canonical import CanonicalUnit
 from src.models.course import Course, LearningUnit
 from src.models.store import Chapter, Lecture, QAHistory, TranscriptLine
+from src.services.guardrail_router import (
+    GuardrailDecision,
+    GuardrailScopePacket,
+    build_guardrail_router_client,
+    guardrail_user_message,
+)
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
+from src.services.language_normalization import (
+    InputLanguageNormalizer,
+    LanguageNormalizationResult,
+    get_input_language_normalizer,
+)
 from src.services.lecture_scope_service import get_lecture_scope_metadata
 from src.services.llm_rate_limiter import enforce_llm_rate_limit
 from src.services.model_registry import (
@@ -140,6 +151,80 @@ Answer the student's question using ONLY the provided lecture context (transcrip
 - Reference timestamps when citing specific lecture moments.
 - Answer in the SAME LANGUAGE as the student's question.
 """
+
+
+def build_tutor_guardrail_event(decision: GuardrailDecision) -> dict | None:
+    if decision.action == "ALLOW_LESSON_ANSWER":
+        return None
+    return {
+        "blocked": True,
+        "message": guardrail_user_message(decision),
+        "guardrail": {
+            "blocked": True,
+            "action": decision.action,
+            "safety_label": decision.safety_label,
+            "topic_label": decision.topic_label,
+            "attack_type": decision.attack_type,
+            "selected_kp_ids": decision.selected_kp_ids,
+        },
+    }
+
+
+def normalize_tutor_question_for_model(
+    question: str,
+    *,
+    normalizer: InputLanguageNormalizer | None = None,
+) -> LanguageNormalizationResult:
+    service = normalizer or get_input_language_normalizer()
+    return asyncio.run(service.normalize(question))
+
+
+def enforce_tutor_response_language(
+    text: str,
+    language: LanguageNormalizationResult,
+    *,
+    normalizer: InputLanguageNormalizer | None = None,
+) -> str:
+    if language.target_language != "en" or not text.strip():
+        return text
+    service = normalizer or get_input_language_normalizer()
+    detect = getattr(service, "detect", None)
+    if detect is None or detect(text) == "en":
+        return text
+    translator = getattr(service, "translator", None)
+    translate = getattr(translator, "translate_to_english", None)
+    if translate is None:
+        return text
+    try:
+        translated = asyncio.run(translate(text))
+    except Exception:
+        return text
+    return translated if translated.strip() else text
+
+
+def build_tutor_guardrail_scope(
+    *,
+    lecture_id: str,
+    lecture_title: str,
+    context_summary: str,
+    current_chapter: str,
+    lecture_scope: dict | None,
+    context_binding_id: str | None = None,
+) -> GuardrailScopePacket:
+    summary = (context_summary or "").strip()
+    scope_parts = [f"Unit summary: {summary}" if summary else "Unit summary: unavailable"]
+    if current_chapter:
+        scope_parts.append(f"Current chapter: {current_chapter}")
+
+    return GuardrailScopePacket(
+        feature="tutor",
+        scope_level="unit" if context_binding_id else "lecture",
+        scope_id=context_binding_id or lecture_id,
+        allowed_scope_summary="\n".join(scope_parts),
+        candidate_kps=[],
+        recent_context=[],
+        selected_text="",
+    )
 
 
 def _sanitize_tutor_input_question(question: str):
@@ -524,6 +609,9 @@ def get_context_and_stream_langgraph(
         )
         return
 
+    language_normalization = normalize_tutor_question_for_model(sanitized_user_question)
+    sanitized_user_question = language_normalization.normalized_text
+
     def emit_status(message: str) -> str:
         nonlocal first_status_at
         if first_status_at is None:
@@ -629,6 +717,43 @@ def get_context_and_stream_langgraph(
                     "",
                 )
                 with start_langfuse_observation(
+                    name="tutor-guardrail-router",
+                    input={
+                        "question": sanitized_user_question,
+                        "lecture_title": lecture_title,
+                        "current_chapter": current_chapter,
+                    },
+                    metadata={
+                        "feature": "tutor",
+                        "step": "guardrail-router",
+                        "has_image": has_image,
+                    },
+                ):
+                    guardrail_decision = build_guardrail_router_client().route_sync(
+                        message=sanitized_user_question,
+                        scope=build_tutor_guardrail_scope(
+                            lecture_id=lecture_id,
+                            lecture_title=lecture_title,
+                            context_summary=context_summary,
+                            current_chapter=current_chapter,
+                            lecture_scope=lecture_scope,
+                            context_binding_id=context_binding_id,
+                        ),
+                    )
+                guardrail_event = build_tutor_guardrail_event(guardrail_decision)
+                if guardrail_event is not None:
+                    route = guardrail_decision.action
+                    if first_answer_at is None:
+                        first_answer_at = time.perf_counter()
+                    yield json.dumps(guardrail_event) + "\n"
+                    qa_logger.info(
+                        f"\n{'='*60}\n[GUARDRAIL] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"[Lecture] : {lecture_id}\n[Question]: {sanitized_user_question}\n"
+                        f"[Action]  : {guardrail_decision.action}\n"
+                        f"[Reason]  : {guardrail_decision.safety_label}/{guardrail_decision.topic_label}/{guardrail_decision.attack_type}\n{'='*60}"
+                    )
+                    return
+                with start_langfuse_observation(
                     name="tutor-route-question",
                     input={
                         "question": sanitized_user_question,
@@ -675,7 +800,11 @@ def get_context_and_stream_langgraph(
                     and chat_model_id == DEFAULT_CHAT_MODEL_ID
                 ):
                     direct_answer = routing.get("direct_answer", "")
-                    sanitized_answer = _sanitize_tutor_output_text(direct_answer).sanitized_text
+                    language_answer = enforce_tutor_response_language(
+                        direct_answer,
+                        language_normalization,
+                    )
+                    sanitized_answer = _sanitize_tutor_output_text(language_answer).sanitized_text
                     if first_answer_at is None:
                         first_answer_at = time.perf_counter()
                     yield (
@@ -684,7 +813,7 @@ def get_context_and_stream_langgraph(
                                 "a": sanitized_answer,
                                 "guardrail": {
                                     "input_redacted": input_guardrail.was_redacted,
-                                    "output_redacted": sanitized_answer != direct_answer,
+                                    "output_redacted": sanitized_answer != language_answer,
                                 },
                             }
                         )

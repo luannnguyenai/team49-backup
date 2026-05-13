@@ -73,7 +73,7 @@ class FailingToolNodes(FakeToolNodes):
 
 
 @pytest.mark.asyncio
-async def test_tool_executor_searches_current_path_with_llm_query():
+async def test_tool_executor_searches_current_path_with_llm_query_and_slot_fallback():
     tools = FakeToolNodes()
     executor = AgenticRAGToolExecutor(tools)
     slots = AgentSlots(raw_topic="YOLO", search_queries=["YOLO"])
@@ -91,7 +91,31 @@ async def test_tool_executor_searches_current_path_with_llm_query():
     )
 
     assert observation.tool == "search_current_path_units"
-    assert tools.calls[0][3].search_queries == ["YOLO single-stage detector"]
+    assert tools.calls[0][3].search_queries == ["YOLO single-stage detector", "YOLO"]
+
+
+@pytest.mark.asyncio
+async def test_tool_executor_preserves_slot_fallback_after_llm_search_queries():
+    tools = FakeToolNodes()
+    executor = AgenticRAGToolExecutor(tools)
+    slots = AgentSlots(raw_topic="CNN refined topic", search_queries=["CNN refined topic", "CNN"])
+
+    await executor.execute(
+        AgenticRAGToolCall(
+            tool="search_current_path_units",
+            arguments={
+                "query": "CNN refined topic",
+                "search_queries": ["CNN refined topic"],
+            },
+            rationale="search refined topic",
+        ),
+        message="khái niệm cơ bản",
+        intent="find_content",
+        slots=slots,
+        allowed_course_ids=["CS231N"],
+    )
+
+    assert tools.calls[0][3].search_queries == ["CNN refined topic", "CNN"]
 
 
 @pytest.mark.asyncio

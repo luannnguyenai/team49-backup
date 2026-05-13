@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import NewLandingPage from "@/components/landing/NewLandingPage";
+import LandingPage from "@/components/landing/LandingPage";
 
 export const metadata: Metadata = {
   title: "AI Learning Hub - Your Personal Path to Mastery",
@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootPage() {
-  return <NewLandingPage />;
+  return <LandingPage />;
 }

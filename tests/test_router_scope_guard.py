@@ -77,6 +77,28 @@ class RouterScopeGuardTests(unittest.TestCase):
         self.assertIn("Convolution and pooling", result["message"])
         self.assertIn("Lecture 5", result["message"])
 
+    def test_route_question_parses_content_block_responses(self):
+        fake_llm = _FakeLLM(
+            [
+                {
+                    "type": "text",
+                    "text": '{"route":"SIMPLE","scope":"IN_SCOPE","direct_answer":"Attention weighs relevant tokens.","reason":"basic concept"}',
+                }
+            ]
+        )
+
+        with patch("src.services.router._get_router_llm", return_value=fake_llm):
+            result = route_question(
+                question="Explain attention.",
+                lecture_title="Lecture 8: Attention and Transformers",
+                context_summary="- Attention: alignment scores over tokens",
+                current_timestamp=60,
+                current_chapter="Attention",
+            )
+
+        self.assertEqual(result["route"], "SIMPLE")
+        self.assertEqual(result["direct_answer"], "Attention weighs relevant tokens.")
+
 
 if __name__ == "__main__":
     unittest.main()
