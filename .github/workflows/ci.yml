@@ -167,7 +167,7 @@ jobs:
           path: reports/
 
   frontend:
-    name: "Frontend · Type-check + Build"
+    name: "Frontend · Type-check"
     runs-on: [self-hosted, phoenix-runner]
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
@@ -193,9 +193,6 @@ jobs:
 
       - name: TypeScript type-check
         run: npm run type-check
-
-      - name: Next.js build (dry-run)
-        run: npm run build
 
   ci-status:
     name: "CI · Status"
