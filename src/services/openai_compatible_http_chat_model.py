@@ -6,7 +6,7 @@ from collections.abc import Callable
 from typing import Any
 
 import httpx
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, AIMessageChunk
 
 
 class OpenAICompatibleHTTPChatModel:
@@ -38,16 +38,29 @@ class OpenAICompatibleHTTPChatModel:
         }
         return AIMessage(content=self._post_chat_completions(payload))
 
+    def stream(self, messages: list[Any], config: dict | None = None, **_kwargs: Any):
+        payload = {
+            "model": self.model,
+            "messages": self._normalize_messages(messages),
+            "temperature": self.temperature,
+            "stream": True,
+        }
+        for content in self._stream_chat_completions(payload):
+            yield AIMessageChunk(content=content)
+
     def with_structured_output(self, schema, method: str | None = None, **_kwargs: Any):
         return _StructuredHTTPChatModel(self, schema)
 
-    def _post_chat_completions(self, payload: dict[str, Any]) -> str:
-        headers = {
+    def _headers(self, *, accept: str = "application/json") -> dict[str, str]:
+        return {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
-            "Accept": "application/json",
+            "Accept": accept,
             "User-Agent": "AI-Learning-Hub/1.0",
         }
+
+    def _post_chat_completions(self, payload: dict[str, Any]) -> str:
+        headers = self._headers()
         last_exc: Exception | None = None
         for attempt in range(self.max_retries + 1):
             client = self._client_factory()
@@ -70,6 +83,35 @@ class OpenAICompatibleHTTPChatModel:
                     close()
         raise RuntimeError("openai_compatible_chat_completion_failed") from last_exc
 
+    def _stream_chat_completions(self, payload: dict[str, Any]):
+        headers = self._headers(accept="text/event-stream")
+        last_exc: Exception | None = None
+        for attempt in range(self.max_retries + 1):
+            client = self._client_factory()
+            try:
+                with client.stream(
+                    "POST",
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=self.timeout,
+                ) as response:
+                    response.raise_for_status()
+                    for line in response.iter_lines():
+                        content = self._extract_stream_delta_content(line)
+                        if content:
+                            yield content
+                    return
+            except Exception as exc:
+                last_exc = exc
+                if attempt >= self.max_retries:
+                    raise
+            finally:
+                close = getattr(client, "close", None)
+                if callable(close):
+                    close()
+        raise RuntimeError("openai_compatible_chat_stream_failed") from last_exc
+
     @staticmethod
     def _extract_message_content(payload: dict[str, Any]) -> str:
         choices = payload.get("choices")
@@ -82,6 +124,32 @@ class OpenAICompatibleHTTPChatModel:
         if content is None:
             raise ValueError("chat_completion_missing_content")
         return str(content)
+
+    @staticmethod
+    def _extract_stream_delta_content(line: Any) -> str | None:
+        if isinstance(line, bytes):
+            line = line.decode("utf-8", errors="replace")
+        text = str(line).strip()
+        if not text:
+            return None
+        if text.startswith("data:"):
+            text = text.removeprefix("data:").strip()
+        if text == "[DONE]":
+            return None
+        payload = json.loads(text)
+        choices = payload.get("choices")
+        if not choices or not isinstance(choices[0], dict):
+            return None
+        delta = choices[0].get("delta")
+        if isinstance(delta, dict):
+            content = delta.get("content")
+            return None if content is None else str(content)
+        message = choices[0].get("message")
+        if isinstance(message, dict):
+            content = message.get("content")
+            return None if content is None else str(content)
+        text_content = choices[0].get("text")
+        return None if text_content is None else str(text_content)
 
     @staticmethod
     def _normalize_messages(messages: list[Any]) -> list[dict[str, str]]:
