@@ -118,6 +118,15 @@ async function doRefresh(): Promise<string | null> {
   }
 }
 
+export async function refreshAccessToken(): Promise<string | null> {
+  if (!_refreshPromise) {
+    _refreshPromise = doRefresh().finally(() => {
+      _refreshPromise = null;
+    });
+  }
+  return _refreshPromise;
+}
+
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
@@ -129,13 +138,7 @@ api.interceptors.response.use(
       original._retry = true;
 
       // Deduplicate concurrent refresh calls
-      if (!_refreshPromise) {
-        _refreshPromise = doRefresh().finally(() => {
-          _refreshPromise = null;
-        });
-      }
-
-      const newToken = await _refreshPromise;
+      const newToken = await refreshAccessToken();
       if (newToken) {
         original.headers.Authorization = `Bearer ${newToken}`;
         return api(original);
