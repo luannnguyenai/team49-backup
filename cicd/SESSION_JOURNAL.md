@@ -135,11 +135,11 @@ gh api orgs/a20-ai-thuc-chien/actions/runners
 # {"message":"You must be an org admin or have the runners and runner groups fine-grained permission.","status":"403"}
 ```
 
-**Issue 5 — Không kiểm được status `phoenix-runner`**:
+**Issue 5 — Không kiểm được status `phoenix-runner-02`**:
 - Cần admin permission để list runner. Maintain role không đủ.
 - Rủi ro: nếu runner offline, CI block, deploy không bắt đầu.
-- Fix: thay tạm `runs-on: [self-hosted, phoenix-runner]` → `runs-on: ubuntu-latest` cho 7 job trong `ci.yml`. Postgres + Redis service container vẫn hoạt động trên `ubuntu-latest`.
-- Commit `2763240 fix(ci): switch ci.yml from self-hosted phoenix-runner to ubuntu-latest`.
+- Fix: thay tạm `runs-on: [self-hosted, phoenix-runner-02]` → `runs-on: ubuntu-latest` cho 7 job trong `ci.yml`. Postgres + Redis service container vẫn hoạt động trên `ubuntu-latest`.
+- Commit `2763240 fix(ci): switch ci.yml from self-hosted phoenix-runner-02 to ubuntu-latest`.
 
 ### 3.8 Push trigger workflow (Bài 8)
 
@@ -203,7 +203,7 @@ gh run list --workflow="Deploy ECS Production" --limit 3
 | 4 | Approval gate | Cần admin enable: Environment `production` → Required reviewers; Branch protection main → Required PR review |
 | 5 | Domain cutover (Phase 25) | HTTPS listener + ACM + Route 53 + frontend rebuild với production domain |
 | 6 | N1 N4 N5 N6 (non-blocking) | S3 bucket templatize, log group pre-flight, run-task log retrieval, decision self-hosted dài hạn |
-| 7 | `phoenix-runner` decision | Tạm dùng ubuntu-latest. Quyết định dài hạn sau khi pipeline chạy ổn |
+| 7 | `phoenix-runner-02` decision | Tạm dùng ubuntu-latest. Quyết định dài hạn sau khi pipeline chạy ổn |
 
 ---
 

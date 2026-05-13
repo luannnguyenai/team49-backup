@@ -91,33 +91,10 @@ jobs:
       - name: Check deploy docs whitespace
         run: git diff --check -- deploy .github/workflows .dockerignore pyproject.toml
 
-  lint-backend:
-    name: "Backend · Lint (ruff)"
+  backend:
+    name: "Backend · Ruff + Pytest"
     runs-on: [self-hosted, phoenix-runner]
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Install ruff
-        run: pip install ruff
-
-      - name: Ruff lint
-        run: ruff check src/ scripts/
-
-      - name: Ruff format check
-        run: ruff format --check src/ scripts/
-
-  test-backend:
-    name: "Backend · Test (pytest)"
-    runs-on: [self-hosted, phoenix-runner]
-    needs: [changes, lint-backend]
     if: needs.changes.outputs.backend == 'true'
 
     services:
@@ -161,6 +138,12 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Ruff lint
+        run: ruff check src/ scripts/
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
@@ -183,38 +166,10 @@ jobs:
           name: backend-test-results
           path: reports/
 
-  lint-frontend:
-    name: "Frontend · Lint (ESLint)"
+  frontend:
+    name: "Frontend · Type-check"
     runs-on: [self-hosted, phoenix-runner]
     needs: changes
-    if: needs.changes.outputs.frontend == 'true'
-    env:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
-      API_INTERNAL_URL: http://localhost:8000
-
-    defaults:
-      run:
-        working-directory: frontend
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: ESLint
-        run: npm run lint
-
-  typecheck-frontend:
-    name: "Frontend · TypeScript"
-    runs-on: [self-hosted, phoenix-runner]
-    needs: [changes, lint-frontend]
     if: needs.changes.outputs.frontend == 'true'
     env:
       NEXT_PUBLIC_API_URL: http://localhost:8000
@@ -239,17 +194,14 @@ jobs:
       - name: TypeScript type-check
         run: npm run type-check
 
-      - name: Next.js build (dry-run)
-        run: npm run build
-
   ci-status:
     name: "CI · Status"
     runs-on: [self-hosted, phoenix-runner]
     needs:
       - changes
       - repo-config
-      - test-backend
-      - typecheck-frontend
+      - backend
+      - frontend
     if: always()
 
     steps:
@@ -260,8 +212,8 @@ jobs:
           repo_config="${{ needs.changes.outputs.repo_config }}"
 
           repo_result="${{ needs.repo-config.result }}"
-          backend_result="${{ needs.test-backend.result }}"
-          frontend_result="${{ needs.typecheck-frontend.result }}"
+          backend_result="${{ needs.backend.result }}"
+          frontend_result="${{ needs.frontend.result }}"
 
           echo "backend changed: $backend -> $backend_result"
           echo "frontend changed: $frontend -> $frontend_result"

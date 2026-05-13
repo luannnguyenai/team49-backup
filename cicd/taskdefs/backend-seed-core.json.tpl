@@ -15,7 +15,7 @@
         "sh",
         "-eu",
         "-c",
-        "uv run python scripts/materialize_canonical_bundle.py --s3-uri \"$CANONICAL_BUNDLE_S3_URI\" --output-dir \"$CANONICAL_BUNDLE_LOCAL_DIR\"; uv run python scripts/seed.py --input-dir \"$CANONICAL_BUNDLE_LOCAL_DIR\""
+        "uv run python scripts/materialize_canonical_bundle.py --s3-uri \"$CANONICAL_BUNDLE_S3_URI\" --output-dir \"$CANONICAL_BUNDLE_LOCAL_DIR\"; uv run python scripts/assert_init_inputs.py --canonical-dir \"$CANONICAL_BUNDLE_LOCAL_DIR\" --require-bootstrap --require-runtime-lecture-inputs; uv run python scripts/seed.py --input-dir \"$CANONICAL_BUNDLE_LOCAL_DIR\""
       ],
       "environment": [
         { "name": "PYTHONPATH", "value": "/app" },

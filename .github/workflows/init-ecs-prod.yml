@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       run_seed_core:
-        description: Import canonical content, product shell, and lectures
+        description: Import canonical content, product shell, and runtime lecture tables
         required: true
         default: "true"
         type: choice
@@ -52,7 +52,7 @@ concurrency:
 jobs:
   init:
     name: Initialize Production Data
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: [self-hosted, phoenix-runner-02]
     environment: production
     if: >
       github.event_name == 'workflow_dispatch' ||
@@ -107,7 +107,7 @@ jobs:
             run_seed_accounts="true"
             smoke_after_init="true"
             requested_bundle_version=""
-            requested_tag=""
+            requested_tag="${{ github.event.workflow_run.head_sha }}"
           fi
 
           if [ -n "$requested_tag" ]; then

@@ -36,7 +36,7 @@ concurrency:
 jobs:
   build:
     name: Build And Push Images
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: [self-hosted, phoenix-runner-01]
     environment: production
     if: >
       github.event_name == 'workflow_dispatch' ||
@@ -50,6 +50,7 @@ jobs:
       ECR_BACKEND_REPOSITORY: ${{ vars.ECR_BACKEND_REPOSITORY }}
       ECR_FRONTEND_REPOSITORY: ${{ vars.ECR_FRONTEND_REPOSITORY }}
       PRODUCTION_BACKEND_URL: ${{ vars.PRODUCTION_BACKEND_URL }}
+      PRODUCTION_FRONTEND_URL: ${{ vars.PRODUCTION_FRONTEND_URL }}
       NEXT_PUBLIC_GRAFANA_HOST: ${{ vars.NEXT_PUBLIC_GRAFANA_HOST }}
       NEXT_PUBLIC_LANGFUSE_HOST: ${{ vars.NEXT_PUBLIC_LANGFUSE_HOST }}
 
@@ -105,10 +106,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          grafana_host="${NEXT_PUBLIC_GRAFANA_HOST:-}"
+          if [ -z "$grafana_host" ]; then
+            grafana_host="/grafana"
+            echo "NEXT_PUBLIC_GRAFANA_HOST unset; defaulting frontend embed host to same-origin /grafana"
+          elif [[ "$grafana_host" == http://* ]] && [[ "${PRODUCTION_FRONTEND_URL:-}" == https://* ]]; then
+            grafana_host="/grafana"
+            echo "NEXT_PUBLIC_GRAFANA_HOST is HTTP while production URLs are HTTPS; forcing same-origin /grafana to avoid mixed-content iframe failures"
+          fi
+
           docker build -f frontend/Dockerfile \
             --build-arg NEXT_PUBLIC_API_URL="$PRODUCTION_BACKEND_URL" \
             --build-arg API_INTERNAL_URL="$PRODUCTION_BACKEND_URL" \
-            --build-arg NEXT_PUBLIC_GRAFANA_HOST="${NEXT_PUBLIC_GRAFANA_HOST:-}" \
+            --build-arg NEXT_PUBLIC_GRAFANA_HOST="$grafana_host" \
             --build-arg NEXT_PUBLIC_LANGFUSE_HOST="${NEXT_PUBLIC_LANGFUSE_HOST:-https://cloud.langfuse.com}" \
             -t "$FRONTEND_IMAGE" frontend
           docker push "$FRONTEND_IMAGE"

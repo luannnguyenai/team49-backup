@@ -17,13 +17,14 @@ import KpiCard from "@/components/admin/KpiCard";
 import KpiGroup from "@/components/admin/KpiGroup";
 import ChartCard from "@/components/admin/ChartCard";
 import StatusBadge from "@/components/admin/StatusBadge";
+import { resolveGrafanaBaseUrl } from "@/lib/admin/grafana-host";
 import { adminApi, SystemHealth } from "@/lib/admin-api";
 import { systemTooltips } from "@/lib/admin-tooltips";
 import { CHART_GRID, CHART_PALETTE } from "@/lib/admin/chart-theme";
 
 type SeriesPoint = { t: number; cpu: number | null; ram: number | null };
 
-const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST?.trim() || "/grafana";
+const GRAFANA_HOST = process.env.NEXT_PUBLIC_GRAFANA_HOST;
 
 function fmtPct(p: number | null | undefined): string {
   if (p === null || p === undefined) return "—";
@@ -45,6 +46,8 @@ export default function AdminSystemPage() {
   const [series, setSeries] = useState<SeriesPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [grafanaWarning, setGrafanaWarning] = useState<string | null>(null);
+  const [grafanaBaseUrl, setGrafanaBaseUrl] = useState("/grafana");
   const startRef = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -72,6 +75,15 @@ export default function AdminSystemPage() {
       cancelled = true;
       clearInterval(id);
     };
+  }, []);
+
+  useEffect(() => {
+    const { baseUrl, warning } = resolveGrafanaBaseUrl(
+      GRAFANA_HOST,
+      typeof window === "undefined" ? undefined : window.location.origin,
+    );
+    setGrafanaBaseUrl(baseUrl);
+    setGrafanaWarning(warning);
   }, []);
 
   return (
@@ -179,35 +191,30 @@ export default function AdminSystemPage() {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h3 className="text-base font-semibold text-slate-900 dark:text-white">Grafana — System Health</h3>
-            {GRAFANA_HOST ? (
-              <p className="text-xs text-slate-500 dark:text-slate-400">Postgres + Redis exporters via Prometheus.</p>
-            ) : (
-              <p className="text-xs text-amber-700 dark:text-amber-300">
-                Chưa cấu hình <code>NEXT_PUBLIC_GRAFANA_HOST</code>, nên chưa thể mở dashboard nhúng.
-              </p>
-            )}
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Postgres + Redis exporters via Prometheus. Embedded from <code>{grafanaBaseUrl}</code>.
+            </p>
+            {grafanaWarning ? (
+              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">{grafanaWarning}</p>
+            ) : null}
           </div>
-          {GRAFANA_HOST ? (
-            <a
-              href={`${GRAFANA_HOST}/d/a20-system-health`}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-            >
-              Open Grafana →
-            </a>
-          ) : null}
+          <a
+            href={`${grafanaBaseUrl}/d/a20-system-health`}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+          >
+            Open Grafana →
+          </a>
         </div>
-        {GRAFANA_HOST ? (
-          <div className="overflow-hidden rounded-[20px] border border-slate-200/80 bg-white/80">
-            <iframe
-              src={`${GRAFANA_HOST}/d/a20-system-health?theme=light&kiosk`}
-              title="Grafana — System Health"
-              className="h-[640px] w-full"
-              loading="lazy"
-            />
-          </div>
-        ) : null}
+        <div className="overflow-hidden rounded-[20px] border border-slate-200/80 bg-white/80">
+          <iframe
+            src={`${grafanaBaseUrl}/d/a20-system-health?theme=light&kiosk`}
+            title="Grafana — System Health"
+            className="h-[640px] w-full"
+            loading="lazy"
+          />
+        </div>
       </div>
     </div>
   );
