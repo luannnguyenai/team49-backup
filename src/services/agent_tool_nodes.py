@@ -55,10 +55,23 @@ class AgentToolNodes:
         intent: str,
         slots: AgentSlots,
         allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None = None,
     ) -> ToolResult:
-        course_ids = self.scope_service.course_ids_for_paths(
+        scoped_course_ids = self.scope_service.course_ids_for_paths(
             slots.resolved_search_path_ids,
             allowed_course_ids,
+        )
+        current_path_ids = (
+            slots.excluded_search_path_ids
+            if slots.search_scope == "expanded_paths" and slots.excluded_search_path_ids
+            else slots.resolved_search_path_ids
+        )
+        current_course_ids = current_path_course_ids or self.scope_service.course_ids_for_paths(
+            current_path_ids,
+            allowed_course_ids,
+        )
+        preferred_course_ids = (
+            scoped_course_ids if slots.search_scope == "explicit_path" else current_course_ids
         )
         search_queries = self._search_queries(message, slots)
         searches = [
@@ -68,7 +81,10 @@ class AgentToolNodes:
                     scope="global_catalog"
                     if slots.search_scope == "expanded_paths"
                     else "current_path",
-                    courseIds=course_ids,
+                    courseIds=allowed_course_ids,
+                    currentPathCourseIds=current_course_ids,
+                    preferredCourseIds=preferred_course_ids,
+                    preferredScope=slots.search_scope,
                     intent=intent,
                     limit=20,
                 ),
@@ -126,7 +142,7 @@ class AgentToolNodes:
                 update={
                     "intent": intent,
                     "selected_path": slots.search_scope,
-                    "candidate_courses": course_ids,
+                    "candidate_courses": allowed_course_ids,
                     "selected_unit_ids": [],
                 }
             )
@@ -154,18 +170,44 @@ class AgentToolNodes:
             and not (verdict.label == "direct_match" and len(verdict.selected_unit_ids) < 3)
         ):
             raw_topic = slots.raw_topic or message
+            top_results = all_results[:5]
+            citations = [
+                AgentCitation(
+                    canonical_unit_id=result.canonical_unit_id,
+                    course_id=result.course_id,
+                    lecture_id=result.lecture_id,
+                    lecture_title=result.lecture_title,
+                    unit_name=result.unit_name,
+                    learn_href=result.learn_href,
+                    quote=result.summary,
+                    source="summary",
+                )
+                for result in top_results
+            ]
+            actions = [
+                AgentAction(
+                    type="open_unit",
+                    label=f"Open {result.unit_name}",
+                    learn_href=result.learn_href,
+                    canonical_unit_id=result.canonical_unit_id,
+                )
+                for result in top_results
+                if result.learn_href
+            ]
             trace = search.trace.model_copy(
                 update={
                     "intent": intent,
                     "selected_path": slots.search_scope,
-                    "candidate_courses": course_ids,
-                    "selected_unit_ids": [],
+                    "candidate_courses": allowed_course_ids,
+                    "selected_unit_ids": [result.canonical_unit_id for result in top_results],
                 }
             )
             return ToolResult(
                 kind="clarification",
                 answer_markdown=None,
-                warning=None,
+                citations=citations,
+                actions=actions,
+                warning=self._outside_current_path_warning(top_results),
                 requires_evidence=False,
                 metadata={
                     "too_many_results_offered": True,
@@ -173,19 +215,20 @@ class AgentToolNodes:
                     "raw_topic": raw_topic,
                     "search_queries": search_queries,
                     "top_results_allowed": True,
+                    "answer_confidence": "partial",
                 },
                 trace=trace,
             )
         if (
             verdict.label == "weak_match"
             and slots.search_scope == "current_path"
-            and len(allowed_course_ids) > len(course_ids)
+            and len(allowed_course_ids) > len(scoped_course_ids)
         ):
             trace = search.trace.model_copy(
                 update={
                     "intent": intent,
                     "selected_path": slots.search_scope,
-                    "candidate_courses": course_ids,
+                    "candidate_courses": allowed_course_ids,
                     "selected_unit_ids": [],
                 }
             )
@@ -245,12 +288,12 @@ class AgentToolNodes:
             actions.append(prereq_action)
         trace = search.trace.model_copy(
             update={
-                "intent": intent,
-                "selected_path": slots.search_scope,
-                "candidate_courses": course_ids,
-                "selected_unit_ids": [citation.canonical_unit_id for citation in citations],
-            }
-        )
+                    "intent": intent,
+                    "selected_path": slots.search_scope,
+                    "candidate_courses": allowed_course_ids,
+                    "selected_unit_ids": [citation.canonical_unit_id for citation in citations],
+                }
+            )
         if verdict.label == "weak_match" and not actions:
             return ToolResult(
                 kind="find_content",
@@ -384,6 +427,7 @@ class AgentToolNodes:
             answer_markdown=answer_markdown,
             citations=citations,
             actions=actions,
+            warning=self._outside_current_path_warning(results),
             requires_evidence=verdict.requires_grounded_answer,
             metadata=metadata,
             trace=trace,
@@ -405,6 +449,18 @@ class AgentToolNodes:
             seen.add(key)
             deduped.append(candidate)
         return deduped[:5]
+
+    @staticmethod
+    def _outside_current_path_warning(results) -> AgentWarning | None:
+        if not any(getattr(result, "outside_current_path", False) for result in results):
+            return None
+        return AgentWarning(
+            type="outside_current_path",
+            message=(
+                "Some sources are outside your current learning path. "
+                "You can open them directly if you want to self-study that material."
+            ),
+        )
 
     async def _build_prerequisite_path_action(
         self,
