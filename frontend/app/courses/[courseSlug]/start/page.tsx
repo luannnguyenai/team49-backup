@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { courseApi } from "@/lib/api";
+import {
+  clearPendingAssessmentContext,
+  writePendingCanonicalAssessment,
+} from "@/lib/canonical-assessment-session";
 
 interface CourseStartPageProps {
   params: {
@@ -23,6 +27,20 @@ export default function CourseStartPage({ params }: CourseStartPageProps) {
     async function resolveStart() {
       try {
         const decision = await courseApi.start(courseSlug);
+        if (decision.reason === "skill_test_required" && decision.target.startsWith("/assessment")) {
+          const units = await courseApi.listUnits(courseSlug);
+          const assessmentUnits = units.filter((unit) => unit.canonical_unit_id);
+          if (assessmentUnits.length === 0) {
+            throw new Error("No assessment-ready learning units were found for this course.");
+          }
+          clearPendingAssessmentContext();
+          writePendingCanonicalAssessment({
+            canonicalUnitIds: assessmentUnits.map((unit) => unit.canonical_unit_id!),
+            unitNameMap: Object.fromEntries(
+              assessmentUnits.map((unit) => [unit.canonical_unit_id!, unit.title]),
+            ),
+          });
+        }
         if (active) {
           router.replace(decision.target);
         }
