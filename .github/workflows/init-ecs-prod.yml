@@ -52,7 +52,7 @@ concurrency:
 jobs:
   init:
     name: Initialize Production Data
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: [self-hosted, phoenix-runner-02]
     environment: production
     if: >
       github.event_name == 'workflow_dispatch' ||

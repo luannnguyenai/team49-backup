@@ -16,7 +16,7 @@
 - Create: `.github/workflows/build-push.yml`
 
 - [ ] Define a `workflow_run` build workflow for `CI` plus manual dispatch.
-- [ ] Run on `[self-hosted, phoenix-runner]` and use production-scoped AWS vars/secrets.
+- [ ] Run on `[self-hosted, phoenix-runner-02]` and use production-scoped AWS vars/secrets.
 - [ ] Check out `workflow_run.head_sha` when triggered automatically.
 - [ ] Build and push backend/frontend images tagged by commit SHA.
 
@@ -26,7 +26,7 @@
 - Modify: `.github/workflows/deploy-ecs-prod.yml`
 
 - [ ] Replace `push` trigger and reusable `ci` job with `workflow_run` from `Build & Push to ECR`.
-- [ ] Change runner to `[self-hosted, phoenix-runner]`.
+- [ ] Change runner to `[self-hosted, phoenix-runner-02]`.
 - [ ] Update image tag resolution to use `workflow_run.head_sha` for automatic deploys.
 - [ ] Remove image build/push steps from deploy while preserving deploy, migration, bootstrap, and smoke logic.
 

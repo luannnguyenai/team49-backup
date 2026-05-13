@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   plan:
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: [self-hosted, phoenix-runner-02]
     environment: production
 
     steps:

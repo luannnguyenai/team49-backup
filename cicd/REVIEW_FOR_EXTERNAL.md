@@ -407,7 +407,7 @@ on:
 
 jobs:
   changes:
-    runs-on: [self-hosted, phoenix-runner]   # ← N3: self-hosted only
+    runs-on: [self-hosted, phoenix-runner-02]   # ← N3: self-hosted only
     steps:
       - uses: dorny/paths-filter@v3
         with:
@@ -555,8 +555,8 @@ And expose `bootstrap_task_family` as a variable, plumb from root module.
 ### N2. `CLOUDFRONT_DOMAIN` placeholder verification
 Verify `vars.CLOUDFRONT_DOMAIN` is set in GitHub repo settings before first run (already populated per SESSION_JOURNAL Bài 8).
 
-### N3. CI runs on self-hosted `phoenix-runner` only
-`ci.yml:31` `runs-on: [self-hosted, phoenix-runner]`. If runner offline → deploy blocks at `needs: ci`. Recommend `ubuntu-latest` for the gating job, or set up backup runner.
+### N3. CI runs on self-hosted `phoenix-runner-02` only
+`ci.yml:31` `runs-on: [self-hosted, phoenix-runner-02]`. If runner offline → deploy blocks at `needs: ci`. Recommend `ubuntu-latest` for the gating job, or set up backup runner.
 
 ### N4. Pre-flight CloudWatch log group check
 Add idempotent `aws logs create-log-group --log-group-name "$LOG_GROUP" 2>/dev/null || true` before each `register-task-definition` call. Low risk now (Terraform created them) but defends against staging clones.

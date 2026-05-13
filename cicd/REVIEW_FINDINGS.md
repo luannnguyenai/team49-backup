@@ -92,8 +92,8 @@ Kiến trúc `cicd/` **đúng spec** `AWS_CICD_GUIDE.md`: 8-step workflow shape,
 ### N2. `CLOUDFRONT_DOMAIN` placeholder verify
 - Workflow truyền từ `vars.CLOUDFRONT_DOMAIN`. Verify giá trị có set trong GitHub repo settings trước run lần đầu.
 
-### N3. CI chạy trên self-hosted `phoenix-runner`
-- `ci.yml:31` `runs-on: [self-hosted, phoenix-runner]`. Runner offline → deploy block.
+### N3. CI chạy trên self-hosted `phoenix-runner-02`
+- `ci.yml:31` `runs-on: [self-hosted, phoenix-runner-02]`. Runner offline → deploy block.
 - **Quyết định**: chuyển sang `ubuntu-latest` cho gate critical, hoặc setup runner backup.
 
 ### N4. Pre-flight CloudWatch log group

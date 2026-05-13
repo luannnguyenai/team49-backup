@@ -22,7 +22,7 @@ concurrency:
 jobs:
   build-backend:
     name: Build Backend
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: [self-hosted, phoenix-runner-02]
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
@@ -65,7 +65,7 @@ jobs:
 
   build-frontend:
     name: Build Frontend
-    runs-on: [self-hosted, phoenix-runner]
+    runs-on: [self-hosted, phoenix-runner-02]
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&

@@ -20,7 +20,7 @@ Add `.github/workflows/build-push.yml` with:
 
 - `workflow_run` trigger on successful `CI` completion for branch `main`
 - optional `workflow_dispatch` for manual rebuilds
-- self-hosted `phoenix-runner`
+- self-hosted `phoenix-runner-02`
 - AWS credential setup via OIDC role assumption
 - backend and frontend image builds pushed to ECR with immutable SHA tags
 
@@ -32,7 +32,7 @@ Refactor `.github/workflows/deploy-ecs-prod.yml` to:
 
 - trigger from successful `Build & Push to ECR` completion on `main`
 - keep `workflow_dispatch` for manual deploys and rollbacks
-- run on self-hosted `phoenix-runner`
+- run on self-hosted `phoenix-runner-02`
 - remove build/push steps entirely
 - resolve image tags from `workflow_run.head_sha` for automatic deploys, or from `image_tag` / `github.sha` for manual deploys
 - preserve ECS task definition registration, service updates, migration/bootstrap tasks, and smoke checks
