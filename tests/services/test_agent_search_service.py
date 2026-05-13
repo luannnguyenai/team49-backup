@@ -167,7 +167,7 @@ async def test_search_reranks_specific_mask_rcnn_above_broad_rcnn_family():
 
     assert response.results[0].canonical_unit_id == "mask-rcnn"
     assert response.results[0].score > response.results[1].score
-    assert response.trace.ranking_version == "unit_title_rerank_v1"
+    assert response.trace.ranking_version == "unit_title_rerank_v2"
 
 
 @pytest.mark.asyncio
@@ -268,3 +268,179 @@ async def test_search_reranks_kim_cnn_above_generic_cnn_units():
 
     assert response.results[0].canonical_unit_id == "kim-cnn"
     assert response.results[0].score > response.results[1].score
+
+
+@pytest.mark.asyncio
+async def test_search_prefers_current_path_when_relevance_is_tied_but_keeps_outside_results():
+    class Repo:
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
+            return [
+                SimpleNamespace(
+                    unit_id="vision-cnn",
+                    course_id="CS231n",
+                    lecture_id="lecture-05",
+                    lecture_title="Lecture 5: Image Classification with CNNs",
+                    unit_name="CNN foundations",
+                    summary="CNN foundations.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+                SimpleNamespace(
+                    unit_id="nlp-cnn",
+                    course_id="CS224n",
+                    lecture_id="lecture-16",
+                    lecture_title="Lecture 16 - ConvNets and TreeRNNs",
+                    unit_name="CNN foundations",
+                    summary="CNN foundations.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+            ]
+
+    service = AgentUnitSearchService(Repo(), FakeNavigation())
+    response = await service.search(
+        UnitSearchRequest(
+            query="CNN",
+            courseIds=["CS224n", "CS231n"],
+            currentPathCourseIds=["CS224n"],
+            preferredCourseIds=["CS224n"],
+        ),
+        allowed_course_ids=["CS224n", "CS231n"],
+    )
+
+    assert [result.canonical_unit_id for result in response.results] == [
+        "nlp-cnn",
+        "vision-cnn",
+    ]
+    assert response.results[0].outside_current_path is False
+    assert response.results[1].outside_current_path is True
+
+
+@pytest.mark.asyncio
+async def test_search_explicit_preferred_path_can_outrank_current_path():
+    class Repo:
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
+            return [
+                SimpleNamespace(
+                    unit_id="nlp-cnn",
+                    course_id="CS224n",
+                    lecture_id="lecture-16",
+                    lecture_title="Lecture 16 - ConvNets and TreeRNNs",
+                    unit_name="CNN foundations",
+                    summary="CNN foundations.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+                SimpleNamespace(
+                    unit_id="vision-cnn",
+                    course_id="CS231n",
+                    lecture_id="lecture-05",
+                    lecture_title="Lecture 5: Image Classification with CNNs",
+                    unit_name="CNN foundations",
+                    summary="CNN foundations.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+            ]
+
+    service = AgentUnitSearchService(Repo(), FakeNavigation())
+    response = await service.search(
+        UnitSearchRequest(
+            query="CNN của CV",
+            courseIds=["CS224n", "CS231n"],
+            currentPathCourseIds=["CS224n"],
+            preferredCourseIds=["CS231n"],
+            preferredScope="explicit_path",
+        ),
+        allowed_course_ids=["CS224n", "CS231n"],
+    )
+
+    assert response.results[0].canonical_unit_id == "vision-cnn"
+    assert response.results[0].outside_current_path is True
+
+
+@pytest.mark.asyncio
+async def test_search_explicit_path_prioritizes_dedicated_path_course_over_shared_course():
+    class Repo:
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
+            return [
+                SimpleNamespace(
+                    unit_id="shared-cnn",
+                    course_id="CS230",
+                    lecture_id="lecture-09",
+                    lecture_title="Lecture 9: What Is Going On Inside My Model?",
+                    unit_name="CNN foundations",
+                    summary="CNN foundations.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+                SimpleNamespace(
+                    unit_id="vision-cnn",
+                    course_id="CS231n",
+                    lecture_id="lecture-05",
+                    lecture_title="Lecture 5: Image Classification with CNNs",
+                    unit_name="CNN foundations",
+                    summary="CNN foundations.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+            ]
+
+    service = AgentUnitSearchService(Repo(), FakeNavigation())
+    response = await service.search(
+        UnitSearchRequest(
+            query="CNN của CV",
+            courseIds=["CS230", "CS224n", "CS231n"],
+            currentPathCourseIds=["CS230", "CS224n"],
+            preferredCourseIds=["CS230", "CS231n"],
+            preferredScope="explicit_path",
+        ),
+        allowed_course_ids=["CS230", "CS224n", "CS231n"],
+    )
+
+    assert [result.canonical_unit_id for result in response.results] == [
+        "vision-cnn",
+        "shared-cnn",
+    ]
+
+
+@pytest.mark.asyncio
+async def test_search_specific_query_beats_current_path_bonus():
+    class Repo:
+        async def search_canonical_units(self, terms, course_ids, limit, title_only=False):
+            return [
+                SimpleNamespace(
+                    unit_id="vision-cnn",
+                    course_id="CS231n",
+                    lecture_id="lecture-05",
+                    lecture_title="Lecture 5: Image Classification with CNNs",
+                    unit_name="CNN foundations",
+                    summary="CNN foundations.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+                SimpleNamespace(
+                    unit_id="kim-cnn",
+                    course_id="CS224n",
+                    lecture_id="lecture-16",
+                    lecture_title="Lecture 16 - ConvNets and TreeRNNs",
+                    unit_name="Kim CNN for sentence classification",
+                    summary="Kim CNN applies filters over n-grams for sentence classification.",
+                    description="",
+                    has_quiz_items=True,
+                ),
+            ]
+
+    service = AgentUnitSearchService(Repo(), FakeNavigation())
+    response = await service.search(
+        UnitSearchRequest(
+            query="Kim CNN",
+            courseIds=["CS224n", "CS231n"],
+            currentPathCourseIds=["CS231n"],
+            preferredCourseIds=["CS231n"],
+        ),
+        allowed_course_ids=["CS224n", "CS231n"],
+    )
+
+    assert response.results[0].canonical_unit_id == "kim-cnn"
+    assert response.results[0].outside_current_path is True
