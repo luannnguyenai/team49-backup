@@ -36,10 +36,12 @@ async def run_seed(
     *, input_dir: Path = DEFAULT_INPUT_DIR, validate_only: bool = False
 ) -> dict[str, Any]:
     """Import canonical content and product shell, or validate both without writes."""
+    canonical_units_path = input_dir / "units.jsonl"
+
     if validate_only:
         canonical_report = validate_canonical_artifacts(input_dir)
         canonical_report.pop("_loaded_rows", None)
-        product_bundle = build_product_shell_bundle()
+        product_bundle = build_product_shell_bundle(canonical_units_path=canonical_units_path)
         return {
             "mode": "validate_only",
             "canonical": canonical_report,
@@ -50,7 +52,10 @@ async def run_seed(
 
     async with async_session() as session:
         canonical_report = await import_canonical_artifacts(session=session, input_dir=input_dir)
-        product_report = await import_product_shell(session=session)
+        product_report = await import_product_shell(
+            session=session,
+            canonical_units_path=canonical_units_path,
+        )
         await seed_lectures_runtime(session)
         parity_report = await build_parity_report(session)
         await session.commit()
