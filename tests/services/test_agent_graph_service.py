@@ -1623,6 +1623,78 @@ async def test_graph_downgrades_grounded_answer_when_llm_rejects_evidence():
     assert response.fallback is not None
 
 
+async def test_graph_preserves_source_cards_when_no_source_answer_mentions_candidates():
+    class Router:
+        def route(self, message, route_context):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.9,
+                extracted_slots=AgentSlots(raw_topic="CNNs"),
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown=(
+                    "The clearest place to review CNNs in your current path is "
+                    "**CS231n - Lecture 5: Image Classification with CNNs**. "
+                    "The search also found a CNN-related segment in **Lecture 10**, "
+                    "but from titles alone I can't verify which one is best."
+                ),
+                evidence_sufficient=False,
+                confidence="no_source",
+                clarification_question=None,
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn-lecture-5",
+                    course_id="CS231n",
+                    unit_name="Image Classification with CNNs",
+                    lecture_title="Lecture 5: Image Classification with CNNs",
+                    summary="Lecture 5 introduces CNN-based image classification.",
+                    learn_href="/courses/cs231n/learn/lecture-5-image-classification-with-cnns-seg3",
+                    score=3,
+                    quiz_available=True,
+                ),
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn-lecture-10",
+                    course_id="CS231n",
+                    unit_name="Video Understanding",
+                    lecture_title="Lecture 10: Video Understanding",
+                    summary="Lecture 10 has a CNN-related segment.",
+                    learn_href="/courses/cs231n/learn/lecture-10-seg1",
+                    score=2,
+                    quiz_available=True,
+                ),
+            ],
+            trace=RetrievalTrace(trace_id="trace-cnn-candidate-cards", ranking_version="unit_search_v1"),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="Where should I review CNNs?", incomingMessageId="msg-cnn-candidates"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-cnn-candidates",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.confidence == "partial"
+    assert [citation.canonical_unit_id for citation in response.citations] == [
+        "unit-cnn-lecture-5",
+        "unit-cnn-lecture-10",
+    ]
+    assert response.fallback is None
+
+
 async def test_graph_lets_llm_review_related_evidence_as_partial_context():
     class Router:
         def route(self, message, route_context):
@@ -1880,7 +1952,13 @@ async def test_expanded_search_with_too_many_results_asks_to_refine_or_show_top_
 
     assert response.answer.confidence == "partial"
     assert "30 results" in response.answer.markdown
-    assert response.citations == []
+    assert [citation.canonical_unit_id for citation in response.citations] == [
+        "unit-cnn-0",
+        "unit-cnn-1",
+        "unit-cnn-2",
+        "unit-cnn-3",
+        "unit-cnn-4",
+    ]
     persisted = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]["pendingClarification"]
     assert persisted["clarification"]["payload"]["kind"] == "retrieval_query"
     assert persisted["clarification"]["payload"]["original_intent"] == "find_content"
@@ -2006,7 +2084,13 @@ async def test_current_path_search_with_too_many_results_asks_to_refine_or_show_
     assert response.answer.confidence == "partial"
     assert response.answer.markdown == "Router generated refinement question for CNN with 30 results."
     assert "I found" not in response.answer.markdown
-    assert response.citations == []
+    assert [citation.canonical_unit_id for citation in response.citations] == [
+        "unit-current-cnn-0",
+        "unit-current-cnn-1",
+        "unit-current-cnn-2",
+        "unit-current-cnn-3",
+        "unit-current-cnn-4",
+    ]
     persisted = conversation_repo.upsert_memory.await_args.kwargs["summary_json"]["pendingClarification"]
     assert persisted["clarification"]["payload"]["search_scope"] == "current_path"
     assert persisted["clarification"]["payload"]["show_top_results_allowed"] is True
@@ -2487,7 +2571,10 @@ async def test_path_choice_action_searches_selected_path_with_original_topic():
 
     assert response.answer.confidence == "grounded"
     assert search_requests[0].query == "CNNs"
-    assert search_requests[0].course_ids == ["CS231n"]
+    assert search_requests[0].course_ids == ["CS231n", "CS224n"]
+    assert search_requests[0].current_path_course_ids == ["CS224n"]
+    assert search_requests[0].preferred_course_ids == ["CS231n"]
+    assert search_requests[0].preferred_scope == "explicit_path"
     assert response.actions[0].type == "open_unit"
 
 
@@ -4107,6 +4194,178 @@ async def test_graph_persists_pending_path_switch_action():
     repo.create_pending_action.assert_awaited_once()
     assert response.actions[0].action_id == "act-1"
     assert events == ["interrupted"]
+
+
+async def test_graph_chat_stream_persists_pending_replan_action_with_checkpoint_state():
+    conversation_id = str(uuid4())
+    user_id = str(uuid4())
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="request_replan",
+                confidence=0.95,
+                extracted_slots=AgentSlots(canonical_unit_ids=["unit-a"]),
+                rationale="replan",
+            )
+
+    async def create_pending_action(**kwargs):
+        return SimpleNamespace(action_id="act-replan", **kwargs)
+
+    repo = SimpleNamespace(
+        create_pending_action=AsyncMock(side_effect=create_pending_action),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        graph_repo=repo,
+        thread_lock=NoopThreadLock(),
+    )
+
+    events = []
+    stream = await service.chat_stream(
+        request=AgentChatRequest(message="Send me replan link", incomingMessageId="msg-replan"),
+        conversation_id=conversation_id,
+        thread_id="thread-replan-stream",
+        user_id=user_id,
+        allowed_course_ids=["CS231n"],
+    )
+    async for line in stream:
+        events.append(line)
+
+    repo.create_pending_action.assert_awaited_once()
+    kwargs = repo.create_pending_action.await_args.kwargs
+    assert kwargs["conversation_id"] == conversation_id
+    assert kwargs["thread_id"] == "thread-replan-stream"
+    assert kwargs["user_id"] == user_id
+    assert kwargs["idempotency_key"] == "thread-replan-stream:msg-replan:request_replan"
+    assert any('"done"' in event and '"act-replan"' in event for event in events)
+    assert not any("AGENT_STREAM_ERROR" in event for event in events)
+
+
+async def test_graph_chat_stream_persists_assistant_citations_for_source_cards():
+    conversation_id = str(uuid4())
+    user_id = str(uuid4())
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.95,
+                extracted_slots=AgentSlots(raw_topic="CNNs", search_queries=["CNNs"]),
+            )
+
+        def rag_think(self, **kwargs):
+            return SimpleNamespace(
+                user_goal="Find where to review CNNs",
+                active_topic="CNNs",
+                evidence_need="course unit citations",
+                tool_plan=["search current path"],
+            )
+
+        def rag_act(self, **kwargs):
+            return AgenticRAGToolCall(
+                tool="search_current_path_units",
+                arguments={"query": "CNNs"},
+                rationale="Search current path for CNN content.",
+            )
+
+        def rag_observe(self, **kwargs):
+            return kwargs["tool_observation"]
+
+        def rag_respond_stream(self, **kwargs):
+            yield "Review CS231n Lecture 5 first."
+
+        def rag_respond(self, **kwargs):
+            return AgenticRAGFinal(
+                answer_markdown="Review CS231n Lecture 5 first.",
+                evidence_status="grounded",
+                evidence_sufficient=True,
+            )
+
+    async def search(request, allowed_course_ids):
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="unit-cnn",
+                    course_id="CS231n",
+                    unit_name="Lecture 5: Image Classification with CNNs",
+                    lecture_title="Lecture 5: Image Classification",
+                    summary="CNN layers are introduced in this lecture.",
+                    learn_href="/courses/cs231n/learn/lecture-5-seg1",
+                    score=4,
+                    quiz_available=True,
+                )
+            ],
+            trace=RetrievalTrace(trace_id="trace-cnn-stream", ranking_version="unit_search_v1"),
+        )
+
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(return_value=[]),
+        add_message=AsyncMock(),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        conversation_repo=conversation_repo,
+        thread_lock=NoopThreadLock(),
+    )
+
+    events = []
+    stream = await service.chat_stream(
+        request=AgentChatRequest(message="Where should I review CNNs?", incomingMessageId="msg-cnn-stream"),
+        conversation_id=conversation_id,
+        thread_id="thread-cnn-stream",
+        user_id=user_id,
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+    async for line in stream:
+        events.append(line)
+
+    assert any('"done"' in event and '"unit-cnn"' in event for event in events)
+    assistant_call = conversation_repo.add_message.await_args_list[-1].kwargs
+    assert assistant_call["role"] == "assistant"
+    assert assistant_call["citations"][0]["canonical_unit_id"] == "unit-cnn"
+
+
+async def test_graph_chat_stream_persists_exact_greeting_response():
+    conversation_id = str(uuid4())
+    user_id = str(uuid4())
+    conversation_repo = SimpleNamespace(
+        get_memory=AsyncMock(return_value=None),
+        list_messages=AsyncMock(return_value=[]),
+        add_message=AsyncMock(),
+        upsert_memory=AsyncMock(),
+    )
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=SimpleNamespace(),
+        conversation_repo=conversation_repo,
+        thread_lock=NoopThreadLock(),
+    )
+
+    events = []
+    stream = await service.chat_stream(
+        request=AgentChatRequest(message="Hello", incomingMessageId="msg-greeting-stream"),
+        conversation_id=conversation_id,
+        thread_id="thread-greeting-stream",
+        user_id=user_id,
+        allowed_course_ids=["CS231n"],
+    )
+    async for line in stream:
+        events.append(line)
+
+    assert any('"done"' in event and "What AI/ML topic" in event for event in events)
+    assert [call.kwargs["role"] for call in conversation_repo.add_message.await_args_list] == [
+        "user",
+        "assistant",
+    ]
 
 
 async def test_dispatch_persists_path_switch_picker_action_without_target_path():

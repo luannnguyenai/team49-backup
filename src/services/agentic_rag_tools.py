@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from inspect import signature
 
 from src.schemas.agent import AgentFallback, AgentWarning
 from src.services.agent_error_codes import classify_rag_error
@@ -123,6 +124,7 @@ class AgenticRAGToolExecutor:
         intent: str,
         slots: AgentSlots,
         allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None = None,
     ) -> AgenticRAGObservation:
         spec = self.registry.resolve(tool_call.tool)
         if spec is None:
@@ -180,11 +182,25 @@ class AgenticRAGToolExecutor:
                     allowed_course_ids=allowed_course_ids,
                 )
             search_slots = slots.model_copy(update={"search_scope": "expanded_paths"})
-            return await self._search(tool_call, message, intent, search_slots, allowed_course_ids)
+            return await self._search(
+                tool_call,
+                message,
+                intent,
+                search_slots,
+                allowed_course_ids,
+                current_path_course_ids,
+            )
 
         if tool_call.tool in {"search_current_path_units", "get_unit_summary"}:
             search_slots = slots.model_copy(update={"search_scope": "current_path"})
-            return await self._search(tool_call, message, intent, search_slots, allowed_course_ids)
+            return await self._search(
+                tool_call,
+                message,
+                intent,
+                search_slots,
+                allowed_course_ids,
+                current_path_course_ids,
+            )
 
         result = await self.tools.clarify(message, reason=f"Tool {spec.name} is not available yet.")
         return self._observation("ask_clarification", result, "needs_clarification")
@@ -196,6 +212,7 @@ class AgenticRAGToolExecutor:
         intent: str,
         slots: AgentSlots,
         allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None,
     ) -> AgenticRAGObservation:
         query = str(tool_call.arguments.get("query") or "").strip()
         search_queries = [
@@ -217,11 +234,18 @@ class AgenticRAGToolExecutor:
         if query:
             search_slots = search_slots.model_copy(update={"raw_topic": query})
         try:
+            parameters = signature(self.tools.find_content).parameters
+            kwargs = (
+                {"current_path_course_ids": current_path_course_ids}
+                if "current_path_course_ids" in parameters
+                else {}
+            )
             result = await self.tools.find_content(
                 message,
                 intent,
                 search_slots,
                 allowed_course_ids,
+                **kwargs,
             )
         except Exception as exc:
             error_code = classify_rag_error(exc)

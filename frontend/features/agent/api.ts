@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { api, refreshAccessToken, tokenStorage } from "@/lib/api";
 import {
   normalizeChatModelAvailability,
   type ChatModelAvailabilityResponse,
@@ -7,6 +7,7 @@ import {
 
 export const AGENT_REQUEST_TIMEOUT_MS = 60_000;
 const AGENT_CHAT_PATH = "/api/agent/chat";
+const AGENT_CHAT_STREAM_PATH = "/api/agent/chat/stream";
 const AGENT_ACTION_CONTINUE_PATH = "/api/agent/actions/continue";
 
 function agentRuntimeEndpoint(path: string) {
@@ -155,6 +156,45 @@ export interface AgentChatResponse {
 
 export type AgentToolMode = "course" | "web_papers";
 export type AgentChatModelId = ChatModelId;
+
+export interface StreamStatusEvent {
+  status: string;
+}
+
+export interface StreamThoughtEvent {
+  thought: {
+    user_goal: string;
+    active_topic?: string;
+    evidence_need: string;
+    tool_plan: string[];
+  };
+}
+
+export interface StreamChunkEvent {
+  chunk: string;
+}
+
+export interface StreamDoneEvent {
+  done: AgentChatResponse;
+}
+
+export type StreamEvent = StreamStatusEvent | StreamThoughtEvent | StreamChunkEvent | StreamDoneEvent;
+
+export function isStreamStatus(event: StreamEvent): event is StreamStatusEvent {
+  return "status" in event && !("chunk" in event) && !("done" in event) && !("thought" in event);
+}
+
+export function isStreamThought(event: StreamEvent): event is StreamThoughtEvent {
+  return "thought" in event;
+}
+
+export function isStreamChunk(event: StreamEvent): event is StreamChunkEvent {
+  return "chunk" in event;
+}
+
+export function isStreamDone(event: StreamEvent): event is StreamDoneEvent {
+  return "done" in event;
+}
 
 export interface AgentInProgressResponse {
   status: "in_progress";
@@ -330,6 +370,92 @@ export const agentApi = {
         timeout: AGENT_REQUEST_TIMEOUT_MS,
       })
       .then((r) => r.data),
+
+  chatStream: (
+    payload: {
+      message: string;
+      incomingMessageId: string;
+      conversationId?: string | null;
+      routeContext?: Record<string, unknown>;
+      traceMode?: "none" | "summary" | "full";
+      toolMode?: AgentToolMode;
+      chatModelId?: AgentChatModelId;
+    },
+    signal?: AbortSignal,
+  ) => {
+    const endpoint = agentRuntimeEndpoint(AGENT_CHAT_STREAM_PATH);
+    const publicApiUrl =
+      typeof window !== "undefined" ? process.env.NEXT_PUBLIC_API_URL?.trim() : undefined;
+    let fetchUrl: string;
+    if (publicApiUrl) {
+      const base = publicApiUrl.endsWith("/") ? publicApiUrl : `${publicApiUrl}/`;
+      const directUrl = new URL(endpoint.replace(/^\//, ""), base);
+      if (directUrl.origin === window.location.origin) {
+        fetchUrl = directUrl.pathname;
+      } else {
+        fetchUrl = directUrl.href;
+      }
+    } else {
+      fetchUrl = endpoint;
+    }
+    const requestBody = JSON.stringify(payload);
+    const buildHeaders = () => {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const accessToken = tokenStorage.getAccess();
+      if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+      }
+      return headers;
+    };
+    const send = () =>
+      fetch(fetchUrl, {
+        method: "POST",
+        headers: buildHeaders(),
+        body: requestBody,
+        credentials: "include",
+        signal,
+      });
+    return send().then(async (initialResponse) => {
+      let response = initialResponse;
+      if (response.status === 401) {
+        const refreshedToken = await refreshAccessToken();
+        if (refreshedToken) {
+          response = await send();
+        }
+      }
+      if (!response.ok) {
+        throw new Error(`Stream request failed: ${response.status}`);
+      }
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      return {
+        async *[Symbol.asyncIterator]() {
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split("\n");
+              buffer = lines.pop()!;
+              for (const line of lines) {
+                if (!line.trim()) continue;
+                yield JSON.parse(line) as StreamEvent;
+              }
+            }
+            if (buffer.trim()) {
+              yield JSON.parse(buffer) as StreamEvent;
+            }
+          } finally {
+            reader.releaseLock();
+          }
+        },
+        abort() {
+          reader.cancel().catch(() => undefined);
+        },
+      };
+    });
+  },
 
   continueAction: (payload: {
     conversationId: string;

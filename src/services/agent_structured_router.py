@@ -115,14 +115,28 @@ class StructuredAgentRouter:
             if effective_target_path and intent != "request_path_switch"
             else "current_path"
         )
+        raw_topic = result.raw_topic
         search_queries = result.search_queries
+        if intent in {
+            "find_content",
+            "explain_concept",
+            "general_course_question",
+            "navigate_to_unit",
+        }:
+            clean_topic = (
+                self._extract_prerequisite_target(raw_topic)
+                or self._extract_prerequisite_target(message)
+            )
+            if clean_topic:
+                raw_topic = clean_topic
+                search_queries = self._prepend_search_query(search_queries, clean_topic)
         if recent_messages and len(message.split()) <= 8 and result.raw_topic:
-            search_queries = [result.raw_topic]
+            search_queries = [raw_topic or result.raw_topic]
         return AgentRoute(
             intent=intent,
             confidence=result.confidence,
             extracted_slots=AgentSlots(
-                raw_topic=result.raw_topic,
+                raw_topic=raw_topic,
                 search_queries=search_queries,
                 target_path=effective_target_path,
                 requested_path_id=effective_target_path
@@ -137,6 +151,41 @@ class StructuredAgentRouter:
             clarification_question=result.clarification_question,
             candidate_intent=candidate_intent,
         )
+
+    @staticmethod
+    def _extract_prerequisite_target(value: str | None) -> str | None:
+        if not value:
+            return None
+        text = value.strip().strip("?.! ")
+        if not re.search(r"\bprereq(?:uisite)?s?\b", text, flags=re.IGNORECASE):
+            return None
+        patterns = (
+            r"\bprereq(?:uisite)?s?(?:\s+(?:chain|path|order|sequence|list))?\s+(?:for|of|to|before)\s+(?P<topic>.+)$",
+            r"^(?P<topic>.+?)\s+prereq(?:uisite)?s?(?:\s+(?:chain|path|order|sequence|list))?$",
+        )
+        for pattern in patterns:
+            match = re.search(pattern, text, flags=re.IGNORECASE)
+            if not match:
+                continue
+            topic = re.sub(r"\s+", " ", match.group("topic")).strip(" ,;:?.!")
+            if topic and not re.search(r"\bprereq(?:uisite)?s?\b", topic, flags=re.IGNORECASE):
+                return topic
+        return None
+
+    @staticmethod
+    def _prepend_search_query(search_queries: list[str], query: str) -> list[str]:
+        deduped = [query]
+        seen = {query.casefold()}
+        for item in search_queries:
+            normalized = item.strip()
+            if not normalized:
+                continue
+            key = normalized.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(normalized)
+        return deduped
 
     def rag_think(
         self,
@@ -298,6 +347,47 @@ class StructuredAgentRouter:
                 }
             )
         return final
+
+    def rag_respond_stream(
+        self,
+        *,
+        message: str,
+        thought,
+        observations: list[dict],
+        route_context: RouteContext | None,
+        recent_messages: list[dict],
+    ):
+        messages = [
+            {
+                "role": "system",
+                "content": self._agentic_prompt("responding.system"),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Route context: {self._dump_route_context(route_context)}\n"
+                    f"Recent visible thread messages: {recent_messages}\n"
+                    f"Thought summary: {self._dump_like(thought)}\n"
+                    f"Validated observations: {observations}\n"
+                    f"User message: {message}"
+                ),
+            },
+        ]
+        try:
+            for chunk in self.model.stream(messages):
+                content = getattr(chunk, "content", None)
+                if isinstance(content, list):
+                    content = "".join(
+                        p.get("text", "") if isinstance(p, dict) else str(p)
+                        for p in content
+                    )
+                if content:
+                    yield content
+        except Exception as exc:
+            raise AgentRouterUnavailableError(
+                "agentic_rag_responding_stream_error",
+                classify_agent_error(exc, default="AGENT_LLM_UNAVAILABLE"),
+            ) from exc
 
     def resolve_pending_followup(
         self,

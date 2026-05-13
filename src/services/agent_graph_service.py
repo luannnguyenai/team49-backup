@@ -481,6 +481,289 @@ class AgentGraphService:
                     )
                 raise
 
+    async def chat_stream(
+        self,
+        request: AgentChatRequest,
+        conversation_id: str,
+        thread_id: str,
+        user_id: str,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None = None,
+    ):
+        from collections.abc import AsyncGenerator
+
+        async def _generate() -> AsyncGenerator[str, None]:
+            import json as _json
+
+            try:
+                logger.info("chat_stream: _generate starting conv=%s", conversation_id)
+                sanitized_request, input_guardrail = self._sanitize_request(request)
+
+                persisted_user_message = False
+
+                async def persist_user_message_if_needed() -> None:
+                    nonlocal persisted_user_message
+                    if persisted_user_message:
+                        return
+                    if self.conversation_repo is None or not hasattr(self.conversation_repo, "add_message"):
+                        return
+                    await self.conversation_repo.add_message(
+                        conversation_id=UUID(str(conversation_id)),
+                        user_id=UUID(str(user_id)),
+                        role="user",
+                        markdown=sanitized_request.message,
+                    )
+                    persisted_user_message = True
+
+                async def persist_assistant_message(response: AgentChatResponse) -> None:
+                    await persist_user_message_if_needed()
+                    if self.conversation_repo is None or not hasattr(self.conversation_repo, "add_message"):
+                        return
+                    await self.conversation_repo.add_message(
+                        conversation_id=UUID(str(conversation_id)),
+                        user_id=UUID(str(user_id)),
+                        role="assistant",
+                        markdown=response.answer.markdown,
+                        citations=[
+                            citation.model_dump(mode="json") for citation in response.citations
+                        ],
+                        actions=[action.model_dump(mode="json") for action in response.actions],
+                    )
+                    await self._compact_thread_memory_if_needed(
+                        conversation_id=conversation_id,
+                        user_id=user_id,
+                        thread_id=thread_id,
+                    )
+
+                if input_guardrail.should_block:
+                    block_response = self.composer.compose_guardrail_block(
+                        conversation_id=conversation_id,
+                        block_reason=input_guardrail.block_reason or "pii_input_blocked",
+                        error_code=input_guardrail.error_code,
+                    )
+                    block_response = self._sanitize_response(block_response, input_guardrail)
+                    await persist_assistant_message(block_response)
+                    yield _json.dumps({"done": block_response.model_dump(mode="json", by_alias=True)}) + "\n"
+                    return
+
+                exact_greeting = self._compose_exact_greeting_response(
+                    conversation_id=conversation_id,
+                    message=sanitized_request.message,
+                )
+                if exact_greeting is not None:
+                    exact_greeting = self._sanitize_response(exact_greeting, input_guardrail)
+                    await persist_assistant_message(exact_greeting)
+                    yield _json.dumps({"done": exact_greeting.model_dump(mode="json", by_alias=True)}) + "\n"
+                    return
+
+                normalized_language = await self.language_normalizer.normalize(sanitized_request.message)
+                sanitized_request = sanitized_request.model_copy(
+                    update={"message": normalized_language.normalized_text}
+                )
+
+                pending_for_guardrail = await self._load_pending_clarification(
+                    conversation_id, user_id, thread_id,
+                )
+                assistant_context = await self._load_guardrail_assistant_context(
+                    conversation_id, user_id,
+                )
+                guardrail_decision = await self._route_guardrail(
+                    message=sanitized_request.message,
+                    route_context=sanitized_request.route_context,
+                    allowed_course_ids=allowed_course_ids,
+                    current_path_course_ids=current_path_course_ids,
+                    pending_clarification=pending_for_guardrail,
+                    assistant_context=assistant_context,
+                )
+                guardrail_response = self._compose_guardrail_response(
+                    conversation_id=conversation_id,
+                    decision=guardrail_decision,
+                )
+                if guardrail_response is not None:
+                    guardrail_response = await self._enforce_response_language(
+                        guardrail_response,
+                        normalized_language,
+                    )
+                    guardrail_response = self._sanitize_response(guardrail_response, input_guardrail)
+                    await persist_assistant_message(guardrail_response)
+                    yield _json.dumps({"done": guardrail_response.model_dump(mode="json", by_alias=True)}) + "\n"
+                    return
+
+                async def emit_done_response(response: AgentChatResponse) -> str:
+                    response = await self._enforce_response_language(response, normalized_language)
+                    response = self._sanitize_response(response, input_guardrail)
+                    await persist_assistant_message(response)
+                    return _json.dumps({"done": response.model_dump(mode="json", by_alias=True)}) + "\n"
+
+                if request.tool_mode == "web_papers":
+                    async for event in self._stream_external_research(
+                        request=sanitized_request,
+                        conversation_id=conversation_id,
+                        user_id=user_id,
+                    ):
+                        if not event.strip():
+                            continue
+                        try:
+                            parsed = _json.loads(event.strip())
+                        except (ValueError, KeyError):
+                            yield event
+                            continue
+                        if isinstance(parsed, dict) and "done" in parsed:
+                            yield await emit_done_response(AgentChatResponse.model_validate(parsed["done"]))
+                        else:
+                            yield event
+                    return
+
+                yield _json.dumps({"status": "Analyzing your question"}) + "\n"
+                logger.info("chat_stream: before _route_intent conv=%s msg=%s", conversation_id, sanitized_request.message[:80])
+                stream_state = AgentCheckpointState(
+                    thread_id=thread_id,
+                    conversation_id=conversation_id,
+                    user_id=user_id,
+                    incoming_message_id=sanitized_request.incoming_message_id,
+                    route_context=sanitized_request.route_context,
+                    trace_id=str(uuid4()),
+                ).model_dump()
+                stream_state["message"] = sanitized_request.message
+                stream_state["pending_clarification"] = await self._load_pending_clarification(
+                    conversation_id, user_id, thread_id,
+                )
+                stream_state["recent_messages"] = await self._load_recent_message_context(conversation_id, user_id)
+                stream_state["allowed_course_ids"] = allowed_course_ids
+                stream_state["current_path_course_ids"] = current_path_course_ids or allowed_course_ids
+                stream_state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id, thread_id)
+                route_state = await self._route_intent(stream_state)
+                logger.info("chat_stream: after _route_intent intent=%s conv=%s", route_state.get("intent"), conversation_id)
+                canonicalized = await self._canonicalize_slots(route_state)
+                policy_state = await self._policy_guard(canonicalized)
+                logger.info("chat_stream: after _policy_guard intent=%s should_rag=%s conv=%s", policy_state.get("intent"), self._should_use_rag_react(policy_state), conversation_id)
+
+                intent = policy_state.get("intent", "")
+                slots = policy_state.get("slots")
+                if isinstance(slots, dict):
+                    slots = AgentSlots.model_validate(slots)
+
+                should_rag = self._should_use_rag_react(policy_state)
+                supports_agentic = self._router_supports_agentic_rag()
+
+                if should_rag and supports_agentic:
+                    slots = self._slots_with_active_citation_for_followup(policy_state, slots)
+                    async for event in self.agentic_rag.run_stream(
+                        message=sanitized_request.message,
+                        intent=intent,
+                        slots=slots,
+                        route_context=policy_state.get("route_context"),
+                        recent_messages=policy_state.get("recent_messages") or [],
+                        allowed_course_ids=allowed_course_ids,
+                        current_path_course_ids=policy_state.get("current_path_course_ids"),
+                    ):
+                        if not event.strip():
+                            continue
+                        try:
+                            parsed = _json.loads(event.strip())
+                        except (ValueError, KeyError):
+                            yield event
+                            continue
+                        if isinstance(parsed, dict) and "done" in parsed:
+                            result_data = parsed["done"]
+                            if isinstance(result_data, dict) and "answer_markdown" in result_data:
+                                result = ToolResult.model_validate(result_data)
+                            elif isinstance(result_data, dict):
+                                result = ToolResult(
+                                    kind=result_data.get("kind", "find_content"),
+                                    answer_markdown=result_data.get("answer_markdown", ""),
+                                    citations=result_data.get("citations", []),
+                                    requires_evidence=result_data.get("requires_evidence", False),
+                                    metadata=result_data.get("metadata", {}),
+                                )
+                            else:
+                                yield event
+                                continue
+                            response = self.composer.compose(
+                                conversation_id=conversation_id,
+                                message_id=str(uuid4()),
+                                result=result,
+                            )
+                            logger.info("chat_stream: done wrapping citations=%d confidence=%s conv=%s", len(response.citations), response.answer.confidence, conversation_id)
+                            yield await emit_done_response(response)
+                        else:
+                            yield event
+                else:
+                    if self._graph is None:
+                        raise RuntimeError("langgraph_not_installed")
+                    final_state = await self._graph.ainvoke(
+                        policy_state,
+                        config={"configurable": {"thread_id": thread_id}},
+                    )
+                    result = final_state.get("tool_result")
+                    if isinstance(result, dict):
+                        result = ToolResult.model_validate(result)
+                    response = self.composer.compose(
+                        conversation_id=conversation_id,
+                        message_id=str(uuid4()),
+                        result=result,
+                    )
+                    yield await emit_done_response(response)
+            except Exception as exc:
+                error_code = "AGENT_STREAM_ERROR"
+                if isinstance(exc, AgentRouterUnavailableError):
+                    error_code = exc.error_code or "AGENT_ROUTER_UNAVAILABLE"
+                logger.exception("chat_stream_failed code=%s conversation_id=%s exc_type=%s exc_msg=%s", error_code, conversation_id, type(exc).__name__, str(exc)[:200])
+                error_response = AgentChatResponse(
+                    conversation_id=conversation_id,
+                    message_id=str(uuid4()),
+                    answer=AgentAnswer(
+                        markdown="The AI assistant encountered an error while processing your request. Please try again.",
+                        confidence="fallback",
+                    ),
+                    fallback=AgentFallback(
+                        reason="agent_unavailable",
+                        message=str(exc),
+                        error_code=error_code,
+                    ),
+                )
+                yield _json.dumps({"done": error_response.model_dump(mode="json", by_alias=True)}) + "\n"
+
+        return _generate()
+
+    async def _stream_external_research(self, *, request, conversation_id, user_id):
+        import json as _json
+
+        if not settings.external_research_enabled:
+            yield _json.dumps({"status": "Searching web and papers"}) + "\n"
+            result = ToolResult(
+                kind="find_content",
+                answer_markdown="External web and paper search is temporarily disabled.",
+                citations=[],
+                requires_evidence=False,
+                metadata={"tool_mode": "web_papers", "answer_confidence": "fallback"},
+            )
+            response = self.composer.compose(conversation_id=conversation_id, message_id=str(uuid4()), result=result)
+            yield _json.dumps({"done": response.model_dump(mode="json", by_alias=True)}) + "\n"
+            return
+
+        recent_messages = await self._load_recent_message_context(conversation_id, user_id)
+        generator = await self.external_research.answer_stream(
+            message=request.message,
+            recent_messages=recent_messages,
+        )
+        async for line in generator:
+            if line.strip():
+                parsed = _json.loads(line.strip())
+                if "done" in parsed:
+                    tool_result_data = parsed["done"]
+                    result = tool_result_data
+                    if isinstance(result, dict):
+                        result = ToolResult.model_validate(result)
+                    response = self.composer.compose(
+                        conversation_id=conversation_id,
+                        message_id=str(uuid4()),
+                        result=result,
+                    )
+                    yield _json.dumps({"done": response.model_dump(mode="json", by_alias=True)}) + "\n"
+                else:
+                    yield line
+
     def _sanitize_request(
         self,
         request: AgentChatRequest,
@@ -519,6 +802,11 @@ class AgentGraphService:
             if self._should_allow_recent_assistant_guardrail_followup(
                 message=message,
                 assistant_context=assistant_context or [],
+                decision=decision,
+            ):
+                return GuardrailDecision.allow()
+            if self._should_allow_safe_app_action_guardrail_clarify(
+                message=message,
                 decision=decision,
             ):
                 return GuardrailDecision.allow()
@@ -640,6 +928,25 @@ class AgentGraphService:
                 )
         context_terms = self._normalized_terms(" ".join(context_parts))
         return bool(message_terms & context_terms)
+
+    @staticmethod
+    def _should_allow_safe_app_action_guardrail_clarify(
+        *,
+        message: str,
+        decision: GuardrailDecision,
+    ) -> bool:
+        if decision.safety_label != "SAFE" or decision.action != "ASK_CLARIFY":
+            return False
+        normalized = str(message or "").strip().lower()
+        if not normalized:
+            return False
+        replan_terms = {"replan", "re-plan", "recalculate plan", "optimize plan"}
+        if any(term in normalized for term in replan_terms):
+            return True
+        if "repath" in normalized or "re-path" in normalized:
+            return True
+        path_action_terms = {"switch", "change", "move", "transfer"}
+        return "path" in normalized and any(term in normalized for term in path_action_terms)
 
     @staticmethod
     def _compose_guardrail_response(
@@ -1316,6 +1623,7 @@ class AgentGraphService:
             route_context=state.get("route_context"),
             recent_messages=state.get("recent_messages") or [],
             allowed_course_ids=state["allowed_course_ids"],
+            current_path_course_ids=state.get("current_path_course_ids"),
         )
         update: dict = {**state, "slots": slots, "tool_result": result}
         return self._attach_rag_pending_clarification(update, result, slots)
@@ -1469,6 +1777,7 @@ class AgentGraphService:
             state["intent"],
             search_slots,
             state["allowed_course_ids"],
+            current_path_course_ids=state.get("current_path_course_ids"),
         )
         active_result = self._recent_citation_result(
             {**state, "slots": search_slots, "rag_tool_call": tool_call},
@@ -1614,6 +1923,19 @@ class AgentGraphService:
                     },
                 }
             )
+        if result.citations and self._answer_mentions_citation(answer_markdown, result.citations):
+            return result.model_copy(
+                update={
+                    "answer_markdown": answer_markdown,
+                    "requires_evidence": False,
+                    "metadata": {
+                        **result.metadata,
+                        "answer_confidence": "partial",
+                        "grounding_evidence_sufficient": False,
+                        "preserved_candidate_citations": True,
+                    },
+                }
+            )
         return result.model_copy(
             update={
                 "answer_markdown": answer_markdown,
@@ -1642,6 +1964,31 @@ class AgentGraphService:
                 "bạn cần",
             )
         )
+
+    @staticmethod
+    def _answer_mentions_citation(markdown: str | None, citations: list[AgentCitation]) -> bool:
+        def normalize(value: str | None) -> str:
+            return re.sub(
+                r"\s+",
+                " ",
+                re.sub(r"[^0-9a-zA-Z]+", " ", value or ""),
+            ).strip().casefold()
+
+        answer = normalize(markdown)
+        if not answer:
+            return False
+        for citation in citations:
+            identifiers = [
+                citation.unit_name,
+                citation.lecture_title,
+                f"{citation.course_id} {citation.unit_name}",
+                f"{citation.course_id} {citation.lecture_title or ''}",
+            ]
+            for identifier in identifiers:
+                candidate = normalize(identifier)
+                if len(candidate) >= 6 and candidate in answer:
+                    return True
+        return False
 
     def _compose_source_limited_answer(self, state: dict, result: ToolResult) -> str:
         composer = getattr(self.response_router, "compose_source_limited_answer", None)
@@ -2061,6 +2408,7 @@ class AgentGraphService:
                 state["intent"],
                 slots,
                 state["allowed_course_ids"],
+                current_path_course_ids=state.get("current_path_course_ids"),
             )
             if result.citations and (
                 result.requires_evidence
@@ -2124,6 +2472,22 @@ class AgentGraphService:
                                         **result.metadata,
                                         "answer_confidence": "partial",
                                         "grounding_evidence_sufficient": False,
+                                    },
+                                }
+                            )
+                        elif result.citations and self._answer_mentions_citation(
+                            answer_markdown,
+                            result.citations,
+                        ):
+                            result = result.model_copy(
+                                update={
+                                    "answer_markdown": answer_markdown,
+                                    "requires_evidence": False,
+                                    "metadata": {
+                                        **result.metadata,
+                                        "answer_confidence": "partial",
+                                        "grounding_evidence_sufficient": False,
+                                        "preserved_candidate_citations": True,
                                     },
                                 }
                             )

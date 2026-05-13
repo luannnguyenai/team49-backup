@@ -370,6 +370,11 @@ class UnitSearchRequest(BaseModel):
     query: str = Field(min_length=1)
     scope: AgentScope | None = None
     course_ids: list[str] | None = Field(default=None, alias="courseIds")
+    current_path_course_ids: list[str] | None = Field(default=None, alias="currentPathCourseIds")
+    preferred_course_ids: list[str] | None = Field(default=None, alias="preferredCourseIds")
+    preferred_scope: Literal["current_path", "explicit_path", "expanded_paths"] | None = Field(
+        default=None, alias="preferredScope"
+    )
     limit: int = Field(default=5, ge=1, le=20)
     intent: AgentIntent | None = None
 

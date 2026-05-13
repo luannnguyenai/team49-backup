@@ -142,6 +142,7 @@ async def api_list_course_units(
                 "unit_type": u["unit_type"],
                 "order_index": u["order_index"],
                 "lecture_label": u.get("lecture_label"),
+                "canonical_unit_id": u.get("canonical_unit_id"),
                 "is_completed": u.get("is_completed", False),
             }
             for u in units

@@ -58,6 +58,7 @@ class CourseUnitListItem(BaseModel):
     unit_type: str
     order_index: int
     lecture_label: str | None = None
+    canonical_unit_id: str | None = None
     is_completed: bool = False
 
 

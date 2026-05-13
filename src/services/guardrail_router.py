@@ -266,11 +266,14 @@ class GuardrailRouterClient:
             return self._parse_openai_response(response.json())
 
     def _route_via_fallback_model(self, *, message: str, scope: GuardrailScopePacket) -> GuardrailDecision:
+        import logging as _logging
         model = self.fallback_model or self._build_fallback_model()
         if model is None:
             raise GuardrailRouterUnavailableError("guardrail_router_fallback_not_configured")
         response = model.invoke([{"role": "user", "content": build_guardrail_prompt(message, scope)}])
-        return parse_guardrail_decision(getattr(response, "content", response))
+        raw = getattr(response, "content", response)
+        _logging.getLogger(__name__).debug("guardrail_fallback raw_response type=%s repr=%.500s", type(raw).__name__, repr(raw)[:500])
+        return parse_guardrail_decision(raw)
 
     def _build_fallback_model(self):
         provider = self.config.fallback_provider.strip()
@@ -321,17 +324,22 @@ def parse_guardrail_decision(value: Any) -> GuardrailDecision:
         if text.startswith("json"):
             text = text[4:]
         text = text.strip()
+    import logging as _logging
     try:
         parsed = json.loads(text)
         if isinstance(parsed, dict):
             parsed = _normalize_guardrail_decision_payload(parsed)
         return GuardrailDecision.model_validate(parsed)
     except (json.JSONDecodeError, ValidationError, TypeError) as exc:
+        _logging.getLogger(__name__).warning("guardrail parse failed text=%.300s exc=%s", text[:300], exc)
         raise GuardrailRouterUnavailableError("guardrail_router_invalid_response") from exc
 
 
 def _normalize_guardrail_decision_payload(payload: dict[str, Any]) -> dict[str, Any]:
     normalized = dict(payload)
+    safety_label = str(normalized.get("safety_label", "")).strip().upper()
+    if safety_label in {"AMBIGUOUS", "N/A", "N_A", "NA", "NONE", ""}:
+        normalized["safety_label"] = "SAFE"
     attack_type = str(normalized.get("attack_type", "")).strip().lower()
     if attack_type in {"", "n/a", "n_a", "na", "none"}:
         normalized["attack_type"] = "none"

@@ -7,6 +7,20 @@ import httpx
 from lingua import Language, LanguageDetectorBuilder
 
 DetectedLanguage = Literal["en", "vi", "other"]
+VIETNAMESE_ONLY_CHARS = set("ăâđêôơưĂÂĐÊÔƠƯ")
+VIETNAMESE_PHRASE_HINTS = (
+    "tìm",
+    "giải",
+    "thích",
+    "cho tôi",
+    "là gì",
+    "ở đâu",
+    "được",
+    "không",
+    "học",
+    "bài",
+    "lộ trình",
+)
 
 
 @dataclass(frozen=True)
@@ -94,6 +108,8 @@ class InputLanguageNormalizer:
         stripped = (text or "").strip()
         if not stripped:
             return "en"
+        if self._has_vietnamese_hint(stripped):
+            return "vi"
         broad_language = self.all_language_detector.detect_language_of(stripped)
         if broad_language == Language.ENGLISH:
             return "en"
@@ -108,6 +124,13 @@ class InputLanguageNormalizer:
         if primary_language == Language.ENGLISH:
             return "en"
         return "en"
+
+    @staticmethod
+    def _has_vietnamese_hint(text: str) -> bool:
+        if any(char in VIETNAMESE_ONLY_CHARS for char in text):
+            return True
+        lowered = text.casefold()
+        return any(hint in lowered for hint in VIETNAMESE_PHRASE_HINTS)
 
 
 _default_normalizer: InputLanguageNormalizer | None = None

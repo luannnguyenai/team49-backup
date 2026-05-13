@@ -183,6 +183,34 @@ def test_structured_router_ignores_inferred_target_path_without_explicit_scope()
     assert route.extracted_slots.search_scope == "current_path"
 
 
+def test_structured_router_extracts_prerequisite_target_topic():
+    model = FakeStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.86,
+            "raw_topic": "Mask R-CNN prerequisite chain",
+            "search_queries": [
+                "Mask R-CNN prerequisite chain",
+                "Mask R-CNN prerequisites",
+            ],
+            "target_path": None,
+            "explicit_scope_requested": False,
+            "rationale": "The user asked for a prerequisite chain.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="Show me the prerequisite chain for Mask R-CNN",
+        route_context=None,
+    )
+
+    assert route.extracted_slots.raw_topic == "Mask R-CNN"
+    assert route.extracted_slots.search_queries[:2] == [
+        "Mask R-CNN",
+        "Mask R-CNN prerequisite chain",
+    ]
+
+
 def test_structured_router_prompt_rejects_keyword_routing_as_source_of_truth():
     model = FakeStructuredModel(
         {
@@ -203,6 +231,7 @@ def test_structured_router_prompt_rejects_keyword_routing_as_source_of_truth():
     assert "Do not use raw keyword matching as the source of truth" in system_prompt
     assert "policy/course-mechanics questions from action creation" in system_prompt
     assert "short title-level BM25 queries first" in system_prompt
+    assert "prerequisite chain for Mask R-CNN" in system_prompt
     assert "try retrieval before asking about the desired angle" in system_prompt
 
 
@@ -396,6 +425,7 @@ def test_structured_router_agentic_rag_acting_prompt_uses_dynamic_tool_text():
     system_prompt = model.messages[0]["content"]
     assert "{tool_list}" not in system_prompt
     assert "Current-path search must be preferred" in system_prompt
+    assert "include a non-empty arguments.query" in system_prompt
     assert "search_current_path_units" in system_prompt
     assert "Search title-level course units" in system_prompt
 

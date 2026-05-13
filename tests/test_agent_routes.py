@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi import HTTPException
 
-from src.routers.agent import agent_chat
+from src.routers.agent import _is_agent_stream_done_line, agent_chat
 from src.schemas.agent import AgentChatRequest
 from src.services.model_registry import ChatModelUnavailableError
 
@@ -35,3 +35,9 @@ async def test_agent_chat_rejects_unavailable_chat_model_before_invocation():
     assert exc.value.detail["code"] == "chat_model_unavailable"
     assert exc.value.detail["modelId"] == "qwen35_4b"
     graph_service.assert_not_called()
+
+
+def test_agent_stream_done_line_detection_for_pre_yield_commit():
+    assert _is_agent_stream_done_line('{"done":{"answer":{"markdown":"ok"}}}\n') is True
+    assert _is_agent_stream_done_line('{"status":"Reading sources"}\n') is False
+    assert _is_agent_stream_done_line("not-json") is False
