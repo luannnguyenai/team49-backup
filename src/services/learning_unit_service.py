@@ -237,6 +237,7 @@ def list_course_units(course_slug: str) -> list[dict[str, Any]]:
                 "unit_type": "lecture",
                 "order_index": order_index,
                 "lecture_label": f"Lecture {order_index:02d}",
+                "canonical_unit_id": unit.get("canonical_unit_id"),
                 "is_completed": False,
             }
         )
@@ -408,6 +409,7 @@ async def _list_course_units_from_db(course_slug: str) -> list[dict[str, Any]]:
                         "unit_type": "lecture",
                         "order_index": section.sort_order,
                         "lecture_label": f"Lecture {section.sort_order:02d}",
+                        "canonical_unit_id": unit.canonical_unit_id,
                     }
                 )
             return lecture_units
