@@ -4,9 +4,9 @@ import argparse
 import json
 from pathlib import Path
 
+from scripts.seed_lectures import _course_specs
 from src.data_paths import COURSES_FILE, OVERVIEWS_FILE
 from src.scripts.pipeline.import_canonical_artifacts_to_db import IMPORT_SPECS, load_jsonl
-from scripts.seed_lectures import _course_specs
 
 
 def _ensure_file(path: Path, *, label: str) -> dict[str, object]:
