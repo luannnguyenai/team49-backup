@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       run_seed_core:
-        description: Import canonical content, product shell, and lectures
+        description: Import canonical content, product shell, and runtime lecture tables
         required: true
         default: "true"
         type: choice
