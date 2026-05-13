@@ -45,6 +45,41 @@ class FakeClient:
         self.closed = True
 
 
+class FakeStreamResponse:
+    def __init__(self, lines: list[str]) -> None:
+        self.lines = lines
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_exc_info) -> None:
+        return None
+
+    def raise_for_status(self) -> None:
+        return None
+
+    def iter_lines(self):
+        return iter(self.lines)
+
+
+class FakeStreamingClient(FakeClient):
+    def __init__(self, lines: list[str]) -> None:
+        super().__init__([])
+        self.lines = lines
+
+    def stream(self, method, url, *, headers, json, timeout):
+        self.requests.append(
+            {
+                "method": method,
+                "url": url,
+                "headers": headers,
+                "json": json,
+                "timeout": timeout,
+            }
+        )
+        return FakeStreamResponse(self.lines)
+
+
 def test_http_chat_model_omits_openai_sdk_headers() -> None:
     client = FakeClient([FakeResponse("Hello there!")])
     model = OpenAICompatibleHTTPChatModel(
@@ -64,6 +99,33 @@ def test_http_chat_model_omits_openai_sdk_headers() -> None:
     assert request["headers"]["Authorization"] == "Bearer EMPTY"
     assert not any(name.lower().startswith("x-stainless") for name in request["headers"])
     assert request["headers"].get("User-Agent") != "OpenAI/Python 2.31.0"
+
+
+def test_http_chat_model_streams_openai_compatible_sse_chunks() -> None:
+    client = FakeStreamingClient(
+        [
+            'data: {"choices":[{"delta":{"content":"Hello"}}]}',
+            "",
+            'data: {"choices":[{"delta":{"content":" world"}}]}',
+            "data: [DONE]",
+        ]
+    )
+    model = OpenAICompatibleHTTPChatModel(
+        model="qwen3.5-4b-lora",
+        base_url="https://vllm.a20-app-049.io.vn/v1",
+        api_key="EMPTY",
+        temperature=0.2,
+        timeout=30,
+        client_factory=lambda: client,
+    )
+
+    chunks = list(model.stream([{"role": "user", "content": "Say hello."}]))
+
+    assert [chunk.content for chunk in chunks] == ["Hello", " world"]
+    request = client.requests[0]
+    assert request["method"] == "POST"
+    assert request["url"] == "https://vllm.a20-app-049.io.vn/v1/chat/completions"
+    assert request["json"]["stream"] is True
 
 
 def test_http_chat_model_structured_output_uses_json_object_and_local_parsing() -> None:
