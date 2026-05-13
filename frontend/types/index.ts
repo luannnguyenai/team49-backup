@@ -297,6 +297,7 @@ export interface CourseUnitListItem {
   unit_type: string;
   order_index: number;
   lecture_label?: string | null;
+  canonical_unit_id?: string | null;
   is_completed?: boolean;
 }
 
