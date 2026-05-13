@@ -1,5 +1,7 @@
 # Agent Guidelines
 
+ALWAYS USE UTF-8 ENCODING WHEN READ-WRITE FILES!
+
 ## Mandatory Rules When Using AI Coding Agents
 
 ### 1. AI Prompt Logging (Automatic)
