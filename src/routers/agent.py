@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+import json
 import logging
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_db
-from src.dependencies.auth import get_current_user
+from src.dependencies.auth import get_current_user, get_current_user_from_request
 from src.exceptions import ValidationError
 from src.models.user import User
 from src.repositories.agent_conversation_repo import AgentConversationRepository
@@ -18,6 +19,7 @@ from src.repositories.goal_preference_repo import GoalPreferenceRepository
 from src.schemas.agent import (
     AgentActionResponse,
     AgentActionResumeRequest,
+    AgentAnswer,
     AgentAssessmentWorkflowRequest,
     AgentAssessmentWorkflowResponse,
     AgentChatRequest,
@@ -27,6 +29,7 @@ from src.schemas.agent import (
     AgentConversationMutationResponse,
     AgentConversationSummary,
     AgentConversationUpdateRequest,
+    AgentFallback,
     PathRequirementsRequest,
     PathRequirementsResponse,
     RequestReplanActionRequest,
@@ -82,6 +85,14 @@ def _services(db: AsyncSession):
     search = AgentUnitSearchService(repo, navigation)
     requirements = AgentPathRequirementService(repo, navigation)
     return repo, navigation, search, requirements
+
+
+def _is_agent_stream_done_line(line: str) -> bool:
+    try:
+        payload = json.loads(line.strip())
+    except (TypeError, ValueError):
+        return False
+    return isinstance(payload, dict) and "done" in payload
 
 
 async def _safe_rollback(db: AsyncSession) -> None:
@@ -221,6 +232,94 @@ async def agent_chat(
             exc,
         )
     return response
+
+
+@agent_router.post("/chat/stream")
+async def agent_chat_stream(
+    body: AgentChatRequest,
+    user: User = Depends(get_current_user_from_request),
+    db: AsyncSession = Depends(get_async_db),
+):
+    try:
+        await ensure_chat_model_available(body.chat_model_id)
+    except ChatModelUnavailableError as exc:
+        raise _chat_model_unavailable_http_error(exc) from exc
+
+    context = await _agent_context_for_user(user, db)
+    _repo, _navigation, search, requirements = _services(db)
+    conversation_repo = AgentConversationRepository(db)
+    if body.conversation_id:
+        conversation_id = UUID(body.conversation_id)
+        conversation = await conversation_repo.get_conversation(conversation_id, user.id)
+        if not conversation:
+            raise HTTPException(status_code=404, detail="conversation_not_found")
+    else:
+        conversation = await conversation_repo.create_conversation(user.id)
+        conversation_id = conversation.id
+        body.conversation_id = str(conversation_id)
+
+    async def _stream_and_persist():
+        committed = False
+        try:
+            async with build_agent_graph_checkpointer() as checkpointer:
+                generator = await AgentGraphService(
+                    search,
+                    requirements,
+                    router=build_production_agent_router(),
+                    response_router=build_production_agent_response_router(
+                        chat_model_id=body.chat_model_id,
+                    ),
+                    graph_repo=AgentGraphRepository(db),
+                    thread_lock=AgentThreadLock(db),
+                    conversation_repo=conversation_repo,
+                    path_switch_service=AgentPathSwitchService(
+                        GoalPreferenceRepository(db),
+                        generate_learning_path,
+                    ),
+                    action_db=db,
+                    action_user=user,
+                    checkpointer=checkpointer,
+                ).chat_stream(
+                    request=body,
+                    conversation_id=str(conversation_id),
+                    thread_id=conversation.thread_id,
+                    user_id=str(user.id),
+                    allowed_course_ids=context.allowed_course_ids,
+                    current_path_course_ids=context.selected_path_course_ids,
+                )
+                async for line in generator:
+                    if not committed and _is_agent_stream_done_line(line):
+                        await db.commit()
+                        committed = True
+                    yield line
+            if not committed:
+                await db.commit()
+        except Exception as exc:
+            import json as _json
+            logger.exception("stream_and_persist_failed conversation_id=%s exc_type=%s", conversation_id, type(exc).__name__)
+            error_response = AgentChatResponse(
+                conversation_id=str(conversation_id),
+                message_id=str(uuid4()),
+                answer=AgentAnswer(
+                    markdown="The AI assistant encountered a stream error. Please try again.",
+                    confidence="fallback",
+                ),
+                fallback=AgentFallback(
+                    reason="agent_unavailable",
+                    message=str(exc)[:200],
+                    error_code="STREAM_PERSIST_ERROR",
+                ),
+            )
+            yield _json.dumps({"done": error_response.model_dump(by_alias=True)}) + "\n"
+
+    return StreamingResponse(
+        _stream_and_persist(),
+        media_type="application/x-ndjson",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @agent_router.post("/actions/continue", response_model=AgentChatResponse)
