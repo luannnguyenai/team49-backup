@@ -143,6 +143,23 @@ describe("dashboard search", () => {
     expect(screen.queryByText("Ready to start right now")).not.toBeInTheDocument();
   });
 
+  it("renders course card progress from the catalog response", async () => {
+    const catalogResponse = {
+      items: [
+        {
+          ...CS231N_RECOMMENDED,
+          progress_percent: 100,
+        },
+      ],
+    };
+    catalogCacheMock.getCachedAllCourseCatalog.mockResolvedValue(catalogResponse);
+
+    render(<DashboardPage />);
+
+    expect(await screen.findByText(CS231N_ITEM.title)).toBeInTheDocument();
+    expect(screen.getByText("Progress: 100%")).toBeInTheDocument();
+  });
+
   it("applies search after the active dashboard tab filter", async () => {
     navigationMock.searchParams = new URLSearchParams("q=operations");
 
