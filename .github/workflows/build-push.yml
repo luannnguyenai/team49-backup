@@ -66,6 +66,8 @@ jobs:
 
       - uses: aws-actions/amazon-ecr-login@v2
 
+      - uses: docker/setup-buildx-action@v3
+
       - name: Resolve build scope and tag
         id: build
         shell: bash
@@ -98,8 +100,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker build -t "$BACKEND_IMAGE" .
-          docker push "$BACKEND_IMAGE"
+          docker buildx build \
+            --push \
+            -t "$BACKEND_IMAGE" \
+            .
 
       - name: Build and push frontend image
         if: ${{ steps.build.outputs.build_frontend == 'true' }}
@@ -115,10 +119,12 @@ jobs:
             echo "NEXT_PUBLIC_GRAFANA_HOST is HTTP while production URLs are HTTPS; forcing same-origin /grafana to avoid mixed-content iframe failures"
           fi
 
-          docker build -f frontend/Dockerfile \
+          docker buildx build \
+            --push \
+            -f frontend/Dockerfile \
             --build-arg NEXT_PUBLIC_API_URL="$PRODUCTION_BACKEND_URL" \
             --build-arg API_INTERNAL_URL="$PRODUCTION_BACKEND_URL" \
             --build-arg NEXT_PUBLIC_GRAFANA_HOST="$grafana_host" \
             --build-arg NEXT_PUBLIC_LANGFUSE_HOST="${NEXT_PUBLIC_LANGFUSE_HOST:-https://cloud.langfuse.com}" \
-            -t "$FRONTEND_IMAGE" frontend
-          docker push "$FRONTEND_IMAGE"
+            -t "$FRONTEND_IMAGE" \
+            frontend
