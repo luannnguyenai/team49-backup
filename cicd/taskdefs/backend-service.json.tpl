@@ -43,6 +43,7 @@
         { "name": "MODEL_EXTRA_KWARGS", "value": "{}" },
         { "name": "LLM_REQUEST_TIMEOUT_SECONDS", "value": "30" },
         { "name": "LLM_MAX_RETRIES", "value": "1" },
+        { "name": "PROMETHEUS_URL", "value": "http://prometheus.obs.a20-prod.internal:9090" },
         { "name": "LOKI_URL", "value": "http://loki.obs.a20-prod.internal:3100" }
       ],
       "secrets": [

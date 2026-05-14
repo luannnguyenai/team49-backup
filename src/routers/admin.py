@@ -40,11 +40,25 @@ try:
 except ImportError:  # pragma: no cover
     psutil = None  # graceful degradation
 
-LOG_DIR = Path("logs")
+def _running_in_ecs() -> bool:
+    return bool(
+        os.getenv("ECS_CONTAINER_METADATA_URI_V4")
+        or os.getenv("ECS_CONTAINER_METADATA_URI")
+        or os.getenv("AWS_EXECUTION_ENV", "").startswith("AWS_ECS")
+    )
+
+
+LOG_DIR = Path(os.getenv("AI_LOG_DIR") or "logs")
 QA_LOG = LOG_DIR / "qa_history.jsonl"
 ACCESS_LOG = LOG_DIR / "access.jsonl"
-PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
-LOKI_URL = os.getenv("LOKI_URL", "http://host.docker.internal:3100")
+PROMETHEUS_URL = os.getenv(
+    "PROMETHEUS_URL",
+    "http://prometheus.obs.a20-prod.internal:9090" if _running_in_ecs() else "http://localhost:9090",
+)
+LOKI_URL = os.getenv(
+    "LOKI_URL",
+    "http://loki.obs.a20-prod.internal:3100" if _running_in_ecs() else "http://host.docker.internal:3100",
+)
 APP_BOOT_TS = datetime.now(UTC)
 CONTAINER_LOG_ALLOWLIST = (
     "al_backend",
@@ -195,11 +209,14 @@ def _read_access_log_events(limit: int) -> list[dict[str, Any]]:
 
 
 def _candidate_loki_urls() -> list[str]:
-    candidates = [
-        LOKI_URL,
-        "http://host.docker.internal:3100",
-        "http://localhost:3100",
-    ]
+    candidates = [os.getenv("LOKI_URL", LOKI_URL)]
+    if not _running_in_ecs():
+        candidates.extend(
+            [
+                "http://host.docker.internal:3100",
+                "http://localhost:3100",
+            ]
+        )
     ordered: list[str] = []
     for candidate in candidates:
         if candidate and candidate not in ordered:
@@ -366,6 +383,8 @@ async def _fetch_loki_events(limit: int, query: str | None = None) -> list[dict[
 
 
 def _get_runtime_source_status() -> dict[str, Any]:
+    if _running_in_ecs():
+        return _build_source_state("skipped", 0, "container logs are not available on ECS")
     if shutil.which("docker") is None:
         return _build_source_state("unavailable", 0, "docker cli not available")
 
@@ -386,6 +405,8 @@ def _get_runtime_source_status() -> dict[str, Any]:
 
 
 async def _fetch_container_events(limit: int) -> list[dict[str, Any]]:
+    if _running_in_ecs():
+        return []
     if shutil.which("docker") is None:
         return []
 

@@ -3,7 +3,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.routers.admin import current_model, llm_stats, logs_events, logs_summary, model_health
+from src.routers.admin import (
+    _candidate_loki_urls,
+    _get_runtime_source_status,
+    current_model,
+    llm_stats,
+    logs_events,
+    logs_summary,
+    model_health,
+)
 
 
 @pytest.mark.asyncio
@@ -254,3 +262,21 @@ async def test_logs_summary_prefers_cloudwatch_when_available():
     assert result["totals"]["events"] == 1
     assert result["totals"]["errors"] == 1
     assert result["sources"]["cloudwatch"]["status"] == "healthy"
+
+
+def test_candidate_loki_urls_skip_local_fallbacks_on_ecs(monkeypatch):
+    monkeypatch.setenv("ECS_CONTAINER_METADATA_URI_V4", "http://169.254.170.2/v4")
+    monkeypatch.setenv("LOKI_URL", "http://loki.obs.a20-prod.internal:3100")
+
+    urls = _candidate_loki_urls()
+
+    assert urls == ["http://loki.obs.a20-prod.internal:3100"]
+
+
+def test_runtime_source_status_skips_container_logs_on_ecs(monkeypatch):
+    monkeypatch.setenv("ECS_CONTAINER_METADATA_URI_V4", "http://169.254.170.2/v4")
+
+    status = _get_runtime_source_status()
+
+    assert status["status"] == "skipped"
+    assert "ECS" in status["message"]

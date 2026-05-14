@@ -99,6 +99,9 @@ jobs:
       MIGRATE_TASK_FAMILY: ${{ vars.MIGRATE_TASK_FAMILY }}
       PRODUCTION_BACKEND_URL: ${{ vars.PRODUCTION_BACKEND_URL }}
       PRODUCTION_FRONTEND_URL: ${{ vars.PRODUCTION_FRONTEND_URL }}
+      PRODUCTION_DB_INSTANCE_IDENTIFIER: ${{ vars.PRODUCTION_DB_INSTANCE_IDENTIFIER }}
+      PRODUCTION_REDIS_CLUSTER_ID: ${{ vars.PRODUCTION_REDIS_CLUSTER_ID }}
+      PRODUCTION_PROMETHEUS_URL: ${{ vars.PRODUCTION_PROMETHEUS_URL }}
       NEXT_PUBLIC_GRAFANA_HOST: ${{ vars.NEXT_PUBLIC_GRAFANA_HOST }}
       NEXT_PUBLIC_LANGFUSE_HOST: ${{ vars.NEXT_PUBLIC_LANGFUSE_HOST }}
       SMOKE_DB_ROUTE: ${{ vars.SMOKE_DB_ROUTE }}
@@ -203,6 +206,11 @@ jobs:
             echo "CANONICAL_BUNDLE_S3_URI=${canonical_bundle_s3_uri}" >> "$GITHUB_ENV"
             echo "CANONICAL_BUNDLE_LOCAL_DIR=${canonical_bundle_local_dir}" >> "$GITHUB_ENV"
           fi
+
+      - name: Reconcile backend secret
+        if: ${{ steps.tag.outputs.deploy_backend == 'true' || steps.tag.outputs.run_migrations == 'true' || steps.tag.outputs.run_seed_core == 'true' || steps.tag.outputs.run_sync_schema_v2 == 'true' || steps.tag.outputs.run_seed_accounts == 'true' }}
+        shell: bash
+        run: bash cicd/scripts/reconcile-backend-secret.sh
 
       - name: Deploy backend service
         if: ${{ steps.tag.outputs.deploy_backend == 'true' }}
