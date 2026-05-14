@@ -23,8 +23,8 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: terraform-ecs-prod
-  cancel-in-progress: true
+  group: terraform-${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   plan:

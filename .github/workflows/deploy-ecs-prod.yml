@@ -70,8 +70,8 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: deploy-production
-  cancel-in-progress: true
+  group: deploy-${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   deploy:

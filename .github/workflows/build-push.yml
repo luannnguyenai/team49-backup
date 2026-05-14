@@ -30,8 +30,8 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: build-push-${{ github.event.workflow_run.head_branch || github.ref }}
-  cancel-in-progress: true
+  group: build-push-${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   build:
