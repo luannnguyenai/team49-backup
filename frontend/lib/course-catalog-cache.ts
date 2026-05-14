@@ -2,7 +2,7 @@ import { bootstrapDataApi, courseApi } from "@/lib/api";
 import { mergeMockCourses } from "@/lib/mock-course-catalog";
 import type { BootstrapCourse, CourseCatalogItem, CourseCatalogResponse } from "@/types";
 
-type CacheKey = "all:true" | "all:false";
+type CacheKey = string;
 
 type CacheEntry = {
   data: CourseCatalogResponse | null;
@@ -15,8 +15,8 @@ const API_TIMEOUT_MS = 3_000;
 
 const catalogCache = new Map<CacheKey, CacheEntry>();
 
-function getCacheKey(includeUnavailable: boolean): CacheKey {
-  return includeUnavailable ? "all:true" : "all:false";
+function getCacheKey(includeUnavailable: boolean, scope: string): CacheKey {
+  return `all:${includeUnavailable ? "true" : "false"}:${scope}`;
 }
 
 function getOrCreateEntry(key: CacheKey): CacheEntry {
@@ -72,8 +72,11 @@ async function loadCatalogResponse(includeUnavailable: boolean): Promise<CourseC
   }
 }
 
-export function getCachedAllCourseCatalog(includeUnavailable: boolean): Promise<CourseCatalogResponse> {
-  const key = getCacheKey(includeUnavailable);
+export function getCachedAllCourseCatalog(
+  includeUnavailable: boolean,
+  scope = "public",
+): Promise<CourseCatalogResponse> {
+  const key = getCacheKey(includeUnavailable, scope);
   const entry = getOrCreateEntry(key);
 
   if (entry.data) {

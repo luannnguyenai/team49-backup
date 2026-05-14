@@ -15,9 +15,14 @@ const MAX_RESULTS = 8;
 type MobileSearchSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  catalogCacheScope?: string;
 };
 
-export default function MobileSearchSheet({ open, onOpenChange }: MobileSearchSheetProps) {
+export default function MobileSearchSheet({
+  open,
+  onOpenChange,
+  catalogCacheScope = "public",
+}: MobileSearchSheetProps) {
   const router = useRouter();
   const mountedRef = useRef(true);
   const [query, setQuery] = useState("");
@@ -33,6 +38,11 @@ export default function MobileSearchSheet({ open, onOpenChange }: MobileSearchSh
   }, []);
 
   useEffect(() => {
+    setCatalogCourses([]);
+    setHasLoadedCourses(false);
+  }, [catalogCacheScope]);
+
+  useEffect(() => {
     if (!open) {
       setQuery("");
       return;
@@ -43,7 +53,7 @@ export default function MobileSearchSheet({ open, onOpenChange }: MobileSearchSh
     }
 
     setIsLoadingCourses(true);
-    getCachedAllCourseCatalog(true)
+    getCachedAllCourseCatalog(true, catalogCacheScope)
       .then((response) => {
         if (mountedRef.current) {
           setCatalogCourses(response.items);
@@ -61,7 +71,7 @@ export default function MobileSearchSheet({ open, onOpenChange }: MobileSearchSh
           setIsLoadingCourses(false);
         }
       });
-  }, [hasLoadedCourses, isLoadingCourses, open]);
+  }, [catalogCacheScope, hasLoadedCourses, isLoadingCourses, open]);
 
   const matchingCourses = useMemo(() => {
     const normalizedQuery = normalizeCourseSearchQuery(query);
