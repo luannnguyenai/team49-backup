@@ -56,6 +56,7 @@ function StatCard({
 
 function CourseCard({ course }: { course: CourseCatalogItem }) {
   const model = buildDashboardCourseCardModel(course);
+  const progressPercent = Math.min(Math.max(course.progress_percent ?? 0, 0), 100);
 
   return (
     <div className="card group flex flex-col overflow-hidden p-0 transition-shadow hover:shadow-brand-soft">
@@ -90,9 +91,12 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
         {course.status === "ready" ? (
           <div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-page">
-              <div className="h-full w-0 rounded-full bg-primary-600" />
+              <div
+                className="h-full rounded-full bg-primary-600"
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
-            <p className="mt-1 text-xs text-text-muted">Progress: 0%</p>
+            <p className="mt-1 text-xs text-text-muted">Progress: {progressPercent}%</p>
           </div>
         ) : null}
 
@@ -149,6 +153,33 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {loading ? (
+        <div className="flex h-24 items-center justify-center">
+          <LoadingSpinner size="md" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+          <StatCard
+            icon={<BookOpen className="h-6 w-6 text-stat-courses" />}
+            iconBg="bg-stat-courses-soft"
+            value={String(courses.length)}
+            label="Courses in catalog"
+          />
+          <StatCard
+            icon={<TrendingUp className="h-6 w-6 text-stat-progress" />}
+            iconBg="bg-stat-progress-soft"
+            value={`${avgScore}%`}
+            label="Average progress"
+          />
+          <StatCard
+            icon={<Clock className="h-6 w-6 text-stat-time" />}
+            iconBg="bg-stat-time-soft"
+            value={`${totalHours}h`}
+            label="Total study time"
+          />
+        </div>
+      )}
+
       <div>
         <div className="mb-4 space-y-2">
           <h2 className="text-lg font-bold text-text-strong">Explore courses</h2>
@@ -198,33 +229,6 @@ export default function DashboardPage() {
           </>
         )}
       </div>
-
-      {loading ? (
-        <div className="flex h-24 items-center justify-center">
-          <LoadingSpinner size="md" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-          <StatCard
-            icon={<BookOpen className="h-6 w-6 text-stat-courses" />}
-            iconBg="bg-stat-courses-soft"
-            value={String(courses.length)}
-            label="Courses in catalog"
-          />
-          <StatCard
-            icon={<TrendingUp className="h-6 w-6 text-stat-progress" />}
-            iconBg="bg-stat-progress-soft"
-            value={`${avgScore}%`}
-            label="Average progress"
-          />
-          <StatCard
-            icon={<Clock className="h-6 w-6 text-stat-time" />}
-            iconBg="bg-stat-time-soft"
-            value={`${totalHours}h`}
-            label="Total study time"
-          />
-        </div>
-      )}
     </div>
   );
 }

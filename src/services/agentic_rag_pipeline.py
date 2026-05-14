@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import re
+from collections.abc import AsyncGenerator
 from typing import Any
 
 from src.schemas.agent import RouteContext
@@ -23,6 +25,7 @@ class AgenticRAGPipeline:
         route_context: RouteContext | None,
         recent_messages: list[dict],
         allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None = None,
     ) -> ToolResult:
         thought = self.router.rag_think(
             message=message,
@@ -45,6 +48,7 @@ class AgenticRAGPipeline:
             intent=intent,
             slots=slots,
             allowed_course_ids=allowed_course_ids,
+            current_path_course_ids=current_path_course_ids,
         )
         try:
             observation = self.router.rag_observe(
@@ -66,6 +70,93 @@ class AgenticRAGPipeline:
             recent_messages=recent_messages,
         )
         return self._result_from_final(final, observation)
+
+    async def run_stream(
+        self,
+        *,
+        message: str,
+        intent: str,
+        slots: AgentSlots,
+        route_context: RouteContext | None,
+        recent_messages: list[dict],
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None = None,
+    ) -> AsyncGenerator[str, None]:
+        yield json.dumps({"status": "Analyzing your question"}) + "\n"
+
+        thought = self.router.rag_think(
+            message=message,
+            intent=intent,
+            slots=slots,
+            route_context=route_context,
+            recent_messages=recent_messages,
+        )
+        yield json.dumps({
+            "thought": {
+                "user_goal": thought.user_goal,
+                "active_topic": thought.active_topic,
+                "evidence_need": thought.evidence_need,
+                "tool_plan": thought.tool_plan,
+            },
+        }) + "\n"
+
+        yield json.dumps({"status": "Searching course content"}) + "\n"
+        tool_call = self.router.rag_act(
+            message=message,
+            thought=thought,
+            slots=slots,
+            route_context=route_context,
+            recent_messages=recent_messages,
+            observations=[],
+        )
+
+        yield json.dumps({"status": "Reading sources"}) + "\n"
+        tool_observation = await self.tool_executor.execute(
+            tool_call,
+            message=message,
+            intent=intent,
+            slots=slots,
+            allowed_course_ids=allowed_course_ids,
+            current_path_course_ids=current_path_course_ids,
+        )
+        try:
+            observation = self.router.rag_observe(
+                message=message,
+                thought=thought,
+                tool_call=tool_call,
+                tool_observation=tool_observation,
+                route_context=route_context,
+                recent_messages=recent_messages,
+            )
+        except AgentRouterUnavailableError:
+            observation = tool_observation
+        observation = self._validated_observation(observation, tool_observation)
+
+        yield json.dumps({"status": "Composing answer"}) + "\n"
+        accumulated_parts: list[str] = []
+        for token in self.response_router.rag_respond_stream(
+            message=message,
+            thought=thought,
+            observations=[observation.model_dump(mode="json")],
+            route_context=route_context,
+            recent_messages=recent_messages,
+        ):
+            if isinstance(token, list):
+                token = "".join(
+                    p.get("text", "") if isinstance(p, dict) else str(p)
+                    for p in token
+                )
+            accumulated_parts.append(token)
+            yield json.dumps({"chunk": token}) + "\n"
+
+        answer_markdown = "".join(accumulated_parts)
+        final = AgenticRAGFinal(
+            answer_markdown=answer_markdown,
+            evidence_status=observation.evidence_status,
+            evidence_sufficient=bool(observation.result.citations),
+        )
+        result = self._result_from_final(final, observation)
+        yield json.dumps({"done": result.model_dump(mode="json")}) + "\n"
 
     def _validated_observation(
         self,

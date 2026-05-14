@@ -255,6 +255,25 @@ def test_guardrail_decision_normalizes_fallback_attack_type_alias():
     assert decision.attack_type == "none"
 
 
+def test_guardrail_decision_normalizes_ambiguous_safety_alias():
+    decision = parse_guardrail_decision(
+        json.dumps(
+            {
+                "safety_label": "AMBIGUOUS",
+                "topic_label": "AMBIGUOUS",
+                "action": "ASK_CLARIFY",
+                "attack_type": "N_A",
+                "selected_kp_ids": [],
+            }
+        )
+    )
+
+    assert decision.safety_label == "SAFE"
+    assert decision.topic_label == "AMBIGUOUS"
+    assert decision.action == "ASK_CLARIFY"
+    assert decision.attack_type == "none"
+
+
 def test_guardrail_decision_normalizes_prompt_injection_attack_alias():
     decision = parse_guardrail_decision(
         json.dumps(

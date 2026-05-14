@@ -183,3 +183,107 @@ async def test_find_content_answers_broad_direct_matches_without_topic_choice_ca
     ]
     assert not [action for action in result.actions if action.type == "choose_topic"]
     assert result.metadata["evidence_verdict"] == "direct_match"
+
+
+@pytest.mark.asyncio
+async def test_find_content_too_many_results_preserves_top_five_candidate_source_cards():
+    tools = AgentToolNodes(
+        FakeSearchService(
+            [
+                UnitSearchResult(
+                    canonical_unit_id=f"unit-cnn-{index}",
+                    course_id="CS231n",
+                    lecture_title=f"Lecture {index}: CNNs",
+                    unit_name=f"CNN result {index}",
+                    summary=f"CNN summary {index}.",
+                    learn_href=f"/courses/cs231n/learn/cnn-{index}",
+                    score=3,
+                )
+                for index in range(25)
+            ]
+        ),
+        requirement_service=None,
+    )
+
+    result = await tools.find_content(
+        "Where should I review CNNs?",
+        "find_content",
+        AgentSlots(raw_topic="CNNs", search_queries=["CNNs"]),
+        ["CS231n"],
+    )
+
+    assert result.metadata["too_many_results_offered"] is True
+    assert [citation.canonical_unit_id for citation in result.citations] == [
+        "unit-cnn-0",
+        "unit-cnn-1",
+        "unit-cnn-2",
+        "unit-cnn-3",
+        "unit-cnn-4",
+    ]
+    assert [action.canonical_unit_id for action in result.actions] == [
+        "unit-cnn-0",
+        "unit-cnn-1",
+        "unit-cnn-2",
+        "unit-cnn-3",
+        "unit-cnn-4",
+    ]
+
+
+@pytest.mark.asyncio
+async def test_find_content_searches_all_allowed_courses_with_current_path_preference():
+    captured = {}
+
+    class SearchService:
+        async def search(self, request, allowed_course_ids):
+            captured["request"] = request
+            captured["allowed_course_ids"] = allowed_course_ids
+            return UnitSearchResponse(
+                results=[
+                    UnitSearchResult(
+                        canonical_unit_id="vision-cnn",
+                        course_id="CS231n",
+                        lecture_title="Lecture 5: Image Classification with CNNs",
+                        unit_name="CNN foundations",
+                        summary="Vision CNN content.",
+                        learn_href="/courses/cs231n/learn/cnn",
+                        score=5,
+                        outside_current_path=True,
+                    ),
+                    UnitSearchResult(
+                        canonical_unit_id="nlp-cnn",
+                        course_id="CS224n",
+                        lecture_title="Lecture 16 - ConvNets and TreeRNNs",
+                        unit_name="CNN for sentence classification",
+                        summary="NLP CNN content.",
+                        learn_href="/courses/cs224n/learn/cnn",
+                        score=4,
+                    ),
+                ],
+                trace=RetrievalTrace(trace_id="trace-all-allowed", ranking_version="unit_title_rerank_v2"),
+            )
+
+    tools = AgentToolNodes(SearchService(), requirement_service=None)
+
+    result = await tools.find_content(
+        "Where should I review CNNs?",
+        "find_content",
+        AgentSlots(
+            raw_topic="CNNs",
+            search_queries=["CNNs"],
+            search_scope="current_path",
+            resolved_search_path_ids=["nlp"],
+        ),
+        ["CS224n", "CS231n"],
+        current_path_course_ids=["CS224n"],
+    )
+
+    request = captured["request"]
+    assert request.course_ids == ["CS224n", "CS231n"]
+    assert request.current_path_course_ids == ["CS224n"]
+    assert request.preferred_course_ids == ["CS224n"]
+    assert result.warning is not None
+    assert result.warning.type == "outside_current_path"
+    assert [citation.canonical_unit_id for citation in result.citations] == [
+        "vision-cnn",
+        "nlp-cnn",
+    ]

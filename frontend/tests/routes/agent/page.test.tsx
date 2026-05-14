@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import AgentPage from "@/app/agent/page";
@@ -11,6 +11,7 @@ const agentApiMock = vi.hoisted(() => ({
   messages: vi.fn(),
   memory: vi.fn(),
   chat: vi.fn(),
+  chatStream: vi.fn(),
   continueAction: vi.fn(),
   startAssessmentWorkflow: vi.fn(),
   resumeAssessmentWorkflow: vi.fn(),
@@ -90,6 +91,11 @@ describe("agent page", () => {
       actions: [],
       warning: null,
     });
+    agentApiMock.chatStream.mockImplementation(async (payload) => ({
+      async *[Symbol.asyncIterator]() {
+        yield { done: await agentApiMock.chat(payload) };
+      },
+    }));
     agentApiMock.unitContext.mockResolvedValue({
       canonical_unit_id: "unit-rf",
       course_id: "CS231n",
@@ -211,10 +217,72 @@ describe("agent page", () => {
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
   });
 
+  it("labels source cards with their learning path tags", async () => {
+    agentApiMock.chat.mockResolvedValueOnce({
+      conversationId: "conversation-path-tags",
+      messageId: "message-path-tags",
+      answer: {
+        markdown: "Here are CNN sources across available courses.",
+        confidence: "partial",
+      },
+      citations: [
+        {
+          canonical_unit_id: "unit-shared",
+          course_id: "CS230",
+          unit_name: "CNN saliency maps and integrated gradients",
+          lecture_title: "Lecture 9: What Is Going On Inside My Model?",
+          learn_href: "/courses/cs230/learn/cnn-saliency",
+          source: "summary",
+        },
+        {
+          canonical_unit_id: "unit-cv",
+          course_id: "CS231n",
+          unit_name: "What convolutional networks are and why they matter",
+          lecture_title: "Lecture 5: Image Classification with CNNs",
+          learn_href: "/courses/cs231n/learn/cnn-foundations",
+          source: "summary",
+        },
+        {
+          canonical_unit_id: "unit-nlp",
+          course_id: "CS224n",
+          unit_name: "Kim CNN for sentence classification",
+          lecture_title: "Lecture 16 - ConvNets and TreeRNNs",
+          learn_href: "/courses/cs224n/learn/kim-cnn",
+          source: "summary",
+        },
+      ],
+      actions: [],
+      warning: null,
+    });
+    render(<AgentPage />);
+
+    const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
+    fireEvent.click(promptButtons[0]);
+
+    const sharedSource = await screen.findByRole("button", {
+      name: /view source details: cnn saliency maps and integrated gradients/i,
+    });
+    expect(within(sharedSource).getByText("CV")).toBeInTheDocument();
+    expect(within(sharedSource).getByText("NLP")).toBeInTheDocument();
+    expect(within(sharedSource).queryByText("CV NLP")).not.toBeInTheDocument();
+
+    const cvSource = screen.getByRole("button", {
+      name: /view source details: what convolutional networks are and why they matter/i,
+    });
+    expect(within(cvSource).getByText("CV")).toBeInTheDocument();
+    expect(within(cvSource).queryByText("NLP")).not.toBeInTheDocument();
+
+    const nlpSource = screen.getByRole("button", {
+      name: /view source details: kim cnn for sentence classification/i,
+    });
+    expect(within(nlpSource).getByText("NLP")).toBeInTheDocument();
+    expect(within(nlpSource).queryByText("CV")).not.toBeInTheDocument();
+  });
+
   it("sends web and paper mode only when the learner enables external search", async () => {
     render(<AgentPage />);
 
-    const webMode = await screen.findByRole("button", { name: /search web & papers/i });
+    const webMode = await screen.findByRole("button", { name: /search/i });
     fireEvent.click(webMode);
 
     const input = screen.getByPlaceholderText("Ask about your learning path...");
@@ -384,15 +452,13 @@ describe("agent page", () => {
     const promptButtons = await screen.findAllByRole("button", { name: /where should i review cnns/i });
     fireEvent.click(promptButtons[0]);
 
-    const thinkingToggle = await screen.findByRole("button", { name: /ai is thinking/i });
+    const thinkingToggle = await screen.findByRole("button", { name: /thinking/i });
     expect(thinkingToggle).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByText("Routing learning intent")).not.toBeInTheDocument();
+    expect(screen.getByText(/Understanding your question/)).toBeInTheDocument();
 
     fireEvent.click(thinkingToggle);
     expect(thinkingToggle).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText("Routing learning intent")).toBeInTheDocument();
-    expect(screen.getByText("Reading source evidence")).toBeInTheDocument();
-    expect(screen.getByText("Composing grounded answer")).toBeInTheDocument();
+    expect(screen.getAllByText("Understanding your question").length).toBeGreaterThan(0);
 
     resolveChat({
       conversationId: "conversation-1",
@@ -408,7 +474,7 @@ describe("agent page", () => {
 
     expect(await screen.findByText("Here is the grounded answer.")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.queryByRole("button", { name: /ai is thinking/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /^thinking/i })).not.toBeInTheDocument();
     });
   });
 
@@ -509,9 +575,16 @@ describe("agent page", () => {
     fireEvent.change(input, { target: { value: "nền tảng CNN" } });
     fireEvent.click(screen.getByRole("button", { name: /send message/i }));
 
-    expect(await screen.findByText("Lecture 5")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "nền tảng CNN" }),
+      );
+    });
+    expect(
+      await screen.findByText((content) => content.includes("Lecture 5")),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /lecture 5/i })).not.toBeInTheDocument();
-    expect(screen.getByText("source")).toBeInTheDocument();
+    expect(screen.getByText((content) => content.includes("source"))).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /source/i })).not.toBeInTheDocument();
   });
 
@@ -597,6 +670,8 @@ describe("agent page", () => {
     });
     const strong = await screen.findByText("U-Net");
     expect(strong.tagName).toBe("STRONG");
+    expect(screen.queryByText(/AGENT_NETWORK_ERROR/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /retry/i })).not.toBeInTheDocument();
   });
 
   it("retries server-side agent fallback responses with the same message id", async () => {
@@ -650,6 +725,8 @@ describe("agent page", () => {
       incomingMessageId: firstCall.incomingMessageId,
     });
     expect(await screen.findByText("Retry found CNN application content.")).toBeInTheDocument();
+    expect(screen.queryByText(/AGENT_LLM_UNAVAILABLE/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /retry/i })).not.toBeInTheDocument();
   });
 
   it("labels client-side agent timeouts separately from network failures", async () => {

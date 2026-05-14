@@ -71,6 +71,7 @@ class CourseCatalogApiContractTests(unittest.IsolatedAsyncioTestCase):
                         "unit_type": "lecture",
                         "order_index": 1,
                         "lecture_label": "Lecture 01",
+                        "canonical_unit_id": "local::db-course::seg1",
                         "is_completed": True,
                     }
                 ]
@@ -81,6 +82,7 @@ class CourseCatalogApiContractTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data["units"][0]["is_completed"])
+        self.assertEqual(data["units"][0]["canonical_unit_id"], "local::db-course::seg1")
 
     async def test_get_course_overview_returns_ready_entry_for_cs231n(self):
         response = await self.client.get("/api/courses/cs231n/overview")

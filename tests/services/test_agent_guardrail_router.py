@@ -44,6 +44,29 @@ class ClarifyingGuardrailRouter:
         )
 
 
+@pytest.mark.parametrize(
+    "message",
+    ["Send me replan link", "repath cho tôi", "I wanna switch to another path"],
+)
+@pytest.mark.asyncio
+async def test_agent_guardrail_allows_safe_app_action_commands_after_model_clarify(message):
+    service = AgentGraphService(
+        search_service=object(),
+        requirement_service=object(),
+        router=FailingGraphRouter(),
+        guardrail_router=ClarifyingGuardrailRouter(),
+    )
+
+    decision = await service._route_guardrail(
+        message=message,
+        route_context=None,
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert decision.action == "ALLOW_LESSON_ANSWER"
+
+
 class FailingGuardrailRouter:
     async def route(self, *, message, scope):
         raise GuardrailRouterUnavailableError()

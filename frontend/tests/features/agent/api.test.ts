@@ -2,20 +2,29 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const postMock = vi.hoisted(() => vi.fn());
 const getMock = vi.hoisted(() => vi.fn());
+const refreshAccessTokenMock = vi.hoisted(() => vi.fn());
+const tokenStorageMock = vi.hoisted(() => ({
+  getAccess: vi.fn(),
+}));
 
 vi.mock("@/lib/api", () => ({
   api: {
     get: getMock,
     post: postMock,
   },
+  refreshAccessToken: refreshAccessTokenMock,
+  tokenStorage: tokenStorageMock,
 }));
 
 describe("agent api", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
     getMock.mockReset();
     postMock.mockReset();
+    refreshAccessTokenMock.mockReset();
+    tokenStorageMock.getAccess.mockReset();
   });
 
   it("uses an agent-specific timeout for chat requests", async () => {
@@ -149,5 +158,47 @@ describe("agent api", () => {
       },
       { timeout: AGENT_REQUEST_TIMEOUT_MS },
     );
+  });
+
+  it("refreshes and retries streaming chat once after a 401", async () => {
+    const firstResponse = new Response("", { status: 401 });
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('{"done":{"conversationId":"conversation-1","messageId":"message-1","answer":{"markdown":"ok","confidence":"partial"},"citations":[],"actions":[]}}\n'));
+        controller.close();
+      },
+    });
+    const secondResponse = new Response(stream, { status: 200 });
+    const fetchMock = vi.fn().mockResolvedValueOnce(firstResponse).mockResolvedValueOnce(secondResponse);
+    vi.stubGlobal("fetch", fetchMock);
+    tokenStorageMock.getAccess.mockReturnValueOnce("expired-token").mockReturnValueOnce("fresh-token");
+    refreshAccessTokenMock.mockResolvedValueOnce("fresh-token");
+
+    const { agentApi } = await import("@/features/agent/api");
+    const events = [];
+    const responseStream = await agentApi.chatStream({
+      message: "Send me replan link",
+      incomingMessageId: "msg-1",
+      traceMode: "summary",
+    });
+    for await (const event of responseStream) {
+      events.push(event);
+    }
+
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({ Authorization: "Bearer expired-token" });
+    expect(fetchMock.mock.calls[1][1]?.headers).toMatchObject({ Authorization: "Bearer fresh-token" });
+    expect(events).toEqual([
+      {
+        done: {
+          conversationId: "conversation-1",
+          messageId: "message-1",
+          answer: { markdown: "ok", confidence: "partial" },
+          citations: [],
+          actions: [],
+        },
+      },
+    ]);
   });
 });

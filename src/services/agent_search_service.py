@@ -103,6 +103,22 @@ def _rerank_score(query: str, terms: list[str], *, title_text: str, body_text: s
     return max(score, 0.0)
 
 
+def _path_score_adjustment(
+    course_id: str,
+    *,
+    current_path_course_ids: list[str],
+    preferred_course_ids: list[str],
+    preferred_scope: str | None,
+) -> float:
+    if course_id in preferred_course_ids:
+        if preferred_scope == "explicit_path" and course_id in current_path_course_ids:
+            return 2.0
+        return 8.0 if preferred_scope == "explicit_path" else 4.0
+    if course_id in current_path_course_ids:
+        return 4.0
+    return 0.0
+
+
 class AgentUnitSearchService:
     def __init__(
         self,
@@ -141,11 +157,23 @@ class AgentUnitSearchService:
                     unit.description or "",
                 ]
             ).lower()
-            score = _rerank_score(
+            base_score = _rerank_score(
                 request.query,
                 terms,
                 title_text=title_haystack,
                 body_text=body_haystack,
+            )
+            current_path_course_ids = request.current_path_course_ids or []
+            preferred_course_ids = request.preferred_course_ids or current_path_course_ids
+            path_adjustment = (
+                _path_score_adjustment(
+                    unit.course_id,
+                    current_path_course_ids=current_path_course_ids,
+                    preferred_course_ids=preferred_course_ids,
+                    preferred_scope=request.preferred_scope,
+                )
+                if base_score > 0
+                else 0.0
             )
             nav = nav_by_id.get(unit.unit_id)
             scored.append(
@@ -159,8 +187,11 @@ class AgentUnitSearchService:
                     unit_name=unit.unit_name,
                     summary=unit.summary,
                     learn_href=nav.learn_href if nav else None,
-                    score=score,
+                    score=base_score + path_adjustment,
                     quiz_available=bool(getattr(unit, "has_quiz_items", False)),
+                    outside_current_path=bool(
+                        current_path_course_ids and unit.course_id not in current_path_course_ids
+                    ),
                 )
             )
 
@@ -177,8 +208,9 @@ class AgentUnitSearchService:
                 "hidden_logistics_excluded",
                 "allowed_course_intersection",
                 "unit_title_only",
+                "path_aware_rerank",
             ],
-            ranking_version="unit_title_rerank_v1",
+            ranking_version="unit_title_rerank_v2",
             runtime_navigation_resolution=[
                 self.navigation_service.to_trace(nav_by_id[result.canonical_unit_id])
                 for result in results
