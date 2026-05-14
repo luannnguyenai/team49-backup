@@ -51,6 +51,7 @@ psutil>=6.0.0
 # Dev / testing
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
+pytest-cov>=7.1.0
 
 # Optional guardrails PII stack
 # Keep this optional until a version is confirmed compatible with openai>=2.x.
