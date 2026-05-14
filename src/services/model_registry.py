@@ -144,6 +144,10 @@ def build_chat_model_kwargs_for_option(
         if reasoning_effort:
             kwargs["reasoning_effort"] = reasoning_effort
         kwargs.update(extra_kwargs)
+        if option.provider.lower() == "openai" and "api_key" not in kwargs:
+            # Allow test/runtime wiring to instantiate a placeholder chat model
+            # even when CI intentionally omits cloud credentials.
+            kwargs["api_key"] = "EMPTY"
         return kwargs
 
 
