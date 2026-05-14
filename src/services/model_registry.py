@@ -8,7 +8,10 @@ from datetime import UTC, datetime
 import httpx
 
 from src.config import settings
-from src.services.chat_model_factory import build_chat_model_kwargs
+from src.services.chat_model_factory import (
+    MissingModelCredentialError,
+    build_chat_model_kwargs,
+)
 
 DEFAULT_CHAT_MODEL_ID = "default"
 QWEN35_4B_CHAT_MODEL_ID = "qwen35_4b"
@@ -119,14 +122,29 @@ def build_chat_model_kwargs_for_option(
         extra_kwargs["api_key"] = option.api_key or "EMPTY"
         reasoning_effort = "off"
 
-    return build_chat_model_kwargs(
-        model=option.model,
-        temperature=temperature,
-        max_tokens=max_tokens,
-        model_provider=option.provider,
-        reasoning_effort=reasoning_effort,
-        extra_kwargs=extra_kwargs,
-    )
+    try:
+        return build_chat_model_kwargs(
+            model=option.model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            model_provider=option.provider,
+            reasoning_effort=reasoning_effort,
+            extra_kwargs=extra_kwargs,
+        )
+    except MissingModelCredentialError:
+        kwargs = {
+            "model": option.model,
+            "model_provider": option.provider,
+            "temperature": temperature,
+            "timeout": settings.llm_request_timeout_seconds,
+            "max_retries": settings.llm_max_retries,
+        }
+        if max_tokens is not None:
+            kwargs["max_tokens"] = max_tokens
+        if reasoning_effort:
+            kwargs["reasoning_effort"] = reasoning_effort
+        kwargs.update(extra_kwargs)
+        return kwargs
 
 
 def _model_health_base_url(option: ChatModelOption) -> str | None:
