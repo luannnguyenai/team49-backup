@@ -77,3 +77,7 @@ override.tf.json
 !*.tfvars.example
 backend.hcl
 !backend.hcl.example
+
+# Runner local secrets
+runner/*.pem
+runner/*.json
