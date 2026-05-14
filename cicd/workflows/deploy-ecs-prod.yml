@@ -140,6 +140,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python scripts/generate_asset_manifest.py --preserve-existing
           docker build -t "$BACKEND_IMAGE" .
           docker push "$BACKEND_IMAGE"
 

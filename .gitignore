@@ -24,6 +24,7 @@ data/**
 !data/**/*.dvc
 !data/**/.gitignore
 !data/bootstrap/*.json
+!data/asset_manifest.json
 
 # Project local files
 app.db

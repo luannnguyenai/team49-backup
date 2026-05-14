@@ -47,6 +47,7 @@ jobs:
               - "alembic/**"
               - "scripts/**"
               - "data/bootstrap/**"
+              - "data/asset_manifest.json"
               - "requirements.txt"
               - "pyproject.toml"
               - "uv.lock"

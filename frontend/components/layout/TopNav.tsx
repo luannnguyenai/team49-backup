@@ -5,7 +5,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Moon, Sun, Bell, Search, Menu, LogOut, X } from "lucide-react";
+import { Search, Menu, LogOut, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
@@ -388,31 +388,6 @@ function TopNavContent() {
                 <Search className="h-4 w-4" />
               </button>
             ) : null}
-
-            {/* Dark mode toggle */}
-            <button
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="hidden h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 md:flex"
-              style={{ color: "var(--text-secondary)" }}
-              aria-label="Toggle theme"
-            >
-              {resolvedTheme === "dark" ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
-            </button>
-
-            {/* Notifications */}
-            <button
-              className="relative hidden h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 md:flex"
-              style={{ color: "var(--text-secondary)" }}
-              aria-label="Notifications"
-            >
-              <Bell className="h-4 w-4" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
-              <span className="sr-only">Unread notifications</span>
-            </button>
 
             {isAuthenticated ? (
               <>
