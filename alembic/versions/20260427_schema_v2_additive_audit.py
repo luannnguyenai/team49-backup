@@ -5,6 +5,11 @@ Revises: 20260424_resume_state
 Create Date: 2026-04-27
 """
 
+# Contract note:
+# This migration stays additive and idempotent by using raw SQL for
+# IF NOT EXISTS semantics where Alembic's op.add_column / op.create_table
+# do not provide an equivalent cross-rerun safeguard.
+
 from collections.abc import Sequence
 
 from sqlalchemy import text
