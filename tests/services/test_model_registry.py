@@ -10,6 +10,7 @@ from src.services.model_registry import (
     ensure_chat_model_available,
     get_chat_model_option,
     list_chat_model_options,
+    settings,
 )
 
 
@@ -90,7 +91,40 @@ async def test_qwen_health_uses_openai_compatible_models_endpoint():
 
 
 @pytest.mark.asyncio
-async def test_chat_model_availability_marks_down_models_unavailable_without_exposing_details():
+async def test_guardrail_health_supports_public_router_without_api_key(monkeypatch):
+    monkeypatch.setattr(settings, "guardrail_router_base_url", "https://router.example.com/v1")
+    monkeypatch.setattr(settings, "guardrail_router_model", "guardrail-router-merged")
+    monkeypatch.setattr(settings, "guardrail_router_api_key", "")
+    calls: list[dict[str, object]] = []
+
+    class FakeResponse:
+        status_code = 200
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"data": [{"id": "guardrail-router-merged"}]}
+
+    class FakeClient:
+        async def get(self, url, **kwargs):
+            calls.append({"url": url, **kwargs})
+            return FakeResponse()
+
+    result = await check_chat_model_health("qwen35_08b", client=FakeClient())
+
+    assert result["id"] == "qwen35_08b"
+    assert result["status"] == "healthy"
+    assert result["base_url"] == "https://router.example.com/v1"
+    assert calls[0]["url"] == "https://router.example.com/v1/models"
+    assert calls[0]["headers"] == {}
+
+
+@pytest.mark.asyncio
+async def test_chat_model_availability_marks_down_models_unavailable_without_exposing_details(
+    monkeypatch,
+):
+    monkeypatch.setattr(settings, "guardrail_router_base_url", "")
     calls: list[str] = []
 
     class FakeResponse:
@@ -119,13 +153,17 @@ async def test_chat_model_availability_marks_down_models_unavailable_without_exp
 
 
 @pytest.mark.asyncio
-async def test_ensure_chat_model_available_rejects_down_model():
-    class FakeClient:
-        async def get(self, *_args, **_kwargs):
-            raise RuntimeError("connection refused")
+async def test_ensure_chat_model_available_rejects_down_model(monkeypatch):
+    from src.services import model_registry
 
+    model_registry._health_cache.clear()
+
+    async def fake_check_health_cached(model_id: str) -> dict:
+        return {"id": model_id, "status": "down"}
+
+    monkeypatch.setattr(model_registry, "_check_health_cached", fake_check_health_cached)
     with pytest.raises(ChatModelUnavailableError) as exc:
-        await ensure_chat_model_available("qwen35_4b", client=FakeClient())
+        await ensure_chat_model_available("qwen35_4b")
 
     assert exc.value.model_id == "qwen35_4b"
     assert exc.value.status == "down"

@@ -77,7 +77,7 @@ def list_chat_model_options(*, include_non_selectable: bool = False) -> list[Cha
     ]
     if include_non_selectable:
         guardrail_base_url = settings.guardrail_router_base_url.strip().rstrip("/")
-        guardrail_api_key = settings.guardrail_router_api_key or "EMPTY"
+        guardrail_api_key = settings.guardrail_router_api_key.strip() or None
         if guardrail_base_url:
             options.append(
                 ChatModelOption(
@@ -139,7 +139,7 @@ def _model_health_base_url(option: ChatModelOption) -> str | None:
 
 def _model_health_api_key(option: ChatModelOption) -> str:
     if option.base_url:
-        return option.api_key or "EMPTY"
+        return option.api_key or ""
     if option.provider.lower() == "openai":
         return settings.openai_api_key
     return ""
@@ -185,7 +185,7 @@ async def check_chat_model_health(
         )
 
     api_key = _model_health_api_key(option)
-    if option.provider.lower() == "openai" and not api_key:
+    if option.provider.lower() == "openai" and not api_key and not option.base_url:
         return _health_payload(
             option,
             status="down",
