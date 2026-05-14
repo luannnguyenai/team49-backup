@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   plan:
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, linux, aws, ec2]
     environment: production
 
     steps:

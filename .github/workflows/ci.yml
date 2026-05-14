@@ -28,7 +28,7 @@ concurrency:
 jobs:
   changes:
     name: "Detect changed areas"
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, linux, aws, ec2]
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
@@ -63,7 +63,7 @@ jobs:
 
   repo-config:
     name: "Repo config · Validate"
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, linux, aws, ec2]
     needs: changes
     if: needs.changes.outputs.repo_config == 'true'
 
@@ -93,7 +93,7 @@ jobs:
 
   backend:
     name: "Backend · Ruff + Pytest"
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, linux, aws, ec2]
     needs: changes
     if: needs.changes.outputs.backend == 'true'
 
@@ -168,7 +168,7 @@ jobs:
 
   frontend:
     name: "Frontend · Type-check"
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, linux, aws, ec2]
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     env:
@@ -196,7 +196,7 @@ jobs:
 
   ci-status:
     name: "CI · Status"
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, linux, aws, ec2]
     needs:
       - changes
       - repo-config
