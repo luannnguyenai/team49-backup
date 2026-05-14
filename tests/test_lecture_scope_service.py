@@ -1,8 +1,13 @@
 import unittest
+from pathlib import Path
 
 from src.services.lecture_scope_service import get_lecture_scope_metadata
 
 
+@unittest.skipUnless(
+    Path("data/bootstrap/units.json").exists(),
+    "bootstrap units fixture is not present in this environment",
+)
 class LectureScopeServiceTests(unittest.TestCase):
     def test_get_lecture_scope_metadata_resolves_cs231n_lecture(self):
         metadata = get_lecture_scope_metadata("cs231n-lecture-1")

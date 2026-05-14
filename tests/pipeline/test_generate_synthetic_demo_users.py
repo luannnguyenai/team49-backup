@@ -1,4 +1,9 @@
-from src.services.auth_service import verify_password
+import json
+import uuid
+from pathlib import Path
+
+import pytest
+
 from src.scripts.pipeline.generate_synthetic_demo_users import (
     COHORT_DATASET,
     DEMO_DATASET,
@@ -8,17 +13,23 @@ from src.scripts.pipeline.generate_synthetic_demo_users import (
     ItemRef,
     SyntheticCatalog,
     UnitRef,
+    _select_courses,
     build_synthetic_rows,
     build_user_specs,
     load_user_specs,
-    _select_courses,
     write_jsonl_snapshots,
 )
-import json
-from pathlib import Path
-import uuid
+from src.services.auth_service import verify_password
+
+_HAS_DEMO_SCENARIOS = Path("data/synthetic/demo_accounts_v1/scenarios.json").exists()
+_HAS_COHORT_SCENARIOS = Path("data/synthetic/cohort_30_v1/scenarios.json").exists()
+_HAS_SYNTHETIC_SCENARIOS = _HAS_DEMO_SCENARIOS and _HAS_COHORT_SCENARIOS
 
 
+@pytest.mark.skipif(
+    not _HAS_SYNTHETIC_SCENARIOS,
+    reason="synthetic scenario fixtures are not present in this environment",
+)
 def test_build_user_specs_separates_demo_accounts_from_cohort_users():
     specs = build_user_specs()
 
@@ -32,6 +43,10 @@ def test_build_user_specs_separates_demo_accounts_from_cohort_users():
     assert len(build_user_specs("cohort")) == 30
 
 
+@pytest.mark.skipif(
+    not _HAS_DEMO_SCENARIOS,
+    reason="demo scenario fixture is not present in this environment",
+)
 def test_user_specs_are_loaded_from_hand_authored_json():
     specs = load_user_specs(Path("data/synthetic/demo_accounts_v1/scenarios.json"))
 
@@ -45,6 +60,10 @@ def test_user_specs_are_loaded_from_hand_authored_json():
     assert beginner.sessions[0].answer_pattern == ("wrong", "wrong", "correct", "wrong")
 
 
+@pytest.mark.skipif(
+    not _HAS_SYNTHETIC_SCENARIOS,
+    reason="synthetic scenario fixtures are not present in this environment",
+)
 def test_build_user_specs_uses_vinuni_domain_and_expected_demo_accounts():
     specs = build_user_specs()
 
@@ -67,6 +86,10 @@ def test_demo_password_hash_is_static_and_verifies_shared_password():
     assert verify_password(DEMO_PASSWORD, DEMO_PASSWORD_HASH)
 
 
+@pytest.mark.skipif(
+    not _HAS_SYNTHETIC_SCENARIOS,
+    reason="synthetic scenario fixtures are not present in this environment",
+)
 def test_cohort_has_diverse_proficiency_bands():
     cohort_specs = [spec for spec in build_user_specs() if spec.dataset == COHORT_DATASET]
 
@@ -82,6 +105,10 @@ def test_cohort_has_diverse_proficiency_bands():
     }
 
 
+@pytest.mark.skipif(
+    not _HAS_SYNTHETIC_SCENARIOS,
+    reason="synthetic scenario fixtures are not present in this environment",
+)
 def test_build_user_specs_is_deterministic():
     first = [spec.to_metadata() for spec in build_user_specs()]
     second = [spec.to_metadata() for spec in build_user_specs()]
@@ -89,6 +116,10 @@ def test_build_user_specs_is_deterministic():
     assert first == second
 
 
+@pytest.mark.skipif(
+    not _HAS_SYNTHETIC_SCENARIOS,
+    reason="synthetic scenario fixtures are not present in this environment",
+)
 def test_build_synthetic_rows_preserves_case_and_proficiency_metadata():
     rows = build_synthetic_rows(_fake_catalog())
 
@@ -140,6 +171,10 @@ def test_select_courses_includes_deep_learning_foundation_for_nlp_path():
     assert [course.slug for course in selected] == ["cs230", "cs224n"]
 
 
+@pytest.mark.skipif(
+    not _HAS_SYNTHETIC_SCENARIOS,
+    reason="synthetic scenario fixtures are not present in this environment",
+)
 def test_write_jsonl_snapshots_keeps_demo_and_cohort_directories_separate(tmp_path):
     rows = build_synthetic_rows(_fake_catalog())
 

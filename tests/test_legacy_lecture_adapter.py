@@ -1,6 +1,11 @@
 import unittest
+from pathlib import Path
 
 
+@unittest.skipUnless(
+    Path("data/bootstrap/units.json").exists(),
+    "bootstrap units fixture is not present in this environment",
+)
 class LegacyLectureAdapterTests(unittest.TestCase):
     def test_build_course_runtime_lecture_id_uses_video_stem_for_cs224n(self):
         from src.services.legacy_lecture_adapter import build_course_runtime_lecture_id
