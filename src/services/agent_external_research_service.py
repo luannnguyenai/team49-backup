@@ -628,14 +628,13 @@ class AgentExternalResearchService:
         base_thought = self._build_external_thought(message)
 
         def _generate() -> Generator[str, None, None]:
-            for token in rag_respond_stream(
+            yield from rag_respond_stream(
                 message=message,
                 thought=base_thought,
                 observations=[observation],
                 route_context=None,
                 recent_messages=recent_messages,
-            ):
-                yield token
+            )
 
         return _generate()
 
@@ -693,7 +692,6 @@ class AgentExternalResearchService:
 
             yield _json.dumps({"status": "Searching web and papers"}) + "\n"
             documents = await self._act(plan)
-            observed = self._observe(message, documents)
 
             pipeline = ["plan", "search", "consolidate", "respond"]
             if not documents:
