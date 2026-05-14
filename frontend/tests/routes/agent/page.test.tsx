@@ -141,7 +141,7 @@ describe("agent page", () => {
 
     expect(await screen.findAllByRole("heading", { name: "AI Learning Copilot" })).toHaveLength(2);
     expect(screen.getByText(/ask about prerequisites, weak areas/i)).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /where should i review cnns/i })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: /where should i review cnns/i })).toHaveLength(1);
   });
 
   it("keeps the chat workspace focused without the context sidebar or header clear action", async () => {
@@ -303,7 +303,12 @@ describe("agent page", () => {
   it("passes the selected chat model when the learner switches models", async () => {
     render(<AgentPage />);
 
-    const qwenModel = await screen.findByRole("button", { name: /qwen 3.5 4b/i });
+    const modelMenu = await screen.findByRole("button", { name: /agent model: auto/i });
+    expect(screen.queryByRole("button", { name: /qwen 3.5 4b/i })).not.toBeInTheDocument();
+    fireEvent.click(modelMenu);
+
+    expect(screen.getByTestId("agent-composer-card")).not.toHaveClass("overflow-hidden");
+    const qwenModel = await screen.findByRole("menuitemradio", { name: /qwen 3.5 4b/i });
     fireEvent.click(qwenModel);
 
     const input = screen.getByPlaceholderText("Ask about your learning path...");
@@ -331,7 +336,10 @@ describe("agent page", () => {
     });
     render(<AgentPage />);
 
-    const qwenModel = await screen.findByRole("button", { name: /qwen 3.5 4b.*down/i });
+    expect(screen.queryByRole("button", { name: /qwen 3.5 4b.*down/i })).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: /agent model: auto/i }));
+
+    const qwenModel = await screen.findByRole("menuitemradio", { name: /qwen 3.5 4b.*down/i });
     expect(qwenModel).toBeDisabled();
 
     const input = screen.getByPlaceholderText("Ask about your learning path...");

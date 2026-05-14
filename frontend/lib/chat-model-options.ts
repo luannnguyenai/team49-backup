@@ -1,7 +1,7 @@
 export type ChatModelId = "default" | "qwen35_4b";
 
 export const CHAT_MODEL_OPTIONS: Array<{ id: ChatModelId; label: string }> = [
-  { id: "default", label: "Default" },
+  { id: "default", label: "Auto" },
   { id: "qwen35_4b", label: "Qwen 3.5 4B" },
 ];
 

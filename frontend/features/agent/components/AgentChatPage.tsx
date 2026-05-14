@@ -1595,6 +1595,8 @@ function Composer({
   chatModelAvailability: ChatModelAvailability[];
 }) {
   const [text, setText] = useState("");
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const selectedChatModel = CHAT_MODEL_OPTIONS.find((option) => option.id === chatModelId) ?? CHAT_MODEL_OPTIONS[0];
   const send = (event?: FormEvent) => {
     event?.preventDefault();
     const value = text.trim();
@@ -1603,23 +1605,19 @@ function Composer({
     onSend(value);
   };
 
+  useEffect(() => {
+    if (disabled) {
+      setIsModelMenuOpen(false);
+    }
+  }, [disabled]);
+
   return (
     <div className="border-t border-border-subtle bg-surface-page/80 p-4 backdrop-blur">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-          {QUICK_PROMPTS.map((prompt) => (
-            <button
-              key={prompt}
-              type="button"
-              disabled={disabled}
-              onClick={() => onSend(prompt)}
-              className="shrink-0 rounded-full border border-border-subtle bg-surface-card px-3 py-1.5 text-[11px] font-semibold text-text-muted transition hover:border-primary-200 hover:bg-surface-accent-soft hover:text-primary-700 disabled:opacity-60"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
-        <div className="overflow-hidden rounded-2xl border border-border-subtle bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+        <div
+          className="overflow-visible rounded-2xl border border-border-subtle bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.03)]"
+          data-testid="agent-composer-card"
+        >
           <form onSubmit={send}>
             <label htmlFor="agent-message" className="sr-only">
               Message AI Assistant
@@ -1667,37 +1665,76 @@ function Composer({
                 })}
               </div>
               <div className="h-3.5 w-px bg-border-subtle/30" />
-              <div className="flex items-center gap-1.5" data-testid="agent-chat-model-selector">
-                {CHAT_MODEL_OPTIONS.map((option) => {
-                  const availability = getChatModelAvailability(chatModelAvailability, option.id);
-                  const isActive = chatModelId === option.id;
-                  const isUnavailable = !availability.available;
-                  const statusLabel = isUnavailable ? availability.status : null;
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      disabled={disabled || isUnavailable}
-                      onClick={() => onChatModelChange(option.id)}
-                      title={isUnavailable ? `${option.label} is ${availability.status}` : option.label}
-                      className={cn(
-                        "inline-flex h-[28px] max-w-[150px] items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium transition disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-[210px]",
-                        isActive
-                          ? "border border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
-                          : "border border-border-subtle/40 text-text-muted hover:border-border-subtle hover:text-text-strong",
-                      )}
-                      aria-pressed={isActive}
-                    >
-                      <Bot className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{option.label}</span>
-                      {statusLabel ? (
-                        <span className="shrink-0 rounded-full bg-rose-500/10 px-1 py-px text-[9px] uppercase tracking-wide text-rose-700 dark:text-rose-300">
-                          {statusLabel}
-                        </span>
-                      ) : null}
-                    </button>
-                  );
-                })}
+              <div
+                className="relative flex items-center"
+                data-testid="agent-chat-model-selector"
+                onBlur={(event) => {
+                  const nextFocus = event.relatedTarget as Node | null;
+                  if (!event.currentTarget.contains(nextFocus)) {
+                    setIsModelMenuOpen(false);
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => setIsModelMenuOpen((open) => !open)}
+                  className="inline-flex h-[28px] max-w-[150px] items-center gap-1.5 rounded-full border border-primary-200 bg-surface-accent-soft px-2.5 text-[11px] font-medium text-primary-700 transition hover:border-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:text-primary-300 sm:max-w-[210px]"
+                  aria-label={`Agent model: ${selectedChatModel.label}`}
+                  aria-expanded={isModelMenuOpen}
+                  aria-haspopup="menu"
+                >
+                  <Bot className="h-3 w-3 shrink-0" />
+                  <span className="truncate">{selectedChatModel.label}</span>
+                  <ChevronDown
+                    className={cn(
+                      "h-3 w-3 shrink-0 transition-transform",
+                      isModelMenuOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+                {isModelMenuOpen ? (
+                  <div
+                    role="menu"
+                    className="absolute bottom-full left-0 z-30 mb-2 w-56 overflow-hidden rounded-xl border border-border-subtle bg-surface-card p-1.5 shadow-[0_12px_32px_rgba(15,23,42,0.14)]"
+                  >
+                    {CHAT_MODEL_OPTIONS.map((option) => {
+                      const availability = getChatModelAvailability(chatModelAvailability, option.id);
+                      const isActive = chatModelId === option.id;
+                      const isUnavailable = !availability.available;
+                      const statusLabel = isUnavailable ? availability.status : null;
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          role="menuitemradio"
+                          disabled={disabled || isUnavailable}
+                          aria-checked={isActive}
+                          onClick={() => {
+                            onChatModelChange(option.id);
+                            setIsModelMenuOpen(false);
+                          }}
+                          title={isUnavailable ? `${option.label} is ${availability.status}` : option.label}
+                          className={cn(
+                            "flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60",
+                            isActive
+                              ? "bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                              : "text-text-muted hover:bg-surface-page hover:text-text-strong",
+                          )}
+                        >
+                          <Bot className="h-3.5 w-3.5 shrink-0" />
+                          <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                          {statusLabel ? (
+                            <span className="shrink-0 rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-rose-700 dark:text-rose-300">
+                              {statusLabel}
+                            </span>
+                          ) : null}
+                          {isActive ? <Check className="h-3.5 w-3.5 shrink-0" /> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
               </div>
               <div className="ml-auto">
                 {isStreaming ? (
