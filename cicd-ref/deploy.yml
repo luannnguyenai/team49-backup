@@ -27,7 +27,7 @@ concurrency:
 jobs:
   deploy:
     name: Deploy to ECS
-    runs-on: [self-hosted, phoenix-runner-02]
+    runs-on: [self-hosted]
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')

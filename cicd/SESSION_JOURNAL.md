@@ -138,7 +138,7 @@ gh api orgs/a20-ai-thuc-chien/actions/runners
 **Issue 5 — Không kiểm được status `phoenix-runner-02`**:
 - Cần admin permission để list runner. Maintain role không đủ.
 - Rủi ro: nếu runner offline, CI block, deploy không bắt đầu.
-- Fix: thay tạm `runs-on: [self-hosted, phoenix-runner-02]` → `runs-on: ubuntu-latest` cho 7 job trong `ci.yml`. Postgres + Redis service container vẫn hoạt động trên `ubuntu-latest`.
+- Fix: thay tạm `runs-on: [self-hosted]` → `runs-on: ubuntu-latest` cho 7 job trong `ci.yml`. Postgres + Redis service container vẫn hoạt động trên `ubuntu-latest`.
 - Commit `2763240 fix(ci): switch ci.yml from self-hosted phoenix-runner-02 to ubuntu-latest`.
 
 ### 3.8 Push trigger workflow (Bài 8)
