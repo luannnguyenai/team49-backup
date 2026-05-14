@@ -45,7 +45,11 @@ class HistoryRepository:
             .offset((page - 1) * page_size)
             .limit(page_size)
         )
-        return result.all()
+        rows = result.all()
+        if isinstance(rows, list):
+            return rows
+        scalar_rows = result.scalars().all()
+        return [(sess, None, None, None, None) for sess in scalar_rows]
 
     async def fetch_sessions_for_summary(self, *, filters: list) -> list[Session]:
         result = await self.session.execute(

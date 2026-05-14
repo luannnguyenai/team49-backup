@@ -36,13 +36,17 @@ async def test_submit_canonical_assessment_writes_interaction_and_mastery(monkey
     item_result.scalars.return_value.all.return_value = [item]
     seq_result = Mock()
     seq_result.scalar.return_value = 0
+    placement_unit_result = Mock()
+    placement_unit_result.scalars.return_value.all.return_value = [
+        SimpleNamespace(id=uuid4(), canonical_unit_id="unit-1", title="Transformers"),
+    ]
     unit_result = Mock()
     unit_result.scalars.return_value.all.return_value = [
         SimpleNamespace(id=uuid4(), canonical_unit_id="unit-1", title="Transformers"),
     ]
     weak_kp_result = Mock()
     weak_kp_result.all.return_value = []
-    db.execute.side_effect = [item_result, seq_result, unit_result, weak_kp_result]
+    db.execute.side_effect = [item_result, seq_result, placement_unit_result, unit_result, weak_kp_result]
 
     updated = []
 
@@ -50,9 +54,13 @@ async def test_submit_canonical_assessment_writes_interaction_and_mastery(monkey
         updated.append((user_id, canonical_item_id, is_correct))
         return ["kp_attention"]
 
+    async def fake_upsert(self, **kwargs):
+        return SimpleNamespace(**kwargs)
+
     monkeypatch.setattr(assessment_service.settings, "write_canonical_interactions_enabled", True)
     monkeypatch.setattr(assessment_service.settings, "write_learner_mastery_kp_enabled", True)
     monkeypatch.setattr(assessment_service, "update_kp_mastery_from_item", fake_update_kp_mastery_from_item)
+    monkeypatch.setattr(assessment_service.PlacementAssessmentRepository, "upsert", fake_upsert)
 
     user_id = uuid4()
     session_id = uuid4()

@@ -89,7 +89,15 @@ async def get_history(
     )
 
     items: list[HistoryItem] = []
-    for sess, learning_unit_title, section_title, course_id, course_slug in page_rows:
+    for row in page_rows:
+        if len(row) == 5:
+            sess, learning_unit_title, section_title, course_id, course_slug = row
+        elif len(row) == 3:
+            sess, learning_unit_title, section_title = row
+            course_id = None
+            course_slug = None
+        else:
+            raise ValueError(f"Unexpected history row shape: {len(row)}")
         items.append(
             _session_to_item(
                 sess,

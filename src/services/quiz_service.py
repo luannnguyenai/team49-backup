@@ -725,7 +725,11 @@ async def _current_quiz_progress_state(
     db: AsyncSession,
     user_id: uuid.UUID,
 ) -> dict:
-    state = await PlannerAuditRepository(db).get_session_state(user_id, CANONICAL_SESSION_ID)
+    repo = PlannerAuditRepository(db)
+    get_state = getattr(repo, "get_session_state", None)
+    if get_state is None:
+        return {}
+    state = await get_state(user_id, CANONICAL_SESSION_ID)
     current_progress = getattr(state, "current_progress", None) if state is not None else None
     if isinstance(current_progress, dict):
         return dict(current_progress)

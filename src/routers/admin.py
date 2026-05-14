@@ -482,10 +482,14 @@ async def _collect_logs(
     if "container" in selected_sources:
         container_events = await _fetch_container_events(limit)
         events.extend(container_events)
-        states["container"] = {
-            **runtime_state,
-            "count": len(container_events) if runtime_state["status"] == "healthy" else runtime_state["count"],
-        }
+        states["container"] = (
+            {
+                **runtime_state,
+                "count": len(container_events),
+            }
+            if runtime_state["status"] == "healthy"
+            else runtime_state
+        )
     else:
         states["container"] = _build_source_state("skipped", 0, None)
 

@@ -45,6 +45,8 @@ from src.schemas.assessment import (
 )
 from src.services.assessment_strategies import UnitPools
 from src.services.canonical_mastery_service import update_kp_mastery_from_item
+from src.services.canonical_question_selector import CanonicalQuestionSelector
+from src.services.chat_model_factory import MissingModelCredentialError
 from src.services.mastery_evaluator import classify_mastery
 from src.services.strategy_router import pick_strategy
 
@@ -188,6 +190,21 @@ def _canonical_item_to_assessment_question(item: QuestionBankItem):
         option_c=str(padded_choices[2]),
         option_d=str(padded_choices[3]),
         time_expected_seconds=None,
+    )
+
+
+async def _select_canonical_questions_for_units(
+    db: AsyncSession,
+    *,
+    canonical_unit_ids: list[str],
+    phase: str,
+    count: int,
+):
+    selector = CanonicalQuestionSelector(CanonicalQuestionRepository(db))
+    return await selector.select_for_phase(
+        phase=phase,
+        canonical_unit_ids=canonical_unit_ids,
+        count=count,
     )
 
 
@@ -621,13 +638,22 @@ async def generate_assessment_ai_summary(
 
         result = await get_assessment_results(db, user_id, session_id)
         enforce_llm_rate_limit(model=DEFAULT_MODEL, model_provider=settings.model_provider)
-        llm = init_chat_model(
-            **build_chat_model_kwargs(
+        try:
+            llm_kwargs = build_chat_model_kwargs(
                 model=DEFAULT_MODEL,
                 temperature=0.4,
                 max_tokens=500,
             )
-        )
+        except MissingModelCredentialError:
+            llm_kwargs = {
+                "model": DEFAULT_MODEL,
+                "model_provider": settings.model_provider,
+                "temperature": 0.4,
+                "max_tokens": 500,
+                "timeout": settings.llm_request_timeout_seconds,
+                "max_retries": settings.llm_max_retries,
+            }
+        llm = init_chat_model(**llm_kwargs)
         trace_metadata = build_langfuse_metadata(
             user_id=str(user_id),
             session_id=str(session_id),
@@ -723,7 +749,7 @@ async def _build_canonical_assessment_response(
     session_id: uuid.UUID,
     completed_at: datetime,
     rows: list[tuple[Interaction, QuestionBankItem]],
-    placement_overrides: dict[str, str] | None,
+    placement_overrides: dict[str, str] | None = None,
 ) -> AssessmentResultResponse:
     unit_ids = sorted({item.unit_id for _, item in rows})
     unit_result = await db.execute(

@@ -40,7 +40,10 @@ from src.schemas.onboarding import (
     TopicsResponse,
     UnitSummary,
 )
-from src.services.chat_model_factory import build_chat_model_kwargs
+from src.services.chat_model_factory import (
+    MissingModelCredentialError,
+    build_chat_model_kwargs,
+)
 from src.services.llm_rate_limiter import enforce_llm_rate_limit
 
 logger = logging.getLogger(__name__)
@@ -311,13 +314,22 @@ async def analyze_prior_profile(body: PriorAnalysisRequest) -> PriorAnalysisResp
                             user_text,
                         )
         else:
-            llm = init_chat_model(
-                **build_chat_model_kwargs(
+            try:
+                llm_kwargs = build_chat_model_kwargs(
                     model=DEFAULT_MODEL,
                     temperature=0,
                     max_tokens=700,
                 )
-            )
+            except MissingModelCredentialError:
+                llm_kwargs = {
+                    "model": DEFAULT_MODEL,
+                    "model_provider": settings.model_provider,
+                    "temperature": 0,
+                    "max_tokens": 700,
+                    "timeout": settings.llm_request_timeout_seconds,
+                    "max_retries": settings.llm_max_retries,
+                }
+            llm = init_chat_model(**llm_kwargs)
 
             async def call_model() -> str:
                 with start_langfuse_root_span(

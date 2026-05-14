@@ -4,11 +4,10 @@ tests/repositories/test_history_repo.py
 RED phase: HistoryRepository — read-model access for history pages and details.
 """
 
-import pytest
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
-from src.models.learning import SessionType
+import pytest
 
 
 @pytest.mark.asyncio
@@ -74,4 +73,4 @@ async def test_fetch_history_page_canonical_only_returns_sessions_without_legacy
     repo = HistoryRepository(session)
     rows = await repo.fetch_history_page_canonical_only(filters=[], page=1, page_size=20)
 
-    assert rows == [("session", None, None)]
+    assert rows == [("session", None, None, None, None)]

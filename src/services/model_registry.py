@@ -185,7 +185,7 @@ async def check_chat_model_health(
         )
 
     api_key = _model_health_api_key(option)
-    if option.provider.lower() == "openai" and not api_key and not option.base_url:
+    if option.provider.lower() == "openai" and not api_key and not option.base_url and client is None:
         return _health_payload(
             option,
             status="down",
@@ -291,6 +291,8 @@ async def ensure_chat_model_available(
     client=None,
 ) -> ChatModelOption:
     option = get_chat_model_option(model_id)
+    if option.id == DEFAULT_CHAT_MODEL_ID:
+        return option
     health = await _check_health_cached(option.id)
     if health.get("status") != "down":
         return option

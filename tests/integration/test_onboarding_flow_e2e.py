@@ -4,32 +4,26 @@ Tests: Goals → Topics → Known Topics → Experience Level → Placement Asse
 """
 
 import pytest
-from uuid import uuid4
-from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.user import User
-from src.models.learning import GoalPreference
-from src.models.course import LearningUnit
 from src.models.canonical import QuestionBankItem
-from src.models.learning import Session
+from src.models.course import LearningUnit
+from src.models.learning import GoalPreference, Session
+from src.models.user import User
 from src.schemas.onboarding import (
+    ExperienceLevelRequest,
     GoalsRequest,
     KnownTopicsRequest,
-    ExperienceLevelRequest,
 )
-from src.schemas.placement_assessment import (
-    PlacementStartRequest,
-    PlacementSubmitRequest,
-    PlacementAnswerInput,
-)
+from src.schemas.placement_assessment import PlacementAnswerInput
 from src.services.onboarding_service import (
-    save_user_goals,
     get_topics_tree,
-    save_known_topics,
     save_experience_level,
+    save_known_topics,
+    save_user_goals,
 )
+
 placement_assessment_service = pytest.importorskip(
     "src.services.placement_assessment_service",
     reason="Legacy placement assessment service is not present in this runtime.",
@@ -44,7 +38,8 @@ async def test_onboarding_flow_step1_set_goals(db_session: AsyncSession):
     # Create test user
     user = User(
         email="test_goals@example.com",
-        password_hash="dummy",
+        full_name="Test Goals",
+        hashed_password="dummy",
     )
     db_session.add(user)
     await db_session.flush()
@@ -71,7 +66,7 @@ async def test_onboarding_flow_step1_set_goals(db_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_onboarding_flow_step2_get_topics(db_session: AsyncSession):
     """Step 2: User gets available topics for their goals."""
-    user = User(email="test_topics@example.com", password_hash="dummy")
+    user = User(email="test_topics@example.com", full_name="Test Topics", hashed_password="dummy")
     db_session.add(user)
     await db_session.flush()
 
@@ -87,7 +82,7 @@ async def test_onboarding_flow_step2_get_topics(db_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_onboarding_flow_step3_set_known_topics(db_session: AsyncSession):
     """Step 3: User marks which topics they already know."""
-    user = User(email="test_known@example.com", password_hash="dummy")
+    user = User(email="test_known@example.com", full_name="Test Known", hashed_password="dummy")
     db_session.add(user)
     await db_session.flush()
 
@@ -113,7 +108,7 @@ async def test_onboarding_flow_step3_set_known_topics(db_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_onboarding_flow_step4_set_experience_level(db_session: AsyncSession):
     """Step 4: User sets their experience level."""
-    user = User(email="test_experience@example.com", password_hash="dummy")
+    user = User(email="test_experience@example.com", full_name="Test Experience", hashed_password="dummy")
     db_session.add(user)
     await db_session.flush()
 
@@ -138,7 +133,7 @@ async def test_onboarding_flow_step4_set_experience_level(db_session: AsyncSessi
 @pytest.mark.asyncio
 async def test_onboarding_flow_step5_start_placement_assessment(db_session: AsyncSession):
     """Step 5: Start placement assessment for selected topics."""
-    user = User(email="test_placement_start@example.com", password_hash="dummy")
+    user = User(email="test_placement_start@example.com", full_name="Test Placement Start", hashed_password="dummy")
     db_session.add(user)
     await db_session.flush()
 
@@ -157,9 +152,8 @@ async def test_onboarding_flow_step5_start_placement_assessment(db_session: Asyn
     topic_unit_ids = [u.id for u in units[:2]]
 
     # Start placement
-    req = PlacementStartRequest(topic_unit_ids=topic_unit_ids)
     resp = await start_placement_assessment(
-        db_session, user_id=user.id, topic_unit_ids=req.topic_unit_ids
+        db_session, user_id=user.id, topic_unit_ids=topic_unit_ids
     )
 
     # Verify response
@@ -187,7 +181,7 @@ async def test_onboarding_flow_step5_start_placement_assessment(db_session: Asyn
 @pytest.mark.asyncio
 async def test_onboarding_flow_step6_submit_placement_answers(db_session: AsyncSession):
     """Step 6: User submits placement assessment answers."""
-    user = User(email="test_placement_submit@example.com", password_hash="dummy")
+    user = User(email="test_placement_submit@example.com", full_name="Test Placement Submit", hashed_password="dummy")
     db_session.add(user)
     await db_session.flush()
 
@@ -203,7 +197,6 @@ async def test_onboarding_flow_step6_submit_placement_answers(db_session: AsyncS
     if not unit or not unit.canonical_unit_id:
         pytest.skip("No learning unit with canonical_unit_id")
 
-    req = PlacementStartRequest(topic_unit_ids=[unit.id])
     start_resp = await start_placement_assessment(
         db_session, user_id=user.id, topic_unit_ids=[unit.id]
     )
@@ -252,7 +245,7 @@ async def test_onboarding_flow_step6_submit_placement_answers(db_session: AsyncS
 async def test_onboarding_flow_complete_journey(db_session: AsyncSession):
     """Complete onboarding journey: Goals → Topics → Experience → Placement."""
     # Create user
-    user = User(email="test_complete_journey@example.com", password_hash="dummy")
+    user = User(email="test_complete_journey@example.com", full_name="Test Complete Journey", hashed_password="dummy")
     db_session.add(user)
     await db_session.flush()
 
@@ -333,7 +326,7 @@ async def test_onboarding_flow_complete_journey(db_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_placement_assessment_with_mixed_answers(db_session: AsyncSession):
     """Test placement assessment with correct and incorrect answers."""
-    user = User(email="test_mixed_answers@example.com", password_hash="dummy")
+    user = User(email="test_mixed_answers@example.com", full_name="Test Mixed Answers", hashed_password="dummy")
     db_session.add(user)
     await db_session.flush()
 

@@ -106,11 +106,13 @@ class SpreadByPriorStrategy:
         # Split into n quantile bins
         bins = _split_into_bins(sorted_items, n)
 
-        # Select 1 random item per bin
+        # Select 1 representative item per bin.
+        # Using the first sorted item keeps the spread deterministic and
+        # guarantees the easiest bin actually contributes the easiest item.
         selected = []
         for bin_items in bins:
             if bin_items:
-                selected.append(random.choice(bin_items))
+                selected.append(bin_items[0])
 
         # Exposure cap: items shown in last 24h → drop and refill (Commit C+ with exposure_repo)
         # For Commit B: skip this (no exposure tracking yet), log placeholder

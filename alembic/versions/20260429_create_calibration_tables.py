@@ -47,9 +47,21 @@ def upgrade() -> None:
             metrics_json JSONB,
             started_at TIMESTAMPTZ DEFAULT now(),
             finished_at TIMESTAMPTZ,
-            active BOOLEAN NOT NULL DEFAULT FALSE
+            active BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )
         """
+    )
+    _add_col_if_not_exists(
+        "calibration_runs",
+        "created_at",
+        "TIMESTAMPTZ NOT NULL DEFAULT now()",
+    )
+    _add_col_if_not_exists(
+        "calibration_runs",
+        "updated_at",
+        "TIMESTAMPTZ NOT NULL DEFAULT now()",
     )
     _create_index_if_not_exists("ix_calibration_runs_active", "calibration_runs", "active")
     _create_index_if_not_exists("ix_calibration_runs_status", "calibration_runs", "status")
