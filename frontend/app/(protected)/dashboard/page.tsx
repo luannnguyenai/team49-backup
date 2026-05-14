@@ -118,14 +118,18 @@ export default function DashboardPage() {
   const hasActiveSearch = normalizedQuery.length >= 2;
 
   useEffect(() => {
-    Promise.all([getCachedAllCourseCatalog(true), historyApi.list({ page_size: 1 })])
+    setLoading(true);
+    Promise.all([
+      getCachedAllCourseCatalog(true, user?.id ? `user:${user.id}` : "public"),
+      historyApi.list({ page_size: 1 }),
+    ])
       .then(([catalog, hist]) => {
         setCourses(catalog.items);
         setSummary(hist.summary);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.id]);
 
   const filteredByTab = filterDashboardCourses(courses, activeTab);
   const filtered = filterCoursesByQuery(filteredByTab, rawQuery);

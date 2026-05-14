@@ -704,6 +704,8 @@ export default function InContextTutor({
               const hasStepHistory = displayStatusSteps.length > 0;
               const isStepListExpanded = Boolean(expandedStepMessageIds[msg.localId]);
               const latestStep = hasStepHistory ? displayStatusSteps[displayStatusSteps.length - 1] : null;
+              const shouldShowActiveStatus = !msg.content && (msg.isPending || hasStepHistory);
+              const shouldShowProgressToggle = Boolean(msg.content && hasStepHistory);
 
               return (
                 <>
@@ -736,7 +738,7 @@ export default function InContextTutor({
             >
               {msg.role === "ai" ? (
                 <>
-                  {(msg.isPending || hasStepHistory) ? (
+                  {shouldShowActiveStatus ? (
                     <div
                       aria-live="polite"
                       className="mb-3 space-y-2"
@@ -786,6 +788,27 @@ export default function InContextTutor({
                         </div>
                       )}
                     </div>
+                  ) : null}
+
+                  {shouldShowProgressToggle ? (
+                    <button
+                      type="button"
+                      onClick={() => toggleStepVisibility(msg.localId)}
+                      className="mb-3 inline-flex items-center gap-1 text-xs font-medium transition-colors hover:text-blue-600"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {isStepListExpanded ? (
+                        <>
+                          <ChevronUp className="h-3.5 w-3.5" />
+                          Hide progress
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-3.5 w-3.5" />
+                          View progress
+                        </>
+                      )}
+                    </button>
                   ) : null}
 
                   {hasStepHistory && isStepListExpanded ? (

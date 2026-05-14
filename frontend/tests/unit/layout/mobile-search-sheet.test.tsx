@@ -36,7 +36,7 @@ describe("MobileSearchSheet", () => {
     render(<MobileSearchSheet open onOpenChange={onOpenChange} />);
 
     await waitFor(() => {
-      expect(catalogLoaderMock).toHaveBeenCalledWith(true);
+      expect(catalogLoaderMock).toHaveBeenCalledWith(true, "public");
     });
 
     fireEvent.change(screen.getByRole("textbox", { name: "Search courses" }), {

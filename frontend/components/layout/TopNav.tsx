@@ -29,7 +29,15 @@ function getCourseHref(courseSlug: string) {
   return `/courses/${courseSlug}`;
 }
 
-function TopNavSearch({ pathname, className }: { pathname: string; className?: string }) {
+function TopNavSearch({
+  pathname,
+  catalogCacheScope,
+  className,
+}: {
+  pathname: string;
+  catalogCacheScope: string;
+  className?: string;
+}) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mountedRef = useRef(true);
@@ -50,6 +58,11 @@ function TopNavSearch({ pathname, className }: { pathname: string; className?: s
     setDraftQuery("");
     setIsDropdownOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    setCatalogCourses([]);
+    setHasLoadedCourses(false);
+  }, [catalogCacheScope]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -88,7 +101,7 @@ function TopNavSearch({ pathname, className }: { pathname: string; className?: s
     }
 
     setIsLoadingCourses(true);
-    getCachedAllCourseCatalog(true)
+    getCachedAllCourseCatalog(true, catalogCacheScope)
       .then((response) => {
         if (mountedRef.current) {
           setCatalogCourses(response.items);
@@ -106,7 +119,7 @@ function TopNavSearch({ pathname, className }: { pathname: string; className?: s
           setIsLoadingCourses(false);
         }
       });
-  }, [hasLoadedCourses, isLoadingCourses]);
+  }, [catalogCacheScope, hasLoadedCourses, isLoadingCourses]);
 
   useEffect(() => {
     ensureCatalogLoaded();
@@ -308,6 +321,7 @@ function TopNavContent() {
         : pathname === navItem.href || pathname.startsWith(`${navItem.href}/`);
 
   const visibleNavItems = getVisibleNavItems(isAuthenticated);
+  const catalogCacheScope = user?.id ? `user:${user.id}` : "public";
   const navItemsWithResolvedHref = useMemo(
     () =>
       visibleNavItems.map((navItem) => ({
@@ -330,7 +344,11 @@ function TopNavContent() {
           </div>
 
           <Suspense fallback={<div className="hidden min-w-0 flex-1 md:block" />}>
-            <TopNavSearch pathname={pathname} className="hidden md:block" />
+            <TopNavSearch
+              pathname={pathname}
+              catalogCacheScope={catalogCacheScope}
+              className="hidden md:block"
+            />
           </Suspense>
 
           {/* Desktop nav links */}
@@ -440,7 +458,11 @@ function TopNavContent() {
         </div>
       </header>
       {isMobileViewport ? (
-        <MobileSearchSheet open={mobileSearchOpen} onOpenChange={setMobileSearchOpen} />
+        <MobileSearchSheet
+          open={mobileSearchOpen}
+          onOpenChange={setMobileSearchOpen}
+          catalogCacheScope={catalogCacheScope}
+        />
       ) : null}
       {isMobileViewport ? (
         <MobileMenuSheet

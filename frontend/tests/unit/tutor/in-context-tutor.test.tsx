@@ -733,6 +733,38 @@ describe("InContextTutor", () => {
     expect(screen.getAllByText("Finalizing the answer...").length).toBeGreaterThanOrEqual(1);
   });
 
+  it("hides the active finalizing status once streamed answer content is visible", async () => {
+    mockTutorFetch({
+      askResponse: buildDelayedNdjsonResponse(200, [
+        { chunk: '{"status":"Finalizing the answer..."}\n' },
+        { chunk: '{"a":"The visible tutor answer."}\n', delayMs: 20 },
+        { chunk: '{"qa_id":91}\n', delayMs: 500 },
+      ]),
+    });
+
+    render(
+      <InContextTutor
+        lectureId="cs231n-lecture-1"
+        currentTime={840}
+        captureFrame={() => null}
+        unitTitle="Lecture 1: Introduction"
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
+      target: { value: "Explain it simply" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
+
+    expect(await screen.findByText("Finalizing the answer...")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("The visible tutor answer.")).toBeInTheDocument();
+      expect(screen.queryByText("Finalizing the answer...")).not.toBeInTheDocument();
+    });
+  });
+
   it("keeps tutor progress available after completion and restores it from session storage", async () => {
     sessionStorage.setItem(
       TUTOR_SESSION_HISTORY_STORAGE_KEY,

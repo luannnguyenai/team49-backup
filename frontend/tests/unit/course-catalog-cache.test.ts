@@ -89,6 +89,24 @@ describe("course catalog cache", () => {
     });
   });
 
+  it("keeps user-specific catalog responses in separate cache entries", async () => {
+    courseApiMock.catalog
+      .mockResolvedValueOnce({ items: [{ id: "admin-course", progress_percent: 100 }] })
+      .mockResolvedValueOnce({ items: [{ id: "learner-course", progress_percent: 0 }] });
+
+    const { getCachedAllCourseCatalog, resetCachedAllCourseCatalog } = await import(
+      "@/lib/course-catalog-cache"
+    );
+    resetCachedAllCourseCatalog();
+
+    const adminResult = await getCachedAllCourseCatalog(true, "user:admin");
+    const learnerResult = await getCachedAllCourseCatalog(true, "user:learner");
+
+    expect(adminResult.items[0]?.progress_percent).toBe(100);
+    expect(learnerResult.items[0]?.progress_percent).toBe(0);
+    expect(courseApiMock.catalog).toHaveBeenCalledTimes(2);
+  });
+
   it("restarts a stale in-flight request instead of waiting forever", async () => {
     vi.useFakeTimers();
     const stalePromise = new Promise<never>(() => {});
