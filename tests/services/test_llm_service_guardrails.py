@@ -172,6 +172,11 @@ def test_tutor_complex_route_streams_non_chunk_ai_message(monkeypatch) -> None:
     monkeypatch.setattr(llm_service, "get_lecture_scope_metadata", lambda lecture_id: {})
     monkeypatch.setattr(
         llm_service,
+        "build_guardrail_router_client",
+        lambda: SimpleNamespace(route_sync=lambda **_kwargs: GuardrailDecision.allow()),
+    )
+    monkeypatch.setattr(
+        llm_service,
         "route_question",
         lambda *args, **kwargs: {"route": "COMPLEX", "reason": "needs tutor model"},
     )
