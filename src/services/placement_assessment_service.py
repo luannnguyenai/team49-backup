@@ -16,10 +16,16 @@ from src.schemas.placement_assessment import (
     TopicDecision,
 )
 from src.services.assessment_service import (
-    _classify_decision,
+    _classify_decision as _assessment_classify_decision,
+)
+from src.services.assessment_service import (
     start_assessment,
     submit_assessment,
 )
+
+
+def _classify_decision(score_pct: float) -> str:
+    return _assessment_classify_decision(score_pct)
 
 
 def _bucket_select_5(
