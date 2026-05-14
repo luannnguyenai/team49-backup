@@ -30,49 +30,6 @@ elif [[ "$grafana_host" == http://* ]] && [[ "${PRODUCTION_FRONTEND_URL:-}" == h
   grafana_host="/grafana"
 fi
 
-rds_json="$(aws rds describe-db-instances \
-  --db-instance-identifier "$db_instance_id" \
-  --region "$AWS_REGION" \
-  --output json)"
-
-db_host="$(jq -r '.DBInstances[0].Endpoint.Address' <<<"$rds_json")"
-db_port="$(jq -r '.DBInstances[0].Endpoint.Port' <<<"$rds_json")"
-db_name="$(jq -r '.DBInstances[0].DBName' <<<"$rds_json")"
-rds_secret_arn="$(jq -r '.DBInstances[0].MasterUserSecret.SecretArn' <<<"$rds_json")"
-
-if [ -z "$db_host" ] || [ "$db_host" = "null" ] || [ -z "$rds_secret_arn" ] || [ "$rds_secret_arn" = "null" ]; then
-  echo "Unable to resolve production RDS endpoint or managed secret." >&2
-  exit 3
-fi
-
-rds_secret="$(
-  aws secretsmanager get-secret-value \
-    --secret-id "$rds_secret_arn" \
-    --region "$AWS_REGION" \
-    --query SecretString \
-    --output text
-)"
-
-db_user="$(jq -r '.username' <<<"$rds_secret")"
-db_password="$(jq -r '.password' <<<"$rds_secret")"
-
-db_user_escaped="$(jq -rn --arg v "$db_user" '$v|@uri')"
-db_password_escaped="$(jq -rn --arg v "$db_password" '$v|@uri')"
-
-redis_json="$(aws elasticache describe-cache-clusters \
-  --cache-cluster-id "$redis_cluster_id" \
-  --show-cache-node-info \
-  --region "$AWS_REGION" \
-  --output json)"
-
-redis_host="$(jq -r '.CacheClusters[0].CacheNodes[0].Endpoint.Address' <<<"$redis_json")"
-redis_port="$(jq -r '.CacheClusters[0].CacheNodes[0].Endpoint.Port' <<<"$redis_json")"
-
-if [ -z "$redis_host" ] || [ "$redis_host" = "null" ]; then
-  echo "Unable to resolve production Redis endpoint." >&2
-  exit 3
-fi
-
 current_secret="$(
   aws secretsmanager get-secret-value \
     --secret-id "$BACKEND_SECRET_ARN" \
@@ -80,6 +37,102 @@ current_secret="$(
     --query SecretString \
     --output text
 )"
+
+normalized_current_secret="$(jq \
+  --arg frontend_url "$PRODUCTION_FRONTEND_URL" \
+  --arg backend_url "$PRODUCTION_BACKEND_URL" \
+  --arg prometheus_url "$prometheus_url" \
+  --arg grafana_host "$grafana_host" \
+  '
+  .FRONTEND_BASE_URL = $frontend_url
+  | .NEXT_PUBLIC_API_URL = $backend_url
+  | .API_INTERNAL_URL = $backend_url
+  | .NEXT_PUBLIC_GRAFANA_HOST = $grafana_host
+  | .PROMETHEUS_URL = $prometheus_url
+  | .CORS_ORIGINS = ([$frontend_url] | tojson)
+  ' <<<"$current_secret")"
+
+existing_violations="$(
+  jq -r '
+    to_entries[]
+    | select((.value | type) == "string")
+    | select(.key as $k | ["DATABASE_URL","REDIS_URL","FRONTEND_BASE_URL","NEXT_PUBLIC_API_URL","API_INTERNAL_URL","NEXT_PUBLIC_GRAFANA_HOST","PROMETHEUS_URL","CORS_ORIGINS","POSTGRES_HOST"] | index($k))
+    | select(.value | test("localhost|127\\.0\\.0\\.1|change_me"))
+    | "\(.key)=\(.value)"
+  ' <<<"$normalized_current_secret"
+)"
+
+if [ -z "$existing_violations" ]; then
+  tmp_secret="$(mktemp)"
+  trap 'rm -f "$tmp_secret"' EXIT
+  printf '%s' "$normalized_current_secret" > "$tmp_secret"
+
+  aws secretsmanager update-secret \
+    --secret-id "$BACKEND_SECRET_ARN" \
+    --region "$AWS_REGION" \
+    --secret-string "file://$tmp_secret" \
+    >/dev/null
+
+  echo "Backend secret already production-safe; normalized frontend/observability fields only."
+  exit 0
+fi
+
+db_host="${PRODUCTION_DB_HOST:-}"
+db_port="${PRODUCTION_DB_PORT:-}"
+db_name="${PRODUCTION_DB_NAME:-}"
+db_user="${PRODUCTION_DB_USER:-}"
+db_password="${PRODUCTION_DB_PASSWORD:-}"
+redis_host="${PRODUCTION_REDIS_HOST:-}"
+redis_port="${PRODUCTION_REDIS_PORT:-}"
+
+if [ -n "$db_host" ] && [ -n "$db_port" ] && [ -n "$db_name" ] && [ -n "$db_user" ] && [ -n "$db_password" ] && [ -n "$redis_host" ] && [ -n "$redis_port" ]; then
+  echo "Reconciling backend secret from explicit production env values."
+else
+  echo "Backend secret needs repair; resolving DB/Redis endpoints from AWS APIs."
+
+  rds_json="$(aws rds describe-db-instances \
+    --db-instance-identifier "$db_instance_id" \
+    --region "$AWS_REGION" \
+    --output json)"
+
+  db_host="$(jq -r '.DBInstances[0].Endpoint.Address' <<<"$rds_json")"
+  db_port="$(jq -r '.DBInstances[0].Endpoint.Port' <<<"$rds_json")"
+  db_name="$(jq -r '.DBInstances[0].DBName' <<<"$rds_json")"
+  rds_secret_arn="$(jq -r '.DBInstances[0].MasterUserSecret.SecretArn' <<<"$rds_json")"
+
+  if [ -z "$db_host" ] || [ "$db_host" = "null" ] || [ -z "$rds_secret_arn" ] || [ "$rds_secret_arn" = "null" ]; then
+    echo "Unable to resolve production RDS endpoint or managed secret." >&2
+    exit 3
+  fi
+
+  rds_secret="$(
+    aws secretsmanager get-secret-value \
+      --secret-id "$rds_secret_arn" \
+      --region "$AWS_REGION" \
+      --query SecretString \
+      --output text
+  )"
+
+  db_user="$(jq -r '.username' <<<"$rds_secret")"
+  db_password="$(jq -r '.password' <<<"$rds_secret")"
+
+  redis_json="$(aws elasticache describe-cache-clusters \
+    --cache-cluster-id "$redis_cluster_id" \
+    --show-cache-node-info \
+    --region "$AWS_REGION" \
+    --output json)"
+
+  redis_host="$(jq -r '.CacheClusters[0].CacheNodes[0].Endpoint.Address' <<<"$redis_json")"
+  redis_port="$(jq -r '.CacheClusters[0].CacheNodes[0].Endpoint.Port' <<<"$redis_json")"
+
+  if [ -z "$redis_host" ] || [ "$redis_host" = "null" ]; then
+    echo "Unable to resolve production Redis endpoint." >&2
+    exit 3
+  fi
+fi
+
+db_user_escaped="$(jq -rn --arg v "$db_user" '$v|@uri')"
+db_password_escaped="$(jq -rn --arg v "$db_password" '$v|@uri')"
 
 new_secret="$(jq \
   --arg db_host "$db_host" \
