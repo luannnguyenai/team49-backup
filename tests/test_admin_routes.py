@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.routers.admin import current_model, llm_stats, model_health
+from src.routers.admin import current_model, llm_stats, logs_events, logs_summary, model_health
 
 
 @pytest.mark.asyncio
@@ -145,3 +145,112 @@ async def test_system_health_reports_redis_healthy_when_client_is_initialized():
     assert result["redis_hit_rate"] == 0.9
     assert {"name": "postgres", "status": "healthy"} in result["services"]
     assert {"name": "redis", "status": "healthy"} in result["services"]
+
+
+@pytest.mark.asyncio
+async def test_logs_events_merges_selected_sources_and_sorts_descending():
+    app_events = [
+        {
+            "id": "app-1",
+            "timestamp": "2026-05-14T08:00:00+00:00",
+            "source": "app",
+            "service": "backend",
+            "level": "info",
+            "message": "answer generated",
+            "raw": {"question": "What is backprop?"},
+        }
+    ]
+    access_events = [
+        {
+            "id": "access-1",
+            "timestamp": "2026-05-14T08:10:00+00:00",
+            "source": "access",
+            "service": "backend",
+            "level": "error",
+            "message": "GET /api/admin/logs 500",
+            "raw": {"path": "/api/admin/logs", "status": 500},
+        }
+    ]
+    loki_events = [
+        {
+            "id": "loki-1",
+            "timestamp": "2026-05-14T08:05:00+00:00",
+            "source": "loki",
+            "service": "loki",
+            "level": "warn",
+            "message": "promtail delayed",
+            "raw": {"stream": {"source": "access"}},
+        }
+    ]
+
+    with (
+        patch("src.routers.admin._read_app_log_events", return_value=app_events),
+        patch("src.routers.admin._read_access_log_events", return_value=access_events),
+        patch("src.routers.admin._fetch_cloudwatch_events", new=AsyncMock(return_value=[])),
+        patch("src.routers.admin._fetch_loki_events", new=AsyncMock(return_value=loki_events)),
+        patch("src.routers.admin._fetch_container_events", new=AsyncMock(return_value=[])),
+    ):
+        result = await logs_events(
+            _admin=object(),
+            limit=10,
+            sources=["app", "access", "loki"],
+        )
+
+    assert [event["id"] for event in result["items"]] == ["access-1", "loki-1", "app-1"]
+    assert result["total"] == 3
+    assert result["sources"]["cloudwatch"]["status"] == "skipped"
+    assert result["sources"]["container"]["status"] == "skipped"
+
+
+@pytest.mark.asyncio
+async def test_logs_summary_reports_unavailable_runtime_source_without_failing():
+    container_events = []
+    container_status = {"status": "unavailable", "message": "docker cli not available"}
+
+    with (
+        patch("src.routers.admin._read_app_log_events", return_value=[]),
+        patch("src.routers.admin._read_access_log_events", return_value=[]),
+        patch("src.routers.admin._fetch_cloudwatch_events", new=AsyncMock(return_value=[])),
+        patch("src.routers.admin._fetch_loki_events", new=AsyncMock(return_value=[])),
+        patch(
+            "src.routers.admin._fetch_container_events",
+            new=AsyncMock(return_value=container_events),
+        ),
+        patch(
+            "src.routers.admin._get_runtime_source_status",
+            return_value=container_status,
+        ),
+    ):
+        result = await logs_summary(_admin=object(), limit=50)
+
+    assert result["totals"]["events"] == 0
+    assert result["sources"]["container"] == container_status
+
+
+@pytest.mark.asyncio
+async def test_logs_summary_prefers_cloudwatch_when_available():
+    cloudwatch_events = [
+        {
+            "id": "cw-1",
+            "timestamp": "2026-05-14T08:15:00+00:00",
+            "source": "cloudwatch",
+            "service": "a20-backend",
+            "level": "error",
+            "message": "backend crashed",
+            "raw": {"logGroup": "/ecs/a20-backend"},
+        }
+    ]
+
+    with (
+        patch("src.routers.admin._read_app_log_events", return_value=[]),
+        patch("src.routers.admin._read_access_log_events", return_value=[]),
+        patch("src.routers.admin._fetch_cloudwatch_events", new=AsyncMock(return_value=cloudwatch_events)),
+        patch("src.routers.admin._get_cloudwatch_source_status", return_value={"status": "healthy", "count": 1, "message": None}),
+        patch("src.routers.admin._fetch_loki_events", new=AsyncMock(return_value=[])),
+        patch("src.routers.admin._fetch_container_events", new=AsyncMock(return_value=[])),
+    ):
+        result = await logs_summary(_admin=object(), limit=50)
+
+    assert result["totals"]["events"] == 1
+    assert result["totals"]["errors"] == 1
+    assert result["sources"]["cloudwatch"]["status"] == "healthy"

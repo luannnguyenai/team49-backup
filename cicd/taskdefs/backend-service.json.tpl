@@ -26,8 +26,10 @@
         { "name": "AGENT_GRAPH_CHECKPOINTER_BACKEND", "value": "postgres" },
         { "name": "ASSET_STORAGE_PROVIDER", "value": "s3" },
         { "name": "AWS_REGION", "value": "__AWS_REGION__" },
+        { "name": "AWS_DEFAULT_REGION", "value": "__AWS_REGION__" },
         { "name": "AWS_S3_BUCKET", "value": "a20-course-assets-prod" },
         { "name": "AWS_S3_PREFIX", "value": "courses" },
+        { "name": "AWS_CLOUDWATCH_LOG_GROUPS", "value": "/ecs/__ECS_BACKEND_SERVICE_NAME__,/ecs/a20-frontend,/ecs/__ECS_BACKEND_SERVICE_NAME__-migrate,/ecs/__ECS_BACKEND_SERVICE_NAME__-bootstrap,/ecs/__ECS_BACKEND_SERVICE_NAME__-seed-core,/ecs/__ECS_BACKEND_SERVICE_NAME__-sync-schema-v2,/ecs/__ECS_BACKEND_SERVICE_NAME__-seed-accounts" },
         { "name": "CLOUDFRONT_DOMAIN", "value": "__CLOUDFRONT_DOMAIN__" },
         { "name": "ASSET_URL_EXPIRE_SECONDS", "value": "900" },
         { "name": "FRONTEND_BASE_URL", "value": "__PRODUCTION_FRONTEND_URL__" },
@@ -40,7 +42,8 @@
         { "name": "FAST_MODEL", "value": "gpt-5.4-nano" },
         { "name": "MODEL_EXTRA_KWARGS", "value": "{}" },
         { "name": "LLM_REQUEST_TIMEOUT_SECONDS", "value": "30" },
-        { "name": "LLM_MAX_RETRIES", "value": "1" }
+        { "name": "LLM_MAX_RETRIES", "value": "1" },
+        { "name": "LOKI_URL", "value": "http://loki.obs.a20-prod.internal:3100" }
       ],
       "secrets": [
         { "name": "DATABASE_URL", "valueFrom": "__BACKEND_SECRET_ARN__:DATABASE_URL::" },

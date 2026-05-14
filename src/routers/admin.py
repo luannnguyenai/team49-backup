@@ -16,11 +16,14 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
+import subprocess
 from collections import Counter
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+import boto3
 import httpx
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select, text
@@ -41,7 +44,28 @@ LOG_DIR = Path("logs")
 QA_LOG = LOG_DIR / "qa_history.jsonl"
 ACCESS_LOG = LOG_DIR / "access.jsonl"
 PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+LOKI_URL = os.getenv("LOKI_URL", "http://host.docker.internal:3100")
 APP_BOOT_TS = datetime.now(UTC)
+CONTAINER_LOG_ALLOWLIST = (
+    "al_backend",
+    "al_frontend",
+    "al_db",
+    "al_redis",
+    "a20_promtail",
+    "a20_loki",
+    "a20_grafana",
+    "a20_prometheus",
+)
+CLOUDWATCH_LOG_GROUPS_ENV = "AWS_CLOUDWATCH_LOG_GROUPS"
+DEFAULT_CLOUDWATCH_LOG_GROUPS = (
+    "/ecs/a20-backend",
+    "/ecs/a20-frontend",
+    "/ecs/a20-backend-migrate",
+    "/ecs/a20-backend-bootstrap",
+    "/ecs/a20-backend-seed-core",
+    "/ecs/a20-backend-sync-schema-v2",
+    "/ecs/a20-backend-seed-accounts",
+)
 
 admin_router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -77,6 +101,395 @@ def _read_jsonl_tail(path: Path, limit: int) -> list[dict[str, Any]]:
         except Exception:
             continue
     return out
+
+
+def _parse_timestamp(value: Any) -> datetime:
+    if value is None:
+        return datetime.fromtimestamp(0, tz=UTC)
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except Exception:
+        return datetime.fromtimestamp(0, tz=UTC)
+
+
+def _event_sort_key(event: dict[str, Any]) -> datetime:
+    return _parse_timestamp(event.get("timestamp"))
+
+
+def _build_source_state(status: str, count: int = 0, message: str | None = None) -> dict[str, Any]:
+    return {
+        "status": status,
+        "count": count,
+        "message": message,
+    }
+
+
+def _guess_level(raw: dict[str, Any], fallback: str = "info") -> str:
+    level = raw.get("level")
+    if isinstance(level, str) and level.strip():
+        return level.lower()
+
+    status = raw.get("status")
+    try:
+        status_code = int(status)
+    except (TypeError, ValueError):
+        status_code = None
+
+    if raw.get("error") or status == "error":
+        return "error"
+    if status_code is not None and status_code >= 500:
+        return "error"
+    if status_code is not None and status_code >= 400:
+        return "warn"
+    return fallback
+
+
+def _normalize_app_event(raw: dict[str, Any], index: int) -> dict[str, Any]:
+    timestamp = raw.get("timestamp") or raw.get("ts") or raw.get("created_at")
+    message = (
+        raw.get("message")
+        or raw.get("question")
+        or raw.get("answer")
+        or "QA history event"
+    )
+    return {
+        "id": f"app-{index}",
+        "timestamp": str(timestamp) if timestamp else None,
+        "source": "app",
+        "service": "backend",
+        "level": _guess_level(raw),
+        "message": str(message),
+        "request_id": raw.get("request_id"),
+        "user_id": raw.get("user_id") or raw.get("user"),
+        "trace_id": raw.get("langfuse_trace_id") or raw.get("trace_id"),
+        "raw": raw,
+    }
+
+
+def _normalize_access_event(raw: dict[str, Any], index: int) -> dict[str, Any]:
+    status = raw.get("status")
+    message = f'{raw.get("method", "REQ")} {raw.get("path", "/")} {status or "unknown"}'
+    return {
+        "id": f"access-{index}",
+        "timestamp": raw.get("ts") or raw.get("timestamp") or raw.get("created_at"),
+        "source": "access",
+        "service": "backend",
+        "level": _guess_level(raw),
+        "message": message,
+        "request_id": raw.get("request_id"),
+        "user_id": raw.get("user_id"),
+        "trace_id": raw.get("trace_id"),
+        "raw": raw,
+    }
+
+
+def _read_app_log_events(limit: int) -> list[dict[str, Any]]:
+    return [_normalize_app_event(raw, index) for index, raw in enumerate(_read_jsonl_tail(QA_LOG, limit), start=1)]
+
+
+def _read_access_log_events(limit: int) -> list[dict[str, Any]]:
+    return [
+        _normalize_access_event(raw, index)
+        for index, raw in enumerate(_read_jsonl_tail(ACCESS_LOG, limit), start=1)
+    ]
+
+
+def _candidate_loki_urls() -> list[str]:
+    candidates = [
+        LOKI_URL,
+        "http://host.docker.internal:3100",
+        "http://localhost:3100",
+    ]
+    ordered: list[str] = []
+    for candidate in candidates:
+        if candidate and candidate not in ordered:
+            ordered.append(candidate)
+    return ordered
+
+
+def _cloudwatch_log_groups() -> list[str]:
+    configured = os.getenv(CLOUDWATCH_LOG_GROUPS_ENV, "")
+    if configured.strip():
+        return [item.strip() for item in configured.split(",") if item.strip()]
+    return list(DEFAULT_CLOUDWATCH_LOG_GROUPS)
+
+
+def _normalize_cloudwatch_event(raw: dict[str, Any], index: int) -> dict[str, Any]:
+    message_text = raw.get("message", "")
+    raw_payload: dict[str, Any]
+    try:
+        parsed = json.loads(message_text)
+        raw_payload = parsed if isinstance(parsed, dict) else {"message": parsed}
+    except Exception:
+        raw_payload = {"message": message_text}
+
+    service = str(raw.get("logGroupName") or raw.get("log_group") or "cloudwatch").removeprefix("/ecs/")
+    return {
+        "id": f"cloudwatch-{index}",
+        "timestamp": datetime.fromtimestamp(
+            int(raw.get("timestamp", 0)) / 1000,
+            tz=UTC,
+        ).isoformat()
+        if raw.get("timestamp") is not None
+        else None,
+        "source": "cloudwatch",
+        "service": service,
+        "level": _guess_level(raw_payload, fallback="info"),
+        "message": str(
+            raw_payload.get("message")
+            or raw_payload.get("question")
+            or raw_payload.get("path")
+            or message_text
+            or "CloudWatch event"
+        )[:400],
+        "request_id": raw_payload.get("request_id"),
+        "user_id": raw_payload.get("user_id") or raw_payload.get("user"),
+        "trace_id": raw_payload.get("trace_id"),
+        "raw": {
+            "logGroup": raw.get("logGroupName"),
+            "logStream": raw.get("logStreamName"),
+            "payload": raw_payload,
+        },
+    }
+
+
+def _get_cloudwatch_source_status() -> dict[str, Any]:
+    region = os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION")
+    if not region:
+        return _build_source_state("unavailable", 0, "AWS region is not configured")
+    groups = _cloudwatch_log_groups()
+    if not groups:
+        return _build_source_state("unavailable", 0, "No CloudWatch log groups configured")
+    return _build_source_state("healthy", len(groups), None)
+
+
+async def _fetch_cloudwatch_events(limit: int) -> list[dict[str, Any]]:
+    region = os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION")
+    groups = _cloudwatch_log_groups()
+    if not region or not groups:
+        return []
+
+    client = boto3.client("logs", region_name=region)
+    start_time = int((datetime.now(UTC) - timedelta(hours=6)).timestamp() * 1000)
+    per_group_limit = max(1, min(50, limit))
+    events: list[dict[str, Any]] = []
+
+    for group in groups:
+        try:
+            response = client.filter_log_events(
+                logGroupName=group,
+                startTime=start_time,
+                limit=per_group_limit,
+                interleaved=True,
+            )
+        except Exception:
+            continue
+
+        for raw in response.get("events", []):
+            enriched = {
+                **raw,
+                "logGroupName": group,
+            }
+            events.append(enriched)
+
+    normalized = [
+        _normalize_cloudwatch_event(raw, index)
+        for index, raw in enumerate(sorted(events, key=lambda event: event.get("timestamp", 0), reverse=True), start=1)
+    ]
+    return normalized[:limit]
+
+
+async def _fetch_loki_events(limit: int, query: str | None = None) -> list[dict[str, Any]]:
+    logql = query or '{app="a20-app-049"}'
+    end = datetime.now(UTC)
+    start = end - timedelta(hours=6)
+
+    async with httpx.AsyncClient() as client:
+        for base_url in _candidate_loki_urls():
+            try:
+                response = await client.get(
+                    f"{base_url}/loki/api/v1/query_range",
+                    params={
+                        "query": logql,
+                        "start": int(start.timestamp() * 1_000_000_000),
+                        "end": int(end.timestamp() * 1_000_000_000),
+                        "limit": limit,
+                        "direction": "BACKWARD",
+                    },
+                    timeout=3.0,
+                )
+                if response.status_code != 200:
+                    continue
+                result = response.json().get("data", {}).get("result", [])
+                events: list[dict[str, Any]] = []
+                for stream_index, stream in enumerate(result, start=1):
+                    labels = stream.get("stream", {})
+                    for line_index, (timestamp_ns, line) in enumerate(stream.get("values", []), start=1):
+                        try:
+                            timestamp = datetime.fromtimestamp(
+                                int(timestamp_ns) / 1_000_000_000,
+                                tz=UTC,
+                            ).isoformat()
+                        except Exception:
+                            timestamp = None
+                        try:
+                            raw = json.loads(line)
+                        except Exception:
+                            raw = {"line": line}
+                        events.append(
+                            {
+                                "id": f"loki-{stream_index}-{line_index}",
+                                "timestamp": timestamp,
+                                "source": "loki",
+                                "service": labels.get("job", "loki"),
+                                "level": _guess_level(raw),
+                                "message": str(
+                                    raw.get("message")
+                                    or raw.get("question")
+                                    or raw.get("path")
+                                    or raw.get("line")
+                                    or "Loki event"
+                                ),
+                                "request_id": raw.get("request_id"),
+                                "user_id": raw.get("user_id") or raw.get("user"),
+                                "trace_id": raw.get("trace_id"),
+                                "raw": {
+                                    "labels": labels,
+                                    "payload": raw,
+                                },
+                            }
+                        )
+                return events
+            except Exception:
+                continue
+    return []
+
+
+def _get_runtime_source_status() -> dict[str, Any]:
+    if shutil.which("docker") is None:
+        return _build_source_state("unavailable", 0, "docker cli not available")
+
+    try:
+        result = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}"],
+            capture_output=True,
+            text=True,
+            timeout=4,
+            check=True,
+        )
+    except Exception as exc:
+        return _build_source_state("unavailable", 0, f"docker runtime unavailable: {exc}")
+
+    names = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    matched = [name for name in names if name in CONTAINER_LOG_ALLOWLIST]
+    return _build_source_state("healthy", len(matched), None)
+
+
+async def _fetch_container_events(limit: int) -> list[dict[str, Any]]:
+    if shutil.which("docker") is None:
+        return []
+
+    try:
+        result = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}"],
+            capture_output=True,
+            text=True,
+            timeout=4,
+            check=True,
+        )
+    except Exception:
+        return []
+
+    names = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    matched = [name for name in names if name in CONTAINER_LOG_ALLOWLIST]
+    per_container_limit = max(1, min(20, limit // max(1, len(matched))))
+    events: list[dict[str, Any]] = []
+    for container in matched:
+        try:
+            logs_result = subprocess.run(
+                ["docker", "logs", "--tail", str(per_container_limit), container],
+                capture_output=True,
+                text=True,
+                timeout=4,
+                check=True,
+            )
+        except Exception:
+            continue
+        lines = [line for line in logs_result.stdout.splitlines() if line.strip()]
+        for index, line in enumerate(lines, start=1):
+            events.append(
+                {
+                    "id": f"container-{container}-{index}",
+                    "timestamp": datetime.now(UTC).isoformat(),
+                    "source": "container",
+                    "service": container,
+                    "level": "info",
+                    "message": line[:280],
+                    "request_id": None,
+                    "user_id": None,
+                    "trace_id": None,
+                    "raw": {"line": line, "container": container},
+                }
+            )
+    return events
+
+
+async def _collect_logs(
+    limit: int,
+    sources: list[str] | None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    selected_sources = set(sources or ["cloudwatch", "app", "access", "loki", "container"])
+    events: list[dict[str, Any]] = []
+    states: dict[str, Any] = {}
+
+    cloudwatch_state = _get_cloudwatch_source_status()
+    if "cloudwatch" in selected_sources:
+        cloudwatch_events = await _fetch_cloudwatch_events(limit)
+        events.extend(cloudwatch_events)
+        states["cloudwatch"] = {
+            **cloudwatch_state,
+            "count": len(cloudwatch_events) if cloudwatch_state["status"] == "healthy" else cloudwatch_state["count"],
+        }
+    else:
+        states["cloudwatch"] = _build_source_state("skipped", 0, None)
+
+    if "app" in selected_sources:
+        app_events = _read_app_log_events(limit)
+        events.extend(app_events)
+        states["app"] = _build_source_state("healthy", len(app_events), None)
+    else:
+        states["app"] = _build_source_state("skipped", 0, None)
+
+    if "access" in selected_sources:
+        access_events = _read_access_log_events(limit)
+        events.extend(access_events)
+        states["access"] = _build_source_state("healthy", len(access_events), None)
+    else:
+        states["access"] = _build_source_state("skipped", 0, None)
+
+    if "loki" in selected_sources:
+        loki_events = await _fetch_loki_events(limit)
+        events.extend(loki_events)
+        states["loki"] = _build_source_state(
+            "healthy" if loki_events else "degraded",
+            len(loki_events),
+            None if loki_events else "no Loki events returned",
+        )
+    else:
+        states["loki"] = _build_source_state("skipped", 0, None)
+
+    runtime_state = _get_runtime_source_status()
+    if "container" in selected_sources:
+        container_events = await _fetch_container_events(limit)
+        events.extend(container_events)
+        states["container"] = {
+            **runtime_state,
+            "count": len(container_events) if runtime_state["status"] == "healthy" else runtime_state["count"],
+        }
+    else:
+        states["container"] = _build_source_state("skipped", 0, None)
+
+    return sorted(events, key=_event_sort_key, reverse=True), states
 
 
 async def _prom_query(client: httpx.AsyncClient, query: str) -> float | None:
@@ -411,6 +824,42 @@ async def llm_stats(
         "calls_per_hour": [{"hour": h, "count": c} for h, c in sorted(calls_per_hour.items())],
         "top_users": [{"user_id": u, "count": c} for u, c in user_calls.most_common(5)],
         "tutor_latency_per_hour": tutor_latency_per_hour,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Logs explorer
+# ---------------------------------------------------------------------------
+@admin_router.get("/logs/events")
+async def logs_events(
+    _admin: User = Depends(require_admin),
+    limit: int = Query(100, ge=1, le=500),
+    sources: list[str] | None = Query(None),
+) -> dict[str, Any]:
+    events, states = await _collect_logs(limit, sources)
+    return {
+        "total": len(events),
+        "items": events[:limit],
+        "sources": states,
+    }
+
+
+@admin_router.get("/logs/summary")
+async def logs_summary(
+    _admin: User = Depends(require_admin),
+    limit: int = Query(100, ge=1, le=500),
+) -> dict[str, Any]:
+    events, states = await _collect_logs(limit, ["cloudwatch", "app", "access", "loki", "container"])
+    services = {event["service"] for event in events if event.get("service")}
+    totals = {
+        "events": len(events),
+        "errors": sum(1 for event in events if event.get("level") == "error"),
+        "warnings": sum(1 for event in events if event.get("level") == "warn"),
+        "services": len(services),
+    }
+    return {
+        "totals": totals,
+        "sources": states,
     }
 
 

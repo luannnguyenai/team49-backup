@@ -64,10 +64,10 @@ module "assets" {
 module "iam_oidc" {
   source = "../../modules/iam_oidc"
 
-  github_repository = var.github_repository
-  name_prefix       = local.name_prefix
-  asset_bucket_arn  = module.assets.bucket_arn
-  asset_prefix      = var.asset_prefix
+  github_repository       = var.github_repository
+  name_prefix             = local.name_prefix
+  asset_bucket_arn        = module.assets.bucket_arn
+  asset_prefix            = var.asset_prefix
   canonical_bundle_prefix = var.canonical_bundle_prefix
 }
 
@@ -127,8 +127,18 @@ module "backend_service" {
     # Asset delivery
     { name = "ASSET_STORAGE_PROVIDER", value = "s3" },
     { name = "AWS_REGION", value = var.aws_region },
+    { name = "AWS_DEFAULT_REGION", value = var.aws_region },
     { name = "AWS_S3_BUCKET", value = var.asset_bucket_name },
     { name = "AWS_S3_PREFIX", value = var.asset_prefix },
+    { name = "AWS_CLOUDWATCH_LOG_GROUPS", value = join(",", compact([
+      "/ecs/${var.backend_service_name}",
+      "/ecs/${var.frontend_service_name}",
+      "/ecs/${var.backend_service_name}-migrate",
+      "/ecs/${var.backend_service_name}-bootstrap",
+      "/ecs/${var.backend_service_name}-seed-core",
+      "/ecs/${var.backend_service_name}-sync-schema-v2",
+      "/ecs/${var.backend_service_name}-seed-accounts",
+    ])) },
     { name = "CLOUDFRONT_DOMAIN", value = module.assets.cloudfront_domain_name },
     { name = "ASSET_URL_EXPIRE_SECONDS", value = "900" },
 
@@ -154,6 +164,9 @@ module "backend_service" {
 
     # Langfuse non-secret
     { name = "LANGFUSE_BASE_URL", value = "https://cloud.langfuse.com" },
+
+    # Observability
+    { name = "LOKI_URL", value = "http://loki.obs.a20-prod.internal:3100" },
 
     # Knowledge graph
     { name = "KG_PHASE", value = "0" },

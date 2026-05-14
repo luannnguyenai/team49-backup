@@ -111,6 +111,41 @@ export type NegativeFeedbackRow = {
   created_at: string | null;
 };
 
+export type AdminLogSourceState = {
+  status: "healthy" | "degraded" | "unavailable" | "skipped" | string;
+  count: number;
+  message: string | null;
+};
+
+export type AdminLogEvent = {
+  id: string;
+  timestamp: string | null;
+  source: "app" | "access" | "cloudwatch" | "loki" | "container" | string;
+  service: string;
+  level: "info" | "warn" | "error" | string;
+  message: string;
+  request_id?: string | null;
+  user_id?: string | null;
+  trace_id?: string | null;
+  raw: Record<string, unknown>;
+};
+
+export type AdminLogsSummary = {
+  totals: {
+    events: number;
+    errors: number;
+    warnings: number;
+    services: number;
+  };
+  sources: Record<string, AdminLogSourceState>;
+};
+
+export type AdminLogsEventsResponse = {
+  total: number;
+  items: AdminLogEvent[];
+  sources: Record<string, AdminLogSourceState>;
+};
+
 export const adminApi = {
   overview: () => api.get<AdminOverview>("/api/admin/stats/overview").then((r) => r.data),
   currentModel: () => api.get<CurrentModel>("/api/admin/model/current").then((r) => r.data),
@@ -134,5 +169,16 @@ export const adminApi = {
   feedbackNegative: (limit = 20) =>
     api
       .get<NegativeFeedbackRow[]>("/api/admin/feedback/recent-negative", { params: { limit } })
+      .then((r) => r.data),
+  logsSummary: (limit = 100) =>
+    api.get<AdminLogsSummary>("/api/admin/logs/summary", { params: { limit } }).then((r) => r.data),
+  logsEvents: (params?: { limit?: number; sources?: string[] }) =>
+    api
+      .get<AdminLogsEventsResponse>("/api/admin/logs/events", {
+        params: {
+          limit: params?.limit ?? 100,
+          sources: params?.sources,
+        },
+      })
       .then((r) => r.data),
 };

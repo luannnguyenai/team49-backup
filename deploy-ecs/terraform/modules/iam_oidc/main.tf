@@ -171,8 +171,8 @@ resource "aws_iam_role_policy" "backend_task_s3" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:PutObject"]
+        Effect = "Allow"
+        Action = ["s3:GetObject", "s3:PutObject"]
         Resource = [
           "${var.asset_bucket_arn}/${var.asset_prefix}/*",
           "${var.asset_bucket_arn}/${var.canonical_bundle_prefix}/*"
@@ -182,6 +182,27 @@ resource "aws_iam_role_policy" "backend_task_s3" {
         Effect   = "Allow"
         Action   = ["s3:ListBucket"]
         Resource = var.asset_bucket_arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "backend_task_logs" {
+  name = "${var.name_prefix}-backend-task-logs"
+  role = aws_iam_role.backend_task.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams",
+          "logs:FilterLogEvents",
+          "logs:GetLogEvents"
+        ]
+        Resource = "*"
       }
     ]
   })
