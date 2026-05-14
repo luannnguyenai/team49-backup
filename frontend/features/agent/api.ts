@@ -386,17 +386,13 @@ export const agentApi = {
     const endpoint = agentRuntimeEndpoint(AGENT_CHAT_STREAM_PATH);
     const publicApiUrl =
       typeof window !== "undefined" ? process.env.NEXT_PUBLIC_API_URL?.trim() : undefined;
-    let fetchUrl: string;
+    let fetchUrl = endpoint;
     if (publicApiUrl) {
       const base = publicApiUrl.endsWith("/") ? publicApiUrl : `${publicApiUrl}/`;
       const directUrl = new URL(endpoint.replace(/^\//, ""), base);
       if (directUrl.origin === window.location.origin) {
         fetchUrl = directUrl.pathname;
-      } else {
-        fetchUrl = directUrl.href;
       }
-    } else {
-      fetchUrl = endpoint;
     }
     const requestBody = JSON.stringify(payload);
     const buildHeaders = () => {

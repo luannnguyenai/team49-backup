@@ -23,6 +23,12 @@ variable "enable_custom_domains" {
   default = false
 }
 
+variable "custom_https_listener_arn" {
+  type        = string
+  default     = ""
+  description = "Existing HTTPS ALB listener ARN used after custom-domain cutover."
+}
+
 variable "enable_nat_gateway" {
   type    = bool
   default = true

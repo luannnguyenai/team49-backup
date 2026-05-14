@@ -262,7 +262,7 @@ module "observability_stack" {
   task_role_arn           = module.iam_oidc.backend_task_role_arn
 
   alb_security_group_id      = module.security.alb_security_group_id
-  alb_listener_arn           = module.alb.http_listener_arn
+  alb_listener_arn           = var.enable_custom_domains ? var.custom_https_listener_arn : module.alb.http_listener_arn
   backend_security_group_id  = module.security.backend_security_group_id
   backend_container_port     = var.backend_container_port
   database_security_group_id = module.security.database_security_group_id

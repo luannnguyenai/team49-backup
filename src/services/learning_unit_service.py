@@ -28,6 +28,8 @@ from src.data_paths import UNITS_FILE as BOOTSTRAP_UNITS_FILE
 from src.models.canonical import CanonicalUnit
 from src.models.course import (
     Course,
+    CourseAsset,
+    CourseAssetType,
     CourseSection,
     LearningProgressRecord,
     LearningProgressStatus,
@@ -516,6 +518,28 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
                     f"courses/{course_dir.name}/videos/{video_filename}",
                     local_disk_path=course_dir / "videos" / video_filename,
                 )
+            if video_url is None:
+                asset_result = await db.execute(
+                    select(CourseAsset)
+                    .where(
+                        CourseAsset.learning_unit_id == unit.id,
+                        CourseAsset.asset_type == CourseAssetType.video,
+                    )
+                    .order_by(CourseAsset.created_at)
+                    .limit(1)
+                )
+                asset = asset_result.scalar_one_or_none()
+                if asset is not None:
+                    if asset.delivery_url:
+                        video_url = asset.delivery_url
+                    elif asset.storage_key:
+                        video_url = _resolve_course_asset_url(asset.storage_key)
+                        if video_filename is None:
+                            video_filename = asset.storage_key.rsplit("/", 1)[-1]
+            if video_url is None and isinstance(content_ref, dict):
+                fallback_video_url = content_ref.get("video_url") or content_ref.get("url")
+                if fallback_video_url:
+                    video_url = str(fallback_video_url)
 
             transcript_available = canonical_unit is not None and _resolve_transcript_available(
                 canonical_unit.transcript_path

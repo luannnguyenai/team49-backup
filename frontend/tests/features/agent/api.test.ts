@@ -201,4 +201,46 @@ describe("agent api", () => {
       },
     ]);
   });
+
+  it("keeps streaming chat on the same-origin proxy when NEXT_PUBLIC_API_URL is cross-origin", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://api.example.com/");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(
+                new TextEncoder().encode(
+                  '{"done":{"conversationId":"conversation-1","messageId":"message-1","answer":{"markdown":"ok","confidence":"partial"},"citations":[],"actions":[]}}\n',
+                ),
+              );
+              controller.close();
+            },
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+
+    const { agentApi } = await import("@/features/agent/api");
+    const responseStream = await agentApi.chatStream({
+      message: "stream over same origin",
+      incomingMessageId: "msg-stream-origin",
+      traceMode: "summary",
+    });
+
+    for await (const _event of responseStream) {
+      // Drain stream.
+    }
+
+    const fetchMock = vi.mocked(fetch);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/agent/chat/stream",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      }),
+    );
+  });
 });

@@ -319,6 +319,8 @@ resource "aws_ecs_task_definition" "grafana" {
         { name = "GF_SECURITY_COOKIE_SAMESITE", value = "none" },
         { name = "GF_AUTH_ANONYMOUS_ENABLED", value = "true" },
         { name = "GF_AUTH_ANONYMOUS_ORG_ROLE", value = "Viewer" },
+        { name = "GF_AUTH_ANONYMOUS_ORG_NAME", value = "Main Org." },
+        { name = "GF_AUTH_DISABLE_LOGIN_FORM", value = "true" },
         # Allow Grafana provisioning files to interpolate ${VAR}-style refs from env.
         { name = "GF_AUTH_BASIC_ENABLED", value = "true" }
       ]
