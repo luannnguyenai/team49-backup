@@ -54,6 +54,44 @@ class AgentRAGToolRegistry:
                     "search_queries": "Optional list of title-level query variants.",
                 },
             ),
+            "get_lecture_context": AgentRAGToolSpec(
+                name="get_lecture_context",
+                description=(
+                    "Retrieve lecture-level course context. If no lecture summary exists, "
+                    "returns ordered unit summaries from the lecture so the model can summarize."
+                ),
+                requires_evidence=True,
+                when_to_use=(
+                    "Use when the learner asks to summarize or explain a full/current lecture, "
+                    "or when a unit answer needs surrounding lecture context."
+                ),
+                input_schema={
+                    "canonical_unit_id": "Optional current/selected canonical unit id.",
+                    "query": "Optional unit or lecture query when no canonical id is available.",
+                },
+            ),
+            "get_user_learning_context": AgentRAGToolSpec(
+                name="get_user_learning_context",
+                description=(
+                    "Retrieve read-only learning state for the authenticated learner: progress, "
+                    "current unit, weak knowledge points, quiz history analysis, recent "
+                    "assessments, and waived units."
+                ),
+                requires_evidence=False,
+                when_to_use=(
+                    "Use for personalized progress questions, weak-area analysis, quiz-history "
+                    "error patterns, study-time estimates, planner reasoning, and next-step "
+                    "recommendations. The backend injects the authenticated user id; never ask "
+                    "for or pass a user id."
+                ),
+                input_schema={
+                    "context_kind": (
+                        "One of current_unit_state, progress_summary, weak_areas, "
+                        "study_time_estimate, planner_reasoning_context, "
+                        "quiz_history_analysis, general."
+                    )
+                },
+            ),
             "ask_clarification": AgentRAGToolSpec(
                 name="ask_clarification",
                 description="Ask the learner for missing or ambiguous retrieval context.",
@@ -125,6 +163,7 @@ class AgenticRAGToolExecutor:
         slots: AgentSlots,
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None = None,
+        route_context=None,
     ) -> AgenticRAGObservation:
         spec = self.registry.resolve(tool_call.tool)
         if spec is None:
@@ -135,6 +174,23 @@ class AgenticRAGToolExecutor:
             return self._observation("ask_clarification", result, "needs_clarification")
 
         if tool_call.tool == "ask_clarification":
+            if slots.canonical_unit_ids:
+                return await self.execute(
+                    AgenticRAGToolCall(
+                        tool="get_lecture_context",
+                        arguments={"canonical_unit_id": slots.canonical_unit_ids[0]},
+                        rationale=(
+                            "The route context already identifies the current learning unit; "
+                            "retrieve lecture context instead of asking for the same context."
+                        ),
+                    ),
+                    message=message,
+                    intent=intent,
+                    slots=slots,
+                    allowed_course_ids=allowed_course_ids,
+                    current_path_course_ids=current_path_course_ids,
+                    route_context=route_context,
+                )
             question = str(tool_call.arguments.get("question") or "").strip()
             result = await self.tools.clarify(
                 message,
@@ -190,6 +246,62 @@ class AgenticRAGToolExecutor:
                 allowed_course_ids,
                 current_path_course_ids,
             )
+
+        if tool_call.tool == "get_user_learning_context":
+            context_kind = str(tool_call.arguments.get("context_kind") or "general").strip()
+            try:
+                result = await self.tools.user_learning_context(
+                    message=message,
+                    slots=slots,
+                    allowed_course_ids=allowed_course_ids,
+                    current_path_course_ids=current_path_course_ids,
+                    route_context=route_context,
+                    context_kind=context_kind,
+                )
+            except Exception as exc:
+                error_code = classify_rag_error(exc)
+                result = ToolResult(
+                    kind="progress_summary",
+                    answer_markdown=(
+                        "The learner context tool had a system issue. "
+                        f"Please try again later. Error code: {error_code}."
+                    ),
+                    fallback=AgentFallback(
+                        reason="tool_error",
+                        message="Learner context retrieval failed.",
+                        error_code=error_code,
+                    ),
+                    metadata={"rag_error_code": error_code},
+                )
+            return self._observation(tool_call.tool, result, self._status_from_result(result))
+
+        if tool_call.tool == "get_lecture_context":
+            try:
+                result = await self.tools.lecture_context(
+                    message=message,
+                    slots=slots,
+                    allowed_course_ids=allowed_course_ids,
+                    current_path_course_ids=current_path_course_ids,
+                    canonical_unit_id=tool_call.arguments.get("canonical_unit_id"),
+                    query=tool_call.arguments.get("query"),
+                )
+            except Exception as exc:
+                error_code = classify_rag_error(exc)
+                result = ToolResult(
+                    kind="find_content",
+                    answer_markdown=(
+                        "The lecture context tool had a system issue. "
+                        f"Please try again later. Error code: {error_code}."
+                    ),
+                    fallback=AgentFallback(
+                        reason="tool_error",
+                        message="Lecture context retrieval failed.",
+                        error_code=error_code,
+                    ),
+                    requires_evidence=True,
+                    metadata={"rag_error_code": error_code},
+                )
+            return self._observation(tool_call.tool, result, self._status_from_result(result))
 
         if tool_call.tool in {"search_current_path_units", "get_unit_summary"}:
             search_slots = slots.model_copy(update={"search_scope": "current_path"})
