@@ -515,3 +515,48 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 - Benchmark local trên RTX 3050 Laptop GPU chạy được với peak VRAM khoảng `1.5GB`, output schema hợp lệ 8/8 mẫu smoke test, latency trung bình khoảng `3.4s/query`.
 
 **Hệ quả:** Nhánh này tạo được baseline local AI stack có thể kiểm chứng end-to-end: data selection -> dataset builder -> fine-tune notebook -> eval report -> adapter artifact -> local benchmark. Phần production integration phía sau có thể tập trung vào wrapper/serving, sanitizer cho non-ALLOW route, và wiring router trước Qwen3.5-4B thay vì phải tranh luận lại từ đầu về data/model choice.
+
+---
+
+### [ADR-16] Agent search rerank, production observability stack, và auth UX hardening — 12/05/2026
+
+**Bối cảnh:** Tuần cuối trước submission (17/05) tập trung vào 3 vấn đề còn tồn đọng: (1) agent search chỉ dùng embedding similarity, thiếu rerank step nên citation precision thấp khi nhiều unit có title/KP tương tự; (2) observability stack đã có Terraform module nhưng chưa được deploy đầy đủ lên ECS production; (3) auth flow có stale error từ persisted Zustand store, và password policy quá strict cho demo account.
+
+**Quyết định:**
+
+**1. Agent search rerank (Nguyễn Đôn Đức):**
+- Thêm rerank step sau embedding search: score từng kết quả theo combined relevance (embedding sim + KP overlap + unit title match).
+- Ưu tiên unit có KP trực tiếp match với query hơn là unit chỉ có title tương tự.
+- Fix narrow qualified acronym evidence: chặn trường hợp agent cite unit chứa keyword giống nhau nhưng context khác (ví dụ: "YOLO loss" vs "generic loss").
+- Fix contextual prerequisite action preservation: khi follow-up question liên quan prerequisite path, agent giữ pending actions thay vì reset.
+
+**2. Production observability stack (Nguyễn Duy Minh Hoàng):**
+- Terraform module hoàn thiện: Prometheus scrape config, Grafana provisioning (datasource + dashboard), Loki log aggregation.
+- Backend `/metrics` endpoint expose Prometheus-compatible metrics.
+- Fix Cloud Map namespace format — tên namespace phải khớp chính xác với ECS service discovery record.
+- Admin panel frontend embed: iframe Grafana dashboard + Loki query UI, protected bằng admin role.
+- Fix agent downtime 4 lần (HTTPS endpoint URL → pgvector image version → secret injection → Cloud Map namespace) trước khi stack ổn định.
+
+**3. Auth UX hardening (Nguyễn Đôn Đức):**
+- Fix stale error hydration: Zustand persist store có thể giữ `authError` từ session cũ. Fix bằng cách reset error state khi store rehydrate, không dùng persisted error làm initial state.
+- Relax password schema cho auth/user registration: bỏ yêu cầu special character để demo account `DemoPass123!` và các password đơn giản tương tự login được mà không bị validation reject.
+- Thêm test coverage: auth store ignore persisted errors, auth forms clear stale errors trước khi submit.
+
+**4. Submission documentation (Nguyễn Duy Minh Hoàng):**
+- Tạo `docs/ai-logs.md` với đầy đủ cấu trúc: system prompt, chat logs, success/failure cases, guardrail cases.
+- Xóa stale testing docs không còn là source-of-truth (`TESTING_DOCUMENTATION_INDEX.md`, `TEST_STATUS_REPORT.md`, `TESTING_ONBOARDING_FLOW.md`).
+- README cập nhật Quick Links đầy đủ, team section, demo account.
+
+**Hệ quả:**
+- Agent citation precision tăng — rerank giảm false positive cite từ unit có keyword trùng nhưng context sai.
+- Observability live tại production: team có thể debug ECS issue qua Grafana/Loki thay vì phải query CloudWatch thủ công.
+- Demo experience ổn định: không còn stale auth error, demo account login không bị chặn bởi password policy.
+- Repo đủ điều kiện nộp: README, AI Logs, Worklog, Journal, Evaluation Report đều có đúng nội dung và link.
+
+**Bổ sung 13-14/05/2026 (Nguyễn Lê Minh Luân):**
+- Landing page redesign hoàn chỉnh: bố cục mới theo sản phẩm production, button dimensions chuẩn, bỏ social proof section chưa có data thật, thêm Redis error handling robust cho backend.
+- `refactor: improve backend resiliency with robust Redis error handling` — Redis connection failure không còn crash toàn bộ request, fallback gracefully.
+
+**Bổ sung 15/05/2026 (Nguyễn Đôn Đức):**
+- RoadmapPlanner master-detail layout: sidebar navigation, panel detail, unit tests cập nhật theo layout mới — giao diện planner rõ ràng hơn trước khi submission.
+- Fix top nav logo destination: logo click về đúng `/dashboard` thay vì route cũ.

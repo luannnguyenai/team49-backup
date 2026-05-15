@@ -440,3 +440,45 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 - Thiết kế DVC tracking ngay từ đầu trước khi sinh nhiều output zip/checkpoint.
 - Đặt `WORKLOG`, `JOURNAL`, build report và model manifest thành checklist cố định sau mỗi vòng fine-tune.
 - Giữ benchmark nhỏ trong notebook lẫn script local để phát hiện sớm mismatch giữa training prompt và serving prompt.
+
+---
+
+## Tuần 9 — 12/05/2026
+
+**Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
+
+### Đã làm
+- **Agent search rerank** (Rin): Thêm rerank theo score cho kết quả tìm kiếm của agent unit search — ưu tiên unit có relevance cao hơn thay vì chỉ trả về theo thứ tự embedding. Fix narrow qualified acronym evidence (chặn tình huống agent cite nhầm do keyword giống nhau). Thêm contextual prerequisite action preservation để agent không mất track khi follow-up question liên quan prerequisite path.
+- **Observability stack hoàn thiện** (Hoàng): Scaffold production observability đầy đủ — Terraform module cho Prometheus/Grafana/Loki stack, backend metrics scrape endpoint, PostgreSQL datasource trong Grafana, fix Cloud Map namespace format, wiring frontend admin embed panel. Toàn bộ stack deployed lên ECS, admin panel live.
+- **Agent failover & network fix** (Hoàng): Debug và fix 4 lần agent downtime liên tiếp do vLLM endpoint không respond — thêm circuit breaker logic, fix router HTTPS endpoint, cập nhật pgvector image version, fix secret injection cho agent route.
+- **Landing page redesign** (Luân): Cập nhật toàn bộ landing page theo sản phẩm production thực tế — nội dung mới, button dimensions chuẩn, bỏ social proof section chưa có data thật, thêm Redis error handling cho backend resilience.
+- **Auth UX hardening** (Rin): Fix stale error hydration trong auth store (lỗi persisted error từ session cũ hiển thị sai khi load trang mới). Fix login/register stale error. Relax password schema validation cho demo accounts — giảm độ phức tạp để demo thực tế không bị friction với `DemoPass123!`. Thêm test coverage cho toàn bộ auth form edge cases.
+- **RoadmapPlanner master-detail** (Rin): Migrate từ flat list sang master-detail layout với sidebar navigation. Unit tests cập nhật theo layout mới.
+- **Submission documentation** (Hoàng): Tạo `docs/ai-logs.md`, `AI20K_FINAL_SUBMISSION_GUIDE.md`, cập nhật README với Quick Links đầy đủ, xóa stale testing docs (`TESTING_DOCUMENTATION_INDEX.md`, `TEST_STATUS_REPORT.md`, `TESTING_ONBOARDING_FLOW.md`), bổ sung team section.
+- **CI/CD pipeline** (Hoàng): Refactor workflow YAML, fix concurrency (cancel previous progress), cập nhật `build-push.yml` + `ci.yml`, clean up stale jobs. Fix Loki log pipeline.
+
+### Kết quả nổi bật
+- Agent search quality cải thiện: kết quả rerank đúng hơn, acronym trap được giải quyết, contextual citation không bị mất khi multi-turn.
+- Observability live: `admin.a20-app-049.io.vn` hiển thị Grafana dashboard, Loki log stream theo service/level, CloudWatch integration.
+- Auth flow ổn định cho demo: stale error không còn xuất hiện, password demo login không cần complex format.
+- Repo sạch cho submission: stale docs xóa, README đầy đủ Quick Links, team section điền đúng.
+
+### Khó nhất tuần này
+- **Agent downtime 4 lần liên tiếp**: Mỗi fix lộ ra một lớp mới — đầu tiên là HTTPS endpoint URL sai, sau đó là pgvector image mismatch, rồi secret không inject đúng, cuối cùng là Cloud Map namespace sai format. Phải deploy → CloudWatch log → identify → fix → redeploy 4 vòng trong cùng một ngày.
+- **Observability Cloud Map format**: Terraform `service_discovery_registry_arn` và Cloud Map namespace phải khớp chính xác format với ECS service discovery. Một ký tự sai trong namespace gây toàn bộ metrics scrape fail silently — không có lỗi rõ ràng, chỉ thấy "no data" trong Grafana.
+- **Auth stale error**: Lỗi này chỉ xảy ra khi user đã login session cũ còn cached trong Zustand persist store, sau đó mở tab mới. Không reproduce được qua unit test thông thường — phải viết test mock persist state cụ thể mới bắt được.
+
+### AI tool đã dùng
+| Tool | Dùng để làm gì | Kết quả |
+|---|---|---|
+| Claude Code (Opus) | Debug agent downtime từ CloudWatch logs, thiết kế rerank scoring logic, viết auth stale error test cases | Xác định được root cause của từng downtime instance mà không cần SSH trực tiếp vào container |
+| Codex | Refactor observability Terraform module, viết Grafana datasource provisioning config | Observability stack deploy thành công lần đầu sau khi fix namespace format |
+
+### Học được
+- **Rerank là cần thiết khi search space lớn**: Embedding similarity tốt cho recall nhưng không đủ cho precision khi nhiều unit có title/KP tương tự. Một rerank step đơn giản theo combined score tăng rõ rệt chất lượng citation.
+- **Observability silent failure là loại nguy hiểm nhất**: Lỗi "no data" trong Grafana khó hơn lỗi exception. Phải có alert rule ngay từ đầu: nếu metric scrape không có data trong 5 phút thì coi là lỗi, không coi là "không có traffic".
+- **Demo account UX là sản phẩm**: Người dùng demo lần đầu mà không login được vì password quá phức tạp là lỗi UX nghiêm trọng như mọi bug khác. Password policy cho production và cho demo account phải được thiết kế riêng.
+
+### Nếu làm lại, sẽ làm khác
+- Thiết lập observability stack ngay tuần đầu production, không phải tuần cuối. Toàn bộ 5 revision ECS bootstrap tuần 7 sẽ debug nhanh hơn 50% nếu Grafana/Loki đã live từ lúc đó.
+- Chốt demo account policy (email format, password complexity) ngay khi tạo synthetic users, không sửa lại ở tuần submission.
