@@ -180,6 +180,7 @@ export default function LearningUnitDrawer() {
 
       <Link
         href={learningPlayerHref(selectedItem)}
+        onClick={closeDrawer}
         className="flex w-full items-center justify-center rounded-xl bg-primary-600 px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
       >
         Start learning
