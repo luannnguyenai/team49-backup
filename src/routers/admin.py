@@ -14,6 +14,7 @@ Admin dashboard API. All endpoints require role='admin' via require_admin dep.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import shutil
@@ -382,6 +383,24 @@ async def _fetch_loki_events(limit: int, query: str | None = None) -> list[dict[
     return []
 
 
+async def _get_loki_source_status() -> dict[str, Any]:
+    async with httpx.AsyncClient() as client:
+        errors: list[str] = []
+        for base_url in _candidate_loki_urls():
+            try:
+                response = await client.get(f"{base_url}/ready", timeout=1.5)
+                if response.status_code == 200:
+                    return _build_source_state("healthy", 1, f"connected: {base_url}")
+                errors.append(f"{base_url} returned HTTP {response.status_code}")
+            except Exception as exc:
+                errors.append(f"{base_url}: {exc}")
+        return _build_source_state(
+            "unavailable",
+            0,
+            "; ".join(errors[-2:]) if errors else "no Loki URL configured",
+        )
+
+
 def _get_runtime_source_status() -> dict[str, Any]:
     if _running_in_ecs():
         return _build_source_state("skipped", 0, "container logs are not available on ECS")
@@ -489,13 +508,19 @@ async def _collect_logs(
         states["access"] = _build_source_state("skipped", 0, None)
 
     if "loki" in selected_sources:
+        loki_state = await _get_loki_source_status()
         loki_events = await _fetch_loki_events(limit)
         events.extend(loki_events)
-        states["loki"] = _build_source_state(
-            "healthy" if loki_events else "degraded",
-            len(loki_events),
-            None if loki_events else "no Loki events returned",
-        )
+        if loki_state["status"] == "healthy":
+            states["loki"] = _build_source_state(
+                "healthy" if loki_events else "degraded",
+                len(loki_events),
+                None
+                if loki_events
+                else "Loki is reachable, but no matching app events were returned",
+            )
+        else:
+            states["loki"] = loki_state
     else:
         states["loki"] = _build_source_state("skipped", 0, None)
 
@@ -528,6 +553,20 @@ async def _prom_query(client: httpx.AsyncClient, query: str) -> float | None:
         return float(data[0]["value"][1])
     except Exception:
         return None
+
+
+async def _prometheus_status(client: httpx.AsyncClient) -> dict[str, Any]:
+    try:
+        response = await client.get(f"{PROMETHEUS_URL}/-/ready", timeout=1.5)
+        if response.status_code == 200:
+            return _build_source_state("healthy", 1, f"connected: {PROMETHEUS_URL}")
+        return _build_source_state(
+            "degraded",
+            0,
+            f"{PROMETHEUS_URL} returned HTTP {response.status_code}",
+        )
+    except Exception as exc:
+        return _build_source_state("unavailable", 0, f"{PROMETHEUS_URL}: {exc}")
 
 
 async def _prom_query_range(
@@ -618,14 +657,19 @@ async def _load_tutor_latency_timeseries(
     }
 
     metric_series: dict[str, list[tuple[datetime, float]]] = {}
-    for field, query in metric_queries.items():
-        metric_series[field] = await _prom_query_range(
-            client,
-            query,
-            start=start,
-            end=end,
-            step_seconds=step_seconds,
-        )
+    results = await asyncio.gather(
+        *[
+            _prom_query_range(
+                client,
+                query,
+                start=start,
+                end=end,
+                step_seconds=step_seconds,
+            )
+            for query in metric_queries.values()
+        ]
+    )
+    metric_series = dict(zip(metric_queries.keys(), results, strict=True))
 
     return _merge_tutor_latency_series(metric_series)
 
@@ -735,7 +779,7 @@ async def current_model(_admin: User = Depends(require_admin)) -> dict[str, Any]
 
 @admin_router.get("/model/health")
 async def model_health(_admin: User = Depends(require_admin)) -> dict[str, Any]:
-    return {"models": await check_all_chat_model_health()}
+    return {"models": await check_all_chat_model_health(timeout_s=3.0)}
 
 
 @admin_router.get("/users")
@@ -1057,26 +1101,29 @@ async def traffic_summary(
     _admin: User = Depends(require_admin),
 ) -> dict[str, Any]:
     async with httpx.AsyncClient() as client:
-        rps = await _prom_query(client, 'sum(rate(http_requests_total{job="fastapi"}[1m]))')
-        p50 = await _prom_query(
-            client,
-            'histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{job="fastapi"}[5m])))',
-        )
-        p95 = await _prom_query(
-            client,
-            'histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="fastapi"}[5m])))',
-        )
-        p99 = await _prom_query(
-            client,
-            'histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{job="fastapi"}[5m])))',
-        )
-        err4 = await _prom_query(
-            client,
-            'sum(rate(http_requests_total{job="fastapi",status=~"4.."}[5m])) / clamp_min(sum(rate(http_requests_total{job="fastapi"}[5m])),1e-9)',
-        )
-        err5 = await _prom_query(
-            client,
-            'sum(rate(http_requests_total{job="fastapi",status=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total{job="fastapi"}[5m])),1e-9)',
+        status, rps, p50, p95, p99, err4, err5 = await asyncio.gather(
+            _prometheus_status(client),
+            _prom_query(client, 'sum(rate(http_requests_total{job="fastapi"}[1m]))'),
+            _prom_query(
+                client,
+                'histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{job="fastapi"}[5m])))',
+            ),
+            _prom_query(
+                client,
+                'histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="fastapi"}[5m])))',
+            ),
+            _prom_query(
+                client,
+                'histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{job="fastapi"}[5m])))',
+            ),
+            _prom_query(
+                client,
+                'sum(rate(http_requests_total{job="fastapi",status=~"4.."}[5m])) / clamp_min(sum(rate(http_requests_total{job="fastapi"}[5m])),1e-9)',
+            ),
+            _prom_query(
+                client,
+                'sum(rate(http_requests_total{job="fastapi",status=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total{job="fastapi"}[5m])),1e-9)',
+            ),
         )
     return {
         "rps_1m": rps,
@@ -1084,4 +1131,5 @@ async def traffic_summary(
         "rate_4xx": err4,
         "rate_5xx": err5,
         "prometheus_url": PROMETHEUS_URL,
+        "prometheus": status,
     }

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Overview — AI Adaptive Learning Platform</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    .header { padding: 20px 32px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .header-left h1 { font-size: 1.25rem; font-weight: 700; color: #60a5fa; }
+    .header-left p { color: #475569; font-size: 0.82rem; margin-top: 2px; }
+    .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav a { color: #64748b; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #1e293b; transition: all 0.2s; white-space: nowrap; }
+    .nav a:hover { color: #e2e8f0; border-color: #334155; }
+    .nav a.active { background: #1e40af; color: #bfdbfe; border-color: #3b82f6; }
+    .content { padding: 28px 32px; }
+    .diagram-card { background: #0d1117; border: 1px solid #21262d; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .diagram-card h2 { font-size: 0.95rem; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+    .mermaid { background: #0d1117; }
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #21262d; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #6e7681; }
+    .legend-color { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <h1>AI Adaptive Learning Platform</h1>
+      <p>01 · System Overview — all layers and components</p>
+    </div>
+    <nav class="nav">
+      <a href="index.html">← Hub</a>
+      <a href="01-system-overview.html" class="active">01 Overview</a>
+      <a href="02-agentic-rag-pipeline.html">02 RAG Pipeline</a>
+      <a href="03-aws-infrastructure.html">03 AWS Infra</a>
+      <a href="04-request-lifecycle.html">04 Request Flow</a>
+      <a href="05-data-schema.html">05 DB Schema</a>
+    </nav>
+  </div>
+
+  <div class="content">
+    <div class="diagram-card">
+      <h2>Full System Architecture</h2>
+      <div class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1e3a5f', 'primaryTextColor': '#c9d1d9', 'primaryBorderColor': '#58a6ff', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#21262d', 'background': '#0d1117', 'mainBkg': '#0d1117', 'nodeBorder': '#30363d'}}}%%
+flowchart TB
+    subgraph CLIENT["🌐 CLIENT"]
+        B["Browser / PWA\nHTTPS:443"]
+    end
+
+    subgraph CDN_LAYER["☁️ CDN — CloudFront + S3"]
+        CF["CloudFront Distribution\nOrigin Access Control\nvideo · slides · transcripts"]
+        S3B["S3 Private Bucket\ncourse-assets"]
+    end
+
+    subgraph FRONTEND["⚛️ FRONTEND — Next.js 14 App Router · ECS Fargate"]
+        FE_SSR["SSR Pages\nApp Router · React 18"]
+        FE_CLIENT["Client Components\nZustand · Tailwind CSS\nTypeScript 5"]
+        FE_API["server-course-api.ts\n(server-side fetch)"]
+    end
+
+    subgraph BACKEND["⚙️ BACKEND — FastAPI · Python 3.12 · ECS Fargate"]
+        ROUTERS["FastAPI Routers\n/api/courses · /api/agent\n/api/quiz · /api/assessment\n/api/learning-session · /api/review"]
+        subgraph SERVICES["Service Layer"]
+            SVC_C["content_service\ncourse / sections / units"]
+            SVC_A["assessment_service\nquiz_service\nmodule_test_service"]
+            SVC_M["canonical_mastery_service\n2PL-lite IRT scoring\nstaleness decay on-read"]
+            SVC_R["recommendation_engine\nlearning path planner\nprerequisite-aware"]
+            SVC_L["llm_service\nAI orchestration\nPII + Guardrail + Agent"]
+        end
+        SVC_LS["learning_session_service\nabandoned / resume state\nplanner_session_state"]
+    end
+
+    subgraph AI_STACK["🤖 AI AGENT STACK"]
+        GUARDRAIL["Guardrail Router\nQwen3.5-0.8B LoRA\n13,513 samples · valid_json=1.0"]
+        SMART_R["Smart Router\nBLOCKED / SIMPLE / COMPLEX"]
+        subgraph LANGGRAPH["LangGraph ReAct Agent — deeptutor-style"]
+            LG_ROUTER["Structured Router Node\nassessment boundary · topic · intent"]
+            LG_CTX["Context Service Node\nunit context · KP scope · thread memory"]
+            LG_SEARCH["Search Service Node\nsearch_learning_content\npgvector RAG retrieval"]
+            LG_RERANK["Rerank Node\nscore + rerank\nacronym trap filter"]
+            LG_ANSWER["Answer Node\nevidence policy\ngrounded / partial / no_source"]
+            LG_EXT["External Research\nSemantic Scholar · Web Search\n(when in-course insufficient)"]
+        end
+        vLLM_SVC["vLLM Serving\nQwen3.5-4B LoRA\nTutor Answer Generator\n(Cloudflare Tunnel)"]
+        LLM_PROV["LLM Providers\nGemini · OpenAI · Anthropic\n(fallback / orchestration)"]
+    end
+
+    subgraph DATA["🗄️ DATA LAYER — AWS Private Subnet"]
+        PG["RDS PostgreSQL 16\n+ pgvector extension\nproduct shell + canonical content\nlearner state + agent state"]
+        RD["ElastiCache Redis 7\nsession cache · token denylist\nrate limiting · model health cache"]
+    end
+
+    subgraph OBSERVABILITY["📊 OBSERVABILITY"]
+        LF["Langfuse\nLLM tracing · eval\nspan + trace per agent run"]
+        PROM["Prometheus\nbackend metrics scrape\n/metrics endpoint"]
+        GRAF["Grafana\ndashboards\nadmin.a20-app-049.io.vn"]
+        LOKI["Loki\nlog aggregation\nper service / level / time"]
+        CW["CloudWatch\nECS container logs\nFargate task events"]
+    end
+
+    B -->|"HTTPS · app.a20-app-049.io.vn"| FRONTEND
+    B -->|"CDN assets · signed URL"| CF
+    S3B --> CF
+    FE_SSR --> FE_API
+    FE_CLIENT -->|"Axios REST"| ROUTERS
+    FE_API -->|"server-side fetch"| ROUTERS
+
+    ROUTERS --> SERVICES
+    ROUTERS --> SVC_LS
+    SVC_C & SVC_A & SVC_M & SVC_R & SVC_LS --> PG
+    SVC_C & SVC_A & SVC_R & SVC_LS --> RD
+    SVC_C -->|"presigned / CloudFront URL"| S3B
+
+    SVC_L --> GUARDRAIL
+    GUARDRAIL --> SMART_R
+    SMART_R -->|COMPLEX| LANGGRAPH
+    SMART_R -->|SIMPLE| vLLM_SVC
+    LG_ROUTER --> LG_CTX --> LG_SEARCH --> LG_RERANK
+    LG_RERANK -->|evidence ok| LG_ANSWER
+    LG_RERANK -->|insufficient| LG_EXT --> LG_ANSWER
+    LG_SEARCH -->|pgvector| PG
+    LG_ANSWER --> vLLM_SVC
+    vLLM_SVC -->|fallback| LLM_PROV
+    SVC_L -->|direct call| LLM_PROV
+    SVC_L --> LF
+
+    BACKEND --> PROM --> GRAF
+    BACKEND --> LOKI
+    BACKEND --> CW
+
+    style CLIENT fill:#0c4a6e,stroke:#0ea5e9,color:#bae6fd
+    style CDN_LAYER fill:#064e3b,stroke:#10b981,color:#a7f3d0
+    style FRONTEND fill:#1e1b4b,stroke:#818cf8,color:#c7d2fe
+    style BACKEND fill:#292524,stroke:#78716c,color:#e7e5e4
+    style AI_STACK fill:#431407,stroke:#ea580c,color:#fed7aa
+    style LANGGRAPH fill:#3b1d0a,stroke:#f97316,color:#ffedd5
+    style DATA fill:#14532d,stroke:#22c55e,color:#bbf7d0
+    style OBSERVABILITY fill:#1e293b,stroke:#475569,color:#cbd5e1
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#0c4a6e"></div>Client</div>
+        <div class="legend-item"><div class="legend-color" style="background:#064e3b"></div>CDN / Storage</div>
+        <div class="legend-item"><div class="legend-color" style="background:#1e1b4b"></div>Frontend (Next.js)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#292524"></div>Backend (FastAPI)</div>
+        <div class="legend-item"><div class="legend-color" style="background:#431407"></div>AI Stack</div>
+        <div class="legend-item"><div class="legend-color" style="background:#14532d"></div>Data Layer</div>
+        <div class="legend-item"><div class="legend-color" style="background:#1e293b"></div>Observability</div>
+      </div>
+    </div>
+  </div>
+
+  <script>mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });</script>
+</body>
+</html>

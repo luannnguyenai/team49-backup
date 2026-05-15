@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import threading
 import time
 from dataclasses import dataclass
@@ -252,10 +253,15 @@ async def check_chat_model_health(
 
 
 async def check_all_chat_model_health(*, timeout_s: float | None = None, client=None) -> list[dict]:
-    return [
-        await check_chat_model_health(option.id, timeout_s=timeout_s, client=client)
-        for option in list_chat_model_options(include_non_selectable=True)
-    ]
+    options = list_chat_model_options(include_non_selectable=True)
+    return list(
+        await asyncio.gather(
+            *[
+                check_chat_model_health(option.id, timeout_s=timeout_s, client=client)
+                for option in options
+            ]
+        )
+    )
 
 
 def _availability_payload(health: dict) -> dict:

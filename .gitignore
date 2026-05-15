@@ -30,6 +30,8 @@ data/**
 app.db
 *.log
 logs/
+!frontend/app/admin/logs/
+!frontend/app/admin/logs/**
 reports/schema_v2_*_report.json
 
 # Local model and fine-tune artifacts

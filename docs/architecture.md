@@ -101,7 +101,7 @@ User → Frontend → Backend/API → Service Layer → Database + Redis
 flowchart LR
     Input["User Message"]
     PII_IN["PII Sanitizer<br/>(input)"]
-    GR["Guardrail Router<br/>safety_label<br/>topic_label<br/>action"]
+    GR["Guardrail Router<br/>Qwen3.5-0.8B LoRA<br/>safety · topic · action"]
     SR["Smart Router"]
 
     subgraph Paths["Processing Paths"]
@@ -112,6 +112,7 @@ flowchart LR
 
     RA["LangGraph ReAct Agent"]
     TOOLS["Tools:<br/>Python Sandbox<br/>Lecture Context Retrieval"]
+    FT["Fine-tuned Models (vLLM)<br/>Qwen3.5-4B LoRA (Tutor)"]
     LLM["LLM Provider<br/>Gemini / OpenAI / Anthropic"]
     PII_OUT["PII Sanitizer<br/>(output)"]
     TRACE["Langfuse Tracing"]
@@ -123,6 +124,7 @@ flowchart LR
     SR --> COMPLEX --> RA
     RA <--> TOOLS
     RA <--> LLM
+    RA <--> FT
     SIMPLE --> PII_OUT
     RA --> PII_OUT
     PII_OUT --> Output
@@ -135,6 +137,44 @@ flowchart LR
 - Chỉ trả lời dựa trên lecture context (lecture-grounded).
 - Không tiết lộ system instructions.
 - Mọi flow được trace qua Langfuse.
+
+## 3.1. Fine-tuned Models
+
+Hệ thống fine-tune và self-host các model riêng thay vì phụ thuộc hoàn toàn vào LLM API:
+
+### Guardrail Router — Qwen3.5-0.8B LoRA
+
+- **Mục đích:** Phân loại safety/topic/action cho mọi user message trước khi vào AI Tutor.
+- **Output:** JSON ngắn — `safety_label` (SAFE/HARMFUL), `topic_label` (ON_TOPIC/OFF_TOPIC/AMBIGUOUS), `action` (ALLOW_LESSON_ANSWER/SOFT_REFUSE_REDIRECT/ASK_CLARIFY/SAFETY_REFUSE), `attack_type`, `selected_kp_ids`.
+- **Dataset:** 13,513 samples từ 7+ nguồn: EduVidQA, WildGuardMix, JailBreakV-28K, MultiJail, CantTalkAboutThis, CLINC150/OOS, internal question bank.
+- **Kết quả:** `valid_json_rate = 1.0`, `harmful_false_allow_rate = 0.0`, `ambiguous_recall = 0.9905`, `hard_offtopic_recall = 0.9408`.
+- **Serving:** vLLM (OpenAI-compatible) qua Cloudflare Tunnel, fallback sang Gemini/OpenAI.
+
+### Tutor Answer Generator — Qwen3.5-4B LoRA
+
+- **Mục đích:** Sinh câu trả lời / từ chối cho AI Tutor trong ngữ cảnh bài giảng.
+- **Đặc điểm:** Multilingual (Việt/Anh), lecture-grounded, được đánh giá bằng Gemini judge + OpenAI judge.
+- **Serving:** vLLM tại `vllm.a20-app-049.io.vn/v1`.
+
+### Prerequisite Edge Scoring — DeBERTa / ModernBERT / SciBERT
+
+Xây dựng prerequisite graph (quan hệ tiên quyết giữa Knowledge Point) bằng multi-model scoring pipeline:
+
+| Model | Phương pháp | Vai trò |
+|---|---|---|
+| DeBERTa-v3-large-MNLI | Zero-shot NLI forward-reverse | Chấm chiều prerequisite A→B vs B→A |
+| ModernBERT-base | Anchor embedding contrast | Chấm edge strength |
+| ModernBERT-large | Masked prerequisite scoring | Edge strength variant |
+| SciBERT | Masked edge scoring | Domain CS/AI chuyên biệt |
+| DeBERTa + MoocCubeX | Fine-tune prerequisite classification | Rebalanced training cho prerequisite prediction |
+
+**Pipeline:** Raw KP pairs → Multi-model scoring → GPT adjudication → Transitive pruning → `prerequisite_edges` + `pruned_edges` trong PostgreSQL.
+
+### Artifact Management
+
+- **DVC** (Data Version Control) track model adapters, datasets, checkpoints — không commit binary vào Git.
+- Training notebooks trong `notebooks/` — reproducible trên Google Colab.
+- Peak VRAM ~1.5 GB cho router (chạy được trên RTX 3050 Laptop GPU).
 
 ## 4. Database Schema Overview
 

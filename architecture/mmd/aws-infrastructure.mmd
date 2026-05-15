@@ -1,0 +1,63 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#fefce8', 'primaryTextColor': '#713f12', 'primaryBorderColor': '#ca8a04', 'lineColor': '#a16207', 'secondaryColor': '#f0fdf4', 'tertiaryColor': '#eff6ff', 'background': '#ffffff', 'mainBkg': '#fefce8', 'nodeBorder': '#fbbf24', 'clusterBkg': '#fffbeb', 'clusterBorder': '#f59e0b', 'fontFamily': 'ui-sans-serif, system-ui, sans-serif'}}}%%
+flowchart TB
+    INET(["🌐 Internet"]) --> R53["Route 53\na20-app-049.io.vn"]
+    GH["GitHub Actions\nbuild-push.yml\ndeploy-ecs-prod.yml\n(self-hosted EC2 runner)"] -->|"push images"| ECR
+
+    subgraph AWS["☁️ AWS"]
+        R53 --> ALB
+
+        subgraph VPC["VPC — a20-prod-vpc"]
+            subgraph PUB["📡 Public Subnet"]
+                ALB["Application Load Balancer\nHTTPS:443\napp.* → frontend\napi.* → backend"]
+                NAT["NAT Gateway\noutbound egress"]
+            end
+
+            subgraph PRIV["🔒 Private Subnet"]
+                subgraph ECS["ECS Fargate Cluster — a20-prod-cluster"]
+                    FE["Frontend Service\nNext.js 14 standalone\na20-frontend · PORT 3000"]
+                    BE["Backend Service\nFastAPI + uvicorn\na20-backend · PORT 8000"]
+                    TASKS["One-off Tasks\nmigrate · seed-core\nseed-accounts"]
+                end
+                RDS["RDS PostgreSQL 16\n+ pgvector · port 5432\nonly backend SG ingress"]
+                REDIS["ElastiCache Redis 7\nport 6379\nonly backend SG ingress"]
+            end
+        end
+
+        ECR["ECR\nFrontend image\nBackend image\n(tagged by commit SHA)"]
+        SM["Secrets Manager\nDB_URL · REDIS_URL\nAPI keys · vLLM endpoint"]
+        CW["CloudWatch\n/ecs/a20-frontend\n/ecs/a20-backend"]
+
+        subgraph CDN["CDN — Assets"]
+            S3["S3 Private Bucket\ncourse videos · slides\nOrigin Access Control"]
+            CF["CloudFront\ncdn.a20-app-049.io.vn\nSigned URLs · 1h TTL"]
+        end
+
+        subgraph OBS["📊 Observability Stack"]
+            PROM["Prometheus\nscrapes /metrics"]
+            GRAFANA["Grafana\nadmin.a20-app-049.io.vn"]
+            LOKI["Loki · log aggregation"]
+            LF["Langfuse · LLM tracing"]
+        end
+    end
+
+    subgraph EXT["🔌 External APIs — via NAT"]
+        direction LR
+        OPENAI["OpenAI API"]
+        GEMINI["Gemini API"]
+        ANTHROPIC["Anthropic API"]
+        VLLM_S["vLLM Server\nQwen3.5-0.8B + 4B LoRA\n(Cloudflare Tunnel)"]
+    end
+
+    ALB --> FE & BE
+    BE --> RDS & REDIS
+    BE -->|"presigned URL"| S3
+    S3 --> CF
+    INET -->|"CDN assets"| CF
+    BE --> NAT --> EXT
+    ECR -.->|"pull image"| FE & BE & TASKS
+    SM -.->|"inject secrets"| BE & FE
+    CW -.->|"log streams"| ECS
+    BE --> PROM --> GRAFANA
+    BE --> LOKI
+    BE -.->|"async traces"| LF
+    GH -->|"deploy service"| ECS

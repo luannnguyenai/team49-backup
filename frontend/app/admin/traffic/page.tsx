@@ -116,6 +116,11 @@ export default function AdminTrafficPage() {
       {err && (
         <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">{err}</p>
       )}
+      {summary?.prometheus && summary.prometheus.status !== "healthy" ? (
+        <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+          Prometheus {summary.prometheus.status}: {summary.prometheus.message ?? summary.prometheus_url}
+        </p>
+      ) : null}
 
       <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
         <div className="mb-4 flex items-center justify-between">

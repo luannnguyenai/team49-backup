@@ -73,6 +73,7 @@ export type TrafficSummary = {
   rate_4xx: number | null;
   rate_5xx: number | null;
   prometheus_url: string;
+  prometheus?: AdminLogSourceState;
 };
 
 export type LlmStats = {

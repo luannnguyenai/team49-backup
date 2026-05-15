@@ -161,11 +161,18 @@ module "backend_service" {
     { name = "MODEL_EXTRA_KWARGS", value = "{}" },
     { name = "LLM_REQUEST_TIMEOUT_SECONDS", value = "30" },
     { name = "LLM_MAX_RETRIES", value = "1" },
+    { name = "CHAT_MODEL_HEALTH_TIMEOUT_SECONDS", value = "3" },
+    { name = "GUARDRAIL_ROUTER_BASE_URL", value = "https://router.a20-app-049.io.vn/v1" },
+    { name = "GUARDRAIL_ROUTER_MODEL", value = "guardrail-router-merged" },
+    { name = "GUARDRAIL_ROUTER_TIMEOUT_SECONDS", value = "10.0" },
+    { name = "GUARDRAIL_ROUTER_UNHEALTHY_COOLDOWN_SECONDS", value = "60.0" },
+    { name = "GUARDRAIL_ROUTER_MAX_TOKENS", value = "96" },
 
     # Langfuse non-secret
     { name = "LANGFUSE_BASE_URL", value = "https://cloud.langfuse.com" },
 
     # Observability
+    { name = "PROMETHEUS_URL", value = "http://prometheus.obs.a20-prod.internal:9090" },
     { name = "LOKI_URL", value = "http://loki.obs.a20-prod.internal:3100" },
 
     # Knowledge graph
