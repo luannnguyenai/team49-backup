@@ -49,6 +49,7 @@ class AgenticRAGPipeline:
             slots=slots,
             allowed_course_ids=allowed_course_ids,
             current_path_course_ids=current_path_course_ids,
+            route_context=route_context,
         )
         try:
             observation = self.router.rag_observe(
@@ -118,6 +119,7 @@ class AgenticRAGPipeline:
             slots=slots,
             allowed_course_ids=allowed_course_ids,
             current_path_course_ids=current_path_course_ids,
+            route_context=route_context,
         )
         try:
             observation = self.router.rag_observe(
@@ -133,29 +135,16 @@ class AgenticRAGPipeline:
         observation = self._validated_observation(observation, tool_observation)
 
         yield json.dumps({"status": "Composing answer"}) + "\n"
-        accumulated_parts: list[str] = []
-        for token in self.response_router.rag_respond_stream(
+        final = self.response_router.rag_respond(
             message=message,
             thought=thought,
             observations=[observation.model_dump(mode="json")],
             route_context=route_context,
             recent_messages=recent_messages,
-        ):
-            if isinstance(token, list):
-                token = "".join(
-                    p.get("text", "") if isinstance(p, dict) else str(p)
-                    for p in token
-                )
-            accumulated_parts.append(token)
-            yield json.dumps({"chunk": token}) + "\n"
-
-        answer_markdown = "".join(accumulated_parts)
-        final = AgenticRAGFinal(
-            answer_markdown=answer_markdown,
-            evidence_status=observation.evidence_status,
-            evidence_sufficient=bool(observation.result.citations),
         )
         result = self._result_from_final(final, observation)
+        if result.answer_markdown:
+            yield json.dumps({"chunk": result.answer_markdown}) + "\n"
         yield json.dumps({"done": result.model_dump(mode="json")}) + "\n"
 
     def _validated_observation(
@@ -187,6 +176,8 @@ class AgenticRAGPipeline:
         observed_status: str,
         fallback_observation: AgenticRAGObservation,
     ) -> str:
+        if not fallback_observation.result.requires_evidence:
+            return fallback_observation.evidence_status
         if fallback_observation.result.citations:
             return fallback_observation.evidence_status
         if observed_status == "grounded":
@@ -215,7 +206,7 @@ class AgenticRAGPipeline:
                     "requires_evidence": False,
                     "metadata": {
                         **result.metadata,
-                        "agentic_rag_evidence_status": final.evidence_status,
+                        "agentic_rag_evidence_status": observation.evidence_status,
                         "preserved_tool_topic_selection_answer": True,
                     },
                 }
@@ -231,11 +222,11 @@ class AgenticRAGPipeline:
                     "requires_evidence": False,
                     "metadata": {
                         **result.metadata,
-                        "agentic_rag_evidence_status": final.evidence_status,
+                        "agentic_rag_evidence_status": observation.evidence_status,
                     },
                 }
             )
-        if final.evidence_status == "no_source" and not result.citations:
+        if observation.evidence_status == "no_source" and not result.citations:
             return result.model_copy(
                 update={
                     "answer_markdown": answer_markdown,
@@ -252,7 +243,7 @@ class AgenticRAGPipeline:
                 "requires_evidence": False,
                 "metadata": {
                     **result.metadata,
-                    "agentic_rag_evidence_status": final.evidence_status,
+                    "agentic_rag_evidence_status": observation.evidence_status,
                 },
             }
         )
