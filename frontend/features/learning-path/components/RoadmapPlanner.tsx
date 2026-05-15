@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   AlertTriangle,
@@ -396,6 +396,26 @@ export default function RoadmapPlanner({
   const [expandedLectureKeys, setExpandedLectureKeys] = useState<Set<string>>(
     () => new Set(),
   );
+  const [selectedCourseKey, setSelectedCourseKey] = useState<string | null>(
+    null,
+  );
+
+  const recommendedCourseKey =
+    groupedCourses.find((course) =>
+      course.items.some((item) => item.id === recommendedNextId),
+    )?.key ??
+    groupedCourses[0]?.key ??
+    null;
+
+  useEffect(() => {
+    if (!recommendedCourseKey) return;
+    const selectedCourseStillExists = groupedCourses.some(
+      (course) => course.key === selectedCourseKey,
+    );
+    if (!selectedCourseKey || !selectedCourseStillExists) {
+      setSelectedCourseKey(recommendedCourseKey);
+    }
+  }, [groupedCourses, recommendedCourseKey, selectedCourseKey]);
 
   if (!groupedCourses.length) {
     return <PathRequiredState />;
@@ -413,196 +433,275 @@ export default function RoadmapPlanner({
     });
   };
 
-  return (
-    <div className="mx-auto w-full max-w-[980px] py-8">
-      {groupedCourses.map((course) => {
-        const completedUnits = countCompleted(course.items);
-        const totalUnits = course.items.length;
-        const progressPercent =
-          totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0;
-        const display = courseDisplay(course);
+  const selectedCourse =
+    groupedCourses.find((course) => course.key === selectedCourseKey) ??
+    groupedCourses.find((course) => course.key === recommendedCourseKey) ??
+    groupedCourses[0];
+
+  const renderCourseHeader = (course: CourseGroup) => {
+    const completedUnits = countCompleted(course.items);
+    const totalUnits = course.items.length;
+    const progressPercent =
+      totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0;
+    const display = courseDisplay(course);
+
+    return (
+      <div className="relative z-10 mb-8 flex flex-col justify-between gap-4 border-b-2 border-slate-100 pb-6 lg:flex-row lg:items-end">
+        <div>
+          <CourseCodeBadge code={display.code} />
+          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-800 md:text-4xl">
+            {display.title}
+          </h2>
+        </div>
+        <div className="flex shrink-0 flex-col gap-1 lg:items-end">
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-sm font-bold uppercase tracking-widest text-slate-500">
+              {progressPercent}% done
+            </span>
+            <div className="h-3 w-24 overflow-hidden rounded-full border-2 border-slate-800 bg-slate-100 shadow-[1px_1px_0px_#1e293b] md:w-32">
+              <div
+                className="h-full rounded-r-none bg-blue-600 transition-all duration-500 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+          <p className="mt-2 text-sm font-semibold text-slate-500">
+            {course.lectures.length} lectures · {totalUnits} units
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderLectureBlocks = (course: CourseGroup) => (
+    <div className="relative isolate px-0 md:px-4">
+      <div className="absolute bottom-4 left-[23px] top-6 -z-10 w-0 border-l-[2px] border-dashed border-blue-600 md:left-[47px]" />
+
+      {course.lectures.map((lecture, index) => {
+        const isExpanded = expandedLectureKeys.has(lecture.key);
+        const completedLectureUnits = countCompleted(lecture.items);
+        const expandedLectureItems = lecture.items;
+        const optionalIntro = isOptionalIntroLecture(lecture);
+        const isCompleted =
+          lecture.items.length > 0 &&
+          completedLectureUnits === lecture.items.length;
+        const isInProgress =
+          lecture.items.some(
+            (item) =>
+              item.status === "in_progress" || item.status === "completed",
+          ) && !isCompleted;
+        const hasRecommended = lecture.items.some(
+          (item) => item.id === recommendedNextId,
+        );
 
         return (
-          <section key={course.key} className="mb-12 md:mb-16">
-            <div className="relative overflow-hidden rounded-2xl border-2 border-slate-800 bg-white p-5 shadow-[4px_4px_0px_#e2e8f0] md:p-8 md:shadow-[8px_8px_0px_#e2e8f0]">
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.03]"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle at 2px 2px, #000 1px, transparent 0)",
-                  backgroundSize: "24px 24px",
-                }}
-              />
+          <div
+            key={lecture.key}
+            className="group/lecture relative flex items-start gap-4 pb-2 pt-4 md:gap-6"
+          >
+            <button
+              type="button"
+              onClick={() => toggleLecture(lecture.key)}
+              className="relative z-10 mt-[14px] flex shrink-0 cursor-pointer"
+              aria-label={`${isExpanded ? "Collapse" : "Expand"} ${lecture.title}`}
+            >
+              <span
+                className={cn(
+                  "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-800 shadow-[2px_2px_0px_#1e293b] transition-transform hover:scale-110 md:h-16 md:w-16 md:shadow-[3px_3px_0px_#1e293b]",
+                  isCompleted && "bg-emerald-400",
+                  isInProgress && "bg-[#fde047]",
+                  optionalIntro &&
+                    !isCompleted &&
+                    !isInProgress &&
+                    "bg-blue-100",
+                  hasRecommended &&
+                    !isCompleted &&
+                    !isInProgress &&
+                    !optionalIntro &&
+                    "bg-blue-100",
+                  !isCompleted &&
+                    !isInProgress &&
+                    !hasRecommended &&
+                    !optionalIntro &&
+                    "bg-white",
+                )}
+              >
+                {isCompleted ? (
+                  <CheckCircle2 className="h-6 w-6 text-slate-800 md:h-8 md:w-8" />
+                ) : (
+                  <span className="text-lg font-bold text-slate-800 md:text-2xl">
+                    {index + 1}
+                  </span>
+                )}
+              </span>
+            </button>
 
-              <div className="relative z-10 mb-10 flex flex-col justify-between gap-4 border-b-2 border-slate-100 pb-6 md:flex-row md:items-end">
-                <div>
-                  <CourseCodeBadge code={display.code} />
-                  <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-800 md:text-4xl">
-                    {display.title}
-                  </h2>
-                </div>
-                <div className="flex shrink-0 flex-col gap-1 md:items-end">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-sm font-bold uppercase tracking-widest text-slate-500">
-                      {progressPercent}% done
-                    </span>
-                    <div className="h-3 w-24 overflow-hidden rounded-full border-2 border-slate-800 bg-slate-100 shadow-[1px_1px_0px_#1e293b] transition-all hover:h-4 md:w-32">
-                      <div
-                        className="h-full rounded-r-none bg-blue-600 transition-all duration-500 ease-out"
-                        style={{ width: `${progressPercent}%` }}
-                      />
-                    </div>
+            <div className="min-w-0 flex-1 pb-4">
+              <button
+                type="button"
+                onClick={() => toggleLecture(lecture.key)}
+                className={cn(
+                  "w-full rounded-xl border-2 border-slate-800 bg-white p-4 text-left transition-all md:p-5",
+                  isExpanded
+                    ? "translate-y-[2px] shadow-[2px_2px_0px_#1e293b]"
+                    : "shadow-[4px_4px_0px_#1e293b] hover:translate-y-[1px] hover:bg-slate-50 hover:shadow-[3px_3px_0px_#1e293b]",
+                  hasRecommended && "border-amber-200 bg-amber-50",
+                  optionalIntro &&
+                    !hasRecommended &&
+                    !isExpanded &&
+                    "border-blue-200 bg-blue-50",
+                )}
+                aria-expanded={isExpanded}
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-extrabold leading-tight text-slate-800 md:text-xl">
+                      {lecture.title}
+                    </h3>
+                    <p className="mt-1 text-sm font-semibold text-slate-500">
+                      {completedLectureUnits} / {lecture.items.length} units
+                      {hasRecommended ? " · next up here" : ""}
+                      {optionalIntro && !hasRecommended
+                        ? " · optional intro"
+                        : ""}
+                    </p>
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-slate-500">
-                    {course.lectures.length} lectures · {totalUnits} units
-                  </p>
+                  <span
+                    className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 transition-transform",
+                      isExpanded && "rotate-180",
+                    )}
+                  >
+                    <ChevronDown className="h-5 w-5 text-slate-600" />
+                  </span>
                 </div>
-              </div>
+              </button>
 
-              <div className="relative isolate px-0 md:px-4">
-                <div className="absolute bottom-4 left-[23px] top-6 -z-10 w-0 border-l-[2px] border-dashed border-blue-600 md:left-[47px]" />
-
-                {course.lectures.map((lecture, index) => {
-                  const isExpanded = expandedLectureKeys.has(lecture.key);
-                  const completedLectureUnits = countCompleted(lecture.items);
-                  const expandedLectureItems = lecture.items;
-                  const optionalIntro = isOptionalIntroLecture(lecture);
-                  const isCompleted =
-                    lecture.items.length > 0 &&
-                    completedLectureUnits === lecture.items.length;
-                  const isInProgress =
-                    lecture.items.some(
-                      (item) =>
-                        item.status === "in_progress" ||
-                        item.status === "completed",
-                    ) && !isCompleted;
-                  const hasRecommended = lecture.items.some(
-                    (item) => item.id === recommendedNextId,
-                  );
-
-                  return (
-                    <div
-                      key={lecture.key}
-                      className="relative flex items-start gap-4 pb-2 pt-4 md:gap-6 group/lecture"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => toggleLecture(lecture.key)}
-                        className="relative z-10 mt-[14px] flex shrink-0 cursor-pointer"
-                        aria-label={`${isExpanded ? "Collapse" : "Expand"} ${lecture.title}`}
-                      >
-                        <span
-                          className={cn(
-                            "flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-800 shadow-[2px_2px_0px_#1e293b] md:shadow-[3px_3px_0px_#1e293b] transition-transform hover:scale-110 md:h-16 md:w-16",
-                            isCompleted && "bg-emerald-400",
-                            isInProgress && "bg-[#fde047]",
-                            optionalIntro &&
-                            !isCompleted &&
-                            !isInProgress &&
-                            "bg-blue-100",
-                            hasRecommended &&
-                            !isCompleted &&
-                            !isInProgress &&
-                            !optionalIntro &&
-                            "bg-blue-100",
-                            !isCompleted &&
-                            !isInProgress &&
-                            !hasRecommended &&
-                            !optionalIntro &&
-                            "bg-white",
-                          )}
-                        >
-                          {isCompleted ? (
-                            <CheckCircle2 className="h-6 w-6 text-slate-800 md:h-8 md:w-8" />
-                          ) : (
-                            <span className="text-lg font-bold text-slate-800 md:text-2xl">
-                              {index + 1}
-                            </span>
-                          )}
-                        </span>
-                      </button>
-
-                      <div className="min-w-0 flex-1 pb-4">
-                        <button
-                          type="button"
-                          onClick={() => toggleLecture(lecture.key)}
-                          className={cn(
-                            "w-full rounded-xl border-2 border-slate-800 bg-white p-4 text-left transition-all md:p-5",
-                            isExpanded
-                              ? "translate-y-[2px] shadow-[2px_2px_0px_#1e293b]"
-                              : "shadow-[4px_4px_0px_#1e293b] hover:translate-y-[1px] hover:bg-slate-50 hover:shadow-[3px_3px_0px_#1e293b]",
-                            hasRecommended &&
-                            "bg-amber-50 border-amber-200",
-                            optionalIntro &&
-                            !hasRecommended &&
-                            !isExpanded &&
-                            "bg-blue-50 border-blue-200",
-                          )}
-                          aria-expanded={isExpanded}
-                        >
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="min-w-0">
-                              <h3 className="text-lg font-extrabold leading-tight text-slate-800 md:text-xl">
-                                {lecture.title}
-                              </h3>
-                              <p className="mt-1 text-sm font-semibold text-slate-500">
-                                {completedLectureUnits} / {lecture.items.length}{" "}
-                                units
-                                {hasRecommended ? " · next up here" : ""}
-                                {optionalIntro && !hasRecommended
-                                  ? " · optional intro"
-                                  : ""}
-                              </p>
-                            </div>
-                            <span
-                              className={cn(
-                                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 transition-transform",
-                                isExpanded && "rotate-180",
-                              )}
-                            >
-                              <ChevronDown className="h-5 w-5 text-slate-600" />
-                            </span>
-                          </div>
-                        </button>
-
-                        <AnimatePresence>
-                          {isExpanded && expandedLectureItems.length > 0 && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                              animate={{
-                                opacity: 1,
-                                height: "auto",
-                                marginTop: 16,
-                              }}
-                              exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                              transition={{ duration: 0.2, ease: "easeOut" }}
-                              className="overflow-hidden relative"
-                            >
-                              <div className="grid grid-cols-1 gap-3 pb-2 pl-0 lg:grid-cols-2 lg:pl-2">
-                                {expandedLectureItems.map((item) => (
-                                  <UnitCard
-                                    key={item.id}
-                                    item={item}
-                                    isRecommended={
-                                      item.id === recommendedNextId
-                                    }
-                                    currentProgress={currentProgress}
-                                    onSelectItem={onSelectItem}
-                                  />
-                                ))}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
+              <AnimatePresence>
+                {isExpanded && expandedLectureItems.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{
+                      opacity: 1,
+                      height: "auto",
+                      marginTop: 16,
+                    }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="relative overflow-hidden"
+                  >
+                    <div className="grid grid-cols-1 gap-3 pb-2 pl-0 xl:grid-cols-2 xl:pl-2">
+                      {expandedLectureItems.map((item) => (
+                        <UnitCard
+                          key={item.id}
+                          item={item}
+                          isRecommended={item.id === recommendedNextId}
+                          currentProgress={currentProgress}
+                          onSelectItem={onSelectItem}
+                        />
+                      ))}
                     </div>
-                  );
-                })}
-              </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </section>
+          </div>
         );
       })}
+    </div>
+  );
+
+  return (
+    <div className="mx-auto w-full max-w-[1280px] py-8">
+      <div className="grid gap-6 md:grid-cols-[280px_minmax(0,1fr)] md:items-start xl:grid-cols-[320px_minmax(0,1fr)]">
+        <nav
+          aria-label="Course roadmap"
+          className="space-y-3 md:sticky md:top-24"
+        >
+          {groupedCourses.map((course) => {
+            const completedUnits = countCompleted(course.items);
+            const totalUnits = course.items.length;
+            const progressPercent =
+              totalUnits > 0
+                ? Math.round((completedUnits / totalUnits) * 100)
+                : 0;
+            const display = courseDisplay(course);
+            const isSelected = course.key === selectedCourse.key;
+            const isCompleted = isCourseComplete(course.items);
+
+            return (
+              <button
+                key={course.key}
+                type="button"
+                aria-current={isSelected ? "step" : undefined}
+                onClick={() => setSelectedCourseKey(course.key)}
+                className={cn(
+                  "group flex w-full items-start gap-3 rounded-xl border-2 bg-white p-4 text-left transition-all",
+                  isSelected
+                    ? "translate-x-1 border-blue-600 bg-blue-50 shadow-[4px_4px_0px_#3b82f6]"
+                    : "border-slate-800 shadow-[2px_2px_0px_#1e293b] hover:translate-x-1 hover:bg-slate-50 hover:shadow-[4px_4px_0px_#1e293b]",
+                  isCompleted && !isSelected && "opacity-75",
+                )}
+              >
+                <span className="mt-0.5 shrink-0">
+                  {isCompleted ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                  ) : (
+                    <Circle
+                      className={cn(
+                        "h-5 w-5",
+                        isSelected
+                          ? "fill-blue-500/20 text-blue-600"
+                          : "text-slate-300 group-hover:text-slate-500",
+                      )}
+                    />
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
+                  {display.code ? (
+                    <span className="mb-1 inline-flex rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-extrabold text-blue-600">
+                      {display.code}
+                    </span>
+                  ) : null}
+                  <span className="block text-sm font-extrabold leading-tight text-slate-800 md:text-base">
+                    {display.title}
+                  </span>
+                  <span className="mt-2 flex items-center gap-3">
+                    <span className="text-xs font-semibold text-slate-500">
+                      {completedUnits}/{totalUnits} units
+                    </span>
+                    <span className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-200">
+                      <span
+                        className="block h-full rounded-full bg-blue-600 transition-all duration-500"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </span>
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <motion.section
+          key={selectedCourse.key}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-2xl border-2 border-slate-800 bg-white p-5 shadow-[4px_4px_0px_#1e293b] md:p-8 md:shadow-[8px_8px_0px_#1e293b]"
+        >
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 2px 2px, #000 1px, transparent 0)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+          {renderCourseHeader(selectedCourse)}
+          {renderLectureBlocks(selectedCourse)}
+        </motion.section>
+      </div>
     </div>
   );
 }

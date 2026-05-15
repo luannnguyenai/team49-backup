@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PathItemResponse } from "@/types";
 import RoadmapPlanner from "@/features/learning-path/components/RoadmapPlanner";
@@ -139,8 +139,50 @@ describe("RoadmapPlanner", () => {
       />,
     );
 
-    const courseHeadings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
-    expect(courseHeadings).toEqual(["Computer Vision", "Deep Learning"]);
+    const courseButtons = within(
+      screen.getByRole("navigation", { name: /course roadmap/i }),
+    ).getAllByRole("button");
+    expect(courseButtons[0]).toHaveTextContent("Computer Vision");
+    expect(courseButtons[1]).toHaveTextContent("Deep Learning");
+    expect(screen.getByRole("heading", { level: 2, name: "Computer Vision" })).toBeInTheDocument();
+  });
+
+  it("renders a course sidebar and switches the selected course detail", () => {
+    render(
+      <RoadmapPlanner
+        items={[
+          item({
+            id: "vision",
+            order_index: 0,
+            course_id: "cs231n",
+            course_title: "CS231n: Deep Learning for Computer Vision",
+            section_title: "Lecture 1: Vision Foundations",
+            learning_unit_title: "Image Classification",
+          }),
+          item({
+            id: "nlp",
+            order_index: 1,
+            course_id: "cs224n",
+            course_title: "CS224n: Natural Language Processing",
+            section_title: "Lecture 1: Word Vectors",
+            learning_unit_title: "Word2Vec",
+          }),
+        ]}
+      />,
+    );
+
+    const roadmapNav = screen.getByRole("navigation", { name: /course roadmap/i });
+    expect(roadmapNav).toBeInTheDocument();
+    expect(roadmapNav.parentElement).toHaveClass("md:grid-cols-[280px_minmax(0,1fr)]");
+    expect(screen.getByRole("heading", { level: 2, name: "Computer Vision" })).toBeInTheDocument();
+    expect(screen.getByText("Lecture 1: Vision Foundations")).toBeInTheDocument();
+    expect(screen.queryByText("Lecture 1: Word Vectors")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Natural Language Processing/ }));
+
+    expect(screen.getByRole("heading", { level: 2, name: "Natural Language Processing" })).toBeInTheDocument();
+    expect(screen.getByText("Lecture 1: Word Vectors")).toBeInTheDocument();
+    expect(screen.queryByText("Lecture 1: Vision Foundations")).not.toBeInTheDocument();
   });
 
   it("calls unit selection when a unit card is clicked", () => {
