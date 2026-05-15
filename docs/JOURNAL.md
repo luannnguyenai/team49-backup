@@ -108,7 +108,7 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 - **Frontend UI rebuild (Vietnamese)** (Đức): Rebuild toàn bộ frontend UI — design tokens, Vietnamese copy toàn app, lesson sidebar, tutor hub layout (enrolled courses, recommended courses, resume card). Fix alembic merge heads. Scaffold course-first platform pages (catalog, learning unit, overview).
 - **Course-first platform flow** (Đức + Rin): Public/personalized catalog, start gate, learning unit, in-context tutor, dashboard, compatibility redirects. Buffer NDJSON stream chunks, regression test cho stale chapter response, e2e smoke test.
 - **CS224n/CS231n data + LLM rate limiter** (Rin): Curate lecture segments cho CS224n và CS231n, add LLM rate limiter service để tránh API quota issues.
-- **Hybrid merge coordination** (Đức): Quản lý merge `hybrid/integrate-db-review` vào `main`, giữ nguyên history, resolve conflicts giữa course-first và DB/repository stacks.
+- **Hybrid merge coordination** (Rin): Merge `hybrid/integrate-db-review` vào `main` (PR #15), giữ nguyên history, resolve conflicts giữa course-first và DB/repository stacks.
 
 ### Khó nhất tuần này
 - **Hòa giải hai nhánh có trung tâm kiến trúc khác nhau**: một bên course-first, một bên database/repository review. Nếu resolve file theo kiểu "gộp cú pháp" thì rất dễ làm mất contract công khai hoặc kéo lecture stack cũ quay lại.

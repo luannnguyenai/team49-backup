@@ -7,7 +7,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import {
-  Send,
+  ArrowUp,
   X,
   ThumbsUp,
   ThumbsDown,
@@ -20,9 +20,14 @@ import {
   Calculator,
   RefreshCw,
   Sparkles,
+  TriangleAlert,
+  Clock3,
+  Bot,
+  Check,
   type LucideIcon,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import {
   CHAT_MODEL_OPTIONS,
   CHAT_MODEL_STORAGE_KEYS,
@@ -57,6 +62,8 @@ interface ChatMessage {
   isPending?: boolean;
   statusText?: string | null;
   statusSteps?: string[];
+  activityStartedAt?: number;
+  activityCompletedAt?: number;
 }
 
 function formatMessageTime(date: Date): string {
@@ -65,6 +72,23 @@ function formatMessageTime(date: Date): string {
     minute: "2-digit",
     hour12: false,
   }).format(date);
+}
+
+function formatVideoTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return "00:00";
+  }
+
+  const totalSeconds = Math.floor(seconds);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  }
+
+  return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }
 
 function waitForNextPaint(): Promise<void> {
@@ -175,6 +199,120 @@ function getDisplayStatusSteps(message: ChatMessage): string[] {
   return [];
 }
 
+function formatTutorActivityDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (minutes === 0) {
+    return `${seconds}s`;
+  }
+
+  return `${minutes}m ${seconds.toString().padStart(2, "0")}s`;
+}
+
+function getTutorActivityHeader({
+  startedAt,
+  completedAt,
+  now,
+}: {
+  startedAt?: number;
+  completedAt?: number;
+  now: number;
+}) {
+  if (!startedAt) {
+    return "Thought process";
+  }
+
+  const duration = formatTutorActivityDuration((completedAt ?? now) - startedAt);
+  return completedAt ? `Thought for ${duration}` : `Thinking · ${duration}`;
+}
+
+function TutorActivityCard({
+  message,
+  isExpanded,
+  onToggle,
+}: {
+  message: ChatMessage;
+  isExpanded: boolean;
+  onToggle: () => void;
+}) {
+  const [now, setNow] = useState(Date.now());
+  const steps = getDisplayStatusSteps(message);
+  const completed = !message.isPending;
+  const currentLine = steps[steps.length - 1] ?? "Preparing request";
+  const header = getTutorActivityHeader({
+    startedAt: message.activityStartedAt,
+    completedAt: message.activityCompletedAt,
+    now,
+  });
+
+  useEffect(() => {
+    if (completed || typeof window === "undefined") return;
+    const intervalId = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(intervalId);
+  }, [completed]);
+
+  return (
+    <div className="mb-3 w-full max-w-xl rounded-2xl border border-border-subtle/70 bg-surface-card/55 px-3 py-2.5 text-text-muted shadow-sm backdrop-blur-sm">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-3 text-left"
+        aria-expanded={isExpanded}
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span
+            className={cn(
+              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border-subtle bg-surface-page text-primary-700",
+              !completed && "border-primary-200 text-primary-700 dark:text-primary-300",
+            )}
+          >
+            {completed ? <Check className="h-3.5 w-3.5" /> : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-text-body">{header}</span>
+            {!completed ? <span className="mt-0.5 block truncate text-xs text-text-muted">{currentLine}</span> : null}
+          </span>
+        </span>
+        <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", isExpanded && "rotate-180")} />
+      </button>
+
+      {isExpanded ? (
+        <div className="mt-3 border-l border-border-subtle pl-4">
+          <div className="space-y-3">
+            {steps.length > 0 ? (
+              steps.map((step, stepIdx) => {
+                const isCurrentStep = message.isPending && stepIdx === steps.length - 1;
+                const { icon: StepIcon } = getStatusStepMeta(step);
+
+                return (
+                  <div key={`${message.localId}-activity-${stepIdx}`} className="relative">
+                    <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-text-muted" />
+                    <p className="flex items-center gap-2 text-sm font-semibold text-text-body">
+                      {isCurrentStep ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary-700" />
+                      ) : (
+                        <StepIcon className="h-3.5 w-3.5 text-text-muted" />
+                      )}
+                      {step}
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="relative">
+                <span className="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full bg-text-muted" />
+                <p className="text-sm font-semibold text-text-body">Preparing request</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 interface InContextTutorProps {
   lessonKey?: string;
   lectureId: string;
@@ -202,6 +340,7 @@ export default function InContextTutor({
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [chatModelId, setChatModelId] = useState<ChatModelId>("default");
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
   const [chatModelAvailability, setChatModelAvailability] = useState<ChatModelAvailability[]>(
     DEFAULT_CHAT_MODEL_AVAILABILITY,
   );
@@ -325,6 +464,7 @@ export default function InContextTutor({
     }
     const img = captureFrame();
     const sentAt = formatMessageTime(new Date());
+    const activityStartedAt = Date.now();
 
     const userMsg: ChatMessage = {
       localId: nextMessageId(),
@@ -342,6 +482,7 @@ export default function InContextTutor({
       isPending: true,
       statusText: null,
       statusSteps: [],
+      activityStartedAt,
     };
 
     setMessages((prev) => [...prev, userMsg, aiPlaceholder]);
@@ -405,7 +546,9 @@ export default function InContextTutor({
             if (data.e) {
               setMessages((prev) =>
                 prev.map((m, i) =>
-                  i === aiIdx ? { ...m, role: "error", content: data.e, isPending: false } : m,
+                  i === aiIdx
+                    ? { ...m, role: "error", content: data.e, isPending: false, activityCompletedAt: Date.now() }
+                    : m,
                 ),
               );
               hasError = true;
@@ -415,7 +558,7 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, role: "error", content: data.message, isPending: false }
+                    ? { ...m, role: "error", content: data.message, isPending: false, activityCompletedAt: Date.now() }
                     : m,
                 ),
               );
@@ -426,7 +569,7 @@ export default function InContextTutor({
               setMessages((prev) =>
                 prev.map((m, i) =>
                   i === aiIdx
-                    ? { ...m, role: "error", content: String(data.detail), isPending: false }
+                    ? { ...m, role: "error", content: String(data.detail), isPending: false, activityCompletedAt: Date.now() }
                     : m,
                 ),
               );
@@ -485,14 +628,16 @@ export default function InContextTutor({
               if (data.e) {
                 setMessages((prev) =>
                   prev.map((m, i) =>
-                    i === aiIdx ? { ...m, role: "error", content: data.e, isPending: false } : m,
+                    i === aiIdx
+                      ? { ...m, role: "error", content: data.e, isPending: false, activityCompletedAt: Date.now() }
+                      : m,
                   ),
                 );
               } else if (data.blocked && data.message) {
                 setMessages((prev) =>
                   prev.map((m, i) =>
                     i === aiIdx
-                      ? { ...m, role: "error", content: data.message, isPending: false }
+                      ? { ...m, role: "error", content: data.message, isPending: false, activityCompletedAt: Date.now() }
                       : m,
                   ),
                 );
@@ -500,7 +645,7 @@ export default function InContextTutor({
                 setMessages((prev) =>
                   prev.map((m, i) =>
                     i === aiIdx
-                      ? { ...m, role: "error", content: String(data.detail), isPending: false }
+                      ? { ...m, role: "error", content: String(data.detail), isPending: false, activityCompletedAt: Date.now() }
                       : m,
                   ),
                 );
@@ -562,6 +707,7 @@ export default function InContextTutor({
                   id: qaId,
                   isPending: false,
                   statusText: null,
+                  activityCompletedAt: Date.now(),
                 }
               : m,
           ),
@@ -574,6 +720,7 @@ export default function InContextTutor({
                   ...m,
                   isPending: false,
                   statusText: null,
+                  activityCompletedAt: Date.now(),
                 }
               : m,
           ),
@@ -583,7 +730,9 @@ export default function InContextTutor({
       const msg = err instanceof Error ? err.message : "Connection error";
       setMessages((prev) =>
         prev.map((m, i) =>
-          i === aiIdx ? { ...m, role: "error", content: msg, senderName: "AI Tutor", isPending: false } : m,
+          i === aiIdx
+            ? { ...m, role: "error", content: msg, senderName: "AI Tutor", isPending: false, activityCompletedAt: Date.now() }
+            : m,
         ),
       );
     } finally {
@@ -595,6 +744,8 @@ export default function InContextTutor({
   }, [input, streaming, lectureId, currentTime, contextBindingId, messages.length, captureFrame, nextMessageId, userFullName, chatModelId, chatModelAvailability]);
 
   const hasMessages = messages.length > 0;
+  const currentVideoTime = formatVideoTime(currentTime);
+  const selectedChatModel = CHAT_MODEL_OPTIONS.find((option) => option.id === chatModelId) ?? CHAT_MODEL_OPTIONS[0];
 
   const toggleStepVisibility = useCallback((localId: string) => {
     setExpandedStepMessageIds((prev) => ({
@@ -603,94 +754,98 @@ export default function InContextTutor({
     }));
   }, []);
 
+  useEffect(() => {
+    if (streaming) {
+      setIsModelMenuOpen(false);
+    }
+  }, [streaming]);
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col bg-surface-page text-text-strong">
       {/* Header */}
       <div
-        className="flex h-12 items-center justify-between border-b px-4 shrink-0"
-        style={{ borderColor: "var(--border)" }}
+        className="shrink-0 border-b border-border-subtle bg-white/80 px-4 py-3 backdrop-blur dark:bg-slate-950/80"
       >
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span
-            className="text-sm font-semibold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            AI Tutor
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <label htmlFor="tutor-model-select" className="sr-only">
-            Tutor model
-          </label>
-          <select
-            id="tutor-model-select"
-            aria-label="Tutor model"
-            value={chatModelId}
-            disabled={streaming}
-            onChange={(event) => changeChatModel(event.target.value as ChatModelId)}
-            className="h-8 rounded-lg border bg-transparent px-2 text-xs font-medium outline-none transition-colors disabled:opacity-60"
-            style={{
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
-            }}
-          >
-            {CHAT_MODEL_OPTIONS.map((option) => {
-              const availability = getChatModelAvailability(chatModelAvailability, option.id);
-              const isUnavailable = !availability.available;
-              return (
-                <option key={option.id} value={option.id} disabled={isUnavailable}>
-                  {isUnavailable ? `${option.label} (${availability.status})` : option.label}
-                </option>
-              );
-            })}
-          </select>
-          {onClose ? (
-            <button
-              onClick={onClose}
-              className="rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
-              style={{ color: "var(--text-muted)" }}
-            >
-              <span className="sr-only">Close tutor</span>
-              <X className="h-4 w-4" />
-            </button>
-          ) : null}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="hero-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white shadow-brand-soft">
+                <Bot className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-sm font-semibold text-text-strong">
+                    AI Tutor
+                  </span>
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                </div>
+                <p className="truncate text-xs font-medium text-text-muted">
+                  Context-aware help for this unit
+                </p>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-primary-200 bg-surface-accent-soft px-2.5 py-1 text-[11px] font-medium text-primary-700 dark:text-primary-300"
+                title={unitTitle}
+              >
+                <BookOpenText className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{unitTitle}</span>
+              </span>
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full border border-border-subtle px-2.5 py-1 text-[11px] font-medium tabular-nums text-text-muted"
+              >
+                <Clock3 className="h-3.5 w-3.5" />
+                {currentVideoTime}
+              </span>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center">
+            {onClose ? (
+              <button
+                onClick={onClose}
+                className="rounded-xl p-2 text-text-muted transition-colors hover:bg-surface-page hover:text-text-strong"
+              >
+                <span className="sr-only">Close tutor</span>
+                <X className="h-4 w-4" />
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
 
       {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {!hasMessages && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
-              <svg
-                className="h-7 w-7 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-                />
-              </svg>
+          <div className="flex min-h-[360px] flex-col items-center justify-center px-2 py-10 text-center">
+            <div className="hero-gradient mb-4 flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-brand-soft">
+              <Sparkles className="h-7 w-7" />
             </div>
-            <p
-              className="text-sm font-semibold mb-1"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <p className="mb-1 text-sm font-semibold text-text-strong">
               Ask anything about this lecture
             </p>
-            <p
-              className="text-xs max-w-52"
-              style={{ color: "var(--text-muted)" }}
-            >
+            <p className="max-w-xs text-xs leading-relaxed text-text-muted">
               Your questions are linked to{" "}
               <span className="font-medium">{unitTitle}</span> at the current
               video timestamp.
             </p>
+            {suggestions.length > 0 ? (
+              <div className="mt-5 flex w-full max-w-[320px] flex-col gap-2">
+                {suggestions.slice(0, 3).map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => {
+                      void handleSend(suggestion);
+                    }}
+                    disabled={streaming}
+                    className="rounded-2xl border border-border-subtle bg-white/80 px-3 py-2 text-left text-xs font-medium leading-snug text-text-strong shadow-sm transition hover:border-primary-200 hover:bg-surface-accent-soft disabled:opacity-50"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -704,8 +859,12 @@ export default function InContextTutor({
               const hasStepHistory = displayStatusSteps.length > 0;
               const isStepListExpanded = Boolean(expandedStepMessageIds[msg.localId]);
               const latestStep = hasStepHistory ? displayStatusSteps[displayStatusSteps.length - 1] : null;
-              const shouldShowActiveStatus = !msg.content && (msg.isPending || hasStepHistory);
-              const shouldShowProgressToggle = Boolean(msg.content && hasStepHistory);
+              const shouldShowTutorActivity = msg.role === "ai" && hasStepHistory;
+              const shouldRenderMessageBubble =
+                msg.role !== "ai" || Boolean(msg.content) || !shouldShowTutorActivity;
+              const shouldShowActiveStatus = false;
+              const shouldShowProgressToggle = false;
+              const shouldShowLegacyStepList = false;
 
               return (
                 <>
@@ -719,22 +878,23 @@ export default function InContextTutor({
               <time dateTime={msg.sentAt}>{msg.sentAt}</time>
             </div>
 
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+            {shouldShowTutorActivity ? (
+              <TutorActivityCard
+                message={msg}
+                isExpanded={isStepListExpanded}
+                onToggle={() => toggleStepVisibility(msg.localId)}
+              />
+            ) : null}
+
+            {shouldRenderMessageBubble ? (
+              <div
+              className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                 msg.role === "user"
-                  ? "bg-blue-600 text-white rounded-br-md"
+                  ? "rounded-br-md bg-primary-600 text-white shadow-[0_4px_12px_rgba(79,70,229,0.15)]"
                   : msg.role === "error"
-                    ? "bg-red-50 text-red-700 border border-red-200 rounded-bl-md"
-                    : "rounded-bl-md transition-all duration-200"
+                    ? "rounded-bl-md border border-red-200 bg-red-50 text-red-700"
+                    : "rounded-bl-md border border-border-subtle bg-surface-card text-text-strong transition-all duration-200"
               }`}
-              style={
-                msg.role === "ai"
-                  ? {
-                      backgroundColor: "var(--bg-page)",
-                      color: "var(--text-primary)",
-                    }
-                  : undefined
-              }
             >
               {msg.role === "ai" ? (
                 <>
@@ -742,16 +902,18 @@ export default function InContextTutor({
                     <div
                       aria-live="polite"
                       className="mb-3 space-y-2"
-                      style={{ color: "var(--text-secondary)" }}
                     >
                       {latestStep ? (
-                        <div className="rounded-xl border px-3 py-2" style={{ borderColor: "var(--border)" }}>
+                        <div
+                          className="rounded-xl border bg-white/70 px-3 py-2 dark:bg-slate-900/60"
+                          style={{ borderColor: "var(--border)" }}
+                        >
                           <div className="flex items-start gap-2 italic">
                             {(() => {
                               const { icon: StepIcon, accentClassName } = getStatusStepMeta(latestStep);
                               return msg.isPending ? (
                                 <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center ${accentClassName}`}>
-                                  <StepIcon className="h-4 w-4" />
+                                  <Loader2 className="h-4 w-4 animate-spin" />
                                 </span>
                               ) : (
                                 <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center ${accentClassName}`}>
@@ -765,8 +927,7 @@ export default function InContextTutor({
                             <button
                               type="button"
                               onClick={() => toggleStepVisibility(msg.localId)}
-                              className="mt-2 inline-flex items-center gap-1 text-xs font-medium transition-colors hover:text-blue-600"
-                              style={{ color: "var(--text-muted)" }}
+                              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-text-muted transition-colors hover:text-primary-700"
                             >
                               {isStepListExpanded ? (
                                 <>
@@ -783,7 +944,7 @@ export default function InContextTutor({
                           ) : null}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+                        <div className="flex items-center gap-2 text-text-muted">
                           <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
                         </div>
                       )}
@@ -794,8 +955,7 @@ export default function InContextTutor({
                     <button
                       type="button"
                       onClick={() => toggleStepVisibility(msg.localId)}
-                      className="mb-3 inline-flex items-center gap-1 text-xs font-medium transition-colors hover:text-blue-600"
-                      style={{ color: "var(--text-muted)" }}
+                      className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-text-muted transition-colors hover:text-primary-700"
                     >
                       {isStepListExpanded ? (
                         <>
@@ -811,7 +971,7 @@ export default function InContextTutor({
                     </button>
                   ) : null}
 
-                  {hasStepHistory && isStepListExpanded ? (
+                  {shouldShowLegacyStepList && hasStepHistory && isStepListExpanded ? (
                     <div
                       className="mb-3 space-y-2 rounded-xl border px-3 py-3 italic"
                       style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
@@ -864,6 +1024,8 @@ export default function InContextTutor({
                 >
                   <button
                     onClick={() => rateAnswer(idx, msg.id!, 1)}
+                    aria-label="Useful"
+                    title="Useful"
                     className={`p-1 rounded transition-colors ${
                       msg.rating === 1
                         ? "text-emerald-500"
@@ -875,6 +1037,8 @@ export default function InContextTutor({
                   </button>
                   <button
                     onClick={() => rateAnswer(idx, msg.id!, -1)}
+                    aria-label="Not Useful"
+                    title="Not Useful"
                     className={`p-1 rounded transition-colors ${
                       msg.rating === -1
                         ? "text-red-400"
@@ -884,9 +1048,18 @@ export default function InContextTutor({
                   >
                     <ThumbsDown className="h-3.5 w-3.5" />
                   </button>
+                  <button
+                    type="button"
+                    aria-label="Report to admin"
+                    title="Report to admin"
+                    className="ml-auto rounded p-1 text-amber-500 transition-colors hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-500/10"
+                  >
+                    <TriangleAlert className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               )}
             </div>
+            ) : null}
                 </>
               );
             })()}
@@ -897,45 +1070,14 @@ export default function InContextTutor({
 
       {/* Input */}
       <div
-        className="border-t p-3 shrink-0"
-        style={{ borderColor: "var(--border)" }}
+        className="shrink-0 border-t border-border-subtle bg-surface-page/80 p-3 backdrop-blur"
       >
-        {!hasMessages && suggestions.length > 0 ? (
-          <div className="mb-3 flex flex-wrap gap-2">
-            {suggestions.slice(0, 1).map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => {
-                  void handleSend(suggestion);
-                }}
-                disabled={streaming}
-                className="rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
-                style={{
-                  borderColor: "rgba(37,99,235,0.18)",
-                  backgroundColor: "rgba(37,99,235,0.06)",
-                  color: "var(--text-primary)",
-                }}
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        <div
-          className="flex items-end gap-2 rounded-xl border p-2"
-          style={{
-            borderColor: "var(--border)",
-            backgroundColor: "var(--bg-page)",
-          }}
-        >
+        <div className="overflow-visible rounded-2xl border border-border-subtle bg-surface-card shadow-[0_1px_8px_rgba(0,0,0,0.03)] transition-colors focus-within:border-primary-200">
           <textarea
             ref={inputRef}
             rows={1}
             aria-busy={streaming}
-            className="flex-1 resize-none bg-transparent text-sm outline-none"
-            style={{ color: "var(--text-primary)" }}
+            className="max-h-[160px] min-h-[52px] w-full resize-none bg-transparent px-4 pb-2 pt-3.5 text-[15px] leading-relaxed text-text-strong outline-none placeholder:text-text-muted"
             placeholder="Ask about this lecture..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -947,21 +1089,92 @@ export default function InContextTutor({
             }}
             disabled={streaming}
           />
-          <button
-            aria-label={streaming ? "Tutor is replying" : "Send question"}
-            onClick={() => {
-              void handleSend();
-            }}
-            disabled={streaming || !input.trim()}
-            className="shrink-0 rounded-lg p-2 transition-colors disabled:opacity-30"
-            style={{ color: "#2563eb" }}
-          >
-            {streaming ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </button>
+          <div className="flex items-center justify-between gap-2 border-t border-border-subtle/35 px-3 py-2">
+            <div
+              className="relative"
+              onBlur={(event) => {
+                const nextFocus = event.relatedTarget as Node | null;
+                if (!event.currentTarget.contains(nextFocus)) {
+                  setIsModelMenuOpen(false);
+                }
+              }}
+            >
+              <button
+                type="button"
+                disabled={streaming}
+                onClick={() => setIsModelMenuOpen((open) => !open)}
+                className="inline-flex h-[29px] max-w-[150px] items-center gap-1.5 rounded-full border border-primary-200 bg-surface-accent-soft px-2.5 text-[11px] font-medium text-primary-700 transition hover:border-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:text-primary-300"
+                aria-label={`Tutor model: ${selectedChatModel.label}`}
+                aria-expanded={isModelMenuOpen}
+                aria-haspopup="menu"
+              >
+                <Bot className="h-3 w-3 shrink-0" />
+                <span className="truncate">{selectedChatModel.label}</span>
+                <ChevronDown
+                  className={cn(
+                    "h-3 w-3 shrink-0 transition-transform",
+                    isModelMenuOpen && "rotate-180",
+                  )}
+                />
+              </button>
+              {isModelMenuOpen ? (
+                <div
+                  role="menu"
+                  className="absolute bottom-full left-0 z-30 mb-2 w-56 overflow-hidden rounded-xl border border-border-subtle bg-surface-card p-1.5 shadow-[0_12px_32px_rgba(15,23,42,0.14)]"
+                >
+                  {CHAT_MODEL_OPTIONS.map((option) => {
+                    const availability = getChatModelAvailability(chatModelAvailability, option.id);
+                    const isActive = chatModelId === option.id;
+                    const isUnavailable = !availability.available;
+                    const statusLabel = isUnavailable ? availability.status : null;
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        role="menuitemradio"
+                        disabled={streaming || isUnavailable}
+                        aria-checked={isActive}
+                        onClick={() => {
+                          changeChatModel(option.id);
+                          setIsModelMenuOpen(false);
+                        }}
+                        title={isUnavailable ? `${option.label} is ${availability.status}` : option.label}
+                        className={cn(
+                          "flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60",
+                          isActive
+                            ? "bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                            : "text-text-muted hover:bg-surface-page hover:text-text-strong",
+                        )}
+                      >
+                        <Bot className="h-3.5 w-3.5 shrink-0" />
+                        <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                        {statusLabel ? (
+                          <span className="shrink-0 rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-rose-700 dark:text-rose-300">
+                            {statusLabel}
+                          </span>
+                        ) : null}
+                        {isActive ? <Check className="h-3.5 w-3.5 shrink-0" /> : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+            <button
+              aria-label={streaming ? "Tutor is replying" : "Send question"}
+              onClick={() => {
+                void handleSend();
+              }}
+              disabled={streaming || !input.trim()}
+              className="flex h-[29px] w-[29px] shrink-0 items-center justify-center rounded-full bg-primary-600 p-0 text-white shadow-[0_4px_12px_rgba(79,70,229,0.15)] transition hover:shadow-[0_6px_16px_rgba(79,70,229,0.22)] disabled:cursor-not-allowed disabled:opacity-25 disabled:shadow-none"
+            >
+              {streaming ? (
+                <Loader2 className="h-[15px] w-[15px] animate-spin" />
+              ) : (
+                <ArrowUp className="h-[15px] w-[15px]" strokeWidth={2.5} />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -168,7 +168,7 @@ describe("InContextTutor", () => {
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
       target: { value: "What does the basketball mean?" },
     });
-    fireEvent.click(screen.getAllByRole("button")[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
     expect(screen.queryByText("Thinking...")).not.toBeInTheDocument();
 
@@ -200,7 +200,7 @@ describe("InContextTutor", () => {
       fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
         target: { value: "Explain the main idea." },
       });
-      fireEvent.click(screen.getAllByRole("button")[1]);
+      fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
       await waitFor(() => {
         expect(screen.getByText("Direct stream response.")).toBeInTheDocument();
@@ -231,13 +231,12 @@ describe("InContextTutor", () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText("Tutor model"), {
-      target: { value: "qwen35_4b" },
-    });
+    fireEvent.click(screen.getByRole("button", { name: /Tutor model:/i }));
+    fireEvent.click(screen.getByRole("menuitemradio", { name: /Qwen 3.5 4B/i }));
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
       target: { value: "Explain the slide." },
     });
-    fireEvent.click(screen.getAllByRole("button")[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
     await waitFor(() => {
       expect(screen.getByText("Qwen tutor response.")).toBeInTheDocument();
@@ -270,16 +269,16 @@ describe("InContextTutor", () => {
       />,
     );
 
-    const modelSelect = screen.getByLabelText("Tutor model");
     await waitFor(() => {
-      expect(modelSelect).toHaveValue("default");
+      expect(localStorage.getItem("tutor.chatModelId")).toBe("default");
     });
-    expect(screen.getByRole("option", { name: /qwen 3.5 4b.*down/i })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: /Tutor model: Auto/i }));
+    expect(screen.getByRole("menuitemradio", { name: /qwen 3.5 4b.*down/i })).toBeDisabled();
 
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
       target: { value: "Explain the slide." },
     });
-    fireEvent.click(screen.getAllByRole("button")[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
     await waitFor(() => {
       expect(screen.getByText("Default tutor response.")).toBeInTheDocument();
@@ -451,7 +450,7 @@ describe("InContextTutor", () => {
     await waitFor(() => {
       expect(screen.getByText("Immediate answer.")).toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "View progress" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Thought for \d+s/i })).toBeInTheDocument();
   });
 
   it("shows starter suggestions before the first message and hides them after chat begins", async () => {
@@ -476,7 +475,7 @@ describe("InContextTutor", () => {
     );
 
     expect(screen.getByRole("button", { name: "Explain the concept in this section" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Why does this topic matter?" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Why does this topic matter?" })).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
       target: { value: "Tell me the key idea" },
@@ -510,7 +509,7 @@ describe("InContextTutor", () => {
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
       target: { value: "Start streaming please" },
     });
-    fireEvent.click(screen.getAllByRole("button")[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
     expect(screen.queryByText("Thinking...")).not.toBeInTheDocument();
 
@@ -541,7 +540,7 @@ describe("InContextTutor", () => {
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
       target: { value: "measure brain activity là gì" },
     });
-    fireEvent.click(screen.getAllByRole("button")[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
     await waitFor(() => {
       expect(
@@ -572,7 +571,7 @@ describe("InContextTutor", () => {
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
       target: { value: "Explain the context first" },
     });
-    fireEvent.click(screen.getAllByRole("button")[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
     expect(await screen.findByText("Reading lecture context...")).toBeInTheDocument();
     await waitFor(() => {
@@ -582,7 +581,7 @@ describe("InContextTutor", () => {
     await waitFor(() => {
       expect(screen.getByText("Answer starts here.")).toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "View progress" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Thought for \d+s/i })).toBeInTheDocument();
   });
 
   it("includes context_binding_id in tutor requests when provided", async () => {
@@ -604,7 +603,7 @@ describe("InContextTutor", () => {
     fireEvent.change(screen.getByPlaceholderText("Ask about this lecture..."), {
       target: { value: "Keep this tied to the active unit" },
     });
-    fireEvent.click(screen.getAllByRole("button")[1]);
+    fireEvent.click(screen.getByRole("button", { name: "Send question" }));
 
     await waitFor(() => {
       expect(getFetchCallsByMethod("POST")).toHaveLength(1);
@@ -688,7 +687,7 @@ describe("InContextTutor", () => {
       expect(screen.getByText("I have finished summarizing it.")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "View progress" }));
+    fireEvent.click(screen.getByRole("button", { name: /Thought for \d+s/i }));
     expect(screen.getByText("Reading lecture context...")).toBeInTheDocument();
     expect(screen.getByText("Finding the most relevant section...")).toBeInTheDocument();
     expect(screen.getAllByText("Thinking through the answer...").length).toBeGreaterThanOrEqual(1);
@@ -728,12 +727,12 @@ describe("InContextTutor", () => {
       expect(screen.getByText("The result has been checked.")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "View progress" }));
+    fireEvent.click(screen.getByRole("button", { name: /Thought for \d+s/i }));
     expect(screen.getByText("Checking the calculation...")).toBeInTheDocument();
     expect(screen.getAllByText("Finalizing the answer...").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("hides the active finalizing status once streamed answer content is visible", async () => {
+  it("keeps the active finalizing status in the activity card while answer content streams", async () => {
     mockTutorFetch({
       askResponse: buildDelayedNdjsonResponse(200, [
         { chunk: '{"status":"Finalizing the answer..."}\n' },
@@ -761,7 +760,7 @@ describe("InContextTutor", () => {
 
     await waitFor(() => {
       expect(screen.getByText("The visible tutor answer.")).toBeInTheDocument();
-      expect(screen.queryByText("Finalizing the answer...")).not.toBeInTheDocument();
+      expect(screen.getByText("Finalizing the answer...")).toBeInTheDocument();
     });
   });
 
@@ -801,7 +800,7 @@ describe("InContextTutor", () => {
       expect(screen.getByText("Stored answer.")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "View progress" }));
+    fireEvent.click(screen.getByRole("button", { name: "Thought process" }));
     expect(screen.getByText("Reading lecture context...")).toBeInTheDocument();
     expect(screen.getAllByText("Thinking through the answer...").length).toBeGreaterThanOrEqual(1);
   });
