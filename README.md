@@ -106,6 +106,56 @@ AI Adaptive Tutor giải quyết bằng **vòng lặp học tập thích ứng (
 
 ---
 
+## :brain: 4.1. Fine-tuned Models
+
+Ngoài việc sử dụng LLM API (Gemini, OpenAI, Anthropic), hệ thống còn **fine-tune và self-host** các model riêng phục vụ 3 mục đích chính:
+
+### :shield: Guardrail Router — Qwen3.5-0.8B LoRA
+
+| Hạng mục | Chi tiết |
+|---|---|
+| Base model | Qwen3.5-0.8B |
+| Phương pháp | LoRA fine-tune (Unsloth) |
+| Mục đích | Phân loại safety/topic/action cho mọi user message trước khi vào AI Tutor |
+| Output | JSON ngắn: `safety_label`, `topic_label`, `action`, `attack_type`, `selected_kp_ids` |
+| Dataset | 13,513 samples từ 7+ nguồn (EduVidQA, WildGuardMix, JailBreakV-28K, MultiJail, CantTalkAboutThis, CLINC150, internal question bank) |
+| Kết quả | `valid_json_rate = 1.0`, `harmful_false_allow_rate = 0.0`, `ambiguous_recall = 0.9905`, `hard_offtopic_recall = 0.9408` |
+| Serving | vLLM trên Cloudflare Tunnel, fallback sang Gemini/OpenAI nếu local server không khả dụng |
+| VRAM | Peak ~1.5 GB (chạy được trên RTX 3050 Laptop GPU) |
+
+### :robot: Tutor Answer Generator — Qwen3.5-4B LoRA
+
+| Hạng mục | Chi tiết |
+|---|---|
+| Base model | Qwen3.5-4B |
+| Phương pháp | LoRA fine-tune (Unsloth) |
+| Mục đích | Sinh câu trả lời / từ chối cho AI Tutor trong ngữ cảnh bài giảng |
+| Đặc điểm | Multilingual (Việt/Anh), lecture-grounded, không hallucinate ngoài context |
+| Evaluation | So sánh với baseline Gemini/OpenAI qua Gemini judge + OpenAI judge notebooks |
+| Serving | vLLM (OpenAI-compatible API) tại `vllm.a20-app-049.io.vn/v1` |
+
+### :link: Prerequisite Edge Scoring — DeBERTa / ModernBERT / SciBERT
+
+Fine-tune và zero-shot scoring cho **prerequisite graph** (quan hệ tiên quyết giữa các Knowledge Point):
+
+| Model | Vai trò | Phương pháp |
+|---|---|---|
+| **DeBERTa-v3-large-MNLI** | Chấm chiều prerequisite A→B vs B→A | Zero-shot NLI (entailment vs contradiction), forward-reverse scoring |
+| **ModernBERT-base** | Chấm edge strength qua anchor embedding | Anchor embedding contrast (positive/negative prerequisite anchors) |
+| **ModernBERT-large** | Variant masked scoring cho edge strength | Masked prerequisite scoring |
+| **SciBERT** | Scoring cho domain khoa học chuyên biệt | Masked edge scoring cho CS/AI domain |
+| **DeBERTa + MoocCubeX** | Rebalanced prerequisite classification | Fine-tune trên MoocCubeX dataset cho prerequisite prediction |
+
+**Pipeline**: Raw KP pairs → Multi-model scoring → GPT-5.4 adjudication → Transitive pruning → Final prerequisite graph được import vào PostgreSQL (`prerequisite_edges`, `pruned_edges`).
+
+### :package: Artifact Management
+
+- Model adapters và datasets được track bằng **DVC** (Data Version Control) — không commit binary vào Git.
+- Toàn bộ training notebooks nằm trong `notebooks/` — reproducible trên Google Colab.
+- Build reports: `docs/guardrail-router-v1-build-report.md`, `docs/guardrail-router-v2-build-report.md`.
+
+---
+
 ## :building_construction: 5. Kiến trúc hệ thống
 
 ```text
@@ -134,6 +184,9 @@ User (Browser)
       +--------> PostgreSQL 16 (canonical content, learner state, planner)
       +--------> Redis 7 (cache, sessions)
       +--------> LLM Providers (Gemini, OpenAI, Anthropic)
+      +--------> Fine-tuned Models (vLLM self-hosted)
+      |            |-- Qwen3.5-0.8B LoRA (Guardrail Router)
+      |            +-- Qwen3.5-4B LoRA (Tutor Answer Generator)
       +--------> Langfuse (LLM observability & tracing)
 ```
 
@@ -149,6 +202,8 @@ User (Browser)
 | :gear: Backend/API | Python 3.12, FastAPI, SQLAlchemy async, Pydantic v2, Alembic |
 | :floppy_disk: Database | PostgreSQL 16, Redis 7 |
 | :brain: AI Agent/LLM | LangChain, LangGraph, Gemini / OpenAI / Anthropic |
+| :fire: Fine-tuned Models | Qwen3.5-0.8B LoRA (Guardrail Router), Qwen3.5-4B LoRA (Tutor), DeBERTa/ModernBERT/SciBERT (KG Edge Scoring) |
+| :rocket: Model Serving | vLLM (OpenAI-compatible), Unsloth (LoRA training), DVC (artifact tracking) |
 | :mag: Observability | Langfuse (LLM tracing), Prometheus, Grafana, Loki |
 | :cloud: Deployment | Docker Compose, AWS ECS/Fargate, Terraform |
 | :test_tube: Testing | pytest, Playwright, golden eval dataset (50+ cases) |

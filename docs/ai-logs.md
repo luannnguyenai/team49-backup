@@ -53,8 +53,12 @@ User Response
 | Agent Framework | LangGraph ReAct Agent |
 | Tool Calling | Python Sandbox (numpy, sympy, scipy, pandas) |
 | Smart Router | Lightweight LLM (FAST_MODEL) |
-| Guardrail Router | Fine-tuned classifier (13,513 samples) |
+| Guardrail Router | **Qwen3.5-0.8B LoRA** fine-tuned classifier (13,513 samples), served via vLLM |
+| Tutor Answer Generator | **Qwen3.5-4B LoRA** fine-tuned, lecture-grounded multilingual (Việt/Anh) |
+| KG Edge Scoring | **DeBERTa-v3-large-MNLI**, **ModernBERT-base/large**, **SciBERT** — prerequisite graph scoring |
+| LLM Providers | Gemini, OpenAI, Anthropic (fallback + adjudication) |
 | PII Protection | GuardrailsPIIDetector (input: fail_open, output: fail_closed) |
+| Model Serving | vLLM (OpenAI-compatible API), Unsloth (LoRA training), DVC (artifact tracking) |
 | Observability | Langfuse tracing |
 
 ---
