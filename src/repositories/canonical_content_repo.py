@@ -14,6 +14,7 @@ from src.models.canonical import (
     UnitKPMap,
 )
 from src.models.course import Course, CourseSection, LearningUnit
+from src.models.store import Lecture as LegacyLecture
 
 
 class CanonicalContentRepository:
@@ -229,6 +230,86 @@ class CanonicalContentRepository:
             unit.canonical_unit_id: (unit, course, section)
             for unit, course, section in result.all()
             if unit.canonical_unit_id
+        }
+
+    async def get_lecture_context_for_unit(
+        self,
+        canonical_unit_id: str,
+        *,
+        allowed_course_ids: list[str],
+        limit: int = 40,
+    ) -> dict | None:
+        if not canonical_unit_id:
+            return None
+        normalized_courses = [str(course_id).lower() for course_id in allowed_course_ids]
+        current_result = await self.session.execute(
+            select(CanonicalUnit).where(CanonicalUnit.unit_id == canonical_unit_id).limit(1)
+        )
+        current = current_result.scalar_one_or_none()
+        if current is None:
+            return None
+        if normalized_courses and current.course_id.lower() not in normalized_courses:
+            return None
+
+        legacy_lecture = None
+        legacy_filters = []
+        if current.lecture_id:
+            legacy_filters.append(LegacyLecture.id == current.lecture_id)
+        if current.lecture_title:
+            legacy_filters.append(func.lower(LegacyLecture.title) == current.lecture_title.lower())
+        if legacy_filters:
+            legacy_result = await self.session.execute(
+                select(LegacyLecture).where(or_(*legacy_filters)).limit(1)
+            )
+            legacy_lecture = legacy_result.scalar_one_or_none()
+        lecture_summary = (
+            str(legacy_lecture.description).strip()
+            if legacy_lecture is not None and legacy_lecture.description
+            else None
+        )
+
+        lecture_filters = [CanonicalUnit.course_id == current.course_id]
+        if current.lecture_id:
+            lecture_filters.append(CanonicalUnit.lecture_id == current.lecture_id)
+        elif current.lecture_order is not None:
+            lecture_filters.append(CanonicalUnit.lecture_order == current.lecture_order)
+        elif current.lecture_title:
+            lecture_filters.append(CanonicalUnit.lecture_title == current.lecture_title)
+        else:
+            lecture_filters.append(CanonicalUnit.unit_id == current.unit_id)
+
+        result = await self.session.execute(
+            select(CanonicalUnit)
+            .where(
+                *lecture_filters,
+                CanonicalUnit.active.is_not(False),
+            )
+            .order_by(CanonicalUnit.ordering_index, CanonicalUnit.unit_id)
+            .limit(limit)
+        )
+        units = list(result.scalars().all())
+        return {
+            "course_id": current.course_id,
+            "lecture_id": current.lecture_id,
+            "lecture_order": current.lecture_order,
+            "lecture_title": current.lecture_title,
+            "source": "lecture_description" if lecture_summary else "unit_summaries",
+            "lecture_summary": lecture_summary,
+            "units": [
+                {
+                    "canonical_unit_id": unit.unit_id,
+                    "course_id": unit.course_id,
+                    "lecture_id": unit.lecture_id,
+                    "lecture_order": unit.lecture_order,
+                    "lecture_title": unit.lecture_title,
+                    "unit_name": unit.unit_name,
+                    "summary": unit.summary,
+                    "description": unit.description,
+                    "duration_min": unit.duration_min,
+                    "ordering_index": unit.ordering_index,
+                }
+                for unit in units
+            ],
         }
 
     async def get_mastery_lcb_by_kp_ids(self, user_id, kp_ids: list[str]) -> dict[str, float]:
