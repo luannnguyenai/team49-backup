@@ -1,6 +1,7 @@
 import pytest
 
 from src.services.agent_graph_contracts import AgentRouterUnavailableError, AgentSlots, ToolResult
+from src.services.agent_prompt_manager import AgentPromptManager
 from src.services.agentic_rag_contracts import AgenticRAGObservation, AgenticRAGToolCall
 from src.services.agentic_rag_pipeline import AgenticRAGPipeline
 from src.services.agentic_rag_tools import AgenticRAGToolExecutor, AgentRAGToolRegistry
@@ -30,11 +31,18 @@ def test_agent_rag_tool_registry_lists_policy_metadata():
 
     current_path = registry.resolve("search_current_path_units")
     expansion = registry.resolve("offer_scope_expansion")
+    user_context = registry.resolve("get_user_learning_context")
+    lecture_context = registry.resolve("get_lecture_context")
 
     assert current_path is not None
     assert current_path.requires_evidence is True
     assert expansion is not None
     assert expansion.requires_evidence is False
+    assert user_context is not None
+    assert user_context.requires_evidence is False
+    assert "quiz_history_analysis" in user_context.input_schema["context_kind"]
+    assert lecture_context is not None
+    assert lecture_context.requires_evidence is True
     assert registry.resolve("unsupported_tool") is None
 
 
@@ -44,9 +52,28 @@ def test_agent_rag_tool_registry_builds_llm_visible_prompt_text():
     prompt_text = registry.build_prompt_text()
 
     assert "search_current_path_units" in prompt_text
+    assert "get_user_learning_context" in prompt_text
+    assert "quiz-history" in prompt_text
+    assert "get_lecture_context" in prompt_text
     assert "offer_scope_expansion" in prompt_text
     assert "requires evidence" in prompt_text
     assert "current path first" in prompt_text.lower()
+
+
+def test_agentic_rag_responding_prompt_disallows_unsolicited_followup_offers():
+    prompt = AgentPromptManager().get("agentic_rag", "responding.system")
+
+    assert "Do not end with optional invitations" in prompt
+    assert "unless the user explicitly requested that action" in prompt
+
+
+def test_agentic_rag_tool_call_allows_missing_rationale_from_provider():
+    call = AgenticRAGToolCall(
+        tool="get_lecture_context",
+        arguments={"canonical_unit_id": "unit-current"},
+    )
+
+    assert call.rationale == ""
 
 
 class FakeToolNodes:
@@ -65,6 +92,53 @@ class FakeToolNodes:
             citations=[],
             metadata={"search_queries": slots.search_queries},
         )
+
+    async def user_learning_context(
+        self,
+        *,
+        message,
+        slots,
+        allowed_course_ids,
+        current_path_course_ids=None,
+        route_context=None,
+        context_kind=None,
+    ):
+        self.calls.append(
+            (
+                "user_learning_context",
+                message,
+                allowed_course_ids,
+                current_path_course_ids,
+                route_context,
+                context_kind,
+            )
+        )
+        return ToolResult(
+            kind="progress_summary",
+            metadata={"learner_context": {"context_kind": context_kind}},
+        )
+
+    async def lecture_context(
+        self,
+        *,
+        message,
+        slots,
+        allowed_course_ids,
+        current_path_course_ids=None,
+        canonical_unit_id=None,
+        query=None,
+    ):
+        self.calls.append(
+            (
+                "lecture_context",
+                message,
+                allowed_course_ids,
+                current_path_course_ids,
+                canonical_unit_id,
+                query,
+            )
+        )
+        return ToolResult(kind="find_content", metadata={"lecture_context_found": True})
 
 
 class FailingToolNodes(FakeToolNodes):
@@ -138,6 +212,95 @@ async def test_tool_executor_blocks_expanded_search_without_approval():
 
     assert observation.evidence_status == "scope_expansion_required"
     assert observation.result.kind == "clarification"
+
+
+@pytest.mark.asyncio
+async def test_tool_executor_reads_authenticated_user_learning_context():
+    tools = FakeToolNodes()
+    executor = AgenticRAGToolExecutor(tools)
+
+    observation = await executor.execute(
+        AgenticRAGToolCall(
+            tool="get_user_learning_context",
+            arguments={"context_kind": "weak_areas"},
+            rationale="Need learner progress.",
+        ),
+        message="mình yếu phần nào?",
+        intent="summarize_progress",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230", "CS231N"],
+        current_path_course_ids=["CS230"],
+        route_context={"route": "/agent"},
+    )
+
+    assert observation.tool == "get_user_learning_context"
+    assert observation.evidence_status == "partial"
+    assert tools.calls[0] == (
+        "user_learning_context",
+        "mình yếu phần nào?",
+        ["CS230", "CS231N"],
+        ["CS230"],
+        {"route": "/agent"},
+        "weak_areas",
+    )
+
+
+@pytest.mark.asyncio
+async def test_tool_executor_gets_lecture_context_without_sql_access():
+    tools = FakeToolNodes()
+    executor = AgenticRAGToolExecutor(tools)
+
+    observation = await executor.execute(
+        AgenticRAGToolCall(
+            tool="get_lecture_context",
+            arguments={"canonical_unit_id": "unit-1"},
+            rationale="Need lecture evidence.",
+        ),
+        message="tóm tắt lecture này",
+        intent="find_content",
+        slots=AgentSlots(canonical_unit_ids=["unit-1"]),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert observation.tool == "get_lecture_context"
+    assert tools.calls[0] == (
+        "lecture_context",
+        "tóm tắt lecture này",
+        ["CS230"],
+        ["CS230"],
+        "unit-1",
+        None,
+    )
+
+
+@pytest.mark.asyncio
+async def test_tool_executor_uses_current_unit_context_instead_of_reasking():
+    tools = FakeToolNodes()
+    executor = AgenticRAGToolExecutor(tools)
+
+    observation = await executor.execute(
+        AgenticRAGToolCall(
+            tool="ask_clarification",
+            arguments={"question": "Which video should I summarize?"},
+            rationale="The model thought context was missing.",
+        ),
+        message="mình vừa xem tới nửa video, tóm tắt nội dung video này giúp mình",
+        intent="find_content",
+        slots=AgentSlots(canonical_unit_ids=["unit-current"]),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert observation.tool == "get_lecture_context"
+    assert tools.calls[0] == (
+        "lecture_context",
+        "mình vừa xem tới nửa video, tóm tắt nội dung video này giúp mình",
+        ["CS230"],
+        ["CS230"],
+        "unit-current",
+        None,
+    )
 
 
 @pytest.mark.asyncio
@@ -312,6 +475,154 @@ async def test_agentic_rag_pipeline_continues_when_observer_model_is_unavailable
     assert result.answer_markdown == "YOLO is covered as a single-stage detector."
     assert result.citations[0].canonical_unit_id == "u-yolo"
     assert result.metadata["agentic_rag_evidence_status"] == "grounded"
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_pipeline_preserves_tool_evidence_status_over_final_downgrade():
+    class DowngradingFinalRouter(FakePipelineRouter):
+        def rag_act(self, **kwargs):
+            self.calls.append(("act", kwargs))
+            return AgenticRAGToolCall(
+                tool="get_user_learning_context",
+                arguments={"context_kind": "weak_areas"},
+                rationale="Need learner context.",
+            )
+
+        def rag_respond(self, **kwargs):
+            self.calls.append(("respond", kwargs))
+            return type(
+                "Final",
+                (),
+                {
+                    "answer_markdown": "Bạn đang yếu nhất ở supervised window classification.",
+                    "evidence_status": "no_source",
+                    "evidence_sufficient": False,
+                    "clarification_question": None,
+                },
+            )()
+
+    pipeline = AgenticRAGPipeline(
+        router=DowngradingFinalRouter(),
+        tool_executor=AgenticRAGToolExecutor(FakeToolNodes()),
+    )
+
+    result = await pipeline.run(
+        message="mình yếu phần nào?",
+        intent="summarize_progress",
+        slots=AgentSlots(),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS230"],
+    )
+
+    assert result.metadata["agentic_rag_evidence_status"] == "partial"
+    assert result.requires_evidence is False
+    assert result.fallback is None
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_pipeline_keeps_nonevidence_tool_status_when_observer_downgrades():
+    class DowngradingObserverRouter(FakePipelineRouter):
+        def rag_act(self, **kwargs):
+            self.calls.append(("act", kwargs))
+            return AgenticRAGToolCall(
+                tool="get_user_learning_context",
+                arguments={"context_kind": "quiz_history_analysis"},
+                rationale="Need learner quiz history.",
+            )
+
+        def rag_observe(self, **kwargs):
+            self.calls.append(("observe", kwargs))
+            return AgenticRAGObservation(
+                tool="get_user_learning_context",
+                success=True,
+                evidence_status="no_source",
+                result=ToolResult(kind="progress_summary", requires_evidence=True),
+            )
+
+        def rag_respond(self, **kwargs):
+            self.calls.append(("respond", kwargs))
+            return type(
+                "Final",
+                (),
+                {
+                    "answer_markdown": "Bạn hay sai nhất ở adaptive optimizers.",
+                    "evidence_status": "no_source",
+                    "evidence_sufficient": False,
+                    "clarification_question": None,
+                },
+            )()
+
+    pipeline = AgenticRAGPipeline(
+        router=DowngradingObserverRouter(),
+        tool_executor=AgenticRAGToolExecutor(FakeToolNodes()),
+    )
+
+    result = await pipeline.run(
+        message="mình hay sai phần nào trong quiz?",
+        intent="summarize_progress",
+        slots=AgentSlots(),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS230"],
+    )
+
+    assert result.metadata["agentic_rag_evidence_status"] == "partial"
+    assert result.requires_evidence is False
+    assert result.fallback is None
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_stream_uses_structured_responder_contract():
+    class StructuredOnlyRouter(FakePipelineRouter):
+        def rag_think(self, **kwargs):
+            self.calls.append(("think", kwargs))
+            return type(
+                "Thought",
+                (),
+                {
+                    "user_goal": "Find YOLO",
+                    "active_topic": "YOLO",
+                    "evidence_need": "retrieval",
+                    "tool_plan": ["search_current_path_units"],
+                },
+            )()
+
+        def rag_respond(self, **kwargs):
+            self.calls.append(("respond", kwargs))
+            return type(
+                "Final",
+                (),
+                {
+                    "answer_markdown": "YOLO is covered as a single-stage detector.",
+                    "evidence_status": "grounded",
+                    "evidence_sufficient": True,
+                    "clarification_question": None,
+                },
+            )()
+
+        def rag_respond_stream(self, **kwargs):
+            raise AssertionError("raw response streaming should not be used")
+
+    pipeline = AgenticRAGPipeline(
+        router=StructuredOnlyRouter(),
+        tool_executor=AgenticRAGToolExecutor(GroundedToolNodes()),
+    )
+
+    events = [
+        line
+        async for line in pipeline.run_stream(
+            message="Tìm thông tin YOLO",
+            intent="find_content",
+            slots=AgentSlots(raw_topic="YOLO"),
+            route_context=None,
+            recent_messages=[],
+            allowed_course_ids=["CS231N"],
+        )
+    ]
+
+    assert any('"chunk"' in event and "YOLO is covered" in event for event in events)
+    assert any('"done"' in event and "YOLO is covered" in event for event in events)
 
 
 @pytest.mark.asyncio
