@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Lifecycle — AI Adaptive Learning Platform</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    .header { padding: 20px 32px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .header-left h1 { font-size: 1.25rem; font-weight: 700; color: #22d3ee; }
+    .header-left p { color: #475569; font-size: 0.82rem; margin-top: 2px; }
+    .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav a { color: #64748b; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #1e293b; transition: all 0.2s; white-space: nowrap; }
+    .nav a:hover { color: #e2e8f0; border-color: #334155; }
+    .nav a.active { background: #164e63; color: #a5f3fc; border-color: #22d3ee; }
+    .content { padding: 28px 32px; }
+    .diagram-card { background: #0d1117; border: 1px solid #21262d; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .diagram-card h2 { font-size: 0.95rem; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+    .mermaid { background: #0d1117; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <h1>Request Lifecycle</h1>
+      <p>04 · Sequence diagrams — page load · AI tutor chat · assessment · asset delivery</p>
+    </div>
+    <nav class="nav">
+      <a href="index.html">← Hub</a>
+      <a href="01-system-overview.html">01 Overview</a>
+      <a href="02-agentic-rag-pipeline.html">02 RAG Pipeline</a>
+      <a href="03-aws-infrastructure.html">03 AWS Infra</a>
+      <a href="04-request-lifecycle.html" class="active">04 Request Flow</a>
+      <a href="05-data-schema.html">05 DB Schema</a>
+    </nav>
+  </div>
+
+  <div class="content">
+
+    <div class="diagram-card">
+      <h2>Flow 1 — Page Load & Course Discovery (SSR)</h2>
+      <div class="mermaid">
+%%{init: {'theme': 'dark', 'sequence': {'diagramMarginX': 20, 'diagramMarginY': 10, 'actorMargin': 50, 'width': 140, 'height': 40}}}%%
+sequenceDiagram
+    actor Browser
+    participant ALB as ALB<br/>(a20-app-049.io.vn)
+    participant FE as Next.js Frontend<br/>(ECS Fargate)
+    participant BE as FastAPI Backend<br/>(ECS Fargate)
+    participant PG as PostgreSQL<br/>(RDS private)
+    participant Redis as Redis<br/>(ElastiCache)
+
+    Browser->>+ALB: GET https://a20-app-049.io.vn/
+    ALB->>+FE: route → frontend target group
+    Note over FE: SSR — App Router
+    FE->>+BE: GET /api/courses (server-side fetch<br/>via API_INTERNAL_URL)
+    BE->>+Redis: GET courses_catalog (cache)
+    Redis-->>-BE: miss
+    BE->>+PG: SELECT courses, course_sections,<br/>learning_units WHERE active=true
+    PG-->>-BE: course catalog rows
+    BE-->>-FE: JSON { courses: [...] }
+    FE-->>-ALB: rendered HTML + hydration script
+    ALB-->>-Browser: HTTP 200 page
+
+    Browser->>+ALB: GET /dashboard (protected route)
+    ALB->>+FE: route → frontend
+    FE->>+BE: GET /api/auth/me (Bearer token)
+    BE->>+Redis: GET session:{token}
+    Redis-->>-BE: user session
+    BE-->>-FE: user profile + selected_courses
+    FE->>+BE: GET /api/learning-path (personalized)
+    BE->>+PG: SELECT learner_mastery_kp,<br/>learning_progress_records<br/>WHERE user_id=?
+    PG-->>-BE: mastery + progress data
+    Note over BE: recommendation_engine computes<br/>next units (prerequisite-aware planner)
+    BE-->>-FE: learning path with next units
+    FE-->>-ALB: rendered dashboard HTML
+    ALB-->>-Browser: HTTP 200
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <h2>Flow 2 — AI Tutor Chat (Agentic RAG + SSE Streaming)</h2>
+      <div class="mermaid">
+%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    actor Browser
+    participant BE as FastAPI Backend
+    participant Redis as Redis
+    participant GR as Guardrail Router<br/>(Qwen3.5-0.8B LoRA)
+    participant LG as LangGraph Agent
+    participant PG as PostgreSQL<br/>(pgvector)
+    participant vLLM as vLLM / LLM Provider
+    participant LF as Langfuse
+
+    Browser->>+BE: POST /api/agent/message<br/>{ thread_id, message, unit_id, kp_ids }
+    BE->>+Redis: GET session + rate limit check
+    Redis-->>-BE: ok
+
+    Note over BE: PII Sanitizer — redact input
+    BE->>+GR: classify(message, context)
+    Note over GR: Qwen3.5-0.8B LoRA inference<br/>~3.4s via Cloudflare Tunnel
+    GR-->>-BE: { safety: SAFE, topic: ON_TOPIC,<br/>action: ALLOW_LESSON_ANSWER,<br/>selected_kp_ids: [...] }
+
+    Note over BE: Smart Router — COMPLEX path
+    BE->>+LG: invoke_graph(thread_id, message, kp_scope)
+
+    Note over LG: Structured Router Node<br/>assessment boundary check → pass
+    LG->>+PG: load_thread_state(thread_id)<br/>(agent_graph_runs, agent_pending_actions)
+    PG-->>-LG: conversation history + pending actions
+
+    Note over LG: Context Service Node<br/>load unit context + KP scope
+
+    Note over LG: Search Service Node<br/>search_learning_content tool
+    LG->>+PG: vector_search(query_embedding, kp_filter)<br/>pgvector ANN search
+    PG-->>-LG: top-k relevant chunks + metadata
+
+    Note over LG: Rerank Node<br/>score: embed_sim + KP_overlap + title_match
+
+    Note over LG: Answer Node<br/>evidence_policy: grounded<br/>confidence: grounded
+
+    LG->>+vLLM: generate(system_prompt, evidence, question)<br/>POST /v1/chat/completions (streaming)
+    Note over vLLM: Qwen3.5-4B LoRA<br/>lecture-grounded answer generation
+    vLLM-->>LG: token stream (SSE chunks)
+    LG-->>BE: streamed response tokens
+
+    LG->>+PG: save_thread_state(thread_id, response)<br/>(agent_response_payloads for idempotency)
+    PG-->>-LG: ok
+
+    Note over BE: PII Sanitizer — redact output
+    BE-->>Browser: SSE stream (text/event-stream)<br/>data: { token: "..." }\n\n
+
+    BE--)LF: trace_span(thread_id, input, output,<br/>guardrail_result, latency) [async]
+    deactivate BE
+    deactivate LG
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <h2>Flow 3 — Assessment + Mastery Update</h2>
+      <div class="mermaid">
+%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    actor Browser
+    participant BE as FastAPI Backend
+    participant PG as PostgreSQL
+
+    Browser->>+BE: POST /api/assessment/start<br/>{ goal_id, selected_course_ids }
+    Note over BE: assessment_service.start_assessment()<br/>select canonical units by learner goal
+    BE->>+PG: SELECT question_bank<br/>WHERE canonical_unit_id IN (...)<br/>GROUP BY difficulty + depth_policy
+    PG-->>-BE: sampled questions (5 per unit)
+    BE-->>-Browser: { session_id, questions: [...] }
+
+    Browser->>Browser: learner answers questions
+    Browser->>+BE: POST /api/assessment/submit<br/>{ session_id, answers: [...] }
+    BE->>+PG: SELECT item_calibration<br/>WHERE canonical_item_id IN (?)
+    PG-->>-BE: IRT params (discrimination, difficulty, guessing)
+    Note over BE: canonical_mastery_service<br/>2PL-lite residual scoring:<br/>delta = observed - predicted_probability<br/>theta_mu += delta * weight * discrimination
+    BE->>+PG: UPSERT learner_mastery_kp<br/>SET theta_mu, theta_sigma, updated_at
+    PG-->>-BE: ok
+    BE->>+PG: INSERT interactions<br/>(canonical_item_id, correct, latency_ms)<br/>INSERT learning_session_events
+    PG-->>-BE: ok
+    Note over BE: recommendation_engine.recompute()<br/>prerequisite-aware next unit selection<br/>mastery_lcb = sigmoid((θ_mu - θ_sigma) / sqrt(1 + θ_sigma²))
+    BE->>+PG: UPDATE learning_progress_records<br/>SELECT next recommended units
+    PG-->>-BE: next_units + skip_eligible_units
+    BE-->>-Browser: { score, feedback, next_units, mastery_by_kp }
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <h2>Flow 4 — Video Asset Delivery (S3 + CloudFront)</h2>
+      <div class="mermaid">
+%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    actor Browser
+    participant BE as FastAPI Backend
+    participant S3 as S3 Private Bucket
+    participant CF as CloudFront CDN
+
+    Browser->>+BE: GET /api/content/units/{id}/assets
+    Note over BE: content_service validates<br/>user enrollment + unit access
+    BE->>+S3: generate_presigned_url()<br/>OR get CloudFront signed URL<br/>(expires: 1 hour)
+    S3-->>-BE: signed URL
+    BE-->>-Browser: { video_url: "https://cdn.a20-app-049.io.vn/...",<br/>transcript_url: "...", slides_url: "..." }
+
+    Note over Browser: Browser fetches CDN directly<br/>Backend does NOT proxy bytes
+    Browser->>+CF: GET https://cdn.a20-app-049.io.vn/courses/cs231n/videos/lec01.mp4
+    CF->>CF: check cache hit
+    CF->>+S3: fetch from origin (cache miss only)
+    S3-->>-CF: video bytes
+    CF-->>-Browser: video stream (partial content / range request)
+
+    Browser->>+BE: PUT /api/learning-session/units/{id}/progress<br/>{ video_progress_s: 342, video_finished: false }
+    BE->>BE: UPDATE learning_progress_records<br/>UPDATE planner_session_state
+    BE-->>-Browser: { ok: true }
+      </div>
+    </div>
+
+  </div>
+
+  <script>mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });</script>
+</body>
+</html>

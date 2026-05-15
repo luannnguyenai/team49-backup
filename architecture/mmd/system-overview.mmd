@@ -1,0 +1,53 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#dbeafe', 'primaryTextColor': '#1e3a5f', 'primaryBorderColor': '#3b82f6', 'lineColor': '#64748b', 'secondaryColor': '#f0fdf4', 'tertiaryColor': '#fef3c7', 'background': '#ffffff', 'mainBkg': '#f8fafc', 'nodeBorder': '#94a3b8', 'clusterBkg': '#f1f5f9', 'clusterBorder': '#cbd5e1', 'titleColor': '#0f172a', 'edgeLabelBackground': '#ffffff', 'fontFamily': 'ui-sans-serif, system-ui, sans-serif'}}}%%
+flowchart TB
+    subgraph CLIENT["🌐 Client"]
+        B["Browser / PWA"]
+    end
+
+    subgraph CDN["☁️ CDN — CloudFront + S3"]
+        CF["CloudFront\nvideo · slides · transcripts"]
+        S3B["S3 Private Bucket"]
+    end
+
+    subgraph FE["⚛️ Frontend — Next.js 14 App Router · ECS Fargate"]
+        FE_APP["App Router · React 18 · TypeScript 5\nZustand State · Tailwind CSS"]
+    end
+
+    subgraph BE["⚙️ Backend — FastAPI · Python 3.12 · ECS Fargate"]
+        API["FastAPI Routers — /api/courses · /api/agent · /api/quiz"]
+        SVC1["content_service · quiz_service · assessment_service"]
+        SVC2["canonical_mastery_service (2PL-lite IRT) · recommendation_engine"]
+        SVC3["llm_service — AI orchestration"]
+    end
+
+    subgraph AI["🤖 AI Agent Stack"]
+        GR["Guardrail Router\nQwen3.5-0.8B LoRA · 13,513 samples\nvalid_json=1.0 · harmful_allow=0.0"]
+        SR["Smart Router\nBLOCKED / SIMPLE / COMPLEX"]
+        LG["LangGraph ReAct Agent\ndeeptutor-style · structured router\ncontext svc · search svc · rerank · answer node"]
+        vLLM["vLLM · Qwen3.5-4B LoRA\nTutor Answer Generator\nfallback: Gemini / OpenAI / Anthropic"]
+    end
+
+    subgraph DATA["🗄️ Data Layer — AWS Private Subnet"]
+        PG["RDS PostgreSQL 16 + pgvector\ncanonical content · learner state · agent state"]
+        RD["ElastiCache Redis 7\nsessions · rate limit · model health cache"]
+    end
+
+    subgraph OBS["📊 Observability"]
+        LF["Langfuse — LLM tracing"]
+        PROM["Prometheus → Grafana"]
+        LOKI["Loki — log aggregation"]
+    end
+
+    B -->|"HTTPS"| FE_APP
+    B -->|"CDN assets"| CF
+    S3B --> CF
+    FE_APP -->|"REST API"| API
+    API --> SVC1 & SVC2 & SVC3
+    SVC1 & SVC2 --> PG & RD
+    SVC3 --> GR --> SR
+    SR -->|"COMPLEX"| LG
+    SR -->|"SIMPLE"| vLLM
+    LG -->|"pgvector RAG"| PG
+    LG --> vLLM
+    SVC3 --> LF
+    BE --> PROM & LOKI

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic RAG Pipeline — AI Adaptive Learning Platform</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    .header { padding: 20px 32px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .header-left h1 { font-size: 1.25rem; font-weight: 700; color: #f97316; }
+    .header-left p { color: #475569; font-size: 0.82rem; margin-top: 2px; }
+    .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav a { color: #64748b; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #1e293b; transition: all 0.2s; white-space: nowrap; }
+    .nav a:hover { color: #e2e8f0; border-color: #334155; }
+    .nav a.active { background: #7c2d12; color: #fed7aa; border-color: #ea580c; }
+    .content { padding: 28px 32px; }
+    .diagram-card { background: #0d1117; border: 1px solid #21262d; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .diagram-card h2 { font-size: 0.95rem; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .info-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px; }
+    .info-box h3 { font-size: 0.8rem; color: #f97316; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .info-box p { font-size: 0.78rem; color: #6e7681; line-height: 1.6; }
+    .info-box code { background: #0d1117; padding: 1px 5px; border-radius: 3px; font-size: 0.75rem; color: #79c0ff; }
+    .mermaid { background: #0d1117; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <h1>Agentic RAG Pipeline</h1>
+      <p>02 · PII → Guardrail Router → Smart Router → LangGraph deeptutor-style Agent → RAG → Response</p>
+    </div>
+    <nav class="nav">
+      <a href="index.html">← Hub</a>
+      <a href="01-system-overview.html">01 Overview</a>
+      <a href="02-agentic-rag-pipeline.html" class="active">02 RAG Pipeline</a>
+      <a href="03-aws-infrastructure.html">03 AWS Infra</a>
+      <a href="04-request-lifecycle.html">04 Request Flow</a>
+      <a href="05-data-schema.html">05 DB Schema</a>
+    </nav>
+  </div>
+
+  <div class="content">
+    <div class="info-grid">
+      <div class="info-box">
+        <h3>🛡️ Guardrail Router</h3>
+        <p>Model: <code>Qwen3.5-0.8B LoRA</code><br>
+        Dataset: 13,513 samples (7 nguồn)<br>
+        <code>valid_json_rate = 1.0</code><br>
+        <code>harmful_false_allow_rate = 0.0</code><br>
+        <code>ambiguous_recall = 0.9905</code><br>
+        Serving: vLLM via Cloudflare Tunnel</p>
+      </div>
+      <div class="info-box">
+        <h3>🧠 LangGraph Agent</h3>
+        <p>Style: deeptutor-style RAG<br>
+        Nodes: structured router → context → search → rerank → answer<br>
+        State: checkpointer + thread lock<br>
+        Memory: multi-turn conversation history<br>
+        Evidence: grounded / partial / no_source</p>
+      </div>
+      <div class="info-box">
+        <h3>🤖 Model Serving</h3>
+        <p>Fast model: <code>Qwen3.5-4B LoRA</code> (SIMPLE route)<br>
+        Answer gen: <code>Qwen3.5-4B LoRA</code> (COMPLEX route)<br>
+        Endpoint: <code>vllm.a20-app-049.io.vn/v1</code><br>
+        Fallback: Gemini / OpenAI / Anthropic<br>
+        VRAM: ~1.5GB peak (RTX 3050)</p>
+      </div>
+      <div class="info-box">
+        <h3>🔍 RAG Stack</h3>
+        <p>Retrieval: pgvector (PostgreSQL 16)<br>
+        Tool: <code>search_learning_content</code><br>
+        Rerank: combined score (embed sim + KP overlap + title match)<br>
+        Scope: current learning unit first<br>
+        External fallback: Semantic Scholar + Web</p>
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <h2>Full Pipeline — Input to Response</h2>
+      <div class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#431407', 'primaryTextColor': '#fed7aa', 'primaryBorderColor': '#ea580c', 'lineColor': '#fb923c', 'secondaryColor': '#0d1117', 'tertiaryColor': '#161b22', 'background': '#0d1117', 'nodeBorder': '#374151'}}}%%
+flowchart LR
+    IN(["💬 User Message\n(HTTP POST /api/agent/message)"]) --> PII_IN
+
+    subgraph SAFETY["🛡️ Safety Gate"]
+        PII_IN["PII Sanitizer\n(input)\nredact PII before any LLM call"]
+        GR["Guardrail Router\nQwen3.5-0.8B LoRA\n📊 13,513 training samples"]
+        GR_OUT{{"Route Decision"}}
+    end
+
+    subgraph GUARD_LABELS["Guardrail Output Labels"]
+        GL1["safety_label\nSAFE / HARMFUL"]
+        GL2["topic_label\nON_TOPIC / OFF_TOPIC\nAMBIGUOUS / N_A"]
+        GL3["action\nALLOW_LESSON_ANSWER\nSOFT_REFUSE_REDIRECT\nASK_CLARIFY\nSAFETY_REFUSE"]
+        GL4["attack_type\nharmful_request\npolicy_override\njailbreak_template\nmultilingual_jailbreak"]
+    end
+
+    REFUSE_SAFETY(["❌ SAFETY_REFUSE\nHARMFUL → block"])
+    REFUSE_TOPIC(["↩️ SOFT_REFUSE_REDIRECT\nOFF_TOPIC → redirect"])
+    CLARIFY(["❓ ASK_CLARIFY\nAMBIGUOUS → ask"])
+
+    subgraph ROUTING["🔀 Smart Router"]
+        SR["Intent Classification\nBLOCKED / SIMPLE / COMPLEX"]
+        SR_OUT{{"Route"}}
+    end
+
+    BLOCK_OUT(["🚫 BLOCKED\nPolicy violation"])
+
+    subgraph FAST_PATH["⚡ Simple Path"]
+        FAST["Fast Model\nQwen3.5-4B LoRA\n+ LLM Provider fallback\n(direct answer, no tools)"]
+    end
+
+    subgraph AGENT["🧠 LangGraph ReAct Agent — deeptutor-style"]
+        AG_ROUTER["Structured Router Node\n① assessment boundary check\n② topic classification\n③ pronoun resolution\n④ intent detection"]
+        ASSESS_BLOCK(["🚫 Assessment Boundary\nblock answer when in quiz/test"])
+        AG_CTX["Context Service Node\nload learning unit context\nKP scope + conversation history\nthread memory (multi-turn)"]
+
+        subgraph RAG_CORE["RAG Core"]
+            AG_SEARCH["Search Service Node\nsearch_learning_content tool\npgvector embedding search\nscope: current unit first"]
+            AG_RERANK["Rerank Node\ncombined score:\n• embedding similarity\n• KP overlap score\n• unit title match\n• acronym trap filter"]
+        end
+
+        AG_EXT["External Research Node\nSemantic Scholar API\nWeb Search fallback\n(when in-course evidence insufficient)"]
+
+        AG_ANSWER["Answer Node\n📌 evidence_policy enforcement\nconfidence: grounded | partial | no_source\ncitation: must_not_hallucinate\nmust_not_cite outside source"]
+
+        THREAD_MEM[("Thread Memory\nCheckpointer\nagent_graph_runs\nagent_pending_actions\nagent_response_payloads")]
+    end
+
+    subgraph MODELS["🤖 Model Serving"]
+        vLLM_MAIN["vLLM\nQwen3.5-4B LoRA\nTutor Answer Generator\nvllm.a20-app-049.io.vn/v1"]
+        LLM_FB["LLM Providers\nGemini / OpenAI / Anthropic\n(fallback + orchestration)"]
+    end
+
+    subgraph OUTPUT["📤 Output"]
+        PII_OUT["PII Sanitizer\n(output)\nredact before returning"]
+        RESP(["SSE Stream Response\nto Browser"])
+        TRACE["Langfuse Trace\nspan + eval\nasync logging"]
+    end
+
+    PII_IN --> GR
+    GR -.->|"labels"| GUARD_LABELS
+    GR --> GR_OUT
+    GR_OUT -->|"HARMFUL"| REFUSE_SAFETY
+    GR_OUT -->|"OFF_TOPIC"| REFUSE_TOPIC
+    GR_OUT -->|"AMBIGUOUS"| CLARIFY
+    GR_OUT -->|"ON_TOPIC\nALLOW_LESSON_ANSWER"| SR
+
+    SR --> SR_OUT
+    SR_OUT -->|"BLOCKED"| BLOCK_OUT
+    SR_OUT -->|"SIMPLE"| FAST
+    SR_OUT -->|"COMPLEX"| AG_ROUTER
+
+    AG_ROUTER -->|"assessment context detected"| ASSESS_BLOCK
+    AG_ROUTER -->|"normal query"| AG_CTX
+    AG_CTX --> AG_SEARCH
+    AG_SEARCH --> AG_RERANK
+    AG_RERANK -->|"evidence sufficient"| AG_ANSWER
+    AG_RERANK -->|"evidence insufficient\n+ not assessment"| AG_EXT
+    AG_EXT --> AG_ANSWER
+    AG_ANSWER --> vLLM_MAIN
+    FAST --> vLLM_MAIN
+    vLLM_MAIN -->|"model unavailable"| LLM_FB
+
+    AG_ANSWER <-.->|"state read/write"| THREAD_MEM
+    AG_CTX <-.->|"recall history"| THREAD_MEM
+
+    vLLM_MAIN --> PII_OUT
+    LLM_FB --> PII_OUT
+    PII_OUT --> RESP
+    PII_OUT --> TRACE
+
+    style SAFETY fill:#1c0a00,stroke:#c2410c
+    style GUARD_LABELS fill:#0c0a00,stroke:#78350f
+    style ROUTING fill:#0a0a1a,stroke:#4338ca
+    style AGENT fill:#0a1a0a,stroke:#16a34a
+    style RAG_CORE fill:#051a05,stroke:#15803d
+    style FAST_PATH fill:#0a0a1a,stroke:#6366f1
+    style MODELS fill:#1a0a1a,stroke:#a21caf
+    style OUTPUT fill:#001a1a,stroke:#0891b2
+    style THREAD_MEM fill:#1a1500,stroke:#b45309
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <h2>Guardrail Training Data Sources</h2>
+      <div class="mermaid">
+%%{init: {'theme': 'dark'}}%%
+pie title Guardrail Dataset — 13,513 samples
+    "EduVidQA + Question Bank (ON_TOPIC)" : 4200
+    "CantTalkAboutThis + CLINC150/OOS (OFF_TOPIC)" : 3100
+    "WildGuardMix (HARMFUL)" : 1500
+    "JailBreakV-28K (jailbreak)" : 900
+    "MultiJail (multilingual jailbreak)" : 700
+    "Router + Policy Injection" : 600
+    "Ambiguous + Open-QA" : 2513
+      </div>
+    </div>
+  </div>
+
+  <script>mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });</script>
+</body>
+</html>

@@ -22,7 +22,7 @@
 
   ---
 
-  [**:rocket: Live Demo**](https://a20-app-049.io.vn) · [**:books: Architecture**](docs/architecture.md) · [**:robot: AI Logs**](docs/ai-logs.md) · [**:bar_chart: Evaluation**](docs/evaluation-report.md) · [**:memo: Worklog**](docs/WORKLOG.md) · [**:notebook: Journal**](docs/JOURNAL.md)
+  [**:rocket: Live Demo**](https://a20-app-049.io.vn) · [**:triangular_ruler: Architecture**](architecture/index.html) · [**:robot: AI Logs**](docs/ai-logs.md) · [**:bar_chart: Evaluation**](docs/evaluation-report.md) · [**:memo: Worklog**](docs/WORKLOG.md) · [**:notebook: Journal**](docs/JOURNAL.md)
 
 </div>
 
@@ -35,7 +35,7 @@
 | :globe_with_meridians: Live URL | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
 | :clapper: Demo Video | _Đang cập nhật_ |
 | :bar_chart: Pitch Deck | _Đang cập nhật_ |
-| :triangular_ruler: Architecture | [docs/architecture.md](docs/architecture.md) |
+| :triangular_ruler: Architecture | [architecture/index.html](architecture/index.html) · [SVGs](architecture/) |
 | :robot: AI Logs | [docs/ai-logs.md](docs/ai-logs.md) |
 | :clipboard: Worklog | [docs/WORKLOG.md](docs/WORKLOG.md) |
 | :notebook: Weekly Journal | [docs/JOURNAL.md](docs/JOURNAL.md) |
@@ -158,39 +158,24 @@ Fine-tune và zero-shot scoring cho **prerequisite graph** (quan hệ tiên quy�
 
 ## :building_construction: 5. Kiến trúc hệ thống
 
-```text
-User (Browser)
-      |
-      v
-+-------------------------------------------+
-| Next.js 14 App Router (Frontend)          |
-| React 18 · TypeScript 5 · Tailwind CSS   |
-+-------------------------------------------+
-      |
-      v
-+-------------------------------------------+
-| FastAPI (Backend API)                     |
-| Python 3.12 · Pydantic v2 · Alembic      |
-+-------------------------------------------+
-      |
-      +--------> Service Layer
-      |            |-- content_service (course, sections, units)
-      |            |-- quiz_service / assessment_service
-      |            |-- canonical_mastery_service (KP mastery)
-      |            |-- recommendation_engine (planner + audit)
-      |            |-- llm_service (AI Tutor — LangGraph ReAct Agent)
-      |            +-- guardrail_router (safety + topic classification)
-      |
-      +--------> PostgreSQL 16 (canonical content, learner state, planner)
-      +--------> Redis 7 (cache, sessions)
-      +--------> LLM Providers (Gemini, OpenAI, Anthropic)
-      +--------> Fine-tuned Models (vLLM self-hosted)
-      |            |-- Qwen3.5-0.8B LoRA (Guardrail Router)
-      |            +-- Qwen3.5-4B LoRA (Tutor Answer Generator)
-      +--------> Langfuse (LLM observability & tracing)
-```
+![System Overview](architecture/system-overview.svg)
 
-:point_right: Chi tiết: [**docs/architecture.md**](docs/architecture.md) (Mermaid diagrams, data flow, deployment)
+### Agentic RAG Pipeline
+
+![Agentic RAG Pipeline](architecture/agentic-rag.svg)
+
+### AWS Infrastructure
+
+![AWS Infrastructure](architecture/aws-infrastructure.svg)
+
+| Sơ đồ | Mô tả |
+|---|---|
+| [System Overview](architecture/system-overview.svg) | Toàn bộ stack: Client → CDN → Next.js → FastAPI → AI → Data → Observability |
+| [Agentic RAG Pipeline](architecture/agentic-rag.svg) | PII Sanitizer → Guardrail Router → Smart Router → LangGraph → vLLM |
+| [AWS Infrastructure](architecture/aws-infrastructure.svg) | VPC, ECS Fargate, RDS, ElastiCache, ECR, S3+CloudFront, CI/CD |
+| [Request Lifecycle](architecture/request-lifecycle.svg) | Sequence diagrams: SSR, AI chat SSE, Assessment IRT, Video delivery |
+| [Data Schema](architecture/data-schema.svg) | ER diagrams: Product Shell, Canonical Content, Learner State, Agent State |
+| [Interactive Diagrams](architecture/index.html) | HTML viewer cho tất cả sơ đồ (open locally) |
 
 ---
 

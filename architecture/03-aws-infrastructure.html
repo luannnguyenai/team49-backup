@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Infrastructure — AI Adaptive Learning Platform</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    .header { padding: 20px 32px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .header-left h1 { font-size: 1.25rem; font-weight: 700; color: #f59e0b; }
+    .header-left p { color: #475569; font-size: 0.82rem; margin-top: 2px; }
+    .nav { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav a { color: #64748b; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #1e293b; transition: all 0.2s; white-space: nowrap; }
+    .nav a:hover { color: #e2e8f0; border-color: #334155; }
+    .nav a.active { background: #78350f; color: #fef3c7; border-color: #f59e0b; }
+    .content { padding: 28px 32px; }
+    .diagram-card { background: #0d1117; border: 1px solid #21262d; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .diagram-card h2 { font-size: 0.95rem; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+    .mermaid { background: #0d1117; overflow-x: auto; }
+    .specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .spec { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px; }
+    .spec h3 { font-size: 0.75rem; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .spec p { font-size: 0.77rem; color: #6e7681; line-height: 1.5; }
+    .spec code { background: #0d1117; padding: 1px 4px; border-radius: 3px; color: #79c0ff; font-size: 0.73rem; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <h1>AWS Infrastructure</h1>
+      <p>03 · VPC · ECS Fargate · RDS · ElastiCache · S3/CloudFront · CI/CD · Observability</p>
+    </div>
+    <nav class="nav">
+      <a href="index.html">← Hub</a>
+      <a href="01-system-overview.html">01 Overview</a>
+      <a href="02-agentic-rag-pipeline.html">02 RAG Pipeline</a>
+      <a href="03-aws-infrastructure.html" class="active">03 AWS Infra</a>
+      <a href="04-request-lifecycle.html">04 Request Flow</a>
+      <a href="05-data-schema.html">05 DB Schema</a>
+    </nav>
+  </div>
+
+  <div class="content">
+    <div class="specs">
+      <div class="spec">
+        <h3>🖥️ ECS Cluster</h3>
+        <p>Cluster: <code>a20-prod-cluster</code><br>
+        Frontend: <code>a20-frontend</code><br>
+        Backend: <code>a20-backend</code><br>
+        Runtime: Fargate (serverless)<br>
+        Images: ECR with commit SHA tag</p>
+      </div>
+      <div class="spec">
+        <h3>🗄️ Databases</h3>
+        <p>RDS: PostgreSQL 16 + pgvector<br>
+        ElastiCache: Redis 7 / Valkey<br>
+        Both in private subnet<br>
+        No public internet access<br>
+        Backend SG ingress only</p>
+      </div>
+      <div class="spec">
+        <h3>☁️ Assets</h3>
+        <p>S3: private bucket, IAM OAC<br>
+        CloudFront: CDN distribution<br>
+        Backend generates signed URLs<br>
+        Browser fetches CDN direct<br>
+        Backend does NOT proxy bytes</p>
+      </div>
+      <div class="spec">
+        <h3>🔐 Secrets</h3>
+        <p>Secrets Manager: DB_URL, REDIS_URL<br>
+        OpenAI / Gemini / Anthropic keys<br>
+        Langfuse keys, vLLM endpoint<br>
+        ECS injects via <code>secrets[]</code><br>
+        <code>reconcile-backend-secret.sh</code></p>
+      </div>
+      <div class="spec">
+        <h3>🚀 CI/CD</h3>
+        <p>Self-hosted EC2 runner<br>
+        <code>build-push.yml</code>: build + ECR push<br>
+        <code>deploy-ecs-prod.yml</code>: deploy<br>
+        <code>init-ecs-prod.yml</code>: seed DB<br>
+        OIDC keyless AWS auth</p>
+      </div>
+      <div class="spec">
+        <h3>📊 Observability</h3>
+        <p>Prometheus: <code>/metrics</code> scrape<br>
+        Grafana: dashboards (admin panel)<br>
+        Loki: log aggregation per service<br>
+        CloudWatch: ECS container logs<br>
+        Langfuse: LLM tracing + evals</p>
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <h2>AWS Cloud Architecture — Production</h2>
+      <div class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1c1007', 'primaryTextColor': '#fef3c7', 'primaryBorderColor': '#f59e0b', 'lineColor': '#fbbf24', 'secondaryColor': '#0d1117', 'tertiaryColor': '#161b22', 'background': '#0d1117'}}}%%
+flowchart TB
+    subgraph INTERNET["🌐 Internet"]
+        USER["Browser / Client"]
+        GH["GitHub Actions\n(CI/CD Workflows)"]
+    end
+
+    subgraph AWS_GLOBAL["AWS — Global Services"]
+        R53["Route 53\nDNS: a20-app-049.io.vn\n*.a20-app-049.io.vn"]
+        ACM["ACM Certificate\nTLS / HTTPS"]
+        ECR["ECR\nFrontend image\nBackend image\n(tagged by commit SHA)"]
+        SM["Secrets Manager\nDB_URL · REDIS_URL\nAPI keys · vLLM endpoint\nCORS · Frontend URL"]
+        CW["CloudWatch\nLogs: /ecs/a20-frontend\nLogs: /ecs/a20-backend\nMetrics: ECS task stats"]
+    end
+
+    subgraph VPC["AWS VPC — a20-prod-vpc"]
+        subgraph PUBLIC_SUBNET["📡 Public Subnet"]
+            ALB["Application Load Balancer\nHTTPS:443 · HTTP:80→443 redirect\napp.* → frontend target\napi.* → backend target"]
+            NAT["NAT Gateway\ncontrolled outbound egress\n(backend → external APIs)"]
+        end
+
+        subgraph PRIVATE_SUBNET["🔒 Private Subnet"]
+            subgraph ECS_CLUSTER["ECS Fargate Cluster — a20-prod-cluster"]
+                FE_TASK["Frontend Task\nNext.js 14 standalone\nnode server.js · PORT 3000\na20-frontend service"]
+                BE_TASK["Backend Task\nFastAPI + uvicorn\nPORT 8000\na20-backend service"]
+                subgraph ONE_OFF["One-off Tasks (CI/CD triggered)"]
+                    MIGRATE["migrate task\nalembic upgrade head"]
+                    SEED_CORE["seed-core task\nimport canonical bundle from S3"]
+                    SEED_ACC["seed-accounts task\ndemo + admin accounts"]
+                end
+            end
+            RDS["RDS PostgreSQL 16\n+ pgvector extension\nPrivate · port 5432\nonly backend SG allowed"]
+            REDIS["ElastiCache Redis 7\n/ Valkey\nPrivate · port 6379\nonly backend SG allowed"]
+        end
+    end
+
+    subgraph ASSETS["☁️ Assets — CDN"]
+        S3["S3 Private Bucket\ncourse videos\nslides · transcripts\nOrigin Access Control"]
+        CF["CloudFront Distribution\ncdn.a20-app-049.io.vn\nTLS · cache headers\nSigned URLs (1h expiry)"]
+    end
+
+    subgraph OBS["📊 Observability Stack"]
+        PROM["Prometheus\nscrapes backend /metrics"]
+        GRAFANA["Grafana\nadmin.a20-app-049.io.vn\n(ECS embedded)"]
+        LOKI["Loki\nlog aggregation\n(ECS sidecar or external)"]
+        LF["Langfuse\nLLM tracing\nlangfuse.com (SaaS)"]
+    end
+
+    subgraph EXTERNAL["🔌 External APIs — via NAT"]
+        OPENAI["OpenAI API\nGPT models"]
+        GEMINI["Google Gemini\nGemini models"]
+        ANTHROPIC["Anthropic\nClaude models"]
+        VLLM["vLLM Server\nQwen3.5-0.8B LoRA\nQwen3.5-4B LoRA\n(Cloudflare Tunnel)"]
+        SEMANTIC["Semantic Scholar\nExternal research"]
+    end
+
+    USER -->|"HTTPS"| R53
+    R53 --> ALB
+    ACM -.->|"TLS cert"| ALB
+    ALB -->|"app.*"| FE_TASK
+    ALB -->|"api.*"| BE_TASK
+    BE_TASK --> RDS
+    BE_TASK --> REDIS
+    BE_TASK -->|"presigned URL\ngeneration"| S3
+    S3 --> CF
+    USER -->|"CDN assets"| CF
+    BE_TASK --> NAT
+    NAT --> OPENAI & GEMINI & ANTHROPIC & VLLM & SEMANTIC
+    ECR -.->|"pull image"| FE_TASK & BE_TASK & ONE_OFF
+    SM -.->|"inject secrets"| BE_TASK & FE_TASK
+    CW -.->|"log streams"| ECS_CLUSTER
+    BE_TASK --> PROM --> GRAFANA
+    BE_TASK --> LOKI
+    BE_TASK -.->|"async traces"| LF
+
+    GH -->|"build + push\nbuild-push.yml"| ECR
+    GH -->|"register task def\ndeploy service\ndeploy-ecs-prod.yml"| ECS_CLUSTER
+    GH -->|"run one-off tasks\ninit-ecs-prod.yml"| ONE_OFF
+
+    style INTERNET fill:#0c1a2e,stroke:#1d4ed8
+    style AWS_GLOBAL fill:#1c1007,stroke:#d97706
+    style VPC fill:#0a1a0a,stroke:#16a34a
+    style PUBLIC_SUBNET fill:#0d2010,stroke:#22c55e
+    style PRIVATE_SUBNET fill:#030f03,stroke:#15803d
+    style ECS_CLUSTER fill:#071a07,stroke:#4ade80
+    style ONE_OFF fill:#040e04,stroke:#86efac
+    style ASSETS fill:#001a1a,stroke:#0891b2
+    style OBS fill:#0a0a1a,stroke:#6366f1
+    style EXTERNAL fill:#1a0a0a,stroke:#dc2626
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <h2>CI/CD Deployment Pipeline</h2>
+      <div class="mermaid">
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    subgraph DEV["Developer"]
+        PUSH["git push\nto main"]
+    end
+
+    subgraph CI["GitHub Actions CI"]
+        LINT["lint + type-check\npytest + playwright\n(ci.yml)"]
+    end
+
+    subgraph BUILD["GitHub Actions Build — self-hosted EC2 runner"]
+        BUILD_BE["docker buildx\nbackend image\n→ ECR"]
+        BUILD_FE["docker buildx\nfrontend image\nbake NEXT_PUBLIC_API_URL\n→ ECR"]
+    end
+
+    subgraph DEPLOY["GitHub Actions Deploy"]
+        RENDER["render-taskdef.sh\n.json.tpl → task definition"]
+        RECON["reconcile-backend-secret.sh\nupdate Secrets Manager\nDB_URL · REDIS_URL · CORS"]
+        DEPLOY_BE["update backend service\nwait stable"]
+        MIGRATE["run migrate task\nalembic upgrade head"]
+        DEPLOY_FE["update frontend service\nwait stable"]
+        SMOKE["smoke tests\n/health · / · CloudFront asset"]
+    end
+
+    subgraph INIT["GitHub Actions Init (manual / first-time)"]
+        SEED_CORE["seed-core task\nimport canonical JSONL from S3"]
+        SYNC["sync-schema-v2 task\nbackfill · parity check"]
+        SEED_ACC["seed-accounts task\ndemo@vinuni.edu.vn\nadmin accounts"]
+    end
+
+    PUSH --> LINT --> BUILD_BE & BUILD_FE
+    BUILD_BE & BUILD_FE --> RENDER
+    RENDER --> RECON --> DEPLOY_BE --> MIGRATE --> DEPLOY_FE --> SMOKE
+    SMOKE -.->|"manual trigger"| SEED_CORE --> SYNC --> SEED_ACC
+
+    style DEV fill:#0c1a2e,stroke:#3b82f6
+    style CI fill:#1a0a1a,stroke:#a855f7
+    style BUILD fill:#1c1007,stroke:#f59e0b
+    style DEPLOY fill:#0a1a0a,stroke:#22c55e
+    style INIT fill:#0a0a1a,stroke:#6366f1
+      </div>
+    </div>
+  </div>
+
+  <script>mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });</script>
+</body>
+</html>
