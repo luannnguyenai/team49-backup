@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PathItemResponse } from "@/types";
 import LearningUnitDrawer from "@/features/learning-path/components/LearningUnitDrawer";
@@ -71,5 +71,18 @@ describe("LearningUnitDrawer", () => {
       "href",
       "/learn/legacy-unit-id",
     );
+  });
+
+  it("closes the details drawer when the primary CTA starts learning", () => {
+    resetStore(pathItem({ learning_unit_id: "unit-1" }));
+
+    render(<LearningUnitDrawer />);
+
+    const startLearning = screen.getByRole("link", { name: "Start learning" });
+    startLearning.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(startLearning);
+
+    expect(useLearningPathStore.getState().selectedItemId).toBeNull();
+    expect(useLearningPathStore.getState().selectedSectionKey).toBeNull();
   });
 });
