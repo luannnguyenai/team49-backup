@@ -7,7 +7,7 @@ Pydantic v2 schemas for User endpoints.
 import uuid
 from datetime import date, datetime
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field
 
 from src.models.user import PreferredMethod
 
@@ -34,14 +34,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     """POST /users — create a new account."""
 
-    password: str = Field(min_length=8, max_length=128)
-
-    @field_validator("password")
-    @classmethod
-    def password_strength(cls, v: str) -> str:
-        if not any(c.isdigit() for c in v):
-            raise ValueError("Password must contain at least one digit")
-        return v
+    password: str = Field(min_length=1, max_length=128)
 
 
 class UserUpdate(BaseModel):
@@ -57,14 +50,7 @@ class PasswordChange(BaseModel):
     """POST /users/{id}/change-password"""
 
     current_password: str
-    new_password: str = Field(min_length=8, max_length=128)
-
-    @field_validator("new_password")
-    @classmethod
-    def password_strength(cls, v: str) -> str:
-        if not any(c.isdigit() for c in v):
-            raise ValueError("New password must contain at least one digit")
-        return v
+    new_password: str = Field(min_length=1, max_length=128)
 
 
 # ---------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 "use client";
 // components/auth/RegisterForm.tsx
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,11 +20,7 @@ const schema = z
       .min(2, "Full name must be at least 2 characters")
       .max(255, "Full name is too long"),
     email: z.string().email("Invalid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/\d/, "Password must contain at least 1 number")
-      .regex(/[a-zA-Z]/, "Password must contain at least 1 letter"),
+    password: z.string().min(1, "Password is required"),
     confirm_password: z.string(),
   })
   .refine((d) => d.password === d.confirm_password, {
@@ -40,6 +36,11 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const { register: registerUser, isLoading, error, clearError } = useAuthStore();
+
+  useEffect(() => {
+    clearError();
+    return clearError;
+  }, [clearError]);
 
   const {
     register,

@@ -71,6 +71,27 @@ describe("auth forms preserve next redirect context", () => {
     });
   });
 
+  it("login form accepts a short test password", async () => {
+    loginMock.mockResolvedValue(undefined);
+
+    render(<LoginForm />);
+
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "learner@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Password"), {
+      target: { value: "x" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Sign in" }).closest("form")!);
+
+    await waitFor(() => {
+      expect(loginMock).toHaveBeenCalledWith({
+        email: "learner@example.com",
+        password: "x",
+      });
+    });
+  });
+
   it("login form preserves next on the register link", () => {
     render(<LoginForm />);
 
@@ -117,6 +138,34 @@ describe("auth forms preserve next redirect context", () => {
       expect(routerPushMock).toHaveBeenCalledWith(
         "/onboarding?next=%2Fcourses%2Fcs231n%2Fstart",
       );
+    });
+  });
+
+  it("register form accepts a short test password", async () => {
+    registerUserMock.mockResolvedValue(undefined);
+
+    render(<RegisterForm />);
+
+    fireEvent.change(screen.getByLabelText("Full name"), {
+      target: { value: "Learner Example" },
+    });
+    fireEvent.change(screen.getByLabelText("Email"), {
+      target: { value: "learner@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Password"), {
+      target: { value: "x" },
+    });
+    fireEvent.change(screen.getByLabelText("Confirm password"), {
+      target: { value: "x" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Create account" }).closest("form")!);
+
+    await waitFor(() => {
+      expect(registerUserMock).toHaveBeenCalledWith({
+        email: "learner@example.com",
+        password: "x",
+        full_name: "Learner Example",
+      });
     });
   });
 

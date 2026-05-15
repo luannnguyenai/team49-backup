@@ -263,7 +263,7 @@ function TopNavFallback() {
     >
       <div className="flex h-16 items-center gap-4 px-4 md:px-6">
         <div className="shrink-0">
-          <BrandLogo compact />
+          <BrandLogo compact href="/dashboard" />
         </div>
         <div className="hidden flex-1 sm:block" />
       </div>
@@ -340,7 +340,7 @@ function TopNavContent() {
         <div className="flex h-16 items-center gap-4 px-4 md:px-6">
           {/* Logo */}
           <div className="shrink-0">
-            <BrandLogo compact />
+            <BrandLogo compact href="/dashboard" />
           </div>
 
           <Suspense fallback={<div className="hidden min-w-0 flex-1 md:block" />}>
