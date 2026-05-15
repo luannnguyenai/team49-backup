@@ -3,131 +3,172 @@
 
   # AI Adaptive Learning Platform
 
-  **Nền tảng học tập thích ứng sử dụng AI — cá nhân hóa lộ trình học cho từng học sinh dựa trên năng lực thực tế.**
+  > *"Hoc dung thu ban yeu, voi lo trinh rieng cho ban — co AI huong dan 24/7"*
 
-  [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-  [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-  [![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
-  [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-  [![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)](https://redis.io/)
-  [![LangChain](https://img.shields.io/badge/LangChain-LangGraph-1C3C3C?logo=langchain&logoColor=white)](https://www.langchain.com/)
-  [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
-  [![AWS](https://img.shields.io/badge/AWS-ECS%2FFargate-FF9900?logo=amazonecs&logoColor=white)](https://aws.amazon.com/ecs/)
-  [![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?logo=terraform&logoColor=white)](https://www.terraform.io/)
-  [![License](https://img.shields.io/badge/License-Private-red)]()
+  **Nen tang hoc tap thich ung su dung AI — ca nhan hoa lo trinh hoc cho tung hoc sinh dua tren nang luc thuc te.**
 
-  [🚀 Live Demo](https://a20-app-049.io.vn) • [📖 Architecture](docs/architecture.md) • [🤖 AI Logs](docs/ai-logs.md) • [📊 Evaluation](docs/evaluation-report.md) • [📋 Worklog](docs/WORKLOG.md)
+  [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+  [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+  [![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+  [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
+  [![LangChain](https://img.shields.io/badge/LangChain-LangGraph-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://www.langchain.com/)
+  [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+  [![AWS](https://img.shields.io/badge/AWS-ECS%2FFargate-FF9900?style=for-the-badge&logo=amazonecs&logoColor=white)](https://aws.amazon.com/ecs/)
+  [![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
+  [![Langfuse](https://img.shields.io/badge/Langfuse-Tracing-4F46E5?style=for-the-badge)](https://langfuse.com/)
+
+  ---
+
+  [**:rocket: Live Demo**](https://a20-app-049.io.vn) · [**:books: Architecture**](docs/architecture.md) · [**:robot: AI Logs**](docs/ai-logs.md) · [**:bar_chart: Evaluation**](docs/evaluation-report.md) · [**:memo: Worklog**](docs/WORKLOG.md) · [**:notebook: Journal**](docs/JOURNAL.md)
 
 </div>
 
 ---
 
-## Quick Links
+## :link: Quick Links
 
-| Hạng mục | Link |
+| Hang muc | Link |
 |---|---|
-| Live URL | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
-| Demo Video | _Đang cập nhật_ |
-| Pitch Deck | _Đang cập nhật_ |
-| Architecture | [docs/architecture.md](docs/architecture.md) |
-| AI Logs | [docs/ai-logs.md](docs/ai-logs.md) |
-| Worklog | [docs/WORKLOG.md](docs/WORKLOG.md) |
-| Weekly Journal | [docs/JOURNAL.md](docs/JOURNAL.md) |
-| Evaluation Report | [docs/evaluation-report.md](docs/evaluation-report.md) |
+| :globe_with_meridians: Live URL | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
+| :clapper: Demo Video | _Dang cap nhat_ |
+| :bar_chart: Pitch Deck | _Dang cap nhat_ |
+| :triangular_ruler: Architecture | [docs/architecture.md](docs/architecture.md) |
+| :robot: AI Logs | [docs/ai-logs.md](docs/ai-logs.md) |
+| :clipboard: Worklog | [docs/WORKLOG.md](docs/WORKLOG.md) |
+| :notebook: Weekly Journal | [docs/JOURNAL.md](docs/JOURNAL.md) |
+| :white_check_mark: Evaluation Report | [docs/evaluation-report.md](docs/evaluation-report.md) |
 
 ---
 
-## 1. Giới thiệu dự án
+## :bulb: 1. Gioi thieu du an
 
-**AI Adaptive Tutor** là nền tảng học tập cá nhân hóa, nơi AI đóng vai trò gia sư 24/7 — hướng dẫn học sinh học đúng thứ họ cần, đúng thời điểm, dựa trên năng lực thực tế được đo lường liên tục.
+**AI Adaptive Tutor** la nen tang hoc tap ca nhan hoa, noi AI dong vai tro gia su 24/7 — huong dan hoc sinh hoc dung thu ho can, dung thoi diem, dua tren nang luc thuc te duoc do luong lien tuc.
 
-Sản phẩm hướng tới học sinh từ cấp 2 đến đại học, đặc biệt những bạn tự học qua tài liệu online mà thiếu lộ trình rõ ràng và không có người hướng dẫn thường xuyên.
+San pham huong toi hoc sinh tu cap 2 den dai hoc, dac biet nhung ban tu hoc qua tai lieu online ma thieu lo trinh ro rang va khong co nguoi huong dan thuong xuyen.
 
-## 2. Vấn đề cần giải quyết
+---
 
-Học sinh tự học hiện tại gặp các vấn đề:
+## :warning: 2. Van de can giai quyet
 
-- **Không biết mình yếu ở đâu** — thiếu công cụ đánh giá năng lực chính xác
-- **Nội dung học không phù hợp level** — học quá dễ hoặc quá khó, mất thời gian
-- **Không có feedback tức thì** — làm bài xong không biết đúng sai, không hiểu tại sao
-- **Không có người hướng dẫn 24/7** — muốn hỏi lúc nào cũng phải tự tìm
+> **80% hoc sinh tu hoc online khong co lo trinh ro rang va khong biet minh yeu o dau.**
 
-Hệ quả: học sinh học lan man, mất động lực, không tối ưu được thời gian học.
+| Van de | He qua |
+|---|---|
+| :x: Khong biet minh yeu o dau | Hoc lan man, khong tap trung dung cho |
+| :x: Noi dung khong phu hop level | Hoc qua de hoac qua kho, mat thoi gian |
+| :x: Khong co feedback tuc thi | Lam bai xong khong biet dung sai, khong hieu tai sao |
+| :x: Khong co nguoi huong dan 24/7 | Muon hoi luc nao cung phai tu tim |
 
-## 3. Giải pháp
+**Ket qua:** Hoc sinh mat dong luc, hoc khong hieu qua, khong toi uu duoc thoi gian.
 
-AI Adaptive Tutor giải quyết bằng vòng lặp học tập thích ứng:
+---
 
-1. **Đánh giá năng lực** — Diagnostic quiz xác định level và điểm yếu theo từng Knowledge Point (KP)
-2. **Lộ trình cá nhân hóa** — Planner tự động đề xuất nội dung học dựa trên mastery thực tế, prerequisite graph và mục tiêu cá nhân
-3. **Học + Feedback tức thì** — Học bài, làm quiz, nhận giải thích ngay lập tức bằng AI tutor
-4. **Cập nhật mastery** — Mỗi lần trả lời, hệ thống cập nhật điểm mastery theo KP và điều chỉnh lộ trình
+## :rocket: 3. Giai phap
 
-## 4. Tính năng chính
+AI Adaptive Tutor giai quyet bang **vong lap hoc tap thich ung (Adaptive Learning Loop)**:
 
-- **Onboarding & Placement Assessment** — Đánh giá đầu vào để xác định level và chọn mục tiêu học
-- **Adaptive Learning Path** — Lộ trình học cá nhân hóa dựa trên KP mastery và prerequisite graph
-- **AI Tutor 24/7** — Gia sư AI hỗ trợ giải đáp trong ngữ cảnh bài giảng, có thể chạy code Python sandbox
-- **Quiz & Assessment** — Mini quiz, module test, placement test với feedback tức thì
-- **Mastery Tracking** — Theo dõi tiến độ theo từng Knowledge Point với IRT scoring
-- **Guardrail & Safety** — Smart Router phân loại intent, Guardrail Router chặn prompt injection và off-topic
-- **Video Learning** — Xem bài giảng video với progress tracking và inline quiz
-- **Lecture Q&A** — Hỏi đáp trong context bài giảng, AI trả lời dựa trên transcript + slides
+```
+  +-------------------+       +---------------------+       +------------------+
+  | 1. Danh gia       | ----> | 2. Lo trinh         | ----> | 3. Hoc + Quiz    |
+  | nang luc (KP)     |       | ca nhan hoa         |       | + AI Tutor       |
+  +-------------------+       +---------------------+       +------------------+
+         ^                                                          |
+         |                  +---------------------+                 |
+         +----------------- | 4. Cap nhat mastery | <---------------+
+                            | + dieu chinh path   |
+                            +---------------------+
+```
 
-## 5. Kiến trúc hệ thống
+| Buoc | Mo ta |
+|---|---|
+| :one: **Diagnostic Assessment** | Quiz xac dinh level va diem yeu theo tung Knowledge Point (KP) |
+| :two: **Personalized Path** | Planner tu dong de xuat noi dung hoc dua tren mastery, prerequisite graph va muc tieu |
+| :three: **Learn + Instant Feedback** | Hoc bai, lam quiz, nhan giai thich ngay lap tuc bang AI tutor |
+| :four: **Mastery Update** | He thong cap nhat diem mastery theo KP va dieu chinh lo trinh |
+
+---
+
+## :star2: 4. Tinh nang chinh
+
+| Tinh nang | Mo ta | AI-powered |
+|---|---|:---:|
+| :dart: **Onboarding & Placement** | Danh gia dau vao de xac dinh level va chon muc tieu hoc | :white_check_mark: |
+| :compass: **Adaptive Learning Path** | Lo trinh ca nhan hoa dua tren KP mastery va prerequisite graph | :white_check_mark: |
+| :robot: **AI Tutor 24/7** | Gia su AI ho tro giai dap trong ngu canh bai giang, chay code Python sandbox | :white_check_mark: |
+| :pencil2: **Quiz & Assessment** | Mini quiz, module test, placement test voi feedback tuc thi | :white_check_mark: |
+| :chart_with_upwards_trend: **Mastery Tracking** | Theo doi tien do theo tung Knowledge Point voi IRT scoring | |
+| :shield: **Guardrail & Safety** | Smart Router phan loai intent, Guardrail Router chan prompt injection | :white_check_mark: |
+| :tv: **Video Learning** | Xem bai giang video voi progress tracking va inline quiz | |
+| :speech_balloon: **Lecture Q&A** | Hoi dap trong context bai giang, AI tra loi dua tren transcript + slides | :white_check_mark: |
+
+---
+
+## :building_construction: 5. Kien truc he thong
 
 ```text
 User (Browser)
-      │
-      ▼
-Next.js 14 App Router (Frontend)
-      │
-      ▼
-FastAPI (Backend API)
-      │
-      ├──► Service Layer
-      │       ├── content_service (course, sections, units)
-      │       ├── quiz_service / assessment_service
-      │       ├── canonical_mastery_service (KP mastery)
-      │       ├── recommendation_engine (planner + audit)
-      │       ├── llm_service (AI Tutor — LangGraph ReAct Agent)
-      │       └── guardrail_router (safety + topic classification)
-      │
-      ├──► PostgreSQL 16 (canonical content, learner state, planner audit)
-      ├──► Redis 7 (cache, sessions)
-      └──► External LLM Providers (Gemini, OpenAI, Anthropic)
+      |
+      v
++-------------------------------------------+
+| Next.js 14 App Router (Frontend)          |
+| React 18 . TypeScript 5 . Tailwind CSS   |
++-------------------------------------------+
+      |
+      v
++-------------------------------------------+
+| FastAPI (Backend API)                     |
+| Python 3.12 . Pydantic v2 . Alembic      |
++-------------------------------------------+
+      |
+      +--------> Service Layer
+      |            |-- content_service (course, sections, units)
+      |            |-- quiz_service / assessment_service
+      |            |-- canonical_mastery_service (KP mastery)
+      |            |-- recommendation_engine (planner + audit)
+      |            |-- llm_service (AI Tutor - LangGraph ReAct Agent)
+      |            +-- guardrail_router (safety + topic classification)
+      |
+      +--------> PostgreSQL 16 (canonical content, learner state, planner)
+      +--------> Redis 7 (cache, sessions)
+      +--------> LLM Providers (Gemini, OpenAI, Anthropic)
+      +--------> Langfuse (LLM observability & tracing)
 ```
 
-Chi tiết: [docs/architecture.md](docs/architecture.md)
+:point_right: Chi tiet: [**docs/architecture.md**](docs/architecture.md) (Mermaid diagrams, data flow, deployment)
 
-## 6. Công nghệ sử dụng
+---
 
-| Thành phần | Công nghệ |
+## :wrench: 6. Cong nghe su dung
+
+| Thanh phan | Cong nghe |
 |---|---|
-| Frontend | Next.js 14 App Router, React 18, TypeScript 5, Zustand, Tailwind CSS |
-| Backend/API | Python 3.12, FastAPI, SQLAlchemy async, Pydantic v2, Alembic |
-| Database | PostgreSQL 16, Redis 7 |
-| AI Agent/LLM | LangChain, LangGraph, Gemini / OpenAI / Anthropic |
-| Observability | Langfuse (LLM tracing), Prometheus, Grafana, Loki |
-| Deployment | Docker Compose, AWS ECS/Fargate, Terraform |
-| Testing | pytest, Playwright, golden eval dataset (50+ cases) |
+| :art: Frontend | Next.js 14 App Router, React 18, TypeScript 5, Zustand, Tailwind CSS |
+| :gear: Backend/API | Python 3.12, FastAPI, SQLAlchemy async, Pydantic v2, Alembic |
+| :floppy_disk: Database | PostgreSQL 16, Redis 7 |
+| :brain: AI Agent/LLM | LangChain, LangGraph, Gemini / OpenAI / Anthropic |
+| :mag: Observability | Langfuse (LLM tracing), Prometheus, Grafana, Loki |
+| :cloud: Deployment | Docker Compose, AWS ECS/Fargate, Terraform |
+| :test_tube: Testing | pytest, Playwright, golden eval dataset (50+ cases) |
 
-## 7. Cài đặt và chạy local
+---
 
-### Yêu cầu
+## :computer: 7. Cai dat va chay local
 
-- Docker Desktop với Docker Compose v2, hoặc Python 3.12, Node.js 18+, PostgreSQL 16, Redis 7, `uv`
-- Ít nhất 1 LLM API key (Gemini, OpenAI, hoặc Anthropic)
+### Yeu cau
 
-### Cách 1: Docker (khuyến nghị)
+- Docker Desktop voi Docker Compose v2, hoac Python 3.12, Node.js 18+, PostgreSQL 16, Redis 7, `uv`
+- It nhat 1 LLM API key (Gemini, OpenAI, hoac Anthropic)
+
+### Cach 1: Docker (khuyen nghi) :whale:
 
 ```bash
 git clone https://github.com/a20-ai-thuc-chien/A20-App-049.git
 cd A20-App-049
 cp .env.example .env
-# Điền API keys vào .env
+# Dien API keys vao .env
 
 docker compose up -d --build
 docker compose exec backend alembic upgrade head
@@ -135,7 +176,7 @@ docker compose exec backend python -m src.scripts.pipeline.import_canonical_arti
 docker compose exec backend python -m src.scripts.pipeline.import_product_shell_to_db
 ```
 
-### Cách 2: Chạy trực tiếp
+### Cach 2: Chay truc tiep :zap:
 
 ```bash
 # Backend
@@ -153,19 +194,19 @@ printf "NEXT_PUBLIC_API_URL=http://localhost:8000\n" > .env.local
 npm run dev
 ```
 
-### Truy cập
+### Truy cap
 
-| URL | Mô tả |
+| URL | Mo ta |
 |---|---|
-| `http://localhost:3000` | Frontend |
-| `http://localhost:8000/docs` | Swagger API docs |
-| `http://localhost:8000/health` | Health check |
+| :globe_with_meridians: `http://localhost:3000` | Frontend |
+| :page_facing_up: `http://localhost:8000/docs` | Swagger API docs |
+| :heartbeat: `http://localhost:8000/health` | Health check |
 
-## 8. Biến môi trường
+---
 
-Không commit file `.env`. Chỉ commit `.env.example`.
+## :key: 8. Bien moi truong
 
-Biến chính:
+> :warning: **Khong commit file `.env`.** Chi commit `.env.example`.
 
 ```env
 DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5433/ai_learning
@@ -176,84 +217,104 @@ DEFAULT_MODEL=gemini-2.0-flash
 GEMINI_API_KEY=...
 ```
 
-Xem `.env.example` để biết đầy đủ các biến môi trường.
-
-## 9. Cách sử dụng sản phẩm
-
-### Luồng chính: Học tập thích ứng
-
-1. **Đăng ký / Đăng nhập** — Tạo tài khoản hoặc đăng nhập
-2. **Onboarding** — Chọn mục tiêu học (ví dụ: Deep Learning, Computer Vision, NLP)
-3. **Placement Assessment** — Làm bài đánh giá đầu vào (5-10 câu) để xác định level
-4. **Xem lộ trình** — Hệ thống đề xuất lộ trình học cá nhân hóa dựa trên kết quả đánh giá
-5. **Học bài** — Xem video bài giảng, đọc nội dung, hỏi AI Tutor bất cứ lúc nào
-6. **Làm quiz** — Sau mỗi bài học, làm mini quiz để kiểm tra hiểu bài
-7. **Xem feedback** — Nhận giải thích chi tiết cho từng câu trả lời
-8. **Cập nhật lộ trình** — Hệ thống tự động điều chỉnh lộ trình dựa trên kết quả mới
-
-### Tài khoản demo
-
-Email: `demo@vinuni.edu.vn` | Password: `DemoPass123!`
-
-## 10. Demo và kết quả
-
-- **Live URL:** [https://a20-app-049.io.vn](https://a20-app-049.io.vn)
-- **Video Demo:** _Đang cập nhật_
-- **Evaluation Report:** [docs/evaluation-report.md](docs/evaluation-report.md)
-- **AI Logs:** [docs/ai-logs.md](docs/ai-logs.md)
-- **Golden Eval Dataset:** 50+ test cases cho agent behavior ([docs/agent-golden-evals.md](docs/agent-golden-evals.md))
-- **Guardrail Router:** 13,513 samples cho safety/topic classification
-
-## 11. Evaluation
-
-Chi tiết: [docs/evaluation-report.md](docs/evaluation-report.md)
-
-Tóm tắt:
-
-| Loại đánh giá | Số lượng | Mô tả |
-|---|---|---|
-| API Contract Tests | 13+ | Kiểm tra HTTP route contracts |
-| Service Logic Tests | 10+ | Kiểm tra business logic |
-| Golden Eval Cases | 50+ | Kiểm tra hành vi AI Agent |
-| Guardrail Dataset | 13,513 | Kiểm tra phân loại safety/topic |
-| Integration Tests | 5+ | Kiểm tra luồng end-to-end |
-
-Failure cases và cách xử lý được ghi nhận trong [docs/evaluation-report.md](docs/evaluation-report.md).
-
-## 12. Team & Phân công công việc
-
-| Thành viên | Vai trò | Công việc chính |
-|---|---|---|
-| _Tên thành viên 1_ | _Vai trò_ | _Mô tả công việc_ |
-| _Tên thành viên 2_ | _Vai trò_ | _Mô tả công việc_ |
-| _Tên thành viên 3_ | _Vai trò_ | _Mô tả công việc_ |
-| _Tên thành viên 4_ | _Vai trò_ | _Mô tả công việc_ |
-
-> Vui lòng cập nhật bảng trên với thông tin thực tế của team.
-
-## 13. Hạn chế và hướng phát triển
-
-### Hạn chế hiện tại
-
-- IRT/BKT mastery scoring đang ở phase-1 (posterior scoring), chưa có calibration job với dữ liệu thực
-- Golden eval dataset kiểm tra hành vi expected, chưa đo live model accuracy/latency quantitatively
-- Route contract test suite có lỗi request hang (httpx.ASGITransport) — service-level tests là regression signal chính
-- Nội dung học hiện tập trung vào Computer Vision / Deep Learning, chưa mở rộng nhiều domain
-
-### Hướng phát triển
-
-- Chạy IRT calibration job với dữ liệu interaction thực để nâng cấp mastery scoring
-- Thêm domain mới (NLP, Mathematics, Programming)
-- Mở rộng AI Agent với thêm tools (web search, document retrieval)
-- A/B testing prompt versions để tối ưu chất lượng AI tutor
-- Dashboard cho giáo viên theo dõi tiến độ lớp học
-- Mobile app (React Native)
+Xem `.env.example` de biet day du cac bien moi truong.
 
 ---
 
-## Technical Reference
+## :joystick: 9. Cach su dung san pham
 
-Các tài liệu kỹ thuật chi tiết:
+### Luong chinh: Hoc tap thich ung
+
+| Buoc | Hanh dong | Mo ta |
+|:---:|---|---|
+| 1 | :door: **Dang ky / Dang nhap** | Tao tai khoan hoac dang nhap |
+| 2 | :dart: **Onboarding** | Chon muc tieu hoc (Deep Learning, Computer Vision, NLP) |
+| 3 | :pencil: **Placement Assessment** | Lam bai danh gia dau vao (5-10 cau) de xac dinh level |
+| 4 | :world_map: **Xem lo trinh** | He thong de xuat lo trinh ca nhan hoa dua tren ket qua |
+| 5 | :books: **Hoc bai** | Xem video bai giang, doc noi dung, hoi AI Tutor bat cu luc nao |
+| 6 | :pencil2: **Lam quiz** | Sau moi bai hoc, lam mini quiz de kiem tra hieu bai |
+| 7 | :bulb: **Xem feedback** | Nhan giai thich chi tiet cho tung cau tra loi |
+| 8 | :arrows_counterclockwise: **Cap nhat lo trinh** | He thong tu dong dieu chinh lo trinh dua tren ket qua moi |
+
+### :bust_in_silhouette: Tai khoan demo
+
+| | |
+|---|---|
+| **Email** | `demo@vinuni.edu.vn` |
+| **Password** | `DemoPass123!` |
+
+---
+
+## :movie_camera: 10. Demo va ket qua
+
+| Hang muc | Link / Thong tin |
+|---|---|
+| :globe_with_meridians: **Live URL** | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
+| :clapper: **Video Demo** | _Dang cap nhat_ |
+| :white_check_mark: **Evaluation Report** | [docs/evaluation-report.md](docs/evaluation-report.md) |
+| :robot: **AI Logs** | [docs/ai-logs.md](docs/ai-logs.md) |
+| :test_tube: **Golden Eval Dataset** | 50+ test cases ([docs/agent-golden-evals.md](docs/agent-golden-evals.md)) |
+| :shield: **Guardrail Router** | 13,513 samples safety/topic classification |
+
+---
+
+## :bar_chart: 11. Evaluation
+
+> Chi tiet: [**docs/evaluation-report.md**](docs/evaluation-report.md)
+
+| Loai danh gia | So luong | Mo ta |
+|---|---|---|
+| :white_check_mark: API Contract Tests | 13+ | Kiem tra HTTP route contracts |
+| :gear: Service Logic Tests | 10+ | Kiem tra business logic |
+| :robot: Golden Eval Cases | 50+ | Kiem tra hanh vi AI Agent (10+ categories) |
+| :shield: Guardrail Dataset | 13,513 | Kiem tra phan loai safety/topic |
+| :arrows_counterclockwise: Integration Tests | 5+ | Kiem tra luong end-to-end |
+
+**Failure cases** va cach xu ly duoc ghi nhan trong [docs/evaluation-report.md](docs/evaluation-report.md).
+
+---
+
+## :busts_in_silhouette: 12. Team & Phan cong cong viec
+
+| Thanh vien | Vai tro | Cong viec chinh |
+|---|---|---|
+| _Ten thanh vien 1_ | _Vai tro_ | _Mo ta cong viec_ |
+| _Ten thanh vien 2_ | _Vai tro_ | _Mo ta cong viec_ |
+| _Ten thanh vien 3_ | _Vai tro_ | _Mo ta cong viec_ |
+| _Ten thanh vien 4_ | _Vai tro_ | _Mo ta cong viec_ |
+
+> :pencil2: Vui long cap nhat bang tren voi thong tin thuc te cua team.
+
+---
+
+## :crystal_ball: 13. Han che va huong phat trien
+
+### Han che hien tai
+
+| # | Han che | Ghi chu |
+|---|---|---|
+| 1 | IRT/BKT mastery scoring dang o phase-1 | Chua co calibration job voi du lieu thuc |
+| 2 | Golden eval dataset kiem tra hanh vi expected | Chua do live model accuracy/latency |
+| 3 | Route contract test suite co loi request hang | Service-level tests la regression signal chinh |
+| 4 | Noi dung hoc tap trung Computer Vision / Deep Learning | Chua mo rong nhieu domain |
+
+### Huong phat trien
+
+| # | Ke hoach | Gia tri |
+|---|---|---|
+| 1 | :chart_with_upwards_trend: Chay IRT calibration voi du lieu thuc | Nang cap mastery scoring chinh xac |
+| 2 | :books: Them domain moi (NLP, Math, Programming) | Mo rong pham vi hoc tap |
+| 3 | :mag: Mo rong AI Agent tools (web search, doc retrieval) | Agent thong minh hon |
+| 4 | :test_tube: A/B testing prompt versions | Toi uu chat luong AI tutor |
+| 5 | :chart_with_upwards_trend: Dashboard cho giao vien | Theo doi tien do lop hoc |
+| 6 | :iphone: Mobile app (React Native) | Ho tro hoc tren dien thoai |
+
+---
+
+<details>
+<summary><strong>:books: Technical Reference (click de mo)</strong></summary>
+
+### Tai lieu ky thuat chi tiet
 
 - [Production DB Integration Handoff](docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md)
 - [Schema Branch Snapshot](docs/SCHEMA_BRANCH_SNAPSHOT_2026-04-23.md)
@@ -262,9 +323,7 @@ Các tài liệu kỹ thuật chi tiết:
 
 ### Current Production Contract
 
-The active runtime schema is canonical and course-first. Do not build new product logic on the old `modules`, `topics`, `questions`, `mastery_scores`, or `learning_paths` tables; those runtime tables have been dropped from the production schema.
-
-Authoritative layers:
+The active runtime schema is canonical and course-first. Do not build new product logic on the old `modules`, `topics`, `questions`, `mastery_scores`, or `learning_paths` tables.
 
 | Layer | Active tables / artifacts | Purpose |
 |---|---|---|
@@ -299,15 +358,15 @@ deploy-ecs/                          AWS ECS deployment (Terraform, task defs, o
 
 ### API Surface
 
-| Area | Endpoints | Mô tả |
+| Area | Endpoints | Mo ta |
 |---|---|---|
-| Auth/Onboarding | `/api/auth/*`, `/api/users/me/onboarding` | Đăng ký, đăng nhập, forgot password, onboarding goals |
-| Content | `/api/course-sections`, `/api/learning-units/{id}/content` | Course catalog và learning unit content |
-| Quiz | `/api/quiz/start`, `/api/quiz/{id}/answer`, `/api/quiz/{id}/complete` | Mini quiz với canonical question bank |
-| Assessment | `/api/assessment/start`, `/api/assessment/{id}/submit`, `/api/assessment/{id}/results` | Placement assessment và results |
+| Auth/Onboarding | `/api/auth/*`, `/api/users/me/onboarding` | Dang ky, dang nhap, forgot password, onboarding goals |
+| Content | `/api/course-sections`, `/api/learning-units/{id}/content` | Course catalog va learning unit content |
+| Quiz | `/api/quiz/start`, `/api/quiz/{id}/answer`, `/api/quiz/{id}/complete` | Mini quiz voi canonical question bank |
+| Assessment | `/api/assessment/start`, `/api/assessment/{id}/submit`, `/api/assessment/{id}/results` | Placement assessment va results |
 | Learning Path | `/api/learning-path/generate`, `/api/learning-path`, `/api/learning-path/timeline` | Adaptive learning path generation |
-| Learning Session | `/api/learning-session/resume`, `/api/learning-session/learning-units/{id}/progress` | Abandon/resume và progress tracking |
-| AI Tutor | `/api/lectures/ask`, `/api/lectures/{qa_id}/rate` | Lecture Q&A streaming với rating |
+| Learning Session | `/api/learning-session/resume`, `/api/learning-session/learning-units/{id}/progress` | Abandon/resume va progress tracking |
+| AI Tutor | `/api/lectures/ask`, `/api/lectures/{qa_id}/rate` | Lecture Q&A streaming voi rating |
 | History | `/api/history`, `/api/history/{id}/detail` | Interaction history |
 
 ### LLM Tracing
@@ -354,3 +413,11 @@ Demo accounts: `@vinuni.edu.vn`, password `DemoPass123!`
 - Do not commit `.ai-log/*.jsonl`
 - Do not reintroduce dropped legacy runtime tables
 - Keep new logic KP-level and learning-unit-level
+
+</details>
+
+---
+
+<div align="center">
+  <sub>Built with :heart: by Team A20-App-049 | AI20K Build Phase 2026</sub>
+</div>
