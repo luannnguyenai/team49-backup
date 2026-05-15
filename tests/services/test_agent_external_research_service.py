@@ -4,12 +4,12 @@ import logging
 import pytest
 
 from src.schemas.agent import AgentCitation
+from src.services.agent_external_citation_manager import ExternalCitationManager
 from src.services.agent_external_research_service import (
     AgentExternalResearchService,
     ExternalResearchDocument,
     SearchPlan,
 )
-from src.services.agent_external_citation_manager import ExternalCitationManager
 from src.services.agentic_rag_contracts import AgenticRAGFinal
 
 
@@ -128,6 +128,14 @@ def test_external_research_plans_clean_cnn_queries_with_domain_context():
     plan = service._plan_search("tìm thông tin về CNN")
 
     assert plan == SearchPlan(tools=("web", "paper"), queries=("CNN machine learning",))
+
+
+def test_external_research_plans_clean_vietnamese_paper_topic_queries():
+    service = AgentExternalResearchService()
+
+    plan = service._plan_search("tôi muốn tìm các paper liên quan về chủ đề Attention")
+
+    assert plan == SearchPlan(tools=("web", "paper"), queries=("Attention machine learning",))
 
 
 def test_semantic_scholar_rate_limit_lock_is_initialized_eagerly():
