@@ -126,6 +126,28 @@ describe("password reset flow", () => {
     });
   });
 
+  it("reset password accepts a short test password", async () => {
+    currentSearchParams = new URLSearchParams("token=reset-token-123");
+    vi.mocked(authApi.confirmPasswordReset).mockResolvedValue({ status: "ok" });
+
+    render(<ResetPasswordForm />);
+
+    fireEvent.change(screen.getByLabelText("New password"), {
+      target: { value: "x" },
+    });
+    fireEvent.change(screen.getByLabelText("Confirm new password"), {
+      target: { value: "x" },
+    });
+    fireEvent.submit(screen.getByRole("button", { name: "Reset password" }).closest("form")!);
+
+    await waitFor(() => {
+      expect(authApi.confirmPasswordReset).toHaveBeenCalledWith({
+        token: "reset-token-123",
+        new_password: "x",
+      });
+    });
+  });
+
   it("login shows password reset success banner", () => {
     currentSearchParams = new URLSearchParams("reset=success");
 
