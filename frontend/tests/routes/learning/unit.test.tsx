@@ -1199,6 +1199,8 @@ describe("learning unit page (US3)", () => {
     const search = screen.getByLabelText("Search courses");
     const tutorLink = screen.getByRole("link", { name: "AI Assistant" });
 
+    expect(brand).toHaveAttribute("href", "/dashboard");
+
     const headerRow = brand.closest("header")?.firstElementChild;
     expect(headerRow).not.toBeNull();
     expect(headerRow?.contains(brand)).toBe(true);
