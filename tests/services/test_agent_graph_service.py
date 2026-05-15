@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+import json
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
@@ -20,6 +21,7 @@ from src.services.agentic_rag_contracts import AgenticRAGFinal, AgenticRAGObserv
 from src.services.agent_graph_router import DeterministicAgentRouter
 from src.services.agent_graph_service import AgentGraphService
 from src.services.agent_memory_compaction_service import AgentMemoryCompactionService
+from src.services.language_normalization import LanguageNormalizationResult
 
 pytestmark = pytest.mark.asyncio
 
@@ -67,6 +69,64 @@ class NoopLock:
 
     async def __aexit__(self, exc_type, exc, tb):
         return None
+
+
+async def test_enforce_response_language_strips_unexpected_script_words():
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=SimpleNamespace(),
+    )
+    response = AgentChatResponse(
+        conversation_id=str(uuid4()),
+        message_id=str(uuid4()),
+        answer=AgentAnswer(
+            markdown="Ước tính cho CS230 בלבד là khoảng 230 tuần.",
+            confidence="partial",
+        ),
+    )
+
+    cleaned = await service._enforce_response_language(
+        response,
+        LanguageNormalizationResult(
+            original_text="bao lâu",
+            normalized_text="bao lâu",
+            detected_language="vi",
+            target_language="vi",
+        ),
+    )
+
+    assert "בלבד" not in cleaned.answer.markdown
+    assert "CS230 là khoảng 230 tuần" in cleaned.answer.markdown
+
+
+async def test_enforce_response_language_strips_additional_unexpected_scripts():
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=SimpleNamespace(),
+    )
+    response = AgentChatResponse(
+        conversation_id=str(uuid4()),
+        message_id=str(uuid4()),
+        answer=AgentAnswer(
+            markdown="Dữ liệu hiện có chỉ ցույց ra nội dung bài giảng.",
+            confidence="partial",
+        ),
+    )
+
+    cleaned = await service._enforce_response_language(
+        response,
+        LanguageNormalizationResult(
+            original_text="video này có quiz không?",
+            normalized_text="video này có quiz không?",
+            detected_language="vi",
+            target_language="vi",
+        ),
+    )
+
+    assert "ցույց" not in cleaned.answer.markdown
+    assert "Dữ liệu hiện có chỉ ra nội dung bài giảng." in cleaned.answer.markdown
 
 
 class NoopThreadLock:
@@ -597,6 +657,150 @@ async def test_graph_delegates_supported_router_to_agentic_rag_pipeline():
         "observe",
         "respond",
     ]
+
+
+async def test_graph_delegates_progress_intent_to_agentic_rag_user_context_tool():
+    calls = []
+    user_id = uuid4()
+
+    class UserLearningContext:
+        async def snapshot(self, **kwargs):
+            calls.append(("snapshot", kwargs["user_id"], kwargs["context_kind"]))
+            return {
+                "context_kind": kwargs["context_kind"],
+                "progress_summary": {"completed_units": 18, "in_progress_units": 2},
+                "weak_knowledge_points": [{"name": "optimization", "mastery_lcb": 0.31}],
+            }
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="summarize_progress",
+                confidence=0.91,
+                extracted_slots=AgentSlots(),
+            )
+
+        def rag_think(self, **kwargs):
+            calls.append(("think", kwargs["intent"]))
+            return {"user_goal": "Summarize progress", "active_topic": None}
+
+        def rag_act(self, **kwargs):
+            calls.append(("act", kwargs["message"]))
+            return AgenticRAGToolCall(
+                tool="get_user_learning_context",
+                arguments={"context_kind": "weak_areas"},
+                rationale="Need authenticated learner progress.",
+            )
+
+        def rag_observe(self, **kwargs):
+            return kwargs["tool_observation"]
+
+        def rag_respond(self, **kwargs):
+            context = kwargs["observations"][0]["result"]["metadata"]["learner_context"]
+            return AgenticRAGFinal(
+                answer_markdown=(
+                    f"Completed {context['progress_summary']['completed_units']} units; "
+                    f"weak area: {context['weak_knowledge_points'][0]['name']}."
+                ),
+                evidence_status="partial",
+                evidence_sufficient=True,
+            )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        action_user=SimpleNamespace(id=user_id),
+        user_learning_context_service=UserLearningContext(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(message="mình yếu phần nào?", incomingMessageId="msg-user-context"),
+        conversation_id=str(uuid4()),
+        thread_id="thread-user-context",
+        user_id=str(user_id),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert response.answer.markdown == "Completed 18 units; weak area: optimization."
+    assert ("snapshot", user_id, "weak_areas") in calls
+    assert [call[0] for call in calls if call[0] in {"think", "act", "snapshot"}] == [
+        "think",
+        "act",
+        "snapshot",
+    ]
+
+
+async def test_graph_uses_user_context_when_progress_route_needs_low_confidence_repair():
+    calls = []
+    user_id = uuid4()
+
+    class UserLearningContext:
+        async def snapshot(self, **kwargs):
+            calls.append(("snapshot", kwargs["context_kind"]))
+            return {
+                "context_kind": kwargs["context_kind"],
+                "progress_summary": {"completed_units": 18},
+                "weak_knowledge_points": [{"name": "supervised learning"}],
+            }
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="clarify",
+                candidate_intent="summarize_progress",
+                confidence=0.52,
+                extracted_slots=AgentSlots(),
+                clarification_question="Please provide your current progress.",
+            )
+
+        def rag_think(self, **kwargs):
+            calls.append(("think", kwargs["intent"]))
+            return {"user_goal": "Diagnose weak areas from saved progress"}
+
+        def rag_act(self, **kwargs):
+            calls.append(("act", kwargs["message"]))
+            return AgenticRAGToolCall(
+                tool="get_user_learning_context",
+                arguments={"context_kind": "weak_areas"},
+                rationale="Use authenticated learner context instead of asking the user to restate progress.",
+            )
+
+        def rag_observe(self, **kwargs):
+            return kwargs["tool_observation"]
+
+        def rag_respond(self, **kwargs):
+            context = kwargs["observations"][0]["result"]["metadata"]["learner_context"]
+            return AgenticRAGFinal(
+                answer_markdown=f"Bạn đang yếu ở {context['weak_knowledge_points'][0]['name']}.",
+                evidence_status="partial",
+                evidence_sufficient=True,
+            )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        action_user=SimpleNamespace(id=user_id),
+        user_learning_context_service=UserLearningContext(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="mình yếu phần nào? dựa trên tiến độ học của mình",
+            incomingMessageId="msg-user-context-low-confidence",
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-user-context-low-confidence",
+        user_id=str(user_id),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert response.answer.markdown == "Bạn đang yếu ở supervised learning."
+    assert ("think", "summarize_progress") in calls
+    assert ("snapshot", "weak_areas") in calls
 
 
 async def test_agentic_rag_pins_active_citation_for_short_followup():
@@ -1229,6 +1433,301 @@ async def test_graph_promotes_short_followup_with_active_citation_out_of_clarify
     )
 
     assert response.answer.markdown == "Contextual follow-up answer for Single-stage and transformer detectors: YOLO and DETR."
+
+
+async def test_graph_promotes_current_lesson_route_context_out_of_clarify_route():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="clarify",
+                confidence=0.48,
+                extracted_slots=AgentSlots(),
+                candidate_intent="find_content",
+                clarification_question="Which lesson do you mean?",
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown=f"Current lesson answer for {citations[0]['unit_name']}.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    search_queries: list[str] = []
+
+    async def search(request, allowed_course_ids):
+        search_queries.append(request.query)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="canonical-lecture-1",
+                    course_id="CS231n",
+                    unit_name="Lecture 1: Introduction",
+                    summary="Introductory computer vision content.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs231n/learn/lecture-1-introduction",
+                )
+            ],
+            trace=RetrievalTrace(
+                trace_id="trace-route-context-promoted",
+                ranking_version="unit_title_search_v1",
+            ),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="tóm tắt video này",
+            incomingMessageId="msg-promote-route-context",
+            routeContext={
+                "route": "/learn",
+                "unitSlug": "lecture-1-introduction",
+                "canonicalUnitId": "canonical-lecture-1",
+                "playerTimestampSec": 300,
+            },
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-promote-route-context",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS231n"],
+        current_path_course_ids=["CS231n"],
+    )
+
+    assert response.answer.markdown == "Current lesson answer for Lecture 1: Introduction."
+    assert "lecture 1 introduction" in search_queries
+    assert "canonical-lecture-1" in search_queries
+
+
+async def test_graph_promotes_long_current_video_summary_with_route_context():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="clarify",
+                confidence=0.42,
+                extracted_slots=AgentSlots(),
+                candidate_intent="find_content",
+                clarification_question="Which video should I summarize?",
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown=f"Current video summary for {citations[0]['unit_name']}.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    search_queries: list[str] = []
+
+    async def search(request, allowed_course_ids):
+        search_queries.append(request.query)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="canonical-lecture-2-seg3",
+                    course_id="CS230",
+                    unit_name="Day & Night classification as a supervised design exercise",
+                    summary="The unit covers day/night image classification design choices.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs230/learn/lecture-02-seg3",
+                )
+            ],
+            trace=RetrievalTrace(
+                trace_id="trace-long-current-video",
+                ranking_version="unit_title_search_v1",
+            ),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="mình vừa xem tới nửa video, tóm tắt nội dung video này giúp mình",
+            incomingMessageId="msg-long-current-video",
+            routeContext={
+                "route": "/learn",
+                "unitSlug": "lecture-02-supervised-learning-seg3",
+                "canonicalUnitId": "canonical-lecture-2-seg3",
+                "playerTimestampSec": 1132,
+            },
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-long-current-video",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert response.answer.markdown == (
+        "Current video summary for Day & Night classification as a supervised design exercise."
+    )
+    assert "lecture 02 supervised learning seg3" in search_queries
+    assert "canonical-lecture-2-seg3" in search_queries
+
+
+async def test_graph_uses_current_lesson_route_context_when_rag_route_has_empty_topic():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="find_content",
+                confidence=0.72,
+                extracted_slots=AgentSlots(),
+                candidate_intent=None,
+                clarification_question=None,
+            )
+
+        def compose_grounded_answer(self, message, citations):
+            return SimpleNamespace(
+                answer_markdown=f"Natural current lesson answer for {citations[0]['unit_name']}.",
+                evidence_sufficient=True,
+                confidence="grounded",
+                clarification_question=None,
+            )
+
+    search_queries: list[str] = []
+
+    async def search(request, allowed_course_ids):
+        search_queries.append(request.query)
+        return UnitSearchResponse(
+            results=[
+                UnitSearchResult(
+                    canonical_unit_id="canonical-lecture-1",
+                    course_id="CS230",
+                    unit_name="Day & Night classification as a supervised design exercise",
+                    summary="This unit discusses day/night image classification.",
+                    score=3,
+                    quiz_available=True,
+                    learn_href="/courses/cs230/learn/lecture-02-seg3",
+                )
+            ],
+            trace=RetrievalTrace(
+                trace_id="trace-route-context-empty-topic",
+                ranking_version="unit_title_search_v1",
+            ),
+        )
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(search=search),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="tóm tắt video này giúp mình",
+            incomingMessageId="msg-route-context-empty-topic",
+            routeContext={
+                "route": "/learn",
+                "unitSlug": "lecture-02-supervised-learning-seg3",
+                "canonicalUnitId": "canonical-lecture-1",
+            },
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-route-context-empty-topic",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert response.answer.markdown == (
+        "Natural current lesson answer for Day & Night classification as a supervised design exercise."
+    )
+    assert "lecture 02 supervised learning seg3" in search_queries
+    assert "canonical-lecture-1" in search_queries
+
+
+async def test_graph_preserves_raw_topic_and_adds_current_unit_context():
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="explain_concept",
+                confidence=0.8,
+                extracted_slots=AgentSlots(
+                    raw_topic="day/night classification",
+                    search_queries=["day/night classification"],
+                ),
+            )
+
+        def rag_think(self, **kwargs):
+            return {"user_goal": "Explain current segment", "active_topic": "day/night classification"}
+
+        def rag_act(self, **kwargs):
+            assert kwargs["slots"].raw_topic == "day/night classification"
+            assert kwargs["slots"].canonical_unit_ids == ["canonical-lecture-2-seg3"]
+            return AgenticRAGToolCall(
+                tool="get_lecture_context",
+                arguments={"canonical_unit_id": "bad-model-argument"},
+            )
+
+        def rag_observe(self, **kwargs):
+            return kwargs["tool_observation"]
+
+        def rag_respond(self, **kwargs):
+            citations = kwargs["observations"][0]["result"]["citations"]
+            return AgenticRAGFinal(
+                answer_markdown=f"Explained using {citations[0]['unit_name']}.",
+                evidence_status="grounded",
+                evidence_sufficient=True,
+            )
+
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            if canonical_unit_id != "canonical-lecture-2-seg3":
+                return None
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "source": "unit_summaries",
+                "lecture_summary": None,
+                "units": [
+                    {
+                        "canonical_unit_id": "canonical-lecture-2-seg3",
+                        "course_id": "CS230",
+                        "lecture_id": "lecture-02",
+                        "lecture_title": "Lecture 2",
+                        "unit_name": "Day & Night classification",
+                        "summary": "Design choices for day/night classification.",
+                    }
+                ],
+            }
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(repo=Repo()),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+    )
+
+    response = await service.chat(
+        request=AgentChatRequest(
+            message="giải thích phần day/night classification trong video này dễ hiểu hơn",
+            incomingMessageId="msg-current-topic-with-route-context",
+            routeContext={
+                "route": "/learn",
+                "unitSlug": "lecture-02-supervised-learning-seg3",
+                "canonicalUnitId": "canonical-lecture-2-seg3",
+            },
+        ),
+        conversation_id=str(uuid4()),
+        thread_id="thread-current-topic-with-route-context",
+        user_id=str(uuid4()),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert response.answer.markdown == "Explained using Day & Night classification."
 
 
 async def test_graph_does_not_promote_clarify_route_when_message_names_new_acronym_topic():
@@ -4242,6 +4741,51 @@ async def test_graph_chat_stream_persists_pending_replan_action_with_checkpoint_
     assert kwargs["idempotency_key"] == "thread-replan-stream:msg-replan:request_replan"
     assert any('"done"' in event and '"act-replan"' in event for event in events)
     assert not any("AGENT_STREAM_ERROR" in event for event in events)
+
+
+async def test_graph_chat_stream_replan_proposal_matches_vietnamese_message_language():
+    conversation_id = str(uuid4())
+    user_id = str(uuid4())
+
+    class Router:
+        def route(self, message, route_context, recent_messages=None):
+            return AgentRoute(
+                intent="request_replan",
+                confidence=0.95,
+                extracted_slots=AgentSlots(),
+                rationale="replan",
+            )
+
+    async def create_pending_action(**kwargs):
+        return SimpleNamespace(action_id="act-replan-vi", **kwargs)
+
+    service = AgentGraphService(
+        search_service=SimpleNamespace(),
+        requirement_service=SimpleNamespace(),
+        router=Router(),
+        graph_repo=SimpleNamespace(create_pending_action=AsyncMock(side_effect=create_pending_action)),
+        thread_lock=NoopThreadLock(),
+    )
+
+    events = []
+    stream = await service.chat_stream(
+        request=AgentChatRequest(
+            message="Tối ưu lộ trình vì mình đã biết CNN rồi",
+            incomingMessageId="msg-replan-vi",
+        ),
+        conversation_id=conversation_id,
+        thread_id="thread-replan-vi",
+        user_id=user_id,
+        allowed_course_ids=["CS231n"],
+    )
+    async for line in stream:
+        events.append(line)
+
+    done_payload = next(json.loads(event)["done"] for event in events if '"done"' in event)
+    answer = done_payload["answer"]["markdown"]
+    assert "Mở" in answer
+    assert "scope builder" not in answer
+    assert "Open scope builder" not in str(done_payload)
 
 
 async def test_graph_chat_stream_persists_assistant_citations_for_source_cards():
