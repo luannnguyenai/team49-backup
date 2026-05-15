@@ -17,9 +17,7 @@ const schema = z
   .object({
     new_password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/\d/, "Password must contain at least 1 number")
-      .regex(/[a-zA-Z]/, "Password must contain at least 1 letter"),
+      .min(1, "Password is required"),
     confirm_password: z.string(),
   })
   .refine((d) => d.new_password === d.confirm_password, {
