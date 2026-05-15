@@ -1,6 +1,28 @@
-# AI Adaptive Learning Platform
+<div align="center">
+  <img src="./heroimage.png" alt="AI Adaptive Learning Platform" width="800"/>
 
-Nền tảng học tập thích ứng sử dụng AI, giúp cá nhân hóa lộ trình học cho từng học sinh dựa trên năng lực thực tế.
+  # AI Adaptive Learning Platform
+
+  **Nền tảng học tập thích ứng sử dụng AI — cá nhân hóa lộ trình học cho từng học sinh dựa trên năng lực thực tế.**
+
+  [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+  [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+  [![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+  [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+  [![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)](https://redis.io/)
+  [![LangChain](https://img.shields.io/badge/LangChain-LangGraph-1C3C3C?logo=langchain&logoColor=white)](https://www.langchain.com/)
+  [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+  [![AWS](https://img.shields.io/badge/AWS-ECS%2FFargate-FF9900?logo=amazonecs&logoColor=white)](https://aws.amazon.com/ecs/)
+  [![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?logo=terraform&logoColor=white)](https://www.terraform.io/)
+  [![License](https://img.shields.io/badge/License-Private-red)]()
+
+  [🚀 Live Demo](https://a20-app-049.io.vn) • [📖 Architecture](docs/architecture.md) • [🤖 AI Logs](docs/ai-logs.md) • [📊 Evaluation](docs/evaluation-report.md) • [📋 Worklog](docs/WORKLOG.md)
+
+</div>
+
+---
 
 ## Quick Links
 
