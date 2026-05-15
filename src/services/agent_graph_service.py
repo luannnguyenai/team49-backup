@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+import unicodedata
 from datetime import UTC, datetime, timedelta
 from inspect import signature
 from types import SimpleNamespace
@@ -71,7 +72,18 @@ RAG_AGENT_INTENTS = {
     "explain_concept",
     "general_course_question",
     "navigate_to_unit",
+    "ask_what_next",
+    "explain_planner_decision",
+    "summarize_progress",
 }
+
+USER_CONTEXT_AGENT_INTENTS = {
+    "ask_what_next",
+    "explain_planner_decision",
+    "summarize_progress",
+}
+
+USER_CONTEXT_RAG_MIN_CONFIDENCE = 0.0
 
 EXACT_GREETING_RESPONSES = {
     "Hello": "Hi! What AI/ML topic would you like help with today?",
@@ -148,6 +160,7 @@ class AgentGraphService:
         guardrail_router=None,
         language_normalizer=None,
         response_router=None,
+        user_learning_context_service=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -181,6 +194,7 @@ class AgentGraphService:
         self.pii_guardrail = pii_guardrail_service or PIIGuardrailService()
         self.guardrail_router = guardrail_router or build_guardrail_router_client()
         self.language_normalizer = language_normalizer or get_input_language_normalizer()
+        self.user_learning_context_service = user_learning_context_service
         prerequisite_path_service = None
         if hasattr(search_service, "repo"):
             prerequisite_path_service = AgentPrerequisitePathService(
@@ -192,6 +206,7 @@ class AgentGraphService:
             requirement_service,
             prerequisite_path_service=prerequisite_path_service,
             user_id=getattr(action_user, "id", None),
+            user_learning_context_service=user_learning_context_service,
         )
         self.agentic_rag_tools = AgenticRAGToolExecutor(self.tools)
         self.agentic_rag = AgenticRAGPipeline(
@@ -278,15 +293,33 @@ class AgentGraphService:
         slots = state.get("slots")
         if isinstance(slots, dict):
             slots = AgentSlots.model_validate(slots)
+        effective_intent = self._effective_rag_intent(state)
         return (
             isinstance(policy, PolicyDecision)
             and policy.allow
-            and state.get("intent") in RAG_AGENT_INTENTS
-            and float(state.get("intent_confidence") or 0.0) >= 0.65
+            and effective_intent is not None
             and isinstance(slots, AgentSlots)
             and not slots.ambiguity_options
-            and bool((slots.raw_topic or "").strip())
+            and (
+                bool((slots.raw_topic or "").strip())
+                or bool(slots.canonical_unit_ids)
+                or effective_intent in USER_CONTEXT_AGENT_INTENTS
+            )
         )
+
+    def _effective_rag_intent(self, state: dict) -> str | None:
+        intent = state.get("intent")
+        confidence = float(state.get("intent_confidence") or 0.0)
+        if intent in RAG_AGENT_INTENTS and confidence >= 0.65:
+            return intent
+        candidate_intent = state.get("candidate_intent")
+        if (
+            intent == "clarify"
+            and candidate_intent in USER_CONTEXT_AGENT_INTENTS
+            and confidence >= USER_CONTEXT_RAG_MIN_CONFIDENCE
+        ):
+            return candidate_intent
+        return None
 
     async def chat(
         self,
@@ -645,12 +678,13 @@ class AgentGraphService:
 
                 should_rag = self._should_use_rag_react(policy_state)
                 supports_agentic = self._router_supports_agentic_rag()
+                effective_rag_intent = self._effective_rag_intent(policy_state) or intent
 
                 if should_rag and supports_agentic:
                     slots = self._slots_with_active_citation_for_followup(policy_state, slots)
                     async for event in self.agentic_rag.run_stream(
                         message=sanitized_request.message,
-                        intent=intent,
+                        intent=effective_rag_intent,
                         slots=slots,
                         route_context=policy_state.get("route_context"),
                         recent_messages=policy_state.get("recent_messages") or [],
@@ -1024,6 +1058,14 @@ class AgentGraphService:
         response: AgentChatResponse,
         language: LanguageNormalizationResult,
     ) -> AgentChatResponse:
+        cleaned = self._strip_unexpected_script_words(
+            response.answer.markdown,
+            target_language=language.target_language,
+        )
+        if cleaned != response.answer.markdown:
+            response = response.model_copy(
+                update={"answer": response.answer.model_copy(update={"markdown": cleaned})}
+            )
         if language.target_language != "en" or not response.answer.markdown.strip():
             return response
         detect = getattr(self.language_normalizer, "detect", None)
@@ -1051,6 +1093,54 @@ class AgentGraphService:
             return response
         return response.model_copy(
             update={"answer": response.answer.model_copy(update={"markdown": translated})}
+        )
+
+    @classmethod
+    def _strip_unexpected_script_words(cls, text: str, *, target_language: str) -> str:
+        if target_language not in {"en", "vi"} or not text:
+            return text
+        cleaned_chars = [
+            "" if cls._is_unexpected_script_letter(char) else char
+            for char in text
+        ]
+        cleaned = "".join(cleaned_chars)
+        cleaned = re.sub(r"[ \t]{2,}", " ", cleaned)
+        cleaned = re.sub(r"\s+([,.;:!?])", r"\1", cleaned)
+        return cleaned
+
+    @staticmethod
+    def _is_unexpected_script_letter(char: str) -> bool:
+        if not char.isalpha():
+            return False
+        name = unicodedata.name(char, "")
+        return any(
+            script in name
+            for script in (
+                "HEBREW",
+                "ARABIC",
+                "CYRILLIC",
+                "CJK",
+                "HIRAGANA",
+                "KATAKANA",
+                "HANGUL",
+                "ARMENIAN",
+                "GEORGIAN",
+                "DEVANAGARI",
+                "BENGALI",
+                "GURMUKHI",
+                "GUJARATI",
+                "ORIYA",
+                "TAMIL",
+                "TELUGU",
+                "KANNADA",
+                "MALAYALAM",
+                "SINHALA",
+                "THAI",
+                "LAO",
+                "KHMER",
+                "MYANMAR",
+                "ETHIOPIC",
+            )
         )
 
     async def _invoke_graph_and_compose(
@@ -1186,6 +1276,7 @@ class AgentGraphService:
             self._route_with_recent_context(state["message"], state),
             state,
         )
+        route = self._apply_current_lesson_context_to_rag_route(route, state)
         return {
             **state,
             "intent": route.intent,
@@ -1194,6 +1285,42 @@ class AgentGraphService:
             "clarification_question": route.clarification_question,
             "candidate_intent": route.candidate_intent,
         }
+
+    def _apply_current_lesson_context_to_rag_route(
+        self,
+        route: AgentRoute,
+        state: dict,
+    ) -> AgentRoute:
+        if route.intent not in RAG_AGENT_INTENTS:
+            return route
+        if route.intent in USER_CONTEXT_AGENT_INTENTS:
+            return route
+        slots = route.extracted_slots
+        if self._message_names_explicit_acronym_topic(state.get("message")):
+            return route
+        context_topic = self._route_context_search_topic(state)
+        if context_topic is None:
+            return route
+        slot_updates: dict[str, Any] = {}
+        if not slots.canonical_unit_ids:
+            slot_updates["canonical_unit_ids"] = context_topic["canonical_unit_ids"]
+        if not (slots.raw_topic or slots.search_queries):
+            slot_updates.update(
+                {
+                    "raw_topic": context_topic["raw_topic"],
+                    "search_queries": context_topic["search_queries"],
+                    "search_scope": "current_path",
+                }
+            )
+        if not slot_updates:
+            return route
+        return route.model_copy(
+            update={
+                "confidence": max(route.confidence, 0.8),
+                "extracted_slots": slots.model_copy(update=slot_updates),
+                "clarification_question": None,
+            }
+        )
 
     def _resolve_pending_failed_request_retry(
         self,
@@ -1270,10 +1397,29 @@ class AgentGraphService:
     def _promote_contextual_rag_followup(self, route: AgentRoute, state: dict) -> AgentRoute:
         if route.intent != "clarify" or route.candidate_intent not in RAG_AGENT_INTENTS:
             return route
-        if len(str(state.get("message") or "").split()) > 8:
-            return route
         active = self._active_recent_citation(state)
         if active is None:
+            context_topic = self._route_context_search_topic(state)
+            if context_topic is not None:
+                if self._message_names_explicit_acronym_topic(state.get("message")):
+                    return route
+                return route.model_copy(
+                    update={
+                        "intent": route.candidate_intent or "find_content",
+                        "confidence": max(route.confidence, 0.8),
+                        "extracted_slots": AgentSlots(
+                            raw_topic=context_topic["raw_topic"],
+                            search_queries=context_topic["search_queries"],
+                            canonical_unit_ids=context_topic["canonical_unit_ids"],
+                            search_scope="current_path",
+                        ),
+                        "clarification_question": None,
+                    }
+                )
+            if len(str(state.get("message") or "").split()) > 8:
+                return route
+            return route
+        if len(str(state.get("message") or "").split()) > 8:
             return route
         if self._message_names_unmatched_explicit_topic(state.get("message"), active):
             return route
@@ -1289,6 +1435,32 @@ class AgentGraphService:
                 "clarification_question": None,
             }
         )
+
+    def _route_context_search_topic(self, state: dict) -> dict | None:
+        route_context = state.get("route_context")
+        unit_slug = self._value_from(route_context, "unit_slug") or self._value_from(
+            route_context, "unitSlug"
+        )
+        canonical_unit_id = self._value_from(
+            route_context, "canonical_unit_id"
+        ) or self._value_from(route_context, "canonicalUnitId")
+        if not unit_slug and not canonical_unit_id:
+            return None
+
+        search_queries: list[str] = []
+        if unit_slug:
+            search_queries.append(re.sub(r"[-_]+", " ", str(unit_slug)).strip())
+        if canonical_unit_id and str(canonical_unit_id) not in search_queries:
+            search_queries.append(str(canonical_unit_id))
+        search_queries = [query for query in search_queries if query]
+        if not search_queries:
+            return None
+        canonical_unit_ids = [str(canonical_unit_id)] if canonical_unit_id else []
+        return {
+            "raw_topic": search_queries[0],
+            "search_queries": search_queries[:5],
+            "canonical_unit_ids": canonical_unit_ids,
+        }
 
     def _resolve_pending_retrieval_query(
         self,
@@ -1616,9 +1788,10 @@ class AgentGraphService:
         if isinstance(slots, dict):
             slots = AgentSlots.model_validate(slots)
         slots = self._slots_with_active_citation_for_followup(state, slots)
+        effective_rag_intent = self._effective_rag_intent(state) or state["intent"]
         result = await self.agentic_rag.run(
             message=state["message"],
-            intent=state["intent"],
+            intent=effective_rag_intent,
             slots=slots,
             route_context=state.get("route_context"),
             recent_messages=state.get("recent_messages") or [],
@@ -2312,6 +2485,13 @@ class AgentGraphService:
                 return True
         return False
 
+    @staticmethod
+    def _message_names_explicit_acronym_topic(message: str | None) -> bool:
+        return any(
+            len(raw_term) > 2 and raw_term.isupper()
+            for raw_term in re.findall(r"[a-zA-Z][a-zA-Z0-9]*", str(message or ""))
+        )
+
     def _model_dump_like(self, value):
         if isinstance(value, dict):
             return value
@@ -2622,7 +2802,7 @@ class AgentGraphService:
             )
             return {**state, "tool_result": result}
         if state["intent"] == "request_replan":
-            result = await self.tools.replan_proposal()
+            result = await self.tools.replan_proposal(state.get("message", ""))
             result = await self._persist_pending_action_for_result(state, result, "request_replan")
             return {**state, "tool_result": result}
         if state["intent"] == "request_path_switch":
