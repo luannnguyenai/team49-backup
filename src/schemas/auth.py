@@ -22,17 +22,8 @@ class RegisterRequest(BaseModel):
     """POST /api/auth/register"""
 
     email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
+    password: str = Field(min_length=1, max_length=128)
     full_name: str = Field(min_length=1, max_length=255)
-
-    @field_validator("password")
-    @classmethod
-    def password_strength(cls, v: str) -> str:
-        if not any(c.isdigit() for c in v):
-            raise ValueError("Password must contain at least one digit.")
-        if not any(c.isalpha() for c in v):
-            raise ValueError("Password must contain at least one letter.")
-        return v
 
 
 class LoginRequest(BaseModel):
@@ -59,16 +50,7 @@ class ForgotPasswordConfirmRequest(BaseModel):
     """POST /api/auth/forgot-password/confirm"""
 
     token: str = Field(min_length=16, max_length=512)
-    new_password: str = Field(min_length=8, max_length=128)
-
-    @field_validator("new_password")
-    @classmethod
-    def password_strength(cls, v: str) -> str:
-        if not any(c.isdigit() for c in v):
-            raise ValueError("Password must contain at least one digit.")
-        if not any(c.isalpha() for c in v):
-            raise ValueError("Password must contain at least one letter.")
-        return v
+    new_password: str = Field(min_length=1, max_length=128)
 
 
 # ---------------------------------------------------------------------------

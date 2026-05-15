@@ -1,7 +1,7 @@
 "use client";
 // components/auth/LoginForm.tsx
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,7 +15,7 @@ import { useAuthStore } from "@/stores/authStore";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -25,6 +25,11 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error, clearError } = useAuthStore();
+
+  useEffect(() => {
+    clearError();
+    return clearError;
+  }, [clearError]);
 
   const {
     register,
