@@ -57,6 +57,18 @@ function scheduleRefresh(
   set({ _refreshTimer: timer });
 }
 
+function mergePersistedAuthState(persistedState: unknown, currentState: AuthState): AuthState {
+  if (!persistedState || typeof persistedState !== "object") return currentState;
+  const persisted = persistedState as Partial<Pick<AuthState, "user">>;
+  return {
+    ...currentState,
+    user: persisted.user ?? currentState.user,
+    error: null,
+    isLoading: false,
+    _refreshTimer: null,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Store
 // ---------------------------------------------------------------------------
@@ -180,6 +192,7 @@ export const useAuthStore = create<AuthState>()(
       // Only persist the user object — tokens live in cookies
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ user: state.user }),
+      merge: mergePersistedAuthState,
     }
   )
 );
