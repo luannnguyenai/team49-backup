@@ -21,6 +21,7 @@ import {
   learningSessionApi,
   quizApi,
 } from "@/lib/api";
+import { writeAgentRouteContext } from "@/features/agent/route-context";
 import MobileKeyIdeasSheet from "@/components/learn/MobileKeyIdeasSheet";
 import type {
   CourseUnitListItem,
@@ -633,6 +634,7 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   );
   const quizProgressRef = useRef<InlineQuizProgress>({});
   const lastWatchSyncRef = useRef(0);
+  const lastAgentContextSyncRef = useRef<string | null>(null);
   const inlineQuizSubmitPendingRef = useRef(false);
   const handledCheckpointHashRef = useRef<string | null>(null);
   const handledUnitSeekRef = useRef<string | null>(null);
@@ -641,6 +643,21 @@ export default function LearningUnitShell({ data, courseSlug }: LearningUnitShel
   useEffect(() => {
     quizProgressRef.current = inlineQuizProgress;
   }, [inlineQuizProgress]);
+
+  useEffect(() => {
+    const timestamp = Math.max(0, Math.round(currentTime || unit.start_seconds || 0));
+    const syncKey = `${unit.id}:${timestamp}`;
+    if (lastAgentContextSyncRef.current === syncKey) return;
+    lastAgentContextSyncRef.current = syncKey;
+    writeAgentRouteContext({
+      route: "/learn",
+      courseSlug,
+      unitSlug: unit.slug,
+      canonicalUnitId: unit.canonical_unit_id ?? undefined,
+      playerTimestampSec: timestamp,
+      savedAt: Date.now(),
+    });
+  }, [courseSlug, currentTime, unit.canonical_unit_id, unit.id, unit.slug, unit.start_seconds]);
 
   useEffect(() => {
     const leftPref = readPanelPreference(LEFT_PANEL_STORAGE_KEY, LEFT_PANEL_DEFAULT_WIDTH);
