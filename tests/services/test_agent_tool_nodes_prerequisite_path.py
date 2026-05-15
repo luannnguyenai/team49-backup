@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from uuid import UUID
 
 import pytest
@@ -12,6 +13,47 @@ from src.schemas.agent import (
 )
 from src.services.agent_graph_contracts import AgentSlots
 from src.services.agent_tool_nodes import AgentToolNodes
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_falls_back_to_slot_unit_when_model_argument_is_bad():
+    calls = []
+
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            calls.append(canonical_unit_id)
+            if canonical_unit_id != "slot-current":
+                return None
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {
+                        "canonical_unit_id": "slot-current",
+                        "course_id": "CS230",
+                        "lecture_id": "lecture-02",
+                        "lecture_title": "Lecture 2",
+                        "unit_name": "Day & Night classification",
+                        "summary": "Day/night classification design summary.",
+                    }
+                ],
+            }
+
+    tools = AgentToolNodes(SimpleNamespace(repo=Repo()), requirement_service=None)
+
+    result = await tools.lecture_context(
+        message="tóm tắt video này",
+        slots=AgentSlots(canonical_unit_ids=["slot-current"]),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        canonical_unit_id="lecture-02-supervised-learning",
+    )
+
+    assert calls == ["lecture-02-supervised-learning", "slot-current"]
+    assert result.citations[0].canonical_unit_id == "slot-current"
 
 
 class FakeSearchService:
