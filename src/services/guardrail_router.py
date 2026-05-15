@@ -338,13 +338,31 @@ def parse_guardrail_decision(value: Any) -> GuardrailDecision:
 def _normalize_guardrail_decision_payload(payload: dict[str, Any]) -> dict[str, Any]:
     normalized = dict(payload)
     safety_label = str(normalized.get("safety_label", "")).strip().upper()
+    if safety_label in {"ON_TOPIC", "OFF_TOPIC"}:
+        normalized["safety_label"] = (
+            "HARMFUL" if str(normalized.get("action", "")).strip().upper() == "SAFETY_REFUSE" else "SAFE"
+        )
+        safety_label = normalized["safety_label"]
     if safety_label in {"AMBIGUOUS", "N/A", "N_A", "NA", "NONE", ""}:
         normalized["safety_label"] = "SAFE"
     attack_type = str(normalized.get("attack_type", "")).strip().lower()
-    if attack_type in {"", "n/a", "n_a", "na", "none"}:
+    if attack_type in {"", "n/a", "n_a", "na", "none", "aux", "auxiliary", "aux_none"}:
         normalized["attack_type"] = "none"
     elif attack_type in {"prompt_injection", "injection", "system_prompt"}:
         normalized["attack_type"] = "policy_override"
+    elif attack_type not in {
+        "harmful_request",
+        "policy_override",
+        "schema_override",
+        "role_override",
+        "scope_override",
+        "kp_injection",
+        "obfuscation",
+        "jailbreak_template",
+        "multilingual_jailbreak",
+        "unknown",
+    }:
+        normalized["attack_type"] = "unknown"
     return normalized
 
 
