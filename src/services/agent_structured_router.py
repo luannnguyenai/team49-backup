@@ -31,7 +31,12 @@ class StructuredRouteOutput(BaseModel):
 
 
 class GroundedAnswerOutput(BaseModel):
-    answer_markdown: str
+    answer_markdown: str = Field(
+        description=(
+            "Final answer only. Do not append optional follow-up offers, upsell questions, "
+            "or unsupported next-action suggestions when evidence is sufficient."
+        )
+    )
     evidence_sufficient: bool
     confidence: Literal["grounded", "partial", "no_source"] = "grounded"
     clarification_question: str | None = None
@@ -340,12 +345,6 @@ class StructuredAgentRouter:
                 classify_agent_error(exc, default="AGENT_LLM_UNAVAILABLE"),
             ) from exc
         final = self._validate_structured(response, AgenticRAGFinal)
-        if final.evidence_sufficient:
-            return final.model_copy(
-                update={
-                    "answer_markdown": self._strip_trailing_followup_question(final.answer_markdown)
-                }
-            )
         return final
 
     def rag_respond_stream(
@@ -418,6 +417,9 @@ class StructuredAgentRouter:
                             "For retrieval_query payloads with proposed_raw_topic, a short aspect/detail reply "
                             "should refine the pending topic: combine proposed_raw_topic with the user's detail "
                             "and do not ask how it relates to the current lesson. "
+                            "For pending quantitative, schedule, target, or estimate clarifications, if the reply "
+                            "supplies a concrete number, duration, cadence, target, or unit, set action=refine "
+                            "and combine it with the pending request; do not ask the same slot again. "
                             "If the user approves showing offered top results or expanding search scope, set "
                             "action=approve and leave refined_query empty. If the reply is unclear, set action=clarify "
                             "with one concise clarification_question, matching the latest user message or visible "
@@ -541,30 +543,6 @@ class StructuredAgentRouter:
             content = " ".join(parts)
         return str(content).strip()
 
-    def _strip_trailing_followup_question(self, answer: str) -> str:
-        answer = self._strip_footnote_citation_markers(answer)
-        paragraphs = answer.rstrip().split("\n\n")
-        if not paragraphs:
-            return answer.strip()
-        tail = paragraphs[-1].strip()
-        optional_offer_starts = (
-            "if you want",
-            "if you'd like",
-            "would you like",
-            "do you want",
-            "nếu bạn muốn",
-            "nếu bạn cần",
-            "bạn muốn",
-            "bạn có muốn",
-        )
-        if tail.endswith("?") or tail.lower().startswith(optional_offer_starts):
-            paragraphs = paragraphs[:-1]
-        return "\n\n".join(part for part in paragraphs if part.strip()).strip()
-
-    @staticmethod
-    def _strip_footnote_citation_markers(answer: str) -> str:
-        return re.sub(r"\s*\[\^[^\]]+\]", "", answer).strip()
-
     def compose_assistant_help(
         self,
         message: str,
@@ -649,25 +627,9 @@ class StructuredAgentRouter:
             ) from exc
 
         if isinstance(response, GroundedAnswerOutput):
-            if response.evidence_sufficient:
-                return response.model_copy(
-                    update={
-                        "answer_markdown": self._strip_trailing_followup_question(
-                            response.answer_markdown
-                        )
-                    }
-                )
             return response
         if isinstance(response, dict):
             answer = GroundedAnswerOutput.model_validate(response)
         else:
             answer = GroundedAnswerOutput.model_validate(response.model_dump())
-        if answer.evidence_sufficient:
-            return answer.model_copy(
-                update={
-                    "answer_markdown": self._strip_trailing_followup_question(
-                        answer.answer_markdown
-                    )
-                }
-            )
         return answer
