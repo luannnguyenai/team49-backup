@@ -6,11 +6,7 @@ import { useEffect, useState } from "react";
 
 import KpiCard from "@/components/admin/KpiCard";
 import KpiGroup from "@/components/admin/KpiGroup";
-import {
-  adminApi,
-  AdminOverview,
-  CurrentModel,
-} from "@/lib/admin-api";
+import { adminApi, AdminOverview } from "@/lib/admin-api";
 import { overviewTooltips } from "@/lib/admin-tooltips";
 
 function fmtPct(p: number | null | undefined): string {
@@ -20,7 +16,6 @@ function fmtPct(p: number | null | undefined): string {
 
 export default function AdminOverviewPage() {
   const [overview, setOverview] = useState<AdminOverview | null>(null);
-  const [model, setModel] = useState<CurrentModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -28,13 +23,9 @@ export default function AdminOverviewPage() {
     let cancelled = false;
     const load = async () => {
       try {
-        const [o, m] = await Promise.all([
-          adminApi.overview(),
-          adminApi.currentModel().catch(() => null),
-        ]);
+        const o = await adminApi.overview();
         if (cancelled) return;
         setOverview(o);
-        setModel(m);
         setErr(null);
       } catch (e) {
         if (!cancelled) setErr(String((e as Error).message ?? e));
@@ -105,26 +96,11 @@ export default function AdminOverviewPage() {
         />
       </KpiGroup>
 
-      <KpiGroup title="AI Service" cols={4}>
+      <KpiGroup title="AI Service" cols={2}>
         <KpiCard
           label="LLM calls (24h)"
           value={overview?.llm_calls_24h ?? "—"}
           tooltip={overviewTooltips.llmCalls24h}
-          loading={loading}
-        />
-        <KpiCard
-          label="Model đang dùng"
-          value={
-            model ? (
-              <span title={`${model.provider}/${model.name}`} className="block truncate">
-                {model.name}
-              </span>
-            ) : (
-              "—"
-            )
-          }
-          hint={model ? `${model.provider} · fast: ${model.fast_model}` : "Loading…"}
-          tooltip={overviewTooltips.modelCurrent}
           loading={loading}
         />
         <KpiCard

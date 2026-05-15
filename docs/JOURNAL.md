@@ -306,6 +306,75 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 
 ---
 
+## Tuần 6 — 29/04/2026
+
+**Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
+
+### Đã làm
+- **LangGraph Agentic RAG redesign**: Thiết kế lại toàn bộ agent pipeline theo kiến trúc deeptutor — structured router → context service → search service (RAG) → answer node. Thêm prerequisite path agent, citation grounding, evidence policy (`grounded / partial / no_source`) và assessment boundary (block agent khi user đang trong bài kiểm tra).
+- **Guardrail Router client**: Xây dựng multilayer guardrail gate tích hợp vào cả tutor flow lẫn agent flow. Thêm language normalization dùng Lingua detector để xử lý câu hỏi tiếng Việt / tiếng Anh đồng thời.
+- **vLLM self-hosted serving**: Triển khai Qwen3.5-0.8B (guardrail router base) lên server riêng qua Cloudflare Tunnel — phục vụ như OpenAI-compatible API endpoint, tách biệt hoàn toàn với app serving.
+- **External research mode**: Tích hợp Semantic Scholar API và web search để agent có thể mở rộng tìm kiếm ra ngoài learning content khi nội dung khóa học không đủ context.
+- **AWS ECS infrastructure**: Provision toàn bộ hạ tầng production bằng Terraform — VPC, public/private subnets, ALB, ECS Fargate cluster, RDS PostgreSQL, ElastiCache Redis, ECR registry, S3 + CloudFront, Secrets Manager, IAM/OIDC cho GitHub Actions. Thêm observability stack: Prometheus + Grafana + Loki.
+- **Langfuse tracing hardening**: Bổ sung trace ID propagation, span tagging theo route/agent node, và eval trigger hook để capture mọi agent run vào Langfuse dashboard.
+
+### Khó nhất tuần này
+- **Citation grounding vs. hallucination tradeoff**: Agent cần trích dẫn đúng source segment mà không sinh nội dung ngoài source. Phải thiết kế evidence policy chi tiết và thêm `must_not_hallucinate` rules vào golden eval để kiểm soát được regression.
+- **Guardrail multilayer latency**: Mỗi request đi qua guardrail router trước khi vào agent. Với vLLM local qua Cloudflare Tunnel, latency tăng thêm 3-4s cho mỗi turn. Phải cache route result cho session và chỉ re-route khi topic thay đổi để giảm impact.
+- **Terraform IaC từ zero**: Chưa có state file nào, phải provision toàn bộ từ đầu. RDS và ElastiCache ở private subnet nên phải cẩn thận security group rules để backend ECS task có thể reach được.
+
+### AI tool đã dùng
+| Tool | Dùng để làm gì | Kết quả |
+|---|---|---|
+| Claude Code (Opus) | Thiết kế LangGraph graph nodes, viết evidence policy rules, scaffold Terraform modules | Agentic RAG pipeline có cấu trúc rõ ràng, citation và no-hallucination constraint được enforce ở node level |
+| Codex | Review Terraform plan output, fix IAM policy scope, viết script reconcile Secrets Manager | Infrastructure provision thành công, secret injection vào ECS task definition hoạt động đúng |
+
+### Học được
+- **Citation phải là contract, không phải style**: Nếu không định nghĩa rõ "grounded = có exact match với source segment", agent sẽ drift sang paraphrase và bắt đầu fabricate. Golden eval phải có `must_not_cite` cases để giữ boundary.
+- **Terraform state là canonical**: Sau khi provision, mọi thay đổi hạ tầng phải đi qua `terraform apply`. Sửa trực tiếp trên Console rồi apply sau sẽ gây conflict state mà rất khó debug.
+- **vLLM qua tunnel phù hợp cho prototype, không phải production**: Latency Cloudflare Tunnel dao động nhiều hơn kết nối trực tiếp. Production deployment cần đưa guardrail model vào cùng VPC với app.
+
+### Nếu làm lại, sẽ làm khác
+- Thiết kế golden eval test cases song song với agent node design, không chờ pipeline xong mới viết test — lúc đó mất nhiều lần refactor để fit behavior vào test.
+- Provision Terraform với remote state (S3 backend) từ đầu thay vì local state, để nhiều người có thể apply mà không conflict.
+
+---
+
+## Tuần 7 — 09/05/2026
+
+**Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
+
+### Đã làm
+- **ECS production deployment**: Manual bootstrap production — 5 backend task revisions (canonical migration, vLLM config, Secrets Manager wiring, CORS fix) và 1 frontend revision. Images được tag theo commit hash (`frontend:7deedc0`, `backend:7deedc0-units`). Live tại `a20-app-049.io.vn`.
+- **CI/CD automation**: Đưa pipeline vào `.github/workflows/` — `build-push.yml` chạy trên self-hosted EC2 runner (build + push Docker images lên ECR), `deploy-ecs-prod.yml` render task definition từ template rồi deploy lên ECS Fargate. Thêm `reconcile-backend-secret.sh` để update Secrets Manager động theo deployment context.
+- **Admin observability panel**: Xây dựng trang admin với Loki log streaming (query theo service/level/time range), Prometheus metrics embed, Grafana dashboard embed và CloudWatch log group integration. Không expose ra public — route protected bằng admin role check.
+- **Agent UI cải tiến**: Thêm activity tracker hiển thị real-time agent action (search, retrieve, cite), model dropdown selector (chọn provider/model trong session), model health caching và failover khi endpoint không healthy.
+- **Landing page redesign**: Cập nhật layout và copy theo sản phẩm production thực tế (thay vì prototype copy từ tuần 1-2).
+- **Auth hardening**: Fix stale hydration error khi token hết hạn giữa session, relax password schema cho demo accounts (giảm độ phức tạp để demo thực tế không bị friction).
+- **RoadmapPlanner refactor**: Migrate từ flat list sang master-detail layout với sidebar navigation, cập nhật unit testing theo layout mới.
+
+### Khó nhất tuần này
+- **5 backend revisions trong một ngày**: Mỗi revision fix một lớp — đầu tiên là migration fail vì revision id quá dài (PostgreSQL varchar(32) limit), sau đó là Secrets Manager IAM permission thiếu, rồi CORS config chưa include production domain, rồi vLLM endpoint URL sai format. Phải deploy → test → identify → fix → redeploy 5 vòng.
+- **Self-hosted runner trên EC2**: Docker buildx trên EC2 cần cấu hình đúng IAM role để push lên ECR. Multi-platform build tốn thêm thời gian. Runner phải được giữ alive qua `screen` session hoặc systemd service để không mất kết nối giữa build.
+- **Guardrail model vLLM latency**: Với ECS deployment, guardrail router vẫn gọi sang Cloudflare Tunnel. Latency dao động gây timeout cho một số request. Phải implement circuit breaker và fallback route (default ALLOW khi guardrail không trả kết quả kịp).
+
+### AI tool đã dùng
+| Tool | Dùng để làm gì | Kết quả |
+|---|---|---|
+| Claude Code (Opus) | Debug ECS deployment failures từ CloudWatch logs, thiết kế CI/CD yaml, viết admin panel query logic | Pipeline CI/CD hoạt động end-to-end từ push → build → deploy mà không cần thao tác thủ công |
+| Codex | Viết reconcile-backend-secret.sh, fix task definition template, benchmark admin panel queries | Secret sync tự động theo deployment, task def render đúng theo env |
+
+### Học được
+- **ECS production bootstrap cần checklist chặt**: Mỗi revision là một deployment window. Nếu không có checklist (migration → secret → CORS → health check → smoke test), dễ bỏ sót bước và phải rollback.
+- **CI/CD trên self-hosted runner tiết kiệm cost nhưng phức tạp hơn**: Phải manage runner lifecycle (restart sau EC2 reboot, log rotation, IAM permission boundary). GitHub-hosted runner đơn giản hơn cho prototyping, self-hosted phù hợp hơn khi cần Docker cache và ECR proximity.
+- **Observability phải có từ ngày đầu production**: Không có Loki/CloudWatch, 5 revision debug đó sẽ tốn gấp đôi thời gian vì không biết lỗi xảy ra ở container layer nào.
+
+### Nếu làm lại, sẽ làm khác
+- Viết smoke test script chạy ngay sau mỗi ECS deployment thay vì test thủ công qua browser. Với 5 revision, một script `curl` + assertion đơn giản đã tiết kiệm được ít nhất 30 phút.
+- Thiết lập Terraform remote state và ECS blue/green deployment từ đầu, không phải force-deploy revision mới lên task definition cũ.
+
+---
+
 ## Tuần 8 — 11/05/2026
 
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân

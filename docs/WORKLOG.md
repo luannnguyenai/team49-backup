@@ -406,7 +406,88 @@ Case runtime đã handle:
 - Không state-lock. Nếu demo làm thay đổi state, chạy `.venv/bin/python -m src.scripts.pipeline.reset_demo_accounts` để reset riêng 9 demo accounts. Cohort 30 có command riêng để tránh reset nhầm khi đang demo.
 - Synthetic vẫn không được tính là real calibration evidence; calibration readiness tiếp tục tách real vs synthetic response counts.
 
-### [ADR-12] Chuẩn hóa fine-tuned local AI stack cho guardrail router và tutor answer generator — 11/05/2026
+### [ADR-12] LangGraph full redesign thành deeptutor-style agentic RAG pipeline — 29/04/2026
+
+**Bối cảnh:** Sau canonical DB cutover (ADR-11), tutor vẫn dùng basic LangGraph ReAct flow không có RAG retrieval, citation grounding, hay assessment boundary. Agent không nhớ context giữa các turn, không có search tooling thật, và không thể phân biệt câu hỏi học vs câu hỏi trong bài kiểm tra.
+
+**Các lựa chọn đã xem xét:**
+- **Giữ ReAct đơn thuần, thêm context injection**: Đơn giản nhưng không giải quyết được hallucination khi source evidence không đủ, và không enforce citation contract.
+- **Chuyển sang RAG pipeline tuyến tính**: Dễ debug nhưng mất khả năng retry, query refinement, và multi-hop reasoning khi cần.
+- **Deeptutor-style graph với evidence policy**: Structured router → context service → search service → answer node. Mỗi node có trách nhiệm riêng. Evidence policy (`grounded / partial / no_source`) được enforce ở node level, không phải prompt-only.
+
+**Quyết định:** Thiết kế lại LangGraph graph theo kiến trúc deeptutor:
+
+1. **Structured router node**: Phân loại intent, detect assessment context, resolve pronoun/topic carryover.
+2. **Context service**: Nạp learning unit context, KP scope, conversation history.
+3. **Search service** với tool `search_learning_content`: RAG retrieval từ canonical content, trả evidence kèm confidence score.
+4. **Answer node**: Sinh trả lời chỉ trong scope evidence. Nếu confidence thấp → trả `partial` hoặc `no_source`, không fabricate.
+5. **Assessment boundary**: Nếu router detect user đang trong assessment context → block agent response ngay, không đi tiếp vào RAG.
+6. **External research fallback**: Khi source content không đủ và không phải assessment → gọi Semantic Scholar API hoặc web search.
+7. **Thread memory**: Agent nhớ thông tin từ các turn trước trong conversation (câu trả lời, citation, topic).
+
+Golden eval dataset gồm 50+ cases bao gồm 10 categories kiểm tra đúng/sai từng node behavior: `rag_initial_retrieval`, `rag_followup_same_topic`, `source_limited_answer`, `contextual_evidence_gap`, `new_topic_after_context`, `thread_memory`, `scope_current_path_first`, `search_refinement`, `lexical_trap`, `assessment_boundary`.
+
+**Hệ quả:** Agent có citation contract rõ ràng, hallucination được kiểm soát qua evidence policy, và assessment boundary ngăn agent giải bài kiểm tra hộ user. Đổi lại, pipeline phức tạp hơn — mỗi node cần test case riêng và việc debug agent failure phải trace qua Langfuse span.
+
+---
+
+### [ADR-13] AWS ECS Terraform production infrastructure provisioning — 03/05/2026
+
+**Bối cảnh:** Hệ thống đang chạy local / EC2 thủ công. Cần infrastructure production chuẩn để: (1) deployment ổn định, (2) scaling theo traffic, (3) secret management an toàn, (4) observability đủ để debug production issue.
+
+**Các lựa chọn đã xem xét:**
+- **Tiếp tục EC2 manual + systemd**: Đơn giản nhất nhưng không có auto-recovery, không có rolling deploy, secret phải SSH vào máy chỉnh.
+- **Docker Compose trên EC2**: Quen thuộc nhưng không có health check tự động, load balancing, hay secret injection managed.
+- **ECS Fargate + Terraform IaC**: Stateless containers, managed health check, ALB routing, Secrets Manager integration, OIDC cho CI/CD keyless. Chi phí cao hơn nhưng phù hợp với production submission.
+
+**Quyết định:** Provision toàn bộ qua Terraform tại `deploy-ecs/terraform/live/prod/`:
+
+1. **Network**: VPC, public subnets (ALB), private subnets (ECS tasks, RDS, Redis).
+2. **Compute**: ECS Fargate cluster, backend service + frontend service, task definitions từ template `.json.tpl`.
+3. **Data**: RDS PostgreSQL (production DB), ElastiCache Redis (session/token denylist/rate limit cache).
+4. **Registry**: ECR repo cho backend + frontend images.
+5. **Static assets**: S3 bucket + CloudFront distribution cho slide/transcript assets.
+6. **Secret management**: AWS Secrets Manager — DATABASE_URL, REDIS_URL, API keys (OpenAI, Langfuse, Semantic Scholar). ECS task nhận secret qua `secrets[]` trong task definition.
+7. **Auth CI/CD**: IAM OIDC provider cho GitHub Actions, không dùng long-lived access key.
+8. **Observability**: Prometheus scrape endpoint, Grafana dashboard, Loki log aggregation, CloudWatch log group per service. Admin panel tích hợp tất cả vào UI internal.
+
+Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare Tunnel (không nằm trong ECS) — phase này ưu tiên có endpoint hoạt động trước, chưa optimize latency.
+
+**Hệ quả:** Production infrastructure có IaC full, rollback bằng `terraform apply` với state trước. Đổi lại, ECS task definition template phải đồng bộ với Secrets Manager key names, và bất kỳ thay đổi env nào phải qua `reconcile-backend-secret.sh` + redeploy.
+
+---
+
+### [ADR-14] GitHub Actions CI/CD automation với self-hosted EC2 runner — 09/05/2026
+
+**Bối cảnh:** Sau 5 backend revision manual (migration, IAM, CORS, vLLM config, health check), rõ ràng manual deployment là nút thắt lớn — mỗi push code mất 15-20 phút thao tác thủ công và dễ bỏ sót bước.
+
+**Các lựa chọn đã xem xét:**
+- **GitHub-hosted runner**: Setup đơn giản, nhưng không có Docker layer cache (slow build), phải push image 2-3GB mỗi lần, và GitHub Actions IP không ổn định với ECR auth.
+- **Self-hosted runner trên EC2**: Docker cache nằm tại máy, proximity với ECR giảm push time, IAM instance role thay vì access key. Phức tạp hơn khi manage runner lifecycle.
+- **CodePipeline / CodeBuild**: Native AWS nhưng thêm infrastructure cost và tách rời khỏi GitHub event model.
+
+**Quyết định:** Self-hosted EC2 runner với pipeline 2 stage:
+
+1. **`build-push.yml`** (trigger: push to `main`):
+   - Checkout code.
+   - Build Docker image với `buildx` (multi-platform).
+   - Push lên ECR với tag commit hash.
+   - Bake `NEXT_PUBLIC_API_URL` và `API_INTERNAL_URL` vào frontend image tại build time.
+
+2. **`deploy-ecs-prod.yml`** (trigger: sau `build-push` pass):
+   - Gọi `cicd/scripts/render-taskdef.sh` để render `.json.tpl` thành task definition thật.
+   - Gọi `cicd/scripts/reconcile-backend-secret.sh` để sync Secrets Manager với giá trị deployment hiện tại (DB URL, Redis URL, CORS origins, frontend URL).
+   - Register task definition mới lên ECS.
+   - Update service để deploy revision mới (rolling update).
+   - Wait for service stable trước khi pipeline kết thúc.
+
+3. **OIDC auth**: GitHub Actions nhận temporary credential từ AWS IAM qua OIDC — không có long-lived secret trong GitHub Secrets.
+
+**Hệ quả:** Push vào `main` tự động build, push và deploy cả backend lẫn frontend lên production ECS trong khoảng 8-12 phút. Không cần SSH vào server. Đổi lại, runner EC2 phải được giữ alive và IAM permission của runner role phải được maintain cẩn thận (ECR push, ECS update, Secrets Manager read/write).
+
+---
+
+### [ADR-15] Chuẩn hóa fine-tuned local AI stack cho guardrail router và tutor answer generator — 11/05/2026
 
 **Bối cảnh:** Nhánh `rin/fine-tune` hoàn thiện một vòng fine-tune thực dụng cho hệ tutoring multilingual: model nhỏ làm lesson-scope guardrail/router, model lớn hơn làm answer/refusal generator. Mục tiêu không phải thay toàn bộ runtime ngay lập tức, mà là tạo một bộ artifact có thể tái lập, đo được, và đủ sạch để chuyển sang production integration sau.
 

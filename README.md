@@ -333,12 +333,9 @@ Xem `.env.example` để biết đầy đủ các biến môi trường.
 
 | Thành viên | Vai trò | Công việc chính |
 |---|---|---|
-| _Tên thành viên 1_ | _Vai trò_ | _Mô tả công việc_ |
-| _Tên thành viên 2_ | _Vai trò_ | _Mô tả công việc_ |
-| _Tên thành viên 3_ | _Vai trò_ | _Mô tả công việc_ |
-| _Tên thành viên 4_ | _Vai trò_ | _Mô tả công việc_ |
-
-> :pencil2: Vui lòng cập nhật bảng trên với thông tin thực tế của team.
+| **Nguyễn Duy Minh Hoàng** | Infrastructure & DevOps Lead | AWS ECS/Fargate + Terraform IaC, CI/CD pipeline (GitHub Actions self-hosted runner), Observability stack (Prometheus/Grafana/Loki/CloudWatch), Production deployment & secret management, Model registry |
+| **Nguyễn Đôn Đức** | AI/ML Lead | Agentic RAG pipeline (LangGraph deeptutor-style), Guardrail Router fine-tune (Qwen3.5-0.8B LoRA, 13,513 samples), Language normalization (Vi/En), External research mode (Semantic Scholar + web search), Model health caching & failover, Auth hardening, Agent UI |
+| **Nguyễn Lê Minh Luân** | Frontend & Assessment Lead | Landing page redesign, Onboarding UX (goal selection, experience level, placement flow), Placement assessment (IRTAdaptiveStrategy, 3PL-lite batch CAT), Calibration scaffold (calibration_runs, item_calibration_history), Backend Redis resilience |
 
 ---
 
