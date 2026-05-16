@@ -127,6 +127,7 @@ class FakeToolNodes:
         current_path_course_ids=None,
         canonical_unit_id=None,
         query=None,
+        scope=None,
     ):
         self.calls.append(
             (
@@ -136,6 +137,7 @@ class FakeToolNodes:
                 current_path_course_ids,
                 canonical_unit_id,
                 query,
+                scope,
             )
         )
         return ToolResult(kind="find_content", metadata={"lecture_context_found": True})
@@ -271,6 +273,7 @@ async def test_tool_executor_gets_lecture_context_without_sql_access():
         ["CS230"],
         "unit-1",
         None,
+        None,
     )
 
 
@@ -299,6 +302,7 @@ async def test_tool_executor_uses_current_unit_context_instead_of_reasking():
         ["CS230"],
         ["CS230"],
         "unit-current",
+        None,
         None,
     )
 
@@ -388,6 +392,89 @@ class GroundedToolNodes(FakeToolNodes):
         )
 
 
+class LearnerThenLectureToolNodes(FakeToolNodes):
+    async def user_learning_context(
+        self,
+        *,
+        message,
+        slots,
+        allowed_course_ids,
+        current_path_course_ids=None,
+        route_context=None,
+        context_kind=None,
+    ):
+        self.calls.append(
+            (
+                "user_learning_context",
+                message,
+                allowed_course_ids,
+                current_path_course_ids,
+                route_context,
+                context_kind,
+            )
+        )
+        return ToolResult(
+            kind="progress_summary",
+            requires_evidence=False,
+            metadata={
+                "learner_context": {
+                    "current_learning_state": {
+                        "current_unit": {
+                            "canonical_unit_id": "unit-neurons",
+                            "unit_title": "Neurons, multi-class labels, capacity, and embeddings",
+                        }
+                    },
+                    "recent_progress": [
+                        {
+                            "canonical_unit_id": "unit-neurons",
+                            "unit_title": "Neurons, multi-class labels, capacity, and embeddings",
+                        }
+                    ],
+                }
+            },
+        )
+
+    async def lecture_context(
+        self,
+        *,
+        message,
+        slots,
+        allowed_course_ids,
+        current_path_course_ids=None,
+        canonical_unit_id=None,
+        query=None,
+        scope=None,
+    ):
+        self.calls.append(
+            (
+                "lecture_context",
+                message,
+                allowed_course_ids,
+                current_path_course_ids,
+                canonical_unit_id,
+                query,
+                scope,
+            )
+        )
+        return ToolResult(
+            kind="find_content",
+            answer_markdown=None,
+            requires_evidence=False,
+            metadata={
+                "lecture_context_found": True,
+                "lecture_context": {
+                    "units": [
+                        {
+                            "canonical_unit_id": canonical_unit_id,
+                            "unit_name": "Neurons, multi-class labels, capacity, and embeddings",
+                            "summary": "This unit recaps neurons, class labels, capacity, and embeddings.",
+                        }
+                    ]
+                },
+            },
+        )
+
+
 @pytest.mark.asyncio
 async def test_agentic_rag_pipeline_runs_stages_in_order_and_returns_tool_result():
     router = FakePipelineRouter()
@@ -407,6 +494,222 @@ async def test_agentic_rag_pipeline_runs_stages_in_order_and_returns_tool_result
     assert result.answer_markdown == "YOLO is covered as a single-stage detector."
     assert result.citations[0].canonical_unit_id == "u-yolo"
     assert result.actions[0].learn_href == "/courses/cs231n/learn/lecture-9-seg4"
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_pipeline_can_chain_learner_context_to_lecture_context():
+    class MultiStepRouter(FakePipelineRouter):
+        def rag_act(self, **kwargs):
+            self.calls.append(("act", kwargs))
+            observations = kwargs.get("observations") or []
+            if not observations:
+                return AgenticRAGToolCall(
+                    tool="get_user_learning_context",
+                    arguments={"context_kind": "current_unit_state"},
+                    rationale="Resolve the learner's latest watched unit first.",
+                )
+            return AgenticRAGToolCall(
+                tool="get_lecture_context",
+                arguments={"canonical_unit_id": "unit-neurons"},
+                rationale="Use the resolved unit id to retrieve summary evidence.",
+            )
+
+        def rag_respond(self, **kwargs):
+            self.calls.append(("respond", kwargs))
+            return type(
+                "Final",
+                (),
+                {
+                    "answer_markdown": "This unit recaps neurons, multi-class labels, capacity, and embeddings.",
+                    "evidence_status": "partial",
+                    "evidence_sufficient": True,
+                    "clarification_question": None,
+                },
+            )()
+
+    tools = LearnerThenLectureToolNodes()
+    router = MultiStepRouter()
+    pipeline = AgenticRAGPipeline(router=router, tool_executor=AgenticRAGToolExecutor(tools))
+
+    result = await pipeline.run(
+        message="tóm tắt video gần đây nhất tôi đã học",
+        intent="find_content",
+        slots=AgentSlots(),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert [call[0] for call in tools.calls] == ["user_learning_context", "lecture_context"]
+    assert tools.calls[1][4] == "unit-neurons"
+    assert result.answer_markdown == "This unit recaps neurons, multi-class labels, capacity, and embeddings."
+    assert result.metadata["agentic_rag_evidence_status"] == "partial"
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_pipeline_chains_lecture_context_for_summary_progress_intent_when_unit_is_resolved():
+    class MultiStepRouter(FakePipelineRouter):
+        def rag_act(self, **kwargs):
+            self.calls.append(("act", kwargs))
+            observations = kwargs.get("observations") or []
+            if not observations:
+                return AgenticRAGToolCall(
+                    tool="get_user_learning_context",
+                    arguments={"context_kind": "current_unit_state"},
+                    rationale="Resolve the learner's latest watched unit first.",
+                )
+            return AgenticRAGToolCall(
+                tool="get_lecture_context",
+                arguments={"canonical_unit_id": "unit-neurons"},
+                rationale="Fetch summary evidence for the resolved unit.",
+            )
+
+        def rag_respond(self, **kwargs):
+            self.calls.append(("respond", kwargs))
+            return type(
+                "Final",
+                (),
+                {
+                    "answer_markdown": "Summary built from lecture evidence.",
+                    "evidence_status": "partial",
+                    "evidence_sufficient": True,
+                    "clarification_question": None,
+                },
+            )()
+
+    tools = LearnerThenLectureToolNodes()
+    router = MultiStepRouter()
+    pipeline = AgenticRAGPipeline(router=router, tool_executor=AgenticRAGToolExecutor(tools))
+
+    result = await pipeline.run(
+        message="tóm tắt video gần đây tôi mới học",
+        intent="summarize_progress",
+        slots=AgentSlots(),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert [call[0] for call in tools.calls] == ["user_learning_context", "lecture_context"]
+    assert result.answer_markdown == "Summary built from lecture evidence."
+
+
+def test_should_continue_after_observation_when_learner_context_resolves_a_unit():
+    observation = AgenticRAGObservation(
+        tool="get_user_learning_context",
+        arguments={},
+        rationale="resolve learner context",
+        success=True,
+        result=ToolResult(
+            kind="progress_summary",
+            requires_evidence=False,
+            metadata={
+                "learner_context": {
+                    "current_learning_state": {
+                        "current_unit": {"canonical_unit_id": "unit-neurons"},
+                    },
+                },
+            },
+        ),
+        evidence_status="partial",
+    )
+
+    assert AgenticRAGPipeline._should_continue_after_observation(observation)
+
+
+def test_enrich_tool_call_injects_canonical_unit_id_from_prior_learner_context():
+    observation = AgenticRAGObservation(
+        tool="get_user_learning_context",
+        arguments={},
+        rationale="resolve learner context",
+        success=True,
+        result=ToolResult(
+            kind="progress_summary",
+            requires_evidence=False,
+            metadata={
+                "learner_context": {
+                    "current_learning_state": {
+                        "current_unit": {"canonical_unit_id": "local::lecture-2::seg2"},
+                    },
+                },
+            },
+        ),
+        evidence_status="partial",
+    )
+    tool_call = AgenticRAGToolCall(
+        tool="get_lecture_context",
+        arguments={},
+        rationale="missing canonical_unit_id",
+    )
+
+    enriched = AgenticRAGPipeline._enrich_tool_call_from_observations(tool_call, [observation])
+
+    assert enriched.arguments["canonical_unit_id"] == "local::lecture-2::seg2"
+
+
+def test_enrich_tool_call_keeps_existing_canonical_unit_id():
+    observation = AgenticRAGObservation(
+        tool="get_user_learning_context",
+        arguments={},
+        rationale="resolve learner context",
+        success=True,
+        result=ToolResult(
+            kind="progress_summary",
+            requires_evidence=False,
+            metadata={
+                "learner_context": {
+                    "current_learning_state": {
+                        "current_unit": {"canonical_unit_id": "local::lecture-2::seg2"},
+                    },
+                },
+            },
+        ),
+        evidence_status="partial",
+    )
+    tool_call = AgenticRAGToolCall(
+        tool="get_lecture_context",
+        arguments={"canonical_unit_id": "explicit::id"},
+        rationale="already has id",
+    )
+
+    enriched = AgenticRAGPipeline._enrich_tool_call_from_observations(tool_call, [observation])
+
+    assert enriched.arguments["canonical_unit_id"] == "explicit::id"
+
+
+def test_enrich_tool_call_no_op_for_non_lecture_context_tool():
+    tool_call = AgenticRAGToolCall(
+        tool="search_current_path_units",
+        arguments={"query": "topic"},
+        rationale="search",
+    )
+
+    enriched = AgenticRAGPipeline._enrich_tool_call_from_observations(tool_call, [])
+
+    assert enriched is tool_call
+
+
+def test_should_not_continue_after_observation_when_no_unit_can_be_resolved():
+    observation = AgenticRAGObservation(
+        tool="get_user_learning_context",
+        arguments={},
+        rationale="resolve learner context",
+        success=True,
+        result=ToolResult(
+            kind="progress_summary",
+            requires_evidence=False,
+            metadata={
+                "learner_context": {
+                    "progress_summary": {"total_units": 12},
+                },
+            },
+        ),
+        evidence_status="partial",
+    )
+
+    assert not AgenticRAGPipeline._should_continue_after_observation(observation)
 
 
 @pytest.mark.asyncio
