@@ -21,6 +21,7 @@ from src.services.agentic_rag_contracts import AgenticRAGFinal, AgenticRAGObserv
 from src.services.agent_graph_router import DeterministicAgentRouter
 from src.services.agent_graph_service import AgentGraphService
 from src.services.agent_memory_compaction_service import AgentMemoryCompactionService
+from src.services.guardrail_router import GuardrailDecision
 from src.services.language_normalization import LanguageNormalizationResult
 
 pytestmark = pytest.mark.asyncio
@@ -70,6 +71,90 @@ class NoopLock:
 
     async def __aexit__(self, exc_type, exc, tb):
         return None
+
+
+async def test_guardrail_safety_refuse_can_be_overridden_by_high_confidence_course_route():
+    decision = GuardrailDecision(
+        safety_label="HARMFUL",
+        topic_label="N_A",
+        action="SAFETY_REFUSE",
+        attack_type="none",
+        selected_kp_ids=[],
+    )
+    route = AgentRoute(
+        intent="find_content",
+        confidence=0.9,
+        extracted_slots=AgentSlots(raw_topic="current lecture"),
+    )
+
+    assert AgentGraphService._should_allow_prerouted_educational_request_after_guardrail(
+        decision=decision,
+        route=route,
+    )
+
+
+async def test_guardrail_safety_refuse_override_requires_no_attack_type():
+    decision = GuardrailDecision(
+        safety_label="HARMFUL",
+        topic_label="N_A",
+        action="SAFETY_REFUSE",
+        attack_type="policy_override",
+        selected_kp_ids=[],
+    )
+    route = AgentRoute(
+        intent="find_content",
+        confidence=0.95,
+        extracted_slots=AgentSlots(raw_topic="current lecture"),
+    )
+
+    assert not AgentGraphService._should_allow_prerouted_educational_request_after_guardrail(
+        decision=decision,
+        route=route,
+    )
+
+
+async def test_guardrail_clarify_can_be_overridden_by_high_confidence_course_route():
+    decision = GuardrailDecision(
+        safety_label="SAFE",
+        topic_label="AMBIGUOUS",
+        action="ASK_CLARIFY",
+        attack_type="none",
+        selected_kp_ids=[],
+    )
+    route = AgentRoute(
+        intent="find_content",
+        confidence=0.86,
+        extracted_slots=AgentSlots(raw_topic="full current lecture summary"),
+    )
+
+    assert AgentGraphService._should_allow_prerouted_educational_request_after_guardrail(
+        decision=decision,
+        route=route,
+    )
+
+
+async def test_guardrail_unavailable_can_be_overridden_by_high_confidence_course_route():
+    route = AgentRoute(
+        intent="find_content",
+        confidence=0.86,
+        extracted_slots=AgentSlots(raw_topic="full current lecture summary"),
+    )
+
+    assert AgentGraphService._should_allow_prerouted_educational_request_when_guardrail_unavailable(
+        route=route,
+    )
+
+
+async def test_guardrail_unavailable_override_requires_high_confidence():
+    route = AgentRoute(
+        intent="find_content",
+        confidence=0.42,
+        extracted_slots=AgentSlots(raw_topic="ambiguous topic"),
+    )
+
+    assert not AgentGraphService._should_allow_prerouted_educational_request_when_guardrail_unavailable(
+        route=route,
+    )
 
 
 async def test_enforce_response_language_strips_unexpected_script_words():

@@ -380,23 +380,50 @@ class AgentGraphService:
                     recent_messages=preloaded_recent_messages,
                 )
             )
+        prerouted_route: AgentRoute | None = None
         try:
             guardrail_decision = await guardrail_task
-        except BaseException:
+        except Exception:
             if prerouted_task is not None:
-                prerouted_task.cancel()
-            raise
+                try:
+                    prerouted_route = await prerouted_task
+                except (asyncio.CancelledError, Exception):
+                    prerouted_route = None
+            if self._should_allow_prerouted_educational_request_when_guardrail_unavailable(
+                route=prerouted_route,
+            ):
+                guardrail_decision = GuardrailDecision.allow()
+            else:
+                if prerouted_task is not None:
+                    prerouted_task.cancel()
+                raise
         guardrail_response = self._compose_guardrail_response(
             conversation_id=conversation_id,
             decision=guardrail_decision,
         )
         if guardrail_response is not None:
             if prerouted_task is not None:
+                try:
+                    prerouted_route = await prerouted_task
+                except (asyncio.CancelledError, Exception):
+                    prerouted_route = None
+            if self._should_allow_prerouted_educational_request_after_guardrail(
+                decision=guardrail_decision,
+                route=prerouted_route,
+            ):
+                guardrail_response = None
+                guardrail_decision = GuardrailDecision.allow()
+            else:
+                if prerouted_task is not None:
+                    prerouted_task.cancel()
+                return guardrail_response
+
+        if guardrail_response is not None:
+            if prerouted_task is not None:
                 prerouted_task.cancel()
             return guardrail_response
 
-        prerouted_route: AgentRoute | None = None
-        if prerouted_task is not None:
+        if prerouted_route is None and prerouted_task is not None:
             try:
                 prerouted_route = await prerouted_task
             except (asyncio.CancelledError, Exception):
@@ -659,29 +686,55 @@ class AgentGraphService:
                             recent_messages=preloaded_recent_messages,
                         )
                     )
+                prerouted_route: AgentRoute | None = None
                 try:
                     guardrail_decision = await guardrail_task
-                except BaseException:
+                except Exception:
                     if prerouted_task is not None:
-                        prerouted_task.cancel()
-                    raise
+                        try:
+                            prerouted_route = await prerouted_task
+                        except (asyncio.CancelledError, Exception):
+                            prerouted_route = None
+                    if self._should_allow_prerouted_educational_request_when_guardrail_unavailable(
+                        route=prerouted_route,
+                    ):
+                        guardrail_decision = GuardrailDecision.allow()
+                    else:
+                        if prerouted_task is not None:
+                            prerouted_task.cancel()
+                        raise
                 guardrail_response = self._compose_guardrail_response(
                     conversation_id=conversation_id,
                     decision=guardrail_decision,
                 )
                 if guardrail_response is not None:
                     if prerouted_task is not None:
-                        prerouted_task.cancel()
-                    guardrail_response = await self._enforce_response_language(
-                        guardrail_response,
-                        normalized_language,
-                    )
-                    guardrail_response = self._sanitize_response(guardrail_response, input_guardrail)
-                    await persist_assistant_message(guardrail_response)
-                    yield _json.dumps({"done": guardrail_response.model_dump(mode="json", by_alias=True)}) + "\n"
-                    return
-                prerouted_route: AgentRoute | None = None
-                if prerouted_task is not None:
+                        try:
+                            prerouted_route = await prerouted_task
+                        except (asyncio.CancelledError, Exception):
+                            prerouted_route = None
+                    if self._should_allow_prerouted_educational_request_after_guardrail(
+                        decision=guardrail_decision,
+                        route=prerouted_route,
+                    ):
+                        guardrail_response = None
+                        guardrail_decision = GuardrailDecision.allow()
+                    else:
+                        if prerouted_task is not None:
+                            prerouted_task.cancel()
+                        guardrail_response = await self._enforce_response_language(
+                            guardrail_response,
+                            normalized_language,
+                        )
+                        guardrail_response = self._sanitize_response(
+                            guardrail_response,
+                            input_guardrail,
+                        )
+                        await persist_assistant_message(guardrail_response)
+                        yield _json.dumps({"done": guardrail_response.model_dump(mode="json", by_alias=True)}) + "\n"
+                        return
+
+                if prerouted_route is None and prerouted_task is not None:
                     try:
                         prerouted_route = await prerouted_task
                     except (asyncio.CancelledError, Exception):
@@ -1048,6 +1101,33 @@ class AgentGraphService:
         return "path" in normalized and any(term in normalized for term in path_action_terms)
 
     @staticmethod
+    def _should_allow_prerouted_educational_request_after_guardrail(
+        *,
+        decision: GuardrailDecision,
+        route: AgentRoute | None,
+    ) -> bool:
+        if decision.action not in {"SAFETY_REFUSE", "ASK_CLARIFY"} or decision.attack_type != "none":
+            return False
+        if route is None or route.clarification_question:
+            return False
+        effective_intent = route.candidate_intent if route.intent == "clarify" else route.intent
+        if effective_intent not in RAG_AGENT_INTENTS:
+            return False
+        return route.confidence >= 0.75
+
+    @staticmethod
+    def _should_allow_prerouted_educational_request_when_guardrail_unavailable(
+        *,
+        route: AgentRoute | None,
+    ) -> bool:
+        if route is None or route.clarification_question:
+            return False
+        effective_intent = route.candidate_intent if route.intent == "clarify" else route.intent
+        if effective_intent not in RAG_AGENT_INTENTS:
+            return False
+        return route.confidence >= 0.75
+
+    @staticmethod
     def _compose_guardrail_response(
         *,
         conversation_id: str,
@@ -1358,18 +1438,6 @@ class AgentGraphService:
             route = self._route_with_recent_context(state["message"], state)
         route = self._promote_contextual_rag_followup(route, state)
         route = self._apply_current_lesson_context_to_rag_route(route, state)
-        logger.warning(
-            "route_intent message=%r intent=%s confidence=%.2f candidate=%s "
-            "raw_topic=%r search_queries=%s clarification=%r used_prerouted=%s",
-            (state.get("message") or "")[:120],
-            route.intent,
-            route.confidence,
-            route.candidate_intent,
-            route.extracted_slots.raw_topic,
-            route.extracted_slots.search_queries,
-            (route.clarification_question or "")[:120],
-            used_prerouted,
-        )
         return {
             **state,
             "intent": route.intent,
