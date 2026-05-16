@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram id="reqlifecycle" name="Request Lifecycle">
+    <mxGraphModel dx="1366" dy="768" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ═══ FLOW 1: PAGE LOAD (SSR) ═══ -->
+        <mxCell id="title1" value="🖥  Flow 1 — Page Load (SSR)" style="text;html=1;align=center;fontStyle=1;fontSize=14;fontColor=#374151;" vertex="1" parent="1">
+          <mxGeometry x="100" y="40" width="560" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Swimlane container for Flow 1 -->
+        <mxCell id="swim1" value="" style="swimlane;startSize=0;fillColor=#F9FAFB;strokeColor=#E5E7EB;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="640" height="960" as="geometry"/>
+        </mxCell>
+
+        <!-- Flow 1 Steps -->
+        <mxCell id="f1s1" value="&lt;b&gt;1 · Browser&lt;/b&gt; — GET /courses/:id&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;HTTPS to CloudFront / ALB&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim1">
+          <mxGeometry x="40" y="40" width="560" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="f1s2" value="&lt;b&gt;2 · ALB&lt;/b&gt; — Route → Next.js Frontend (ECS)&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;Path-based routing &lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim1">
+          <mxGeometry x="40" y="150" width="560" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="f1s3" value="&lt;b&gt;3 · Next.js Frontend&lt;/b&gt; — Server-side fetch → FastAPI /api/courses&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;RSC data fetch with auth cookie&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF0E8;strokeColor=#E7500A;fontColor=#7B2A0A;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim1">
+          <mxGeometry x="40" y="260" width="560" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="f1s4" value="&lt;b&gt;4 · FastAPI Backend&lt;/b&gt; — Query PostgreSQL + Redis cache&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;Course data · learner progress · mastery&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF0E8;strokeColor=#E7500A;fontColor=#7B2A0A;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim1">
+          <mxGeometry x="40" y="370" width="560" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="f1s5" value="&lt;b&gt;5 · Browser&lt;/b&gt; — Receive rendered HTML + hydrate&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;Full page with course, progress, planner&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim1">
+          <mxGeometry x="40" y="480" width="560" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Flow 1 Icons -->
+        <mxCell id="fi1" value="" style="shape=mxgraph.aws4.user;fillColor=#232F3E;strokeColor=none;html=1;sketch=0;" vertex="1" parent="swim1">
+          <mxGeometry x="550" y="50" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="fi2" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.application_load_balancer;sketch=0;fillColor=#8C4FFF;strokeColor=#ffffff;html=1;" vertex="1" parent="swim1">
+          <mxGeometry x="550" y="160" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="fi3" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecs;sketch=0;fillColor=#ED7100;strokeColor=#ffffff;html=1;" vertex="1" parent="swim1">
+          <mxGeometry x="550" y="270" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="fi4" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecs;sketch=0;fillColor=#ED7100;strokeColor=#ffffff;html=1;" vertex="1" parent="swim1">
+          <mxGeometry x="550" y="380" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="fi5" value="" style="shape=mxgraph.aws4.user;fillColor=#232F3E;strokeColor=none;html=1;sketch=0;" vertex="1" parent="swim1">
+          <mxGeometry x="550" y="490" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Flow 1 Connectors -->
+        <mxCell id="fc1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="f1s1" target="f1s2" parent="swim1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="fc2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="f1s2" target="f1s3" parent="swim1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="fc3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="f1s3" target="f1s4" parent="swim1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="fc4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="f1s4" target="f1s5" parent="swim1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══ FLOW 2: AI TUTOR CHAT ═══ -->
+        <mxCell id="title2" value="🤖  Flow 2 — AI Tutor Chat (Agentic RAG)" style="text;html=1;align=center;fontStyle=1;fontSize=14;fontColor=#374151;" vertex="1" parent="1">
+          <mxGeometry x="954" y="40" width="640" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="swim2" value="" style="swimlane;startSize=0;fillColor=#F9FAFB;strokeColor=#E5E7EB;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="954" y="80" width="640" height="960" as="geometry"/>
+        </mxCell>
+
+        <!-- Flow 2 Steps -->
+        <mxCell id="f2s1" value="&lt;b&gt;1 · Browser&lt;/b&gt; — POST /api/agent/chat&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;User message + session context&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim2">
+          <mxGeometry x="40" y="40" width="560" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="f2s2" value="&lt;b&gt;2 · FastAPI Backend&lt;/b&gt; — PII Sanitize → Guardrail Router&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;Qwen3.5-0.8B LoRA · SAFE / HARMFUL check&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontColor=#7F1D1D;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim2">
+          <mxGeometry x="40" y="150" width="560" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="f2s3" value="&lt;b&gt;3 · LangGraph Agent&lt;/b&gt; — Smart Router → ReAct graph&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;COMPLEX: enter agent graph with tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim2">
+          <mxGeometry x="40" y="260" width="560" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="f2s4" value="&lt;b&gt;4 · Agent Tools&lt;/b&gt; — RAG search pgvector → retrieve transcript chunks&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;Optionally: Python Sandbox or Semantic Scholar&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim2">
+          <mxGeometry x="40" y="370" width="560" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="f2s5" value="&lt;b&gt;5 · Answer Generator&lt;/b&gt; — Qwen3.5-4B LoRA generates grounded answer&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;Citation grounded · No hallucination policy&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim2">
+          <mxGeometry x="40" y="480" width="560" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="f2s6" value="&lt;b&gt;6 · SSE Stream&lt;/b&gt; — Token-by-token stream → Browser&lt;br&gt;&lt;font size='2' color='#6B7280'&gt;Langfuse trace logged · Redis updates session&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D1FAE5;strokeColor=#27AE60;fontColor=#065F46;arcSize=6;align=left;spacingLeft=10;" vertex="1" parent="swim2">
+          <mxGeometry x="40" y="590" width="560" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Flow 2 Icons -->
+        <mxCell id="gi1" value="" style="shape=mxgraph.aws4.user;fillColor=#232F3E;strokeColor=none;html=1;sketch=0;" vertex="1" parent="swim2">
+          <mxGeometry x="550" y="50" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="gi2" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.waf;sketch=0;fillColor=#DD344C;strokeColor=#ffffff;html=1;" vertex="1" parent="swim2">
+          <mxGeometry x="550" y="160" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="gi3" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.step_functions;sketch=0;fillColor=#FF9900;strokeColor=#ffffff;html=1;" vertex="1" parent="swim2">
+          <mxGeometry x="550" y="270" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="gi4" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#C7131F;strokeColor=#ffffff;html=1;" vertex="1" parent="swim2">
+          <mxGeometry x="550" y="380" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="gi5" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2;sketch=0;fillColor=#01A88D;strokeColor=#ffffff;html=1;" vertex="1" parent="swim2">
+          <mxGeometry x="550" y="490" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="gi6" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudfront;sketch=0;fillColor=#3F8624;strokeColor=#ffffff;html=1;" vertex="1" parent="swim2">
+          <mxGeometry x="550" y="600" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Flow 2 Connectors -->
+        <mxCell id="gc1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="f2s1" target="f2s2" parent="swim2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="gc2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="f2s2" target="f2s3" parent="swim2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="gc3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="f2s3" target="f2s4" parent="swim2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="gc4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="f2s4" target="f2s5" parent="swim2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="gc5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="f2s5" target="f2s6" parent="swim2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

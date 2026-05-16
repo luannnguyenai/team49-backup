@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram id="dataschema" name="Data Schema">
+    <mxGraphModel dx="1366" dy="768" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ══════════════════════════════════════════
+             PAGE TITLE
+        ══════════════════════════════════════════ -->
+        <mxCell id="title" value="Database Schema — 4 Layers · PostgreSQL 16 + pgvector" style="text;html=1;align=center;fontStyle=1;fontSize=16;fontColor=#232F3E;" vertex="1" parent="1">
+          <mxGeometry x="327" y="30" width="1000" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════
+             LAYER 1: PRODUCT SHELL  (top-left, orange)
+        ══════════════════════════════════════════ -->
+        <mxCell id="z1" value="&lt;b&gt;🏗  Layer 1 — Product Shell&lt;/b&gt;&lt;br&gt;&lt;font size='2'&gt;Course catalog &amp;amp; content structure&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FED7AA;fontColor=#9A3412;arcSize=5;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="720" height="400" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z1_rds" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#ED7100;strokeColor=#ffffff;html=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="100" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Layer 1 tables -->
+        <mxCell id="z1t1" value="courses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="160" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1t1n" value="canonical_course_id" style="text;html=1;align=left;fontSize=10;fontColor=#9A3412;" vertex="1" parent="1">
+          <mxGeometry x="310" y="174" width="160" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1t2" value="course_sections" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="218" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1t3" value="learning_units" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="276" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1t3n" value="canonical_unit_id" style="text;html=1;align=left;fontSize=10;fontColor=#9A3412;" vertex="1" parent="1">
+          <mxGeometry x="310" y="290" width="160" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1t4" value="lectures" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="334" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1t4n" value="video · transcript" style="text;html=1;align=left;fontSize=10;fontColor=#9A3412;" vertex="1" parent="1">
+          <mxGeometry x="310" y="348" width="140" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1t5" value="transcripts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="160" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z1t6" value="learning_progress_records" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="218" width="240" height="44" as="geometry"/>
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════
+             LAYER 2: CANONICAL CONTENT (top-right, blue)
+        ══════════════════════════════════════════ -->
+        <mxCell id="z2" value="&lt;b&gt;📚  Layer 2 — Canonical Content&lt;/b&gt;&lt;br&gt;&lt;font size='2'&gt;KP graph · Assessment · Prerequisites&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#BFDBFE;fontColor=#1E3A8A;arcSize=5;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="814" y="80" width="780" height="400" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z2_rds" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#C7131F;strokeColor=#ffffff;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1554" y="100" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Layer 2 tables -->
+        <mxCell id="z2t1" value="concepts_kp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="854" y="160" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2t1n" value="Knowledge Points" style="text;html=1;align=left;fontSize=10;fontColor=#1E3A8A;" vertex="1" parent="1">
+          <mxGeometry x="1064" y="174" width="160" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2t2" value="question_bank" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="854" y="218" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2t2n" value="+ item_phase_map" style="text;html=1;align=left;fontSize=10;fontColor=#1E3A8A;" vertex="1" parent="1">
+          <mxGeometry x="1064" y="232" width="150" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2t3" value="item_calibration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="854" y="276" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2t3n" value="IRT params" style="text;html=1;align=left;fontSize=10;fontColor=#1E3A8A;" vertex="1" parent="1">
+          <mxGeometry x="1064" y="290" width="120" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2t4" value="item_kp_map" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="160" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2t5" value="prerequisite_edges" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="218" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z2t6" value="unit_kp_map" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="276" width="200" height="44" as="geometry"/>
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════
+             LAYER 3: LEARNER STATE (bottom-left, green)
+        ══════════════════════════════════════════ -->
+        <mxCell id="z3" value="&lt;b&gt;🎓  Layer 3 — Learner State&lt;/b&gt;&lt;br&gt;&lt;font size='2'&gt;Mastery · Planner · Session tracking&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#BBF7D0;fontColor=#14532D;arcSize=5;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="60" y="510" width="720" height="400" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z3_rds" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#3F8624;strokeColor=#ffffff;html=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="530" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Layer 3 tables -->
+        <mxCell id="z3t1" value="users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="590" width="200" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3t2" value="sessions + interactions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="648" width="220" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3t3" value="learner_mastery_kp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="706" width="220" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3t3n" value="theta · sigma" style="text;html=1;align=left;fontSize=10;fontColor=#14532D;" vertex="1" parent="1">
+          <mxGeometry x="330" y="720" width="100" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3t4" value="goal_preferences" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="590" width="220" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3t4n" value="selected courses" style="text;html=1;align=left;fontSize=10;fontColor=#14532D;" vertex="1" parent="1">
+          <mxGeometry x="460" y="642" width="130" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3t5" value="plan_history · rationale_log" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="660" width="240" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z3t6" value="waived_units · planner_session_state" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="718" width="260" height="44" as="geometry"/>
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════
+             LAYER 4: AGENT STATE (bottom-right, purple)
+        ══════════════════════════════════════════ -->
+        <mxCell id="z4" value="&lt;b&gt;🤖  Layer 4 — Agent State&lt;/b&gt;&lt;br&gt;&lt;font size='2'&gt;LangGraph run state · Citations · Actions&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#E9D5FF;fontColor=#4A1D96;arcSize=5;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="814" y="510" width="780" height="400" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="z4_rds" value="" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#8C4FFF;strokeColor=#ffffff;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1554" y="530" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Layer 4 tables -->
+        <mxCell id="z4t1" value="agent_graph_runs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="854" y="590" width="220" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4t1n" value="turn · trace_id" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" vertex="1" parent="1">
+          <mxGeometry x="1084" y="604" width="120" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4t2" value="agent_pending_actions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="854" y="648" width="220" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4t2n" value="prerequisite" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" vertex="1" parent="1">
+          <mxGeometry x="1084" y="662" width="100" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4t3" value="agent_response_payloads" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="854" y="706" width="220" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4t3n" value="citations" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" vertex="1" parent="1">
+          <mxGeometry x="1084" y="720" width="100" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4t4" value="agent_route_context" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="590" width="220" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4t4n" value="course · unit scope" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="642" width="140" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4t5" value="localized_content" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="660" width="220" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="z4t5n" value="vi / en" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="712" width="80" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- ══════════════════════════════════════════
+             ADAPTIVE LEARNING LOOP (bottom)
+        ══════════════════════════════════════════ -->
+        <mxCell id="loop_bg" value="Adaptive Learning Loop — How layers interact" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E5E7EB;fontColor=#374151;fontStyle=1;fontSize=12;align=center;verticalAlign=top;spacingTop=8;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="60" y="940" width="1534" height="150" as="geometry"/>
+        </mxCell>
+
+        <!-- Loop boxes -->
+        <mxCell id="lb1" value="📋 Onboarding&#xa;goal_preferences" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FED7AA;fontColor=#9A3412;fontSize=11;fontStyle=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="100" y="980" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="lb2" value="📝 Assessment&#xa;question_bank + IRT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#BFDBFE;fontColor=#1E3A8A;fontSize=11;fontStyle=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="310" y="980" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="lb3" value="📊 Mastery Update&#xa;learner_mastery_kp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#BBF7D0;fontColor=#14532D;fontSize=11;fontStyle=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="520" y="980" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="lb4" value="🗺 Planner&#xa;prerequisite_edges" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#BBF7D0;fontColor=#14532D;fontSize=11;fontStyle=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="730" y="980" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="lb5" value="🎬 Learn Unit&#xa;learning_units" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FED7AA;fontColor=#9A3412;fontSize=11;fontStyle=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="940" y="980" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="lb6" value="🤖 AI Tutor&#xa;agent_graph_runs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#E9D5FF;fontColor=#4A1D96;fontSize=11;fontStyle=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="980" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="lb7" value="🔄 Next Unit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#BBF7D0;fontColor=#14532D;fontSize=11;fontStyle=1;arcSize=6;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="980" width="160" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Loop connectors -->
+        <mxCell id="la1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="lb1" target="lb2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="la2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="lb2" target="lb3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="la3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="lb3" target="lb4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="la4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="lb4" target="lb5" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="la5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="lb5" target="lb6" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="la6" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="lb6" target="lb7" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Cross-layer FK edges -->
+        <mxCell id="fk1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=ERone;startArrow=ERmanyToOne;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="z1t3" target="z2t6" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="fk2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=ERone;startArrow=ERmanyToOne;" edge="1" source="z3t3" target="z2t1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="fk3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=ERone;startArrow=ERmanyToOne;" edge="1" source="z4t1" target="z3t2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
