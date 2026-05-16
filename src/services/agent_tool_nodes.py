@@ -26,12 +26,14 @@ class AgentToolNodes:
         prerequisite_path_service=None,
         user_id=None,
         user_learning_context_service=None,
+        lecture_summary_aggregator=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
         self.prerequisite_path_service = prerequisite_path_service
         self.user_id = user_id
         self.user_learning_context_service = user_learning_context_service
+        self.lecture_summary_aggregator = lecture_summary_aggregator
         self.scope_service = AgentSearchScopeService()
         self.evidence_quality = AgentEvidenceQualityService()
 
@@ -104,6 +106,7 @@ class AgentToolNodes:
         current_path_course_ids: list[str] | None = None,
         canonical_unit_id: str | None = None,
         query: str | None = None,
+        scope: str | None = None,
     ) -> ToolResult:
         repo = getattr(self.search_service, "repo", None)
         get_lecture_context = getattr(repo, "get_lecture_context_for_unit", None)
@@ -123,13 +126,17 @@ class AgentToolNodes:
             normalized = str(slot_unit_id).strip()
             if normalized and normalized not in candidate_ids:
                 candidate_ids.append(normalized)
+        scoped_course_ids = self._merged_course_scope(
+            current_path_course_ids,
+            allowed_course_ids,
+        )
 
         lecture = None
         selected_id = None
         for candidate_id in candidate_ids:
             lecture = await get_lecture_context(
                 candidate_id,
-                allowed_course_ids=current_path_course_ids or allowed_course_ids,
+                allowed_course_ids=scoped_course_ids,
             )
             if lecture:
                 selected_id = candidate_id
@@ -148,7 +155,7 @@ class AgentToolNodes:
                 selected_id = search_result.citations[0].canonical_unit_id
                 lecture = await get_lecture_context(
                     selected_id,
-                    allowed_course_ids=current_path_course_ids or allowed_course_ids,
+                    allowed_course_ids=scoped_course_ids,
                 )
         if not selected_id:
             return ToolResult(
@@ -164,6 +171,19 @@ class AgentToolNodes:
                 requires_evidence=True,
                 metadata={"lecture_context_found": False, "canonical_unit_id": selected_id},
             )
+
+        resolved_scope = self._resolve_lecture_scope(scope)
+        lecture, scope_metadata = await self._apply_lecture_scope_filter(
+            lecture,
+            scope=resolved_scope,
+            scoped_course_ids=scoped_course_ids,
+        )
+        lecture, aggregation_metadata = await self._maybe_aggregate_lecture_summary(
+            lecture,
+            scope=resolved_scope,
+            message=message,
+        )
+        scope_metadata.update(aggregation_metadata)
 
         citations = [
             AgentCitation(
@@ -189,8 +209,102 @@ class AgentToolNodes:
                 "lecture_context": lecture,
                 "raw_topic": lecture.get("lecture_title") or selected_id,
                 "search_queries": [lecture.get("lecture_title") or selected_id],
+                **scope_metadata,
             },
         )
+
+    @staticmethod
+    def _resolve_lecture_scope(scope: str | None) -> str:
+        if isinstance(scope, str) and scope.strip().lower() == "all":
+            return "all"
+        return "learned"
+
+    async def _maybe_aggregate_lecture_summary(
+        self,
+        lecture: dict,
+        *,
+        scope: str,
+        message: str,
+    ) -> tuple[dict, dict]:
+        metadata: dict = {}
+        if scope != "all":
+            return lecture, metadata
+        if lecture.get("lecture_summary"):
+            return lecture, metadata
+        if self.lecture_summary_aggregator is None:
+            return lecture, metadata
+        units = lecture.get("units") or []
+        if not any((u.get("summary") or u.get("description")) for u in units):
+            return lecture, metadata
+        aggregated = await self.lecture_summary_aggregator.aggregate(
+            lecture_title=lecture.get("lecture_title"),
+            units=units,
+            language_hint=message,
+        )
+        if not aggregated:
+            metadata["lecture_aggregated_summary_status"] = "failed"
+            return lecture, metadata
+        enriched = {
+            **lecture,
+            "aggregated_summary": aggregated,
+            "source": "aggregated_unit_summaries",
+        }
+        metadata.update(
+            {
+                "lecture_aggregated_summary_status": "ready",
+                "lecture_aggregated_summary_length": len(aggregated),
+            }
+        )
+        return enriched, metadata
+
+    async def _apply_lecture_scope_filter(
+        self,
+        lecture: dict,
+        *,
+        scope: str,
+        scoped_course_ids: list[str],
+    ) -> tuple[dict, dict]:
+        scope_metadata: dict = {"lecture_scope": scope, "lecture_scope_applied": False}
+        if scope != "learned":
+            return lecture, scope_metadata
+        if self.user_id is None or self.user_learning_context_service is None:
+            return lecture, scope_metadata
+        units = lecture.get("units") or []
+        if not units:
+            return lecture, scope_metadata
+        try:
+            learned_ids = await self.user_learning_context_service.learned_canonical_unit_ids(
+                self.user_id,
+                scoped_course_ids,
+            )
+        except Exception:
+            return lecture, scope_metadata
+        original_count = len(units)
+        filtered = [unit for unit in units if unit.get("canonical_unit_id") in learned_ids]
+        if not filtered:
+            scope_metadata["lecture_scope_fallback"] = "no_learned_units"
+            return lecture, scope_metadata
+        scoped_lecture = {**lecture, "units": filtered}
+        scope_metadata.update(
+            {
+                "lecture_scope_applied": True,
+                "lecture_scope_total_units": original_count,
+                "lecture_scope_learned_units": len(filtered),
+            }
+        )
+        return scoped_lecture, scope_metadata
+
+    @staticmethod
+    def _merged_course_scope(
+        primary_course_ids: list[str] | None,
+        fallback_course_ids: list[str] | None,
+    ) -> list[str]:
+        merged: list[str] = []
+        for course_id in [*(primary_course_ids or []), *(fallback_course_ids or [])]:
+            normalized = str(course_id).strip()
+            if normalized and normalized not in merged:
+                merged.append(normalized)
+        return merged
 
     async def find_content(
         self,
