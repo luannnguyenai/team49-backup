@@ -316,6 +316,7 @@ export interface LectureTocResponse {
 
 export interface LearningUnitSummary {
   id: string;
+  canonical_unit_id?: string | null;
   slug: string;
   title: string;
   lecture_title?: string | null;

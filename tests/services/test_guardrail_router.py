@@ -195,6 +195,21 @@ def test_guardrail_prompt_allows_safe_assistant_operation_messages():
     assert "pass them to the downstream assistant router" in prompt
 
 
+def test_guardrail_prompt_allows_learner_activity_and_progress_questions_for_agent():
+    prompt = build_guardrail_prompt(
+        "video gần nhất tôi đã học",
+        GuardrailScopePacket(
+            feature="agent",
+            scope_level="query",
+            scope_id="agent",
+            allowed_scope_summary="Agent guardrail scope: current user query only.",
+        ),
+    )
+
+    assert "learner progress, recent activity, current lesson" in prompt
+    assert "classify them as ON_TOPIC and ALLOW_LESSON_ANSWER" in prompt
+
+
 def test_guardrail_prompt_uses_prompt_manager_system_rules(tmp_path):
     from src.services.agent_prompt_manager import AgentPromptManager
 
@@ -274,6 +289,24 @@ def test_guardrail_decision_normalizes_ambiguous_safety_alias():
     assert decision.attack_type == "none"
 
 
+def test_guardrail_decision_recovers_when_model_swaps_safety_and_topic_labels():
+    decision = parse_guardrail_decision(
+        json.dumps(
+            {
+                "safety_label": "ON_TOPIC",
+                "topic_label": "ON_TOPIC",
+                "action": "ALLOW_LESSON_ANSWER",
+                "attack_type": "aux",
+                "selected_kp_ids": [],
+            }
+        )
+    )
+
+    assert decision.safety_label == "SAFE"
+    assert decision.topic_label == "ON_TOPIC"
+    assert decision.attack_type == "none"
+
+
 def test_guardrail_decision_normalizes_prompt_injection_attack_alias():
     decision = parse_guardrail_decision(
         json.dumps(
@@ -288,6 +321,39 @@ def test_guardrail_decision_normalizes_prompt_injection_attack_alias():
     )
 
     assert decision.attack_type == "policy_override"
+
+
+def test_guardrail_decision_normalizes_auxiliary_attack_aliases():
+    for alias in ("auxiliary", "aux_none"):
+        decision = parse_guardrail_decision(
+            json.dumps(
+                {
+                    "safety_label": "SAFE",
+                    "topic_label": "ON_TOPIC",
+                    "action": "ALLOW_LESSON_ANSWER",
+                    "attack_type": alias,
+                    "selected_kp_ids": [],
+                }
+            )
+        )
+
+        assert decision.attack_type == "none"
+
+
+def test_guardrail_decision_normalizes_unknown_attack_alias():
+    decision = parse_guardrail_decision(
+        json.dumps(
+            {
+                "safety_label": "SAFE",
+                "topic_label": "ON_TOPIC",
+                "action": "ALLOW_LESSON_ANSWER",
+                "attack_type": "benign_extra",
+                "selected_kp_ids": [],
+            }
+        )
+    )
+
+    assert decision.attack_type == "unknown"
 
 
 def test_guardrail_fallback_model_disables_reasoning(monkeypatch):

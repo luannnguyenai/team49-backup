@@ -105,6 +105,7 @@ class AgentSlots(BaseModel):
     assessment_phase: str | None = None
     canonical_unit_ids: list[str] = Field(default_factory=list)
     course_ids: list[str] = Field(default_factory=list)
+    lecture_scope: Literal["learned", "all"] | None = None
     ambiguity_options: list[dict[str, Any]] = Field(default_factory=list)
     search_scope: Literal["current_path", "explicit_path", "expanded_paths"] = "current_path"
     scope_expansion_offered: bool = False

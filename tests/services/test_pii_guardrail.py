@@ -82,6 +82,20 @@ def test_sanitize_output_does_not_redact_numbers_inside_urls() -> None:
     assert result.was_redacted is False
 
 
+def test_sanitize_output_does_not_redact_dates_or_iso_timestamps_as_phone_numbers() -> None:
+    text = (
+        "Recent activity: you most recently opened the same CS230 unit on "
+        "2026-05-15T11:10:00+07:00."
+    )
+    service = PIIGuardrailService()
+
+    result = service.sanitize_output(text)
+
+    assert result.sanitized_text == text
+    assert result.was_redacted is False
+    assert "[REDACTED_PHONE]" not in result.sanitized_text
+
+
 def test_sanitize_input_blocks_disallowed_entities() -> None:
     service = PIIGuardrailService(
         adapter=StubAdapter(

@@ -11,6 +11,7 @@ class CourseCatalogItem(BaseModel):
     model_config = {"from_attributes": True}
 
     id: str
+    canonical_unit_id: str | None = None
     slug: str
     title: str
     short_description: str
@@ -77,6 +78,7 @@ class LearningUnitSummary(BaseModel):
     model_config = {"from_attributes": True}
 
     id: str
+    canonical_unit_id: str | None = None
     slug: str
     title: str
     lecture_title: str | None = None

@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from uuid import UUID
 
 import pytest
@@ -12,6 +13,444 @@ from src.schemas.agent import (
 )
 from src.services.agent_graph_contracts import AgentSlots
 from src.services.agent_tool_nodes import AgentToolNodes
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_falls_back_to_slot_unit_when_model_argument_is_bad():
+    calls = []
+
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            calls.append(canonical_unit_id)
+            if canonical_unit_id != "slot-current":
+                return None
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {
+                        "canonical_unit_id": "slot-current",
+                        "course_id": "CS230",
+                        "lecture_id": "lecture-02",
+                        "lecture_title": "Lecture 2",
+                        "unit_name": "Day & Night classification",
+                        "summary": "Day/night classification design summary.",
+                    }
+                ],
+            }
+
+    tools = AgentToolNodes(SimpleNamespace(repo=Repo()), requirement_service=None)
+
+    result = await tools.lecture_context(
+        message="tóm tắt video này",
+        slots=AgentSlots(canonical_unit_ids=["slot-current"]),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        canonical_unit_id="lecture-02-supervised-learning",
+    )
+
+    assert calls == ["lecture-02-supervised-learning", "slot-current"]
+    assert result.citations[0].canonical_unit_id == "slot-current"
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_keeps_allowed_courses_when_current_path_scope_is_alias():
+    scopes = []
+
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            scopes.append(list(allowed_course_ids))
+            if "CS230" not in allowed_course_ids:
+                return None
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {
+                        "canonical_unit_id": canonical_unit_id,
+                        "course_id": "CS230",
+                        "lecture_id": "lecture-02",
+                        "lecture_title": "Lecture 2",
+                        "unit_name": "Neurons",
+                        "summary": "Neural-network notation and embeddings.",
+                    }
+                ],
+            }
+
+    tools = AgentToolNodes(SimpleNamespace(repo=Repo()), requirement_service=None)
+
+    result = await tools.lecture_context(
+        message="tóm tắt video gần nhất",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["computer_vision"],
+        canonical_unit_id="unit-neurons",
+    )
+
+    assert scopes == [["computer_vision", "CS230"]]
+    assert result.citations[0].quote == "Neural-network notation and embeddings."
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_resolves_unit_from_learner_context_when_args_are_empty():
+    repo_calls: list[str] = []
+    snapshot_route_contexts: list[dict] = []
+
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            repo_calls.append(canonical_unit_id)
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {
+                        "canonical_unit_id": canonical_unit_id,
+                        "course_id": "CS230",
+                        "lecture_id": "lecture-02",
+                        "lecture_title": "Lecture 2",
+                        "unit_name": "Seg 1",
+                        "summary": "Recap.",
+                    }
+                ],
+            }
+
+    class FakeUserLearningContextService:
+        async def snapshot(self, *, user_id, allowed_course_ids, current_path_course_ids=None, route_context=None, context_kind=None):
+            snapshot_route_contexts.append(route_context)
+            return {
+                "current_learning_state": {
+                    "current_unit": {"canonical_unit_id": "local::lecture-02::seg2"},
+                },
+            }
+
+        async def learned_canonical_unit_ids(self, user_id, course_ids):
+            return {"local::lecture-02::seg2"}
+
+    tools = AgentToolNodes(
+        SimpleNamespace(repo=Repo()),
+        requirement_service=None,
+        user_id=UUID("00000000-0000-0000-0000-000000000001"),
+        user_learning_context_service=FakeUserLearningContextService(),
+    )
+
+    result = await tools.lecture_context(
+        message="Summarize the lessons I just learned in this lecture",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert repo_calls == ["local::lecture-02::seg2"]
+    assert snapshot_route_contexts == [None]
+    assert result.citations
+    assert result.metadata["lecture_context_found"] is True
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_uses_route_context_unit_when_model_args_are_empty():
+    repo_calls: list[str] = []
+
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            repo_calls.append(canonical_unit_id)
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {
+                        "canonical_unit_id": canonical_unit_id,
+                        "course_id": "CS230",
+                        "lecture_id": "lecture-02",
+                        "lecture_title": "Lecture 2",
+                        "unit_name": "Seg 2",
+                        "summary": "Recap.",
+                    }
+                ],
+            }
+
+    tools = AgentToolNodes(SimpleNamespace(repo=Repo()), requirement_service=None)
+
+    result = await tools.lecture_context(
+        message="Give me a full summary of this lecture",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        route_context={"canonicalUnitId": "local::lecture-02::seg2"},
+        scope="all",
+    )
+
+    assert repo_calls == ["local::lecture-02::seg2"]
+    assert result.citations[0].canonical_unit_id == "local::lecture-02::seg2"
+    assert result.metadata["lecture_scope"] == "all"
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_default_scope_filters_to_learned_units():
+    learned_calls = []
+
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {"canonical_unit_id": "seg1", "course_id": "CS230", "unit_name": "Seg 1", "summary": "s1"},
+                    {"canonical_unit_id": "seg2", "course_id": "CS230", "unit_name": "Seg 2", "summary": "s2"},
+                    {"canonical_unit_id": "seg3", "course_id": "CS230", "unit_name": "Seg 3", "summary": "s3"},
+                ],
+            }
+
+    class FakeUserLearningContextService:
+        async def learned_canonical_unit_ids(self, user_id, course_ids):
+            learned_calls.append((user_id, list(course_ids)))
+            return {"seg1", "seg2"}
+
+    tools = AgentToolNodes(
+        SimpleNamespace(repo=Repo()),
+        requirement_service=None,
+        user_id=UUID("00000000-0000-0000-0000-000000000001"),
+        user_learning_context_service=FakeUserLearningContextService(),
+    )
+
+    result = await tools.lecture_context(
+        message="tóm tắt video tôi mới học",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        canonical_unit_id="seg2",
+    )
+
+    assert learned_calls == [(UUID("00000000-0000-0000-0000-000000000001"), ["CS230"])]
+    citation_ids = [c.canonical_unit_id for c in result.citations]
+    assert citation_ids == ["seg1", "seg2"]
+    assert result.metadata["lecture_scope"] == "learned"
+    assert result.metadata["lecture_scope_applied"] is True
+    assert result.metadata["lecture_scope_total_units"] == 3
+    assert result.metadata["lecture_scope_learned_units"] == 2
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_scope_all_returns_full_lecture():
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {"canonical_unit_id": "seg1", "course_id": "CS230", "unit_name": "Seg 1", "summary": "s1"},
+                    {"canonical_unit_id": "seg2", "course_id": "CS230", "unit_name": "Seg 2", "summary": "s2"},
+                    {"canonical_unit_id": "seg3", "course_id": "CS230", "unit_name": "Seg 3", "summary": "s3"},
+                ],
+            }
+
+    class FakeUserLearningContextService:
+        async def learned_canonical_unit_ids(self, user_id, course_ids):
+            raise AssertionError("scope=all must not query learned units")
+
+    tools = AgentToolNodes(
+        SimpleNamespace(repo=Repo()),
+        requirement_service=None,
+        user_id=UUID("00000000-0000-0000-0000-000000000001"),
+        user_learning_context_service=FakeUserLearningContextService(),
+    )
+
+    result = await tools.lecture_context(
+        message="tóm tắt toàn bộ lecture này",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        canonical_unit_id="seg2",
+        scope="all",
+    )
+
+    citation_ids = [c.canonical_unit_id for c in result.citations]
+    assert citation_ids == ["seg1", "seg2", "seg3"]
+    assert result.metadata["lecture_scope"] == "all"
+    assert result.metadata["lecture_scope_applied"] is False
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_scope_all_invokes_aggregator_when_lecture_summary_is_missing():
+    captured = []
+
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {"canonical_unit_id": "seg1", "course_id": "CS230", "unit_name": "Seg 1", "summary": "s1"},
+                    {"canonical_unit_id": "seg2", "course_id": "CS230", "unit_name": "Seg 2", "summary": "s2"},
+                ],
+            }
+
+    class FakeAggregator:
+        async def aggregate(self, *, lecture_title, units, language_hint=None):
+            captured.append({"lecture_title": lecture_title, "units": units, "language_hint": language_hint})
+            return "Lecture-level synthesis from unit summaries."
+
+    tools = AgentToolNodes(
+        SimpleNamespace(repo=Repo()),
+        requirement_service=None,
+        lecture_summary_aggregator=FakeAggregator(),
+    )
+
+    result = await tools.lecture_context(
+        message="tóm tắt toàn bộ lecture này",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        canonical_unit_id="seg1",
+        scope="all",
+    )
+
+    assert result.metadata["lecture_aggregated_summary_status"] == "ready"
+    assert result.metadata["lecture_context"]["aggregated_summary"].startswith("Lecture-level")
+    assert result.metadata["lecture_context"]["source"] == "aggregated_unit_summaries"
+    assert captured[0]["lecture_title"] == "Lecture 2"
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_scope_all_does_not_invoke_aggregator_when_lecture_summary_exists():
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": "Authoritative lecture summary from database.",
+                "source": "lecture_description",
+                "units": [
+                    {"canonical_unit_id": "seg1", "course_id": "CS230", "unit_name": "Seg 1", "summary": "s1"},
+                ],
+            }
+
+    class FakeAggregator:
+        async def aggregate(self, *, lecture_title, units, language_hint=None):
+            raise AssertionError("aggregator must not run when a DB lecture summary exists")
+
+    tools = AgentToolNodes(
+        SimpleNamespace(repo=Repo()),
+        requirement_service=None,
+        lecture_summary_aggregator=FakeAggregator(),
+    )
+
+    result = await tools.lecture_context(
+        message="tóm tắt toàn bộ lecture này",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        canonical_unit_id="seg1",
+        scope="all",
+    )
+
+    assert "lecture_aggregated_summary_status" not in result.metadata
+    assert result.metadata["lecture_context"]["lecture_summary"].startswith("Authoritative")
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_scope_learned_does_not_invoke_aggregator():
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {"canonical_unit_id": "seg1", "course_id": "CS230", "unit_name": "Seg 1", "summary": "s1"},
+                ],
+            }
+
+    class FakeAggregator:
+        async def aggregate(self, *, lecture_title, units, language_hint=None):
+            raise AssertionError("aggregator must not run for scope=learned")
+
+    class FakeUserLearningContextService:
+        async def learned_canonical_unit_ids(self, user_id, course_ids):
+            return {"seg1"}
+
+    tools = AgentToolNodes(
+        SimpleNamespace(repo=Repo()),
+        requirement_service=None,
+        user_id=UUID("00000000-0000-0000-0000-000000000001"),
+        user_learning_context_service=FakeUserLearningContextService(),
+        lecture_summary_aggregator=FakeAggregator(),
+    )
+
+    result = await tools.lecture_context(
+        message="tóm tắt video tôi mới học",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        canonical_unit_id="seg1",
+    )
+
+    assert "lecture_aggregated_summary_status" not in result.metadata
+
+
+@pytest.mark.asyncio
+async def test_lecture_context_learned_scope_falls_back_when_no_learned_units():
+    class Repo:
+        async def get_lecture_context_for_unit(self, canonical_unit_id, *, allowed_course_ids):
+            return {
+                "course_id": "CS230",
+                "lecture_id": "lecture-02",
+                "lecture_title": "Lecture 2",
+                "lecture_summary": None,
+                "source": "unit_summaries",
+                "units": [
+                    {"canonical_unit_id": "seg1", "course_id": "CS230", "unit_name": "Seg 1", "summary": "s1"},
+                    {"canonical_unit_id": "seg2", "course_id": "CS230", "unit_name": "Seg 2", "summary": "s2"},
+                ],
+            }
+
+    class FakeUserLearningContextService:
+        async def learned_canonical_unit_ids(self, user_id, course_ids):
+            return set()
+
+    tools = AgentToolNodes(
+        SimpleNamespace(repo=Repo()),
+        requirement_service=None,
+        user_id=UUID("00000000-0000-0000-0000-000000000001"),
+        user_learning_context_service=FakeUserLearningContextService(),
+    )
+
+    result = await tools.lecture_context(
+        message="tóm tắt video tôi mới học",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        canonical_unit_id="seg1",
+    )
+
+    citation_ids = [c.canonical_unit_id for c in result.citations]
+    assert citation_ids == ["seg1", "seg2"]
+    assert result.metadata["lecture_scope"] == "learned"
+    assert result.metadata["lecture_scope_fallback"] == "no_learned_units"
+    assert result.metadata["lecture_scope_applied"] is False
 
 
 class FakeSearchService:

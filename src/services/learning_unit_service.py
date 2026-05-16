@@ -354,6 +354,7 @@ async def get_learning_unit_payload(
         ),
         unit=LearningUnitSummary(
             id=unit_row["id"],
+            canonical_unit_id=unit_row.get("canonical_unit_id"),
             slug=unit_row["slug"],
             title=unit_row["title"],
             lecture_title=unit_row["title"],
@@ -571,6 +572,7 @@ async def _get_learning_unit_payload_from_db(course_slug: str, unit_slug: str) -
                 },
                 "unit": {
                     "id": str(unit.id),
+                    "canonical_unit_id": unit.canonical_unit_id,
                     "slug": unit.slug,
                     "title": unit.title,
                     "lecture_title": canonical_unit.lecture_title

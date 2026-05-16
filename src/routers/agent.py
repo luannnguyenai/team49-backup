@@ -65,6 +65,7 @@ from src.services.agent_router_factory import (
 from src.services.agent_search_service import AgentUnitSearchService
 from src.services.agent_title_generator import generate_conversation_title
 from src.services.agent_unit_context_service import AgentUnitContextService
+from src.services.agent_user_learning_context_service import AgentUserLearningContextService
 from src.services.guardrails.pii_guardrail import PIIGuardrailService
 from src.services.model_registry import ChatModelUnavailableError, ensure_chat_model_available
 from src.services.recommendation_engine import generate_learning_path
@@ -199,6 +200,7 @@ async def agent_chat(
                 action_db=db,
                 action_user=user,
                 checkpointer=checkpointer,
+                user_learning_context_service=AgentUserLearningContextService(db),
             ).chat(
                 request=body,
                 conversation_id=str(conversation_id),
@@ -279,6 +281,7 @@ async def agent_chat_stream(
                     action_db=db,
                     action_user=user,
                     checkpointer=checkpointer,
+                    user_learning_context_service=AgentUserLearningContextService(db),
                 ).chat_stream(
                     request=body,
                     conversation_id=str(conversation_id),
