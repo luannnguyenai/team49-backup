@@ -68,6 +68,12 @@ class PIIGuardrailService:
                 continue
             if self._span_overlaps_url(text, entity.start, entity.end):
                 continue
+            if entity.entity_type == "PHONE_NUMBER" and self._span_is_date_or_timestamp(
+                text,
+                entity.start,
+                entity.end,
+            ):
+                continue
             redactions.append((entity.start, entity.end, rule.placeholder))
 
         if not redactions:
@@ -94,3 +100,16 @@ class PIIGuardrailService:
             if start < match.end() and end > match.start():
                 return True
         return False
+
+    @staticmethod
+    def _span_is_date_or_timestamp(text: str, start: int, end: int) -> bool:
+        span = text[start:end]
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", span):
+            return True
+        window = text[start : min(len(text), end + 15)]
+        return bool(
+            re.match(
+                r"\d{4}-\d{2}-\d{2}(?:[T\s]\d{2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:?\d{2})?)?",
+                window,
+            )
+        )
