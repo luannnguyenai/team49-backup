@@ -368,7 +368,8 @@ def test_structured_router_prompt_distinguishes_progress_diagnosis_from_assessme
     assert route.intent == "summarize_progress"
     assert "Use summarize_progress when the learner asks for a diagnosis" in system_prompt
     assert "read-only learner-context request" in system_prompt
-    assert "Use assess_knowledge only when the learner asks to take" in system_prompt
+    assert "Use assess_knowledge only when the learner asks to start" in system_prompt
+    assert "scored assessment session" in system_prompt
     assert "not use assess_knowledge merely because the learner asks what they are weak at" in system_prompt
 
 
@@ -397,6 +398,29 @@ def test_structured_router_prompt_routes_quiz_history_analysis_to_progress_summa
     assert "missed in prior quiz attempts" in system_prompt
 
 
+def test_structured_router_prompt_routes_learned_history_diagnosis_to_progress_summary():
+    model = FakeStructuredModel(
+        {
+            "intent": "summarize_progress",
+            "confidence": 0.88,
+            "raw_topic": None,
+            "target_path": None,
+            "rationale": "The learner asks for diagnosis from already learned material.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="Dựa trên những gì tôi đã học hãy đánh giá năng lực của tôi",
+        route_context=None,
+    )
+
+    system_prompt = model.messages[0]["content"]
+    assert route.intent == "summarize_progress"
+    assert "already learned" in system_prompt
+    assert "existing learning state" in system_prompt
+    assert "not a new assessment" in system_prompt
+
+
 def test_structured_router_prompt_resolves_current_path_time_estimates():
     model = FakeStructuredModel(
         {
@@ -423,6 +447,111 @@ def test_structured_router_prompt_resolves_current_path_time_estimates():
     assert "Treat deictic path references as current-path references" in system_prompt
     assert "prefer current-path scope over the current unit" in system_prompt
     assert "explicit cadence and a current-path target" in system_prompt
+
+
+def test_structured_router_prompt_routes_latest_learned_content_summary_to_retrieval():
+    model = FakeStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.82,
+            "raw_topic": "latest learned video",
+            "search_queries": ["latest learned video"],
+            "target_path": None,
+            "explicit_scope_requested": False,
+            "rationale": "The learner asks to summarize their latest learned content.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="tóm tắt lại video gần nhất cho tôi",
+        route_context=None,
+    )
+
+    system_prompt = model.messages[0]["content"]
+    assert route.intent == "find_content"
+    assert route.extracted_slots.raw_topic == "latest learned video"
+    assert "latest watched/learned" in system_prompt
+    assert "route to retrieval" in system_prompt
+    assert "not clarify for a title first" in system_prompt
+    assert "Do not clarify merely to ask for summary format" in system_prompt
+    assert "default to a concise bullet summary" in system_prompt
+    assert "Do not ask which course or path contains the latest learned content" in system_prompt
+    assert "Latest learned video summary" in system_prompt
+    assert 'intent=find_content, raw_topic="latest learned video"' in system_prompt
+
+
+def test_structured_router_prompt_includes_vietnamese_deictic_video_examples():
+    model = FakeStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.84,
+            "raw_topic": "latest learned video",
+            "search_queries": ["latest learned video"],
+            "target_path": None,
+            "explicit_scope_requested": False,
+            "rationale": "Vietnamese deictic latest-video summary.",
+        }
+    )
+
+    StructuredAgentRouter(model=model).route(
+        message="tóm tắt video vừa xem",
+        route_context=None,
+    )
+
+    system_prompt = model.messages[0]["content"]
+    assert "tóm tắt video gần nhất" in system_prompt
+    assert "video vừa xem" in system_prompt
+    assert "do not ask the learner to send a title or a link" in system_prompt
+    assert "Vietnamese latest video recap" in system_prompt
+
+
+def test_structured_router_prompt_routes_vietnamese_replan_request_to_request_replan():
+    model = FakeStructuredModel(
+        {
+            "intent": "request_replan",
+            "confidence": 0.88,
+            "raw_topic": None,
+            "target_path": None,
+            "rationale": "Vietnamese replan optimization request.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="tôi muốn tối ưu hoá lộ trình",
+        route_context=None,
+    )
+
+    system_prompt = model.messages[0]["content"]
+    assert route.intent == "request_replan"
+    assert "tối ưu hoá lộ trình" in system_prompt
+    assert "request_replan" in system_prompt
+    assert "Do not classify these messages as assistant_help or clarify" in system_prompt
+    assert "Vietnamese replan request" in system_prompt
+
+
+def test_structured_router_prompt_includes_vietnamese_capability_examples():
+    model = FakeStructuredModel(
+        {
+            "intent": "summarize_progress",
+            "confidence": 0.86,
+            "raw_topic": None,
+            "target_path": None,
+            "rationale": "Vietnamese capability review.",
+        }
+    )
+
+    StructuredAgentRouter(model=model).route(
+        message="đánh giá năng lực hiện tại của tôi",
+        route_context=None,
+    )
+
+    system_prompt = model.messages[0]["content"]
+    assert "đánh giá năng lực hiện tại của tôi" in system_prompt
+    assert "đánh giá trình độ của tôi" in system_prompt
+    assert "Vietnamese capability evaluation" in system_prompt
+    assert "prefer summarize_progress" in system_prompt
+    assert "explicit new-test verb" in system_prompt
+    assert "làm bài kiểm tra" in system_prompt
 
 
 def test_structured_router_prompt_keeps_second_layer_guardrails():
@@ -620,6 +749,87 @@ def test_structured_router_agentic_rag_acting_prompt_uses_dynamic_tool_text():
     assert "Search title-level course units" in system_prompt
 
 
+def test_structured_router_agentic_rag_prompt_chains_recent_video_resolution_to_content_context():
+    prompt = AgentPromptManager().get("agentic_rag", "acting.system")
+
+    assert "latest learned content" in prompt
+    assert "get_user_learning_context first" in prompt
+    assert "then call get_lecture_context" in prompt
+    assert "after a learner-context observation identifies" in prompt
+
+
+def test_structured_router_agentic_rag_acting_prompt_documents_lecture_scope_modes():
+    prompt = AgentPromptManager().get("agentic_rag", "acting.system")
+
+    assert "arguments.scope=learned" in prompt
+    assert "arguments.scope=all" in prompt
+    assert "tóm tắt video đã học" in prompt
+    assert "tóm tắt toàn bộ lecture" in prompt
+    assert "tóm tắt cả video" in prompt
+
+
+def test_structured_router_agentic_rag_responding_prompt_describes_lecture_scope_metadata():
+    prompt = AgentPromptManager().get("agentic_rag", "responding.system")
+
+    assert "lecture_scope=learned" in prompt
+    assert "lecture_scope=all" in prompt
+    assert "Do not invent units outside the returned list" in prompt
+
+
+def test_structured_router_agentic_rag_responding_prompt_handles_aggregated_lecture_summary():
+    prompt = AgentPromptManager().get("agentic_rag", "responding.system")
+
+    assert "lecture_summary or aggregated_summary" in prompt
+    assert "Prefer lecture_summary when both are present" in prompt
+    assert "backend-produced synthesis" in prompt
+
+
+def test_structured_router_agentic_rag_responding_prompt_generates_inline_practice_questions():
+    prompt = AgentPromptManager().get("agentic_rag", "responding.system")
+
+    assert "Practice question generation" in prompt
+    assert "Default to 3 questions" in prompt
+    assert "cap at 5" in prompt
+    assert "informal practice" in prompt
+    assert "does not affect their stored quiz history" in prompt
+    assert "Do not reveal answers in this message" in prompt
+
+
+def test_structured_router_agentic_rag_responding_prompt_grades_practice_answers_conversationally():
+    prompt = AgentPromptManager().get("agentic_rag", "responding.system")
+
+    assert "Grading practice answers" in prompt
+    assert "correct, partially correct, or incorrect" in prompt
+    assert "Do not invent quiz scores or update assessment state" in prompt
+
+
+def test_structured_router_prompt_routes_practice_question_generation_to_retrieval():
+    model = FakeStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.85,
+            "raw_topic": "latest learned video",
+            "search_queries": ["latest learned video"],
+            "target_path": None,
+            "explicit_scope_requested": False,
+            "rationale": "Ad-hoc practice question generation about the current lesson.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="tạo cho tôi 3 câu hỏi về phần này",
+        route_context=None,
+    )
+
+    system_prompt = model.messages[0]["content"]
+    assert route.intent == "find_content"
+    assert "Ad-hoc practice/review question requests are not assess_knowledge" in system_prompt
+    assert "tạo cho tôi N câu hỏi về X" in system_prompt
+    assert "informal practice that does not affect" in system_prompt
+    assert "Practice question generation" in system_prompt
+    assert "tạo cho tôi 3 câu hỏi về phần này" in system_prompt
+
+
 def test_structured_router_agentic_rag_observing_stage_judges_evidence():
     model = FakeStructuredModel(
         {
@@ -687,6 +897,22 @@ def test_structured_router_agentic_rag_responding_stage_uses_validated_evidence(
     assert final.evidence_sufficient is True
     assert "Use only validated observations and accepted citations" in model.messages[0]["content"]
     assert "Do not reveal hidden thinking" in model.messages[0]["content"]
+
+
+def test_structured_router_agentic_rag_responding_prompt_does_not_request_images():
+    prompt = AgentPromptManager().get("agentic_rag", "responding.system")
+
+    assert "Do not ask the learner to send screenshots or images" in prompt
+    assert "image-reading capability is explicitly available" in prompt
+
+
+def test_structured_router_agentic_rag_responding_prompt_uses_unit_summaries_as_summary_evidence():
+    prompt = AgentPromptManager().get("agentic_rag", "responding.system")
+
+    assert "unit summaries and descriptions are valid source evidence" in prompt
+    assert "Do not claim that video or lecture content is unavailable" in prompt
+    assert "default to a concise bullet summary" in prompt
+    assert "Do not ask the learner to choose a summary format" in prompt
 
 
 def test_structured_router_agentic_rag_responding_stage_locks_latest_user_language():
