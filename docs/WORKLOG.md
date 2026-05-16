@@ -6,7 +6,7 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 ## Các Quyết Định Kỹ Thuật (ADR)
 
-### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026
+### [ADR-1] Chuyển đổi sang Real-time Streaming Response — 06/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** AI xử lý thông tin với số lượng token lớn (Transcript dài 10 phút + 1 ảnh Frame Capture). API response theo dạng tĩnh truyền thống (Chờ AI xong mới trả toàn bộ một cục JSON) tạo ra thời gian chờ quá tải, dẫn đến UX bị ngắt quãng, không mang lại cảm giác "Trò chuyện tương tác thời gian thực".
 
@@ -21,7 +21,7 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 ---
 
-### [ADR-2] Giữ Local Video Player thay vì dùng YouTube Embed cho tính năng Visual Context — 06/04/2026
+### [ADR-2] Giữ Local Video Player thay vì dùng YouTube Embed cho tính năng Visual Context — 06/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Mong muốn cao trong việc tiết kiệm dung lượng lưu trữ file của toàn server. Các file Local `.mp4` bài giảng thường ở dung lượng siêu khổng lồ (Nửa GB đến cả vài GB mỗi video). Nhúng (Embed) video YouTube thẳng lên giao diện là idea hoàn hảo lúc đó.
 
@@ -34,7 +34,7 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 ---
 
-### [ADR-3] Dockerize Project for Distribution & Persistence — 08/04/2026
+### [ADR-3] Dockerize Project for Distribution & Persistence — 08/04/2026 (Nguyễn Đôn Đức)
 
 **Bối cảnh:** Dự án đang ngày một lớn mạnh với nhiều thành phần (FastAPI, Streamlit, SQLite). Việc chia sẻ dự án cho các thành viên khác gặp khó khăn do yêu cầu cài đặt `uv`, cấu hình môi trường Python 3.12 và quản lý 4.5GB dữ liệu video. Ngoài ra, việc duy trì trạng thái Database và Logs cần sự ổn định cao.
 
@@ -53,7 +53,7 @@ Ghi lại các quyết định kỹ thuật, phân công, và brainstorming củ
 
 ---
 
-### [ADR-4] Chuyển đổi kiến trúc sang LangGraph ReAct Agent & Python Sandbox — 11/04/2026
+### [ADR-4] Chuyển đổi kiến trúc sang LangGraph ReAct Agent & Python Sandbox — 11/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Các vấn đề trong khóa CS231N phần lớn đòi hỏi khả năng toán học nâng cao (Ví dụ: tính đạo hàm, vector gradient, tính toán tích cực ma trận Backpropagation). LLLM như Gemini/GPT thường xuyên tính nhẩm sai các bước trung gian dẫn đến kết quả cuối cùng vô dụng đối với việc học kỹ thuật. 
 
@@ -72,7 +72,7 @@ Tuy nhiên, để chặn sinh viên (hoặc hacker) đánh lừa Agent sinh ra c
 
 ---
 
-### [ADR-5] Smart Router — Dual-Model Routing & Provider Abstraction — 11/04/2026
+### [ADR-5] Smart Router — Dual-Model Routing & Provider Abstraction — 11/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Sau khi triển khai LangGraph ReAct Agent (ADR-4), mọi câu hỏi — kể cả "Chào bạn" hay "Bài này nói về gì?" — đều phải đi qua chuỗi xử lý nặng nề: LangGraph graph → model lớn (`gpt-5.4-mini`) → potentially tool calls. Chi phí token cao và latency dài cho những câu hỏi đơn giản. Ngoài ra, `ChatOpenAI` bị hardcode khiến hệ thống không thể chạy trên local model (Ollama).
 
@@ -90,7 +90,7 @@ Tuy nhiên, để chặn sinh viên (hoặc hacker) đánh lừa Agent sinh ra c
 
 ---
 
-### [ADR-6] Hợp nhất `course-first` và `db-review` qua nhánh hybrid giữ nguyên history — 18/04/2026
+### [ADR-6] Hợp nhất `course-first` và `db-review` qua nhánh hybrid giữ nguyên history — 18/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** `main` mạnh về product flow `Course -> Overview -> Start -> Learning Unit`, còn `db-review` mạnh về PostgreSQL, repository layer, Redis auth hardening, và cấu trúc backend sạch hơn. Merge thẳng một nhánh lên nhánh kia có nguy cơ hoặc làm mất UX course-first, hoặc kéo các giả định lecture-first quay lại làm trung tâm.
 
@@ -113,7 +113,7 @@ Merge kết quả về `main` bằng merge commit `fe3ea17` để preserve histo
 
 ---
 
-### [ADR-7] Giữ `course-first` làm contract công khai, cô lập lecture stack thành compatibility layer — 18/04/2026
+### [ADR-7] Giữ `course-first` làm contract công khai, cô lập lecture stack thành compatibility layer — 18/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Sau refactor, UI và flow chính của sản phẩm đi theo `Course / LearningUnit`. Tuy nhiên tutor và một phần dữ liệu cũ vẫn phụ thuộc lecture-centric stack. Nếu không khóa boundary, model cũ dễ rò ngược ra public API và frontend.
 
@@ -131,7 +131,7 @@ Merge kết quả về `main` bằng merge commit `fe3ea17` để preserve histo
 
 ---
 
-### [ADR-8] Tách `data/` theo vai trò pipeline: `bootstrap / courses / working / final_artifacts` — 22/04/2026
+### [ADR-8] Tách `data/` theo vai trò pipeline: `bootstrap / courses / working / final_artifacts` — 22/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Sau khi chạy các prompt pipeline P1→P5 cho CS224n và CS231n, thư mục `data/` bắt đầu lẫn nhiều loại artifact khác nhau:
 - bootstrap fixture cho app runtime,
@@ -169,7 +169,7 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
 
 ---
 
-### [ADR-9] Ưu tiên Database-First Evolution cho phase production hardening — 23/04/2026
+### [ADR-9] Ưu tiên Database-First Evolution cho phase production hardening — 23/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và demo đã đủ chạy, nút thắt lớn nhất không còn nằm ở prompt/pipeline nữa mà nằm ở sự lệch giữa runtime schema cũ (`topic/module`) và target schema mới (`kp/unit + planner audit`). Nếu tiếp tục nối service trực tiếp lên runtime cũ thì càng về sau càng khó migrate.
 
@@ -188,7 +188,7 @@ Việc để tất cả nằm ngang hàng ở `data/` làm phát sinh 3 rủi ro
 
 **Hệ quả:** Database direction rõ ràng hơn cho production. Người làm integration phía sau không phải đoán source-of-truth nữa, và việc nâng cấp database có thể tiến hành độc lập với việc refactor service/router/frontend.
 
-### [ADR-10] Canonical DB materialization và runtime cutover dùng feature flags — 23/04/2026
+### [ADR-10] Canonical DB materialization và runtime cutover dùng feature flags — 23/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Sau khi canonical ingestion artifacts đã sạch và learner/planner tables đã có landing zone, cùng một bài toán xuất hiện ở nhiều lớp: nếu runtime tiếp tục đọc/ghi theo `topic/module/questions/mastery_scores` cũ thì production sẽ bị kẹt ở schema legacy; nếu cắt thẳng sang canonical không kiểm soát thì dễ fabricate mapping hoặc phá web hiện tại.
 
@@ -225,7 +225,7 @@ Tất cả read/write path mới đều nằm sau feature flags. Không drop/tru
 
 **Hệ quả:** Backend có đường đi production sang canonical data nhưng vẫn rollback được bằng flag. Thành viên khác cần chạy migration/import/backfill/parity trước khi bật read flags ở môi trường thật. UI không bị đụng trong lượt DB/runtime cutover này.
 
-### [ADR-11] Hard Canonical Cutover: drop legacy curriculum/mastery/planner tables — 23/04/2026
+### [ADR-11] Hard Canonical Cutover: drop legacy curriculum/mastery/planner tables — 23/04/2026 (Nguyễn Duy Minh Hoàng + Nguyễn Lê Minh Luân)
 
 **Bối cảnh:** Sau khi canonical importer, product-shell backfill, learner/planner sidecar tables và parity checker đã ổn, phần còn lại của rủi ro production nằm ở chỗ runtime vẫn có thể vô tình đọc/ghi các bảng legacy như `modules`, `topics`, `questions`, `mastery_scores`, `learning_paths`. Giữ chúng quá lâu sẽ khiến team tiếp tục build nhầm lên schema cũ.
 
@@ -406,7 +406,7 @@ Case runtime đã handle:
 - Không state-lock. Nếu demo làm thay đổi state, chạy `.venv/bin/python -m src.scripts.pipeline.reset_demo_accounts` để reset riêng 9 demo accounts. Cohort 30 có command riêng để tránh reset nhầm khi đang demo.
 - Synthetic vẫn không được tính là real calibration evidence; calibration readiness tiếp tục tách real vs synthetic response counts.
 
-### [ADR-12] LangGraph full redesign thành deeptutor-style agentic RAG pipeline — 29/04/2026
+### [ADR-12] LangGraph full redesign thành deeptutor-style agentic RAG pipeline — 29/04/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Sau canonical DB cutover (ADR-11), tutor vẫn dùng basic LangGraph ReAct flow không có RAG retrieval, citation grounding, hay assessment boundary. Agent không nhớ context giữa các turn, không có search tooling thật, và không thể phân biệt câu hỏi học vs câu hỏi trong bài kiểm tra.
 
@@ -431,7 +431,7 @@ Golden eval dataset gồm 50+ cases bao gồm 10 categories kiểm tra đúng/sa
 
 ---
 
-### [ADR-13] AWS ECS Terraform production infrastructure provisioning — 03/05/2026
+### [ADR-13] AWS ECS Terraform production infrastructure provisioning — 03/05/2026 (Nguyễn Đôn Đức)
 
 **Bối cảnh:** Hệ thống đang chạy local / EC2 thủ công. Cần infrastructure production chuẩn để: (1) deployment ổn định, (2) scaling theo traffic, (3) secret management an toàn, (4) observability đủ để debug production issue.
 
@@ -457,7 +457,7 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 
 ---
 
-### [ADR-14] GitHub Actions CI/CD automation với self-hosted EC2 runner — 09/05/2026
+### [ADR-14] GitHub Actions CI/CD automation với self-hosted EC2 runner — 09/05/2026 (Nguyễn Đôn Đức)
 
 **Bối cảnh:** Sau 5 backend revision manual (migration, IAM, CORS, vLLM config, health check), rõ ràng manual deployment là nút thắt lớn — mỗi push code mất 15-20 phút thao tác thủ công và dễ bỏ sót bước.
 
@@ -487,7 +487,7 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 
 ---
 
-### [ADR-15] Chuẩn hóa fine-tuned local AI stack cho guardrail router và tutor answer generator — 11/05/2026
+### [ADR-15] Chuẩn hóa fine-tuned local AI stack cho guardrail router và tutor answer generator — 11/05/2026 (Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Nhánh `rin/fine-tune` hoàn thiện một vòng fine-tune thực dụng cho hệ tutoring multilingual: model nhỏ làm lesson-scope guardrail/router, model lớn hơn làm answer/refusal generator. Mục tiêu không phải thay toàn bộ runtime ngay lập tức, mà là tạo một bộ artifact có thể tái lập, đo được, và đủ sạch để chuyển sang production integration sau.
 
@@ -518,7 +518,7 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 
 ---
 
-### [ADR-16] Agent search rerank, production observability stack, và auth UX hardening — 12/05/2026
+### [ADR-16] Agent search rerank, production observability stack, và auth UX hardening — 12/05/2026 (Nguyễn Đôn Đức + Nguyễn Duy Minh Hoàng)
 
 **Bối cảnh:** Tuần cuối trước submission (17/05) tập trung vào 3 vấn đề còn tồn đọng: (1) agent search chỉ dùng embedding similarity, thiếu rerank step nên citation precision thấp khi nhiều unit có title/KP tương tự; (2) observability stack đã có Terraform module nhưng chưa được deploy đầy đủ lên ECS production; (3) auth flow có stale error từ persisted Zustand store, và password policy quá strict cho demo account.
 
@@ -557,6 +557,26 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 - Landing page redesign hoàn chỉnh: bố cục mới theo sản phẩm production, button dimensions chuẩn, bỏ social proof section chưa có data thật, thêm Redis error handling robust cho backend.
 - `refactor: improve backend resiliency with robust Redis error handling` — Redis connection failure không còn crash toàn bộ request, fallback gracefully.
 
-**Bổ sung 15/05/2026 (Nguyễn Đôn Đức):**
+**Bổ sung 15/05/2026 (Nguyễn Duy Minh Hoàng):**
 - RoadmapPlanner master-detail layout: sidebar navigation, panel detail, unit tests cập nhật theo layout mới — giao diện planner rõ ràng hơn trước khi submission.
 - Fix top nav logo destination: logo click về đúng `/dashboard` thay vì route cũ.
+- Auth UX hardening: fix stale error hydration (Zustand persist store), relax password validation cho demo accounts, test coverage đầy đủ.
+- Agent route context: persist learning route context trong unit shell, wire user learning context vào agent router, route progress requests through agentic RAG.
+
+---
+
+### [ADR-17] Agent learner context, workload tools và agentic RAG refinement — 15/05/2026 (Nguyễn Duy Minh Hoàng)
+
+**Bối cảnh:** Trước submission, agent pipeline thiếu khả năng truy xuất ngữ cảnh học tập thực tế của người dùng trong conversation — agent biết content nhưng không biết learner đang học đến đâu, đã xem bài nào, còn bao nhiêu đơn vị chưa hoàn thành. Ngoài ra agent chưa trả lời được câu hỏi "Tôi nên học bao lâu mỗi ngày?" mà không có workload estimate.
+
+**Quyết định:**
+
+1. **User learning context snapshots**: Thêm service và schema lưu snapshot context của learner tại thời điểm turn — mastery, progress, active course, enrolled units. Agent router wire context này vào mỗi request để câu trả lời phù hợp với tiến độ thực tế của từng user.
+2. **Learner + lecture RAG tools**: Register 2 tool mới vào agentic RAG — `learner_context_tool` (đọc snapshot mastery/progress) và `lecture_context_tool` (truy xuất chi tiết bài giảng theo unit). Agent có thể combine cả 2 để trả lời câu hỏi liên quan đến "tôi đang ở đâu trong khoá học".
+3. **Lecture summary aggregator**: Aggregator tổng hợp lecture highlights từ nhiều units cho câu hỏi tổng quát ("Khoá này có những chủ đề gì?").
+4. **Workload extraction**: Support primary course workload extraction trong learning context — agent trả lời câu hỏi về lịch học/thời gian cam kết dựa trên số units còn lại và mastery hiện tại.
+5. **Guardrail alias normalization**: Normalize guardrail router aliases để route quyết định nhất quán dù user nhập theo nhiều cách (Vietnamese / English / mixed).
+6. **RAG intent threshold**: Hạ threshold confidence cho RAG intent từ 0.6 xuống 0.45 — tránh bỏ sót câu hỏi học thuật có intent rõ nhưng wording không khớp hoàn toàn với training prompt.
+7. **Agent route context persistence**: Khi user chuyển từ trang học sang agent chat, route context (course, unit, section) được truyền và persist trong agent session, không cần user nhắc lại.
+
+**Hệ quả:** Agent không còn "mù" về learner — có thể cá nhân hóa câu trả lời theo mastery và progress thực tế. Workload tool giúp agent đưa ra lịch học gợi ý thực tế thay vì chỉ describe nội dung. Guardrail alias normalization giảm edge case route sai do linguistic variation. RAG intent threshold thấp hơn giảm false negative cho câu hỏi học thuật ngắn.
