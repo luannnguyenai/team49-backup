@@ -3,9 +3,6 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-import json as _json
-import logging as _logging
-
 from src.schemas.agent import (
     AgentAction,
     AgentCitation,
@@ -15,7 +12,6 @@ from src.schemas.agent import (
     UnitSearchRequest,
 )
 
-_diag_logger = _logging.getLogger(__name__)
 from src.services.agent_evidence_quality import AgentEvidenceQualityService, EvidenceQualityVerdict
 from src.services.agent_graph_contracts import AgentSlots, ToolResult
 from src.services.agent_search_scope_service import AgentSearchScopeService
@@ -90,25 +86,6 @@ class AgentToolNodes:
             route_context=route_context,
             context_kind=context_kind,
         )
-        try:
-            workload = snapshot.get("path_workload_summary") or {}
-            _diag_logger.warning(
-                "user_learning_context.snapshot user=%s allowed=%s current_path=%s context_kind=%s "
-                "workload_keys=%s primary_course_id=%s primary_course=%s course_ids=%s "
-                "total_units=%s remaining_minutes=%s",
-                self.user_id,
-                allowed_course_ids,
-                current_path_course_ids,
-                context_kind,
-                sorted(workload.keys()) if isinstance(workload, dict) else None,
-                workload.get("primary_course_id") if isinstance(workload, dict) else None,
-                _json.dumps(workload.get("primary_course"), ensure_ascii=False) if isinstance(workload, dict) else None,
-                workload.get("course_ids") if isinstance(workload, dict) else None,
-                workload.get("total_units") if isinstance(workload, dict) else None,
-                workload.get("remaining_estimated_minutes") if isinstance(workload, dict) else None,
-            )
-        except Exception:
-            pass
         return ToolResult(
             kind="progress_summary",
             answer_markdown=None,
@@ -128,6 +105,7 @@ class AgentToolNodes:
         slots: AgentSlots,
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None = None,
+        route_context=None,
         canonical_unit_id: str | None = None,
         query: str | None = None,
         scope: str | None = None,
@@ -150,10 +128,21 @@ class AgentToolNodes:
             normalized = str(slot_unit_id).strip()
             if normalized and normalized not in candidate_ids:
                 candidate_ids.append(normalized)
+        route_unit_id = self._canonical_unit_id_from_route_context(route_context)
+        if route_unit_id and route_unit_id not in candidate_ids:
+            candidate_ids.append(route_unit_id)
         scoped_course_ids = self._merged_course_scope(
             current_path_course_ids,
             allowed_course_ids,
         )
+        if not candidate_ids and not (query and str(query).strip()):
+            fallback_unit_id = await self._resolve_lecture_unit_from_learner_context(
+                allowed_course_ids=allowed_course_ids,
+                current_path_course_ids=current_path_course_ids,
+                route_context=route_context,
+            )
+            if fallback_unit_id:
+                candidate_ids.append(fallback_unit_id)
 
         lecture = None
         selected_id = None
@@ -242,6 +231,58 @@ class AgentToolNodes:
         if isinstance(scope, str) and scope.strip().lower() == "all":
             return "all"
         return "learned"
+
+    @staticmethod
+    def _canonical_unit_id_from_route_context(route_context) -> str | None:
+        if route_context is None:
+            return None
+        value = None
+        if isinstance(route_context, dict):
+            value = route_context.get("canonical_unit_id") or route_context.get("canonicalUnitId")
+        else:
+            value = getattr(route_context, "canonical_unit_id", None) or getattr(
+                route_context, "canonicalUnitId", None
+            )
+        if value and str(value).strip():
+            return str(value).strip()
+        return None
+
+    async def _resolve_lecture_unit_from_learner_context(
+        self,
+        *,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None,
+        route_context=None,
+    ) -> str | None:
+        if self.user_id is None or self.user_learning_context_service is None:
+            return None
+        try:
+            snapshot = await self.user_learning_context_service.snapshot(
+                user_id=self.user_id,
+                allowed_course_ids=allowed_course_ids,
+                current_path_course_ids=current_path_course_ids,
+                route_context=route_context,
+                context_kind="current_unit_state",
+            )
+        except Exception:
+            return None
+        current_state = snapshot.get("current_learning_state") if isinstance(snapshot, dict) else None
+        if isinstance(current_state, dict):
+            current_unit = current_state.get("current_unit")
+            if isinstance(current_unit, dict) and current_unit.get("canonical_unit_id"):
+                return str(current_unit["canonical_unit_id"])
+        recent_progress = snapshot.get("recent_progress") if isinstance(snapshot, dict) else None
+        if isinstance(recent_progress, list):
+            for item in recent_progress:
+                if isinstance(item, dict) and item.get("canonical_unit_id"):
+                    return str(item["canonical_unit_id"])
+        path_position = snapshot.get("path_position") if isinstance(snapshot, dict) else None
+        if isinstance(path_position, dict):
+            for key in ("current_unit", "next_unfinished_unit", "next_unit", "previous_unit"):
+                node = path_position.get(key)
+                if isinstance(node, dict) and node.get("canonical_unit_id"):
+                    return str(node["canonical_unit_id"])
+        return None
 
     async def _maybe_aggregate_lecture_summary(
         self,
