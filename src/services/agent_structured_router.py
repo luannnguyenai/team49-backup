@@ -26,6 +26,7 @@ class StructuredRouteOutput(BaseModel):
     search_queries: list[str] = Field(default_factory=list)
     target_path: Literal["computer_vision", "nlp"] | None = None
     explicit_scope_requested: bool = False
+    lecture_scope: Literal["learned", "all"] | None = None
     rationale: str
     clarification_question: str | None = None
 
@@ -151,6 +152,7 @@ class StructuredAgentRouter:
                 if search_scope == "explicit_path"
                 else [],
                 search_scope=search_scope,
+                lecture_scope=result.lecture_scope,
             ),
             rationale=result.rationale,
             clarification_question=result.clarification_question,

@@ -134,6 +134,32 @@ def test_structured_router_prompt_uses_current_lesson_context_before_clarifying(
     assert "before asking for a course, path, platform, or topic clarification" in system_prompt
 
 
+def test_structured_router_extracts_full_lecture_scope_slot():
+    model = FakeStructuredModel(
+        {
+            "intent": "find_content",
+            "confidence": 0.9,
+            "raw_topic": "current lecture full summary",
+            "search_queries": ["current lecture full summary"],
+            "target_path": None,
+            "explicit_scope_requested": False,
+            "lecture_scope": "all",
+            "rationale": "User asked for the full current lecture.",
+        }
+    )
+
+    route = StructuredAgentRouter(model=model).route(
+        message="Give me a full summary of this lecture, including the parts I haven't watched yet",
+        route_context={
+            "route": "/learn",
+            "canonicalUnitId": "unit-current",
+        },
+    )
+
+    assert route.extracted_slots.lecture_scope == "all"
+    assert 'lecture_scope="all"' in model.messages[0]["content"]
+
+
 def test_structured_router_prompt_distinguishes_single_unit_skip_advice_from_replan():
     model = FakeStructuredModel(
         {
@@ -761,10 +787,13 @@ def test_structured_router_agentic_rag_acting_prompt_documents_lecture_scope_mod
     prompt = AgentPromptManager().get("agentic_rag", "acting.system")
 
     assert "arguments.scope=learned" in prompt
-    assert "arguments.scope=all" in prompt
+    assert 'MUST include arguments.scope="all"' in prompt
+    assert "call get_lecture_context first" in prompt
     assert "tóm tắt video đã học" in prompt
     assert "tóm tắt toàn bộ lecture" in prompt
     assert "tóm tắt cả video" in prompt
+    assert "including the parts I haven't watched yet" in prompt
+    assert "kể cả phần chưa xem" in prompt
 
 
 def test_structured_router_agentic_rag_responding_prompt_describes_lecture_scope_metadata():
