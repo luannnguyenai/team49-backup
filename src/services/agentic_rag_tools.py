@@ -288,9 +288,10 @@ class AgenticRAGToolExecutor:
                     slots=slots,
                     allowed_course_ids=allowed_course_ids,
                     current_path_course_ids=current_path_course_ids,
+                    route_context=route_context,
                     canonical_unit_id=tool_call.arguments.get("canonical_unit_id"),
                     query=tool_call.arguments.get("query"),
-                    scope=tool_call.arguments.get("scope"),
+                    scope=tool_call.arguments.get("scope") or slots.lecture_scope,
                 )
             except Exception as exc:
                 error_code = classify_rag_error(exc)
