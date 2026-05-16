@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 import unicodedata
@@ -52,6 +53,7 @@ from src.services.agent_thread_memory_state import AgentThreadMemoryStateStore
 from src.services.agent_tool_nodes import AgentToolNodes
 from src.services.agentic_rag_pipeline import AgenticRAGPipeline
 from src.services.agentic_rag_tools import AgenticRAGToolExecutor
+from src.services.lecture_summary_aggregator import LectureSummaryAggregator
 from src.services.guardrail_router import (
     GuardrailDecision,
     GuardrailRouterUnavailableError,
@@ -161,6 +163,7 @@ class AgentGraphService:
         language_normalizer=None,
         response_router=None,
         user_learning_context_service=None,
+        lecture_summary_aggregator=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -195,6 +198,7 @@ class AgentGraphService:
         self.guardrail_router = guardrail_router or build_guardrail_router_client()
         self.language_normalizer = language_normalizer or get_input_language_normalizer()
         self.user_learning_context_service = user_learning_context_service
+        self.lecture_summary_aggregator = lecture_summary_aggregator or LectureSummaryAggregator()
         prerequisite_path_service = None
         if hasattr(search_service, "repo"):
             prerequisite_path_service = AgentPrerequisitePathService(
@@ -207,6 +211,7 @@ class AgentGraphService:
             prerequisite_path_service=prerequisite_path_service,
             user_id=getattr(action_user, "id", None),
             user_learning_context_service=user_learning_context_service,
+            lecture_summary_aggregator=self.lecture_summary_aggregator,
         )
         self.agentic_rag_tools = AgenticRAGToolExecutor(self.tools)
         self.agentic_rag = AgenticRAGPipeline(
@@ -356,20 +361,50 @@ class AgentGraphService:
             conversation_id,
             user_id,
         )
-        guardrail_decision = await self._route_guardrail(
-            message=sanitized_request.message,
-            route_context=sanitized_request.route_context,
-            allowed_course_ids=allowed_course_ids,
-            current_path_course_ids=current_path_course_ids,
-            pending_clarification=pending_for_guardrail,
-            assistant_context=assistant_context_for_guardrail,
+        preloaded_recent_messages = await self._load_recent_message_context(
+            conversation_id,
+            user_id,
         )
+        guardrail_task = asyncio.create_task(
+            self._route_guardrail(
+                message=sanitized_request.message,
+                route_context=sanitized_request.route_context,
+                allowed_course_ids=allowed_course_ids,
+                current_path_course_ids=current_path_course_ids,
+                pending_clarification=pending_for_guardrail,
+                assistant_context=assistant_context_for_guardrail,
+            )
+        )
+        prerouted_task: asyncio.Task | None = None
+        if pending_for_guardrail is None:
+            prerouted_task = asyncio.create_task(
+                self._speculative_route(
+                    message=sanitized_request.message,
+                    route_context=sanitized_request.route_context,
+                    recent_messages=preloaded_recent_messages,
+                )
+            )
+        try:
+            guardrail_decision = await guardrail_task
+        except BaseException:
+            if prerouted_task is not None:
+                prerouted_task.cancel()
+            raise
         guardrail_response = self._compose_guardrail_response(
             conversation_id=conversation_id,
             decision=guardrail_decision,
         )
         if guardrail_response is not None:
+            if prerouted_task is not None:
+                prerouted_task.cancel()
             return guardrail_response
+
+        prerouted_route: AgentRoute | None = None
+        if prerouted_task is not None:
+            try:
+                prerouted_route = await prerouted_task
+            except (asyncio.CancelledError, Exception):
+                prerouted_route = None
 
         if self.graph_repo is None:
             response = await self._invoke_graph_and_compose(
@@ -379,6 +414,9 @@ class AgentGraphService:
                 user_id=user_id,
                 allowed_course_ids=allowed_course_ids,
                 current_path_course_ids=current_path_course_ids,
+                prerouted_route=prerouted_route,
+                preloaded_recent_messages=preloaded_recent_messages,
+                preloaded_pending=pending_for_guardrail,
             )
             response = await self._enforce_response_language(response, normalized_language)
             return self._sanitize_response(response, input_guardrail)
@@ -458,6 +496,9 @@ class AgentGraphService:
                     user_id=user_id,
                     allowed_course_ids=allowed_course_ids,
                     current_path_course_ids=current_path_course_ids,
+                    prerouted_route=prerouted_route,
+                    preloaded_recent_messages=preloaded_recent_messages,
+                    preloaded_pending=pending_for_guardrail,
                 )
                 response = await self._enforce_response_language(response, normalized_language)
                 response = self._sanitize_response(response, input_guardrail)
@@ -600,19 +641,41 @@ class AgentGraphService:
                 assistant_context = await self._load_guardrail_assistant_context(
                     conversation_id, user_id,
                 )
-                guardrail_decision = await self._route_guardrail(
-                    message=sanitized_request.message,
-                    route_context=sanitized_request.route_context,
-                    allowed_course_ids=allowed_course_ids,
-                    current_path_course_ids=current_path_course_ids,
-                    pending_clarification=pending_for_guardrail,
-                    assistant_context=assistant_context,
+                preloaded_recent_messages = await self._load_recent_message_context(
+                    conversation_id, user_id,
                 )
+                guardrail_task = asyncio.create_task(
+                    self._route_guardrail(
+                        message=sanitized_request.message,
+                        route_context=sanitized_request.route_context,
+                        allowed_course_ids=allowed_course_ids,
+                        current_path_course_ids=current_path_course_ids,
+                        pending_clarification=pending_for_guardrail,
+                        assistant_context=assistant_context,
+                    )
+                )
+                prerouted_task: asyncio.Task | None = None
+                if pending_for_guardrail is None:
+                    prerouted_task = asyncio.create_task(
+                        self._speculative_route(
+                            message=sanitized_request.message,
+                            route_context=sanitized_request.route_context,
+                            recent_messages=preloaded_recent_messages,
+                        )
+                    )
+                try:
+                    guardrail_decision = await guardrail_task
+                except BaseException:
+                    if prerouted_task is not None:
+                        prerouted_task.cancel()
+                    raise
                 guardrail_response = self._compose_guardrail_response(
                     conversation_id=conversation_id,
                     decision=guardrail_decision,
                 )
                 if guardrail_response is not None:
+                    if prerouted_task is not None:
+                        prerouted_task.cancel()
                     guardrail_response = await self._enforce_response_language(
                         guardrail_response,
                         normalized_language,
@@ -621,6 +684,12 @@ class AgentGraphService:
                     await persist_assistant_message(guardrail_response)
                     yield _json.dumps({"done": guardrail_response.model_dump(mode="json", by_alias=True)}) + "\n"
                     return
+                prerouted_route: AgentRoute | None = None
+                if prerouted_task is not None:
+                    try:
+                        prerouted_route = await prerouted_task
+                    except (asyncio.CancelledError, Exception):
+                        prerouted_route = None
 
                 async def emit_done_response(response: AgentChatResponse) -> str:
                     response = await self._enforce_response_language(response, normalized_language)
@@ -658,13 +727,13 @@ class AgentGraphService:
                     trace_id=str(uuid4()),
                 ).model_dump()
                 stream_state["message"] = sanitized_request.message
-                stream_state["pending_clarification"] = await self._load_pending_clarification(
-                    conversation_id, user_id, thread_id,
-                )
-                stream_state["recent_messages"] = await self._load_recent_message_context(conversation_id, user_id)
+                stream_state["pending_clarification"] = pending_for_guardrail
+                stream_state["recent_messages"] = preloaded_recent_messages
                 stream_state["allowed_course_ids"] = allowed_course_ids
                 stream_state["current_path_course_ids"] = current_path_course_ids or allowed_course_ids
                 stream_state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id, thread_id)
+                if prerouted_route is not None:
+                    stream_state["prerouted_route"] = prerouted_route.model_dump(mode="json")
                 route_state = await self._route_intent(stream_state)
                 logger.info("chat_stream: after _route_intent intent=%s conv=%s", route_state.get("intent"), conversation_id)
                 canonicalized = await self._canonicalize_slots(route_state)
@@ -1152,6 +1221,9 @@ class AgentGraphService:
         user_id: str,
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None,
+        prerouted_route: AgentRoute | None = None,
+        preloaded_recent_messages: list[dict] | None = None,
+        preloaded_pending: PendingClarification | None = None,
     ) -> AgentChatResponse:
         state = AgentCheckpointState(
             thread_id=thread_id,
@@ -1164,16 +1236,19 @@ class AgentGraphService:
         state["message"] = request.message
         state["allowed_course_ids"] = allowed_course_ids
         state["current_path_course_ids"] = current_path_course_ids or allowed_course_ids
-        state["recent_messages"] = await self._load_recent_message_context(
-            conversation_id,
-            user_id,
+        state["recent_messages"] = (
+            preloaded_recent_messages
+            if preloaded_recent_messages is not None
+            else await self._load_recent_message_context(conversation_id, user_id)
         )
-        state["pending_clarification"] = await self._load_pending_clarification(
-            conversation_id,
-            user_id,
-            thread_id,
+        state["pending_clarification"] = (
+            preloaded_pending
+            if preloaded_pending is not None
+            else await self._load_pending_clarification(conversation_id, user_id, thread_id)
         )
         state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id, thread_id)
+        if prerouted_route is not None:
+            state["prerouted_route"] = prerouted_route.model_dump(mode="json")
         if request.tool_mode == "web_papers":
             if not settings.external_research_enabled:
                 return self.composer.compose(
@@ -1272,10 +1347,19 @@ class AgentGraphService:
             if pending_result is not None:
                 return pending_result
 
-        route = self._promote_contextual_rag_followup(
-            self._route_with_recent_context(state["message"], state),
-            state,
-        )
+        prerouted = state.get("prerouted_route")
+        if isinstance(prerouted, dict):
+            try:
+                route = AgentRoute.model_validate(prerouted)
+            except Exception:
+                route = None
+        elif isinstance(prerouted, AgentRoute):
+            route = prerouted
+        else:
+            route = None
+        if route is None:
+            route = self._route_with_recent_context(state["message"], state)
+        route = self._promote_contextual_rag_followup(route, state)
         route = self._apply_current_lesson_context_to_rag_route(route, state)
         return {
             **state,
@@ -1284,6 +1368,7 @@ class AgentGraphService:
             "slots": route.extracted_slots,
             "clarification_question": route.clarification_question,
             "candidate_intent": route.candidate_intent,
+            "prerouted_route": None,
         }
 
     def _apply_current_lesson_context_to_rag_route(
@@ -1393,6 +1478,34 @@ class AgentGraphService:
                 recent_messages=state.get("recent_messages") or [],
             )
         return route(message=message, route_context=state.get("route_context"))
+
+    async def _speculative_route(
+        self,
+        *,
+        message: str,
+        route_context,
+        recent_messages: list[dict] | None,
+    ) -> AgentRoute | None:
+        try:
+            route_fn = self.router.route
+            try:
+                parameters = signature(route_fn).parameters
+            except (TypeError, ValueError):
+                parameters = {}
+            if "recent_messages" in parameters:
+                return await asyncio.to_thread(
+                    route_fn,
+                    message=message,
+                    route_context=route_context,
+                    recent_messages=recent_messages or [],
+                )
+            return await asyncio.to_thread(
+                route_fn,
+                message=message,
+                route_context=route_context,
+            )
+        except Exception:
+            return None
 
     def _promote_contextual_rag_followup(self, route: AgentRoute, state: dict) -> AgentRoute:
         if route.intent != "clarify" or route.candidate_intent not in RAG_AGENT_INTENTS:
