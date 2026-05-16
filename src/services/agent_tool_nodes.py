@@ -3,6 +3,9 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+import json as _json
+import logging as _logging
+
 from src.schemas.agent import (
     AgentAction,
     AgentCitation,
@@ -11,6 +14,8 @@ from src.schemas.agent import (
     PathRequirementsRequest,
     UnitSearchRequest,
 )
+
+_diag_logger = _logging.getLogger(__name__)
 from src.services.agent_evidence_quality import AgentEvidenceQualityService, EvidenceQualityVerdict
 from src.services.agent_graph_contracts import AgentSlots, ToolResult
 from src.services.agent_search_scope_service import AgentSearchScopeService
@@ -85,6 +90,25 @@ class AgentToolNodes:
             route_context=route_context,
             context_kind=context_kind,
         )
+        try:
+            workload = snapshot.get("path_workload_summary") or {}
+            _diag_logger.warning(
+                "user_learning_context.snapshot user=%s allowed=%s current_path=%s context_kind=%s "
+                "workload_keys=%s primary_course_id=%s primary_course=%s course_ids=%s "
+                "total_units=%s remaining_minutes=%s",
+                self.user_id,
+                allowed_course_ids,
+                current_path_course_ids,
+                context_kind,
+                sorted(workload.keys()) if isinstance(workload, dict) else None,
+                workload.get("primary_course_id") if isinstance(workload, dict) else None,
+                _json.dumps(workload.get("primary_course"), ensure_ascii=False) if isinstance(workload, dict) else None,
+                workload.get("course_ids") if isinstance(workload, dict) else None,
+                workload.get("total_units") if isinstance(workload, dict) else None,
+                workload.get("remaining_estimated_minutes") if isinstance(workload, dict) else None,
+            )
+        except Exception:
+            pass
         return ToolResult(
             kind="progress_summary",
             answer_markdown=None,
