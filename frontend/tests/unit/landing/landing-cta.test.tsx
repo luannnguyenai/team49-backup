@@ -3,22 +3,19 @@ import { describe, expect, it } from "vitest";
 import LandingPage from "@/components/landing/LandingPage";
 
 describe("Landing CTA contract", () => {
-  it("uses shared primary and secondary button utilities", () => {
+  it("routes primary learning-path CTAs through login", () => {
     render(<LandingPage />);
 
-    const createLinks = screen.getAllByRole("link", { name: /create your account/i });
-    expect(createLinks[0].className).toContain("btn-primary");
-    expect(createLinks[0].className).not.toMatch(/\bbg-slate-950\b/);
-
-    const signInLinks = screen.getAllByRole("link", { name: /^sign in$/i });
-    expect(signInLinks[0].className).toContain("btn-secondary");
+    const ctaLinks = screen.getAllByRole("link", { name: /get your own learning path/i });
+    expect(ctaLinks.length).toBeGreaterThan(0);
+    expect(ctaLinks[0]).toHaveAttribute("href", "/login?from=%2Fonboarding");
+    expect(ctaLinks[0].className).toContain("btn-primary");
   });
 
-  it("stacks the hero CTAs for narrow screens before expanding horizontally", () => {
+  it("keeps public auth links available in the landing nav", () => {
     render(<LandingPage />);
 
-    const createLink = screen.getAllByRole("link", { name: /create your account/i })[0];
-    expect(createLink.parentElement?.className).toContain("flex-col");
-    expect(createLink.parentElement?.className).toContain("sm:flex-row");
+    expect(screen.getAllByRole("link", { name: /^sign in$/i })[0]).toHaveAttribute("href", "/login");
+    expect(screen.getAllByRole("link", { name: /^sign up$/i })[0]).toHaveAttribute("href", "/register");
   });
 });

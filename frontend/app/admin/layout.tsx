@@ -2,8 +2,8 @@
 
 // app/admin/layout.tsx
 // Client-side admin guard + shell. Redirects:
-//   - missing JWT  → /login?from=/admin
-//   - role !== admin → /tutor
+//   - missing JWT  → /
+//   - role !== admin → /agent
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const verify = async () => {
       const hasToken = Boolean(tokenStorage.getAccess());
       if (!hasToken) {
-        router.replace("/login?from=/admin");
+        router.replace("/");
         return;
       }
       let me = user;
@@ -31,11 +31,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         me = useAuthStore.getState().user;
       }
       if (!me) {
-        router.replace("/login?from=/admin");
+        router.replace("/");
         return;
       }
       if (me.role !== "admin") {
-        router.replace("/tutor");
+        router.replace("/agent");
         return;
       }
       setChecking(false);

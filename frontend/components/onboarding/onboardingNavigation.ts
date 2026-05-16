@@ -1,7 +1,7 @@
 const DEFAULT_LEARN_HREF = "/learn";
 
 function normalizeNextHref(next: string | null): string {
-  return next && next.startsWith("/") ? next : DEFAULT_LEARN_HREF;
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : DEFAULT_LEARN_HREF;
 }
 
 export function buildAssessmentNextHref(next: string | null): string {

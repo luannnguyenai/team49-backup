@@ -1062,20 +1062,20 @@ function PathSwitchAction({
   };
 
   return (
-    <div className="mt-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+    <div className="card-glass mt-2 p-3">
       <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <div className="hero-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-brand-soft">
           <Map className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-black text-slate-900">{action.label || "Change path"}</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
+          <p className="text-sm font-semibold text-text-strong">{action.label || "Change path"}</p>
+          <p className="mt-1 text-xs leading-5 text-text-muted">
             Select a target path. The change is applied only after confirmation.
           </p>
         </div>
       </div>
 
-      <label className="mt-3 block text-xs font-black uppercase tracking-wider text-slate-500" htmlFor={`path-switch-${action.label}`}>
+      <label className="mt-3 block text-xs font-semibold uppercase tracking-wider text-text-muted" htmlFor={`path-switch-${action.label}`}>
         Target learning path
       </label>
       <select
@@ -1086,7 +1086,7 @@ function PathSwitchAction({
           setSelectedPath(event.target.value as PlannerPathKey);
           setSwitchedTo(null);
         }}
-        className="mt-1 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+        className="input-base mt-1 min-h-11 w-full px-3 text-sm font-semibold"
       >
         {(Object.keys(SUPPORTED_LEARNING_PATHS) as PlannerPathKey[]).map((pathKey) => {
           const path = SUPPORTED_LEARNING_PATHS[pathKey];
@@ -1097,18 +1097,18 @@ function PathSwitchAction({
           );
         })}
       </select>
-      <p className="mt-1 text-xs text-slate-500">{target.selectedCourseIds.join(" -> ")}</p>
+      <p className="mt-1 text-xs text-text-muted">{target.selectedCourseIds.join(" -> ")}</p>
 
       <button
         type="button"
         disabled={isCurrent}
         onClick={() => setShowConfirm(true)}
-        className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-black text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+        className="btn-primary mt-3 min-h-11 w-full text-sm disabled:cursor-not-allowed disabled:opacity-60"
       >
         <ArrowRight className="h-4 w-4" />
         Repath
       </button>
-      {isCurrent ? <p className="mt-2 text-xs font-medium text-slate-500">This is already your active path.</p> : null}
+      {isCurrent ? <p className="mt-2 text-xs font-medium text-text-muted">This is already your active path.</p> : null}
       {commitError ? <p className="mt-2 text-xs font-bold text-red-600">{commitError}</p> : null}
       {switchedTo ? (
         <p className="mt-2 text-xs font-bold text-emerald-700">
@@ -1117,15 +1117,15 @@ function PathSwitchAction({
       ) : null}
 
       {showConfirm ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Confirm path change"
-            className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+            className="card-glass w-full max-w-sm p-5 shadow-2xl"
           >
-            <p className="text-base font-black text-slate-900">Confirm path change</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="text-base font-semibold text-text-strong">Confirm path change</p>
+            <p className="mt-2 text-sm leading-6 text-text-muted">
               Are you sure you want to switch to {target.label}? Your planner will rebuild around this path.
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2">
@@ -1133,7 +1133,7 @@ function PathSwitchAction({
                 type="button"
                 disabled={isCommitting}
                 onClick={() => setShowConfirm(false)}
-                className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                className="btn-secondary min-h-11 px-4 text-sm"
               >
                 Cancel
               </button>
@@ -1141,7 +1141,7 @@ function PathSwitchAction({
                 type="button"
                 disabled={isCommitting}
                 onClick={applyPathChange}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-black text-white transition hover:bg-blue-700 disabled:opacity-60"
+                className="btn-primary min-h-11 px-4 text-sm disabled:opacity-60"
               >
                 {isCommitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Change path

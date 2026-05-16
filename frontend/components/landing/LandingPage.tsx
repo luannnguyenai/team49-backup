@@ -103,7 +103,7 @@ export default function LandingPage() {
 
               <div className="flex justify-center">
                 <Link
-                  href="/onboarding"
+                  href="/login?from=%2Fonboarding"
                   className="btn-primary group flex h-14 w-full items-center justify-center gap-3 rounded-full bg-blue-600 px-8 text-lg font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 active:scale-[0.98] sm:w-auto min-w-[280px]"
                 >
                   Get Your Own Learning Path
@@ -401,7 +401,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-8 flex justify-center">
               <Link
-                href="/onboarding"
+                href="/login?from=%2Fonboarding"
                 className="btn-primary group flex h-14 w-full items-center justify-center gap-3 rounded-full bg-blue-600 px-8 text-lg font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 active:scale-[0.98] sm:w-auto min-w-[280px]"
               >
                 Get Your Own Learning Path

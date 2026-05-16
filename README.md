@@ -33,8 +33,8 @@
 | Hạng mục | Link |
 |---|---|
 | :globe_with_meridians: Live URL | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
-| :clapper: Demo Video | _Đang cập nhật_ |
-| :bar_chart: Pitch Deck | _Đang cập nhật_ |
+| :clapper: Demo Video | _(link)_ |
+| :bar_chart: Pitch Deck | _(link)_ |
 | :triangular_ruler: Architecture | [architecture/index.html](architecture/index.html) · [SVGs](architecture/) |
 | :robot: AI Logs | [docs/ai-logs.md](docs/ai-logs.md) |
 | :clipboard: Worklog | [docs/WORKLOG.md](docs/WORKLOG.md) |
@@ -53,7 +53,7 @@ Sản phẩm hướng tới học sinh từ cấp 2 đến đại học, đặc 
 
 ## :warning: 2. Vấn đề cần giải quyết
 
-> **80% học sinh tự học online không có lộ trình rõ ràng và không biết mình yếu ở đâu.**
+> **Phần lớn học sinh tự học online không có lộ trình rõ ràng và không biết mình yếu ở đâu.**
 
 | Vấn đề | Hệ quả |
 |---|---|
@@ -70,24 +70,14 @@ Sản phẩm hướng tới học sinh từ cấp 2 đến đại học, đặc 
 
 AI Adaptive Tutor giải quyết bằng **vòng lặp học tập thích ứng (Adaptive Learning Loop)**:
 
-```
-  +-------------------+       +---------------------+       +------------------+
-  | 1. Đánh giá       | ----> | 2. Lộ trình         | ----> | 3. Học + Quiz    |
-  | năng lực (KP)     |       | cá nhân hóa         |       | + AI Tutor       |
-  +-------------------+       +---------------------+       +------------------+
-         ^                                                          |
-         |                  +---------------------+                 |
-         +----------------- | 4. Cập nhật mastery | <---------------+
-                            | + điều chỉnh path   |
-                            +---------------------+
-```
-
 | Bước | Mô tả |
 |---|---|
 | :one: **Diagnostic Assessment** | Quiz xác định level và điểm yếu theo từng Knowledge Point (KP) |
 | :two: **Personalized Path** | Planner tự động đề xuất nội dung học dựa trên mastery, prerequisite graph và mục tiêu |
 | :three: **Learn + Instant Feedback** | Học bài, làm quiz, nhận giải thích ngay lập tức bằng AI tutor |
 | :four: **Mastery Update** | Hệ thống cập nhật điểm mastery theo KP và điều chỉnh lộ trình |
+
+![Assessment Flow](architecture/07-assessment-flow.svg)
 
 ---
 
@@ -160,17 +150,8 @@ Fine-tune và zero-shot scoring cho **prerequisite graph** (quan hệ tiên quy�
 
 ![System Overview](architecture/system-overview.svg)
 
-### Agentic RAG Pipeline
-
-![Agentic RAG Pipeline](architecture/agentic-rag.svg)
-
-### AWS Infrastructure
-
-![AWS Infrastructure](architecture/aws-infrastructure.svg)
-
 | Sơ đồ | Mô tả |
 |---|---|
-| [System Overview](architecture/system-overview.svg) | Toàn bộ stack: Client → CDN → Next.js → FastAPI → AI → Data → Observability |
 | [Agentic RAG Pipeline](architecture/agentic-rag.svg) | PII Sanitizer → Guardrail Router → Smart Router → LangGraph → vLLM |
 | [AWS Infrastructure](architecture/aws-infrastructure.svg) | VPC, ECS Fargate, RDS, ElastiCache, ECR, S3+CloudFront, CI/CD |
 | [Request Lifecycle](architecture/request-lifecycle.svg) | Sequence diagrams: SSR, AI chat SSE, Assessment IRT, Video delivery |
@@ -290,7 +271,7 @@ Xem `.env.example` để biết đầy đủ các biến môi trường.
 | Hạng mục | Link / Thông tin |
 |---|---|
 | :globe_with_meridians: **Live URL** | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
-| :clapper: **Video Demo** | _Đang cập nhật_ |
+| :clapper: **Video Demo** | _(link)_ |
 | :white_check_mark: **Evaluation Report** | [docs/evaluation-report.md](docs/evaluation-report.md) |
 | :robot: **AI Logs** | [docs/ai-logs.md](docs/ai-logs.md) |
 | :test_tube: **Golden Eval Dataset** | 50+ test cases ([docs/agent-golden-evals.md](docs/agent-golden-evals.md)) |

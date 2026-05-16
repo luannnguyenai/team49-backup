@@ -17,8 +17,8 @@ describe("ReplanKnowledgeClaimStep", () => {
       />,
     );
 
-    expect(screen.getByText(/Mô tả này không tự động bỏ qua bài học/i)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Bạn đã biết phần nào rồi?"), {
+    expect(screen.getByText(/This description does not automatically skip lessons/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("What do you already know?"), {
       target: { value: "Tôi biết Faster R-CNN" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));

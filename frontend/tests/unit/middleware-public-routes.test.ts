@@ -43,6 +43,34 @@ describe("auth middleware public route handling", () => {
     );
   });
 
+  it("falls back to dashboard for unsafe authenticated auth redirects", () => {
+    const request = new NextRequest("http://localhost:3000/login?next=%2F%2Fevil.example");
+    request.cookies.set("al_access_token", "token");
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost:3000/dashboard");
+  });
+
+  it("redirects unauthenticated app routes to the landing page", () => {
+    const request = new NextRequest("http://localhost:3000/learn");
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost:3000/");
+  });
+
+  it("redirects unauthenticated course routes to the landing page", () => {
+    const request = new NextRequest("http://localhost:3000/courses/cs231n");
+
+    const response = middleware(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost:3000/");
+  });
+
   it("redirects authenticated users away from the public landing page", () => {
     const request = new NextRequest("http://localhost:3000/");
     request.cookies.set("al_access_token", "token");

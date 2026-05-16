@@ -1,0 +1,214 @@
+﻿<svg width="1400" height="700" viewBox="0 0 1400 700" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,-apple-system,Segoe UI,Helvetica,sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L0,7 L10,3.5 z" fill="#6B7280"/>
+    </marker>
+    <marker id="arrBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L0,7 L10,3.5 z" fill="#3B82F6"/>
+    </marker>
+    <marker id="arrGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L0,7 L10,3.5 z" fill="#16A34A"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="700" fill="#FAFAFA"/>
+
+  <!-- ─── LEFT COLUMN: User I/O ──────────────────────────────────── -->
+
+  <!-- User query speech bubble -->
+  <rect x="20" y="60" width="200" height="90" rx="10" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <text x="120" y="82" text-anchor="middle" font-size="9" font-weight="700" fill="#1E40AF">User Query</text>
+  <text x="36" y="100" font-size="8.5" fill="#374151">"I struggle balancing work</text>
+  <text x="36" y="115" font-size="8.5" fill="#374151">and self-care. Even when</text>
+  <text x="36" y="130" font-size="8.5" fill="#374151">I rest, I feel anxious."</text>
+  <!-- speech bubble tail -->
+  <polygon points="100,150 120,150 110,165" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+
+  <!-- User icon -->
+  <circle cx="120" cy="195" r="24" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.5"/>
+  <text x="120" y="200" text-anchor="middle" font-size="18">🧑</text>
+  <text x="120" y="226" text-anchor="middle" font-size="9" fill="#6B7280">User query</text>
+
+  <!-- Arrow right from user → STT -->
+  <line x1="144" y1="195" x2="230" y2="195" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- STT box -->
+  <rect x="230" y="160" width="130" height="70" rx="8" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.5"/>
+  <text x="295" y="185" text-anchor="middle" font-size="10" font-weight="700" fill="#1E3A8A">Speech to</text>
+  <text x="295" y="199" text-anchor="middle" font-size="10" font-weight="700" fill="#1E3A8A">Text</text>
+  <text x="295" y="218" text-anchor="middle" font-size="8.5" fill="#3B82F6">Interface</text>
+
+  <!-- Vertical label: Speech to Text Interface -->
+  <text x="295" y="248" text-anchor="middle" font-size="7.5" fill="#9CA3AF" font-style="italic">STT Interface</text>
+
+  <!-- Arrow STT → Query Preprocess -->
+  <line x1="360" y1="195" x2="430" y2="195" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ─── CENTER: Processing ─────────────────────────────────────── -->
+
+  <!-- Query Preprocess -->
+  <rect x="430" y="160" width="140" height="70" rx="8" fill="#FEF9C3" stroke="#FDE047" stroke-width="1.5"/>
+  <text x="500" y="185" text-anchor="middle" font-size="10" font-weight="700" fill="#713F12">Query</text>
+  <text x="500" y="199" text-anchor="middle" font-size="10" font-weight="700" fill="#713F12">Preprocess</text>
+  <text x="500" y="218" text-anchor="middle" font-size="8.5" fill="#92400E">Tokenize  embed</text>
+
+  <!-- Arrow down from Query Preprocess → Context Fusion -->
+  <line x1="500" y1="230" x2="500" y2="340" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Context Fusion -->
+  <rect x="430" y="340" width="140" height="70" rx="8" fill="#FEF3C7" stroke="#FCD34D" stroke-width="1.5"/>
+  <text x="500" y="365" text-anchor="middle" font-size="10" font-weight="700" fill="#78350F">Context</text>
+  <text x="500" y="379" text-anchor="middle" font-size="10" font-weight="700" fill="#78350F">Fusion</text>
+  <text x="500" y="398" text-anchor="middle" font-size="8" fill="#92400E">Aggregate context</text>
+
+  <!-- Arrow up Context Fusion → Generation LLM -->
+  <line x1="500" y1="340" x2="500" y2="295" stroke="#6B7280" stroke-width="1.3" stroke-dasharray="3,2"/>
+  <!-- (already connected via down arrow, show loop back up via generation) -->
+
+  <!-- Generation LLM -->
+  <rect x="590" y="280" width="150" height="80" rx="10" fill="#DCFCE7" stroke="#86EFAC" stroke-width="2"/>
+  <text x="665" y="300" text-anchor="middle" font-size="9" fill="#14532D">Generation</text>
+  <text x="665" y="314" text-anchor="middle" font-size="12" font-weight="700" fill="#15803D">LLM</text>
+  <text x="665" y="330" text-anchor="middle" font-size="18">🤖</text>
+  <text x="665" y="353" text-anchor="middle" font-size="8" fill="#166534">Answer Generator</text>
+
+  <!-- Safety Filter LLM -->
+  <rect x="590" y="390" width="150" height="80" rx="10" fill="#FEE2E2" stroke="#FCA5A5" stroke-width="2"/>
+  <text x="665" y="410" text-anchor="middle" font-size="9" fill="#7F1D1D">Safety Filter</text>
+  <text x="665" y="424" text-anchor="middle" font-size="12" font-weight="700" fill="#DC2626">LLM</text>
+  <text x="665" y="440" text-anchor="middle" font-size="18">🤖</text>
+  <text x="665" y="463" text-anchor="middle" font-size="8" fill="#991B1B">Guardrail</text>
+
+  <!-- Bidirectional arrows Gen LLM <-> Safety Filter -->
+  <line x1="665" y1="360" x2="665" y2="390" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="648" y1="390" x2="648" y2="360" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Arrow Context Fusion → Generation LLM -->
+  <line x1="570" y1="370" x2="590" y2="330" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Arrow Generation LLM → Voice Renderer (left output) -->
+  <line x1="590" y1="310" x2="360" y2="450" stroke="#16A34A" stroke-width="1.8" marker-end="url(#arrGreen)"/>
+
+  <!-- Label on this arrow -->
+  <text x="445" y="373" font-size="8" fill="#16A34A" transform="rotate(-25,445,373)">response</text>
+
+  <!-- ─── VOICE & ANIMATION RENDERER (left output) ───────────────── -->
+
+  <!-- Vertical label box -->
+  <rect x="230" y="400" width="130" height="70" rx="8" fill="#E0F2FE" stroke="#7DD3FC" stroke-width="1.5"/>
+  <text x="295" y="425" text-anchor="middle" font-size="10" font-weight="700" fill="#0C4A6E">Voice &amp;</text>
+  <text x="295" y="439" text-anchor="middle" font-size="10" font-weight="700" fill="#0C4A6E">Animation</text>
+  <text x="295" y="458" text-anchor="middle" font-size="8.5" fill="#0369A1">Renderer</text>
+
+  <!-- Arrow Voice Renderer → Avatar -->
+  <line x1="230" y1="435" x2="144" y2="490" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 3D Avatar -->
+  <circle cx="120" cy="520" r="24" fill="#E0E7FF" stroke="#A5B4FC" stroke-width="1.5"/>
+  <text x="120" y="527" text-anchor="middle" font-size="18">🧑</text>
+  <text x="120" y="551" text-anchor="middle" font-size="9" fill="#6B7280">3D Virtual Avatar</text>
+
+  <!-- Avatar response bubble -->
+  <polygon points="100,560 120,560 110,545" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
+  <rect x="20" y="560" width="200" height="100" rx="10" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.5"/>
+  <text x="36" y="580" font-size="8.5" fill="#374151">"You've been under a lot.</text>
+  <text x="36" y="595" font-size="8.5" fill="#374151">Rest is strength, not</text>
+  <text x="36" y="610" font-size="8.5" fill="#374151">laziness. Want to try</text>
+  <text x="36" y="625" font-size="8.5" fill="#374151">a grounding exercise?"</text>
+  <text x="36" y="645" font-size="8" fill="#16A34A">— AI Tutor response</text>
+
+  <!-- ─── RIGHT: CONTEXT-AWARE RAG (dashed box) ─────────────────── -->
+
+  <!-- Main dashed container -->
+  <rect x="760" y="40" width="620" height="610" rx="14" fill="#F8FBFF" stroke="#93C5FD" stroke-width="2" stroke-dasharray="8,5"/>
+  <text x="1070" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#1E40AF">CONTEXT - AWARE RAG</text>
+
+  <!-- Knowledge Base -->
+  <rect x="780" y="80" width="580" height="180" rx="10" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+  <text x="1070" y="104" text-anchor="middle" font-size="11" font-weight="700" fill="#1E40AF">Knowledge Base</text>
+
+  <!-- Embedding Model -->
+  <rect x="800" y="116" width="240" height="64" rx="8" fill="white" stroke="#BFDBFE" stroke-width="1.2"/>
+  <text x="920" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1E3A8A">Embedding Model</text>
+  <text x="920" y="158" text-anchor="middle" font-size="8.5" fill="#3B82F6">text-embedding-3-large</text>
+  <text x="920" y="171" text-anchor="middle" font-size="8" fill="#93C5FD">dim 1536</text>
+
+  <!-- Curated Document -->
+  <rect x="1100" y="116" width="240" height="64" rx="8" fill="white" stroke="#BFDBFE" stroke-width="1.2"/>
+  <text x="1220" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1E3A8A">Curated Document</text>
+  <text x="1220" y="158" text-anchor="middle" font-size="8.5" fill="#3B82F6">Transcripts  Slides</text>
+  <text x="1220" y="171" text-anchor="middle" font-size="8" fill="#93C5FD">Exercises  Notes</text>
+
+  <!-- Arrows to Vector Database -->
+  <line x1="920"  y1="180" x2="970"  y2="212" stroke="#3B82F6" stroke-width="1.2" marker-end="url(#arrBlue)"/>
+  <line x1="1220" y1="180" x2="1170" y2="212" stroke="#3B82F6" stroke-width="1.2" marker-end="url(#arrBlue)"/>
+
+  <!-- Vector Database -->
+  <rect x="910" y="212" width="320" height="42" rx="7" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.2"/>
+  <text x="1070" y="237" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1E40AF">Vector Database</text>
+
+  <!-- Retrieve / Query labels -->
+  <text x="795" y="276" font-size="9" fill="#6B7280">Retrieve</text>
+  <line x1="820" y1="254" x2="782" y2="290" stroke="#6B7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="1282" y="276" font-size="9" fill="#6B7280">Query</text>
+  <line x1="1280" y1="254" x2="1318" y2="290" stroke="#6B7280" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- Tri-Retrieval RAG Module -->
+  <rect x="780" y="290" width="580" height="180" rx="10" fill="#ECFDF5" stroke="#6EE7B7" stroke-width="1.5"/>
+  <text x="1070" y="314" text-anchor="middle" font-size="11" font-weight="700" fill="#065F46">Tri-Retrieval RAG Module</text>
+
+  <!-- Dense Retriever -->
+  <rect x="800" y="326" width="250" height="64" rx="8" fill="white" stroke="#6EE7B7" stroke-width="1.2"/>
+  <text x="925" y="350" text-anchor="middle" font-size="10.5" font-weight="700" fill="#065F46">Dense Retriever</text>
+  <text x="925" y="366" text-anchor="middle" font-size="8.5" fill="#059669">Vector Search</text>
+  <text x="925" y="380" text-anchor="middle" font-size="8" fill="#6EE7B7">cosine similarity  top-k</text>
+
+  <!-- Searching Tool -->
+  <rect x="1090" y="326" width="250" height="64" rx="8" fill="white" stroke="#6EE7B7" stroke-width="1.2"/>
+  <text x="1215" y="350" text-anchor="middle" font-size="10.5" font-weight="700" fill="#065F46">Searching Tool</text>
+  <text x="1215" y="366" text-anchor="middle" font-size="8.5" fill="#059669">Web Search API</text>
+  <text x="1215" y="380" text-anchor="middle" font-size="8" fill="#6EE7B7">external references</text>
+
+  <!-- Spare Retriever BM25 below center -->
+  <rect x="940" y="406" width="260" height="52" rx="8" fill="white" stroke="#6EE7B7" stroke-width="1.2"/>
+  <text x="1070" y="428" text-anchor="middle" font-size="10.5" font-weight="700" fill="#065F46">Spare Retriever</text>
+  <text x="1070" y="444" text-anchor="middle" font-size="8.5" fill="#059669">BM25  keyword match</text>
+
+  <!-- Memory Retention -->
+  <rect x="780" y="490" width="580" height="142" rx="10" fill="#FDF4FF" stroke="#E9D5FF" stroke-width="1.5"/>
+  <text x="1070" y="514" text-anchor="middle" font-size="11" font-weight="700" fill="#581C87">Memory Retention</text>
+
+  <!-- Long-term Memory -->
+  <rect x="800" y="526" width="250" height="60" rx="8" fill="white" stroke="#E9D5FF" stroke-width="1.2"/>
+  <text x="925" y="548" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7C3AED">Long-term Memory</text>
+  <text x="925" y="564" text-anchor="middle" font-size="8.5" fill="#8B5CF6">Conversation history</text>
+  <text x="925" y="577" text-anchor="middle" font-size="8" fill="#C4B5FD">persistent across sessions</text>
+
+  <!-- Short-term Memory -->
+  <rect x="1090" y="526" width="250" height="60" rx="8" fill="white" stroke="#E9D5FF" stroke-width="1.2"/>
+  <text x="1215" y="548" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7C3AED">Short-term Memory</text>
+  <text x="1215" y="564" text-anchor="middle" font-size="8.5" fill="#8B5CF6">Session context cache</text>
+  <text x="1215" y="577" text-anchor="middle" font-size="8" fill="#C4B5FD">TTL-based  fast access</text>
+
+  <!-- Memory icons -->
+  <text x="830" y="547" font-size="14">🗄️</text>
+  <text x="1120" y="547" font-size="14">⚡</text>
+
+  <!-- ─── ARROWS: RAG ↔ Center ───────────────────────────────────── -->
+
+  <!-- Query Preprocess → KB (right arrow) -->
+  <line x1="570" y1="185" x2="780" y2="185" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="672" y="178" text-anchor="middle" font-size="8" fill="#6B7280">query</text>
+
+  <!-- RAG results → Context Fusion (left arrow) -->
+  <line x1="780" y1="380" x2="570" y2="380" stroke="#059669" stroke-width="2" marker-end="url(#arrGreen)"/>
+  <text x="672" y="372" text-anchor="middle" font-size="8" fill="#059669">retrieved context</text>
+
+  <!-- Memory → Context Fusion -->
+  <line x1="780" y1="548" x2="700" y2="440" stroke="#8B5CF6" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <text x="726" y="502" font-size="8" fill="#8B5CF6" transform="rotate(-35,726,502)">memory</text>
+
+  <!-- Footer note -->
+  <text x="700" y="682" text-anchor="middle" font-size="9" fill="#9CA3AF">AI Avatar Pipeline — A20-App-049 · Context-Aware Agentic RAG · AI20K Build Phase 2026</text>
+</svg>

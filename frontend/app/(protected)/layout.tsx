@@ -27,7 +27,7 @@ export default function ProtectedLayout({
     const verify = async () => {
       const hasToken = Boolean(tokenStorage.getAccess());
       if (!hasToken) {
-        router.replace("/login");
+        router.replace("/");
         return;
       }
       setChecking(false);

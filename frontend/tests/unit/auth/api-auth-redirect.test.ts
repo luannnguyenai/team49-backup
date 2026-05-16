@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildUnauthorizedRedirectTarget } from "@/lib/auth-redirect";
+import {
+  buildUnauthorizedRedirectTarget,
+  getSafeInternalRedirectTarget,
+  isSafeInternalRedirectTarget,
+} from "@/lib/auth-redirect";
 
 describe("buildUnauthorizedRedirectTarget", () => {
   it("preserves the current protected path as next", () => {
@@ -19,5 +23,20 @@ describe("buildUnauthorizedRedirectTarget", () => {
 
   it("falls back to plain login when the current path is empty", () => {
     expect(buildUnauthorizedRedirectTarget("")).toBe("/login");
+  });
+});
+
+describe("safe internal redirect helpers", () => {
+  it("accepts relative app paths", () => {
+    expect(isSafeInternalRedirectTarget("/dashboard")).toBe(true);
+    expect(getSafeInternalRedirectTarget("/learn?view=timeline", "/dashboard")).toBe(
+      "/learn?view=timeline",
+    );
+  });
+
+  it("rejects protocol-relative and empty targets", () => {
+    expect(isSafeInternalRedirectTarget("//evil.example")).toBe(false);
+    expect(getSafeInternalRedirectTarget("//evil.example", "/dashboard")).toBe("/dashboard");
+    expect(getSafeInternalRedirectTarget(null, "/dashboard")).toBe("/dashboard");
   });
 });

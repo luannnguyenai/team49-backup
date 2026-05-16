@@ -18,7 +18,9 @@
       "Bash(aws secretsmanager list-secrets *)",
       "Bash(aws ecs *)",
       "Bash(Get-ChildItem *)",
-      "Bash(rtk proxy *)"
+      "Bash(rtk proxy *)",
+      "Bash(Get-Content *)",
+      "Bash(awk '{print $5, $9}')"
     ]
   },
   "disabledMcpjsonServers": [

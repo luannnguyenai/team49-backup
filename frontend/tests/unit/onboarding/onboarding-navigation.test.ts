@@ -36,4 +36,14 @@ describe("onboarding navigation", () => {
     expect(buildAssessmentNextHref(null)).toBe("/learn");
     expect(buildAssessmentNextHref("/dashboard")).toBe("/dashboard");
   });
+
+  it("rejects unsafe protocol-relative next targets", () => {
+    expect(buildAssessmentNextHref("//evil.example")).toBe("/learn");
+    expect(
+      buildPostOnboardingHref({
+        hasAssessmentUnits: true,
+        requestedNext: "//evil.example",
+      }),
+    ).toBe("/assessment?next=%2Flearn");
+  });
 });

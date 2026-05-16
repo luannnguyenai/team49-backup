@@ -11,6 +11,7 @@ import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import { getSafeInternalRedirectTarget } from "@/lib/auth-redirect";
 import { useAuthStore } from "@/stores/authStore";
 
 const schema = z
@@ -72,14 +73,14 @@ export default function RegisterForm() {
         password: data.password,
         full_name: data.full_name,
       });
-      const next = searchParams.get("next") ?? searchParams.get("from");
+      const next = getSafeInternalRedirectTarget(searchParams.get("next") ?? searchParams.get("from"), "");
       router.push(next ? `/onboarding?next=${encodeURIComponent(next)}` : "/onboarding");
     } catch {
       // error set in store
     }
   };
 
-  const next = searchParams.get("next") ?? searchParams.get("from");
+  const next = getSafeInternalRedirectTarget(searchParams.get("next") ?? searchParams.get("from"), "");
   const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
 
   return (

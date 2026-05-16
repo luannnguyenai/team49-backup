@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ProtectedLayout from "@/app/(protected)/layout";
 
@@ -46,6 +46,12 @@ vi.mock("@/components/layout/TopNav", () => ({
 }));
 
 describe("ProtectedLayout", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    authStoreMock.user = null;
+    tokenStorageMock.getAccess.mockReturnValue("token");
+  });
+
   it("renders children immediately when an access token already exists", () => {
     render(
       <ProtectedLayout>
@@ -64,5 +70,19 @@ describe("ProtectedLayout", () => {
     );
 
     expect(container.querySelector("main")?.className).toContain("mobile-bottom-nav-offset");
+  });
+
+  it("returns missing-token users to the landing page", async () => {
+    tokenStorageMock.getAccess.mockReturnValue("");
+
+    render(
+      <ProtectedLayout>
+        <div>Protected content</div>
+      </ProtectedLayout>,
+    );
+
+    await waitFor(() => {
+      expect(navigationMock.replace).toHaveBeenCalledWith("/");
+    });
   });
 });

@@ -11,18 +11,16 @@ describe("landing page route", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "A clearer path to learning AI",
+        name: "Your Personal Path to Mastery",
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Start with a structured path that helps you focus, build momentum, and keep moving without piecing everything together on your own.",
-      ),
+      screen.getByText("Adaptive, tailored learning modules created just for your goals."),
     ).toBeInTheDocument();
     expect(
       screen
-        .getAllByRole("link", { name: "Create your account" })
-        .every((link) => link.getAttribute("href") === "/register"),
+        .getAllByRole("link", { name: "Get Your Own Learning Path" })
+        .every((link) => link.getAttribute("href") === "/login?from=%2Fonboarding"),
     ).toBe(true);
     expect(
       screen
@@ -39,7 +37,7 @@ describe("landing page route", () => {
     expect(
       screen.getByRole("heading", { name: "Support that keeps you learning" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Product team")).toBeInTheDocument();
+    expect(screen.getByText("Dự án AI Learning Hub")).toBeInTheDocument();
   });
 });
 
