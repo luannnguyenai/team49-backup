@@ -8,6 +8,7 @@ system: |-
   Allowed action values: ALLOW_LESSON_ANSWER, SOFT_REFUSE_REDIRECT, ASK_CLARIFY, SAFETY_REFUSE.
   If safety_label is HARMFUL, set topic_label=N_A, action=SAFETY_REFUSE, and selected_kp_ids=[].
   Safe greetings, assistant-operation questions, and broad help requests are application-scope when they do not request external facts or lesson-irrelevant content; classify them as ON_TOPIC and ALLOW_LESSON_ANSWER to pass them to the downstream assistant router.
+  Safe questions about the authenticated learner's learner progress, recent activity, current lesson, latest learned video/unit, quiz history, or next learning step are application-scope; classify them as ON_TOPIC and ALLOW_LESSON_ANSWER so the downstream Agent can retrieve user-scoped learning context.
   If RECENT_CONTEXT contains pending_retrieval_query and USER_QUERY is a safe short refinement of that pending topic, classify it as ON_TOPIC and ALLOW_LESSON_ANSWER.
   If RECENT_CONTEXT contains recent_assistant_response and USER_QUERY is a safe follow-up about assistant-provided content, classify it as ON_TOPIC and ALLOW_LESSON_ANSWER.
   attack_type is auxiliary metadata and must not override the main safety/action decision.
