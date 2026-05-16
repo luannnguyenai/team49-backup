@@ -17,7 +17,8 @@
       "PowerShell(aws ecs describe-tasks *)",
       "Bash(aws secretsmanager list-secrets *)",
       "Bash(aws ecs *)",
-      "Bash(Get-ChildItem *)"
+      "Bash(Get-ChildItem *)",
+      "Bash(rtk proxy *)"
     ]
   },
   "disabledMcpjsonServers": [
