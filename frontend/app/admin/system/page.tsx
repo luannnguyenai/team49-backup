@@ -139,19 +139,19 @@ export default function AdminSystemPage() {
         <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">{err}</p>
       )}
 
-      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
-        <h3 className="mb-3 text-base font-semibold text-slate-900 dark:text-white">Services</h3>
+      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md">
+        <h3 className="mb-3 text-base font-semibold text-slate-900">Services</h3>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {(data?.services ?? []).map((s) => (
             <div
               key={s.name}
-              className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-white/60 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60"
+              className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-white/60 px-4 py-3"
             >
               <div>
-                <p className="text-sm font-semibold capitalize text-slate-900 dark:text-white">
+                <p className="text-sm font-semibold capitalize text-slate-900">
                   {s.name}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">backend/postgres/redis</p>
+                <p className="text-xs text-slate-500">backend/postgres/redis</p>
               </div>
               <StatusBadge status={s.status} />
             </div>
@@ -187,15 +187,15 @@ export default function AdminSystemPage() {
         </ResponsiveContainer>
       </ChartCard>
 
-      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">Grafana — System Health</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <h3 className="text-base font-semibold text-slate-900">Grafana — System Health</h3>
+            <p className="text-xs text-slate-500">
               Postgres + Redis exporters via Prometheus. Embedded from <code>{grafanaBaseUrl}</code>.
             </p>
             {grafanaWarning ? (
-              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">{grafanaWarning}</p>
+              <p className="mt-1 text-xs text-amber-700">{grafanaWarning}</p>
             ) : null}
           </div>
           <a

@@ -1,10 +1,9 @@
 "use client";
 // components/layout/TopBar.tsx
-// Top navigation bar with page title, theme toggle, notifications, and avatar
+// Top navigation bar with page title, notifications, and avatar
 
-import { useTheme } from "next-themes";
 import { useAuthStore } from "@/stores/authStore";
-import { Menu, Sun, Moon, Bell } from "lucide-react";
+import { Menu, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -13,11 +12,7 @@ interface Props {
 }
 
 export default function TopBar({ title, onMenuClick }: Props) {
-  const { theme, setTheme } = useTheme();
   const user = useAuthStore((s) => s.user);
-
-  const toggleTheme = () =>
-    setTheme(theme === "dark" ? "light" : "dark");
 
   return (
     <header
@@ -50,19 +45,6 @@ export default function TopBar({ title, onMenuClick }: Props) {
 
       {/* Right actions */}
       <div className="flex items-center gap-1.5">
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="btn-ghost h-9 w-9 p-0"
-          aria-label="Toggle theme"
-        >
-          {theme === "dark" ? (
-            <Sun className="h-4 w-4" />
-          ) : (
-            <Moon className="h-4 w-4" />
-          )}
-        </button>
-
         {/* Notifications */}
         <button
           className="btn-ghost relative h-9 w-9 p-0"
@@ -77,7 +59,7 @@ export default function TopBar({ title, onMenuClick }: Props) {
         <div
           className={cn(
             "flex h-8 w-8 items-center justify-center rounded-full",
-            "bg-surface-accent-soft text-primary-700 dark:text-primary-300",
+            "bg-surface-accent-soft text-primary-700",
             "text-sm font-semibold cursor-pointer hover:ring-2 hover:ring-primary-300 transition-all"
           )}
           aria-label="Profile"

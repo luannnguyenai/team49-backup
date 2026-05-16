@@ -7,25 +7,25 @@ type Status = "healthy" | "degraded" | "down" | "unknown" | string;
 const STYLES: Record<string, { bg: string; text: string; dot: string; label: string }> = {
   healthy: {
     bg: "bg-emerald-500/10",
-    text: "text-emerald-700 dark:text-emerald-300",
+    text: "text-emerald-700",
     dot: "bg-emerald-500",
     label: "Healthy",
   },
   degraded: {
     bg: "bg-amber-500/10",
-    text: "text-amber-700 dark:text-amber-300",
+    text: "text-amber-700",
     dot: "bg-amber-500",
     label: "Degraded",
   },
   down: {
     bg: "bg-rose-500/10",
-    text: "text-rose-700 dark:text-rose-300",
+    text: "text-rose-700",
     dot: "bg-rose-500",
     label: "Down",
   },
   unknown: {
     bg: "bg-slate-500/10",
-    text: "text-slate-600 dark:text-slate-400",
+    text: "text-slate-600",
     dot: "bg-slate-400",
     label: "Unknown",
   },

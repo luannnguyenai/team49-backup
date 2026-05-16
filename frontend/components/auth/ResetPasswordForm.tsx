@@ -93,7 +93,7 @@ export default function ResetPasswordForm() {
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="hover:text-slate-600 dark:hover:text-slate-300"
+            className="hover:text-slate-600"
             aria-label={showPassword ? "Hide new password" : "Show new password"}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -113,7 +113,7 @@ export default function ResetPasswordForm() {
           <button
             type="button"
             onClick={() => setShowConfirm((v) => !v)}
-            className="hover:text-slate-600 dark:hover:text-slate-300"
+            className="hover:text-slate-600"
             aria-label={showConfirm ? "Hide password confirmation" : "Show password confirmation"}
           >
             {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

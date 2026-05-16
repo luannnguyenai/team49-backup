@@ -25,7 +25,7 @@ export default function ReplanKnowledgeClaimStep({
       </div>
 
       {message && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           {message}
         </div>
       )}

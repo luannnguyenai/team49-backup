@@ -181,7 +181,7 @@ export default function ReplanScopeReviewStep({
                       [unit.canonicalUnitId]: event.target.value as DifficultyFilter,
                     }))
                   }
-                  className="rounded-lg border bg-white px-3 py-2 text-xs font-medium dark:bg-slate-900"
+                  className="rounded-lg border bg-white px-3 py-2 text-xs font-medium"
                   style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
                 >
                   {Object.entries(FILTER_LABELS).map(([value, label]) => (

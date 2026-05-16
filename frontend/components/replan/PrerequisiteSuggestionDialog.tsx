@@ -24,7 +24,7 @@ export default function PrerequisiteSuggestionDialog({
         role="dialog"
         aria-modal="true"
         aria-label="Found related foundational topics"
-        className="w-full max-w-lg rounded-2xl border bg-white p-5 shadow-xl dark:bg-slate-950"
+        className="w-full max-w-lg rounded-2xl border bg-white p-5 shadow-xl"
         style={{ borderColor: "var(--border)" }}
       >
         <div>

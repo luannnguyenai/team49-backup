@@ -53,7 +53,7 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
       return [
         <code
           key={key}
-          className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 font-mono text-sm"
+          className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-sm"
           style={{ color: "var(--color-primary-600)" }}
         >
           {part.slice(1, -1)}
@@ -220,7 +220,7 @@ function renderToken(token: Token, idx: number): React.ReactNode {
       return (
         <pre
           key={idx}
-          className="my-4 overflow-x-auto rounded-xl bg-slate-900 dark:bg-slate-950 p-4 text-sm leading-relaxed shadow-inner"
+          className="my-4 overflow-x-auto rounded-xl bg-slate-900 p-4 text-sm leading-relaxed shadow-inner"
         >
           {token.lang && (
             <span className="mb-2 block text-xs font-medium text-slate-500 uppercase tracking-wide">
@@ -232,7 +232,7 @@ function renderToken(token: Token, idx: number): React.ReactNode {
       );
 
     case "hr":
-      return <hr key={idx} className="my-6 border-slate-200 dark:border-slate-700" />;
+      return <hr key={idx} className="my-6 border-slate-200" />;
 
     case "blockquote":
       return (

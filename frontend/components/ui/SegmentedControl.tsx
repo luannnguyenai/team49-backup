@@ -47,7 +47,7 @@ export default function SegmentedControl<T extends string>({
               "min-w-0 rounded-full px-3 py-2 text-sm font-medium transition-colors",
               active
                 ? "bg-[color:var(--brand-ink)] text-[color:var(--brand-ink-fg)]"
-                : "text-text-body hover:bg-slate-100 dark:hover:bg-slate-800",
+                : "text-text-body hover:bg-slate-100",
             )}
             onClick={() => {
               if (!active && !option.disabled) {

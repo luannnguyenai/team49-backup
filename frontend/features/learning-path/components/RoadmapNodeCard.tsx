@@ -31,7 +31,7 @@ export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectS
   if (node.kind === "course") {
     return (
       <div
-        className="pointer-events-none absolute z-0 rounded-[28px] border border-blue-100 bg-white/80 shadow-sm ring-1 ring-blue-50 dark:border-slate-800 dark:bg-slate-900/70 dark:ring-slate-800"
+        className="pointer-events-none absolute z-0 rounded-[28px] border border-blue-100 bg-white/80 shadow-sm ring-1 ring-blue-50"
         style={{
           left: node.x,
           top: node.y,
@@ -40,12 +40,12 @@ export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectS
         }}
       >
         <div className="px-6 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-600">
             Course
           </p>
-          <p className="mt-1 text-lg font-bold text-slate-950 dark:text-white">{node.title}</p>
+          <p className="mt-1 text-lg font-bold text-slate-950">{node.title}</p>
           {node.subtitle ? (
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{node.subtitle}</p>
+            <p className="mt-1 text-sm text-slate-500">{node.subtitle}</p>
           ) : null}
         </div>
       </div>
@@ -71,11 +71,11 @@ export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectS
       aria-label={label}
       onClick={handleClick}
       className={cn(
-        "absolute z-20 rounded-2xl border text-left shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-950",
+        "absolute z-20 rounded-2xl border text-left shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-white",
         isTopic
           ? "bg-yellow-300 px-5 py-4 text-slate-950 hover:bg-yellow-200"
-          : "bg-white px-5 py-4 hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-950",
-        node.isRecommended && "ring-2 ring-amber-400 ring-offset-2 ring-offset-white dark:ring-offset-slate-950",
+          : "bg-white px-5 py-4 hover:-translate-y-0.5 hover:shadow-md",
+        node.isRecommended && "ring-2 ring-amber-400 ring-offset-2 ring-offset-white",
         node.status === "completed" && "opacity-75",
         node.status === "skipped" && "opacity-55",
       )}
@@ -99,7 +99,7 @@ export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectS
           ) : null}
         </div>
         {!isTopic ? (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">
             {statusIcon(node.status)}
             {statusLabel(node.status)}
           </span>
@@ -119,7 +119,7 @@ export default function RoadmapNodeCard({ node, insight, onSelectItem, onSelectS
               <span
                 key={code}
                 title={reason.details}
-                className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-950/40 dark:text-blue-200"
+                className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700"
               >
                 {reason.label}
               </span>

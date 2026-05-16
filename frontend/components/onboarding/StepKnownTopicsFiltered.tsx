@@ -103,7 +103,7 @@ export default function StepKnownTopicsFiltered({
 
       {hiddenConfidentCount > 0 && (
         <div
-          className="rounded-xl border border-primary-100 bg-primary-50 p-3 text-xs font-medium text-primary-700 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-300"
+          className="rounded-xl border border-primary-100 bg-primary-50 p-3 text-xs font-medium text-primary-700"
         >
           {hiddenConfidentCount} groups clearly matched your description and were selected silently for placement verification.
         </div>
@@ -142,7 +142,7 @@ export default function StepKnownTopicsFiltered({
                   <button
                     type="button"
                     onClick={() => setExpandedTopicId(isExpanded ? null : topic.id)}
-                    className="rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                    className="rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors hover:bg-slate-50"
                     style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
                     aria-label={`Quick view ${label}`}
                   >
@@ -184,7 +184,7 @@ export default function StepKnownTopicsFiltered({
                         className={cn(
                           "flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-xs font-semibold transition-all",
                           isSelected
-                            ? "border-primary-600 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300"
+                            ? "border-primary-600 bg-primary-50 text-primary-700"
                             : "hover:border-slate-300",
                         )}
                         style={{ borderColor: isSelected ? undefined : "var(--border)" }}
@@ -209,7 +209,7 @@ export default function StepKnownTopicsFiltered({
               type="button"
               aria-label="View selected units"
               onClick={() => setShowSelectedUnits((value) => !value)}
-              className="rounded-lg border border-primary-200 bg-primary-50 p-1.5 text-primary-700 transition-colors hover:bg-primary-100 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-300"
+              className="rounded-lg border border-primary-200 bg-primary-50 p-1.5 text-primary-700 transition-colors hover:bg-primary-100"
             >
               <Eye className="h-3.5 w-3.5" />
             </button>

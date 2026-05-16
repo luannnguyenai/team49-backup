@@ -67,8 +67,8 @@ export default function StepDesiredSections({
               "w-full rounded-xl border-2 p-4 text-left",
               "transition-all duration-150 hover:shadow-md active:scale-[0.99]",
               isSelected
-                ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                : "hover:border-slate-300 dark:hover:border-slate-600"
+                ? "border-primary-500 bg-primary-50"
+                : "hover:border-slate-300"
             )}
             style={{
               borderColor: isSelected ? undefined : "var(--border)",

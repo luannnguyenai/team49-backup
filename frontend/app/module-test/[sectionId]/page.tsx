@@ -115,7 +115,7 @@ function NavQBtn({
   } else if (answered) {
     cls += "border-state-success-border bg-state-success-bg text-state-success-fg";
   } else {
-    cls += "border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400";
+    cls += "border-slate-200 bg-white text-slate-500";
   }
 
   return (
@@ -409,7 +409,7 @@ export default function ModuleTestPage() {
           <span className="inline-block h-3 w-3 rounded bg-state-warning-fg" />Flagged
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded border border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800" />Unanswered
+          <span className="inline-block h-3 w-3 rounded border border-slate-300 bg-white" />Unanswered
         </span>
       </div>
 
@@ -514,7 +514,7 @@ export default function ModuleTestPage() {
 
           {/* Progress bar */}
           <div className="hidden sm:flex items-center gap-2 flex-1 max-w-xs">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
               <div
                 className="h-full rounded-full bg-primary-500 transition-all duration-300"
                 style={{ width: `${progressPct}%` }}
@@ -638,8 +638,8 @@ export default function ModuleTestPage() {
                     "flex w-full items-start gap-3 rounded-xl border-2 px-4 py-3.5 text-left",
                     "transition-all duration-150 active:scale-[0.99]",
                     isSelected
-                      ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                      : "hover:border-slate-300 dark:hover:border-slate-600",
+                      ? "border-primary-500 bg-primary-50"
+                      : "hover:border-slate-300",
                   ].join(" ")}
                   style={{
                     borderColor: isSelected ? undefined : "var(--border)",
@@ -651,7 +651,7 @@ export default function ModuleTestPage() {
                       "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm font-bold transition-colors",
                       isSelected
                         ? "bg-primary-600 text-white"
-                        : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
+                        : "bg-slate-100 text-slate-500",
                     ].join(" ")}
                   >
                     {opt}
@@ -660,7 +660,7 @@ export default function ModuleTestPage() {
                     className={[
                       "mt-0.5 text-sm leading-relaxed",
                       isSelected
-                        ? "font-medium text-primary-700 dark:text-primary-200"
+                        ? "font-medium text-primary-700"
                         : "",
                     ].join(" ")}
                     style={{ color: isSelected ? undefined : "var(--text-primary)" }}

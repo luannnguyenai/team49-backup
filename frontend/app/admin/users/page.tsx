@@ -80,11 +80,11 @@ export default function AdminUsersPage() {
         </ResponsiveContainer>
       </ChartCard>
 
-      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">Users</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <h3 className="text-base font-semibold text-slate-900">Users</h3>
+            <p className="text-xs text-slate-500">
               Total: {data?.total ?? "—"} · Page {data?.page ?? 1} / {totalPages}
             </p>
           </div>
@@ -95,7 +95,7 @@ export default function AdminUsersPage() {
               setQ(e.target.value);
             }}
             placeholder="Search email or name…"
-            className="w-72 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-900/60"
+            className="w-72 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
           />
         </div>
 
@@ -126,25 +126,25 @@ export default function AdminUsersPage() {
                 data?.items.map((u) => (
                   <tr
                     key={u.id}
-                    className="border-t border-slate-100 transition hover:bg-cyan-50/40 dark:border-slate-800 dark:hover:bg-slate-800/40"
+                    className="border-t border-slate-100 transition hover:bg-cyan-50/40"
                   >
-                    <td className="px-3 py-2 font-medium text-slate-900 dark:text-white">{u.email}</td>
-                    <td className="px-3 py-2 text-slate-600 dark:text-slate-300">{u.full_name}</td>
+                    <td className="px-3 py-2 font-medium text-slate-900">{u.email}</td>
+                    <td className="px-3 py-2 text-slate-600">{u.full_name}</td>
                     <td className="px-3 py-2">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
                           u.role === "admin"
-                            ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300"
-                            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                            ? "bg-indigo-100 text-indigo-700"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                       >
                         {u.role}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-slate-600 dark:text-slate-300">
+                    <td className="px-3 py-2 text-slate-600">
                       {u.is_onboarded ? "✓" : "—"}
                     </td>
-                    <td className="px-3 py-2 text-slate-500 dark:text-slate-400">
+                    <td className="px-3 py-2 text-slate-500">
                       {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
                     </td>
                   </tr>

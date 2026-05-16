@@ -133,7 +133,7 @@ export default function RadarChart({ data, size = 320 }: Props) {
           stroke="currentColor"
           strokeOpacity={0.12}
           strokeWidth={1}
-          className="text-slate-600 dark:text-slate-400"
+          className="text-slate-600"
         />
       ))}
 
@@ -205,7 +205,7 @@ export default function RadarChart({ data, size = 320 }: Props) {
             fontWeight="600"
             fill="currentColor"
             fillOpacity={0.85}
-            className="text-slate-700 dark:text-slate-200"
+            className="text-slate-700"
           >
             {lb.lines.map((line, lineIndex) => (
               <tspan

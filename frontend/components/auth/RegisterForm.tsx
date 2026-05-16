@@ -85,7 +85,7 @@ export default function RegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400 animate-fade-in">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 animate-fade-in">
           {error}
         </div>
       )}
@@ -121,7 +121,7 @@ export default function RegisterForm() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="hover:text-slate-600 dark:hover:text-slate-300"
+              className="hover:text-slate-600"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -138,7 +138,7 @@ export default function RegisterForm() {
                 <div
                   key={i}
                   className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                    i <= passwordStrength ? strengthColor : "bg-slate-200 dark:bg-slate-700"
+                    i <= passwordStrength ? strengthColor : "bg-slate-200"
                   }`}
                 />
               ))}
@@ -160,7 +160,7 @@ export default function RegisterForm() {
           <button
             type="button"
             onClick={() => setShowConfirm((v) => !v)}
-            className="hover:text-slate-600 dark:hover:text-slate-300"
+            className="hover:text-slate-600"
             aria-label={showConfirm ? "Hide password" : "Show password"}
           >
             {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

@@ -65,14 +65,14 @@ export default function AdminLogsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-[24px] border border-slate-200/70 bg-white/70 px-5 py-4 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="rounded-[24px] border border-slate-200/70 bg-white/70 px-5 py-4 backdrop-blur-md">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-600">
           Observability
         </p>
-        <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-2xl">
+        <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-900 md:text-2xl">
           Unified Log Explorer
         </h2>
-        <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">
+        <p className="mt-1.5 text-sm text-slate-600">
           App, access, container, CloudWatch, and Loki events in one triage surface.
         </p>
       </div>
@@ -84,22 +84,22 @@ export default function AdminLogsPage() {
         <KpiCard label="Services" value={summary?.totals.services ?? "—"} loading={loading} />
       </KpiGroup>
 
-      <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Sources</h3>
+      <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md">
+        <h3 className="text-sm font-semibold text-slate-900">Sources</h3>
         <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {sourceStates.map(([name, state]) => (
             <div
               key={name}
-              className="rounded-xl border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60"
+              className="rounded-xl border border-slate-200/70 bg-white/80 px-4 py-3"
             >
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">
+              <p className="text-sm font-semibold text-slate-900">
                 {name} · {state.status}
               </p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs text-slate-500">
                 {state.count} event{state.count === 1 ? "" : "s"}
               </p>
               {state.message ? (
-                <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">{state.message}</p>
+                <p className="mt-2 text-xs text-slate-600">{state.message}</p>
               ) : null}
             </div>
           ))}
@@ -111,22 +111,22 @@ export default function AdminLogsPage() {
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Recent events</h3>
+        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md">
+          <h3 className="text-sm font-semibold text-slate-900">Recent events</h3>
           <div className="mt-4 space-y-3">
             {(events?.items ?? []).map((event) => (
               <button
                 key={event.id}
                 type="button"
                 onClick={() => setSelectedEvent(event)}
-                className="block w-full rounded-xl border border-slate-200/70 bg-white/85 px-4 py-3 text-left hover:border-cyan-300 hover:bg-cyan-50/70 dark:border-slate-800 dark:bg-slate-900/70"
+                className="block w-full rounded-xl border border-slate-200/70 bg-white/85 px-4 py-3 text-left hover:border-cyan-300 hover:bg-cyan-50/70"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                    <p className="truncate text-sm font-semibold text-slate-900">
                       {event.message}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-xs text-slate-500">
                       {event.service} · {event.source} · {formatTimestamp(event.timestamp)}
                     </p>
                   </div>
@@ -139,15 +139,15 @@ export default function AdminLogsPage() {
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Event detail</h3>
+        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md">
+          <h3 className="text-sm font-semibold text-slate-900">Event detail</h3>
           {selectedEvent ? (
             <div className="mt-4 space-y-3">
               <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                <p className="text-sm font-semibold text-slate-900">
                   {selectedEvent.message}
                 </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-xs text-slate-500">
                   {selectedEvent.service} · {selectedEvent.source} · {formatTimestamp(selectedEvent.timestamp)}
                 </p>
               </div>
@@ -156,7 +156,7 @@ export default function AdminLogsPage() {
               </pre>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-4 text-sm text-slate-500">
               Select an event to inspect raw details.
             </p>
           )}

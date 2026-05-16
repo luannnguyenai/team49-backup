@@ -35,7 +35,7 @@ export default async function CourseOverviewPage({ params }: CourseOverviewPageP
           <section className="space-y-2">
             <Link
               href="/"
-              className="inline-flex items-center text-sm font-medium text-slate-600 transition-colors hover:text-slate-950 dark:text-slate-200 dark:hover:text-white"
+              className="inline-flex items-center text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
             >
               ← Back to catalog
             </Link>

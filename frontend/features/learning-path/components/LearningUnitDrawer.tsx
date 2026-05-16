@@ -107,7 +107,7 @@ export default function LearningUnitDrawer() {
         {selectedSection.items.length} lessons in this group.
       </p>
       {selectedSection.items.map((item) => (
-        <button key={item.id} type="button" onClick={() => selectItem(item.id)} className="w-full rounded-xl border p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-900" style={{ borderColor: "var(--border)" }}>
+        <button key={item.id} type="button" onClick={() => selectItem(item.id)} className="w-full rounded-xl border p-3 text-left hover:bg-slate-50" style={{ borderColor: "var(--border)" }}>
           <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{item.learning_unit_title}</p>
           <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>{getStatusLabel(item.status)}</p>
         </button>
@@ -141,7 +141,7 @@ export default function LearningUnitDrawer() {
       <div className="min-h-[7rem]">
         <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Description</p>
         {contentError ? (
-          <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-200">{contentError}</p>
+          <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{contentError}</p>
         ) : content ? (
           <p className="text-sm leading-6" style={{ color: "var(--text-secondary)" }}>
             {summarizeMarkdown(content.content_markdown) ?? "No detailed description is available yet."}
@@ -209,7 +209,7 @@ export default function LearningUnitDrawer() {
               {title}
             </h2>
           </div>
-          <button ref={closeButtonRef} type="button" onClick={closeDrawer} className="rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close">
+          <button ref={closeButtonRef} type="button" onClick={closeDrawer} className="rounded-lg p-2 hover:bg-slate-100" aria-label="Close">
             <X className="h-5 w-5" />
           </button>
         </div>

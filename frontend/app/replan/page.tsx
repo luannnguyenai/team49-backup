@@ -320,7 +320,7 @@ function ReplanPageContent() {
               {step === "describe" ? "1 / 3" : "3 / 3"}
             </span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+          <div className="h-2 overflow-hidden rounded-full bg-slate-200">
             <div className={`h-full rounded-full bg-primary-600 transition-all duration-500 ease-out ${step === "describe" ? "w-1/3" : "w-full"}`} />
           </div>
         </div>
@@ -353,7 +353,7 @@ function ReplanPageContent() {
                 />
               ) : null}
               {message && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                   {message}
                 </div>
               )}
@@ -408,7 +408,7 @@ function ReplanPageContent() {
             role="dialog"
             aria-modal="true"
             aria-label={statusPopup.title}
-            className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-slate-800"
+            className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-4 flex items-start gap-3">
@@ -423,7 +423,7 @@ function ReplanPageContent() {
               <button
                 type="button"
                 onClick={() => setStatusPopup(null)}
-                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                className="text-slate-400 hover:text-slate-600"
               >
                 <X className="h-5 w-5" />
               </button>

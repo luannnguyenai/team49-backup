@@ -54,7 +54,7 @@ const tutorPoints = [
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="inline-flex items-center gap-2 rounded-full border border-cyan-200/80 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700 dark:border-cyan-400/30 dark:bg-slate-900/70 dark:text-cyan-200">
+    <p className="inline-flex items-center gap-2 rounded-full border border-cyan-200/80 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700">
       <Sparkles className="h-3.5 w-3.5" />
       {children}
     </p>
@@ -65,7 +65,7 @@ function BulletList({ items }: { items: readonly string[] }) {
   return (
     <ul className="space-y-3">
       {items.map((item) => (
-        <li key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-600 dark:text-slate-200">
+        <li key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-600">
           <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-cyan-500" />
           <span>{item}</span>
         </li>
@@ -76,27 +76,27 @@ function BulletList({ items }: { items: readonly string[] }) {
 
 export default function LandingPage() {
   return (
-    <div className="bg-surface-page text-text-strong dark:bg-slate-950 dark:text-white">
+    <div className="bg-surface-page text-text-strong">
       <PublicTopNav />
 
       <main className="landing-scroll-shell md:snap-y md:snap-proximity">
         <section
           id="product"
-          className="landing-panel relative overflow-hidden border-b border-border-subtle dark:border-slate-800 md:snap-start"
+          className="landing-panel relative overflow-hidden border-b border-border-subtle md:snap-start"
         >
-          <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_45%,#ecfeff_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.24),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.2),_transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_48%,#082f49_100%)]" />
+          <div className="landing-panel-glow absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.18),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#ffffff_45%,#ecfeff_100%)]" />
           <div className="relative mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl gap-10 px-4 pb-12 pt-5 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-center lg:gap-14 lg:pb-20 lg:pt-10">
             <ScrollReveal className="space-y-8">
               <SectionLabel>Structured learning experience</SectionLabel>
 
               <div className="space-y-5">
-                <h1 className="text-5xl font-extrabold leading-[1.1] tracking-tight text-slate-900 dark:text-white md:text-6xl lg:text-7xl">
+                <h1 className="text-5xl font-extrabold leading-[1.1] tracking-tight text-slate-900 md:text-6xl lg:text-7xl">
                   Your Personal <br />
                   <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                     Path to Mastery
                   </span>
                 </h1>
-                <p className="max-w-lg text-lg leading-relaxed text-slate-600 dark:text-slate-300 md:text-xl">
+                <p className="max-w-lg text-lg leading-relaxed text-slate-600 md:text-xl">
                   Adaptive, tailored learning modules created just for your goals.
                 </p>
               </div>
@@ -117,13 +117,13 @@ export default function LandingPage() {
                     as="article"
                     key={title}
                     delayMs={80}
-                    className="rounded-3xl border border-white/70 bg-white/70 p-4 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.35)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/75 sm:p-5"
+                    className="rounded-3xl border border-white/70 bg-white/70 p-4 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.35)] backdrop-blur sm:p-5"
                   >
                     <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl hero-gradient text-white">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <h2 className="text-base font-semibold text-slate-950 dark:text-white">{title}</h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-200">{description}</p>
+                    <h2 className="text-base font-semibold text-slate-950">{title}</h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
                   </ScrollReveal>
                 ))}
               </div>
@@ -173,16 +173,16 @@ export default function LandingPage() {
 
         <section
           id="roadmap"
-          className="landing-panel relative border-b border-border-subtle bg-surface-card dark:border-slate-800 dark:bg-slate-950 md:snap-start"
+          className="landing-panel relative border-b border-border-subtle bg-surface-card md:snap-start"
         >
           <div className="mx-auto grid max-w-7xl gap-10 px-4 py-20 md:px-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
             <ScrollReveal className="space-y-6">
               <SectionLabel>Personalized learning path</SectionLabel>
               <div className="space-y-4">
-                <h2 className="text-3xl font-semibold leading-tight text-slate-950 dark:text-white md:text-4xl">
+                <h2 className="text-3xl font-semibold leading-tight text-slate-950 md:text-4xl">
                   Personalized learning path
                 </h2>
-                <p className="max-w-xl text-base leading-8 text-slate-600 dark:text-slate-200">
+                <p className="max-w-xl text-base leading-8 text-slate-600">
                   Instead of piecing together lessons on your own, follow a path that gives you a
                   clearer starting point and a more natural next step.
                 </p>
@@ -192,7 +192,7 @@ export default function LandingPage() {
 
             <div className="relative">
               {/* Connecting Line (Horizontal on desktop) */}
-              <div className="absolute left-0 top-12 hidden h-0.5 w-full bg-slate-100 dark:bg-slate-800 lg:block" />
+              <div className="absolute left-0 top-12 hidden h-0.5 w-full bg-slate-100 lg:block" />
               
               <div className="relative grid gap-8 md:grid-cols-3 lg:gap-12">
                 {/* Step 01 */}
@@ -200,14 +200,14 @@ export default function LandingPage() {
                   as="article"
                   className="group relative flex flex-col items-center text-center"
                 >
-                  <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-slate-50 text-slate-400 shadow-sm transition-all group-hover:scale-110 group-hover:border-cyan-100 group-hover:text-cyan-500 dark:border-slate-900 dark:bg-slate-800">
+                  <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-slate-50 text-slate-400 shadow-sm transition-all group-hover:scale-110 group-hover:border-cyan-100 group-hover:text-cyan-500">
                     <Compass className="h-7 w-7" />
-                    <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-white dark:text-slate-900">
+                    <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
                       01
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Direction</h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-300">
+                  <h3 className="text-xl font-bold text-slate-900">Direction</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-500">
                     Start with a learning direction that fits what you need right now.
                   </p>
                 </ScrollReveal>
@@ -219,9 +219,9 @@ export default function LandingPage() {
                   className="group relative flex flex-col items-center text-center"
                 >
                   {/* Connecting Line (Mobile/Tablet vertical) */}
-                  <div className="absolute -top-8 left-1/2 h-8 w-0.5 -translate-x-1/2 bg-slate-100 dark:bg-slate-800 md:hidden" />
+                  <div className="absolute -top-8 left-1/2 h-8 w-0.5 -translate-x-1/2 bg-slate-100 md:hidden" />
                   
-                  <div className="relative z-10 mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] border-4 border-cyan-50 bg-cyan-100 text-cyan-600 shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all scale-110 group-hover:scale-125 dark:border-cyan-900/50 dark:bg-cyan-900/30 dark:text-cyan-400">
+                  <div className="relative z-10 mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] border-4 border-cyan-50 bg-cyan-100 text-cyan-600 shadow-[0_0_30px_rgba(34,211,238,0.3)] transition-all scale-110 group-hover:scale-125">
                     <Search className="h-9 w-9" />
                     <div className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-cyan-600 text-[11px] font-bold text-white shadow-lg">
                       02
@@ -230,9 +230,9 @@ export default function LandingPage() {
                     <div className="absolute inset-0 -z-10 animate-ping rounded-[2rem] bg-cyan-400 opacity-20" />
                   </div>
                   
-                  <div className="rounded-3xl border border-cyan-100 bg-cyan-50/50 p-4 backdrop-blur-sm dark:border-cyan-900/30 dark:bg-cyan-950/20">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Baseline assessment</h3>
-                    <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300 font-medium">
+                  <div className="rounded-3xl border border-cyan-100 bg-cyan-50/50 p-4 backdrop-blur-sm">
+                    <h3 className="text-xl font-bold text-slate-900">Baseline assessment</h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-600 font-medium">
                       Find a starting point that matches your foundation so you can avoid unnecessary detours.
                     </p>
                   </div>
@@ -245,16 +245,16 @@ export default function LandingPage() {
                   className="group relative flex flex-col items-center text-center"
                 >
                   {/* Connecting Line (Mobile/Tablet vertical) */}
-                  <div className="absolute -top-8 left-1/2 h-8 w-0.5 -translate-x-1/2 bg-slate-100 dark:bg-slate-800 md:hidden" />
+                  <div className="absolute -top-8 left-1/2 h-8 w-0.5 -translate-x-1/2 bg-slate-100 md:hidden" />
 
-                  <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-slate-50 text-slate-400 shadow-sm transition-all group-hover:scale-110 group-hover:border-cyan-100 group-hover:text-cyan-500 dark:border-slate-900 dark:bg-slate-800">
+                  <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-slate-50 text-slate-400 shadow-sm transition-all group-hover:scale-110 group-hover:border-cyan-100 group-hover:text-cyan-500">
                     <Flag className="h-7 w-7" />
-                    <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-white dark:text-slate-900">
+                    <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
                       03
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Clear progression</h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-300">
+                  <h3 className="text-xl font-bold text-slate-900">Clear progression</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-500">
                     Move through an ordered path instead of hopping between disconnected topics.
                   </p>
                 </ScrollReveal>
@@ -343,15 +343,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-panel border-b border-border-subtle bg-surface-card dark:border-slate-800 dark:bg-slate-950 md:snap-start">
+        <section className="landing-panel border-b border-border-subtle bg-surface-card md:snap-start">
           <div className="mx-auto max-w-7xl px-4 py-20 md:px-6">
             <ScrollReveal className="space-y-6">
               <div className="space-y-4 text-center">
                 <SectionLabel>Catalog in progress</SectionLabel>
-                <h2 className="text-3xl font-semibold leading-tight text-slate-950 dark:text-white md:text-4xl">
+                <h2 className="text-3xl font-semibold leading-tight text-slate-950 md:text-4xl">
                   More learning paths are on the way
                 </h2>
-                <p className="mx-auto max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-200">
+                <p className="mx-auto max-w-3xl text-base leading-8 text-slate-600">
                   These upcoming additions show how the platform will keep expanding into new
                   learning directions while preserving the same guided experience.
                 </p>
@@ -363,23 +363,23 @@ export default function LandingPage() {
                     as="article"
                     key={course.slug}
                     delayMs={index * 50}
-                    className="rounded-[28px] border border-border-subtle bg-surface-card p-6 shadow-card dark:border-slate-800 dark:bg-slate-900"
+                    className="rounded-[28px] border border-border-subtle bg-surface-card p-6 shadow-card"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-200">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
                           {course.hero_kicker}
                         </p>
-                        <h3 className="mt-3 text-xl font-semibold text-slate-950 dark:text-white">
+                        <h3 className="mt-3 text-xl font-semibold text-slate-950">
                           {course.title}
                         </h3>
                       </div>
-                      <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700 dark:border-cyan-500/30 dark:bg-cyan-950/30 dark:text-cyan-200">
+                      <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
                         {course.hero_badge}
                       </span>
                     </div>
 
-                    <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-200">
+                    <p className="mt-4 text-sm leading-7 text-slate-600">
                       {course.short_description}
                     </p>
                   </ScrollReveal>
@@ -389,13 +389,13 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-panel border-b border-border-subtle bg-surface-card dark:border-slate-800 dark:bg-slate-950 md:snap-start">
+        <section className="landing-panel border-b border-border-subtle bg-surface-card md:snap-start">
           <ScrollReveal className="mx-auto max-w-5xl px-4 py-20 text-center md:px-6">
             <SectionLabel>Start with direction</SectionLabel>
-            <h2 className="mt-6 text-3xl font-semibold leading-tight text-slate-950 dark:text-white md:text-4xl">
+            <h2 className="mt-6 text-3xl font-semibold leading-tight text-slate-950 md:text-4xl">
               Start with a path that feels easier to follow
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-200">
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-slate-600">
               Built for beginners and self-learners who want to study with more structure, less
               guesswork, and a clearer sense of what comes next.
             </p>
@@ -416,12 +416,12 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 md:grid-cols-[minmax(0,1fr)_minmax(280px,0.8fr)] md:px-6">
           <ScrollReveal className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
-              Product team
+              AI in Action
             </p>
-            <h2 className="text-2xl font-semibold">Building a more structured way to learn AI</h2>
+            <h2 className="text-2xl font-semibold">Dự án AI Learning Hub</h2>
             <p className="max-w-2xl text-sm leading-7 text-slate-300">
-              This product direction is centered on making self-study feel clearer, less fragmented,
-              and easier to continue for learners who need structure more than hype.
+              Dự án thuộc khuôn khổ chương trình AI IN ACTION thuộc VinUniversity,
+              Tập Đoàn VinGroup.
             </p>
           </ScrollReveal>
 
@@ -429,12 +429,12 @@ export default function LandingPage() {
             delayMs={120}
             className="rounded-[28px] border border-white/10 bg-white/5 p-6"
           >
-            <p className="text-sm font-semibold text-white">Contact</p>
-            <div className="mt-4 space-y-3 text-sm text-slate-300">
-              <p>Support channel: the internal product team behind AI Learning Hub</p>
-              <p>Technical contact: through the project repository and the current internal collaboration channel</p>
-              <p>Product scope: guided learning paths, baseline assessment, and in-context study support</p>
-            </div>
+            <p className="text-sm font-semibold text-white">Dev team liên hệ</p>
+            <ul className="mt-4 space-y-3 text-sm text-slate-300">
+              <li>Nguyễn Duy Minh Hoàng</li>
+              <li>Nguyễn Đôn Đức</li>
+              <li>Nguyễn Lê Minh Luân</li>
+            </ul>
           </ScrollReveal>
         </div>
       </footer>

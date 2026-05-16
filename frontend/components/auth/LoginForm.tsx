@@ -63,7 +63,7 @@ export default function LoginForm() {
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400 animate-fade-in">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 animate-fade-in">
           {error}
         </div>
       )}
@@ -88,7 +88,7 @@ export default function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="hover:text-slate-600 dark:hover:text-slate-300"
+            className="hover:text-slate-600"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (

@@ -90,7 +90,7 @@ export default function BottomSheet({
           <button
             type="button"
             aria-label={`Close ${title}`}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-text-body transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-text-body transition-colors hover:bg-slate-100"
             onClick={() => onOpenChange(false)}
           >
             <span aria-hidden="true" className="text-lg leading-none">

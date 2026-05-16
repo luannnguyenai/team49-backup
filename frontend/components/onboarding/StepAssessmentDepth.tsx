@@ -70,7 +70,7 @@ export default function StepAssessmentDepth({
               className={cn(
                 "relative rounded-xl border px-3 py-4 text-left transition-all",
                 isSelected
-                  ? "border-primary-600 bg-primary-50 shadow-sm dark:bg-primary-900/20"
+                  ? "border-primary-600 bg-primary-50 shadow-sm"
                   : "hover:border-slate-300",
               )}
               style={{ borderColor: isSelected ? undefined : "var(--border)" }}

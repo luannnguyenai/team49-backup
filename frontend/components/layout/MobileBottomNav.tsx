@@ -38,8 +38,8 @@ export default function MobileBottomNav({ pathname }: MobileBottomNavProps) {
                 className={cn(
                   "flex min-h-[3.25rem] flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-medium transition-colors",
                   active
-                    ? "bg-surface-accent-soft text-primary-700 dark:text-primary-300"
-                    : "text-text-body hover:bg-slate-100 dark:hover:bg-slate-800",
+                    ? "bg-surface-accent-soft text-primary-700"
+                    : "text-text-body hover:bg-slate-100",
                 )}
               >
                 <Icon className="h-4 w-4" />

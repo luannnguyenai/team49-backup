@@ -359,7 +359,7 @@ function AssessmentPageInner() {
                   Question {currentIdx + 1} / {questions.length}
                 </span>
               </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+              <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
                 <div
                   className="h-full rounded-full bg-primary-600 transition-all duration-500 ease-out"
                   style={{ width: `${progress}%` }}
@@ -411,7 +411,7 @@ function AssessmentPageInner() {
                         ? "bg-state-warning-bg text-state-warning-fg hover:brightness-95"
                         : isAns
                         ? "bg-state-success-bg text-state-success-fg hover:brightness-95"
-                        : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                        : "hover:bg-slate-100"
                     )}
                     style={
                       !isCur && !isAns && !isSkipped
@@ -421,7 +421,7 @@ function AssessmentPageInner() {
                   >
                     {idx + 1}
                     {isQFlagged && (
-                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-state-warning-fg ring-1 ring-white dark:ring-slate-900" />
+                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-state-warning-fg ring-1 ring-white" />
                     )}
                   </button>
                 );
@@ -488,7 +488,7 @@ function AssessmentPageInner() {
                     "ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all duration-150",
                     isFlagged
                       ? "bg-state-warning-bg text-state-warning-fg"
-                      : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                      : "hover:bg-slate-100"
                   )}
                   style={!isFlagged ? { color: "var(--text-muted)" } : undefined}
                 >
@@ -523,8 +523,8 @@ function AssessmentPageInner() {
                       "flex w-full items-start gap-3 rounded-xl border-2 px-4 py-3.5 text-left",
                       "transition-all duration-150 active:scale-[0.99]",
                       isSelected
-                        ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                        : "hover:border-slate-300 hover:shadow-sm dark:hover:border-slate-600"
+                        ? "border-primary-500 bg-primary-50"
+                        : "hover:border-slate-300 hover:shadow-sm"
                     )}
                     style={{
                       borderColor: isSelected ? undefined : "var(--border)",
@@ -537,7 +537,7 @@ function AssessmentPageInner() {
                         "transition-all duration-150",
                         isSelected
                           ? "bg-primary-600 text-white"
-                          : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                          : "bg-slate-100 text-slate-500"
                       )}
                     >
                       {opt}
@@ -545,7 +545,7 @@ function AssessmentPageInner() {
                     <span
                       className={cn(
                         "mt-0.5 text-sm leading-relaxed",
-                        isSelected ? "font-medium text-primary-700 dark:text-primary-200" : ""
+                        isSelected ? "font-medium text-primary-700" : ""
                       )}
                       style={{ color: isSelected ? undefined : "var(--text-primary)" }}
                     >

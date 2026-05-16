@@ -70,7 +70,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
           onClick={() => setCollapsed((c) => !c)}
           className={cn(
             "hidden lg:flex h-6 w-6 items-center justify-center rounded-md transition-colors",
-            "hover:bg-slate-100 dark:hover:bg-slate-800",
+            "hover:bg-slate-100",
             collapsed && "ml-0"
           )}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -131,7 +131,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
           )}
         >
           {/* Avatar */}
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300 text-sm font-semibold">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-accent-soft text-primary-700 text-sm font-semibold">
             {user?.full_name?.[0]?.toUpperCase() ?? "?"}
           </div>
           {!collapsed && (
@@ -147,7 +147,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
           {!collapsed && (
             <button
               onClick={handleLogout}
-              className="rounded-md p-1.5 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
+              className="rounded-md p-1.5 transition-colors hover:bg-red-50 hover:text-red-500"
               aria-label="Sign out"
               style={{ color: "var(--text-muted)" }}
             >
@@ -158,7 +158,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: Props) {
         {collapsed && (
           <button
             onClick={handleLogout}
-            className="mt-1 flex w-full items-center justify-center rounded-lg p-2 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
+            className="mt-1 flex w-full items-center justify-center rounded-lg p-2 transition-colors hover:bg-red-50 hover:text-red-500"
             style={{ color: "var(--text-muted)" }}
             aria-label="Sign out"
           >

@@ -303,7 +303,7 @@ function OnboardingPageInner() {
             </span>
           </div>
 
-          <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+          <div className="h-2 overflow-hidden rounded-full bg-slate-200">
             <div
               className="h-full rounded-full bg-primary-600 transition-all duration-500 ease-out"
               style={{ width: `${progressPercent}%` }}
@@ -322,7 +322,7 @@ function OnboardingPageInner() {
                       ? "bg-primary-600 text-white"
                       : i === displayIdx
                       ? "bg-primary-600 text-white ring-4 ring-primary-600/20"
-                      : "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500"
+                      : "bg-slate-200 text-slate-400"
                   )}
                 >
                   {i < displayIdx ? (
@@ -337,7 +337,7 @@ function OnboardingPageInner() {
                   <div
                     className={cn(
                       "mx-1 h-0.5 flex-1 rounded-full transition-all duration-500",
-                      i < displayIdx ? "bg-primary-600" : "bg-slate-200 dark:bg-slate-700"
+                      i < displayIdx ? "bg-primary-600" : "bg-slate-200"
                     )}
                   />
                 )}
@@ -349,7 +349,7 @@ function OnboardingPageInner() {
         {/* ── Card ── */}
         <div className="card">
           {error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
             </div>
           )}

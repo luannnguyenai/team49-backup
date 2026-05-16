@@ -117,20 +117,20 @@ export default function AdminTrafficPage() {
         <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">{err}</p>
       )}
       {summary?.prometheus && summary.prometheus.status !== "healthy" ? (
-        <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+        <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
           Prometheus {summary.prometheus.status}: {summary.prometheus.message ?? summary.prometheus_url}
         </p>
       ) : null}
 
-      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">Grafana — API Traffic</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <h3 className="text-base font-semibold text-slate-900">Grafana — API Traffic</h3>
+            <p className="text-xs text-slate-500">
               Embedded from <code>{grafanaBaseUrl}</code> · provisioned dashboard <code>{TRAFFIC_DASHBOARD_UID}</code>.
             </p>
             {grafanaWarning ? (
-              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">{grafanaWarning}</p>
+              <p className="mt-1 text-xs text-amber-700">{grafanaWarning}</p>
             ) : null}
           </div>
           <a

@@ -115,7 +115,7 @@ export default function MobileSearchSheet({
             <button
               type="button"
               aria-label="Clear search query"
-              className="flex h-6 w-6 items-center justify-center rounded-full transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+              className="flex h-6 w-6 items-center justify-center rounded-full transition-colors hover:bg-slate-200"
               onClick={() => setQuery("")}
             >
               <X className="h-3.5 w-3.5" />
@@ -131,7 +131,7 @@ export default function MobileSearchSheet({
               <li key={course.id}>
                 <button
                   type="button"
-                  className="flex w-full flex-col items-start gap-1 rounded-2xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-card)] px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-900"
+                  className="flex w-full flex-col items-start gap-1 rounded-2xl border border-[color:var(--border-subtle)] bg-[color:var(--surface-card)] px-4 py-3 text-left transition-colors hover:bg-slate-50"
                   onClick={() => routeToCourse(course.slug)}
                 >
                   <span className="text-sm font-semibold text-text-strong">{course.title}</span>

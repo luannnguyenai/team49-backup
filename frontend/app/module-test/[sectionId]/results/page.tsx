@@ -201,7 +201,7 @@ function WrongAnswerCard({ item }: { item: WrongAnswerDetail }) {
                       "flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-bold",
                       isCorrect ? "bg-state-success-fg text-white"
                         : isSelected ? "bg-state-error-fg text-white"
-                        : "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
+                        : "bg-slate-200 text-slate-600",
                     ].join(" ")}
                   >
                     {opt}
@@ -220,7 +220,7 @@ function WrongAnswerCard({ item }: { item: WrongAnswerDetail }) {
           {item.explanation_text && (
             <div className="insight-card flex items-start gap-2">
               <Lightbulb size={14} className="mt-0.5 shrink-0 text-insight" />
-              <div className="text-sm leading-relaxed text-blue-800 dark:text-blue-200">
+              <div className="text-sm leading-relaxed text-blue-800">
                 <MarkdownRenderer text={item.explanation_text} />
               </div>
             </div>
@@ -323,8 +323,8 @@ function ModuleTestResultsInner() {
           className={[
             "rounded-2xl border p-6 text-center",
             passed
-              ? "border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20"
-              : "border-red-300 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20",
+              ? "border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50"
+              : "border-red-300 bg-gradient-to-br from-red-50 to-orange-50",
           ].join(" ")}
         >
           <div className="mb-3 text-5xl">
@@ -334,7 +334,7 @@ function ModuleTestResultsInner() {
           <h2
             className={[
               "text-2xl font-black tracking-tight",
-              passed ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400",
+              passed ? "text-emerald-700" : "text-red-700",
             ].join(" ")}
           >
             {passed ? "PASSED" : "NOT PASSED"}
@@ -446,7 +446,7 @@ function ModuleTestResultsInner() {
                         {rt.weak_kcs.map((kc) => (
                           <span
                             key={kc}
-                            className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                            className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
                           >
                             {kc}
                           </span>
@@ -473,7 +473,7 @@ function ModuleTestResultsInner() {
         {/* ── PASS: next module card ──────────────────────────────────────── */}
         {passed && next_section && (
           <div
-            className="rounded-2xl border p-5 bg-gradient-to-r from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20"
+            className="rounded-2xl border p-5 bg-gradient-to-r from-primary-50 to-blue-50"
             style={{ borderColor: "var(--color-primary-300, #93c5fd)" }}
           >
             <div className="flex items-center gap-2 mb-2">

@@ -9,7 +9,7 @@ export default function EmptyState() {
 
   return (
     <div className="flex min-h-80 flex-col items-center justify-center rounded-2xl border p-8 text-center" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}>
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100 text-primary-700 dark:bg-primary-900/30">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
         <Map className="h-7 w-7" />
       </div>
       <h2 className="mt-4 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>

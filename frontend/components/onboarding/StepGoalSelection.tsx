@@ -62,8 +62,8 @@ export default function StepGoalSelection({ onNext }: Props) {
                 "relative flex items-center gap-3 rounded-xl border-2 p-4 text-left",
                 "transition-all duration-150 hover:shadow-md active:scale-[0.98]",
                 isSelected
-                  ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                  : "hover:border-slate-300 dark:hover:border-slate-600",
+                  ? "border-primary-500 bg-primary-50"
+                  : "hover:border-slate-300",
               )}
               style={{
                 borderColor: isSelected ? undefined : "var(--border)",
@@ -82,7 +82,7 @@ export default function StepGoalSelection({ onNext }: Props) {
               <span
                 className={cn(
                   "text-sm font-semibold leading-snug",
-                  isSelected ? "text-primary-700 dark:text-primary-300" : "",
+                  isSelected ? "text-primary-700" : "",
                 )}
                 style={{ color: isSelected ? undefined : "var(--text-primary)" }}
               >
@@ -101,7 +101,7 @@ export default function StepGoalSelection({ onNext }: Props) {
           className={cn(
             "w-full rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-150",
             noneSelected
-              ? "cursor-not-allowed bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500"
+              ? "cursor-not-allowed bg-slate-200 text-slate-400"
               : "bg-primary-600 text-white hover:bg-primary-700 active:scale-[0.99]",
           )}
         >

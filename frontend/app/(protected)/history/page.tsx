@@ -204,7 +204,7 @@ function BloomBar({ breakdown }: { breakdown: Record<string, string> }) {
             <span className="w-20 text-right text-xs font-medium text-text-muted">
               {BLOOM_VI[level] ?? level}
             </span>
-            <div className="flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 h-2">
+            <div className="flex-1 overflow-hidden rounded-full bg-slate-200 h-2">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${pct}%`, background: BLOOM_BAR_COLOR[level] ?? "var(--text-muted-2)" }}
@@ -349,7 +349,7 @@ function LinkedReviewPanel({ sessionId }: { sessionId: string }) {
         <p className="text-sm font-semibold text-text-strong">
           Review opened from link
         </p>
-        <span className="rounded-full bg-surface-page px-2 py-0.5 text-xs text-text-body dark:bg-slate-800 dark:text-slate-300">
+        <span className="rounded-full bg-surface-page px-2 py-0.5 text-xs text-text-body">
           Session {sessionId}
         </span>
       </div>
@@ -389,7 +389,7 @@ function QuestionRow({
       {/* Header row */}
       <button
         onClick={onToggle}
-        className="flex w-full items-center gap-3 bg-surface-elevated px-3 py-2.5 text-left transition-colors hover:bg-surface-page dark:hover:bg-slate-800/50"
+        className="flex w-full items-center gap-3 bg-surface-elevated px-3 py-2.5 text-left transition-colors hover:bg-surface-page"
       >
         {/* Correct / Wrong icon */}
         {q.is_correct ? (
@@ -408,7 +408,7 @@ function QuestionRow({
         </span>
 
         {/* Bloom badge */}
-        <span className="hidden shrink-0 rounded-full bg-surface-page px-2 py-0.5 text-xs text-text-muted dark:bg-slate-800 sm:inline">
+        <span className="hidden shrink-0 rounded-full bg-surface-page px-2 py-0.5 text-xs text-text-muted sm:inline">
           {BLOOM_VI[q.bloom_level] ?? q.bloom_level}
         </span>
 
@@ -454,7 +454,7 @@ function QuestionRow({
                     "flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-bold",
                     isCorr ? "bg-state-success-fg text-white"
                       : isSel ? "bg-state-error-fg text-white"
-                      : "bg-slate-200 text-slate-500 dark:bg-slate-700",
+                      : "bg-slate-200 text-slate-500",
                   ].join(" ")}
                 >
                   {opt}
@@ -804,7 +804,7 @@ export default function HistoryPage() {
                   <tr key={i} className="border-t border-border-subtle">
                     {Array.from({ length: 6 }).map((__, j) => (
                       <td key={j} className="px-4 py-3">
-                        <div className="h-4 animate-pulse rounded bg-slate-200 dark:bg-slate-700" style={{ width: j === 0 ? 80 : j === 2 ? 120 : 60 }} />
+                        <div className="h-4 animate-pulse rounded bg-slate-200" style={{ width: j === 0 ? 80 : j === 2 ? 120 : 60 }} />
                       </td>
                     ))}
                   </tr>
@@ -903,8 +903,8 @@ export default function HistoryPage() {
                               className={[
                                 "flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors",
                                 isExpanded
-                                  ? "bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
-                                  : "bg-surface-page text-text-body hover:bg-surface-accent-soft hover:text-primary-700 dark:bg-slate-800 dark:text-slate-400",
+                                  ? "bg-surface-accent-soft text-primary-700"
+                                  : "bg-surface-page text-text-body hover:bg-surface-accent-soft hover:text-primary-700",
                               ].join(" ")}
                             >
                               {isExpanded ? (

@@ -47,12 +47,12 @@ function fmtCheckedAt(value: string | null | undefined): string {
 
 function modelStatusClass(status: string): string {
   if (status === "healthy") {
-    return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
+    return "bg-emerald-500/10 text-emerald-700";
   }
   if (status === "degraded") {
-    return "bg-amber-500/10 text-amber-700 dark:text-amber-300";
+    return "bg-amber-500/10 text-amber-700";
   }
-  return "bg-rose-500/10 text-rose-700 dark:text-rose-300";
+  return "bg-rose-500/10 text-rose-700";
 }
 
 export default function AdminLlmPage() {
@@ -107,14 +107,14 @@ export default function AdminLlmPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <div className="rounded-[24px] border border-slate-200/70 bg-white/70 px-5 py-4 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="rounded-[24px] border border-slate-200/70 bg-white/70 px-5 py-4 backdrop-blur-md">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-600">
           LLM Monitoring
         </p>
-        <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-2xl">
+        <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-900 md:text-2xl">
           Tutor latency, feedback, and call volume
         </h2>
-        <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">
+        <p className="mt-1.5 text-sm text-slate-600">
           Focused on first-status latency, answer latency, user feedback, and recent tutor activity.
         </p>
       </div>
@@ -122,20 +122,20 @@ export default function AdminLlmPage() {
       <section className="space-y-3">
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               Model health
             </h3>
-            <p className="mt-1 text-base font-semibold text-slate-900 dark:text-white">
+            <p className="mt-1 text-base font-semibold text-slate-900">
               Configured models
             </p>
           </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
+          <span className="text-xs text-slate-500">
             {modelHealth.length} model{modelHealth.length === 1 ? "" : "s"}
           </span>
         </header>
-        <div className="overflow-hidden rounded-[18px] border border-slate-200/70 bg-white/70 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+        <div className="overflow-hidden rounded-[18px] border border-slate-200/70 bg-white/70 backdrop-blur-md">
           {modelHealthError ? (
-            <div className="border-b border-amber-200/70 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-200">
+            <div className="border-b border-amber-200/70 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               <p className="font-semibold">Model health unavailable</p>
               <p className="mt-1 text-xs">{modelHealthError}</p>
             </div>
@@ -143,8 +143,8 @@ export default function AdminLlmPage() {
 
           {modelHealth.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200/70 text-sm dark:divide-slate-800">
-                <thead className="bg-slate-50/80 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+              <table className="min-w-full divide-y divide-slate-200/70 text-sm">
+                <thead className="bg-slate-50/80 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                   <tr>
                     <th className="px-4 py-3">Model</th>
                     <th className="px-4 py-3">Provider</th>
@@ -155,30 +155,30 @@ export default function AdminLlmPage() {
                     <th className="px-4 py-3">Error</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200/70 dark:divide-slate-800">
+                <tbody className="divide-y divide-slate-200/70">
                   {modelHealth.map((item) => (
                     <tr key={item.id} className="align-top">
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-slate-900 dark:text-white">{item.label}</p>
-                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.model}</p>
+                        <p className="font-semibold text-slate-900">{item.label}</p>
+                        <p className="mt-1 text-xs text-slate-500">{item.model}</p>
                         {item.is_default ? (
-                          <span className="mt-2 inline-flex rounded-full bg-cyan-500/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">
+                          <span className="mt-2 inline-flex rounded-full bg-cyan-500/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-700">
                             default
                           </span>
                         ) : null}
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.provider}</td>
+                      <td className="px-4 py-3 text-slate-600">{item.provider}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${modelStatusClass(item.status)}`}>
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{fmtMs(item.latency_ms)}</td>
-                      <td className="max-w-[260px] px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
+                      <td className="px-4 py-3 text-slate-600">{fmtMs(item.latency_ms)}</td>
+                      <td className="max-w-[260px] px-4 py-3 text-xs text-slate-500">
                         <span className="break-all">{item.base_url ?? "default provider endpoint"}</span>
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{fmtCheckedAt(item.checked_at)}</td>
-                      <td className="max-w-[300px] px-4 py-3 text-xs text-rose-600 dark:text-rose-300">
+                      <td className="px-4 py-3 text-xs text-slate-500">{fmtCheckedAt(item.checked_at)}</td>
+                      <td className="max-w-[300px] px-4 py-3 text-xs text-rose-600">
                         <span className="line-clamp-3">{item.error ?? "—"}</span>
                       </td>
                     </tr>
@@ -187,7 +187,7 @@ export default function AdminLlmPage() {
               </table>
             </div>
           ) : (
-            <div className="p-4 text-sm text-slate-500 dark:text-slate-400">
+            <div className="p-4 text-sm text-slate-500">
               {loading ? "Checking configured models..." : "No configured model health data returned."}
             </div>
           )}
@@ -423,35 +423,35 @@ export default function AdminLlmPage() {
       </ChartCard>
 
       <div className="space-y-5">
-        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+              <h3 className="text-base font-semibold text-slate-900">
                 Recent negative feedback
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500">
                 Last {negatives.length} answers rated 👎.
               </p>
             </div>
           </div>
           {negatives.length === 0 ? (
-            <p className="rounded-xl bg-emerald-500/10 px-4 py-3 text-xs text-emerald-700 dark:text-emerald-300">
+            <p className="rounded-xl bg-emerald-500/10 px-4 py-3 text-xs text-emerald-700">
               No negative ratings yet.
             </p>
           ) : (
-            <div className="divide-y divide-slate-200/70 dark:divide-slate-800">
+            <div className="divide-y divide-slate-200/70">
               {negatives.map((n) => (
                 <div key={n.id} className="py-3">
-                  <div className="flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center justify-between gap-2 text-xs text-slate-500">
                     <span>
-                      #{n.id} · lecture <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">{n.lecture_id?.slice(0, 14) ?? "—"}</code>
+                      #{n.id} · lecture <code className="rounded bg-slate-100 px-1">{n.lecture_id?.slice(0, 14) ?? "—"}</code>
                     </span>
                     <span>{n.created_at ? new Date(n.created_at).toLocaleString() : "—"}</span>
                   </div>
-                  <p className="mt-1 text-sm font-medium text-slate-900 dark:text-white">
+                  <p className="mt-1 text-sm font-medium text-slate-900">
                     Q: {n.question}
                   </p>
-                  <p className="mt-1 line-clamp-3 text-sm text-slate-600 dark:text-slate-300">
+                  <p className="mt-1 line-clamp-3 text-sm text-slate-600">
                     A: {n.answer}
                   </p>
                 </div>
@@ -460,8 +460,8 @@ export default function AdminLlmPage() {
           )}
         </div>
 
-        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
-          <h3 className="mb-3 text-base font-semibold text-slate-900 dark:text-white">Recent LLM events</h3>
+        <div className="rounded-[24px] border border-slate-200/70 bg-white/70 p-5 backdrop-blur-md">
+          <h3 className="mb-3 text-base font-semibold text-slate-900">Recent LLM events</h3>
           <pre className="max-h-72 overflow-auto rounded-xl bg-slate-950/95 p-4 text-xs text-slate-200">
 {recent.map((r) => JSON.stringify(r)).join("\n")}
           </pre>

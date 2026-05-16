@@ -22,7 +22,7 @@ export default function PathRequiredState() {
       className="flex min-h-[420px] flex-col items-center justify-center rounded-3xl border p-8 text-center"
       style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-card)" }}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
         <MapIcon className="h-7 w-7" />
       </div>
       <h2 className="mt-5 text-xl font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -35,7 +35,7 @@ export default function PathRequiredState() {
         <button
           type="button"
           onClick={() => choosePath("computer_vision")}
-          className="rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-950"
+          className="rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           style={{ borderColor: "var(--border)" }}
         >
           <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -48,7 +48,7 @@ export default function PathRequiredState() {
         <button
           type="button"
           onClick={() => choosePath("nlp")}
-          className="rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-950"
+          className="rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           style={{ borderColor: "var(--border)" }}
         >
           <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>

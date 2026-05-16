@@ -1,5 +1,5 @@
 // app/layout.tsx
-// Root layout — provides ThemeProvider and font
+// Root layout - provides app providers and font
 
 import type { Metadata } from "next";
 import Providers from "@/components/Providers";

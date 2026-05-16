@@ -19,7 +19,7 @@ export default function PublicTopNav() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-white/60 bg-white/75 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/85">
+      <header className="sticky top-0 z-40 border-b border-white/60 bg-white/75 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 md:px-6">
           <BrandLogo subtitle="Structured AI learning" />
 
@@ -28,7 +28,7 @@ export default function PublicTopNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm font-medium text-text-body transition-colors hover:text-text-strong dark:text-slate-200 dark:hover:text-white"
+                className="text-sm font-medium text-text-body transition-colors hover:text-text-strong"
               >
                 {item.label}
               </Link>
@@ -65,7 +65,7 @@ export default function PublicTopNav() {
               key={item.href}
               href={item.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="rounded-2xl border border-[color:var(--border-subtle)] px-4 py-3 text-sm font-medium text-text-body transition-colors hover:bg-slate-50 dark:hover:bg-slate-900"
+              className="rounded-2xl border border-[color:var(--border-subtle)] px-4 py-3 text-sm font-medium text-text-body transition-colors hover:bg-slate-50"
             >
               {item.label}
             </Link>

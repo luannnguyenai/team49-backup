@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Moon, Sun } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 import BottomSheet from "@/components/ui/BottomSheet";
 import { cn } from "@/lib/utils";
@@ -14,8 +14,6 @@ type MobileMenuSheetProps = {
   pathname: string;
   isAuthenticated: boolean;
   initials: string;
-  resolvedTheme?: string;
-  onToggleTheme: () => void;
   onLogout: () => void | Promise<void>;
 };
 
@@ -34,8 +32,6 @@ export default function MobileMenuSheet({
   pathname,
   isAuthenticated,
   initials,
-  resolvedTheme,
-  onToggleTheme,
   onLogout,
 }: MobileMenuSheetProps) {
   return (
@@ -60,8 +56,8 @@ export default function MobileMenuSheet({
                 className={cn(
                   "flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition-colors",
                   active
-                    ? "border-transparent bg-surface-accent-soft text-primary-700 dark:text-primary-300"
-                    : "border-[color:var(--border-subtle)] text-text-body hover:bg-slate-50 dark:hover:bg-slate-900",
+                    ? "border-transparent bg-surface-accent-soft text-primary-700"
+                    : "border-[color:var(--border-subtle)] text-text-body hover:bg-slate-50",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -71,15 +67,6 @@ export default function MobileMenuSheet({
           })}
         </div>
 
-        <button
-          type="button"
-          onClick={onToggleTheme}
-          className="flex w-full items-center gap-3 rounded-2xl border border-[color:var(--border-subtle)] px-4 py-3 text-left text-sm font-medium text-text-body transition-colors hover:bg-slate-50 dark:hover:bg-slate-900"
-        >
-          {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          <span>{resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}</span>
-        </button>
-
         {isAuthenticated ? (
           <button
             type="button"
@@ -87,7 +74,7 @@ export default function MobileMenuSheet({
               onOpenChange(false);
               void onLogout();
             }}
-            className="flex w-full items-center gap-3 rounded-2xl border border-red-200 px-4 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/40"
+            className="flex w-full items-center gap-3 rounded-2xl border border-red-200 px-4 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
           >
             <LogOut className="h-4 w-4" />
             <span>Sign out</span>

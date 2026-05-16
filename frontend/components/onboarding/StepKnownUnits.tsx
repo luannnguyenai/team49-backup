@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils";
 import type { BootstrapTopicGroup } from "@/types";
 
 const SECTION_PALETTES = [
-  { dot: "bg-blue-500", ring: "ring-blue-200 dark:ring-blue-800" },
-  { dot: "bg-purple-500", ring: "ring-purple-200 dark:ring-purple-800" },
-  { dot: "bg-emerald-500", ring: "ring-emerald-200 dark:ring-emerald-800" },
-  { dot: "bg-orange-500", ring: "ring-orange-200 dark:ring-orange-800" },
-  { dot: "bg-rose-500", ring: "ring-rose-200 dark:ring-rose-800" },
+  { dot: "bg-blue-500", ring: "ring-blue-200" },
+  { dot: "bg-purple-500", ring: "ring-purple-200" },
+  { dot: "bg-emerald-500", ring: "ring-emerald-200" },
+  { dot: "bg-orange-500", ring: "ring-orange-200" },
+  { dot: "bg-rose-500", ring: "ring-rose-200" },
 ] as const;
 
 interface Props {
@@ -75,8 +75,8 @@ export default function StepKnownUnits({
                       "relative flex flex-col gap-2 rounded-xl border-2 p-3 text-left",
                       "transition-all duration-150 hover:shadow-sm active:scale-[0.97]",
                       isSelected
-                        ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                        : "hover:border-slate-300 dark:hover:border-slate-600",
+                        ? "border-primary-500 bg-primary-50"
+                        : "hover:border-slate-300",
                     )}
                     style={{
                       borderColor: isSelected ? undefined : "var(--border)",
@@ -94,7 +94,7 @@ export default function StepKnownUnits({
                     <span
                       className={cn(
                         "pr-4 text-xs font-medium leading-snug",
-                        isSelected ? "text-primary-700 dark:text-primary-300" : "",
+                        isSelected ? "text-primary-700" : "",
                       )}
                       style={{ color: isSelected ? undefined : "var(--text-primary)" }}
                     >

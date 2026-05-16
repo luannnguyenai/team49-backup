@@ -88,7 +88,7 @@ function MasteryBar({
           {value.toFixed(1)}%
         </span>
       </div>
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+      <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
         <div
           className="h-full rounded-full transition-all duration-1000 ease-out"
           style={{ width: `${width}%`, background: color }}
@@ -111,7 +111,7 @@ function BloomRow({ label, value, color }: { label: string; value: string; color
       <span className="w-24 shrink-0 text-right text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
         {label}
       </span>
-      <div className="flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 h-3">
+      <div className="flex-1 overflow-hidden rounded-full bg-slate-200 h-3">
         {total > 0 && (
           <div
             className="h-full rounded-full transition-all duration-700"
@@ -191,7 +191,7 @@ function QuizResultsInner() {
       >
         <button
           onClick={() => router.push(runtimeRef.learnHref)}
-          className="rounded-lg p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+          className="rounded-lg p-1.5 hover:bg-slate-100"
           style={{ color: "var(--text-secondary)" }}
           aria-label="Go back"
         >

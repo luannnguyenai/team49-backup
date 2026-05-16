@@ -103,75 +103,6 @@
     --mobile-sheet-max-width: 42rem;
   }
 
-  .dark {
-    --bg-page:       #0f172a;
-    --bg-card:       #1e293b;
-    --bg-sidebar:    #1e293b;
-    --border:        #334155;
-    --text-primary:  #f8fafc;
-    --text-secondary:#e2e8f0;
-    --text-muted:    #cbd5e1;
-
-    /* ── Semantic brand tokens (dark) ──────────────────────────────────── */
-    --surface-page:        #0f172a;
-    --surface-card:        #1e293b;
-    --surface-elevated:    #111827;
-    --surface-accent-soft: rgba(8, 47, 73, 0.35);
-    --text-strong:         #f8fafc;
-    --text-body:           #e2e8f0;
-    --text-muted-2:        #cbd5e1;
-    --border-subtle:       #334155;
-    --brand-primary:       #22d3ee;
-    --brand-primary-hover: #67e8f9;
-    --brand-primary-strong:#818cf8;
-    --brand-accent:        #67e8f9;
-    --brand-accent-soft:   rgba(34, 211, 238, 0.16);
-    --ring-brand:          rgba(103, 232, 249, 0.36);
-    --shadow-brand-soft:   0 20px 60px -30px rgba(34, 211, 238, 0.28);
-
-    /* ── Landing-aligned CTA tokens (dark) ─────────────────────────────── */
-    --brand-ink:           #f8fafc;   /* invert: light ink on dark surface */
-    --brand-ink-hover:     #e2e8f0;
-    --brand-ink-fg:        #020617;
-    --glass-bg:            rgba(15, 23, 42, 0.80);
-    --glass-bg-hover:      #0f172a;
-    --glass-border:        #334155;
-    --glass-border-hover:  #475569;
-    --glass-fg:            #f1f5f9;
-    --shadow-glass:        0 20px 60px -35px rgba(0, 0, 0, 0.55);
-    --shadow-ink:          0 30px 80px -40px rgba(34, 211, 238, 0.45);
-    --bloom-remember-soft:   rgba(14, 165, 233, 0.18);
-    --bloom-understand-soft: rgba(139, 92, 246, 0.18);
-    --bloom-apply-soft:      rgba(245, 158, 11, 0.18);
-    --bloom-analyze-soft:    rgba(239, 68, 68, 0.18);
-    --bloom-evaluate-soft:   rgba(236, 72, 153, 0.18);
-    --bloom-create-soft:     rgba(20, 184, 166, 0.18);
-    --session-assessment-soft: rgba(139, 92, 246, 0.18);
-    --session-quiz-soft:       rgba(59, 130, 246, 0.18);
-    --session-module-test-soft: rgba(245, 158, 11, 0.18);
-    --session-practice-soft:    rgba(100, 116, 139, 0.22);
-    --tier-bronze-soft:   rgba(180, 83, 9, 0.18);
-    --tier-silver-soft:   rgba(100, 116, 139, 0.22);
-    --tier-gold-soft:     rgba(202, 138, 4, 0.18);
-    --tier-platinum-soft: rgba(79, 70, 229, 0.18);
-    --stat-courses-soft:   rgba(37, 99, 235, 0.18);
-    --stat-progress-soft:  rgba(5, 150, 105, 0.18);
-    --stat-time-soft:      rgba(124, 58, 237, 0.18);
-    --stat-completed-soft: rgba(217, 119, 6, 0.18);
-    --insight-bg:     rgba(8, 145, 178, 0.14);
-    --insight-fg:     #67e8f9;
-    --insight-border: rgba(34, 211, 238, 0.34);
-    --state-success-bg:     rgba(16, 185, 129, 0.16);
-    --state-success-fg:     #6ee7b7;
-    --state-success-border: rgba(110, 231, 183, 0.4);
-    --state-error-bg:       rgba(239, 68, 68, 0.16);
-    --state-error-fg:       #fca5a5;
-    --state-error-border:   rgba(252, 165, 165, 0.4);
-    --state-warning-bg:     rgba(245, 158, 11, 0.16);
-    --state-warning-fg:     #fcd34d;
-    --state-warning-border: rgba(252, 211, 77, 0.4);
-  }
-
   * { border-color: var(--border); }
 
   body {
@@ -210,11 +141,7 @@
     box-shadow: var(--shadow-glass);
     backdrop-filter: blur(12px);
   }
-  .dark .card-glass {
-    border-color: #1e293b;
-  }
-
-  /* Ink showcase card — dark high-contrast surface (matches Landing showcase). */
+  /* Ink showcase card for high-contrast surfaces. */
   .card-ink {
     @apply rounded-[32px] p-6;
     background-color: #020617;
@@ -222,11 +149,6 @@
     border: 1px solid rgba(226, 232, 240, 0.8);
     box-shadow: var(--shadow-ink);
   }
-  .dark .card-ink {
-    background-color: #0f172a;
-    border-color: #334155;
-  }
-
   .input-base {
     @apply w-full rounded-lg border bg-surface-card px-3.5 py-2.5 text-sm
            text-text-strong outline-none transition-all duration-150;
@@ -241,8 +163,7 @@
     @apply border-red-500 ring-2 ring-red-500/20;
   }
 
-  /* Landing-aligned ink primary CTA (sync-ui phase-0).
-     Pill shape, slate-950 bg in light mode, inverted in dark. */
+  /* Landing-aligned ink primary CTA (sync-ui phase-0). */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-full
            px-5 py-2.5 text-sm font-semibold
@@ -334,11 +255,11 @@
     color: var(--text-secondary);
   }
   .sidebar-item:hover {
-    @apply bg-slate-100 dark:bg-slate-800;
+    @apply bg-slate-100;
     color: var(--text-primary);
   }
   .sidebar-item.active {
-    @apply bg-surface-accent-soft text-primary-700 dark:text-primary-300;
+    @apply bg-surface-accent-soft text-primary-700;
   }
 }
 

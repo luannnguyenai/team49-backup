@@ -295,7 +295,7 @@ export default function QuizPage() {
           </span>
 
           {/* Progress bar */}
-          <div className="flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 h-2">
+          <div className="flex-1 overflow-hidden rounded-full bg-slate-200 h-2">
             <div
               className="h-full rounded-full bg-primary-500 transition-all duration-300"
               style={{ width: `${progressPct}%` }}
@@ -463,8 +463,8 @@ export default function QuizPage() {
           {/* Keyboard hint */}
           {phase === "quiz" && (
             <p className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
-              Press <kbd className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs dark:bg-slate-800">A</kbd>–
-              <kbd className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs dark:bg-slate-800">D</kbd> to choose
+              Press <kbd className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs">A</kbd>–
+              <kbd className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs">D</kbd> to choose
             </p>
           )}
         </div>

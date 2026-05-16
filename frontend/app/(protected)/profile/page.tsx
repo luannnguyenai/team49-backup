@@ -226,7 +226,7 @@ export default function ProfilePage() {
                   <p className="text-lg font-bold text-text-strong">
                     {user.full_name}
                   </p>
-                  <span className="mt-1 inline-flex items-center rounded-full bg-surface-accent-soft px-2.5 py-0.5 text-xs font-semibold text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300">
+                  <span className="mt-1 inline-flex items-center rounded-full bg-surface-accent-soft px-2.5 py-0.5 text-xs font-semibold text-primary-700">
                     {membershipLabel}
                   </span>
                 </div>

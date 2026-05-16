@@ -167,7 +167,7 @@ function AssistantMarkdown({ markdown, citations = [] }: { markdown: string; cit
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-primary-700 underline decoration-primary-300 underline-offset-2 transition hover:text-primary-900 dark:text-primary-300"
+              className="font-semibold text-primary-700 underline decoration-primary-300 underline-offset-2 transition hover:text-primary-900"
             >
               {children}
             </a>
@@ -333,9 +333,9 @@ function getCitationPathTags(citation: AgentCitation) {
 
 function getCitationPathTagClass(tag: string) {
   if (tag === "CV") {
-    return "border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200";
+    return "border-amber-200 bg-amber-100 text-amber-800";
   }
-  return "border-sky-200 bg-sky-100 text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-200";
+  return "border-sky-200 bg-sky-100 text-sky-800";
 }
 
 function CitationCard({
@@ -361,7 +361,7 @@ function CitationCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <span className="rounded-md bg-surface-accent-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-700 dark:text-primary-300">
+            <span className="rounded-md bg-surface-accent-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-700">
               {getCitationCourseId(citation)}
             </span>
             {pathTags.map((pathTag) => (
@@ -376,7 +376,7 @@ function CitationCard({
               </span>
             ))}
           </div>
-          <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-text-strong group-hover:text-primary-700 dark:group-hover:text-primary-300">
+          <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-text-strong group-hover:text-primary-700">
             {getCitationUnitName(citation)}
           </h4>
           {getCitationLectureTitle(citation) ? (
@@ -424,7 +424,7 @@ function SourceDetailPanel({
     <aside className="flex h-full w-full shrink-0 flex-col border-l border-border-subtle bg-surface-card lg:w-[360px] xl:w-[390px]">
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-border-subtle px-4">
         <div className="min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary-700 dark:text-primary-300">Evidence</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary-700">Evidence</p>
           <h2 className="truncate text-sm font-semibold text-text-strong">{courseId}</h2>
         </div>
         <button
@@ -667,7 +667,7 @@ function AssessmentProposalCard({
   return (
     <div className="card-glass mt-4 overflow-hidden p-0">
       <div className="border-b border-border-subtle bg-surface-page/80 p-5">
-        <span className="rounded-full bg-surface-accent-soft px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary-700 dark:text-primary-300">
+        <span className="rounded-full bg-surface-accent-soft px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary-700">
           Assessment proposal
         </span>
         <h3 className="mt-4 text-xl font-semibold tracking-tight text-text-strong">{proposal.title}</h3>
@@ -1271,7 +1271,7 @@ function ChatMessageItem({
           {isUser ? (
             <p className="whitespace-pre-wrap">{message.markdown}</p>
           ) : (
-            <div className="prose prose-sm prose-slate max-w-none leading-7 dark:prose-invert">
+            <div className="prose prose-sm prose-slate max-w-none leading-7">
               <AssistantMarkdown markdown={message.markdown} citations={message.citations} />
             </div>
           )}
@@ -1483,7 +1483,7 @@ function SessionSidebar({
                       </button>
                     </form>
                   ) : (
-                    <p className={cn("truncate text-sm font-semibold", isActive ? "text-primary-700 dark:text-primary-300" : "text-text-strong")}>
+                    <p className={cn("truncate text-sm font-semibold", isActive ? "text-primary-700" : "text-text-strong")}>
                       {session.title || "New chat"}
                     </p>
                   )}
@@ -1552,7 +1552,7 @@ function EmptyState({ onPrompt }: { onPrompt: (prompt: string) => void }) {
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           {COPILOT_BENEFITS.map((benefit) => (
-            <span key={benefit} className="rounded-full bg-surface-accent-soft px-3 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300">
+            <span key={benefit} className="rounded-full bg-surface-accent-soft px-3 py-1 text-xs font-semibold text-primary-700">
               {benefit}
             </span>
           ))}
@@ -1654,7 +1654,7 @@ function Composer({
                       className={cn(
                         "inline-flex h-[28px] items-center gap-1.5 rounded-full px-2.5 text-[11px] font-medium transition disabled:opacity-60",
                         isActive
-                          ? "border border-primary-200 bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                          ? "border border-primary-200 bg-surface-accent-soft text-primary-700"
                           : "text-text-muted hover:text-text-strong",
                       )}
                       aria-pressed={isActive}
@@ -1680,7 +1680,7 @@ function Composer({
                   type="button"
                   disabled={disabled}
                   onClick={() => setIsModelMenuOpen((open) => !open)}
-                  className="inline-flex h-[28px] max-w-[150px] items-center gap-1.5 rounded-full border border-primary-200 bg-surface-accent-soft px-2.5 text-[11px] font-medium text-primary-700 transition hover:border-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:text-primary-300 sm:max-w-[210px]"
+                  className="inline-flex h-[28px] max-w-[150px] items-center gap-1.5 rounded-full border border-primary-200 bg-surface-accent-soft px-2.5 text-[11px] font-medium text-primary-700 transition hover:border-primary-300 disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-[210px]"
                   aria-label={`Agent model: ${selectedChatModel.label}`}
                   aria-expanded={isModelMenuOpen}
                   aria-haspopup="menu"
@@ -1719,14 +1719,14 @@ function Composer({
                           className={cn(
                             "flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60",
                             isActive
-                              ? "bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                              ? "bg-surface-accent-soft text-primary-700"
                               : "text-text-muted hover:bg-surface-page hover:text-text-strong",
                           )}
                         >
                           <Bot className="h-3.5 w-3.5 shrink-0" />
                           <span className="min-w-0 flex-1 truncate">{option.label}</span>
                           {statusLabel ? (
-                            <span className="shrink-0 rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-rose-700 dark:text-rose-300">
+                            <span className="shrink-0 rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-rose-700">
                               {statusLabel}
                             </span>
                           ) : null}
@@ -1807,7 +1807,7 @@ function AgentActivityCard({ activity }: { activity: AgentActivitySnapshot }) {
           <span
             className={cn(
               "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border-subtle bg-surface-page text-primary-700",
-              !completed && "border-primary-200 text-primary-700 dark:text-primary-300",
+              !completed && "border-primary-200 text-primary-700",
             )}
           >
             {completed ? <Check className="h-3.5 w-3.5" /> : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
@@ -1853,7 +1853,7 @@ function StreamingTurn({
         {activity ? <AgentActivityCard activity={activity} /> : null}
         {markdown !== null ? (
           <div className="rounded-3xl rounded-tl-md border border-border-subtle bg-surface-card px-4 py-3 text-[15px] leading-7 shadow-sm">
-            <div className="prose prose-sm prose-slate max-w-none leading-7 dark:prose-invert">
+            <div className="prose prose-sm prose-slate max-w-none leading-7">
               <AssistantMarkdown markdown={markdown} />
               <span className="inline-block h-5 w-1 animate-pulse rounded-sm bg-primary-400 align-text-bottom" />
             </div>
@@ -2384,7 +2384,7 @@ export default function AgentChatPage() {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="truncate text-lg font-semibold tracking-tight text-text-strong">AI Learning Copilot</h1>
-                <span className="hidden rounded-full bg-surface-accent-soft px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-700 dark:text-primary-300 md:inline-flex">
+                <span className="hidden rounded-full bg-surface-accent-soft px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-700 md:inline-flex">
                   Grounded in your learning path
                 </span>
               </div>

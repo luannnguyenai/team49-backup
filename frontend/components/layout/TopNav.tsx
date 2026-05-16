@@ -6,7 +6,6 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, Menu, LogOut, X } from "lucide-react";
-import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import BrandLogo from "@/components/layout/BrandLogo";
@@ -168,7 +167,7 @@ function TopNavSearch({
               type="button"
               aria-label="Clear search query"
               onClick={clearQuery}
-              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-slate-200"
               style={{ color: "var(--text-muted)" }}
             >
               <X className="h-3 w-3" />
@@ -200,7 +199,7 @@ function TopNavSearch({
                   <button
                     type="button"
                     onClick={() => routeToCourse(course.slug)}
-                    className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-100"
                   >
                     <span className="min-w-0">
                       <span
@@ -278,7 +277,6 @@ function TopNavContent() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const { resolvedTheme, setTheme } = useTheme();
   const isAuthenticated = user !== null;
 
   useEffect(() => {
@@ -364,8 +362,8 @@ function TopNavContent() {
                   className={cn(
                     "flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     active
-                      ? "bg-surface-accent-soft text-primary-700 dark:bg-surface-accent-soft dark:text-primary-300"
-                      : "text-text-body hover:bg-surface-page dark:hover:bg-slate-800"
+                      ? "bg-surface-accent-soft text-primary-700"
+                      : "text-text-body hover:bg-surface-page"
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -381,7 +379,7 @@ function TopNavContent() {
               <button
                 type="button"
                 onClick={() => setMobileSearchOpen(true)}
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
                 style={{ color: "var(--text-secondary)" }}
                 aria-label="Open course search"
               >
@@ -394,7 +392,7 @@ function TopNavContent() {
                 {/* Avatar */}
                 <Link
                   href="/profile"
-                  className="hidden h-9 w-9 items-center justify-center rounded-full bg-surface-accent-soft text-sm font-semibold text-primary-700 transition-opacity hover:opacity-80 dark:bg-surface-accent-soft dark:text-primary-300 md:flex"
+                  className="hidden h-9 w-9 items-center justify-center rounded-full bg-surface-accent-soft text-sm font-semibold text-primary-700 transition-opacity hover:opacity-80 md:flex"
                 >
                   {initials}
                 </Link>
@@ -402,7 +400,7 @@ function TopNavContent() {
                 {/* Logout */}
                 <button
                   onClick={handleLogout}
-                  className="hidden sm:flex h-9 items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
+                  className="hidden sm:flex h-9 items-center gap-1.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-red-50 hover:text-red-500"
                   style={{ color: "var(--text-secondary)" }}
                 >
                   <LogOut className="h-4 w-4" />
@@ -422,7 +420,7 @@ function TopNavContent() {
             {isMobileViewport ? (
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
                 style={{ color: "var(--text-secondary)" }}
                 aria-label="Menu"
               >
@@ -447,8 +445,6 @@ function TopNavContent() {
           pathname={pathname}
           isAuthenticated={isAuthenticated}
           initials={initials}
-          resolvedTheme={resolvedTheme}
-          onToggleTheme={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           onLogout={handleLogout}
         />
       ) : null}

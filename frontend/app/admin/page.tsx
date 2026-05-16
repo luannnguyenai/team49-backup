@@ -43,18 +43,18 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="rounded-[28px] border border-slate-200/70 bg-white/70 p-6 backdrop-blur-md">
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-600">
           Overview
         </p>
-        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white md:text-3xl">
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
           Realtime platform pulse
         </h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <p className="mt-2 text-sm text-slate-600">
           Auto-refreshing every 30s · Postgres · Prometheus · LangFuse Cloud · Loki.
         </p>
         {err && (
-          <p className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
+          <p className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">
             Failed to load some panels: {err}
           </p>
         )}

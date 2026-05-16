@@ -35,11 +35,11 @@ const MASTERY_CONFIG: Record<
   MasteryLevel,
   { label: string; color: string; bg: string }
 > = {
-  not_started: { label: "Not started", color: "text-slate-500 dark:text-slate-400",      bg: "bg-slate-100 dark:bg-slate-800"        },
-  novice:      { label: "Novice",  color: "text-red-600 dark:text-red-400",           bg: "bg-red-50 dark:bg-red-900/20"          },
-  developing:  { label: "Developing", color: "text-orange-600 dark:text-orange-400",  bg: "bg-orange-50 dark:bg-orange-900/20"    },
-  proficient:  { label: "Proficient",   color: "text-blue-600 dark:text-blue-400",          bg: "bg-blue-50 dark:bg-blue-900/20"        },
-  mastered:    { label: "Mastered",   color: "text-emerald-600 dark:text-emerald-400",    bg: "bg-emerald-50 dark:bg-emerald-900/20"  },
+  not_started: { label: "Not started", color: "text-slate-500",      bg: "bg-slate-100"        },
+  novice:      { label: "Novice",  color: "text-red-600",           bg: "bg-red-50"          },
+  developing:  { label: "Developing", color: "text-orange-600",  bg: "bg-orange-50"    },
+  proficient:  { label: "Proficient",   color: "text-blue-600",          bg: "bg-blue-50"        },
+  mastered:    { label: "Mastered",   color: "text-emerald-600",    bg: "bg-emerald-50"  },
 };
 
 const DECISION_OPTIONS: { value: string; label: string }[] = [
@@ -67,7 +67,7 @@ function scoreMessage(pct: number): { emoji: string; text: string } {
 
 function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("animate-pulse rounded-xl bg-slate-200 dark:bg-slate-700", className)} />
+    <div className={cn("animate-pulse rounded-xl bg-slate-200", className)} />
   );
 }
 
@@ -137,10 +137,10 @@ function DecisionRow({ item, currentDecision, onDecisionChange }: DecisionRowPro
         className={cn(
           "w-fit rounded-full px-3 py-1 text-xs font-semibold",
           currentDecision === "relearn"
-            ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
+            ? "bg-red-50 text-red-700"
             : currentDecision === "review"
-              ? "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
-              : "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300",
+              ? "bg-amber-50 text-amber-700"
+              : "bg-emerald-50 text-emerald-700",
         )}
       >
         {DECISION_LABEL[currentDecision] ?? currentDecision}
@@ -150,7 +150,7 @@ function DecisionRow({ item, currentDecision, onDecisionChange }: DecisionRowPro
         aria-label={`Adjust ${item.title}`}
         value={currentDecision}
         onChange={(event) => onDecisionChange(item.id, event.target.value, currentDecision)}
-        className="rounded-lg border bg-white px-3 py-2 text-xs font-medium dark:bg-slate-900"
+        className="rounded-lg border bg-white px-3 py-2 text-xs font-medium"
         style={{ borderColor: "var(--border)", color: "var(--text-primary)" }}
       >
         {DECISION_OPTIONS.map((opt) => (
@@ -342,31 +342,31 @@ function AssessmentResultsInner() {
 
           <div className="space-y-4 p-5 sm:p-6">
             {aiSummaryLoading && (
-              <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-sm text-primary-800 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-200">
+              <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-sm text-primary-800">
                 AI is summarizing your results...
               </div>
             )}
 
             {aiSummary?.summary && (
-              <div className="space-y-3 rounded-2xl border border-primary-100 bg-primary-50 p-4 dark:border-primary-900/40 dark:bg-primary-900/20">
-                <div className="flex items-center gap-2 text-primary-800 dark:text-primary-200">
+              <div className="space-y-3 rounded-2xl border border-primary-100 bg-primary-50 p-4">
+                <div className="flex items-center gap-2 text-primary-800">
                   <Brain className="h-4 w-4" />
                   <p className="text-sm font-semibold">AI summary</p>
                 </div>
-                <p className="text-sm leading-relaxed text-primary-900 dark:text-primary-100">
+                <p className="text-sm leading-relaxed text-primary-900">
                   {aiSummary.summary}
                 </p>
                 {aiSummary.highlights.length > 0 && (
                   <ul className="space-y-1.5">
                     {aiSummary.highlights.map((highlight) => (
-                      <li key={highlight} className="text-sm text-primary-800 dark:text-primary-200">
+                      <li key={highlight} className="text-sm text-primary-800">
                         - {highlight}
                       </li>
                     ))}
                   </ul>
                 )}
                 {aiSummary.next_step && (
-                  <p className="text-sm font-medium text-primary-900 dark:text-primary-100">
+                  <p className="text-sm font-medium text-primary-900">
                     {aiSummary.next_step}
                   </p>
                 )}
@@ -374,29 +374,29 @@ function AssessmentResultsInner() {
             )}
 
             {aiSummary && !aiSummary.available && !aiSummaryLoading && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-100">
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 AI feedback is temporarily unavailable. Your scored placement results below are still saved.
               </div>
             )}
 
             <div className="grid gap-2 sm:grid-cols-3">
-              <div className="rounded-2xl bg-red-50 p-3 dark:bg-red-900/20">
-                <p className="text-2xl font-bold text-red-600 dark:text-red-300">
+              <div className="rounded-2xl bg-red-50 p-3">
+                <p className="text-2xl font-bold text-red-600">
                   {viewModel.counts.relearn}
                 </p>
-                <p className="text-xs font-medium text-red-700 dark:text-red-300">relearn</p>
+                <p className="text-xs font-medium text-red-700">relearn</p>
               </div>
-              <div className="rounded-2xl bg-amber-50 p-3 dark:bg-amber-900/20">
-                <p className="text-2xl font-bold text-amber-600 dark:text-amber-300">
+              <div className="rounded-2xl bg-amber-50 p-3">
+                <p className="text-2xl font-bold text-amber-600">
                   {viewModel.counts.review}
                 </p>
-                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">review</p>
+                <p className="text-xs font-medium text-amber-700">review</p>
               </div>
-              <div className="rounded-2xl bg-emerald-50 p-3 dark:bg-emerald-900/20">
-                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-300">
+              <div className="rounded-2xl bg-emerald-50 p-3">
+                <p className="text-2xl font-bold text-emerald-600">
                   {viewModel.counts.skip}
                 </p>
-                <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">skip</p>
+                <p className="text-xs font-medium text-emerald-700">skip</p>
               </div>
             </div>
           </div>
@@ -425,7 +425,7 @@ function AssessmentResultsInner() {
               ))}
             </div>
           ) : (
-            <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+            <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700">
               No sections need relearning. The path will skip the areas you already know well.
             </div>
           )}
@@ -446,12 +446,12 @@ function AssessmentResultsInner() {
                 {viewModel.masteredPreview.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-lg border border-emerald-100 bg-emerald-50/70 px-3 py-2 dark:border-emerald-900/40 dark:bg-emerald-900/20"
+                    className="rounded-lg border border-emerald-100 bg-emerald-50/70 px-3 py-2"
                   >
-                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                    <p className="text-sm font-semibold text-emerald-900">
                       {item.title}
                     </p>
-                    <p className="mt-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                    <p className="mt-0.5 text-xs font-medium text-emerald-700">
                       {item.scorePercent.toFixed(0)}%
                       {typeof item.questionsCorrect === "number" && typeof item.questionsTotal === "number"
                         ? ` (${item.questionsCorrect}/${item.questionsTotal})`

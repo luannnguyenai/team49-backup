@@ -24,11 +24,11 @@ export default function ChartCard({
     <div className="card-glass">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+          <h3 className="text-base font-semibold text-slate-900">
             {title}
           </h3>
           {subtitle && (
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-slate-500">
               {subtitle}
             </p>
           )}

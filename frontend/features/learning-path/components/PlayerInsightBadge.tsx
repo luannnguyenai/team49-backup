@@ -25,7 +25,7 @@ export default function PlayerInsightBadge({ insight }: PlayerInsightBadgeProps)
         insight.tone === "placement_lite" && "bg-red-100 text-red-800",
         insight.tone === "review_due" && "bg-blue-100 text-blue-800",
         (insight.tone === "quiz_ready" || insight.tone === "active_quiz") && "bg-amber-100 text-amber-800",
-        insight.tone === "resume" && "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200",
+        insight.tone === "resume" && "bg-slate-100 text-slate-700",
       )}
     >
       {iconForTone(insight.tone)}

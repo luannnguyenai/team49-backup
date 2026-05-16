@@ -118,7 +118,7 @@ export default function StepPriorKnowledgeInput({
                 onClick={() => onCodingExperienceChange(level.value)}
                 className={`rounded-xl border-2 p-3 text-left transition-all ${
                   isSelected
-                    ? "border-primary-600 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300"
+                    ? "border-primary-600 bg-primary-50 text-primary-700"
                     : "hover:border-slate-300"
                 }`}
                 style={{

@@ -208,7 +208,7 @@ export default function LearnTopicPage() {
                 <span>Reading progress</span>
                 <span>{readPct}%</span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
                 <div
                   className="h-full rounded-full bg-primary-500 transition-all duration-1000"
                   style={{ width: `${readPct}%` }}

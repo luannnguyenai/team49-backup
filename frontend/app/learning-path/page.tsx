@@ -40,12 +40,12 @@ const STATUS_BADGE: Record<UnitStatus, { label: string; className: string }> = {
   pending: {
     label: "Not started",
     className:
-      "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
+      "bg-slate-100 text-slate-600",
   },
   in_progress: {
     label: "In progress",
     className:
-      "bg-surface-accent-soft text-primary-700 dark:text-primary-300",
+      "bg-surface-accent-soft text-primary-700",
   },
   completed: {
     label: "Completed",
@@ -203,7 +203,7 @@ export default function LearningPathPage() {
                 <h2 className="text-base font-bold" style={{ color: "var(--text-primary)" }}>
                   Phase B: New learning
                 </h2>
-                <span className="rounded-full bg-surface-accent-soft px-2.5 py-0.5 text-xs font-semibold text-primary-700 dark:text-primary-300">
+                <span className="rounded-full bg-surface-accent-soft px-2.5 py-0.5 text-xs font-semibold text-primary-700">
                   {phaseBItems.length} units
                 </span>
                 {phaseBLocked && (

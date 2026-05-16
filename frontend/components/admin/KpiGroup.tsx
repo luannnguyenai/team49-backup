@@ -22,11 +22,11 @@ export default function KpiGroup({ title, description, cols = 4, children }: Pro
   return (
     <section className="space-y-3">
       <header className="flex items-baseline justify-between gap-3">
-        <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+        <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
           {title}
         </h3>
         {description && (
-          <p className="text-[11px] text-slate-400 dark:text-slate-500">{description}</p>
+          <p className="text-[11px] text-slate-400">{description}</p>
         )}
       </header>
       <div className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${COLS_CLASS[cols]}`}>

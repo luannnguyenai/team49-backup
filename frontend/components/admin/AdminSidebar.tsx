@@ -19,10 +19,10 @@ const ITEMS: { href: string; label: string; icon: string }[] = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   return (
-    <aside className="hidden w-60 shrink-0 border-r border-slate-200/70 bg-white/60 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60 lg:block">
+    <aside className="hidden w-60 shrink-0 border-r border-slate-200/70 bg-white/60 backdrop-blur-md lg:block">
       <div className="sticky top-0 flex h-screen flex-col gap-2 px-4 py-6">
         <div className="mb-6 px-2">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
             Admin Console
           </p>
           <p className="mt-1 bg-gradient-to-r from-indigo-600 via-cyan-500 to-teal-400 bg-clip-text text-lg font-bold text-transparent">
@@ -38,8 +38,8 @@ export default function AdminSidebar() {
                 href={it.href}
                 className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                   active
-                    ? "bg-gradient-to-r from-indigo-600/15 via-cyan-500/15 to-teal-400/15 text-slate-900 dark:text-white"
-                    : "text-slate-600 hover:bg-white/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white"
+                    ? "bg-gradient-to-r from-indigo-600/15 via-cyan-500/15 to-teal-400/15 text-slate-900"
+                    : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
                 }`}
               >
                 <span className="text-cyan-500">{it.icon}</span>
@@ -48,8 +48,8 @@ export default function AdminSidebar() {
             );
           })}
         </nav>
-        <div className="mt-auto rounded-xl border border-slate-200/70 bg-white/60 px-3 py-3 text-xs text-slate-500 backdrop-blur dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
-          <p className="font-semibold text-slate-700 dark:text-slate-200">Localhost mode</p>
+        <div className="mt-auto rounded-xl border border-slate-200/70 bg-white/60 px-3 py-3 text-xs text-slate-500 backdrop-blur">
+          <p className="font-semibold text-slate-700">Localhost mode</p>
           <p className="mt-1">Grafana → :3001 · Prom → :9090</p>
         </div>
       </div>
