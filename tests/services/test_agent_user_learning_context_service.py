@@ -38,6 +38,23 @@ def test_path_position_payload_exposes_next_units_without_message_heuristics():
     assert payload["next_unfinished_unit"]["unit_title"] == "Segment 4"
 
 
+def test_duration_hms_formats_video_positions_for_user_facing_answers():
+    assert AgentUserLearningContextService._duration_hms(1247) == "00:20:47"
+    assert AgentUserLearningContextService._duration_hms(3671.8) == "01:01:11"
+    assert AgentUserLearningContextService._duration_hms(None) is None
+
+
+def test_available_fields_does_not_advertise_raw_seconds_to_responder():
+    available = AgentUserLearningContextService.available_fields()
+
+    current_state_fields = available["current_learning_state"]
+    recent_progress_fields = available["recent_progress"]
+    assert "video_progress_s" not in current_state_fields
+    assert "last_position_seconds" not in recent_progress_fields
+    assert "video_progress_hms" in current_state_fields
+    assert "last_position_hms" in recent_progress_fields
+
+
 def _quiz_row(
     *,
     is_correct: bool,
