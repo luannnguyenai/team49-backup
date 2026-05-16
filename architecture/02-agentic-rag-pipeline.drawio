@@ -1,141 +1,101 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<mxfile host="app.diagrams.net" version="21.0.0">
+<mxfile host="app.diagrams.net">
   <diagram id="ragpipeline" name="Agentic RAG Pipeline">
-    <mxGraphModel dx="1366" dy="768" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+    <mxGraphModel dx="1720" dy="944" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
       <root>
-        <mxCell id="0"/>
-        <mxCell id="1" parent="0"/>
-
-        <!-- ── STEP STYLE TEMPLATES (not rendered) ── -->
-        <!-- Blue=input, Red=safety, Orange=router, Purple=agent, Green=tool, Navy=answer, Teal=output -->
-
-        <!-- 1. USER MESSAGE -->
-        <mxCell id="user_msg" value="&lt;b&gt;👤 User Message&lt;/b&gt;&lt;br&gt;&lt;font color='#555' size='2'&gt;Free-text query from learner&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;arcSize=8;align=center;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="334" y="60" width="300" height="64" as="geometry"/>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="user_msg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;arcSize=8;align=center;spacingTop=6;" value="&lt;b&gt;👤 User Message&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#555&#39; size=&#39;2&#39;&gt;Free-text query from learner&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="300" x="334" y="60" as="geometry" />
         </mxCell>
-
-        <!-- 2. PII SANITIZER -->
-        <mxCell id="pii" value="&lt;b&gt;🔒 PII Sanitizer&lt;/b&gt;&lt;br&gt;&lt;font color='#555' size='2'&gt;Strip email · phone · CCCD before LLM&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontColor=#7F1D1D;arcSize=8;align=center;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="334" y="184" width="300" height="64" as="geometry"/>
+        <mxCell id="pii" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontColor=#7F1D1D;arcSize=8;align=center;spacingTop=6;" value="&lt;b&gt;🔒 PII Sanitizer&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#555&#39; size=&#39;2&#39;&gt;Strip email · phone · CCCD before LLM&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="300" x="334" y="184" as="geometry" />
         </mxCell>
-
-        <!-- 3. GUARDRAIL ROUTER -->
-        <mxCell id="guardrail" value="&lt;b&gt;🛡 Guardrail Router&lt;/b&gt;&lt;br&gt;&lt;font color='#555' size='2'&gt;Qwen3.5-0.8B LoRA · SAFE / HARMFUL / AMBIGUOUS&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontColor=#7F1D1D;arcSize=8;align=center;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="334" y="308" width="300" height="64" as="geometry"/>
+        <mxCell id="guardrail" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontColor=#7F1D1D;arcSize=8;align=center;spacingTop=6;" value="&lt;b&gt;🛡 Guardrail Router&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#555&#39; size=&#39;2&#39;&gt;Qwen3.5-0.8B LoRA · SAFE / HARMFUL / AMBIGUOUS&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="300" x="334" y="308" as="geometry" />
         </mxCell>
-
-        <!-- SAFE / HARMFUL labels -->
-        <mxCell id="lbl_safe" value="✅ SAFE" style="text;html=1;align=center;fontColor=#065F46;fontStyle=1;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="254" y="392" width="80" height="24" as="geometry"/>
+        <mxCell id="lbl_safe" parent="1" style="text;html=1;align=center;fontColor=#065F46;fontStyle=1;fontSize=11;" value="✅ SAFE" vertex="1">
+          <mxGeometry height="24" width="80" x="254" y="392" as="geometry" />
         </mxCell>
-        <mxCell id="lbl_harm" value="🚫 HARMFUL" style="text;html=1;align=center;fontColor=#7F1D1D;fontStyle=1;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="634" y="392" width="100" height="24" as="geometry"/>
+        <mxCell id="lbl_harm" parent="1" style="text;html=1;align=center;fontColor=#7F1D1D;fontStyle=1;fontSize=11;" value="🚫 HARMFUL" vertex="1">
+          <mxGeometry height="24" width="100" x="634" y="392" as="geometry" />
         </mxCell>
-
-        <!-- 4a. SMART ROUTER (safe path) -->
-        <mxCell id="smartrouter" value="&lt;b&gt;🔀 Smart Router&lt;/b&gt;&lt;br&gt;&lt;font color='#555' size='2'&gt;SIMPLE or COMPLEX query?&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;arcSize=8;align=center;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="174" y="436" width="260" height="60" as="geometry"/>
+        <mxCell id="smartrouter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;arcSize=8;align=center;spacingTop=6;" value="&lt;b&gt;🔀 Smart Router&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#555&#39; size=&#39;2&#39;&gt;SIMPLE or COMPLEX query?&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="260" x="174" y="436" as="geometry" />
         </mxCell>
-
-        <!-- 4b. SAFETY REFUSE (harmful path) -->
-        <mxCell id="refuse" value="&lt;b&gt;🚫 Safety Refuse&lt;/b&gt;&lt;br&gt;&lt;font color='#555' size='2'&gt;Return refusal. No LLM inference.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#F87171;fontColor=#B91C1C;arcSize=8;align=center;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="634" y="436" width="260" height="60" as="geometry"/>
+        <mxCell id="refuse" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF2F2;strokeColor=#F87171;fontColor=#B91C1C;arcSize=8;align=center;spacingTop=6;" value="&lt;b&gt;🚫 Safety Refuse&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#555&#39; size=&#39;2&#39;&gt;Return refusal. No LLM inference.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="260" x="634" y="436" as="geometry" />
         </mxCell>
-
-        <!-- SIMPLE / COMPLEX labels -->
-        <mxCell id="lbl_simple" value="SIMPLE" style="text;html=1;align=center;fontColor=#92400E;fontStyle=1;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="144" y="516" width="70" height="20" as="geometry"/>
+        <mxCell id="lbl_simple" parent="1" style="text;html=1;align=center;fontColor=#92400E;fontStyle=1;fontSize=10;" value="SIMPLE" vertex="1">
+          <mxGeometry height="20" width="70" x="144" y="516" as="geometry" />
         </mxCell>
-        <mxCell id="lbl_complex" value="COMPLEX" style="text;html=1;align=center;fontColor=#5B21B6;fontStyle=1;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="340" y="516" width="80" height="20" as="geometry"/>
+        <mxCell id="lbl_complex" parent="1" style="text;html=1;align=center;fontColor=#5B21B6;fontStyle=1;fontSize=10;" value="COMPLEX" vertex="1">
+          <mxGeometry height="20" width="80" x="340" y="516" as="geometry" />
         </mxCell>
-
-        <!-- 5a. DIRECT LLM (simple) -->
-        <mxCell id="direct_llm" value="&lt;b&gt;💬 Direct LLM&lt;/b&gt;&lt;br&gt;&lt;font color='#555' size='2'&gt;Gemini / GPT · No agent graph&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;arcSize=8;align=center;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="84" y="556" width="200" height="60" as="geometry"/>
+        <mxCell id="direct_llm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;arcSize=8;align=center;spacingTop=6;" value="&lt;b&gt;💬 Direct LLM&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#555&#39; size=&#39;2&#39;&gt;Gemini / GPT · No agent graph&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="200" x="84" y="556" as="geometry" />
         </mxCell>
-
-        <!-- 5b. LANGGRAPH AGENT (complex) -->
-        <mxCell id="langgraph" value="&lt;b&gt;🤖 LangGraph Agent&lt;/b&gt;&lt;br&gt;&lt;font color='#555' size='2'&gt;Agentic RAG · ReAct · Thread memory&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;arcSize=8;align=center;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="334" y="556" width="260" height="60" as="geometry"/>
+        <mxCell id="langgraph" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;arcSize=8;align=center;spacingTop=6;" value="&lt;b&gt;🤖 LangGraph Agent&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#555&#39; size=&#39;2&#39;&gt;Agentic RAG · ReAct · Thread memory&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="260" x="334" y="556" as="geometry" />
         </mxCell>
-
-        <!-- TOOL BRANCH HEADER -->
-        <mxCell id="lbl_tools" value="Agent Tools" style="text;html=1;align=center;fontColor=#1A6E3A;fontStyle=1;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="334" y="636" width="260" height="20" as="geometry"/>
+        <mxCell id="lbl_tools" parent="1" style="text;html=1;align=center;fontColor=#1A6E3A;fontStyle=1;fontSize=10;" value="Agent Tools" vertex="1">
+          <mxGeometry height="20" width="260" x="334" y="636" as="geometry" />
         </mxCell>
-
-        <!-- TOOLS: RAG, Sandbox, WebSearch -->
-        <mxCell id="tool_rag" value="&lt;b&gt;🔍 RAG&lt;/b&gt;&lt;br&gt;&lt;font size='2'&gt;pgvector&lt;br&gt;Transcript chunks&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FFF4;strokeColor=#27AE60;fontColor=#1A6E3A;arcSize=8;align=center;" vertex="1" parent="1">
-          <mxGeometry x="254" y="666" width="120" height="70" as="geometry"/>
+        <mxCell id="tool_rag" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FFF4;strokeColor=#27AE60;fontColor=#1A6E3A;arcSize=8;align=center;" value="&lt;b&gt;🔍 RAG&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;2&#39;&gt;pgvector&lt;br&gt;Transcript chunks&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="120" x="254" y="666" as="geometry" />
         </mxCell>
-        <mxCell id="tool_sandbox" value="&lt;b&gt;🐍 Sandbox&lt;/b&gt;&lt;br&gt;&lt;font size='2'&gt;Python exec&lt;br&gt;Math · Code&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FFF4;strokeColor=#27AE60;fontColor=#1A6E3A;arcSize=8;align=center;" vertex="1" parent="1">
-          <mxGeometry x="394" y="666" width="120" height="70" as="geometry"/>
+        <mxCell id="tool_sandbox" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FFF4;strokeColor=#27AE60;fontColor=#1A6E3A;arcSize=8;align=center;" value="&lt;b&gt;🐍 Sandbox&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;2&#39;&gt;Python exec&lt;br&gt;Math · Code&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="120" x="394" y="666" as="geometry" />
         </mxCell>
-        <mxCell id="tool_web" value="&lt;b&gt;🌐 Web Search&lt;/b&gt;&lt;br&gt;&lt;font size='2'&gt;Semantic Scholar&lt;br&gt;External refs&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FFF4;strokeColor=#27AE60;fontColor=#1A6E3A;arcSize=8;align=center;" vertex="1" parent="1">
-          <mxGeometry x="534" y="666" width="120" height="70" as="geometry"/>
+        <mxCell id="tool_web" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FFF4;strokeColor=#27AE60;fontColor=#1A6E3A;arcSize=8;align=center;" value="&lt;b&gt;🌐 Web Search&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;2&#39;&gt;Semantic Scholar&lt;br&gt;External refs&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="120" x="534" y="666" as="geometry" />
         </mxCell>
-
-        <!-- 6. ANSWER GENERATOR -->
-        <mxCell id="answgen" value="&lt;b&gt;✍️ Answer Generator&lt;/b&gt;&lt;br&gt;&lt;font color='#555' size='2'&gt;Qwen3.5-4B LoRA · Citation grounding · No hallucination policy&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF4FB;strokeColor=#1565C0;fontColor=#0D4080;arcSize=8;align=center;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="334" y="796" width="300" height="64" as="geometry"/>
+        <mxCell id="answgen" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF4FB;strokeColor=#1565C0;fontColor=#0D4080;arcSize=8;align=center;spacingTop=6;" value="&lt;b&gt;✍️ Answer Generator&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#555&#39; size=&#39;2&#39;&gt;Qwen3.5-4B LoRA · Citation grounding · No hallucination policy&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="300" x="334" y="796" as="geometry" />
         </mxCell>
-
-        <!-- 7. SSE STREAM -->
-        <mxCell id="sse" value="&lt;b&gt;📡 SSE Stream Response&lt;/b&gt;&lt;br&gt;&lt;font color='#555' size='2'&gt;Token-by-token → Browser · Langfuse trace logged&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAFAF1;strokeColor=#27AE60;fontColor=#1A6E3A;arcSize=8;align=center;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="334" y="920" width="300" height="64" as="geometry"/>
+        <mxCell id="sse" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAFAF1;strokeColor=#27AE60;fontColor=#1A6E3A;arcSize=8;align=center;spacingTop=6;" value="&lt;b&gt;📡 SSE Stream Response&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#555&#39; size=&#39;2&#39;&gt;Token-by-token → Browser · Langfuse trace logged&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="300" x="334" y="920" as="geometry" />
         </mxCell>
-
-        <!-- ── EDGES ── -->
-        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="user_msg" target="pii" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e1" edge="1" parent="1" source="user_msg" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="pii" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="pii" target="guardrail" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e2" edge="1" parent="1" source="pii" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="guardrail" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <!-- Guardrail → Smart Router (SAFE) -->
-        <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;" edge="1" source="guardrail" target="smartrouter" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e3" edge="1" parent="1" source="guardrail" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;" target="smartrouter" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <!-- Guardrail → Refuse (HARMFUL) -->
-        <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;" edge="1" source="guardrail" target="refuse" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e4" edge="1" parent="1" source="guardrail" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;" target="refuse" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <!-- SmartRouter → Direct LLM (SIMPLE) -->
-        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;" edge="1" source="smartrouter" target="direct_llm" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e5" edge="1" parent="1" source="smartrouter" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;" target="direct_llm" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <!-- SmartRouter → LangGraph (COMPLEX) -->
-        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;" edge="1" source="smartrouter" target="langgraph" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e6" edge="1" parent="1" source="smartrouter" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;" target="langgraph" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <!-- LangGraph → Tools -->
-        <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="langgraph" target="tool_rag" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e7" edge="1" parent="1" source="langgraph" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="tool_rag" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="langgraph" target="tool_sandbox" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e8" edge="1" parent="1" source="langgraph" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="tool_sandbox" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="langgraph" target="tool_web" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e9" edge="1" parent="1" source="langgraph" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="tool_web" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <!-- Tools → Answer Gen -->
-        <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="tool_rag" target="answgen" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e10" edge="1" parent="1" source="tool_rag" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="answgen" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e11" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="tool_sandbox" target="answgen" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e11" edge="1" parent="1" source="tool_sandbox" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="answgen" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e12" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="tool_web" target="answgen" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e12" edge="1" parent="1" source="tool_web" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="answgen" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <!-- Direct LLM → Answer Gen -->
-        <mxCell id="e13" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="direct_llm" target="answgen" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e13" edge="1" parent="1" source="direct_llm" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="answgen" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <!-- Answer Gen → SSE -->
-        <mxCell id="e14" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="answgen" target="sse" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="e14" edge="1" parent="1" source="answgen" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="sse" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

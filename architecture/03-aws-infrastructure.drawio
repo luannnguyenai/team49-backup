@@ -1,134 +1,334 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<mxfile host="app.diagrams.net" version="21.0.0">
+<mxfile host="app.diagrams.net" pages="3">
   <diagram id="awsinfra" name="AWS Infrastructure">
     <mxGraphModel dx="1366" dy="768" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
-        <mxCell id="0"/>
-        <mxCell id="1" parent="0"/>
-
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
         <!-- ═══════════════════════════════════════
              INTERNET TIER
         ═══════════════════════════════════════ -->
         <mxCell id="zone_internet" value="&lt;b&gt;🌐 Internet&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F9FAFB;strokeColor=#E5E7EB;fontColor=#374151;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;arcSize=3;" vertex="1" parent="1">
-          <mxGeometry x="60" y="60" width="1534" height="110" as="geometry"/>
+          <mxGeometry x="60" y="60" width="1534" height="110" as="geometry" />
         </mxCell>
         <mxCell id="user" value="Learner Browser" style="shape=mxgraph.aws4.user;fillColor=#232F3E;strokeColor=none;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;sketch=0;" vertex="1" parent="1">
-          <mxGeometry x="160" y="80" width="60" height="60" as="geometry"/>
+          <mxGeometry x="160" y="80" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="cloudfront" value="CloudFront CDN&#xa;a20-app-049.io.vn" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudfront;sketch=0;fillColor=#8C4FFF;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="1">
-          <mxGeometry x="680" y="80" width="60" height="60" as="geometry"/>
+          <mxGeometry x="680" y="80" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="s3" value="S3 Bucket&#xa;Videos · Slides" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;sketch=0;fillColor=#3F8624;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="1">
-          <mxGeometry x="1000" y="80" width="60" height="60" as="geometry"/>
+          <mxGeometry x="1000" y="80" width="60" height="60" as="geometry" />
         </mxCell>
-
         <!-- ALB -->
         <mxCell id="alb" value="Application Load Balancer&#xa;SSL Termination · Path-based routing" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.application_load_balancer;sketch=0;fillColor=#8C4FFF;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="1">
-          <mxGeometry x="797" y="220" width="60" height="60" as="geometry"/>
+          <mxGeometry x="797" y="220" width="60" height="60" as="geometry" />
         </mxCell>
-
         <!-- ═══════════════════════════════════════
              AWS VPC
         ═══════════════════════════════════════ -->
         <mxCell id="vpc" value="AWS VPC" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc;strokeColor=#147EBA;fillColor=#E6F2F8;verticalLabelPosition=top;verticalAlign=bottom;align=center;spacingBottom=0;fontStyle=1;fontSize=12;" vertex="1" parent="1">
-          <mxGeometry x="60" y="360" width="1034" height="470" as="geometry"/>
+          <mxGeometry x="60" y="360" width="1034" height="470" as="geometry" />
         </mxCell>
-
         <!-- Public Subnet -->
         <mxCell id="pub_subnet" value="Public Subnet — ECS Fargate Tasks" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_public_subnet;strokeColor=#1A9C3E;fillColor=#F2F9EE;verticalLabelPosition=top;verticalAlign=bottom;align=center;spacingBottom=0;fontStyle=1;fontSize=11;dashed=0;" vertex="1" parent="vpc">
-          <mxGeometry x="40" y="50" width="954" height="200" as="geometry"/>
+          <mxGeometry x="40" y="50" width="954" height="200" as="geometry" />
         </mxCell>
-
         <mxCell id="nextjs" value="Next.js 14&#xa;SSR · RSC" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecs;sketch=0;fillColor=#ED7100;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="pub_subnet">
-          <mxGeometry x="140" y="80" width="60" height="60" as="geometry"/>
+          <mxGeometry x="140" y="80" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="fastapi" value="FastAPI&#xa;REST + SSE" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecs;sketch=0;fillColor=#ED7100;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="pub_subnet">
-          <mxGeometry x="420" y="80" width="60" height="60" as="geometry"/>
+          <mxGeometry x="420" y="80" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="obs_stack" value="Prometheus / Grafana / Loki&#xa;Observability" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch;sketch=0;fillColor=#E7157B;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="pub_subnet">
-          <mxGeometry x="710" y="80" width="60" height="60" as="geometry"/>
+          <mxGeometry x="710" y="80" width="60" height="60" as="geometry" />
         </mxCell>
-
         <!-- Private Subnet -->
         <mxCell id="prv_subnet" value="Private Subnet — Managed Data Services" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_private_subnet;strokeColor=#147EBA;fillColor=#EFF6FF;verticalLabelPosition=top;verticalAlign=bottom;align=center;spacingBottom=0;fontStyle=1;fontSize=11;dashed=1;" vertex="1" parent="vpc">
-          <mxGeometry x="40" y="290" width="954" height="150" as="geometry"/>
+          <mxGeometry x="40" y="290" width="954" height="150" as="geometry" />
         </mxCell>
-
         <mxCell id="rds" value="RDS PostgreSQL 16&#xa;+ pgvector · Multi-AZ" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#C7131F;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="prv_subnet">
-          <mxGeometry x="240" y="40" width="60" height="60" as="geometry"/>
+          <mxGeometry x="240" y="40" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="redis" value="ElastiCache Redis&#xa;Sessions · Rate limit" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elasticache;sketch=0;fillColor=#C7131F;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="prv_subnet">
-          <mxGeometry x="570" y="40" width="60" height="60" as="geometry"/>
+          <mxGeometry x="570" y="40" width="60" height="60" as="geometry" />
         </mxCell>
-
         <!-- ═══════════════════════════════════════
              EXTERNAL: vLLM AI (EC2)
         ═══════════════════════════════════════ -->
         <mxCell id="zone_ai" value="&lt;b&gt;🔌 External AI Serving&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F3FF;strokeColor=#C4B5FD;fontColor=#4C1D95;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;arcSize=5;" vertex="1" parent="1">
-          <mxGeometry x="1130" y="360" width="464" height="230" as="geometry"/>
+          <mxGeometry x="1130" y="360" width="464" height="230" as="geometry" />
         </mxCell>
         <mxCell id="ec2_vllm" value="EC2 Instance&#xa;vLLM · Qwen3.5 LoRA" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2;sketch=0;fillColor=#ED7100;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="1">
-          <mxGeometry x="1200" y="410" width="60" height="60" as="geometry"/>
+          <mxGeometry x="1200" y="410" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="cf_tunnel" value="Cloudflare Tunnel&#xa;OpenAI-compatible API" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudfront;sketch=0;fillColor=#8C4FFF;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="1">
-          <mxGeometry x="1430" y="410" width="60" height="60" as="geometry"/>
+          <mxGeometry x="1430" y="410" width="60" height="60" as="geometry" />
         </mxCell>
-
         <!-- ═══════════════════════════════════════
              CI/CD PIPELINE
         ═══════════════════════════════════════ -->
         <mxCell id="zone_cicd" value="&lt;b&gt;⚙️ CI / CD Pipeline&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FED7AA;fontColor=#C2410C;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;arcSize=5;" vertex="1" parent="1">
-          <mxGeometry x="1130" y="640" width="464" height="190" as="geometry"/>
+          <mxGeometry x="1130" y="640" width="464" height="190" as="geometry" />
         </mxCell>
         <mxCell id="ghactions" value="GitHub Actions&#xa;EC2 self-hosted" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2;sketch=0;fillColor=#232F3E;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="1">
-          <mxGeometry x="1165" y="690" width="60" height="60" as="geometry"/>
+          <mxGeometry x="1165" y="690" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="ecr" value="ECR" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecr;sketch=0;fillColor=#ED7100;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="1">
-          <mxGeometry x="1310" y="690" width="60" height="60" as="geometry"/>
+          <mxGeometry x="1310" y="690" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="secretsmgr" value="Secrets Manager&#xa;DB · Redis · Keys" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.secrets_manager;sketch=0;fillColor=#DD344C;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="1">
-          <mxGeometry x="1455" y="690" width="60" height="60" as="geometry"/>
+          <mxGeometry x="1455" y="690" width="60" height="60" as="geometry" />
         </mxCell>
         <mxCell id="terraform" value="Terraform IaC" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudformation;sketch=0;fillColor=#232F3E;strokeColor=#ffffff;fontColor=#232F3E;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;" vertex="1" parent="1">
-          <mxGeometry x="1310" y="790" width="60" height="60" as="geometry"/>
+          <mxGeometry x="1310" y="790" width="60" height="60" as="geometry" />
         </mxCell>
-
         <!-- ── EDGES ── -->
         <mxCell id="e1" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" edge="1" source="user" target="cloudfront" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e2" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" edge="1" source="user" target="alb" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e3" value="Signed URL" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" edge="1" source="cloudfront" target="s3" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="alb" target="nextjs" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="alb" target="fastapi" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e6" value="SQL" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" edge="1" source="fastapi" target="rds" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="fastapi" target="redis" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e8" value="vLLM API" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;dashed=1;" edge="1" source="fastapi" target="cf_tunnel" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="cf_tunnel" target="ec2_vllm" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="ghactions" target="ecr" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e11" value="deploy" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" edge="1" source="ecr" target="nextjs" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e12" value="env inject" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;dashed=1;" edge="1" source="secretsmgr" target="fastapi" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="QXGz41cb3IcDSdetpg3u" name="Page-2">
+    <mxGraphModel dx="774" dy="425" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <UserObject label="&#xa;&#xa;&lt;a class=&quot;back&quot; href=&quot;index.html&quot;&gt;← Architecture Hub&lt;/a&gt;&#xa;&#xa;&lt;div class=&quot;page-header&quot;&gt;&#xa;  &lt;h1&gt;Request Lifecycle&lt;/h1&gt;&#xa;  &lt;p&gt;Two key flows: standard page load vs. AI Tutor chat with agentic RAG&lt;/p&gt;&#xa;&lt;/div&gt;&#xa;&#xa;&lt;div class=&quot;flows&quot;&gt;&#xa;&#xa;  &#xa;  &lt;div class=&quot;flow&quot;&gt;&#xa;    &lt;div class=&quot;flow-title&quot;&gt;🖥 Flow 1 — Page Load (SSR)&#xa;      &lt;span&gt;Browser requests a course or learning unit page&lt;/span&gt;&#xa;    &lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-blue&quot;&gt;1&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-browser&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Browser&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;GET /courses/:id&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;HTTPS request to CloudFront / ALB&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-orange&quot;&gt;2&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-network&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;ALB&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Route → Next.js Frontend (ECS)&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Path-based routing&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-red&quot;&gt;3&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-frontend&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Next.js Frontend&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Server-side fetch → FastAPI /api/courses&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;RSC data fetch with auth cookie&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-red&quot;&gt;4&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-backend&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;FastAPI Backend&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Query PostgreSQL + Redis cache&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Course data, learner progress, mastery&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-blue&quot;&gt;5&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-browser&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Browser&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Receive rendered HTML + hydrate&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Full page with course, progress, planner&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;&#xa;  &lt;/div&gt;&#xa;&#xa;  &#xa;  &lt;div class=&quot;flow&quot;&gt;&#xa;    &lt;div class=&quot;flow-title&quot;&gt;🤖 Flow 2 — AI Tutor Chat (Agentic RAG)&#xa;      &lt;span&gt;Learner sends a question to AI Tutor&lt;/span&gt;&#xa;    &lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-blue&quot;&gt;1&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-browser&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Browser&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;POST /api/agent/chat&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;User message + session context&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-red&quot;&gt;2&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-backend&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;FastAPI Backend&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;PII Sanitize → Guardrail Router&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Qwen3.5-0.8B LoRA · SAFE / HARMFUL check&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-purple&quot;&gt;3&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-ai&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;LangGraph Agent&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Smart Router → ReAct graph&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;COMPLEX: enter agent graph with tools&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-purple&quot;&gt;4&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-ai&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Agent Tools&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;RAG search pgvector → retrieve transcript chunks&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Optionally: Python Sandbox or Semantic Scholar&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-purple&quot;&gt;5&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-ai&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Answer Generator&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Qwen3.5-4B LoRA generates grounded answer&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Citation grounded · No hallucination policy&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-green&quot;&gt;6&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-stream&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;SSE Stream&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Token-by-token stream → Browser&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Langfuse trace logged · Redis updates session&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;&#xa;  &lt;/div&gt;&#xa;&#xa;&lt;/div&gt;&#xa;&#xa;&#xa;" link="&#xa;&#xa;&lt;a class=&quot;back&quot; href=&quot;index.html&quot;&gt;← Architecture Hub&lt;/a&gt;&#xa;&#xa;&lt;div class=&quot;page-header&quot;&gt;&#xa;  &lt;h1&gt;Request Lifecycle&lt;/h1&gt;&#xa;  &lt;p&gt;Two key flows: standard page load vs. AI Tutor chat with agentic RAG&lt;/p&gt;&#xa;&lt;/div&gt;&#xa;&#xa;&lt;div class=&quot;flows&quot;&gt;&#xa;&#xa;  &#xa;  &lt;div class=&quot;flow&quot;&gt;&#xa;    &lt;div class=&quot;flow-title&quot;&gt;🖥 Flow 1 — Page Load (SSR)&#xa;      &lt;span&gt;Browser requests a course or learning unit page&lt;/span&gt;&#xa;    &lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-blue&quot;&gt;1&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-browser&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Browser&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;GET /courses/:id&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;HTTPS request to CloudFront / ALB&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-orange&quot;&gt;2&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-network&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;ALB&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Route → Next.js Frontend (ECS)&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Path-based routing&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-red&quot;&gt;3&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-frontend&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Next.js Frontend&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Server-side fetch → FastAPI /api/courses&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;RSC data fetch with auth cookie&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-red&quot;&gt;4&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-backend&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;FastAPI Backend&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Query PostgreSQL + Redis cache&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Course data, learner progress, mastery&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-blue&quot;&gt;5&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-browser&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Browser&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Receive rendered HTML + hydrate&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Full page with course, progress, planner&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;&#xa;  &lt;/div&gt;&#xa;&#xa;  &#xa;  &lt;div class=&quot;flow&quot;&gt;&#xa;    &lt;div class=&quot;flow-title&quot;&gt;🤖 Flow 2 — AI Tutor Chat (Agentic RAG)&#xa;      &lt;span&gt;Learner sends a question to AI Tutor&lt;/span&gt;&#xa;    &lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-blue&quot;&gt;1&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-browser&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Browser&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;POST /api/agent/chat&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;User message + session context&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-red&quot;&gt;2&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-backend&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;FastAPI Backend&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;PII Sanitize → Guardrail Router&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Qwen3.5-0.8B LoRA · SAFE / HARMFUL check&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-purple&quot;&gt;3&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-ai&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;LangGraph Agent&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Smart Router → ReAct graph&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;COMPLEX: enter agent graph with tools&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-purple&quot;&gt;4&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-ai&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Agent Tools&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;RAG search pgvector → retrieve transcript chunks&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Optionally: Python Sandbox or Semantic Scholar&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-purple&quot;&gt;5&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-ai&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;Answer Generator&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Qwen3.5-4B LoRA generates grounded answer&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Citation grounded · No hallucination policy&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;    &lt;div class=&quot;connector&quot;&gt;&lt;div class=&quot;connector-num&quot;&gt;&lt;div class=&quot;connector-line&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;connector-body&quot;&gt;&lt;/div&gt;&lt;/div&gt;&#xa;&#xa;    &lt;div class=&quot;step&quot;&gt;&#xa;      &lt;div class=&quot;step-num num-green&quot;&gt;6&lt;/div&gt;&#xa;      &lt;div class=&quot;step-body c-stream&quot;&gt;&#xa;        &lt;div class=&quot;step-actor&quot;&gt;SSE Stream&lt;/div&gt;&#xa;        &lt;div class=&quot;step-action&quot;&gt;Token-by-token stream → Browser&lt;/div&gt;&#xa;        &lt;div class=&quot;step-note&quot;&gt;Langfuse trace logged · Redis updates session&lt;/div&gt;&#xa;      &lt;/div&gt;&#xa;    &lt;/div&gt;&#xa;&#xa;  &lt;/div&gt;&#xa;&#xa;&lt;/div&gt;&#xa;&#xa;&#xa;" id="l0Qmhe2gZN1-vJTZWUx0-1">
+          <mxCell parent="1" style="text;whiteSpace=wrap;html=1;" vertex="1">
+            <mxGeometry height="2740" width="400" as="geometry" />
+          </mxCell>
+        </UserObject>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="-sz9c7as4fbkj7sItTe7" name="Page-3">
+    <mxGraphModel dx="1720" dy="944" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-1" parent="1" style="text;html=1;align=center;fontStyle=1;fontSize=16;fontColor=#232F3E;" value="Database Schema — 4 Layers · PostgreSQL 16 + pgvector" vertex="1">
+          <mxGeometry height="30" width="1000" x="327" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FED7AA;fontColor=#9A3412;arcSize=5;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=13;" value="&lt;b&gt;🏗  Layer 1 — Product Shell&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;2&#39;&gt;Course catalog &amp;amp; content structure&lt;/font&gt;" vertex="1">
+          <mxGeometry height="400" width="720" x="60" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-3" parent="1" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#ED7100;strokeColor=#ffffff;html=1;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="640" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" value="courses" vertex="1">
+          <mxGeometry height="44" width="200" x="100" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-5" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#9A3412;" value="canonical_course_id" vertex="1">
+          <mxGeometry height="20" width="160" x="310" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" value="course_sections" vertex="1">
+          <mxGeometry height="44" width="200" x="100" y="218" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" value="learning_units" vertex="1">
+          <mxGeometry height="44" width="200" x="100" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-8" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#9A3412;" value="canonical_unit_id" vertex="1">
+          <mxGeometry height="20" width="160" x="310" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" value="lectures" vertex="1">
+          <mxGeometry height="44" width="200" x="100" y="334" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-10" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#9A3412;" value="video · transcript" vertex="1">
+          <mxGeometry height="20" width="140" x="310" y="348" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" value="transcripts" vertex="1">
+          <mxGeometry height="44" width="200" x="480" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFDDB3;strokeColor=#F97316;fontColor=#7C2D12;fontSize=12;fontStyle=1;" value="learning_progress_records" vertex="1">
+          <mxGeometry height="44" width="240" x="480" y="218" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#BFDBFE;fontColor=#1E3A8A;arcSize=5;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=13;" value="&lt;b&gt;📚  Layer 2 — Canonical Content&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;2&#39;&gt;KP graph · Assessment · Prerequisites&lt;/font&gt;" vertex="1">
+          <mxGeometry height="400" width="780" x="814" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-14" parent="1" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#C7131F;strokeColor=#ffffff;html=1;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="1554" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" value="concepts_kp" vertex="1">
+          <mxGeometry height="44" width="200" x="854" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-16" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#1E3A8A;" value="Knowledge Points" vertex="1">
+          <mxGeometry height="20" width="160" x="1064" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-17" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" value="question_bank" vertex="1">
+          <mxGeometry height="44" width="200" x="854" y="218" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-18" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#1E3A8A;" value="+ item_phase_map" vertex="1">
+          <mxGeometry height="20" width="150" x="1064" y="232" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-19" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" value="item_calibration" vertex="1">
+          <mxGeometry height="44" width="200" x="854" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-20" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#1E3A8A;" value="IRT params" vertex="1">
+          <mxGeometry height="20" width="120" x="1064" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" value="item_kp_map" vertex="1">
+          <mxGeometry height="44" width="200" x="1240" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-22" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" value="prerequisite_edges" vertex="1">
+          <mxGeometry height="44" width="200" x="1240" y="218" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-23" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BFDBFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=12;fontStyle=1;" value="unit_kp_map" vertex="1">
+          <mxGeometry height="44" width="200" x="1240" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-24" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#BBF7D0;fontColor=#14532D;arcSize=5;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=13;" value="&lt;b&gt;🎓  Layer 3 — Learner State&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;2&#39;&gt;Mastery · Planner · Session tracking&lt;/font&gt;" vertex="1">
+          <mxGeometry height="400" width="720" x="60" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-25" parent="1" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#3F8624;strokeColor=#ffffff;html=1;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="640" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-26" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" value="users" vertex="1">
+          <mxGeometry height="44" width="200" x="100" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-27" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" value="sessions + interactions" vertex="1">
+          <mxGeometry height="44" width="220" x="100" y="648" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-28" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" value="learner_mastery_kp" vertex="1">
+          <mxGeometry height="44" width="220" x="100" y="706" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-29" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#14532D;" value="theta · sigma" vertex="1">
+          <mxGeometry height="20" width="100" x="330" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-30" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" value="goal_preferences" vertex="1">
+          <mxGeometry height="44" width="220" x="460" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-31" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#14532D;" value="selected courses" vertex="1">
+          <mxGeometry height="20" width="130" x="460" y="642" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-32" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" value="plan_history · rationale_log" vertex="1">
+          <mxGeometry height="44" width="240" x="460" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-33" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBF7D0;strokeColor=#22C55E;fontColor=#166534;fontSize=12;fontStyle=1;" value="waived_units · planner_session_state" vertex="1">
+          <mxGeometry height="44" width="260" x="460" y="718" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-34" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#E9D5FF;fontColor=#4A1D96;arcSize=5;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=13;" value="&lt;b&gt;🤖  Layer 4 — Agent State&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;2&#39;&gt;LangGraph run state · Citations · Actions&lt;/font&gt;" vertex="1">
+          <mxGeometry height="400" width="780" x="814" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-35" parent="1" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;sketch=0;fillColor=#8C4FFF;strokeColor=#ffffff;html=1;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="1554" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-36" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" value="agent_graph_runs" vertex="1">
+          <mxGeometry height="44" width="220" x="854" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-37" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" value="turn · trace_id" vertex="1">
+          <mxGeometry height="20" width="120" x="1084" y="604" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-38" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" value="agent_pending_actions" vertex="1">
+          <mxGeometry height="44" width="220" x="854" y="648" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-39" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" value="prerequisite" vertex="1">
+          <mxGeometry height="20" width="100" x="1084" y="662" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-40" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" value="agent_response_payloads" vertex="1">
+          <mxGeometry height="44" width="220" x="854" y="706" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-41" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" value="citations" vertex="1">
+          <mxGeometry height="20" width="100" x="1084" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-42" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" value="agent_route_context" vertex="1">
+          <mxGeometry height="44" width="220" x="1240" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-43" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" value="course · unit scope" vertex="1">
+          <mxGeometry height="20" width="140" x="1240" y="642" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-44" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9D5FF;strokeColor=#8B5CF6;fontColor=#6D28D9;fontSize=12;fontStyle=1;" value="localized_content" vertex="1">
+          <mxGeometry height="44" width="220" x="1240" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-45" parent="1" style="text;html=1;align=left;fontSize=10;fontColor=#4A1D96;" value="vi / en" vertex="1">
+          <mxGeometry height="20" width="80" x="1240" y="712" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-46" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E5E7EB;fontColor=#374151;fontStyle=1;fontSize=12;align=center;verticalAlign=top;spacingTop=8;arcSize=3;" value="Adaptive Learning Loop — How layers interact" vertex="1">
+          <mxGeometry height="150" width="1534" x="60" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-47" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FED7AA;fontColor=#9A3412;fontSize=11;fontStyle=1;arcSize=6;" value="📋 Onboarding&#xa;goal_preferences" vertex="1">
+          <mxGeometry height="60" width="160" x="100" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-48" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#BFDBFE;fontColor=#1E3A8A;fontSize=11;fontStyle=1;arcSize=6;" value="📝 Assessment&#xa;question_bank + IRT" vertex="1">
+          <mxGeometry height="60" width="160" x="310" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-49" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#BBF7D0;fontColor=#14532D;fontSize=11;fontStyle=1;arcSize=6;" value="📊 Mastery Update&#xa;learner_mastery_kp" vertex="1">
+          <mxGeometry height="60" width="160" x="520" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-50" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#BBF7D0;fontColor=#14532D;fontSize=11;fontStyle=1;arcSize=6;" value="🗺 Planner&#xa;prerequisite_edges" vertex="1">
+          <mxGeometry height="60" width="160" x="730" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-51" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FED7AA;fontColor=#9A3412;fontSize=11;fontStyle=1;arcSize=6;" value="🎬 Learn Unit&#xa;learning_units" vertex="1">
+          <mxGeometry height="60" width="160" x="940" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-52" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#E9D5FF;fontColor=#4A1D96;fontSize=11;fontStyle=1;arcSize=6;" value="🤖 AI Tutor&#xa;agent_graph_runs" vertex="1">
+          <mxGeometry height="60" width="160" x="1150" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-53" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#BBF7D0;fontColor=#14532D;fontSize=11;fontStyle=1;arcSize=6;dashed=1;" value="🔄 Next Unit" vertex="1">
+          <mxGeometry height="60" width="160" x="1360" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-54" edge="1" parent="1" source="JEt0fOsC-l6Dxinp3j47-47" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="JEt0fOsC-l6Dxinp3j47-48" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-55" edge="1" parent="1" source="JEt0fOsC-l6Dxinp3j47-48" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="JEt0fOsC-l6Dxinp3j47-49" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-56" edge="1" parent="1" source="JEt0fOsC-l6Dxinp3j47-49" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="JEt0fOsC-l6Dxinp3j47-50" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-57" edge="1" parent="1" source="JEt0fOsC-l6Dxinp3j47-50" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="JEt0fOsC-l6Dxinp3j47-51" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-58" edge="1" parent="1" source="JEt0fOsC-l6Dxinp3j47-51" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="JEt0fOsC-l6Dxinp3j47-52" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-59" edge="1" parent="1" source="JEt0fOsC-l6Dxinp3j47-52" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="JEt0fOsC-l6Dxinp3j47-53" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-60" edge="1" parent="1" source="JEt0fOsC-l6Dxinp3j47-7" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=ERone;startArrow=ERmanyToOne;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="JEt0fOsC-l6Dxinp3j47-23" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-61" edge="1" parent="1" source="JEt0fOsC-l6Dxinp3j47-28" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=ERone;startArrow=ERmanyToOne;" target="JEt0fOsC-l6Dxinp3j47-15" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="954" y="728" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JEt0fOsC-l6Dxinp3j47-62" edge="1" parent="1" source="JEt0fOsC-l6Dxinp3j47-36" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=ERone;startArrow=ERmanyToOne;" target="JEt0fOsC-l6Dxinp3j47-27" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
