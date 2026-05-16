@@ -7,7 +7,7 @@ from typing import Any
 
 from src.schemas.agent import RouteContext
 from src.services.agent_graph_contracts import AgentRouterUnavailableError, AgentSlots, ToolResult
-from src.services.agentic_rag_contracts import AgenticRAGFinal, AgenticRAGObservation
+from src.services.agentic_rag_contracts import AgenticRAGFinal, AgenticRAGObservation, AgenticRAGToolCall
 
 
 class AgenticRAGPipeline:
@@ -134,6 +134,11 @@ class AgenticRAGPipeline:
                 recent_messages=recent_messages,
                 observations=[item.model_dump(mode="json") for item in observations],
             )
+            tool_call = self._enforce_intent_tool_preference(
+                intent=intent,
+                tool_call=tool_call,
+                observations=observations,
+            )
             tool_call = self._enrich_tool_call_from_observations(tool_call, observations)
             fingerprint = (
                 tool_call.tool,
@@ -165,9 +170,28 @@ class AgenticRAGPipeline:
                 observation = tool_observation
             observation = self._validated_observation(observation, tool_observation)
             observations.append(observation)
+            if intent == "ask_what_next" and observation.tool == "get_user_learning_context":
+                break
             if not self._should_continue_after_observation(observation):
                 break
         return observations
+
+    @staticmethod
+    def _enforce_intent_tool_preference(
+        *,
+        intent: str,
+        tool_call: AgenticRAGToolCall,
+        observations: list[AgenticRAGObservation],
+    ) -> AgenticRAGToolCall:
+        if observations:
+            return tool_call
+        if intent == "ask_what_next" and tool_call.tool != "get_user_learning_context":
+            return AgenticRAGToolCall(
+                tool="get_user_learning_context",
+                arguments={"context_kind": "current_unit_state"},
+                rationale="Next-step recommendations must use saved learner path position first.",
+            )
+        return tool_call
 
     @classmethod
     def _enrich_tool_call_from_observations(cls, tool_call, observations):

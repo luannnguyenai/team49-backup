@@ -125,6 +125,7 @@ class FakeToolNodes:
         slots,
         allowed_course_ids,
         current_path_course_ids=None,
+        route_context=None,
         canonical_unit_id=None,
         query=None,
         scope=None,
@@ -275,6 +276,95 @@ async def test_tool_executor_gets_lecture_context_without_sql_access():
         None,
         None,
     )
+
+
+@pytest.mark.asyncio
+async def test_tool_executor_passes_full_lecture_scope_to_lecture_context():
+    tools = FakeToolNodes()
+    executor = AgenticRAGToolExecutor(tools)
+
+    observation = await executor.execute(
+        AgenticRAGToolCall(
+            tool="get_lecture_context",
+            arguments={"canonical_unit_id": "unit-1", "scope": "all"},
+            rationale="Need the complete lecture, including unwatched units.",
+        ),
+        message="Give me a full summary of this lecture, including the parts I haven't watched yet",
+        intent="find_content",
+        slots=AgentSlots(canonical_unit_ids=["unit-1"]),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert observation.tool == "get_lecture_context"
+    assert tools.calls[0] == (
+        "lecture_context",
+        "Give me a full summary of this lecture, including the parts I haven't watched yet",
+        ["CS230"],
+        ["CS230"],
+        "unit-1",
+        None,
+        "all",
+    )
+
+
+@pytest.mark.asyncio
+async def test_tool_executor_uses_lecture_scope_slot_when_tool_call_omits_scope():
+    tools = FakeToolNodes()
+    executor = AgenticRAGToolExecutor(tools)
+
+    await executor.execute(
+        AgenticRAGToolCall(
+            tool="get_lecture_context",
+            arguments={"canonical_unit_id": "unit-1"},
+            rationale="Need lecture evidence.",
+        ),
+        message="Give me a full summary of this lecture",
+        intent="find_content",
+        slots=AgentSlots(canonical_unit_ids=["unit-1"], lecture_scope="all"),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert tools.calls[0] == (
+        "lecture_context",
+        "Give me a full summary of this lecture",
+        ["CS230"],
+        ["CS230"],
+        "unit-1",
+        None,
+        "all",
+    )
+
+
+@pytest.mark.asyncio
+async def test_tool_executor_passes_route_context_to_lecture_context():
+    captured_route_contexts = []
+
+    class RouteAwareToolNodes(FakeToolNodes):
+        async def lecture_context(self, **kwargs):
+            captured_route_contexts.append(kwargs.get("route_context"))
+            return await super().lecture_context(**kwargs)
+
+    tools = RouteAwareToolNodes()
+    executor = AgenticRAGToolExecutor(tools)
+    route_context = {"canonicalUnitId": "unit-from-route"}
+
+    await executor.execute(
+        AgenticRAGToolCall(
+            tool="get_lecture_context",
+            arguments={"scope": "all"},
+            rationale="Use current route context for this lecture.",
+        ),
+        message="Give me a full summary of this lecture",
+        intent="find_content",
+        slots=AgentSlots(),
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+        route_context=route_context,
+    )
+
+    assert captured_route_contexts == [route_context]
 
 
 @pytest.mark.asyncio
@@ -441,6 +531,7 @@ class LearnerThenLectureToolNodes(FakeToolNodes):
         slots,
         allowed_course_ids,
         current_path_course_ids=None,
+        route_context=None,
         canonical_unit_id=None,
         query=None,
         scope=None,
@@ -821,6 +912,82 @@ async def test_agentic_rag_pipeline_preserves_tool_evidence_status_over_final_do
     assert result.metadata["agentic_rag_evidence_status"] == "partial"
     assert result.requires_evidence is False
     assert result.fallback is None
+
+
+@pytest.mark.asyncio
+async def test_agentic_rag_pipeline_uses_learner_context_first_for_next_step_intent():
+    class WrongFirstToolRouter(FakePipelineRouter):
+        def rag_act(self, **kwargs):
+            self.calls.append(("act", kwargs))
+            return AgenticRAGToolCall(
+                tool="search_current_path_units",
+                arguments={"query": "next lesson after current video"},
+                rationale="Wrongly tried search.",
+            )
+
+        def rag_respond(self, **kwargs):
+            self.calls.append(("respond", kwargs))
+            observations = kwargs["observations"]
+            learner_context = observations[0]["result"]["metadata"]["learner_context"]
+            next_unit = learner_context["path_position"]["next_unfinished_unit"]["unit_title"]
+            return type(
+                "Final",
+                (),
+                {
+                    "answer_markdown": f"Study {next_unit} next.",
+                    "evidence_status": "partial",
+                    "evidence_sufficient": True,
+                    "clarification_question": None,
+                },
+            )()
+
+    class NextStepToolNodes(FakeToolNodes):
+        async def user_learning_context(self, **kwargs):
+            self.calls.append(
+                (
+                    "user_learning_context",
+                    kwargs["message"],
+                    kwargs["allowed_course_ids"],
+                    kwargs.get("current_path_course_ids"),
+                    kwargs.get("route_context"),
+                    kwargs.get("context_kind"),
+                )
+            )
+            return ToolResult(
+                kind="progress_summary",
+                requires_evidence=False,
+                metadata={
+                    "learner_context": {
+                        "path_position": {
+                            "next_unfinished_unit": {
+                                "unit_title": "Day & Night classification as a supervised design exercise",
+                                "canonical_unit_id": "seg3",
+                            },
+                        },
+                    },
+                },
+            )
+
+    tools = NextStepToolNodes()
+    pipeline = AgenticRAGPipeline(
+        router=WrongFirstToolRouter(),
+        tool_executor=AgenticRAGToolExecutor(tools),
+    )
+
+    result = await pipeline.run(
+        message="After this video, what should I study next?",
+        intent="ask_what_next",
+        slots=AgentSlots(),
+        route_context=None,
+        recent_messages=[],
+        allowed_course_ids=["CS230"],
+        current_path_course_ids=["CS230"],
+    )
+
+    assert [call[0] for call in tools.calls] == ["user_learning_context"]
+    assert tools.calls[0][5] == "current_unit_state"
+    assert "Day & Night classification" in result.answer_markdown
+    assert result.requires_evidence is False
 
 
 @pytest.mark.asyncio
