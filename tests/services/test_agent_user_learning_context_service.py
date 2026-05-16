@@ -44,6 +44,51 @@ def test_duration_hms_formats_video_positions_for_user_facing_answers():
     assert AgentUserLearningContextService._duration_hms(None) is None
 
 
+def test_pick_primary_course_prefers_more_in_progress_units():
+    per_course = {
+        "CS230": {"in_progress_units": 3, "last_activity": "2026-05-10T00:00:00+00:00", "remaining_units": 10},
+        "CS224N": {"in_progress_units": 0, "last_activity": "2026-05-20T00:00:00+00:00", "remaining_units": 12},
+    }
+
+    primary = AgentUserLearningContextService._pick_primary_course(per_course, ["CS230", "CS224N"])
+
+    assert primary == "CS230"
+
+
+def test_pick_primary_course_tiebreaks_on_last_activity():
+    per_course = {
+        "CS230": {"in_progress_units": 0, "last_activity": "2026-05-10T00:00:00+00:00", "remaining_units": 10},
+        "CS224N": {"in_progress_units": 0, "last_activity": "2026-05-20T00:00:00+00:00", "remaining_units": 12},
+    }
+
+    primary = AgentUserLearningContextService._pick_primary_course(per_course, ["CS230", "CS224N"])
+
+    assert primary == "CS224N"
+
+
+def test_pick_primary_course_falls_back_to_ordered_course_list_when_no_activity():
+    per_course = {
+        "CS230": {"in_progress_units": 0, "last_activity": None, "remaining_units": 5},
+        "CS224N": {"in_progress_units": 0, "last_activity": None, "remaining_units": 5},
+    }
+
+    primary = AgentUserLearningContextService._pick_primary_course(per_course, ["CS224N", "CS230"])
+
+    assert primary == "CS224N"
+
+
+def test_pick_primary_course_returns_single_course_directly():
+    per_course = {"CS230": {"in_progress_units": 0, "last_activity": None, "remaining_units": 5}}
+
+    primary = AgentUserLearningContextService._pick_primary_course(per_course, ["CS230"])
+
+    assert primary == "CS230"
+
+
+def test_pick_primary_course_returns_none_for_empty_map():
+    assert AgentUserLearningContextService._pick_primary_course({}, []) is None
+
+
 def test_available_fields_does_not_advertise_raw_seconds_to_responder():
     available = AgentUserLearningContextService.available_fields()
 
@@ -53,6 +98,11 @@ def test_available_fields_does_not_advertise_raw_seconds_to_responder():
     assert "last_position_seconds" not in recent_progress_fields
     assert "video_progress_hms" in current_state_fields
     assert "last_position_hms" in recent_progress_fields
+
+    workload_fields = available["path_workload_summary"]
+    assert "primary_course_id" in workload_fields
+    assert "primary_course" in workload_fields
+    assert "courses" in workload_fields
 
 
 def _quiz_row(

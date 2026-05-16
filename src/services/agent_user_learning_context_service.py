@@ -79,6 +79,10 @@ class AgentUserLearningContextService:
                 "total_tracked_units",
             ],
             "path_workload_summary": [
+                "course_ids",
+                "primary_course_id",
+                "primary_course",
+                "courses",
                 "total_units",
                 "done_units",
                 "remaining_units",
@@ -253,35 +257,79 @@ class AgentUserLearningContextService:
             stmt = stmt.where(or_(*filters))
         result = await self.session.execute(stmt)
 
+        per_course: dict[str, dict[str, Any]] = {}
         total_units = 0
         done_units = 0
         remaining_units = 0
         total_minutes = 0.0
         remaining_minutes = 0.0
         missing_estimate_units = 0
-        course_ids_seen: set[str] = set()
 
         for unit, course, progress in result.all():
+            canonical_id = course.canonical_course_id or course.slug
+            bucket = per_course.setdefault(
+                canonical_id,
+                {
+                    "course_id": canonical_id,
+                    "total_units": 0,
+                    "done_units": 0,
+                    "remaining_units": 0,
+                    "in_progress_units": 0,
+                    "total_estimated_minutes": 0.0,
+                    "remaining_estimated_minutes": 0.0,
+                    "missing_estimate_units": 0,
+                    "last_activity": None,
+                },
+            )
+            bucket["total_units"] += 1
             total_units += 1
-            course_ids_seen.add(course.canonical_course_id or course.slug)
             estimated = float(unit.estimated_minutes or 0)
             if unit.estimated_minutes is None:
+                bucket["missing_estimate_units"] += 1
                 missing_estimate_units += 1
+            bucket["total_estimated_minutes"] += estimated
             total_minutes += estimated
 
             status = self._value(progress.status) if progress else "not_started"
+            if progress and progress.last_opened_at is not None:
+                iso = self._iso(progress.last_opened_at)
+                if bucket["last_activity"] is None or (iso or "") > (bucket["last_activity"] or ""):
+                    bucket["last_activity"] = iso
+
             if status in {"completed", "skipped"}:
+                bucket["done_units"] += 1
                 done_units += 1
                 continue
 
+            bucket["remaining_units"] += 1
             remaining_units += 1
+            if status == "in_progress":
+                bucket["in_progress_units"] += 1
             watched_minutes = 0.0
             if progress and progress.last_position_seconds is not None:
                 watched_minutes = max(0.0, float(progress.last_position_seconds) / 60.0)
-            remaining_minutes += max(0.0, estimated - min(estimated, watched_minutes))
+            unit_remaining = max(0.0, estimated - min(estimated, watched_minutes))
+            bucket["remaining_estimated_minutes"] += unit_remaining
+            remaining_minutes += unit_remaining
+
+        courses = []
+        for canonical_id in sorted(per_course.keys()):
+            bucket = per_course[canonical_id]
+            bucket["total_estimated_minutes"] = round(bucket["total_estimated_minutes"], 1)
+            bucket["remaining_estimated_minutes"] = round(bucket["remaining_estimated_minutes"], 1)
+            bucket["remaining_estimated_hours"] = round(
+                bucket["remaining_estimated_minutes"] / 60.0, 2
+            )
+            courses.append(bucket)
+
+        primary_course_id = self._pick_primary_course(per_course, course_ids)
+        primary_course = per_course.get(primary_course_id) if primary_course_id else None
 
         return {
-            "course_ids": sorted(course_ids_seen),
+            "course_ids": sorted(per_course.keys()),
+            "primary_course_id": primary_course_id,
+            "primary_course": primary_course,
+            "courses": courses,
             "total_units": total_units,
             "done_units": done_units,
             "remaining_units": remaining_units,
@@ -290,6 +338,41 @@ class AgentUserLearningContextService:
             "remaining_estimated_hours": round(remaining_minutes / 60.0, 2),
             "missing_estimate_units": missing_estimate_units,
         }
+
+    @staticmethod
+    def _pick_primary_course(
+        per_course: dict[str, dict[str, Any]],
+        ordered_course_ids: list[str] | None,
+    ) -> str | None:
+        if not per_course:
+            return None
+        if len(per_course) == 1:
+            return next(iter(per_course))
+
+        def score(canonical_id: str) -> tuple:
+            bucket = per_course[canonical_id]
+            return (
+                bucket["in_progress_units"],
+                bucket["last_activity"] or "",
+                bucket["remaining_units"],
+            )
+
+        ranked = sorted(per_course.keys(), key=score, reverse=True)
+        top = ranked[0]
+        top_bucket = per_course[top]
+        if (
+            top_bucket["in_progress_units"] == 0
+            and top_bucket["last_activity"] is None
+            and ordered_course_ids
+        ):
+            normalized = {str(course_id).lower(): str(course_id) for course_id in ordered_course_ids}
+            for raw_id in ordered_course_ids:
+                key = str(raw_id).strip().lower()
+                if key in {cid.lower() for cid in per_course}:
+                    for cid in per_course:
+                        if cid.lower() == key:
+                            return cid
+        return top
 
     async def _path_position(self, user_id: UUID, course_ids: list[str], current_unit_row) -> dict[str, Any]:
         filters = self._course_filters(course_ids)
