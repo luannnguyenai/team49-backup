@@ -50,6 +50,7 @@ class EchoSanitizedAgentGraphService(AgentGraphService):
         user_id: str,
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None,
+        **kwargs,
     ) -> AgentChatResponse:
         return AgentChatResponse(
             conversation_id=conversation_id,
