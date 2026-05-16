@@ -143,7 +143,8 @@ class AgentExternalResearchService:
             previous = cleaned
             cleaned = re.sub(
                 r"^(please\s+)?(explain|find|search|look up|what is|tell me about|"
-                r"give me information about|giải thích|tìm kiếm|tìm)\s+",
+                r"give me information about|giải thích|tìm kiếm|tìm|"
+                r"tôi\s+muốn\s+tìm|tôi\s+cần\s+tìm|hãy\s+tìm)\s+",
                 "",
                 cleaned,
                 flags=re.IGNORECASE,
@@ -157,13 +158,19 @@ class AgentExternalResearchService:
                 flags=re.IGNORECASE,
             ).strip(" ?.")
             cleaned = re.sub(
-                r"^(thông tin|nội dung|kiến thức|bài báo|papers?|information|content)"
-                r"(\s+(về|about))?\s+",
+                r"^(thông tin|nội dung|kiến thức|bài báo|các\s+paper|"
+                r"các\s+bài\s+báo|papers?|information|content)"
+                r"(\s+(liên\s+quan\s+)?(về\s+chủ\s+đề|về|about|đến|tới|cho))?\s+",
                 "",
                 cleaned,
                 flags=re.IGNORECASE,
             ).strip(" ?.")
-            cleaned = re.sub(r"^(về|about)\s+", "", cleaned, flags=re.IGNORECASE).strip(" ?.")
+            cleaned = re.sub(
+                r"^(liên\s+quan\s+)?(về\s+chủ\s+đề|về|about|đến|tới)\s+",
+                "",
+                cleaned,
+                flags=re.IGNORECASE,
+            ).strip(" ?.")
             if cleaned == previous:
                 break
         return cleaned or message.strip(" ?.")

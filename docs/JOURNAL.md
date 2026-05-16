@@ -9,10 +9,13 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 
 ### Đã làm
-- Chuyển đổi kiến trúc backend API tĩnh sang **Real-time Streaming** bằng `StreamingResponse` (Server-Sent Events).
-- Triển khai **Visual Context (Multi-modal)** lấy frame trực tiếp qua Canvas HTML5 gửi thẳng cho Gemini API.
-- Tích hợp thư viện xử lý **Markdown** (`marked.js`) và **LaTeX/Math** (`KaTeX`) vào giao diện chat thời gian thực.
-- Xây dựng hệ thống ghi log song song: lưu `app.db` (SQLite) cho truy xuất dữ liệu & ghi file `logs/qa_history.log` dạng JSON cho developer dễ theo dõi trực tiếp.
+- **Project scaffolding + Gemini LLM integration** (Rin): Khởi tạo cấu trúc project, tích hợp Gemini API, chuyển đổi backend sang **Real-time Streaming** bằng `StreamingResponse` (Server-Sent Events). Thêm architecture docs (`docs/architecture-flow.png`).
+- **Visual Context (Multi-modal)** (Rin): Triển khai lấy frame trực tiếp qua Canvas HTML5 gửi cho Gemini API. Docker containerization (`Dockerfile`, `docker-compose.yml`) hoàn chỉnh.
+- **Markdown + LaTeX/KaTeX** (Rin): Tích hợp `marked.js` và `KaTeX` vào giao diện chat thời gian thực. Chuẩn hóa timestamp sang `HH:MM:SS`.
+- **Hệ thống log song song** (Rin): Ghi `app.db` (SQLite) + file `logs/qa_history.log` (JSON). Thêm `sanitize_title` để chuẩn hóa tiêu đề bài giảng trong dropdown.
+- **Antigravity hooks & crawl pipeline** (Đức): Setup log hooks cho Antigravity tool (`setup hooks`, `fix: add log hooks for antigravity`), xây dựng crawler data script, fix crawl pipeline.
+- **Login UI** (Đức): Tạo giao diện đăng nhập frontend (`feat: ui login`).
+- **Backend adaptive learning integration** (Luân): Tích hợp các tính năng adaptive learning (quiz, learning paths, module tests) vào backend (`feat: Integrated adaptive learning features`). Xây dựng infrastructure management scripts.
 
 ### Khó nhất tuần này
 - **Streaming & The Thinking Component**: Quản lý state của luồng stream khi `gemini-3-flash-preview` trả về các chunks. Giải quyết vấn đề block luồng khi gặp lỗi (Timeout/API error) từ phía server mà UI không bị treo cứng.
@@ -37,11 +40,13 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 
 ### Đã làm
-- **Di cư dữ liệu CS231N**: Chuyển đổi toàn bộ hệ thống từ CS224N (cũ) sang Stanford CS231N (Spring 2025). Khắc phục thành công các lỗi không nhất quán về định dạng ToC và Transcript.
-- **Chuẩn hóa mốc thời gian**: Toàn bộ hệ thống (Context & AI Response) hiện đã sử dụng định dạng `HH:MM:SS`, giúp người dùng dễ dàng đối chiếu trực tiếp trên Video Player.
-- **Dockerization**: Hoàn thiện Dockerfile (tối ưu bằng `uv`) và `docker-compose.yml`, hỗ trợ chạy song song cả FastAPI Backend và Streamlit Lab UI chỉ với 1 lệnh.
-- **Auto-Sanitization**: Xây dựng logic tự động làm sạch tiêu đề bài giảng (`Lecture X: Topic`), giúp giao diện dropdown luôn chuyên nghiệp.
-- **Prompt Engineering**: Lưu trữ bộ Prompt "expert analyzer" vào thư mục `prompts/` để phục vụ việc trích xuất nội dung bài giảng chất lượng cao trong tương lai.
+- **Di cư dữ liệu CS231N** (Rin): Chuyển đổi từ CS224N sang Stanford CS231N (Spring 2025) — update ingestion service cho JSON ToC, batch ingestion script, fix lỗi ToC và Transcript không nhất quán.
+- **Chuẩn hóa mốc thời gian** (Rin): Toàn bộ hệ thống (Context & AI Response) sử dụng định dạng `HH:MM:SS`. Thêm `sanitize_title` tự động làm sạch tiêu đề bài giảng.
+- **Dockerization** (Rin): Hoàn thiện Dockerfile (tối ưu bằng `uv`) và `docker-compose.yml` — chạy FastAPI Backend song song chỉ với 1 lệnh. Fix volume mapping cho 4.5GB video và SQLite DB.
+- **Prompt Engineering** (Rin): Lưu bộ Prompt "expert analyzer" vào `prompts/` cho việc trích xuất nội dung bài giảng chất lượng cao.
+- **Activity logging hook** (Rin): Thêm activity logging hook (`log_hook.py`) để track Antigravity tool events.
+- **Crawl data & Docker fixes** (Đức): Fix script crawl data, fix Antigravity hook relative paths, fix docker compatibility (linux/windows), thêm Docker init script nhanh.
+- **Backend Auth + AI Tutor page** (Luân): Thêm auth endpoints (login/register/refresh/`/users/me`), seed endpoint, frontend AI Tutor page với video player + chat. Fix proxy rewrite `/data` cho video serving.
 
 ### Khó nhất tuần này
 - **Data Adaptation**: Xử lý sự khác biệt giữa các nguồn dữ liệu trích xuất (có những bài giảng ToC bị trống hoặc format không chuẩn). Đã giải quyết bằng cách thêm `try-except` trong script ingestion và tạo bộ lọc `sanitize_title`.
@@ -66,15 +71,13 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 
 ### Đã làm
-- **Kiến trúc Agentic (LangGraph):** Chuyển đổi LLM Service từ AI trả lời trơn sang một ReAct Agent thực thụ. Tích hợp Python Sandbox tool giúp AI có khả năng tự sinh code giải quyết các bài toán toán học phức tạp (đạo hàm, tích phân, ma trận) trong khóa CS231N thay vì "đoán" kết quả.
-- **Bảo mật Sandbox (Security Hardening):** Cô lập hoàn toàn Python Sandbox với hệ thống. Chặn I/O (File System, Network), bắt lỗi bằng phân tích AST (Static Analysis) trước khi chạy, và giới hạn CPU (12-15s), ngăn chặn Thread-bombing.
-- **Bối cảnh đàm thoại (Conversational Memory):** Inject trực tiếp 5 lượt Q&A gần nhất vào hệ thống prompt để duy trì bối cảnh tốt hơn khi chat.
-- **Tracking & Logging:** 
-  - Chuyển lịch sử QA sang dạng JSONL song song với CSDL để dễ dàng query. 
-  - Lưu tiến độ học tập (Learning Progress) theo session ở phía Frontend, tự động seek video quay lại đúng phút đã dừng.
-- **Guardrails & Feedback:** 
-  - Áp dụng Zero-shot classification prompt để lọc Intents (Jailbreak, Off-topic, Inappropriate) trước khi đưa vào Agent, tránh lãng phí token LLM chính.
-  - Tích hợp User Rating (👍/👎) vào trực tiếp giao diện Frontend. Tính năng "Silent Retry" dưới nền được thêm khi gặp lỗi truy xuất.
+- **Smart Router & Guardrails** (Rin): Thay thế binary intent guardrail bằng **3-way Smart Router** (SIMPLE / COMPLEX / BLOCK) — phân loại query trước khi vào agent để tối ưu token. Implement intent moderation chặn Jailbreak/Off-topic/Inappropriate.
+- **Python Sandbox & Conversational Memory** (Rin): Tích hợp Python Sandbox tool với AST static analysis, giới hạn CPU/Thread. Inject 5 lượt Q&A gần nhất vào prompt (conversational memory). Migrate sang `init_chat_model` provider-agnostic để support multi-model (Claude/Gemini/OpenAI).
+- **Video progress tracking + Retry logic** (Rin): Lưu tiến độ học tập theo session trong DB, tự động seek video đúng phút đã dừng. Thêm retry logic khi AI chat API bị lỗi. Chuyển lịch sử QA sang JSONL song song với CSDL.
+- **User Rating (👍/👎)** (Rin): Implement feedback system cho phép user đánh giá AI response. Thêm "Silent Retry" dưới nền khi gặp lỗi truy xuất.
+- **Auth endpoints + AI Tutor page** (Luân): Tạo auth endpoints đầy đủ (login/register/refresh/`/users/me`), seed endpoint, fix KnowledgeComponent slug, thêm lecture seed script. Xây dựng AI Tutor page (Next.js) với video player + chat interface tích hợp.
+- **IRT 2PL assessment** (Luân): Implement logic IRT 2PL để chọn câu hỏi theo năng lực người dùng trong onboarding assessment. Fix onboarding→assessment flow (4 bugs).
+- **Docker & tooling fixes** (Đức): Thêm Docker init script để khởi động nhanh hơn, fix hooks, fix Docker compatibility Linux/Windows, thêm Alembic migration cho rating table.
 
 ### Khó nhất tuần này
 - **Cân bằng hiệu suất LangGraph:** Việc sử dụng LangGraph kết hợp với ToolNode khiến log trả về frontend phức tạp vì đan xen giữa Token sinh mã và output trả về từ Sub-process sandbox. Khắc phục bằng SSE (Server-Sent Events) debounce sự kiện hiển thị hộp trạng thái `🧠 Thinking...` 
@@ -84,6 +87,7 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 | Tool | Dùng để làm gì | Kết quả |
 |---|---|---|
 | Antigravity (Claude Opus 4.6 / Gemini 3.1 Pro) | Migrate LangGraph, code Sandbox hardening, thiết kế Guardrails. | Nâng tầm MVP từ một chat-bot đơn thuần trở thành Agent tự giải toán. Tự động hóa được tiến trình lưu dữ liệu bằng API. |
+| Claude Code (Sonnet) | `/ecc:plan` lên kế hoạch project setup, `/ecc:refactor-clean` rà dead code backend/frontend, debug Docker startup, tạo `start.sh` khởi động một lệnh | Plan refactor rõ ràng, startup script tinh gọn — team chạy được project bằng một lệnh duy nhất |
 
 ### Học được
 - Kiến trúc ReAct (Reasoning and Acting) thay đổi cục diện giải thích code & thuật toán của Tutor. Tuy nhiên độ trễ thời gian trả lời tăng lên cần thông báo trạng thái "Trận đánh Boss Toán học" rõ ràng xuống giao diện để user không có cảm giác App bị sập.
@@ -98,12 +102,13 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 
 ### Đã làm
-- Hợp nhất nhánh `hybrid/integrate-db-review` vào `main` bằng merge commit, giữ nguyên history thay vì squash.
-- Tích hợp nền **PostgreSQL schema v1** vào app course-first: migration head mới, `pgvector` extension, audit table `mastery_history`, và fix engine non-pooled cho sync threadpool tasks.
-- Đưa vào **repository layer** cho auth/history/recommendation/assessment và nối flow assessment qua `QuestionSelector` thay vì truy cập data layer rải rác.
-- Harden auth/runtime bằng **Redis-backed rate limiting**, **token denylist**, **logout revoke endpoint**, fix startup/CORS/config, và healthcheck/compose migration.
-- Hoàn thiện flow **course-first platform** trên hybrid: public catalog, personalized catalog, overview, start gate, learning unit, in-context tutor, dashboard presenters, user skill overview, và compatibility redirects cho route cũ.
-- Bổ sung lớp ổn định cho tutor và UI: buffer NDJSON stream chunks, regression test cho stale chapter response khi đổi lecture nhanh, e2e smoke coverage và route tests cho course platform.
+- **Knowledge Graph (KG) full implementation** (Luân): Implement toàn bộ KG layer từ zero — `kg_concepts`, `kg_edges`, `kg_sync_state` (Alembic migration), KG loader/builder/discoverer, bridges YAML integration, recommendation engine và learning path service. Expand question bank thêm 80+ items (CV/3D/Robotics/Ethics). KG integrate vào API và CLI với automation.
+- **PostgreSQL schema v1 + repository layer** (Luân): Migration head mới với `pgvector` extension, audit table `mastery_history`. Đưa vào repository layer cho auth/history/recommendation/assessment, nối assessment qua `QuestionSelector`.
+- **Redis auth hardening** (Luân): Redis-backed rate limiting, token denylist, logout revoke endpoint, fix startup/CORS/config, healthcheck migration.
+- **Frontend UI rebuild (Vietnamese)** (Đức): Rebuild toàn bộ frontend UI — design tokens, Vietnamese copy toàn app, lesson sidebar, tutor hub layout (enrolled courses, recommended courses, resume card). Fix alembic merge heads. Scaffold course-first platform pages (catalog, learning unit, overview).
+- **Course-first platform flow** (Đức + Rin): Public/personalized catalog, start gate, learning unit, in-context tutor, dashboard, compatibility redirects. Buffer NDJSON stream chunks, regression test cho stale chapter response, e2e smoke test.
+- **CS224n/CS231n data + LLM rate limiter** (Rin): Curate lecture segments cho CS224n và CS231n, add LLM rate limiter service để tránh API quota issues.
+- **Hybrid merge coordination** (Rin): Merge `hybrid/integrate-db-review` vào `main` (PR #15), giữ nguyên history, resolve conflicts giữa course-first và DB/repository stacks.
 
 ### Khó nhất tuần này
 - **Hòa giải hai nhánh có trung tâm kiến trúc khác nhau**: một bên course-first, một bên database/repository review. Nếu resolve file theo kiểu "gộp cú pháp" thì rất dễ làm mất contract công khai hoặc kéo lecture stack cũ quay lại.
@@ -114,6 +119,7 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 | Tool | Dùng để làm gì | Kết quả |
 |---|---|---|
 | AI coding agents (Codex / Claude / Gemini qua hook logging) | So sánh nhánh, rà conflict, scaffold test hồi quy, và tổng hợp design docs cho hybrid merge | Giữ được history merge, hấp thụ DB hygiene vào `main`, đồng thời không làm mất flow course-first của sản phẩm |
+| Claude Code (Sonnet) | Phân tích dead code frontend (Next.js) và backend (FastAPI), lên plan refactor-clean theo từng module, rà conflict hybrid merge | Xác định vùng dead code có thể xóa an toàn, conflict merge được giải quyết có kiểm soát không mất contract |
 
 ### Học được
 - Nếu hai nhánh khác nhau về kiến trúc, một **hybrid branch có decision log** an toàn hơn rất nhiều so với cherry-pick rời rạc hoặc merge thẳng rồi sửa hậu quả.
@@ -131,16 +137,12 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 
 ### Đã làm
-- Hoàn thiện chuỗi artifact cho ingestion pipeline nhiều bước: rà soát P2, P3, P4, P5 cho hai khóa **CS224n** và **CS231n**, kiểm tra đủ segment, đủ question bank, calibration bootstrap, prerequisite graph và các file review phụ trợ.
-- Tổ chức lại toàn bộ thư mục `data/` theo vai trò rõ ràng:
-  - `data/bootstrap/`
-  - `data/courses/`
-  - `data/working/`
-  - `data/final_artifacts/`
-- Patch các script/service/test chính để dùng path mới thay vì path cũ kiểu `data/CS231n`, `data/course_bootstrap`, `data/p3_inputs`, `data/p5_inputs`.
-- Chuẩn hóa `CS231n/syllabus.json` theo schema mới đang dùng ở `CS224n/syllabus.json`, bổ sung `assets`, `title`, `youtube_title`, `topic`, `year`, `type`, `custom_order` nhưng vẫn giữ các field cũ như `lecture_id`, `lecture_title`, `core_topics`, `scope_keywords`.
-- Dọn artifact P2 single-course cũ của CS224n vì nó là run lỗi thời/failed và đã bị supersede bởi bản P2 final cross-course.
-- Chỉnh `.gitignore` để chỉ ignore video assets; transcript, slides, JSON artifact nhẹ có thể đưa lên GitHub.
+- **CS224n/CS231n data pipeline** (Rin): Curate toàn bộ lecture segments cho CS224n và CS231n — rà soát P2-P5 artifacts, kiểm tra segment, question bank, calibration bootstrap, prerequisite graph. Tổ chức lại `data/` theo vai trò rõ ràng (`bootstrap/`, `courses/`, `working/`, `final_artifacts/`).
+- **Syllabus schema normalization** (Rin): Chuẩn hóa `CS231n/syllabus.json` theo schema mới của CS224n — thêm `assets`, `title`, `youtube_title`, `topic`, `year`, `type`, `custom_order` (additive, giữ field cũ). Patch script/service/test sang path mới.
+- **Onboarding flow UX** (Rin): Thêm experience-level step (beginner skip / experienced continue), flat units trong known-topics step, AI prior profiling step, onboarding assessment depth. Fix onboarding loading hang.
+- **IRT/CAT Placement Assessment** (Luân): Implement `IRTAdaptiveStrategy` với 3PL-lite batch CAT, audit logging qua `interactions` và `sessions` (ADD-only), `random_uniform` và `spread_by_prior` strategies. Scaffold `calibration_runs` và `item_calibration_history`. Fix alembic migration (schema_v2 idempotent, merge heads).
+- **Planner Roadmap UI** (Rin): Port roadmap-style planner UI — group by course, collapse units under lectures, planner path switcher compact, fix placement decisions → planner actions. Weekly time settings popover. Regenerate planner khi profile changes.
+- **Public Landing Page phase 1** (Đức): Tạo public landing page (`feat(frontend): add public landing page phase 1`), scrolling animation, routing authenticated users đến course hub.
 
 ### Khó nhất tuần này
 - **Phân biệt artifact canonical và artifact tạm**: cùng tên `p2` nhưng có bản single-course failed, bản cross-course final, bản input bundle, bản validation report. Nếu không đặt lại cấu trúc thư mục thì rất dễ ingest nhầm.
@@ -168,19 +170,13 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 
 ### Đã làm
-- Khóa lại snapshot schema của nhánh `rin/implement`, tách rõ 4 lớp:
-  - runtime ORM
-  - legacy adapter
-  - canonical artifact
-  - learner/planner stub persistence
-- Bổ sung 6 bảng stub mới cho learner/planner phía DB:
-  - `learner_mastery_kp`
-  - `goal_preferences`
-  - `waived_units`
-  - `plan_history`
-  - `rationale_log`
-  - `planner_session_state`
-- Viết tài liệu thiết kế và implementation plan riêng cho hướng **production DB evolution** để người làm integration sau có thể nối code mà không phải suy luận source-of-truth từ runtime cũ.
+- **DB schema canonical layer** (Rin): Khóa snapshot schema nhánh `rin/implement` — tách 4 lớp rõ ràng (runtime ORM, legacy adapter, canonical artifact, learner/planner stub). Bổ sung 6 bảng stub cho learner/planner: `learner_mastery_kp`, `goal_preferences`, `waived_units`, `plan_history`, `rationale_log`, `planner_session_state`.
+- **Production DB evolution docs** (Rin): Viết `docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md` — khóa authoritative tables, compatibility tables, feature flags, write/read contracts, migration order cho người làm integration sau.
+- **Runtime canonical cutover** (Rin + Luân): Onboarding ghi snapshot vào `goal_preferences`, planner ghi audit vào `plan_history`/`rationale_log`/`planner_session_state`. Materialize canonical content layer thành DB (985 questions, 1171 item-KP mappings, 79 prerequisite edges). Assessment đọc `question_bank` theo `item_phase_map.phase`, canonical answer submit ghi `interactions.canonical_item_id`.
+- **Drop legacy schema** (Luân): DB migration `20260423_drop_legacy` — drop hẳn `modules/topics/knowledge_components/questions/mastery_scores/mastery_history/learning_paths`. Gỡ `src/kg/*` khỏi runtime. Fix `alembic_version varchar(32)` limit.
+- **Abandon/resume state + mastery stale** (Rin): `planner_session_state` lưu `current_unit_id`/`current_stage`/`current_progress`/`last_activity`. Mastery stale dùng read-time sigma inflation, không mutate raw posterior. Quiz abandon giữ `interactions` (evidence không rollback).
+- **Synthetic demo users** (Luân): Script deterministic tạo 9 demo accounts + 30 cohort users với distribution rõ (beginner/developing/proficient/advanced). Source-of-truth chuyển sang `scenarios.json` viết tay thay vì procedural generation.
+- **Onboarding canonical payload** (Rin): Chuyển form/API sang `known_unit_ids`, `desired_section_ids`, `selected_course_ids` thay vì `topic/module`. Backend ghi `goal_preferences.selected_course_ids`.
 
 ### Khó nhất tuần này
 - Phân biệt rõ đâu là việc **khóa schema đích** và đâu là việc **wire logic runtime**. Nếu làm lẫn hai việc trong cùng một lượt sẽ rất dễ tạo double-write bug hoặc nửa cũ nửa mới.
@@ -190,6 +186,7 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 | Tool | Dùng để làm gì | Kết quả |
 |---|---|---|
 | AI coding agents (Codex) | Rà schema hiện tại, đối chiếu canonical artifacts, thêm stub learner/planner tables, và viết production DB evolution docs | Tạo được landing zone DB cho phase production tiếp theo mà chưa phá runtime cũ |
+| Claude Code (Sonnet) | Setup test accounts cho demo, quyết định `.gitignore` cho data pipeline (ignore binary nặng, track JSON/text artifact), rà canonical artifact path | `.gitignore` phản ánh đúng cost dữ liệu, test account sẵn sàng cho smoke test |
 
 ### Học được
 - Khi demo đã xong, phần khó nhất không còn là “sinh dữ liệu” mà là **khóa source-of-truth** để production không bị drift giữa nhiều thế hệ schema.
@@ -311,12 +308,14 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 
 ### Đã làm
-- **LangGraph Agentic RAG redesign**: Thiết kế lại toàn bộ agent pipeline theo kiến trúc deeptutor — structured router → context service → search service (RAG) → answer node. Thêm prerequisite path agent, citation grounding, evidence policy (`grounded / partial / no_source`) và assessment boundary (block agent khi user đang trong bài kiểm tra).
-- **Guardrail Router client**: Xây dựng multilayer guardrail gate tích hợp vào cả tutor flow lẫn agent flow. Thêm language normalization dùng Lingua detector để xử lý câu hỏi tiếng Việt / tiếng Anh đồng thời.
-- **vLLM self-hosted serving**: Triển khai Qwen3.5-0.8B (guardrail router base) lên server riêng qua Cloudflare Tunnel — phục vụ như OpenAI-compatible API endpoint, tách biệt hoàn toàn với app serving.
-- **External research mode**: Tích hợp Semantic Scholar API và web search để agent có thể mở rộng tìm kiếm ra ngoài learning content khi nội dung khóa học không đủ context.
-- **AWS ECS infrastructure**: Provision toàn bộ hạ tầng production bằng Terraform — VPC, public/private subnets, ALB, ECS Fargate cluster, RDS PostgreSQL, ElastiCache Redis, ECR registry, S3 + CloudFront, Secrets Manager, IAM/OIDC cho GitHub Actions. Thêm observability stack: Prometheus + Grafana + Loki.
-- **Langfuse tracing hardening**: Bổ sung trace ID propagation, span tagging theo route/agent node, và eval trigger hook để capture mọi agent run vào Langfuse dashboard.
+- **LangGraph Agentic RAG redesign** (Rin): Thiết kế lại toàn bộ agent pipeline — structured router → context service → search service (RAG) → answer node. Thêm prerequisite path agent, citation grounding, evidence policy (`grounded / partial / no_source`) và assessment boundary (block agent khi user đang trong bài kiểm tra).
+- **Guardrail Router client** (Rin): Xây dựng multilayer guardrail gate tích hợp vào cả tutor flow lẫn agent flow. Thêm language normalization dùng Lingua detector để xử lý tiếng Việt / tiếng Anh.
+- **External research mode** (Rin): Tích hợp Semantic Scholar API và web search để agent mở rộng tìm kiếm ra ngoài learning content.
+- **Langfuse observability** (Rin): Implement Langfuse tracing — trace ID propagation, span tagging theo route/agent node, eval trigger hook. Thêm `ContinueLearningHero` component và admin dashboard KpiGroup (`feat: implement Langfuse observability`).
+- **Replan feature E2E** (Rin): Toàn bộ replan flow từ frontend đến backend — replan route shell, claim guardrails, scope review component, prerequisite suggestion dialog, backend schemas/service/router, LLM keyword extraction, guardrail modes. Fix replan persistence của placement skips.
+- **Frontend theme refactor** (Đức): Rebuild hệ thống màu sắc frontend — design tokens, chart-theme, auth pages refactor (LoginForm, RegisterForm, ForgotPasswordForm), bloom badges, AgentChatPage theme, landing page CTA unify. Vietnamese copy cho auth/public pages.
+- **Reset password flow** (Đức): Implement complete reset password flow (frontend + backend wiring).
+- **vLLM self-hosted serving** (Rin + Đức): Triển khai Qwen3.5-0.8B qua Cloudflare Tunnel như OpenAI-compatible API endpoint cho guardrail router.
 
 ### Khó nhất tuần này
 - **Citation grounding vs. hallucination tradeoff**: Agent cần trích dẫn đúng source segment mà không sinh nội dung ngoài source. Phải thiết kế evidence policy chi tiết và thêm `must_not_hallucinate` rules vào golden eval để kiểm soát được regression.
@@ -327,7 +326,9 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 | Tool | Dùng để làm gì | Kết quả |
 |---|---|---|
 | Claude Code (Opus) | Thiết kế LangGraph graph nodes, viết evidence policy rules, scaffold Terraform modules | Agentic RAG pipeline có cấu trúc rõ ràng, citation và no-hallucination constraint được enforce ở node level |
+| Claude Code (Sonnet) | Fix Next.js build error (thiếu `Suspense` boundary cho `useSearchParams`), debug Docker compose, fix planner course display không load | Frontend build pass production, planner hiển thị đúng danh sách course |
 | Codex | Review Terraform plan output, fix IAM policy scope, viết script reconcile Secrets Manager | Infrastructure provision thành công, secret injection vào ECS task definition hoạt động đúng |
+| Codex | Debug planner feature — phân tích `CourseFeature` component, rà course display và enrollment flow bugs | Xác định root cause course không hiện sau onboarding, fix display logic |
 
 ### Học được
 - **Citation phải là contract, không phải style**: Nếu không định nghĩa rõ "grounded = có exact match với source segment", agent sẽ drift sang paraphrase và bắt đầu fabricate. Golden eval phải có `must_not_cite` cases để giữ boundary.
@@ -345,13 +346,12 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 
 ### Đã làm
-- **ECS production deployment**: Manual bootstrap production — 5 backend task revisions (canonical migration, vLLM config, Secrets Manager wiring, CORS fix) và 1 frontend revision. Images được tag theo commit hash (`frontend:7deedc0`, `backend:7deedc0-units`). Live tại `a20-app-049.io.vn`.
-- **CI/CD automation**: Đưa pipeline vào `.github/workflows/` — `build-push.yml` chạy trên self-hosted EC2 runner (build + push Docker images lên ECR), `deploy-ecs-prod.yml` render task definition từ template rồi deploy lên ECS Fargate. Thêm `reconcile-backend-secret.sh` để update Secrets Manager động theo deployment context.
-- **Admin observability panel**: Xây dựng trang admin với Loki log streaming (query theo service/level/time range), Prometheus metrics embed, Grafana dashboard embed và CloudWatch log group integration. Không expose ra public — route protected bằng admin role check.
-- **Agent UI cải tiến**: Thêm activity tracker hiển thị real-time agent action (search, retrieve, cite), model dropdown selector (chọn provider/model trong session), model health caching và failover khi endpoint không healthy.
-- **Landing page redesign**: Cập nhật layout và copy theo sản phẩm production thực tế (thay vì prototype copy từ tuần 1-2).
-- **Auth hardening**: Fix stale hydration error khi token hết hạn giữa session, relax password schema cho demo accounts (giảm độ phức tạp để demo thực tế không bị friction).
-- **RoadmapPlanner refactor**: Migrate từ flat list sang master-detail layout với sidebar navigation, cập nhật unit testing theo layout mới.
+- **ECS production deployment** (Đức): Manual bootstrap production — 5 backend task revisions liên tiếp (canonical migration fail → Secrets Manager IAM thiếu → CORS chưa include domain → vLLM endpoint sai format → pgvector image mismatch). Images tag theo commit hash (`frontend:7deedc0`, `backend:7deedc0-units`). Live tại `a20-app-049.io.vn` (09-10/05).
+- **CI/CD automation** (Đức): Đưa pipeline vào `.github/workflows/` — `build-push.yml` trên self-hosted EC2 runner (build + push ECR), `deploy-ecs-prod.yml` render task definition từ template rồi deploy ECS Fargate. Fix 4 CI/CD blockers, promote ECS workflows. `reconcile-backend-secret.sh` update Secrets Manager động theo deployment context.
+- **Admin observability panel** (Đức): Trang admin với Loki log streaming, Prometheus metrics embed, Grafana dashboard embed, CloudWatch log group integration. Route protected bằng admin role. Update model selector dropdown và health check display (11/05).
+- **PII Guardrail module** (Đức): Tạo `pii_guardrail.py`, `guardrails_adapter.py`, `pii_policy.py`, `types.py` — phát hiện và chặn PII (email, phone, CCCD) trong user query trước khi vào agent. Test coverage đầy đủ (11/05).
+- **DVC transcript tracking** (Rin): Track course transcript artifacts bằng DVC thay vì đưa binary vào Git (`Track course transcript DVC artifacts`, 08/05).
+- **Agent UI activity tracker** (Rin, agent-ui branch): Thêm real-time activity tracker hiển thị agent actions (search, retrieve, cite), model health caching và failover khi endpoint không healthy. (Hoàn thành merge 13/05, được bắt đầu tuần này)
 
 ### Khó nhất tuần này
 - **5 backend revisions trong một ngày**: Mỗi revision fix một lớp — đầu tiên là migration fail vì revision id quá dài (PostgreSQL varchar(32) limit), sau đó là Secrets Manager IAM permission thiếu, rồi CORS config chưa include production domain, rồi vLLM endpoint URL sai format. Phải deploy → test → identify → fix → redeploy 5 vòng.
@@ -362,7 +362,7 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 | Tool | Dùng để làm gì | Kết quả |
 |---|---|---|
 | Claude Code (Opus) | Debug ECS deployment failures từ CloudWatch logs, thiết kế CI/CD yaml, viết admin panel query logic | Pipeline CI/CD hoạt động end-to-end từ push → build → deploy mà không cần thao tác thủ công |
-| Codex | Viết reconcile-backend-secret.sh, fix task definition template, benchmark admin panel queries | Secret sync tự động theo deployment, task def render đúng theo env |
+| Codex | Phân tích deploy options (full AWS ECS vs. separate services), lên Terraform plan, viết sơ đồ AWS architecture dạng markdown, viết reconcile-backend-secret.sh, fix task definition template | Chọn được strategy deploy đúng, Terraform plan có cơ sở rõ, secret sync tự động |
 
 ### Học được
 - **ECS production bootstrap cần checklist chặt**: Mỗi revision là một deployment window. Nếu không có checklist (migration → secret → CORS → health check → smoke test), dễ bỏ sót bước và phải rollback.
@@ -428,6 +428,7 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 | Tool | Dùng để làm gì | Kết quả |
 |---|---|---|
 | Codex | Review dataset, viết dataset builders/tests, tạo DVC pointers, chuẩn hóa commit theo từng file, và benchmark local adapter | Tạo được baseline fine-tuned router + answer generator có thể tái lập bằng code, DVC artifact và notebook |
+| Claude Code (Sonnet) | Hỗ trợ fine-tuning pipeline — rà training script, kiểm tra data schema alignment giữa training prompt và serving prompt | Phát hiện mismatch enum giữa training và inference prompt trước khi deploy |
 | Gemini/OpenAI judge notebooks | Chấm chất lượng answer model và so sánh với baseline | Có report eval rõ ràng để chọn adapter 4B final thay vì chỉ nhìn loss |
 
 ### Học được
@@ -449,13 +450,13 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 
 ### Đã làm
 - **Agent search rerank** (Rin): Thêm rerank theo score cho kết quả tìm kiếm của agent unit search — ưu tiên unit có relevance cao hơn thay vì chỉ trả về theo thứ tự embedding. Fix narrow qualified acronym evidence (chặn tình huống agent cite nhầm do keyword giống nhau). Thêm contextual prerequisite action preservation để agent không mất track khi follow-up question liên quan prerequisite path.
-- **Observability stack hoàn thiện** (Hoàng): Scaffold production observability đầy đủ — Terraform module cho Prometheus/Grafana/Loki stack, backend metrics scrape endpoint, PostgreSQL datasource trong Grafana, fix Cloud Map namespace format, wiring frontend admin embed panel. Toàn bộ stack deployed lên ECS, admin panel live.
-- **Agent failover & network fix** (Hoàng): Debug và fix 4 lần agent downtime liên tiếp do vLLM endpoint không respond — thêm circuit breaker logic, fix router HTTPS endpoint, cập nhật pgvector image version, fix secret injection cho agent route.
+- **Observability stack hoàn thiện** (Đức): Scaffold production observability đầy đủ — Terraform module cho Prometheus/Grafana/Loki stack, backend metrics scrape endpoint, PostgreSQL datasource trong Grafana, fix Cloud Map namespace format, wiring frontend admin embed panel. Toàn bộ stack deployed lên ECS, admin panel live.
+- **Agent failover & network fix** (Đức): Debug và fix 4 lần agent downtime liên tiếp do vLLM endpoint không respond — thêm circuit breaker logic, fix router HTTPS endpoint, cập nhật pgvector image version, fix secret injection cho agent route.
 - **Landing page redesign** (Luân): Cập nhật toàn bộ landing page theo sản phẩm production thực tế — nội dung mới, button dimensions chuẩn, bỏ social proof section chưa có data thật, thêm Redis error handling cho backend resilience.
 - **Auth UX hardening** (Rin): Fix stale error hydration trong auth store (lỗi persisted error từ session cũ hiển thị sai khi load trang mới). Fix login/register stale error. Relax password schema validation cho demo accounts — giảm độ phức tạp để demo thực tế không bị friction với `DemoPass123!`. Thêm test coverage cho toàn bộ auth form edge cases.
 - **RoadmapPlanner master-detail** (Rin): Migrate từ flat list sang master-detail layout với sidebar navigation. Unit tests cập nhật theo layout mới.
-- **Submission documentation** (Hoàng): Tạo `docs/ai-logs.md`, `AI20K_FINAL_SUBMISSION_GUIDE.md`, cập nhật README với Quick Links đầy đủ, xóa stale testing docs (`TESTING_DOCUMENTATION_INDEX.md`, `TEST_STATUS_REPORT.md`, `TESTING_ONBOARDING_FLOW.md`), bổ sung team section.
-- **CI/CD pipeline** (Hoàng): Refactor workflow YAML, fix concurrency (cancel previous progress), cập nhật `build-push.yml` + `ci.yml`, clean up stale jobs. Fix Loki log pipeline.
+- **Submission documentation** (Đức): Tạo `docs/ai-logs.md`, `AI20K_FINAL_SUBMISSION_GUIDE.md`, cập nhật README với Quick Links đầy đủ, xóa stale testing docs (`TESTING_DOCUMENTATION_INDEX.md`, `TEST_STATUS_REPORT.md`, `TESTING_ONBOARDING_FLOW.md`), bổ sung team section.
+- **CI/CD pipeline** (Đức): Refactor workflow YAML, fix concurrency (cancel previous progress), cập nhật `build-push.yml` + `ci.yml`, clean up stale jobs. Fix Loki log pipeline.
 
 ### Kết quả nổi bật
 - Agent search quality cải thiện: kết quả rerank đúng hơn, acronym trap được giải quyết, contextual citation không bị mất khi multi-turn.
@@ -482,3 +483,40 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 ### Nếu làm lại, sẽ làm khác
 - Thiết lập observability stack ngay tuần đầu production, không phải tuần cuối. Toàn bộ 5 revision ECS bootstrap tuần 7 sẽ debug nhanh hơn 50% nếu Grafana/Loki đã live từ lúc đó.
 - Chốt demo account policy (email format, password complexity) ngay khi tạo synthetic users, không sửa lại ở tuần submission.
+
+---
+
+## Tuần 10 — 15/05/2026 (Submission Week)
+
+**Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
+
+### Đã làm
+- **Architecture HTML redesign** (Đức): Vẽ lại toàn bộ `architecture/03-aws-infrastructure.html` theo chuẩn AWS draw.io 2026 — icon màu chính xác theo category (Networking: #8C4FFF, Compute: #E7500A, Storage: #3DAA35, Database: #1565C0, Security: #DD344C), zone borders (VPC: orange solid, Subnet: blue dashed, ECS Cluster: orange dashed), SVG inline icons cho từng service. Bỏ Mermaid dark theme — chuyển sang white background chuẩn draw.io.
+- **Agent fix** (Đức): Sửa lỗi agent route sau lần downtime cuối — cập nhật vLLM endpoint, fix circuit breaker timeout, verify fallback sang Gemini/OpenAI hoạt động đúng.
+- **Loki log pipeline fix** (Đức): Fix pipeline Loki log aggregation cho production — log stream theo service/level hoạt động lại sau cấu hình sai namespace.
+- **README & SVG update** (Đức): Cập nhật SVG architecture diagrams trong README, bổ sung link Quick Links table, chuẩn hóa format submission.
+- **Submission checklist** (Đức): Tạo `docs/SUBMISSION_CHECKLIST.md` tổng hợp toàn bộ trạng thái submission, còn thiếu Video Demo và Pitch Deck.
+
+### Kết quả nổi bật
+- Architecture HTML đạt chuẩn visual AWS draw.io 2026 — đủ icon, màu, zone borders.
+- Agent production hoạt động ổn định sau fix — fallback sang LLM provider ngoài hoạt động đúng khi vLLM gặp lỗi.
+- Observability (Grafana/Loki) live và ổn định.
+- Repo sạch, documentation đầy đủ cho submission.
+
+### Khó nhất tuần này
+- **Vẽ lại architecture đúng chuẩn draw.io**: Icon AWS mỗi service category có màu riêng và icon path riêng; làm bằng SVG inline trong HTML phức tạp hơn dùng Mermaid nhưng kết quả đẹp và chuyên nghiệp hơn nhiều.
+- **Agent lại downtime lần 5**: Root cause lần này là vLLM endpoint URL thay đổi sau restart server Cloudflare Tunnel; phải update secret + redeploy ECS service.
+
+### AI tool đã dùng
+| Tool | Dùng để làm gì | Kết quả |
+|---|---|---|
+| Claude Code (Sonnet) | Phân tích ảnh draw.io reference, thiết kế SVG icon cho mỗi AWS service, vẽ lại HTML architecture theo chuẩn 2026 | Architecture HTML professional, đủ zone borders, màu AWS chuẩn |
+| Claude Code (Sonnet) | Tạo SUBMISSION_CHECKLIST.md, tổng hợp trạng thái toàn bộ requirements | Biết chính xác còn thiếu gì trước deadline 17/05 |
+
+### Học được
+- **SVG inline diagram trong HTML bền hơn Mermaid cho technical documentation**: Mermaid tốt cho quick iteration nhưng SVG cho phép kiểm soát pixel-level, icon đúng AWS standard, không phụ thuộc JS runtime.
+- **Checklist submission nên làm từ tuần 8, không phải tuần 10**: Ngay khi thấy deadline sắp đến, việc đầu tiên là inventory — xem còn thiếu gì, không phải tiếp tục code feature mới.
+
+### Nếu làm lại, sẽ làm khác
+- Freeze feature development 2 tuần trước deadline. Dành toàn bộ thời gian còn lại cho documentation, testing, và submission prep.
+- Quay video demo từ tuần 9, không phải đợi đến tuần 10.

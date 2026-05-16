@@ -44,6 +44,7 @@
         { "name": "LLM_REQUEST_TIMEOUT_SECONDS", "value": "30" },
         { "name": "LLM_MAX_RETRIES", "value": "1" },
         { "name": "CHAT_MODEL_HEALTH_TIMEOUT_SECONDS", "value": "3" },
+        { "name": "EXTERNAL_RESEARCH_ENABLED", "value": "true" },
         { "name": "GUARDRAIL_ROUTER_BASE_URL", "value": "https://router.a20-app-049.io.vn/v1" },
         { "name": "GUARDRAIL_ROUTER_MODEL", "value": "guardrail-router-merged" },
         { "name": "GUARDRAIL_ROUTER_TIMEOUT_SECONDS", "value": "10.0" },
