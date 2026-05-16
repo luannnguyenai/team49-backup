@@ -15,6 +15,7 @@ class AgenticRAGPipeline:
         self.router = router
         self.tool_executor = tool_executor
         self.response_router = response_router or router
+        self.max_tool_steps = 3
 
     async def run(
         self,
@@ -34,39 +35,21 @@ class AgenticRAGPipeline:
             route_context=route_context,
             recent_messages=recent_messages,
         )
-        tool_call = self.router.rag_act(
+        observations = await self._run_tool_steps(
             message=message,
+            intent=intent,
             thought=thought,
             slots=slots,
             route_context=route_context,
             recent_messages=recent_messages,
-            observations=[],
-        )
-        tool_observation = await self.tool_executor.execute(
-            tool_call,
-            message=message,
-            intent=intent,
-            slots=slots,
             allowed_course_ids=allowed_course_ids,
             current_path_course_ids=current_path_course_ids,
-            route_context=route_context,
         )
-        try:
-            observation = self.router.rag_observe(
-                message=message,
-                thought=thought,
-                tool_call=tool_call,
-                tool_observation=tool_observation,
-                route_context=route_context,
-                recent_messages=recent_messages,
-            )
-        except AgentRouterUnavailableError:
-            observation = tool_observation
-        observation = self._validated_observation(observation, tool_observation)
+        observation = observations[-1]
         final = self.response_router.rag_respond(
             message=message,
             thought=thought,
-            observations=[observation.model_dump(mode="json")],
+            observations=[item.model_dump(mode="json") for item in observations],
             route_context=route_context,
             recent_messages=recent_messages,
         )
@@ -102,43 +85,24 @@ class AgenticRAGPipeline:
         }) + "\n"
 
         yield json.dumps({"status": "Searching course content"}) + "\n"
-        tool_call = self.router.rag_act(
+        yield json.dumps({"status": "Reading sources"}) + "\n"
+        observations = await self._run_tool_steps(
             message=message,
+            intent=intent,
             thought=thought,
             slots=slots,
             route_context=route_context,
             recent_messages=recent_messages,
-            observations=[],
-        )
-
-        yield json.dumps({"status": "Reading sources"}) + "\n"
-        tool_observation = await self.tool_executor.execute(
-            tool_call,
-            message=message,
-            intent=intent,
-            slots=slots,
             allowed_course_ids=allowed_course_ids,
             current_path_course_ids=current_path_course_ids,
-            route_context=route_context,
         )
-        try:
-            observation = self.router.rag_observe(
-                message=message,
-                thought=thought,
-                tool_call=tool_call,
-                tool_observation=tool_observation,
-                route_context=route_context,
-                recent_messages=recent_messages,
-            )
-        except AgentRouterUnavailableError:
-            observation = tool_observation
-        observation = self._validated_observation(observation, tool_observation)
+        observation = observations[-1]
 
         yield json.dumps({"status": "Composing answer"}) + "\n"
         final = self.response_router.rag_respond(
             message=message,
             thought=thought,
-            observations=[observation.model_dump(mode="json")],
+            observations=[item.model_dump(mode="json") for item in observations],
             route_context=route_context,
             recent_messages=recent_messages,
         )
@@ -146,6 +110,133 @@ class AgenticRAGPipeline:
         if result.answer_markdown:
             yield json.dumps({"chunk": result.answer_markdown}) + "\n"
         yield json.dumps({"done": result.model_dump(mode="json")}) + "\n"
+
+    async def _run_tool_steps(
+        self,
+        *,
+        message: str,
+        intent: str,
+        thought: Any,
+        slots: AgentSlots,
+        route_context: RouteContext | None,
+        recent_messages: list[dict],
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None,
+    ) -> list[AgenticRAGObservation]:
+        observations: list[AgenticRAGObservation] = []
+        tool_fingerprints: set[tuple[str, str]] = set()
+        for _step in range(self.max_tool_steps):
+            tool_call = self.router.rag_act(
+                message=message,
+                thought=thought,
+                slots=slots,
+                route_context=route_context,
+                recent_messages=recent_messages,
+                observations=[item.model_dump(mode="json") for item in observations],
+            )
+            tool_call = self._enrich_tool_call_from_observations(tool_call, observations)
+            fingerprint = (
+                tool_call.tool,
+                json.dumps(tool_call.arguments, sort_keys=True, ensure_ascii=False),
+            )
+            if fingerprint in tool_fingerprints:
+                break
+            tool_fingerprints.add(fingerprint)
+
+            tool_observation = await self.tool_executor.execute(
+                tool_call,
+                message=message,
+                intent=intent,
+                slots=slots,
+                allowed_course_ids=allowed_course_ids,
+                current_path_course_ids=current_path_course_ids,
+                route_context=route_context,
+            )
+            try:
+                observation = self.router.rag_observe(
+                    message=message,
+                    thought=thought,
+                    tool_call=tool_call,
+                    tool_observation=tool_observation,
+                    route_context=route_context,
+                    recent_messages=recent_messages,
+                )
+            except AgentRouterUnavailableError:
+                observation = tool_observation
+            observation = self._validated_observation(observation, tool_observation)
+            observations.append(observation)
+            if not self._should_continue_after_observation(observation):
+                break
+        return observations
+
+    @classmethod
+    def _enrich_tool_call_from_observations(cls, tool_call, observations):
+        if tool_call.tool != "get_lecture_context":
+            return tool_call
+        arguments = dict(tool_call.arguments or {})
+        if arguments.get("canonical_unit_id"):
+            return tool_call
+        resolved_unit_id = cls._extract_canonical_unit_id_from_observations(observations)
+        if not resolved_unit_id:
+            return tool_call
+        arguments["canonical_unit_id"] = resolved_unit_id
+        return tool_call.model_copy(update={"arguments": arguments})
+
+    @classmethod
+    def _extract_canonical_unit_id_from_observations(cls, observations) -> str | None:
+        for observation in reversed(observations):
+            learner_context = observation.result.metadata.get("learner_context")
+            if not isinstance(learner_context, dict):
+                continue
+            current_state = learner_context.get("current_learning_state")
+            if isinstance(current_state, dict):
+                current_unit = current_state.get("current_unit")
+                if isinstance(current_unit, dict) and current_unit.get("canonical_unit_id"):
+                    return str(current_unit["canonical_unit_id"])
+            recent_progress = learner_context.get("recent_progress")
+            if isinstance(recent_progress, list):
+                for item in recent_progress:
+                    if isinstance(item, dict) and item.get("canonical_unit_id"):
+                        return str(item["canonical_unit_id"])
+            path_position = learner_context.get("path_position")
+            if isinstance(path_position, dict):
+                for key in ("current_unit", "next_unfinished_unit", "next_unit", "previous_unit"):
+                    node = path_position.get(key)
+                    if isinstance(node, dict) and node.get("canonical_unit_id"):
+                        return str(node["canonical_unit_id"])
+        return None
+
+    @staticmethod
+    def _should_continue_after_observation(observation: AgenticRAGObservation) -> bool:
+        if observation.tool != "get_user_learning_context":
+            return False
+        result = observation.result
+        if result.answer_markdown or result.citations or result.actions:
+            return False
+        learner_context = result.metadata.get("learner_context")
+        if not isinstance(learner_context, dict) or not learner_context:
+            return False
+        return AgenticRAGPipeline._learner_context_resolves_unit(learner_context)
+
+    @staticmethod
+    def _learner_context_resolves_unit(learner_context: dict) -> bool:
+        current_state = learner_context.get("current_learning_state")
+        if isinstance(current_state, dict):
+            current_unit = current_state.get("current_unit")
+            if isinstance(current_unit, dict) and current_unit.get("canonical_unit_id"):
+                return True
+        recent_progress = learner_context.get("recent_progress")
+        if isinstance(recent_progress, list):
+            for item in recent_progress:
+                if isinstance(item, dict) and item.get("canonical_unit_id"):
+                    return True
+        path_position = learner_context.get("path_position")
+        if isinstance(path_position, dict):
+            for key in ("current_unit", "next_unfinished_unit", "next_unit", "previous_unit"):
+                node = path_position.get(key)
+                if isinstance(node, dict) and node.get("canonical_unit_id"):
+                    return True
+        return False
 
     def _validated_observation(
         self,
