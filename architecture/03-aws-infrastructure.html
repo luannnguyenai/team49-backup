@@ -1,836 +1,144 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AWS Infrastructure — AI Adaptive Learning Platform</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
-    .header {
-      padding: 14px 28px; background: #232f3e; color: #fff;
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
-      border-bottom: 3px solid #ff9900;
-    }
-    .header-left h1 { font-size: 1.1rem; font-weight: 700; color: #ff9900; }
-    .header-left p { color: #90a4b4; font-size: 0.78rem; margin-top: 2px; }
-    .nav { display: flex; gap: 5px; flex-wrap: wrap; }
-    .nav a {
-      color: #90a4b4; text-decoration: none; padding: 5px 12px; border-radius: 4px;
-      font-size: 0.78rem; border: 1px solid #37474f; transition: all 0.2s; white-space: nowrap;
-    }
-    .nav a:hover { color: #fff; border-color: #ff9900; }
-    .nav a.active { background: #ff9900; color: #232f3e; border-color: #ff9900; font-weight: 700; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Infrastructure — A20-App-049</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F0F2F5; padding: 40px 24px; color: #16213E; }
+.back { display: inline-block; margin-bottom: 20px; font-size: 13px; color: #4A90D9; text-decoration: none; }
+.page-header { text-align: center; margin-bottom: 40px; }
+.page-header h1 { font-size: 22px; font-weight: 700; color: #232F3E; }
+.page-header p { font-size: 13px; color: #888; margin-top: 6px; }
 
-    .specs-bar {
-      display: flex; gap: 0; background: #fff; border-bottom: 1px solid #dde3ea;
-      overflow-x: auto; padding: 0;
-    }
-    .spec-item {
-      padding: 12px 20px; border-right: 1px solid #eee; min-width: 160px; flex-shrink: 0;
-    }
-    .spec-item h4 { font-size: 0.68rem; color: #ff9900; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
-    .spec-item p { font-size: 0.73rem; color: #546878; line-height: 1.5; }
-    .spec-item code { background: #f4f6f8; padding: 1px 4px; border-radius: 3px; color: #c7511f; font-size: 0.68rem; }
+.canvas { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-    .diagram-section { padding: 20px 24px; }
-    .section-title {
-      font-size: 0.82rem; font-weight: 700; color: #546878; text-transform: uppercase;
-      letter-spacing: .08em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
-    }
-    .section-title::after { content: ''; flex: 1; height: 1px; background: #dde3ea; }
+/* service box */
+.svc { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1.5px solid transparent; white-space: nowrap; }
+.svc-note { font-size: 10px; font-weight: 400; opacity: 0.7; }
+.svc-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
-    .svg-wrapper {
-      background: #fff; border: 1px solid #dde3ea; border-radius: 8px;
-      padding: 8px; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,.06);
-    }
-    svg { display: block; }
+/* zone containers */
+.zone { border-radius: 12px; padding: 16px 20px; }
+.zone-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
 
-    /* Legend */
-    .legend {
-      display: flex; flex-wrap: wrap; gap: 14px; padding: 14px 24px;
-      background: #fff; border-top: 1px solid #eee; border-bottom: 1px solid #eee;
-      margin-bottom: 4px;
-    }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.73rem; color: #546878; }
-    .legend-dot { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
-  </style>
+.zone-internet { background: #F9FAFB; border: 1.5px solid #E5E7EB; }
+.zone-vpc      { background: #FFFBEB; border: 2px solid #F59E0B; }
+.zone-public   { background: #EFF6FF; border: 2px dashed #93C5FD; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.zone-private  { background: #F0FDF4; border: 2px dashed #86EFAC; border-radius: 8px; padding: 14px 16px; }
+.zone-ext      { background: #F5F3FF; border: 1.5px solid #C4B5FD; border-radius: 12px; padding: 14px 20px; }
+.zone-cicd     { background: #FFF7ED; border: 1.5px solid #FED7AA; border-radius: 12px; padding: 14px 20px; }
+
+.vpc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #D97706; margin-bottom: 10px; }
+.subnet-label { font-size: 10px; font-weight: 600; color: #6B7280; margin-bottom: 8px; }
+.ext-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #7C3AED; margin-bottom: 10px; }
+.cicd-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #C2410C; margin-bottom: 10px; }
+
+/* arrow row */
+.flow-arrow { text-align: center; font-size: 20px; color: #9CA3AF; height: 28px; display: flex; align-items: center; justify-content: center; }
+.side-by-side { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* colors */
+.c-user  { background:#EEF4FF; border-color:#4A90D9; color:#1B4F8A; }
+.c-cdn   { background:#FFF3E0; border-color:#FF9900; color:#7D3C00; }
+.c-net   { background:#FFF3E0; border-color:#E8810B; color:#7D3C00; }
+.c-app   { background:#FEF0E8; border-color:#E7500A; color:#7B2A0A; }
+.c-ai    { background:#F5EEF8; border-color:#8E44AD; color:#5B2C6F; }
+.c-db    { background:#EAF4FB; border-color:#1565C0; color:#0D4080; }
+.c-store { background:#EAFAF1; border-color:#27AE60; color:#1A6E3A; }
+.c-obs   { background:#E8F8F5; border-color:#00A1C9; color:#005F6B; }
+.c-cicd  { background:#FEF9E7; border-color:#D4AC0D; color:#7D6608; }
+.c-sec   { background:#FEF2F2; border-color:#DC2626; color:#7F1D1D; }
+.c-ext   { background:#F5F3FF; border-color:#7C3AED; color:#4C1D95; }
+</style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-left">
-    <h1>AWS Infrastructure</h1>
-    <p>03 · VPC · ECS Fargate · RDS · ElastiCache · S3/CloudFront · CI/CD · Observability</p>
-  </div>
-  <nav class="nav">
-    <a href="index.html">← Hub</a>
-    <a href="01-system-overview.html">01 Overview</a>
-    <a href="02-agentic-rag-pipeline.html">02 RAG Pipeline</a>
-    <a href="03-aws-infrastructure.html" class="active">03 AWS Infra</a>
-    <a href="04-request-lifecycle.html">04 Request Flow</a>
-    <a href="05-data-schema.html">05 DB Schema</a>
-  </nav>
+<a class="back" href="index.html">← Architecture Hub</a>
+
+<div class="page-header">
+  <h1>AWS Infrastructure</h1>
+  <p>Production deployment on AWS ECS Fargate · VPC · RDS · ElastiCache · S3 · CloudFront</p>
 </div>
 
-<div class="specs-bar">
-  <div class="spec-item">
-    <h4>ECS Cluster</h4>
-    <p>Cluster: <code>a20-prod-cluster</code><br>Frontend: <code>a20-frontend</code><br>Backend: <code>a20-backend</code><br>Runtime: Fargate (serverless)</p>
+<div class="canvas">
+
+  <!-- INTERNET TIER -->
+  <div class="zone zone-internet">
+    <div class="zone-title" style="color:#6B7280">🌐 Internet / Users</div>
+    <div class="svc-row">
+      <div class="svc c-user">👤 Learner Browser</div>
+      <div class="svc c-cdn">☁️ CloudFront CDN <span class="svc-note">a20-app-049.io.vn · Signed URLs for S3 assets</span></div>
+      <div class="svc c-store">📦 S3 Bucket <span class="svc-note">Videos · Slides · Transcripts</span></div>
+    </div>
   </div>
-  <div class="spec-item">
-    <h4>Databases</h4>
-    <p>RDS: PostgreSQL 16 + pgvector<br>ElastiCache: Redis 7 / Valkey<br>Both in private subnet<br>Backend SG ingress only</p>
+
+  <div class="flow-arrow">↓ HTTPS</div>
+
+  <!-- ALB -->
+  <div class="svc-row" style="justify-content:center;">
+    <div class="svc c-net" style="padding:12px 24px;font-size:14px;">⚖️ Application Load Balancer <span class="svc-note">SSL Termination · Path-based routing / → Frontend · /api → Backend</span></div>
   </div>
-  <div class="spec-item">
-    <h4>Assets / CDN</h4>
-    <p>S3: private bucket, IAM OAC<br>CloudFront: cdn.a20-app-049.io.vn<br>Signed URLs (1h expiry)<br>Browser fetches CDN direct</p>
+
+  <div class="flow-arrow">↓</div>
+
+  <!-- VPC -->
+  <div class="zone zone-vpc">
+    <div class="vpc-label">🏢 AWS VPC</div>
+
+    <!-- Public Subnet -->
+    <div class="zone zone-public">
+      <div class="subnet-label">Public Subnet — ECS Fargate Tasks</div>
+      <div class="svc-row">
+        <div class="svc c-app">▪ Next.js 14 <span class="svc-note">Frontend · SSR · RSC</span></div>
+        <div class="svc c-app">▪ FastAPI <span class="svc-note">Backend API · REST + SSE streaming</span></div>
+        <div class="svc c-obs">📊 Prometheus / Grafana / Loki <span class="svc-note">Observability stack on ECS</span></div>
+      </div>
+    </div>
+
+    <!-- Private Subnet -->
+    <div class="zone zone-private">
+      <div class="subnet-label">Private Subnet — Managed Data Services</div>
+      <div class="svc-row">
+        <div class="svc c-db">🗄 RDS PostgreSQL 16 <span class="svc-note">+ pgvector · Multi-AZ</span></div>
+        <div class="svc c-db">⚡ ElastiCache Redis <span class="svc-note">Sessions · Rate limiting · Token denylist</span></div>
+      </div>
+    </div>
   </div>
-  <div class="spec-item">
-    <h4>Secrets</h4>
-    <p>Secrets Manager: DB_URL, REDIS_URL<br>API keys · vLLM endpoint<br>ECS injects via <code>secrets[]</code></p>
+
+  <!-- Side-by-side: External + CI/CD -->
+  <div class="side-by-side">
+
+    <!-- EXTERNAL vLLM -->
+    <div class="zone zone-ext">
+      <div class="ext-label">🔌 External AI Serving</div>
+      <div class="svc-row">
+        <div class="svc c-ext">🖥 EC2 Instance <span class="svc-note">vLLM · Qwen3.5-0.8B + 4B LoRA</span></div>
+        <div class="svc c-ext">🌐 Cloudflare Tunnel <span class="svc-note">Secure OpenAI-compatible endpoint</span></div>
+      </div>
+    </div>
+
+    <!-- CI/CD -->
+    <div class="zone zone-cicd">
+      <div class="cicd-label">⚙️ CI / CD Pipeline</div>
+      <div class="svc-row" style="gap:6px;">
+        <div class="svc c-cicd" style="font-size:11px;">🔀 GitHub Push</div>
+        <div style="color:#9CA3AF;font-size:16px;">→</div>
+        <div class="svc c-cicd" style="font-size:11px;">⚙️ GitHub Actions <span class="svc-note">EC2 self-hosted</span></div>
+        <div style="color:#9CA3AF;font-size:16px;">→</div>
+        <div class="svc c-cicd" style="font-size:11px;">📦 ECR</div>
+        <div style="color:#9CA3AF;font-size:16px;">→</div>
+        <div class="svc c-cicd" style="font-size:11px;">🚀 ECS Deploy</div>
+      </div>
+      <div style="margin-top:10px;" class="svc-row">
+        <div class="svc c-sec" style="font-size:11px;">🔑 Secrets Manager <span class="svc-note">DB · Redis · API keys → ECS task env</span></div>
+        <div class="svc c-cicd" style="font-size:11px;">🏗 Terraform <span class="svc-note">IaC — all resources</span></div>
+      </div>
+    </div>
+
   </div>
-  <div class="spec-item">
-    <h4>CI/CD</h4>
-    <p>Self-hosted EC2 runner<br><code>build-push.yml</code> → ECR<br><code>deploy-ecs-prod.yml</code><br>OIDC keyless AWS auth</p>
-  </div>
-  <div class="spec-item">
-    <h4>Observability</h4>
-    <p>Prometheus: <code>/metrics</code> scrape<br>Grafana: dashboards<br>Loki: log aggregation<br>Langfuse: LLM tracing</p>
-  </div>
-</div>
 
-<div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:#8C4FFF"></div> Networking &amp; CDN</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#E7500A"></div> Compute (ECS/EC2)</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#3DAA35"></div> Storage (S3)</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#1565C0"></div> Database</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#DD344C"></div> Security &amp; Identity</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#E7500A; opacity:0.5"></div> Management</div>
-  <div class="legend-item">
-    <div style="width:28px;height:14px;border:2px dashed #FF9900;border-radius:3px"></div> VPC
-  </div>
-  <div class="legend-item">
-    <div style="width:28px;height:14px;border:2px dashed #007DC1;border-radius:3px"></div> Subnet
-  </div>
-  <div class="legend-item">
-    <div style="width:28px;height:14px;border:2px dashed #E7500A;border-radius:3px"></div> ECS Cluster
-  </div>
-</div>
-
-<div class="diagram-section">
-  <div class="section-title">AWS Cloud Architecture — Production</div>
-  <div class="svg-wrapper">
-    <svg viewBox="0 0 1560 980" width="1560" height="980" xmlns="http://www.w3.org/2000/svg" font-family="'Helvetica Neue',Arial,sans-serif">
-      <defs>
-        <!-- Arrowhead markers -->
-        <marker id="arrow-dark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#232f3e"/>
-        </marker>
-        <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#007DC1"/>
-        </marker>
-        <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#E7500A"/>
-        </marker>
-        <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#8C4FFF"/>
-        </marker>
-        <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#3DAA35"/>
-        </marker>
-        <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#90a4b4"/>
-        </marker>
-        <!-- Gradients -->
-        <linearGradient id="grad-compute" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stop-color="#D05C17"/>
-          <stop offset="100%" stop-color="#F78E04"/>
-        </linearGradient>
-        <linearGradient id="grad-storage" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stop-color="#116D5B"/>
-          <stop offset="100%" stop-color="#4AB29A"/>
-        </linearGradient>
-        <linearGradient id="grad-security" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stop-color="#BC1356"/>
-          <stop offset="100%" stop-color="#F34482"/>
-        </linearGradient>
-      </defs>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- INTERNET ZONE -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <rect x="5" y="5" width="158" height="970" rx="4" fill="#FFFBF0" stroke="#B8860B" stroke-width="1.5" stroke-dasharray="5 3"/>
-      <text x="84" y="24" text-anchor="middle" font-size="11" font-weight="bold" fill="#B8860B">Internet</text>
-
-      <!-- User Browser icon -->
-      <g transform="translate(36, 50)">
-        <rect x="0" y="0" width="48" height="48" rx="6" fill="#8C4FFF"/>
-        <!-- User/Browser icon (simplified) -->
-        <circle cx="24" cy="16" r="8" fill="none" stroke="#fff" stroke-width="2"/>
-        <path d="M8 40 C8 30 40 30 40 40" fill="none" stroke="#fff" stroke-width="2"/>
-        <text x="24" y="62" text-anchor="middle" font-size="9" fill="#546878" font-weight="600">User Browser</text>
-        <text x="24" y="73" text-anchor="middle" font-size="8" fill="#90a4b4">a20-app-049.io.vn</text>
-      </g>
-
-      <!-- GitHub Actions icon -->
-      <g transform="translate(36, 200)">
-        <rect x="0" y="0" width="48" height="48" rx="6" fill="#24292e"/>
-        <!-- GitHub Octocat simplified -->
-        <circle cx="24" cy="20" r="10" fill="none" stroke="#fff" stroke-width="2"/>
-        <circle cx="24" cy="20" r="4" fill="#fff"/>
-        <path d="M14 28 Q24 38 34 28" fill="none" stroke="#fff" stroke-width="2"/>
-        <text x="24" y="62" text-anchor="middle" font-size="9" fill="#546878" font-weight="600">GitHub Actions</text>
-        <text x="24" y="73" text-anchor="middle" font-size="8" fill="#90a4b4">EC2 Self-hosted Runner</text>
-      </g>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- AWS CLOUD BOX -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <rect x="170" y="5" width="1380" height="970" rx="4" fill="#FAFBFC" stroke="#232f3e" stroke-width="1.5" stroke-dasharray="6 3"/>
-      <!-- AWS Cloud label with logo-style text -->
-      <rect x="170" y="5" width="110" height="22" rx="4" fill="#232f3e"/>
-      <text x="225" y="20" text-anchor="middle" font-size="11" font-weight="bold" fill="#FF9900">AWS Cloud</text>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- GLOBAL SERVICES ROW (top strip, outside VPC) -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <text x="188" y="44" font-size="9" fill="#90a4b4" font-weight="600" text-transform="uppercase">Global / Regional Services</text>
-
-      <!-- Route 53 -->
-      <g transform="translate(186, 52)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="#8C4FFF"/>
-        <circle cx="22" cy="22" r="12" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <line x1="22" y1="10" x2="22" y2="34" stroke="#fff" stroke-width="1.5"/>
-        <line x1="10" y1="22" x2="34" y2="22" stroke="#fff" stroke-width="1.5"/>
-        <path d="M10 16 Q22 12 34 16" fill="none" stroke="#fff" stroke-width="1"/>
-        <path d="M10 28 Q22 32 34 28" fill="none" stroke="#fff" stroke-width="1"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#546878" font-weight="600">Route 53</text>
-        <text x="22" y="68" text-anchor="middle" font-size="8" fill="#90a4b4">DNS</text>
-      </g>
-
-      <!-- ACM -->
-      <g transform="translate(296, 52)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="url(#grad-security)"/>
-        <rect x="11" y="18" width="22" height="16" rx="2" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <path d="M15 18 L15 13 Q22 8 29 13 L29 18" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <circle cx="22" cy="25" r="3" fill="#fff"/>
-        <line x1="22" y1="28" x2="22" y2="31" stroke="#fff" stroke-width="1.5"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#546878" font-weight="600">ACM</text>
-        <text x="22" y="68" text-anchor="middle" font-size="8" fill="#90a4b4">TLS Certificate</text>
-      </g>
-
-      <!-- ECR -->
-      <g transform="translate(406, 52)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="url(#grad-compute)"/>
-        <rect x="8" y="10" width="28" height="24" rx="2" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <line x1="8" y1="18" x2="36" y2="18" stroke="#fff" stroke-width="1"/>
-        <rect x="12" y="22" width="8" height="8" rx="1" fill="#fff" opacity="0.7"/>
-        <rect x="24" y="22" width="8" height="8" rx="1" fill="#fff" opacity="0.9"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#546878" font-weight="600">ECR</text>
-        <text x="22" y="68" text-anchor="middle" font-size="8" fill="#90a4b4">Container Registry</text>
-      </g>
-
-      <!-- CloudWatch -->
-      <g transform="translate(516, 52)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="#E7500A"/>
-        <circle cx="22" cy="22" r="10" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <circle cx="22" cy="22" r="4" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <line x1="22" y1="12" x2="22" y2="15" stroke="#fff" stroke-width="1.5"/>
-        <line x1="22" y1="29" x2="22" y2="32" stroke="#fff" stroke-width="1.5"/>
-        <line x1="12" y1="22" x2="15" y2="22" stroke="#fff" stroke-width="1.5"/>
-        <line x1="29" y1="22" x2="32" y2="22" stroke="#fff" stroke-width="1.5"/>
-        <path d="M14 28 L18 22 L22 25 L26 18 L30 22" fill="none" stroke="#fff" stroke-width="1.2"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#546878" font-weight="600">CloudWatch</text>
-        <text x="22" y="68" text-anchor="middle" font-size="8" fill="#90a4b4">Logs &amp; Metrics</text>
-      </g>
-
-      <!-- Secrets Manager -->
-      <g transform="translate(626, 52)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="url(#grad-security)"/>
-        <circle cx="17" cy="20" r="7" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <circle cx="17" cy="20" r="3" fill="#fff"/>
-        <line x1="24" y1="20" x2="38" y2="20" stroke="#fff" stroke-width="1.5"/>
-        <line x1="34" y1="20" x2="34" y2="26" stroke="#fff" stroke-width="1.5"/>
-        <line x1="30" y1="20" x2="30" y2="24" stroke="#fff" stroke-width="1.5"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#546878" font-weight="600">Secrets Manager</text>
-        <text x="22" y="68" text-anchor="middle" font-size="8" fill="#90a4b4">DB · API Keys</text>
-      </g>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- VPC BOX -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <rect x="180" y="140" width="730" height="820" rx="4" fill="#FFFDF5" stroke="#FF9900" stroke-width="2"/>
-      <rect x="180" y="140" width="140" height="18" rx="3" fill="#FF9900"/>
-      <text x="250" y="153" text-anchor="middle" font-size="10" font-weight="bold" fill="#fff">VPC  a20-prod-vpc</text>
-      <!-- VPC CIDR -->
-      <text x="338" y="153" font-size="9" fill="#FF9900">10.0.0.0/16</text>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- PUBLIC SUBNET -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <rect x="195" y="168" width="700" height="160" rx="3" fill="#E8F4FD" stroke="#007DC1" stroke-width="1.5" stroke-dasharray="6 3"/>
-      <text x="208" y="183" font-size="9" font-weight="600" fill="#007DC1">Public Subnet — 10.0.1.0/24</text>
-
-      <!-- ALB icon -->
-      <g transform="translate(226, 194)">
-        <rect x="0" y="0" width="50" height="50" rx="6" fill="#8C4FFF"/>
-        <!-- ALB icon: three nodes to one -->
-        <circle cx="12" cy="12" r="4" fill="#fff"/>
-        <circle cx="12" cy="25" r="4" fill="#fff"/>
-        <circle cx="12" cy="38" r="4" fill="#fff"/>
-        <circle cx="38" cy="25" r="6" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <line x1="16" y1="12" x2="32" y2="22" stroke="#fff" stroke-width="1.2"/>
-        <line x1="16" y1="25" x2="32" y2="25" stroke="#fff" stroke-width="1.2"/>
-        <line x1="16" y1="38" x2="32" y2="28" stroke="#fff" stroke-width="1.2"/>
-        <text x="25" y="65" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">ALB</text>
-        <text x="25" y="76" text-anchor="middle" font-size="8" fill="#546878">app.* / api.*</text>
-        <text x="25" y="86" text-anchor="middle" font-size="7.5" fill="#90a4b4">HTTPS:443</text>
-      </g>
-
-      <!-- NAT Gateway icon -->
-      <g transform="translate(560, 194)">
-        <rect x="0" y="0" width="50" height="50" rx="6" fill="#8C4FFF"/>
-        <!-- NAT: arrow through gateway -->
-        <rect x="10" y="18" width="30" height="14" rx="3" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <path d="M18 8 L18 18 M14 12 L18 8 L22 12" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <path d="M32 42 L32 32 M28 38 L32 42 L36 38" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <text x="25" y="14" text-anchor="middle" font-size="7" fill="#fff">OUT</text>
-        <text x="25" y="65" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">NAT Gateway</text>
-        <text x="25" y="76" text-anchor="middle" font-size="8" fill="#546878">Controlled Egress</text>
-      </g>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- PRIVATE SUBNET -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <rect x="195" y="345" width="700" height="595" rx="3" fill="#F5F9F2" stroke="#007DC1" stroke-width="1.5" stroke-dasharray="6 3"/>
-      <text x="208" y="360" font-size="9" font-weight="600" fill="#007DC1">Private Subnet — 10.0.2.0/24</text>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- ECS FARGATE CLUSTER -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <rect x="210" y="370" width="430" height="555" rx="3" fill="#FFF5EE" stroke="#E7500A" stroke-width="1.5" stroke-dasharray="5 3"/>
-      <rect x="210" y="370" width="170" height="16" rx="2" fill="#E7500A"/>
-      <text x="295" y="382" text-anchor="middle" font-size="9" font-weight="bold" fill="#fff">ECS Fargate Cluster</text>
-      <text x="390" y="382" font-size="8" fill="#E7500A">a20-prod-cluster</text>
-
-      <!-- Frontend Task -->
-      <rect x="225" y="395" width="185" height="105" rx="4" fill="#fff" stroke="#E7500A" stroke-width="1.2"/>
-      <!-- ECS Fargate icon -->
-      <g transform="translate(232, 402)">
-        <rect x="0" y="0" width="36" height="36" rx="4" fill="url(#grad-compute)"/>
-        <!-- Fargate F-shaped icon -->
-        <rect x="8" y="8" width="20" height="4" rx="1" fill="#fff"/>
-        <rect x="8" y="15" width="14" height="3" rx="1" fill="#fff"/>
-        <rect x="8" y="21" width="20" height="4" rx="1" fill="#fff"/>
-        <rect x="8" y="28" width="4" height="6" rx="1" fill="#fff"/>
-      </g>
-      <text x="275" y="414" font-size="9" font-weight="700" fill="#232f3e">Frontend Task</text>
-      <text x="232" y="448" font-size="8" fill="#546878">Next.js 14 standalone</text>
-      <text x="232" y="459" font-size="8" fill="#546878">node server.js  PORT 3000</text>
-      <text x="232" y="470" font-size="8" fill="#007DC1">a20-frontend service</text>
-      <rect x="232" y="478" width="65" height="14" rx="3" fill="#E8F4FD"/>
-      <text x="264" y="489" text-anchor="middle" font-size="7.5" fill="#007DC1">0.25 vCPU / 0.5 GB</text>
-
-      <!-- Backend Task -->
-      <rect x="225" y="515" width="185" height="105" rx="4" fill="#fff" stroke="#E7500A" stroke-width="1.2"/>
-      <g transform="translate(232, 522)">
-        <rect x="0" y="0" width="36" height="36" rx="4" fill="url(#grad-compute)"/>
-        <rect x="8" y="8" width="20" height="4" rx="1" fill="#fff"/>
-        <rect x="8" y="15" width="14" height="3" rx="1" fill="#fff"/>
-        <rect x="8" y="21" width="20" height="4" rx="1" fill="#fff"/>
-        <rect x="8" y="28" width="4" height="6" rx="1" fill="#fff"/>
-      </g>
-      <text x="275" y="534" font-size="9" font-weight="700" fill="#232f3e">Backend Task</text>
-      <text x="232" y="568" font-size="8" fill="#546878">FastAPI + uvicorn</text>
-      <text x="232" y="579" font-size="8" fill="#546878">PORT 8000</text>
-      <text x="232" y="590" font-size="8" fill="#007DC1">a20-backend service</text>
-      <rect x="232" y="598" width="65" height="14" rx="3" fill="#E8F4FD"/>
-      <text x="264" y="609" text-anchor="middle" font-size="7.5" fill="#007DC1">0.5 vCPU / 1 GB</text>
-
-      <!-- One-off Tasks (inside ECS cluster) -->
-      <rect x="428" y="395" width="198" height="515" rx="4" fill="#FFF8F5" stroke="#E7500A" stroke-width="1" stroke-dasharray="4 2"/>
-      <text x="527" y="410" text-anchor="middle" font-size="8.5" font-weight="700" fill="#E7500A">One-off Tasks</text>
-      <text x="527" y="421" text-anchor="middle" font-size="7.5" fill="#90a4b4">CI/CD triggered</text>
-
-      <!-- migrate task -->
-      <rect x="440" y="432" width="174" height="60" rx="3" fill="#fff" stroke="#E7500A" stroke-width="1"/>
-      <g transform="translate(446, 438)">
-        <rect x="0" y="0" width="28" height="28" rx="3" fill="url(#grad-compute)"/>
-        <path d="M7 14 L14 8 L21 14 M14 8 L14 22" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <path d="M7 20 L14 26 L21 20" fill="none" stroke="#fff" stroke-width="1.2" opacity="0.6"/>
-      </g>
-      <text x="480" y="448" font-size="8.5" font-weight="700" fill="#232f3e">migrate</text>
-      <text x="480" y="460" font-size="7.5" fill="#546878">alembic upgrade head</text>
-      <text x="480" y="471" font-size="7.5" fill="#546878">DB schema migrations</text>
-      <text x="480" y="483" font-size="7.5" fill="#90a4b4">Runs after deploy</text>
-
-      <!-- seed-core task -->
-      <rect x="440" y="502" width="174" height="60" rx="3" fill="#fff" stroke="#E7500A" stroke-width="1"/>
-      <g transform="translate(446, 508)">
-        <rect x="0" y="0" width="28" height="28" rx="3" fill="url(#grad-compute)"/>
-        <rect x="6" y="6" width="16" height="16" rx="2" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <line x1="9" y1="12" x2="19" y2="12" stroke="#fff" stroke-width="1"/>
-        <line x1="9" y1="16" x2="16" y2="16" stroke="#fff" stroke-width="1"/>
-        <line x1="9" y1="20" x2="19" y2="20" stroke="#fff" stroke-width="1"/>
-      </g>
-      <text x="480" y="518" font-size="8.5" font-weight="700" fill="#232f3e">seed-core</text>
-      <text x="480" y="530" font-size="7.5" fill="#546878">import canonical JSONL</text>
-      <text x="480" y="541" font-size="7.5" fill="#546878">from S3 bundle</text>
-      <text x="480" y="553" font-size="7.5" fill="#90a4b4">First-time / after migration</text>
-
-      <!-- sync-schema task -->
-      <rect x="440" y="572" width="174" height="60" rx="3" fill="#fff" stroke="#E7500A" stroke-width="1"/>
-      <g transform="translate(446, 578)">
-        <rect x="0" y="0" width="28" height="28" rx="3" fill="url(#grad-compute)"/>
-        <path d="M8 14 A6 6 0 1 1 14 20" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <path d="M11 18 L8 21 L5 18" fill="none" stroke="#fff" stroke-width="1.5"/>
-      </g>
-      <text x="480" y="588" font-size="8.5" font-weight="700" fill="#232f3e">sync-schema-v2</text>
-      <text x="480" y="600" font-size="7.5" fill="#546878">backfill + parity check</text>
-      <text x="480" y="611" font-size="7.5" fill="#546878">canonical schema sync</text>
-      <text x="480" y="623" font-size="7.5" fill="#90a4b4">Manual trigger</text>
-
-      <!-- seed-accounts task -->
-      <rect x="440" y="642" width="174" height="60" rx="3" fill="#fff" stroke="#E7500A" stroke-width="1"/>
-      <g transform="translate(446, 648)">
-        <rect x="0" y="0" width="28" height="28" rx="3" fill="url(#grad-compute)"/>
-        <circle cx="14" cy="11" r="5" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <path d="M7 24 C7 18 21 18 21 24" fill="none" stroke="#fff" stroke-width="1.5"/>
-      </g>
-      <text x="480" y="658" font-size="8.5" font-weight="700" fill="#232f3e">seed-accounts</text>
-      <text x="480" y="670" font-size="7.5" fill="#546878">demo@vinuni.edu.vn</text>
-      <text x="480" y="681" font-size="7.5" fill="#546878">admin accounts</text>
-      <text x="480" y="693" font-size="7.5" fill="#90a4b4">Manual trigger</text>
-
-      <!-- vLLM self-hosted task -->
-      <rect x="440" y="712" width="174" height="60" rx="3" fill="#fff" stroke="#E7500A" stroke-width="1"/>
-      <g transform="translate(446, 718)">
-        <rect x="0" y="0" width="28" height="28" rx="3" fill="#8C4FFF"/>
-        <path d="M14 6 L20 18 L8 18 Z" fill="#fff"/>
-        <path d="M10 20 L14 26 L18 20" fill="none" stroke="#fff" stroke-width="1.2"/>
-      </g>
-      <text x="480" y="728" font-size="8.5" font-weight="700" fill="#232f3e">vLLM Service</text>
-      <text x="480" y="740" font-size="7.5" fill="#546878">Qwen3.5-0.8B LoRA</text>
-      <text x="480" y="751" font-size="7.5" fill="#546878">Qwen3.5-4B LoRA</text>
-      <text x="480" y="763" font-size="7.5" fill="#90a4b4">Cloudflare Tunnel</text>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- RDS PostgreSQL (Private Subnet, right side) -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <g transform="translate(660, 378)">
-        <rect x="0" y="0" width="52" height="52" rx="6" fill="#1565C0"/>
-        <!-- DB cylinder icon -->
-        <ellipse cx="26" cy="16" rx="14" ry="6" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <rect x="12" y="16" width="28" height="18" fill="#1565C0"/>
-        <ellipse cx="26" cy="34" rx="14" ry="6" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <line x1="12" y1="16" x2="12" y2="34" stroke="#fff" stroke-width="1.5"/>
-        <line x1="40" y1="16" x2="40" y2="34" stroke="#fff" stroke-width="1.5"/>
-        <text x="26" y="66" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">RDS PostgreSQL</text>
-        <text x="26" y="77" text-anchor="middle" font-size="8" fill="#546878">PostgreSQL 16</text>
-        <text x="26" y="87" text-anchor="middle" font-size="7.5" fill="#007DC1">+ pgvector ext</text>
-        <text x="26" y="98" text-anchor="middle" font-size="7.5" fill="#90a4b4">Private · port 5432</text>
-      </g>
-
-      <!-- ElastiCache Redis -->
-      <g transform="translate(660, 510)">
-        <rect x="0" y="0" width="52" height="52" rx="6" fill="#BC1356"/>
-        <!-- Redis lightning bolt -->
-        <path d="M30 8 L18 27 L26 27 L20 44 L34 24 L26 24 Z" fill="#fff"/>
-        <text x="26" y="66" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">ElastiCache</text>
-        <text x="26" y="77" text-anchor="middle" font-size="8" fill="#546878">Redis 7 / Valkey</text>
-        <text x="26" y="87" text-anchor="middle" font-size="7.5" fill="#007DC1">Session Cache</text>
-        <text x="26" y="98" text-anchor="middle" font-size="7.5" fill="#90a4b4">Private · port 6379</text>
-      </g>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- S3 + CLOUDFRONT (right panel) -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <rect x="925" y="140" width="420" height="195" rx="4" fill="#F0FBF0" stroke="#3DAA35" stroke-width="1.5"/>
-      <text x="938" y="158" font-size="9" font-weight="700" fill="#3DAA35">Assets &amp; CDN</text>
-
-      <!-- S3 Bucket -->
-      <g transform="translate(948, 168)">
-        <rect x="0" y="0" width="52" height="52" rx="6" fill="url(#grad-storage)"/>
-        <!-- S3 bucket icon -->
-        <path d="M8 18 L26 10 L44 18 L44 38 L26 46 L8 38 Z" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <line x1="8" y1="18" x2="44" y2="18" stroke="#fff" stroke-width="1"/>
-        <ellipse cx="26" cy="18" rx="18" ry="6" fill="none" stroke="#fff" stroke-width="1"/>
-        <text x="26" y="66" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">S3 Private Bucket</text>
-        <text x="26" y="77" text-anchor="middle" font-size="8" fill="#546878">Videos · Slides · Transcripts</text>
-        <text x="26" y="87" text-anchor="middle" font-size="7.5" fill="#546878">Origin Access Control</text>
-        <text x="26" y="98" text-anchor="middle" font-size="7.5" fill="#3DAA35">IAM OAC</text>
-      </g>
-
-      <!-- CloudFront -->
-      <g transform="translate(1135, 168)">
-        <rect x="0" y="0" width="52" height="52" rx="6" fill="#8C4FFF"/>
-        <!-- CloudFront globe icon -->
-        <circle cx="26" cy="26" r="16" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <ellipse cx="26" cy="26" rx="8" ry="16" fill="none" stroke="#fff" stroke-width="1"/>
-        <line x1="10" y1="26" x2="42" y2="26" stroke="#fff" stroke-width="1"/>
-        <line x1="12" y1="19" x2="40" y2="19" stroke="#fff" stroke-width="0.8" opacity="0.7"/>
-        <line x1="12" y1="33" x2="40" y2="33" stroke="#fff" stroke-width="0.8" opacity="0.7"/>
-        <text x="26" y="66" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">CloudFront</text>
-        <text x="26" y="77" text-anchor="middle" font-size="8" fill="#546878">cdn.a20-app-049.io.vn</text>
-        <text x="26" y="87" text-anchor="middle" font-size="7.5" fill="#546878">Signed URLs · 1h TTL</text>
-        <text x="26" y="98" text-anchor="middle" font-size="7.5" fill="#8C4FFF">TLS · Cache Headers</text>
-      </g>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- EXTERNAL APIs PANEL -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <rect x="925" y="352" width="420" height="260" rx="4" fill="#F8F8FF" stroke="#546878" stroke-width="1.5" stroke-dasharray="5 3"/>
-      <text x="938" y="370" font-size="9" font-weight="700" fill="#546878">External APIs — via NAT Gateway</text>
-
-      <!-- OpenAI -->
-      <g transform="translate(945, 380)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="#10A37F"/>
-        <circle cx="22" cy="22" r="12" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <text x="22" y="27" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">AI</text>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">OpenAI</text>
-        <text x="22" y="69" text-anchor="middle" font-size="7.5" fill="#546878">GPT-4o · o1</text>
-      </g>
-
-      <!-- Gemini -->
-      <g transform="translate(1060, 380)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="#4285F4"/>
-        <path d="M22 10 L26 22 L38 22 L28 29 L32 40 L22 34 L12 40 L16 29 L6 22 L18 22 Z" fill="#fff"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">Google Gemini</text>
-        <text x="22" y="69" text-anchor="middle" font-size="7.5" fill="#546878">Gemini 2.0 Flash</text>
-      </g>
-
-      <!-- Anthropic -->
-      <g transform="translate(1175, 380)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="#D4500A"/>
-        <text x="22" y="30" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">A</text>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">Anthropic</text>
-        <text x="22" y="69" text-anchor="middle" font-size="7.5" fill="#546878">Claude Sonnet</text>
-      </g>
-
-      <!-- vLLM self-hosted -->
-      <g transform="translate(1295, 380)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="#6B4FFF"/>
-        <path d="M22 8 L36 32 L8 32 Z" fill="#fff" opacity="0.9"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">vLLM</text>
-        <text x="22" y="69" text-anchor="middle" font-size="7.5" fill="#546878">Self-hosted Models</text>
-      </g>
-
-      <!-- Email/Misc providers row 2 -->
-      <g transform="translate(945, 470)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="#EA4335"/>
-        <rect x="6" y="10" width="32" height="24" rx="3" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <path d="M6 14 L22 24 L38 14" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">Email Providers</text>
-        <text x="22" y="69" text-anchor="middle" font-size="7.5" fill="#546878">SMTP / SES</text>
-      </g>
-
-      <!-- Semantic Scholar -->
-      <g transform="translate(1060, 470)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="#2E86AB"/>
-        <path d="M10 22 L18 14 L22 18 L28 10 L34 22" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <circle cx="28" cy="30" r="6" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">Semantic Scholar</text>
-        <text x="22" y="69" text-anchor="middle" font-size="7.5" fill="#546878">Research API</text>
-      </g>
-
-      <!-- Cloudflare Tunnel -->
-      <g transform="translate(1175, 470)">
-        <rect x="0" y="0" width="44" height="44" rx="5" fill="#F38020"/>
-        <path d="M6 28 Q10 18 22 18 Q26 10 36 16 Q42 16 40 24 Q44 28 40 30 L8 30 Q4 30 6 28" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <path d="M14 30 L14 36 M22 30 L22 38 M30 30 L30 36" stroke="#fff" stroke-width="1.5"/>
-        <text x="22" y="58" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">Cloudflare</text>
-        <text x="22" y="69" text-anchor="middle" font-size="7.5" fill="#546878">Tunnel to vLLM</text>
-      </g>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- OBSERVABILITY PANEL -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <rect x="925" y="630" width="420" height="325" rx="4" fill="#F5F0FF" stroke="#8C4FFF" stroke-width="1.5"/>
-      <text x="938" y="648" font-size="9" font-weight="700" fill="#8C4FFF">Observability Stack</text>
-
-      <!-- Prometheus -->
-      <g transform="translate(945, 658)">
-        <rect x="0" y="0" width="52" height="52" rx="6" fill="#E6522C"/>
-        <circle cx="26" cy="26" r="14" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <circle cx="26" cy="26" r="6" fill="#fff"/>
-        <line x1="26" y1="12" x2="26" y2="19" stroke="#fff" stroke-width="1.5"/>
-        <line x1="26" y1="33" x2="26" y2="40" stroke="#fff" stroke-width="1.5"/>
-        <line x1="12" y1="26" x2="19" y2="26" stroke="#fff" stroke-width="1.5"/>
-        <line x1="33" y1="26" x2="40" y2="26" stroke="#fff" stroke-width="1.5"/>
-        <text x="26" y="67" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">Prometheus</text>
-        <text x="26" y="78" text-anchor="middle" font-size="8" fill="#546878">Scrapes /metrics</text>
-        <text x="26" y="88" text-anchor="middle" font-size="7.5" fill="#90a4b4">15s interval</text>
-      </g>
-
-      <!-- Grafana -->
-      <g transform="translate(1065, 658)">
-        <rect x="0" y="0" width="52" height="52" rx="6" fill="#F46800"/>
-        <!-- Grafana logo simplified -->
-        <circle cx="26" cy="22" r="12" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <path d="M18 22 L24 16 L28 20 L32 14 L36 22" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <line x1="18" y1="28" x2="36" y2="28" stroke="#fff" stroke-width="1" opacity="0.5"/>
-        <path d="M16 36 L20 32 L26 35 L32 30 L36 34 L36 42 L16 42 Z" fill="#fff" opacity="0.4"/>
-        <text x="26" y="67" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">Grafana</text>
-        <text x="26" y="78" text-anchor="middle" font-size="8" fill="#546878">Dashboards</text>
-        <text x="26" y="88" text-anchor="middle" font-size="7.5" fill="#90a4b4">admin.a20-app-049.io.vn</text>
-      </g>
-
-      <!-- Loki -->
-      <g transform="translate(1185, 658)">
-        <rect x="0" y="0" width="52" height="52" rx="6" fill="#F5A800"/>
-        <!-- Loki log lines -->
-        <rect x="10" y="10" width="32" height="4" rx="2" fill="#fff"/>
-        <rect x="10" y="18" width="24" height="4" rx="2" fill="#fff"/>
-        <rect x="10" y="26" width="28" height="4" rx="2" fill="#fff"/>
-        <rect x="10" y="34" width="20" height="4" rx="2" fill="#fff"/>
-        <text x="26" y="67" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">Loki</text>
-        <text x="26" y="78" text-anchor="middle" font-size="8" fill="#546878">Log Aggregation</text>
-        <text x="26" y="88" text-anchor="middle" font-size="7.5" fill="#90a4b4">Per service streams</text>
-      </g>
-
-      <!-- Langfuse -->
-      <g transform="translate(945, 790)">
-        <rect x="0" y="0" width="52" height="52" rx="6" fill="#1A1A2E"/>
-        <!-- Langfuse trace icon -->
-        <path d="M10 35 Q16 20 22 28 Q28 36 34 15" fill="none" stroke="#8C4FFF" stroke-width="2"/>
-        <circle cx="10" cy="35" r="3" fill="#8C4FFF"/>
-        <circle cx="22" cy="28" r="3" fill="#8C4FFF"/>
-        <circle cx="34" cy="15" r="3" fill="#8C4FFF"/>
-        <text x="26" y="67" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">Langfuse</text>
-        <text x="26" y="78" text-anchor="middle" font-size="8" fill="#546878">LLM Tracing + Evals</text>
-        <text x="26" y="88" text-anchor="middle" font-size="7.5" fill="#90a4b4">langfuse.com (SaaS)</text>
-      </g>
-
-      <!-- CloudWatch Logs reference -->
-      <g transform="translate(1065, 790)">
-        <rect x="0" y="0" width="52" height="52" rx="6" fill="#E7500A"/>
-        <circle cx="26" cy="22" r="10" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <circle cx="26" cy="22" r="4" fill="none" stroke="#fff" stroke-width="1.5"/>
-        <line x1="26" y1="12" x2="26" y2="15" stroke="#fff" stroke-width="1.5"/>
-        <line x1="26" y1="29" x2="26" y2="32" stroke="#fff" stroke-width="1.5"/>
-        <line x1="16" y1="22" x2="19" y2="22" stroke="#fff" stroke-width="1.5"/>
-        <line x1="33" y1="22" x2="36" y2="22" stroke="#fff" stroke-width="1.5"/>
-        <path d="M14 34 L18 28 L22 31 L26 24 L30 28 L34 26 L38 34" fill="none" stroke="#fff" stroke-width="1.2"/>
-        <text x="26" y="67" text-anchor="middle" font-size="9" fill="#232f3e" font-weight="700">CloudWatch</text>
-        <text x="26" y="78" text-anchor="middle" font-size="8" fill="#546878">Container Logs</text>
-        <text x="26" y="88" text-anchor="middle" font-size="7.5" fill="#90a4b4">/ecs/a20-*</text>
-      </g>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- CONNECTIONS / ARROWS -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-
-      <!-- User → Route 53 (DNS) -->
-      <path d="M 120 74 L 196 75" stroke="#232f3e" stroke-width="1.5" fill="none" marker-end="url(#arrow-dark)"/>
-      <text x="155" y="68" font-size="8" fill="#546878" text-anchor="middle">HTTPS</text>
-
-      <!-- Route 53 → ALB -->
-      <path d="M 210 96 L 210 180 L 251 219" stroke="#8C4FFF" stroke-width="1.5" fill="none" marker-end="url(#arrow-purple)" stroke-dasharray="4 2"/>
-      <text x="195" y="148" font-size="8" fill="#8C4FFF">DNS</text>
-
-      <!-- User → CloudFront (assets) -->
-      <path d="M 125 74 L 1028 182 Q 1100 180 1161 194" stroke="#3DAA35" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)" stroke-dasharray="4 2"/>
-      <text x="680" y="155" font-size="8" fill="#3DAA35" text-anchor="middle">CDN assets direct</text>
-
-      <!-- ALB → Frontend -->
-      <path d="M 276 244 L 276 395" stroke="#8C4FFF" stroke-width="1.5" fill="none" marker-end="url(#arrow-purple)"/>
-      <text x="290" y="325" font-size="8" fill="#8C4FFF">app.*</text>
-
-      <!-- ALB → Backend -->
-      <path d="M 276 244 L 310 244 L 310 515" stroke="#007DC1" stroke-width="1.5" fill="none" marker-end="url(#arrow-blue)"/>
-      <text x="320" y="388" font-size="8" fill="#007DC1">api.*</text>
-
-      <!-- Frontend → ALB (API calls) -->
-      <path d="M 245 395 L 240 270 L 245 250" stroke="#007DC1" stroke-width="1" fill="none" marker-end="url(#arrow-blue)" stroke-dasharray="3 2"/>
-      <text x="200" y="330" font-size="7.5" fill="#007DC1">API calls</text>
-
-      <!-- Backend → RDS -->
-      <path d="M 410 567 L 600 567 L 660 430" stroke="#1565C0" stroke-width="1.5" fill="none" marker-end="url(#arrow-blue)"/>
-
-      <!-- Backend → ElastiCache -->
-      <path d="M 410 560 L 580 560 L 660 550" stroke="#BC1356" stroke-width="1.5" fill="none" marker-end="url(#arrow-purple)"/>
-
-      <!-- Backend → NAT (outbound) -->
-      <path d="M 330 515 L 330 300 L 560 230 L 585 244" stroke="#E7500A" stroke-width="1.5" fill="none" marker-end="url(#arrow-orange)" stroke-dasharray="5 3"/>
-      <text x="425" y="298" font-size="7.5" fill="#E7500A" text-anchor="middle">Outbound</text>
-
-      <!-- NAT → External APIs -->
-      <path d="M 635 219 L 870 219 L 870 400 L 945 400" stroke="#E7500A" stroke-width="1.5" fill="none" marker-end="url(#arrow-orange)" stroke-dasharray="4 2"/>
-      <text x="870" y="310" font-size="8" fill="#E7500A" text-anchor="middle">via NAT</text>
-
-      <!-- Backend → S3 (presigned URL generation) -->
-      <path d="M 413 515 L 880 515 L 920 300 L 960 270" stroke="#3DAA35" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)" stroke-dasharray="4 2"/>
-      <text x="870" y="490" font-size="7.5" fill="#3DAA35" text-anchor="middle">presigned URL gen</text>
-
-      <!-- S3 → CloudFront -->
-      <path d="M 1022 194 L 1135 194" stroke="#3DAA35" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)"/>
-      <text x="1078" y="188" font-size="8" fill="#3DAA35" text-anchor="middle">OAC</text>
-
-      <!-- Backend → Prometheus (metrics) -->
-      <path d="M 413 540 L 870 540 L 890 680 L 945 684" stroke="#E6522C" stroke-width="1.2" fill="none" marker-end="url(#arrow-orange)" stroke-dasharray="3 2"/>
-      <text x="860" y="600" font-size="7.5" fill="#E6522C">/metrics</text>
-
-      <!-- Backend → Langfuse (traces) -->
-      <path d="M 413 555 L 880 555 L 915 816 L 945 816" stroke="#8C4FFF" stroke-width="1.2" fill="none" marker-end="url(#arrow-purple)" stroke-dasharray="3 2"/>
-      <text x="897" y="700" font-size="7.5" fill="#8C4FFF" text-anchor="middle">LLM traces</text>
-
-      <!-- ECR → ECS tasks (pull image) -->
-      <path d="M 430 74 L 430 160 L 340 160 L 340 395" stroke="#E7500A" stroke-width="1" fill="none" marker-end="url(#arrow-orange)" stroke-dasharray="3 2" opacity="0.6"/>
-      <text x="350" y="140" font-size="7.5" fill="#E7500A">pull image</text>
-
-      <!-- Secrets Manager → Backend (inject) -->
-      <path d="M 648 74 L 648 160 L 380 160 L 380 515" stroke="#BC1356" stroke-width="1" fill="none" marker-end="url(#arrow-gray)" stroke-dasharray="3 2" opacity="0.6"/>
-
-      <!-- GitHub → ECR -->
-      <path d="M 120 224 L 170 224 L 200 74 L 430 74" stroke="#24292e" stroke-width="1.5" fill="none" marker-end="url(#arrow-dark)" stroke-dasharray="4 2"/>
-      <text x="260" y="170" font-size="8" fill="#546878">build + push</text>
-
-      <!-- GitHub → ECS (deploy) -->
-      <path d="M 120 235 L 165 235 L 250 235 L 250 370" stroke="#E7500A" stroke-width="1.5" fill="none" marker-end="url(#arrow-orange)"/>
-      <text x="185" y="252" font-size="8" fill="#E7500A">deploy</text>
-
-      <!-- Prometheus → Grafana -->
-      <path d="M 997 684 L 1065 684" stroke="#F46800" stroke-width="1.5" fill="none" marker-end="url(#arrow-orange)"/>
-
-    </svg>
-  </div>
-</div>
-
-<!-- CI/CD Pipeline Section -->
-<div class="diagram-section" style="margin-top:8px">
-  <div class="section-title">CI/CD Deployment Pipeline</div>
-  <div class="svg-wrapper">
-    <svg viewBox="0 0 1560 290" width="1560" height="290" xmlns="http://www.w3.org/2000/svg" font-family="'Helvetica Neue',Arial,sans-serif">
-      <defs>
-        <marker id="arrow-cicd" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#232f3e"/>
-        </marker>
-        <marker id="arrow-cicd-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#3DAA35"/>
-        </marker>
-        <marker id="arrow-cicd-b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="#007DC1"/>
-        </marker>
-      </defs>
-
-      <!-- Step boxes -->
-      <!-- 1. Developer Push -->
-      <rect x="10" y="30" width="150" height="60" rx="6" fill="#232f3e"/>
-      <text x="85" y="55" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">Developer Push</text>
-      <text x="85" y="70" text-anchor="middle" font-size="8.5" fill="#90a4b4">git push → main</text>
-      <text x="85" y="82" text-anchor="middle" font-size="7.5" fill="#FF9900">Triggers CI</text>
-
-      <path d="M 160 60 L 190 60" stroke="#232f3e" stroke-width="1.5" fill="none" marker-end="url(#arrow-cicd)"/>
-
-      <!-- 2. CI (Lint + Test) -->
-      <rect x="192" y="30" width="155" height="60" rx="6" fill="#1A0A2E" stroke="#8C4FFF" stroke-width="1.5"/>
-      <text x="269" y="52" text-anchor="middle" font-size="10" fill="#8C4FFF" font-weight="700">GitHub Actions CI</text>
-      <text x="269" y="64" text-anchor="middle" font-size="7.5" fill="#90a4b4">ci.yml</text>
-      <text x="269" y="76" text-anchor="middle" font-size="7.5" fill="#90a4b4">lint · type-check · pytest</text>
-      <text x="269" y="88" text-anchor="middle" font-size="7" fill="#546878">playwright e2e</text>
-
-      <path d="M 347 60 L 377 60" stroke="#8C4FFF" stroke-width="1.5" fill="none" marker-end="url(#arrow-cicd)"/>
-      <text x="362" y="53" text-anchor="middle" font-size="7.5" fill="#8C4FFF">success</text>
-
-      <!-- 3. Build + Push ECR -->
-      <rect x="379" y="30" width="170" height="60" rx="6" fill="#1C1007" stroke="#FF9900" stroke-width="1.5"/>
-      <text x="464" y="52" text-anchor="middle" font-size="10" fill="#FF9900" font-weight="700">Build + Push ECR</text>
-      <text x="464" y="64" text-anchor="middle" font-size="7.5" fill="#90a4b4">build-push.yml</text>
-      <text x="464" y="76" text-anchor="middle" font-size="7.5" fill="#90a4b4">docker buildx bake</text>
-      <text x="464" y="88" text-anchor="middle" font-size="7" fill="#546878">EC2 self-hosted runner</text>
-
-      <path d="M 549 60 L 579 60" stroke="#FF9900" stroke-width="1.5" fill="none" marker-end="url(#arrow-cicd)"/>
-      <text x="564" y="53" text-anchor="middle" font-size="7.5" fill="#FF9900">success</text>
-
-      <!-- 4. Deploy ECS -->
-      <rect x="581" y="10" width="170" height="210" rx="6" fill="#0A1A0A" stroke="#22C55E" stroke-width="1.5"/>
-      <text x="666" y="32" text-anchor="middle" font-size="10" fill="#22C55E" font-weight="700">Deploy ECS</text>
-      <text x="666" y="44" text-anchor="middle" font-size="7.5" fill="#546878">deploy-ecs-prod.yml</text>
-      <!-- steps inside -->
-      <rect x="593" y="52" width="146" height="20" rx="3" fill="#132B13"/>
-      <text x="666" y="66" text-anchor="middle" font-size="7.5" fill="#4ADE80">① render-taskdef.sh</text>
-      <rect x="593" y="76" width="146" height="20" rx="3" fill="#132B13"/>
-      <text x="666" y="90" text-anchor="middle" font-size="7.5" fill="#4ADE80">② reconcile-backend-secret.sh</text>
-      <rect x="593" y="100" width="146" height="20" rx="3" fill="#132B13"/>
-      <text x="666" y="114" text-anchor="middle" font-size="7.5" fill="#4ADE80">③ update backend service</text>
-      <rect x="593" y="124" width="146" height="20" rx="3" fill="#132B13"/>
-      <text x="666" y="138" text-anchor="middle" font-size="7.5" fill="#4ADE80">④ run migrate one-off task</text>
-      <rect x="593" y="148" width="146" height="20" rx="3" fill="#132B13"/>
-      <text x="666" y="162" text-anchor="middle" font-size="7.5" fill="#4ADE80">⑤ update frontend service</text>
-      <rect x="593" y="172" width="146" height="20" rx="3" fill="#132B13"/>
-      <text x="666" y="186" text-anchor="middle" font-size="7.5" fill="#4ADE80">⑥ smoke tests</text>
-      <text x="666" y="208" text-anchor="middle" font-size="7.5" fill="#546878">/health · / · CloudFront</text>
-
-      <path d="M 751 115 L 781 115" stroke="#22C55E" stroke-width="1.5" fill="none" marker-end="url(#arrow-cicd)"/>
-
-      <!-- 5. ECS Fargate -->
-      <rect x="783" y="30" width="155" height="85" rx="6" fill="#071A07" stroke="#4ADE80" stroke-width="1.5"/>
-      <text x="860" y="54" text-anchor="middle" font-size="10" fill="#4ADE80" font-weight="700">ECS Fargate</text>
-      <text x="860" y="67" text-anchor="middle" font-size="7.5" fill="#90a4b4">a20-prod-cluster</text>
-      <text x="860" y="79" text-anchor="middle" font-size="7.5" fill="#4ADE80">a20-frontend</text>
-      <text x="860" y="91" text-anchor="middle" font-size="7.5" fill="#4ADE80">a20-backend</text>
-      <text x="860" y="103" text-anchor="middle" font-size="7.5" fill="#546878">wait stable → healthy</text>
-
-      <!-- Terraform -->
-      <rect x="783" y="135" width="155" height="65" rx="6" fill="#0A0A20" stroke="#6366F1" stroke-width="1.5"/>
-      <text x="860" y="158" text-anchor="middle" font-size="10" fill="#818CF8" font-weight="700">Terraform</text>
-      <text x="860" y="170" text-anchor="middle" font-size="7.5" fill="#546878">terraform-ecs-prod.yml</text>
-      <text x="860" y="182" text-anchor="middle" font-size="7.5" fill="#90a4b4">plan / apply infra</text>
-      <text x="860" y="194" text-anchor="middle" font-size="7.5" fill="#546878">VPC · RDS · ECS · ALB</text>
-
-      <!-- Init workflow -->
-      <rect x="783" y="220" width="155" height="55" rx="6" fill="#0A0A20" stroke="#A855F7" stroke-width="1.5" stroke-dasharray="4 2"/>
-      <text x="860" y="242" text-anchor="middle" font-size="9.5" fill="#A855F7" font-weight="700">Init Workflow</text>
-      <text x="860" y="254" text-anchor="middle" font-size="7.5" fill="#90a4b4">init-ecs-prod.yml</text>
-      <text x="860" y="266" text-anchor="middle" font-size="7.5" fill="#90a4b4">seed-core → sync → accounts</text>
-
-      <!-- Arrows into init -->
-      <path d="M 751 215 L 770 215 L 770 248 L 783 248" stroke="#A855F7" stroke-width="1" fill="none" marker-end="url(#arrow-cicd)" stroke-dasharray="3 2"/>
-      <text x="755" y="236" font-size="7.5" fill="#A855F7">manual</text>
-
-      <!-- ECR (right column) -->
-      <rect x="1000" y="30" width="140" height="65" rx="6" fill="#1C1007" stroke="#FF9900" stroke-width="1.5"/>
-      <text x="1070" y="55" text-anchor="middle" font-size="10" fill="#FF9900" font-weight="700">Amazon ECR</text>
-      <text x="1070" y="68" text-anchor="middle" font-size="7.5" fill="#90a4b4">Frontend image</text>
-      <text x="1070" y="80" text-anchor="middle" font-size="7.5" fill="#90a4b4">Backend image</text>
-      <text x="1070" y="90" text-anchor="middle" font-size="7" fill="#546878">Tagged by commit SHA</text>
-
-      <!-- Build → ECR -->
-      <path d="M 549 50 L 960 50 L 1000 55" stroke="#FF9900" stroke-width="1.2" fill="none" marker-end="url(#arrow-cicd)" stroke-dasharray="4 2"/>
-      <text x="760" y="42" text-anchor="middle" font-size="7.5" fill="#FF9900">push images</text>
-
-      <!-- ECR → ECS tasks -->
-      <path d="M 1000 72 L 960 72 L 938 72" stroke="#FF9900" stroke-width="1" fill="none" marker-end="url(#arrow-cicd)" stroke-dasharray="3 2"/>
-      <text x="968" y="67" font-size="7" fill="#FF9900">pull</text>
-
-      <!-- S3 Canonical Bundles -->
-      <rect x="1000" y="115" width="140" height="65" rx="6" fill="#0A1A0A" stroke="#3DAA35" stroke-width="1.5"/>
-      <text x="1070" y="139" text-anchor="middle" font-size="10" fill="#3DAA35" font-weight="700">S3 Bundles</text>
-      <text x="1070" y="152" text-anchor="middle" font-size="7.5" fill="#90a4b4">Canonical JSONL</text>
-      <text x="1070" y="164" text-anchor="middle" font-size="7.5" fill="#90a4b4">Course content</text>
-      <text x="1070" y="174" text-anchor="middle" font-size="7" fill="#546878">for seed-core task</text>
-
-      <!-- init → S3 -->
-      <path d="M 938 248 L 960 248 L 1000 152" stroke="#3DAA35" stroke-width="1" fill="none" marker-end="url(#arrow-cicd-g)" stroke-dasharray="3 2"/>
-
-      <!-- RDS / App Data -->
-      <rect x="1000" y="200" width="140" height="65" rx="6" fill="#0A0A1A" stroke="#7C3AED" stroke-width="1.5"/>
-      <text x="1070" y="224" text-anchor="middle" font-size="10" fill="#A78BFA" font-weight="700">RDS App Data</text>
-      <text x="1070" y="237" text-anchor="middle" font-size="7.5" fill="#90a4b4">PostgreSQL 16</text>
-      <text x="1070" y="249" text-anchor="middle" font-size="7.5" fill="#90a4b4">initialized by seed tasks</text>
-      <text x="1070" y="259" text-anchor="middle" font-size="7" fill="#546878">+ pgvector extension</text>
-
-      <!-- init → RDS -->
-      <path d="M 938 258 L 1000 240" stroke="#7C3AED" stroke-width="1" fill="none" marker-end="url(#arrow-cicd)" stroke-dasharray="3 2"/>
-
-    </svg>
-  </div>
-</div>
-
-<div style="padding: 12px 24px; background:#232f3e; color:#546878; font-size:0.73rem; display:flex; justify-content:space-between;">
-  <span>AI Adaptive Learning Platform · A20-App-049 · Architecture 03</span>
-  <span>AWS draw.io 2026 style · Generated 2026-05-15</span>
 </div>
 
 </body>
