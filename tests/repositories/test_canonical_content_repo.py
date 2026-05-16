@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
@@ -105,3 +106,51 @@ async def test_get_linked_learning_units_orders_by_course_section_then_unit():
 
     assert "JOIN course_sections" in compiled
     assert "ORDER BY courses.sort_order, course_sections.sort_order, learning_units.sort_order" in compiled
+
+
+@pytest.mark.asyncio
+async def test_get_lecture_context_accepts_allowed_course_uuid_scope():
+    session = AsyncMock()
+    course_id = uuid4()
+    current_unit = SimpleNamespace(
+        unit_id="cs230::lecture-2::seg3",
+        course_id="CS230",
+        lecture_id="lecture-2",
+        lecture_title="Lecture 2",
+        lecture_order=2,
+        unit_name="Neurons, multi-class labels, capacity, and embeddings",
+        summary="Unit summary",
+        description="Unit description",
+        duration_min=8,
+        ordering_index=3,
+    )
+    course = SimpleNamespace(
+        id=course_id,
+        canonical_course_id="CS230",
+        slug="cs230",
+    )
+
+    current_result = Mock()
+    current_result.scalar_one_or_none.return_value = current_unit
+    course_result = Mock()
+    course_result.scalars.return_value.all.return_value = [course]
+    lecture_result = Mock()
+    lecture_result.scalar_one_or_none.return_value = None
+    units_result = Mock()
+    units_result.scalars.return_value.all.return_value = [current_unit]
+    session.execute.side_effect = [
+        current_result,
+        course_result,
+        lecture_result,
+        units_result,
+    ]
+    repo = CanonicalContentRepository(session)
+
+    context = await repo.get_lecture_context_for_unit(
+        "cs230::lecture-2::seg3",
+        allowed_course_ids=[str(course_id)],
+    )
+
+    assert context is not None
+    assert context["course_id"] == "CS230"
+    assert context["units"][0]["canonical_unit_id"] == "cs230::lecture-2::seg3"
