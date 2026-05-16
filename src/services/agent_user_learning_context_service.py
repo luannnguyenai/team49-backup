@@ -67,7 +67,7 @@ class AgentUserLearningContextService:
             "current_learning_state": [
                 "current_unit",
                 "current_stage",
-                "video_progress_s",
+                "video_progress_hms",
                 "watch_percent",
                 "has_quiz_items",
                 "last_activity",
@@ -98,7 +98,7 @@ class AgentUserLearningContextService:
                 "course_id",
                 "unit_title",
                 "status",
-                "last_position_seconds",
+                "last_position_hms",
                 "last_opened_at",
             ],
             "weak_knowledge_points": [
@@ -164,7 +164,7 @@ class AgentUserLearningContextService:
         return {
             "current_unit": unit_payload,
             "current_stage": getattr(state, "current_stage", None) if state else None,
-            "video_progress_s": progress.get("video_progress_s"),
+            "video_progress_hms": self._duration_hms(progress.get("video_progress_s")),
             "watch_percent": progress.get("watch_percent"),
             "last_activity": self._iso(getattr(state, "last_activity", None)) if state else None,
         }
@@ -373,7 +373,7 @@ class AgentUserLearningContextService:
                     "unit_title": unit.title,
                     "canonical_unit_id": unit.canonical_unit_id,
                     "status": self._value(progress.status),
-                    "last_position_seconds": progress.last_position_seconds,
+                    "last_position_hms": self._duration_hms(progress.last_position_seconds),
                     "last_opened_at": self._iso(progress.last_opened_at),
                     "completed_at": self._iso(progress.completed_at),
                 }
@@ -656,6 +656,34 @@ class AgentUserLearningContextService:
             )
         return rows
 
+    async def learned_canonical_unit_ids(
+        self,
+        user_id: UUID,
+        course_ids: list[str],
+    ) -> set[str]:
+        filters = self._course_filters(course_ids)
+        stmt = (
+            select(LearningUnit.canonical_unit_id, LearningProgressRecord.status)
+            .join(Course, LearningUnit.course_id == Course.id)
+            .join(
+                LearningProgressRecord,
+                and_(
+                    LearningProgressRecord.learning_unit_id == LearningUnit.id,
+                    LearningProgressRecord.user_id == user_id,
+                ),
+            )
+        )
+        if filters:
+            stmt = stmt.where(or_(*filters))
+        result = await self.session.execute(stmt)
+        learned: set[str] = set()
+        for canonical_unit_id, status in result.all():
+            if not canonical_unit_id:
+                continue
+            if self._value(status) in {"completed", "in_progress"}:
+                learned.add(str(canonical_unit_id))
+        return learned
+
     def _course_filters(self, course_ids: list[str]):
         if not course_ids:
             return []
@@ -723,6 +751,18 @@ class AgentUserLearningContextService:
     @staticmethod
     def _number(value: Decimal | float | int | None) -> float | None:
         return float(value) if value is not None else None
+
+    @staticmethod
+    def _duration_hms(value: Decimal | float | int | None) -> str | None:
+        if value is None:
+            return None
+        try:
+            total_seconds = max(0, int(float(value)))
+        except (TypeError, ValueError):
+            return None
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
     @staticmethod
     def _iso(value: datetime | None) -> str | None:
