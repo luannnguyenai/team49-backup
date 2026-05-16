@@ -569,7 +569,7 @@ CDN only.
 ### DoD checklist
 
 - [ ] Secret `a20/prod/backend` JSON contains `DATABASE_URL`, `REDIS_URL`, `SECRET_KEY`, plus any third-party keys
-- [ ] `DATABASE_URL` uses `postgresql+asyncpg://` driver
+- [ ] `DATABASE_URL` uses `postgresql+asyncpg://` driver with `?ssl=require`
 - [ ] Backend task execution role policy `secretsmanager:GetSecretValue` scoped to this ARN
 - [ ] No secret value in tfvars, image, or task definition `environment`
 - [ ] Secret values mapped via task definition `secrets[]` block (B4)

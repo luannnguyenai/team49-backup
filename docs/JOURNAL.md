@@ -103,8 +103,7 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 
 ### Đã làm
 - **Knowledge Graph (KG) full implementation** (Luân): Implement toàn bộ KG layer từ zero — `kg_concepts`, `kg_edges`, `kg_sync_state` (Alembic migration), KG loader/builder/discoverer, bridges YAML integration, recommendation engine và learning path service. Expand question bank thêm 80+ items (CV/3D/Robotics/Ethics). KG integrate vào API và CLI với automation.
-- **PostgreSQL schema v1 + repository layer** (Luân): Migration head mới với `pgvector` extension, audit table `mastery_history`. Đưa vào repository layer cho auth/history/recommendation/assessment, nối assessment qua `QuestionSelector`.
-- **Redis auth hardening** (Luân): Redis-backed rate limiting, token denylist, logout revoke endpoint, fix startup/CORS/config, healthcheck migration.
+- **PostgreSQL schema v1 + repository layer** (Đức): Phase 1–5 backend implementation (17/04) — DB foundation cleanup (TDD), repository layer cho auth/history/recommendation/assessment, `QuestionSelector` service, `DomainError` exception pattern, migration head mới với `pgvector` extension, audit table `mastery_history`. Redis-backed rate limiting, token denylist, logout revoke endpoint, fix startup/CORS/config, healthcheck migration.
 - **Frontend UI rebuild (Vietnamese)** (Đức): Rebuild toàn bộ frontend UI — design tokens, Vietnamese copy toàn app, lesson sidebar, tutor hub layout (enrolled courses, recommended courses, resume card). Fix alembic merge heads. Scaffold course-first platform pages (catalog, learning unit, overview).
 - **Course-first platform flow** (Đức + Rin): Public/personalized catalog, start gate, learning unit, in-context tutor, dashboard, compatibility redirects. Buffer NDJSON stream chunks, regression test cho stale chapter response, e2e smoke test.
 - **CS224n/CS231n data + LLM rate limiter** (Rin): Curate lecture segments cho CS224n và CS231n, add LLM rate limiter service để tránh API quota issues.

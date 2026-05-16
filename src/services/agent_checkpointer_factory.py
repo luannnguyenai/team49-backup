@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from src.config import settings
 from src.services.agent_error_codes import agent_system_error_message
@@ -35,8 +36,30 @@ class AgentCheckpointerUnavailableError(RuntimeError):
 
 
 def langgraph_postgres_url(database_url: str) -> str:
+    def _to_psycopg_url(url: str) -> str:
+        parts = urlsplit(url)
+        query = parse_qsl(parts.query, keep_blank_values=True)
+        rewritten_query = []
+        for key, value in query:
+            if key == "ssl":
+                rewritten_query.append(("sslmode", value))
+            else:
+                rewritten_query.append((key, value))
+
+        return urlunsplit(
+            (
+                parts.scheme,
+                parts.netloc,
+                parts.path,
+                urlencode(rewritten_query),
+                parts.fragment,
+            )
+        )
+
     if database_url.startswith("postgresql+asyncpg://"):
-        return "postgresql://" + database_url.removeprefix("postgresql+asyncpg://")
+        return _to_psycopg_url(
+            "postgresql://" + database_url.removeprefix("postgresql+asyncpg://")
+        )
     if database_url.startswith("postgresql+psycopg://"):
         return "postgresql://" + database_url.removeprefix("postgresql+psycopg://")
     if database_url.startswith("postgres://"):

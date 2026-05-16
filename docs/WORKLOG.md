@@ -530,7 +530,7 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 - Fix narrow qualified acronym evidence: chặn trường hợp agent cite unit chứa keyword giống nhau nhưng context khác (ví dụ: "YOLO loss" vs "generic loss").
 - Fix contextual prerequisite action preservation: khi follow-up question liên quan prerequisite path, agent giữ pending actions thay vì reset.
 
-**2. Production observability stack (Nguyễn Duy Minh Hoàng):**
+**2. Production observability stack (Nguyễn Đôn Đức):**
 - Terraform module hoàn thiện: Prometheus scrape config, Grafana provisioning (datasource + dashboard), Loki log aggregation.
 - Backend `/metrics` endpoint expose Prometheus-compatible metrics.
 - Fix Cloud Map namespace format — tên namespace phải khớp chính xác với ECS service discovery record.
@@ -542,7 +542,7 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 - Relax password schema cho auth/user registration: bỏ yêu cầu special character để demo account `DemoPass123!` và các password đơn giản tương tự login được mà không bị validation reject.
 - Thêm test coverage: auth store ignore persisted errors, auth forms clear stale errors trước khi submit.
 
-**4. Submission documentation (Nguyễn Duy Minh Hoàng):**
+**4. Submission documentation (Nguyễn Đôn Đức):**
 - Tạo `docs/ai-logs.md` với đầy đủ cấu trúc: system prompt, chat logs, success/failure cases, guardrail cases.
 - Xóa stale testing docs không còn là source-of-truth (`TESTING_DOCUMENTATION_INDEX.md`, `TEST_STATUS_REPORT.md`, `TESTING_ONBOARDING_FLOW.md`).
 - README cập nhật Quick Links đầy đủ, team section, demo account.

@@ -10,7 +10,7 @@ to Secrets Manager ARNs. Plain values go in `environment[]`. Never put
 
 | Variable | Value | Note |
 |---|---|---|
-| `DATABASE_URL` | `postgresql+asyncpg://USER:PASS@HOST:5432/DB` | **Secret** — Secrets Manager. If password contains `%`, `alembic/env.py` must escape it (trap A3). |
+| `DATABASE_URL` | `postgresql+asyncpg://USER:PASS@HOST:5432/DB?ssl=require` | **Secret** — Secrets Manager. Production RDS requires SSL; for SQLAlchemy `asyncpg`, use `ssl=require`. If password contains `%`, `alembic/env.py` must escape it (trap A3). |
 | `REDIS_URL` | `redis://HOST:6379/0` | **Secret** — Secrets Manager |
 | `PORT` | `8000` | Container listens on fixed container port. Must match Dockerfile `EXPOSE` and target group port (trap B3) |
 | `DB_ECHO` | `false` | Production default |

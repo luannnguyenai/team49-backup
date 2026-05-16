@@ -44,12 +44,26 @@ normalized_current_secret="$(jq \
   --arg prometheus_url "$prometheus_url" \
   --arg grafana_host "$grafana_host" \
   '
+  def ensure_asyncpg_ssl:
+    if (type == "string") and startswith("postgresql+asyncpg://") then
+      (split("?")) as $parts
+      | if ($parts | length) == 1 then
+          . + "?ssl=require"
+        else
+          ($parts[0]) as $base
+          | ($parts[1] | split("&") | map(select((startswith("ssl=") | not) and (startswith("sslmode=") | not))) + ["ssl=require"] | join("&")) as $query
+          | $base + "?" + $query
+        end
+    else
+      .
+    end;
   .FRONTEND_BASE_URL = $frontend_url
   | .NEXT_PUBLIC_API_URL = $backend_url
   | .API_INTERNAL_URL = $backend_url
   | .NEXT_PUBLIC_GRAFANA_HOST = $grafana_host
   | .PROMETHEUS_URL = $prometheus_url
   | .CORS_ORIGINS = ([$frontend_url] | tojson)
+  | .DATABASE_URL |= ensure_asyncpg_ssl
   ' <<<"$current_secret")"
 
 existing_violations="$(
@@ -73,7 +87,7 @@ if [ -z "$existing_violations" ]; then
     --secret-string "file://$tmp_secret" \
     >/dev/null
 
-  echo "Backend secret already production-safe; normalized frontend/observability fields only."
+  echo "Backend secret already production-safe; normalized frontend, observability, and database SSL fields only."
   exit 0
 fi
 
@@ -154,7 +168,7 @@ new_secret="$(jq \
   | .POSTGRES_DB = $db_name
   | .POSTGRES_USER = $db_user
   | .POSTGRES_PASSWORD = $db_password
-  | .DATABASE_URL = ("postgresql+asyncpg://" + $db_user_escaped + ":" + $db_password_escaped + "@" + $db_host + ":" + $db_port + "/" + $db_name)
+  | .DATABASE_URL = ("postgresql+asyncpg://" + $db_user_escaped + ":" + $db_password_escaped + "@" + $db_host + ":" + $db_port + "/" + $db_name + "?ssl=require")
   | .REDIS_URL = ("redis://" + $redis_host + ":" + $redis_port + "/0")
   | .FRONTEND_BASE_URL = $frontend_url
   | .NEXT_PUBLIC_API_URL = $backend_url
@@ -169,7 +183,10 @@ violations="$(
     to_entries[]
     | select((.value | type) == "string")
     | select(.key as $k | ["DATABASE_URL","REDIS_URL","FRONTEND_BASE_URL","NEXT_PUBLIC_API_URL","API_INTERNAL_URL","NEXT_PUBLIC_GRAFANA_HOST","PROMETHEUS_URL","CORS_ORIGINS","POSTGRES_HOST"] | index($k))
-    | select(.value | test("localhost|127\\.0\\.0\\.1"))
+    | select(
+        (.value | test("localhost|127\\.0\\.0\\.1"))
+        or (.key == "DATABASE_URL" and (.value | startswith("postgresql+asyncpg://")) and ((.value | test("([?&])ssl=require(&|$)")) | not))
+      )
     | "\(.key)=\(.value)"
   ' <<<"$new_secret"
 )"

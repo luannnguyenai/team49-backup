@@ -18,6 +18,24 @@ def test_langgraph_postgres_url_converts_asyncpg_sqlalchemy_url():
     )
 
 
+def test_langgraph_postgres_url_maps_asyncpg_ssl_to_psycopg_sslmode():
+    assert (
+        langgraph_postgres_url(
+            "postgresql+asyncpg://user:pass@localhost:5432/app?ssl=require"
+        )
+        == "postgresql://user:pass@localhost:5432/app?sslmode=require"
+    )
+
+
+def test_langgraph_postgres_url_preserves_existing_sslmode():
+    assert (
+        langgraph_postgres_url(
+            "postgresql+asyncpg://user:pass@localhost:5432/app?sslmode=require"
+        )
+        == "postgresql://user:pass@localhost:5432/app?sslmode=require"
+    )
+
+
 def test_langgraph_postgres_url_converts_postgres_alias():
     assert (
         langgraph_postgres_url("postgres://user:pass@localhost:5432/app")

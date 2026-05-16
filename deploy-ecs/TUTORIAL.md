@@ -242,9 +242,11 @@ aws secretsmanager get-secret-value \
 Build `DATABASE_URL`:
 
 ```text
-postgresql+asyncpg://a20admin:<PASSWORD-URL-ENCODED>@<rds-endpoint>:5432/a20app
+postgresql+asyncpg://a20admin:<PASSWORD-URL-ENCODED>@<rds-endpoint>:5432/a20app?ssl=require
 ```
 
+> Production RDS requires encrypted connections. For SQLAlchemy `asyncpg`,
+> use `?ssl=require` in `DATABASE_URL`.
 > Nếu password chứa ký tự đặc biệt (`@`, `/`, `%`, …), phải URL-encode.
 > Nếu sau encode chứa `%`, **vẫn OK** vì `alembic/env.py` đã escape (trap A3).
 
@@ -254,7 +256,7 @@ Tạo secret app:
 aws secretsmanager put-secret-value \
   --secret-id a20/prod/backend \
   --secret-string '{
-    "DATABASE_URL": "postgresql+asyncpg://...",
+    "DATABASE_URL": "postgresql+asyncpg://...?ssl=require",
     "REDIS_URL": "redis://<redis-endpoint>:6379/0",
     "SECRET_KEY": "<random-64-char>"
   }'
