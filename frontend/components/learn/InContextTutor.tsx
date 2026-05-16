@@ -784,21 +784,6 @@ export default function InContextTutor({
                 </p>
               </div>
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span
-                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-primary-200 bg-surface-accent-soft px-2.5 py-1 text-[11px] font-medium text-primary-700 dark:text-primary-300"
-                title={unitTitle}
-              >
-                <BookOpenText className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{unitTitle}</span>
-              </span>
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full border border-border-subtle px-2.5 py-1 text-[11px] font-medium tabular-nums text-text-muted"
-              >
-                <Clock3 className="h-3.5 w-3.5" />
-                {currentVideoTime}
-              </span>
-            </div>
           </div>
           <div className="flex shrink-0 items-center">
             {onClose ? (
@@ -1090,75 +1075,84 @@ export default function InContextTutor({
             disabled={streaming}
           />
           <div className="flex items-center justify-between gap-2 border-t border-border-subtle/35 px-3 py-2">
-            <div
-              className="relative"
-              onBlur={(event) => {
-                const nextFocus = event.relatedTarget as Node | null;
-                if (!event.currentTarget.contains(nextFocus)) {
-                  setIsModelMenuOpen(false);
-                }
-              }}
-            >
-              <button
-                type="button"
-                disabled={streaming}
-                onClick={() => setIsModelMenuOpen((open) => !open)}
-                className="inline-flex h-[29px] max-w-[150px] items-center gap-1.5 rounded-full border border-primary-200 bg-surface-accent-soft px-2.5 text-[11px] font-medium text-primary-700 transition hover:border-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:text-primary-300"
-                aria-label={`Tutor model: ${selectedChatModel.label}`}
-                aria-expanded={isModelMenuOpen}
-                aria-haspopup="menu"
+            <div className="flex min-w-0 items-center gap-2">
+              <div
+                className="relative"
+                onBlur={(event) => {
+                  const nextFocus = event.relatedTarget as Node | null;
+                  if (!event.currentTarget.contains(nextFocus)) {
+                    setIsModelMenuOpen(false);
+                  }
+                }}
               >
-                <Bot className="h-3 w-3 shrink-0" />
-                <span className="truncate">{selectedChatModel.label}</span>
-                <ChevronDown
-                  className={cn(
-                    "h-3 w-3 shrink-0 transition-transform",
-                    isModelMenuOpen && "rotate-180",
-                  )}
-                />
-              </button>
-              {isModelMenuOpen ? (
-                <div
-                  role="menu"
-                  className="absolute bottom-full left-0 z-30 mb-2 w-56 overflow-hidden rounded-xl border border-border-subtle bg-surface-card p-1.5 shadow-[0_12px_32px_rgba(15,23,42,0.14)]"
+                <button
+                  type="button"
+                  disabled={streaming}
+                  onClick={() => setIsModelMenuOpen((open) => !open)}
+                  className="inline-flex h-[29px] max-w-[150px] items-center gap-1.5 rounded-full border border-primary-200 bg-surface-accent-soft px-2.5 text-[11px] font-medium text-primary-700 transition hover:border-primary-300 disabled:cursor-not-allowed disabled:opacity-60 dark:text-primary-300"
+                  aria-label={`Tutor model: ${selectedChatModel.label}`}
+                  aria-expanded={isModelMenuOpen}
+                  aria-haspopup="menu"
                 >
-                  {CHAT_MODEL_OPTIONS.map((option) => {
-                    const availability = getChatModelAvailability(chatModelAvailability, option.id);
-                    const isActive = chatModelId === option.id;
-                    const isUnavailable = !availability.available;
-                    const statusLabel = isUnavailable ? availability.status : null;
-                    return (
-                      <button
-                        key={option.id}
-                        type="button"
-                        role="menuitemradio"
-                        disabled={streaming || isUnavailable}
-                        aria-checked={isActive}
-                        onClick={() => {
-                          changeChatModel(option.id);
-                          setIsModelMenuOpen(false);
-                        }}
-                        title={isUnavailable ? `${option.label} is ${availability.status}` : option.label}
-                        className={cn(
-                          "flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60",
-                          isActive
-                            ? "bg-surface-accent-soft text-primary-700 dark:text-primary-300"
-                            : "text-text-muted hover:bg-surface-page hover:text-text-strong",
-                        )}
-                      >
-                        <Bot className="h-3.5 w-3.5 shrink-0" />
-                        <span className="min-w-0 flex-1 truncate">{option.label}</span>
-                        {statusLabel ? (
-                          <span className="shrink-0 rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-rose-700 dark:text-rose-300">
-                            {statusLabel}
-                          </span>
-                        ) : null}
-                        {isActive ? <Check className="h-3.5 w-3.5 shrink-0" /> : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : null}
+                  <Bot className="h-3 w-3 shrink-0" />
+                  <span className="truncate">{selectedChatModel.label}</span>
+                  <ChevronDown
+                    className={cn(
+                      "h-3 w-3 shrink-0 transition-transform",
+                      isModelMenuOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+                {isModelMenuOpen ? (
+                  <div
+                    role="menu"
+                    className="absolute bottom-full left-0 z-30 mb-2 w-56 overflow-hidden rounded-xl border border-border-subtle bg-surface-card p-1.5 shadow-[0_12px_32px_rgba(15,23,42,0.14)]"
+                  >
+                    {CHAT_MODEL_OPTIONS.map((option) => {
+                      const availability = getChatModelAvailability(chatModelAvailability, option.id);
+                      const isActive = chatModelId === option.id;
+                      const isUnavailable = !availability.available;
+                      const statusLabel = isUnavailable ? availability.status : null;
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          role="menuitemradio"
+                          disabled={streaming || isUnavailable}
+                          aria-checked={isActive}
+                          onClick={() => {
+                            changeChatModel(option.id);
+                            setIsModelMenuOpen(false);
+                          }}
+                          title={isUnavailable ? `${option.label} is ${availability.status}` : option.label}
+                          className={cn(
+                            "flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60",
+                            isActive
+                              ? "bg-surface-accent-soft text-primary-700 dark:text-primary-300"
+                              : "text-text-muted hover:bg-surface-page hover:text-text-strong",
+                          )}
+                        >
+                          <Bot className="h-3.5 w-3.5 shrink-0" />
+                          <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                          {statusLabel ? (
+                            <span className="shrink-0 rounded-full bg-rose-500/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-rose-700 dark:text-rose-300">
+                              {statusLabel}
+                            </span>
+                          ) : null}
+                          {isActive ? <Check className="h-3.5 w-3.5 shrink-0" /> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+              <span
+                className="inline-flex h-[29px] shrink-0 items-center gap-1.5 rounded-full border border-border-subtle px-2.5 text-[11px] font-medium tabular-nums text-text-muted"
+                aria-label={`Video time ${currentVideoTime}`}
+              >
+                <Clock3 className="h-3.5 w-3.5 shrink-0" />
+                {currentVideoTime}
+              </span>
             </div>
             <button
               aria-label={streaming ? "Tutor is replying" : "Send question"}
