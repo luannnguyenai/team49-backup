@@ -195,6 +195,21 @@ def test_guardrail_prompt_allows_safe_assistant_operation_messages():
     assert "pass them to the downstream assistant router" in prompt
 
 
+def test_guardrail_prompt_allows_learner_activity_and_progress_questions_for_agent():
+    prompt = build_guardrail_prompt(
+        "video gần nhất tôi đã học",
+        GuardrailScopePacket(
+            feature="agent",
+            scope_level="query",
+            scope_id="agent",
+            allowed_scope_summary="Agent guardrail scope: current user query only.",
+        ),
+    )
+
+    assert "learner progress, recent activity, current lesson" in prompt
+    assert "classify them as ON_TOPIC and ALLOW_LESSON_ANSWER" in prompt
+
+
 def test_guardrail_prompt_uses_prompt_manager_system_rules(tmp_path):
     from src.services.agent_prompt_manager import AgentPromptManager
 
