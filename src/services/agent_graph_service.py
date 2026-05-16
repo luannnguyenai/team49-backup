@@ -315,14 +315,10 @@ class AgentGraphService:
     def _effective_rag_intent(self, state: dict) -> str | None:
         intent = state.get("intent")
         confidence = float(state.get("intent_confidence") or 0.0)
-        if intent in RAG_AGENT_INTENTS and confidence >= 0.65:
+        if intent in RAG_AGENT_INTENTS and confidence >= 0.45:
             return intent
         candidate_intent = state.get("candidate_intent")
-        if (
-            intent == "clarify"
-            and candidate_intent in USER_CONTEXT_AGENT_INTENTS
-            and confidence >= USER_CONTEXT_RAG_MIN_CONFIDENCE
-        ):
+        if intent == "clarify" and candidate_intent in RAG_AGENT_INTENTS:
             return candidate_intent
         return None
 
@@ -1357,10 +1353,23 @@ class AgentGraphService:
             route = prerouted
         else:
             route = None
+        used_prerouted = route is not None
         if route is None:
             route = self._route_with_recent_context(state["message"], state)
         route = self._promote_contextual_rag_followup(route, state)
         route = self._apply_current_lesson_context_to_rag_route(route, state)
+        logger.warning(
+            "route_intent message=%r intent=%s confidence=%.2f candidate=%s "
+            "raw_topic=%r search_queries=%s clarification=%r used_prerouted=%s",
+            (state.get("message") or "")[:120],
+            route.intent,
+            route.confidence,
+            route.candidate_intent,
+            route.extracted_slots.raw_topic,
+            route.extracted_slots.search_queries,
+            (route.clarification_question or "")[:120],
+            used_prerouted,
+        )
         return {
             **state,
             "intent": route.intent,

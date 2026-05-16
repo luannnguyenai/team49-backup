@@ -57,7 +57,7 @@ class StructuredAgentRouter:
     def __init__(
         self,
         model,
-        confidence_threshold: float = 0.65,
+        confidence_threshold: float = 0.45,
         prompt_manager=None,
         tool_registry: AgentRAGToolRegistry | None = None,
     ):
