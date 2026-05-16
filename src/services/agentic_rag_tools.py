@@ -68,6 +68,12 @@ class AgentRAGToolRegistry:
                 input_schema={
                     "canonical_unit_id": "Optional current/selected canonical unit id.",
                     "query": "Optional unit or lecture query when no canonical id is available.",
+                    "scope": (
+                        "Optional. One of learned (default) or all. Use learned when the learner "
+                        "asks to summarize or recap what they have already learned in a lecture "
+                        "or video. Use all only when the learner explicitly asks for a full, "
+                        "whole, complete, or entire lecture/video summary."
+                    ),
                 },
             ),
             "get_user_learning_context": AgentRAGToolSpec(
@@ -284,6 +290,7 @@ class AgenticRAGToolExecutor:
                     current_path_course_ids=current_path_course_ids,
                     canonical_unit_id=tool_call.arguments.get("canonical_unit_id"),
                     query=tool_call.arguments.get("query"),
+                    scope=tool_call.arguments.get("scope"),
                 )
             except Exception as exc:
                 error_code = classify_rag_error(exc)
