@@ -446,7 +446,8 @@ def test_structured_router_prompt_resolves_current_path_time_estimates():
     assert route.intent == "summarize_progress"
     assert "Treat deictic path references as current-path references" in system_prompt
     assert "prefer current-path scope over the current unit" in system_prompt
-    assert "explicit cadence and a current-path target" in system_prompt
+    assert "is summarize_progress, not general_course_question or clarify" in system_prompt
+    assert "personal study cadence" in system_prompt
 
 
 def test_structured_router_prompt_routes_latest_learned_content_summary_to_retrieval():
@@ -502,7 +503,7 @@ def test_structured_router_prompt_includes_vietnamese_deictic_video_examples():
     assert "tóm tắt video gần nhất" in system_prompt
     assert "video vừa xem" in system_prompt
     assert "do not ask the learner to send a title or a link" in system_prompt
-    assert "Vietnamese latest video recap" in system_prompt
+    assert "Apply intent rules to both English and Vietnamese phrasings" in system_prompt
 
 
 def test_structured_router_prompt_routes_vietnamese_replan_request_to_request_replan():
@@ -526,7 +527,6 @@ def test_structured_router_prompt_routes_vietnamese_replan_request_to_request_re
     assert "tối ưu hoá lộ trình" in system_prompt
     assert "request_replan" in system_prompt
     assert "Do not classify these messages as assistant_help or clarify" in system_prompt
-    assert "Vietnamese replan request" in system_prompt
 
 
 def test_structured_router_prompt_includes_vietnamese_capability_examples():
@@ -548,7 +548,6 @@ def test_structured_router_prompt_includes_vietnamese_capability_examples():
     system_prompt = model.messages[0]["content"]
     assert "đánh giá năng lực hiện tại của tôi" in system_prompt
     assert "đánh giá trình độ của tôi" in system_prompt
-    assert "Vietnamese capability evaluation" in system_prompt
     assert "prefer summarize_progress" in system_prompt
     assert "explicit new-test verb" in system_prompt
     assert "làm bài kiểm tra" in system_prompt
@@ -784,12 +783,15 @@ def test_structured_router_agentic_rag_responding_prompt_handles_aggregated_lect
     assert "backend-produced synthesis" in prompt
 
 
-def test_structured_router_agentic_rag_responding_prompt_does_not_clarify_cadence_estimate():
+def test_structured_router_agentic_rag_responding_prompt_uses_primary_course_for_cadence_estimate():
     prompt = AgentPromptManager().get("agentic_rag", "responding.system")
 
-    assert "When the learner provides a study cadence" in prompt
-    assert "without naming a specific course or path" in prompt
-    assert "state that assumption naturally" in prompt
+    assert "path_workload_summary.primary_course.remaining_estimated_minutes" in prompt
+    assert "matching entry from path_workload_summary.courses" in prompt
+    assert (
+        "Only fall back to the path-wide path_workload_summary.remaining_estimated_minutes"
+        in prompt
+    )
     assert "Do not ask the learner to pick a course/path before giving the estimate" in prompt
 
 
