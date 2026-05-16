@@ -6,6 +6,7 @@ import LearningUnitLoading from "@/app/(protected)/courses/[courseSlug]/learn/[u
 import LearningUnitShell from "@/components/learn/LearningUnitShell";
 import LearningPageScreen from "@/components/learn/LearningPageScreen";
 import TopNav from "@/components/layout/TopNav";
+import { AGENT_ROUTE_CONTEXT_STORAGE_KEY } from "@/features/agent/route-context";
 import { TUTOR_SESSION_HISTORY_STORAGE_KEY } from "@/lib/tutorSessionHistory";
 import {
   COMING_SOON_ITEM,
@@ -278,6 +279,7 @@ describe("learning unit page (US3)", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     sessionStorage.clear();
+    localStorage.clear();
     const { resetCachedAllCourseCatalog } = await import("@/lib/course-catalog-cache");
     resetCachedAllCourseCatalog();
     apiMock.get.mockResolvedValue({ data: [] });
@@ -382,6 +384,37 @@ describe("learning unit page (US3)", () => {
 
     await waitFor(() => {
       expect(screen.getAllByText("Lecture 1: Introduction").length).toBeGreaterThan(0);
+    });
+  });
+
+  it("publishes the active lesson context for the agent", async () => {
+    const data: LearningUnitResponse = {
+      ...LECTURE_1_UNIT,
+      unit: {
+        ...LECTURE_1_UNIT.unit,
+        canonical_unit_id: "canonical-lecture-1",
+        start_seconds: 120,
+      },
+    };
+
+    render(
+      <LearningPageScreen
+        courseSlug="cs231n"
+        unitSlug="lecture-1-introduction"
+        data={data}
+      />,
+    );
+
+    await waitFor(() => {
+      const raw = window.localStorage.getItem(AGENT_ROUTE_CONTEXT_STORAGE_KEY);
+      expect(raw).not.toBeNull();
+      expect(JSON.parse(raw ?? "{}")).toMatchObject({
+        route: "/learn",
+        courseSlug: "cs231n",
+        unitSlug: "lecture-1-introduction",
+        canonicalUnitId: "canonical-lecture-1",
+        playerTimestampSec: 120,
+      });
     });
   });
 

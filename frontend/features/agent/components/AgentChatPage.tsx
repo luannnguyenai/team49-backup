@@ -103,6 +103,7 @@ import {
   type AgentWarning,
   type AssessmentProposal,
 } from "@/features/agent/api";
+import { readAgentRouteContext } from "@/features/agent/route-context";
 import {
   applyAgentActivityStatus,
   applyAgentActivityThought,
@@ -2210,6 +2211,7 @@ export default function AgentChatPage() {
 
       const controller = new AbortController();
       abortControllerRef.current = controller;
+      const routeContext = readAgentRouteContext();
 
       const stream = await agentApi.chatStream(
         {
@@ -2217,6 +2219,7 @@ export default function AgentChatPage() {
           incomingMessageId,
           conversationId: activeSessionId,
           traceMode: "summary",
+          ...(routeContext ? { routeContext } : {}),
           ...(toolMode === "web_papers" ? { toolMode } : {}),
           ...(safeChatModelId !== "default" ? { chatModelId: safeChatModelId } : {}),
         },

@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import AgentPage from "@/app/agent/page";
+import { AGENT_ROUTE_CONTEXT_STORAGE_KEY } from "@/features/agent/route-context";
 import { createLearningProfileForPath } from "@/features/learning-path/profile";
 import { useLearningPathStore } from "@/features/learning-path/store";
 
@@ -215,6 +216,42 @@ describe("agent page", () => {
 
     expect(await screen.findByText("Receptive fields are covered in CS231n.")).toBeInTheDocument();
     expect(screen.getByText("Kernels, stride, pooling, and receptive fields")).toBeInTheDocument();
+  });
+
+  it("includes recent learn route context when sending a chat message", async () => {
+    window.localStorage.setItem(
+      AGENT_ROUTE_CONTEXT_STORAGE_KEY,
+      JSON.stringify({
+        route: "/learn",
+        courseSlug: "cs231n",
+        unitSlug: "lecture-1-introduction",
+        canonicalUnitId: "unit-lecture-1",
+        playerTimestampSec: 312,
+        savedAt: Date.now(),
+      }),
+    );
+
+    render(<AgentPage />);
+
+    const promptButtons = await screen.findAllByRole("button", {
+      name: /where should i review cnns/i,
+    });
+    fireEvent.click(promptButtons[0]);
+
+    await waitFor(() => {
+      expect(agentApiMock.chat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Where should I review CNNs?",
+          routeContext: {
+            route: "/learn",
+            courseSlug: "cs231n",
+            unitSlug: "lecture-1-introduction",
+            canonicalUnitId: "unit-lecture-1",
+            playerTimestampSec: 312,
+          },
+        }),
+      );
+    });
   });
 
   it("labels source cards with their learning path tags", async () => {

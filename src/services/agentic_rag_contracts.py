@@ -9,6 +9,8 @@ from src.services.agent_graph_contracts import ToolResult
 AgenticRAGToolName = Literal[
     "search_current_path_units",
     "get_unit_summary",
+    "get_lecture_context",
+    "get_user_learning_context",
     "ask_clarification",
     "offer_scope_expansion",
     "search_allowed_other_paths",
@@ -35,7 +37,7 @@ class AgenticRAGThought(BaseModel):
 class AgenticRAGToolCall(BaseModel):
     tool: AgenticRAGToolName
     arguments: dict[str, Any] = Field(default_factory=dict)
-    rationale: str
+    rationale: str = ""
 
 
 class AgenticRAGObservation(BaseModel):
@@ -46,7 +48,12 @@ class AgenticRAGObservation(BaseModel):
 
 
 class AgenticRAGFinal(BaseModel):
-    answer_markdown: str
+    answer_markdown: str = Field(
+        description=(
+            "Final answer only. Do not append optional follow-up offers, upsell questions, "
+            "or unsupported next-action suggestions when evidence is sufficient."
+        )
+    )
     evidence_status: AgenticRAGEvidenceStatus
     evidence_sufficient: bool = False
     clarification_question: str | None = None

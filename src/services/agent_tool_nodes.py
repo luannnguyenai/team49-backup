@@ -11,6 +11,7 @@ from src.schemas.agent import (
     PathRequirementsRequest,
     UnitSearchRequest,
 )
+
 from src.services.agent_evidence_quality import AgentEvidenceQualityService, EvidenceQualityVerdict
 from src.services.agent_graph_contracts import AgentSlots, ToolResult
 from src.services.agent_search_scope_service import AgentSearchScopeService
@@ -25,11 +26,15 @@ class AgentToolNodes:
         requirement_service,
         prerequisite_path_service=None,
         user_id=None,
+        user_learning_context_service=None,
+        lecture_summary_aggregator=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
         self.prerequisite_path_service = prerequisite_path_service
         self.user_id = user_id
+        self.user_learning_context_service = user_learning_context_service
+        self.lecture_summary_aggregator = lecture_summary_aggregator
         self.scope_service = AgentSearchScopeService()
         self.evidence_quality = AgentEvidenceQualityService()
 
@@ -48,6 +53,323 @@ class AgentToolNodes:
             answer_markdown=answer_markdown,
             requires_evidence=False,
         )
+
+    async def user_learning_context(
+        self,
+        *,
+        message: str,
+        slots: AgentSlots,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None = None,
+        route_context=None,
+        context_kind: str | None = None,
+    ) -> ToolResult:
+        if self.user_id is None or self.user_learning_context_service is None:
+            return ToolResult(
+                kind="progress_summary",
+                answer_markdown=(
+                    "I cannot read learner progress in this environment, but I can still answer "
+                    "from course content."
+                ),
+                fallback=AgentFallback(
+                    reason="tool_unavailable",
+                    message="Authenticated learner context service is unavailable.",
+                ),
+                requires_evidence=False,
+                metadata={"learner_context_available": False},
+            )
+
+        snapshot = await self.user_learning_context_service.snapshot(
+            user_id=self.user_id,
+            allowed_course_ids=allowed_course_ids,
+            current_path_course_ids=current_path_course_ids,
+            route_context=route_context,
+            context_kind=context_kind,
+        )
+        return ToolResult(
+            kind="progress_summary",
+            answer_markdown=None,
+            requires_evidence=False,
+            metadata={
+                "learner_context_available": True,
+                "learner_context": snapshot,
+                "raw_topic": slots.raw_topic,
+                "search_queries": slots.search_queries,
+            },
+        )
+
+    async def lecture_context(
+        self,
+        *,
+        message: str,
+        slots: AgentSlots,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None = None,
+        route_context=None,
+        canonical_unit_id: str | None = None,
+        query: str | None = None,
+        scope: str | None = None,
+    ) -> ToolResult:
+        repo = getattr(self.search_service, "repo", None)
+        get_lecture_context = getattr(repo, "get_lecture_context_for_unit", None)
+        if get_lecture_context is None:
+            return await self.find_content(
+                message,
+                "find_content",
+                slots,
+                allowed_course_ids,
+                current_path_course_ids=current_path_course_ids,
+            )
+
+        candidate_ids: list[str] = []
+        if canonical_unit_id and str(canonical_unit_id).strip():
+            candidate_ids.append(str(canonical_unit_id).strip())
+        for slot_unit_id in slots.canonical_unit_ids:
+            normalized = str(slot_unit_id).strip()
+            if normalized and normalized not in candidate_ids:
+                candidate_ids.append(normalized)
+        route_unit_id = self._canonical_unit_id_from_route_context(route_context)
+        if route_unit_id and route_unit_id not in candidate_ids:
+            candidate_ids.append(route_unit_id)
+        scoped_course_ids = self._merged_course_scope(
+            current_path_course_ids,
+            allowed_course_ids,
+        )
+        if not candidate_ids and not (query and str(query).strip()):
+            fallback_unit_id = await self._resolve_lecture_unit_from_learner_context(
+                allowed_course_ids=allowed_course_ids,
+                current_path_course_ids=current_path_course_ids,
+                route_context=route_context,
+            )
+            if fallback_unit_id:
+                candidate_ids.append(fallback_unit_id)
+
+        lecture = None
+        selected_id = None
+        for candidate_id in candidate_ids:
+            lecture = await get_lecture_context(
+                candidate_id,
+                allowed_course_ids=scoped_course_ids,
+            )
+            if lecture:
+                selected_id = candidate_id
+                break
+
+        if lecture is None and query:
+            search_slots = slots.model_copy(update={"search_queries": [str(query)], "raw_topic": str(query)})
+            search_result = await self.find_content(
+                message,
+                "find_content",
+                search_slots,
+                allowed_course_ids,
+                current_path_course_ids=current_path_course_ids,
+            )
+            if search_result.citations:
+                selected_id = search_result.citations[0].canonical_unit_id
+                lecture = await get_lecture_context(
+                    selected_id,
+                    allowed_course_ids=scoped_course_ids,
+                )
+        if not selected_id:
+            return ToolResult(
+                kind="clarification",
+                answer_markdown="I need a selected unit or searchable lecture topic to summarize that lecture.",
+                requires_evidence=False,
+            )
+
+        if not lecture:
+            return ToolResult(
+                kind="find_content",
+                answer_markdown="I could not find lecture context for the selected unit.",
+                requires_evidence=True,
+                metadata={"lecture_context_found": False, "canonical_unit_id": selected_id},
+            )
+
+        resolved_scope = self._resolve_lecture_scope(scope)
+        lecture, scope_metadata = await self._apply_lecture_scope_filter(
+            lecture,
+            scope=resolved_scope,
+            scoped_course_ids=scoped_course_ids,
+        )
+        lecture, aggregation_metadata = await self._maybe_aggregate_lecture_summary(
+            lecture,
+            scope=resolved_scope,
+            message=message,
+        )
+        scope_metadata.update(aggregation_metadata)
+
+        citations = [
+            AgentCitation(
+                canonical_unit_id=unit["canonical_unit_id"],
+                course_id=unit["course_id"],
+                lecture_id=unit.get("lecture_id"),
+                lecture_title=unit.get("lecture_title"),
+                unit_name=unit["unit_name"],
+                learn_href=unit.get("learn_href"),
+                quote=unit.get("summary"),
+                source="summary",
+            )
+            for unit in lecture["units"][:8]
+            if unit.get("canonical_unit_id")
+        ]
+        return ToolResult(
+            kind="find_content",
+            answer_markdown=None,
+            citations=citations,
+            requires_evidence=False,
+            metadata={
+                "lecture_context_found": True,
+                "lecture_context": lecture,
+                "raw_topic": lecture.get("lecture_title") or selected_id,
+                "search_queries": [lecture.get("lecture_title") or selected_id],
+                **scope_metadata,
+            },
+        )
+
+    @staticmethod
+    def _resolve_lecture_scope(scope: str | None) -> str:
+        if isinstance(scope, str) and scope.strip().lower() == "all":
+            return "all"
+        return "learned"
+
+    @staticmethod
+    def _canonical_unit_id_from_route_context(route_context) -> str | None:
+        if route_context is None:
+            return None
+        value = None
+        if isinstance(route_context, dict):
+            value = route_context.get("canonical_unit_id") or route_context.get("canonicalUnitId")
+        else:
+            value = getattr(route_context, "canonical_unit_id", None) or getattr(
+                route_context, "canonicalUnitId", None
+            )
+        if value and str(value).strip():
+            return str(value).strip()
+        return None
+
+    async def _resolve_lecture_unit_from_learner_context(
+        self,
+        *,
+        allowed_course_ids: list[str],
+        current_path_course_ids: list[str] | None,
+        route_context=None,
+    ) -> str | None:
+        if self.user_id is None or self.user_learning_context_service is None:
+            return None
+        try:
+            snapshot = await self.user_learning_context_service.snapshot(
+                user_id=self.user_id,
+                allowed_course_ids=allowed_course_ids,
+                current_path_course_ids=current_path_course_ids,
+                route_context=route_context,
+                context_kind="current_unit_state",
+            )
+        except Exception:
+            return None
+        current_state = snapshot.get("current_learning_state") if isinstance(snapshot, dict) else None
+        if isinstance(current_state, dict):
+            current_unit = current_state.get("current_unit")
+            if isinstance(current_unit, dict) and current_unit.get("canonical_unit_id"):
+                return str(current_unit["canonical_unit_id"])
+        recent_progress = snapshot.get("recent_progress") if isinstance(snapshot, dict) else None
+        if isinstance(recent_progress, list):
+            for item in recent_progress:
+                if isinstance(item, dict) and item.get("canonical_unit_id"):
+                    return str(item["canonical_unit_id"])
+        path_position = snapshot.get("path_position") if isinstance(snapshot, dict) else None
+        if isinstance(path_position, dict):
+            for key in ("current_unit", "next_unfinished_unit", "next_unit", "previous_unit"):
+                node = path_position.get(key)
+                if isinstance(node, dict) and node.get("canonical_unit_id"):
+                    return str(node["canonical_unit_id"])
+        return None
+
+    async def _maybe_aggregate_lecture_summary(
+        self,
+        lecture: dict,
+        *,
+        scope: str,
+        message: str,
+    ) -> tuple[dict, dict]:
+        metadata: dict = {}
+        if scope != "all":
+            return lecture, metadata
+        if lecture.get("lecture_summary"):
+            return lecture, metadata
+        if self.lecture_summary_aggregator is None:
+            return lecture, metadata
+        units = lecture.get("units") or []
+        if not any((u.get("summary") or u.get("description")) for u in units):
+            return lecture, metadata
+        aggregated = await self.lecture_summary_aggregator.aggregate(
+            lecture_title=lecture.get("lecture_title"),
+            units=units,
+            language_hint=message,
+        )
+        if not aggregated:
+            metadata["lecture_aggregated_summary_status"] = "failed"
+            return lecture, metadata
+        enriched = {
+            **lecture,
+            "aggregated_summary": aggregated,
+            "source": "aggregated_unit_summaries",
+        }
+        metadata.update(
+            {
+                "lecture_aggregated_summary_status": "ready",
+                "lecture_aggregated_summary_length": len(aggregated),
+            }
+        )
+        return enriched, metadata
+
+    async def _apply_lecture_scope_filter(
+        self,
+        lecture: dict,
+        *,
+        scope: str,
+        scoped_course_ids: list[str],
+    ) -> tuple[dict, dict]:
+        scope_metadata: dict = {"lecture_scope": scope, "lecture_scope_applied": False}
+        if scope != "learned":
+            return lecture, scope_metadata
+        if self.user_id is None or self.user_learning_context_service is None:
+            return lecture, scope_metadata
+        units = lecture.get("units") or []
+        if not units:
+            return lecture, scope_metadata
+        try:
+            learned_ids = await self.user_learning_context_service.learned_canonical_unit_ids(
+                self.user_id,
+                scoped_course_ids,
+            )
+        except Exception:
+            return lecture, scope_metadata
+        original_count = len(units)
+        filtered = [unit for unit in units if unit.get("canonical_unit_id") in learned_ids]
+        if not filtered:
+            scope_metadata["lecture_scope_fallback"] = "no_learned_units"
+            return lecture, scope_metadata
+        scoped_lecture = {**lecture, "units": filtered}
+        scope_metadata.update(
+            {
+                "lecture_scope_applied": True,
+                "lecture_scope_total_units": original_count,
+                "lecture_scope_learned_units": len(filtered),
+            }
+        )
+        return scoped_lecture, scope_metadata
+
+    @staticmethod
+    def _merged_course_scope(
+        primary_course_ids: list[str] | None,
+        fallback_course_ids: list[str] | None,
+    ) -> list[str]:
+        merged: list[str] = []
+        for course_id in [*(primary_course_ids or []), *(fallback_course_ids or [])]:
+            normalized = str(course_id).strip()
+            if normalized and normalized not in merged:
+                merged.append(normalized)
+        return merged
 
     async def find_content(
         self,
@@ -591,15 +913,27 @@ class AgentToolNodes:
             ],
         )
 
-    async def replan_proposal(self) -> ToolResult:
+    async def replan_proposal(self, message: str = "") -> ToolResult:
         expires_at = datetime.now(UTC) + timedelta(minutes=30)
+        if self._looks_vietnamese(message):
+            answer_markdown = (
+                "Được. Mở bộ chọn phạm vi bên dưới, mô tả phần bạn đã biết, "
+                "rồi mình sẽ dùng đánh giá đó để tối ưu lại lộ trình học."
+            )
+            label = "Mở bộ chọn phạm vi"
+        else:
+            answer_markdown = (
+                "Sure. Open the scope builder below, describe what you already know, "
+                "and I will use that assessment to optimize your learning path."
+            )
+            label = "Open scope builder"
         return ToolResult(
             kind="replan_proposal",
-            answer_markdown="Sure. Open the scope builder below, describe what you already know, and I will use that assessment to optimize your learning path.",
+            answer_markdown=answer_markdown,
             actions=[
                 AgentAction(
                     type="request_replan",
-                    label="Open scope builder",
+                    label=label,
                     actionId=f"act_{uuid4()}",
                     status="awaiting_confirmation",
                     expiresAt=expires_at,

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
+import unicodedata
 from datetime import UTC, datetime, timedelta
 from inspect import signature
 from types import SimpleNamespace
@@ -51,6 +53,7 @@ from src.services.agent_thread_memory_state import AgentThreadMemoryStateStore
 from src.services.agent_tool_nodes import AgentToolNodes
 from src.services.agentic_rag_pipeline import AgenticRAGPipeline
 from src.services.agentic_rag_tools import AgenticRAGToolExecutor
+from src.services.lecture_summary_aggregator import LectureSummaryAggregator
 from src.services.guardrail_router import (
     GuardrailDecision,
     GuardrailRouterUnavailableError,
@@ -71,7 +74,18 @@ RAG_AGENT_INTENTS = {
     "explain_concept",
     "general_course_question",
     "navigate_to_unit",
+    "ask_what_next",
+    "explain_planner_decision",
+    "summarize_progress",
 }
+
+USER_CONTEXT_AGENT_INTENTS = {
+    "ask_what_next",
+    "explain_planner_decision",
+    "summarize_progress",
+}
+
+USER_CONTEXT_RAG_MIN_CONFIDENCE = 0.0
 
 EXACT_GREETING_RESPONSES = {
     "Hello": "Hi! What AI/ML topic would you like help with today?",
@@ -148,6 +162,8 @@ class AgentGraphService:
         guardrail_router=None,
         language_normalizer=None,
         response_router=None,
+        user_learning_context_service=None,
+        lecture_summary_aggregator=None,
     ):
         self.search_service = search_service
         self.requirement_service = requirement_service
@@ -181,6 +197,8 @@ class AgentGraphService:
         self.pii_guardrail = pii_guardrail_service or PIIGuardrailService()
         self.guardrail_router = guardrail_router or build_guardrail_router_client()
         self.language_normalizer = language_normalizer or get_input_language_normalizer()
+        self.user_learning_context_service = user_learning_context_service
+        self.lecture_summary_aggregator = lecture_summary_aggregator or LectureSummaryAggregator()
         prerequisite_path_service = None
         if hasattr(search_service, "repo"):
             prerequisite_path_service = AgentPrerequisitePathService(
@@ -192,6 +210,8 @@ class AgentGraphService:
             requirement_service,
             prerequisite_path_service=prerequisite_path_service,
             user_id=getattr(action_user, "id", None),
+            user_learning_context_service=user_learning_context_service,
+            lecture_summary_aggregator=self.lecture_summary_aggregator,
         )
         self.agentic_rag_tools = AgenticRAGToolExecutor(self.tools)
         self.agentic_rag = AgenticRAGPipeline(
@@ -278,15 +298,29 @@ class AgentGraphService:
         slots = state.get("slots")
         if isinstance(slots, dict):
             slots = AgentSlots.model_validate(slots)
+        effective_intent = self._effective_rag_intent(state)
         return (
             isinstance(policy, PolicyDecision)
             and policy.allow
-            and state.get("intent") in RAG_AGENT_INTENTS
-            and float(state.get("intent_confidence") or 0.0) >= 0.65
+            and effective_intent is not None
             and isinstance(slots, AgentSlots)
             and not slots.ambiguity_options
-            and bool((slots.raw_topic or "").strip())
+            and (
+                bool((slots.raw_topic or "").strip())
+                or bool(slots.canonical_unit_ids)
+                or effective_intent in USER_CONTEXT_AGENT_INTENTS
+            )
         )
+
+    def _effective_rag_intent(self, state: dict) -> str | None:
+        intent = state.get("intent")
+        confidence = float(state.get("intent_confidence") or 0.0)
+        if intent in RAG_AGENT_INTENTS and confidence >= 0.45:
+            return intent
+        candidate_intent = state.get("candidate_intent")
+        if intent == "clarify" and candidate_intent in RAG_AGENT_INTENTS:
+            return candidate_intent
+        return None
 
     async def chat(
         self,
@@ -323,20 +357,77 @@ class AgentGraphService:
             conversation_id,
             user_id,
         )
-        guardrail_decision = await self._route_guardrail(
-            message=sanitized_request.message,
-            route_context=sanitized_request.route_context,
-            allowed_course_ids=allowed_course_ids,
-            current_path_course_ids=current_path_course_ids,
-            pending_clarification=pending_for_guardrail,
-            assistant_context=assistant_context_for_guardrail,
+        preloaded_recent_messages = await self._load_recent_message_context(
+            conversation_id,
+            user_id,
         )
+        guardrail_task = asyncio.create_task(
+            self._route_guardrail(
+                message=sanitized_request.message,
+                route_context=sanitized_request.route_context,
+                allowed_course_ids=allowed_course_ids,
+                current_path_course_ids=current_path_course_ids,
+                pending_clarification=pending_for_guardrail,
+                assistant_context=assistant_context_for_guardrail,
+            )
+        )
+        prerouted_task: asyncio.Task | None = None
+        if pending_for_guardrail is None:
+            prerouted_task = asyncio.create_task(
+                self._speculative_route(
+                    message=sanitized_request.message,
+                    route_context=sanitized_request.route_context,
+                    recent_messages=preloaded_recent_messages,
+                )
+            )
+        prerouted_route: AgentRoute | None = None
+        try:
+            guardrail_decision = await guardrail_task
+        except Exception:
+            if prerouted_task is not None:
+                try:
+                    prerouted_route = await prerouted_task
+                except (asyncio.CancelledError, Exception):
+                    prerouted_route = None
+            if self._should_allow_prerouted_educational_request_when_guardrail_unavailable(
+                route=prerouted_route,
+            ):
+                guardrail_decision = GuardrailDecision.allow()
+            else:
+                if prerouted_task is not None:
+                    prerouted_task.cancel()
+                raise
         guardrail_response = self._compose_guardrail_response(
             conversation_id=conversation_id,
             decision=guardrail_decision,
         )
         if guardrail_response is not None:
+            if prerouted_task is not None:
+                try:
+                    prerouted_route = await prerouted_task
+                except (asyncio.CancelledError, Exception):
+                    prerouted_route = None
+            if self._should_allow_prerouted_educational_request_after_guardrail(
+                decision=guardrail_decision,
+                route=prerouted_route,
+            ):
+                guardrail_response = None
+                guardrail_decision = GuardrailDecision.allow()
+            else:
+                if prerouted_task is not None:
+                    prerouted_task.cancel()
+                return guardrail_response
+
+        if guardrail_response is not None:
+            if prerouted_task is not None:
+                prerouted_task.cancel()
             return guardrail_response
+
+        if prerouted_route is None and prerouted_task is not None:
+            try:
+                prerouted_route = await prerouted_task
+            except (asyncio.CancelledError, Exception):
+                prerouted_route = None
 
         if self.graph_repo is None:
             response = await self._invoke_graph_and_compose(
@@ -346,6 +437,9 @@ class AgentGraphService:
                 user_id=user_id,
                 allowed_course_ids=allowed_course_ids,
                 current_path_course_ids=current_path_course_ids,
+                prerouted_route=prerouted_route,
+                preloaded_recent_messages=preloaded_recent_messages,
+                preloaded_pending=pending_for_guardrail,
             )
             response = await self._enforce_response_language(response, normalized_language)
             return self._sanitize_response(response, input_guardrail)
@@ -425,6 +519,9 @@ class AgentGraphService:
                     user_id=user_id,
                     allowed_course_ids=allowed_course_ids,
                     current_path_course_ids=current_path_course_ids,
+                    prerouted_route=prerouted_route,
+                    preloaded_recent_messages=preloaded_recent_messages,
+                    preloaded_pending=pending_for_guardrail,
                 )
                 response = await self._enforce_response_language(response, normalized_language)
                 response = self._sanitize_response(response, input_guardrail)
@@ -567,27 +664,81 @@ class AgentGraphService:
                 assistant_context = await self._load_guardrail_assistant_context(
                     conversation_id, user_id,
                 )
-                guardrail_decision = await self._route_guardrail(
-                    message=sanitized_request.message,
-                    route_context=sanitized_request.route_context,
-                    allowed_course_ids=allowed_course_ids,
-                    current_path_course_ids=current_path_course_ids,
-                    pending_clarification=pending_for_guardrail,
-                    assistant_context=assistant_context,
+                preloaded_recent_messages = await self._load_recent_message_context(
+                    conversation_id, user_id,
                 )
+                guardrail_task = asyncio.create_task(
+                    self._route_guardrail(
+                        message=sanitized_request.message,
+                        route_context=sanitized_request.route_context,
+                        allowed_course_ids=allowed_course_ids,
+                        current_path_course_ids=current_path_course_ids,
+                        pending_clarification=pending_for_guardrail,
+                        assistant_context=assistant_context,
+                    )
+                )
+                prerouted_task: asyncio.Task | None = None
+                if pending_for_guardrail is None:
+                    prerouted_task = asyncio.create_task(
+                        self._speculative_route(
+                            message=sanitized_request.message,
+                            route_context=sanitized_request.route_context,
+                            recent_messages=preloaded_recent_messages,
+                        )
+                    )
+                prerouted_route: AgentRoute | None = None
+                try:
+                    guardrail_decision = await guardrail_task
+                except Exception:
+                    if prerouted_task is not None:
+                        try:
+                            prerouted_route = await prerouted_task
+                        except (asyncio.CancelledError, Exception):
+                            prerouted_route = None
+                    if self._should_allow_prerouted_educational_request_when_guardrail_unavailable(
+                        route=prerouted_route,
+                    ):
+                        guardrail_decision = GuardrailDecision.allow()
+                    else:
+                        if prerouted_task is not None:
+                            prerouted_task.cancel()
+                        raise
                 guardrail_response = self._compose_guardrail_response(
                     conversation_id=conversation_id,
                     decision=guardrail_decision,
                 )
                 if guardrail_response is not None:
-                    guardrail_response = await self._enforce_response_language(
-                        guardrail_response,
-                        normalized_language,
-                    )
-                    guardrail_response = self._sanitize_response(guardrail_response, input_guardrail)
-                    await persist_assistant_message(guardrail_response)
-                    yield _json.dumps({"done": guardrail_response.model_dump(mode="json", by_alias=True)}) + "\n"
-                    return
+                    if prerouted_task is not None:
+                        try:
+                            prerouted_route = await prerouted_task
+                        except (asyncio.CancelledError, Exception):
+                            prerouted_route = None
+                    if self._should_allow_prerouted_educational_request_after_guardrail(
+                        decision=guardrail_decision,
+                        route=prerouted_route,
+                    ):
+                        guardrail_response = None
+                        guardrail_decision = GuardrailDecision.allow()
+                    else:
+                        if prerouted_task is not None:
+                            prerouted_task.cancel()
+                        guardrail_response = await self._enforce_response_language(
+                            guardrail_response,
+                            normalized_language,
+                        )
+                        guardrail_response = self._sanitize_response(
+                            guardrail_response,
+                            input_guardrail,
+                        )
+                        await persist_assistant_message(guardrail_response)
+                        yield _json.dumps({"done": guardrail_response.model_dump(mode="json", by_alias=True)}) + "\n"
+                        return
+
+                if prerouted_route is None and prerouted_task is not None:
+                    try:
+                        prerouted_route = await prerouted_task
+                    except (asyncio.CancelledError, Exception):
+                        prerouted_route = None
 
                 async def emit_done_response(response: AgentChatResponse) -> str:
                     response = await self._enforce_response_language(response, normalized_language)
@@ -625,13 +776,13 @@ class AgentGraphService:
                     trace_id=str(uuid4()),
                 ).model_dump()
                 stream_state["message"] = sanitized_request.message
-                stream_state["pending_clarification"] = await self._load_pending_clarification(
-                    conversation_id, user_id, thread_id,
-                )
-                stream_state["recent_messages"] = await self._load_recent_message_context(conversation_id, user_id)
+                stream_state["pending_clarification"] = pending_for_guardrail
+                stream_state["recent_messages"] = preloaded_recent_messages
                 stream_state["allowed_course_ids"] = allowed_course_ids
                 stream_state["current_path_course_ids"] = current_path_course_ids or allowed_course_ids
                 stream_state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id, thread_id)
+                if prerouted_route is not None:
+                    stream_state["prerouted_route"] = prerouted_route.model_dump(mode="json")
                 route_state = await self._route_intent(stream_state)
                 logger.info("chat_stream: after _route_intent intent=%s conv=%s", route_state.get("intent"), conversation_id)
                 canonicalized = await self._canonicalize_slots(route_state)
@@ -645,12 +796,13 @@ class AgentGraphService:
 
                 should_rag = self._should_use_rag_react(policy_state)
                 supports_agentic = self._router_supports_agentic_rag()
+                effective_rag_intent = self._effective_rag_intent(policy_state) or intent
 
                 if should_rag and supports_agentic:
                     slots = self._slots_with_active_citation_for_followup(policy_state, slots)
                     async for event in self.agentic_rag.run_stream(
                         message=sanitized_request.message,
-                        intent=intent,
+                        intent=effective_rag_intent,
                         slots=slots,
                         route_context=policy_state.get("route_context"),
                         recent_messages=policy_state.get("recent_messages") or [],
@@ -949,6 +1101,33 @@ class AgentGraphService:
         return "path" in normalized and any(term in normalized for term in path_action_terms)
 
     @staticmethod
+    def _should_allow_prerouted_educational_request_after_guardrail(
+        *,
+        decision: GuardrailDecision,
+        route: AgentRoute | None,
+    ) -> bool:
+        if decision.action not in {"SAFETY_REFUSE", "ASK_CLARIFY"} or decision.attack_type != "none":
+            return False
+        if route is None or route.clarification_question:
+            return False
+        effective_intent = route.candidate_intent if route.intent == "clarify" else route.intent
+        if effective_intent not in RAG_AGENT_INTENTS:
+            return False
+        return route.confidence >= 0.75
+
+    @staticmethod
+    def _should_allow_prerouted_educational_request_when_guardrail_unavailable(
+        *,
+        route: AgentRoute | None,
+    ) -> bool:
+        if route is None or route.clarification_question:
+            return False
+        effective_intent = route.candidate_intent if route.intent == "clarify" else route.intent
+        if effective_intent not in RAG_AGENT_INTENTS:
+            return False
+        return route.confidence >= 0.75
+
+    @staticmethod
     def _compose_guardrail_response(
         *,
         conversation_id: str,
@@ -1024,6 +1203,14 @@ class AgentGraphService:
         response: AgentChatResponse,
         language: LanguageNormalizationResult,
     ) -> AgentChatResponse:
+        cleaned = self._strip_unexpected_script_words(
+            response.answer.markdown,
+            target_language=language.target_language,
+        )
+        if cleaned != response.answer.markdown:
+            response = response.model_copy(
+                update={"answer": response.answer.model_copy(update={"markdown": cleaned})}
+            )
         if language.target_language != "en" or not response.answer.markdown.strip():
             return response
         detect = getattr(self.language_normalizer, "detect", None)
@@ -1053,6 +1240,54 @@ class AgentGraphService:
             update={"answer": response.answer.model_copy(update={"markdown": translated})}
         )
 
+    @classmethod
+    def _strip_unexpected_script_words(cls, text: str, *, target_language: str) -> str:
+        if target_language not in {"en", "vi"} or not text:
+            return text
+        cleaned_chars = [
+            "" if cls._is_unexpected_script_letter(char) else char
+            for char in text
+        ]
+        cleaned = "".join(cleaned_chars)
+        cleaned = re.sub(r"[ \t]{2,}", " ", cleaned)
+        cleaned = re.sub(r"\s+([,.;:!?])", r"\1", cleaned)
+        return cleaned
+
+    @staticmethod
+    def _is_unexpected_script_letter(char: str) -> bool:
+        if not char.isalpha():
+            return False
+        name = unicodedata.name(char, "")
+        return any(
+            script in name
+            for script in (
+                "HEBREW",
+                "ARABIC",
+                "CYRILLIC",
+                "CJK",
+                "HIRAGANA",
+                "KATAKANA",
+                "HANGUL",
+                "ARMENIAN",
+                "GEORGIAN",
+                "DEVANAGARI",
+                "BENGALI",
+                "GURMUKHI",
+                "GUJARATI",
+                "ORIYA",
+                "TAMIL",
+                "TELUGU",
+                "KANNADA",
+                "MALAYALAM",
+                "SINHALA",
+                "THAI",
+                "LAO",
+                "KHMER",
+                "MYANMAR",
+                "ETHIOPIC",
+            )
+        )
+
     async def _invoke_graph_and_compose(
         self,
         *,
@@ -1062,6 +1297,9 @@ class AgentGraphService:
         user_id: str,
         allowed_course_ids: list[str],
         current_path_course_ids: list[str] | None,
+        prerouted_route: AgentRoute | None = None,
+        preloaded_recent_messages: list[dict] | None = None,
+        preloaded_pending: PendingClarification | None = None,
     ) -> AgentChatResponse:
         state = AgentCheckpointState(
             thread_id=thread_id,
@@ -1074,16 +1312,19 @@ class AgentGraphService:
         state["message"] = request.message
         state["allowed_course_ids"] = allowed_course_ids
         state["current_path_course_ids"] = current_path_course_ids or allowed_course_ids
-        state["recent_messages"] = await self._load_recent_message_context(
-            conversation_id,
-            user_id,
+        state["recent_messages"] = (
+            preloaded_recent_messages
+            if preloaded_recent_messages is not None
+            else await self._load_recent_message_context(conversation_id, user_id)
         )
-        state["pending_clarification"] = await self._load_pending_clarification(
-            conversation_id,
-            user_id,
-            thread_id,
+        state["pending_clarification"] = (
+            preloaded_pending
+            if preloaded_pending is not None
+            else await self._load_pending_clarification(conversation_id, user_id, thread_id)
         )
         state["memory_ref"] = await self._load_memory_ref(conversation_id, user_id, thread_id)
+        if prerouted_route is not None:
+            state["prerouted_route"] = prerouted_route.model_dump(mode="json")
         if request.tool_mode == "web_papers":
             if not settings.external_research_enabled:
                 return self.composer.compose(
@@ -1182,10 +1423,21 @@ class AgentGraphService:
             if pending_result is not None:
                 return pending_result
 
-        route = self._promote_contextual_rag_followup(
-            self._route_with_recent_context(state["message"], state),
-            state,
-        )
+        prerouted = state.get("prerouted_route")
+        if isinstance(prerouted, dict):
+            try:
+                route = AgentRoute.model_validate(prerouted)
+            except Exception:
+                route = None
+        elif isinstance(prerouted, AgentRoute):
+            route = prerouted
+        else:
+            route = None
+        used_prerouted = route is not None
+        if route is None:
+            route = self._route_with_recent_context(state["message"], state)
+        route = self._promote_contextual_rag_followup(route, state)
+        route = self._apply_current_lesson_context_to_rag_route(route, state)
         return {
             **state,
             "intent": route.intent,
@@ -1193,7 +1445,44 @@ class AgentGraphService:
             "slots": route.extracted_slots,
             "clarification_question": route.clarification_question,
             "candidate_intent": route.candidate_intent,
+            "prerouted_route": None,
         }
+
+    def _apply_current_lesson_context_to_rag_route(
+        self,
+        route: AgentRoute,
+        state: dict,
+    ) -> AgentRoute:
+        if route.intent not in RAG_AGENT_INTENTS:
+            return route
+        if route.intent in USER_CONTEXT_AGENT_INTENTS:
+            return route
+        slots = route.extracted_slots
+        if self._message_names_explicit_acronym_topic(state.get("message")):
+            return route
+        context_topic = self._route_context_search_topic(state)
+        if context_topic is None:
+            return route
+        slot_updates: dict[str, Any] = {}
+        if not slots.canonical_unit_ids:
+            slot_updates["canonical_unit_ids"] = context_topic["canonical_unit_ids"]
+        if not (slots.raw_topic or slots.search_queries):
+            slot_updates.update(
+                {
+                    "raw_topic": context_topic["raw_topic"],
+                    "search_queries": context_topic["search_queries"],
+                    "search_scope": "current_path",
+                }
+            )
+        if not slot_updates:
+            return route
+        return route.model_copy(
+            update={
+                "confidence": max(route.confidence, 0.8),
+                "extracted_slots": slots.model_copy(update=slot_updates),
+                "clarification_question": None,
+            }
+        )
 
     def _resolve_pending_failed_request_retry(
         self,
@@ -1267,13 +1556,60 @@ class AgentGraphService:
             )
         return route(message=message, route_context=state.get("route_context"))
 
+    async def _speculative_route(
+        self,
+        *,
+        message: str,
+        route_context,
+        recent_messages: list[dict] | None,
+    ) -> AgentRoute | None:
+        try:
+            route_fn = self.router.route
+            try:
+                parameters = signature(route_fn).parameters
+            except (TypeError, ValueError):
+                parameters = {}
+            if "recent_messages" in parameters:
+                return await asyncio.to_thread(
+                    route_fn,
+                    message=message,
+                    route_context=route_context,
+                    recent_messages=recent_messages or [],
+                )
+            return await asyncio.to_thread(
+                route_fn,
+                message=message,
+                route_context=route_context,
+            )
+        except Exception:
+            return None
+
     def _promote_contextual_rag_followup(self, route: AgentRoute, state: dict) -> AgentRoute:
         if route.intent != "clarify" or route.candidate_intent not in RAG_AGENT_INTENTS:
             return route
-        if len(str(state.get("message") or "").split()) > 8:
-            return route
         active = self._active_recent_citation(state)
         if active is None:
+            context_topic = self._route_context_search_topic(state)
+            if context_topic is not None:
+                if self._message_names_explicit_acronym_topic(state.get("message")):
+                    return route
+                return route.model_copy(
+                    update={
+                        "intent": route.candidate_intent or "find_content",
+                        "confidence": max(route.confidence, 0.8),
+                        "extracted_slots": AgentSlots(
+                            raw_topic=context_topic["raw_topic"],
+                            search_queries=context_topic["search_queries"],
+                            canonical_unit_ids=context_topic["canonical_unit_ids"],
+                            search_scope="current_path",
+                        ),
+                        "clarification_question": None,
+                    }
+                )
+            if len(str(state.get("message") or "").split()) > 8:
+                return route
+            return route
+        if len(str(state.get("message") or "").split()) > 8:
             return route
         if self._message_names_unmatched_explicit_topic(state.get("message"), active):
             return route
@@ -1289,6 +1625,32 @@ class AgentGraphService:
                 "clarification_question": None,
             }
         )
+
+    def _route_context_search_topic(self, state: dict) -> dict | None:
+        route_context = state.get("route_context")
+        unit_slug = self._value_from(route_context, "unit_slug") or self._value_from(
+            route_context, "unitSlug"
+        )
+        canonical_unit_id = self._value_from(
+            route_context, "canonical_unit_id"
+        ) or self._value_from(route_context, "canonicalUnitId")
+        if not unit_slug and not canonical_unit_id:
+            return None
+
+        search_queries: list[str] = []
+        if unit_slug:
+            search_queries.append(re.sub(r"[-_]+", " ", str(unit_slug)).strip())
+        if canonical_unit_id and str(canonical_unit_id) not in search_queries:
+            search_queries.append(str(canonical_unit_id))
+        search_queries = [query for query in search_queries if query]
+        if not search_queries:
+            return None
+        canonical_unit_ids = [str(canonical_unit_id)] if canonical_unit_id else []
+        return {
+            "raw_topic": search_queries[0],
+            "search_queries": search_queries[:5],
+            "canonical_unit_ids": canonical_unit_ids,
+        }
 
     def _resolve_pending_retrieval_query(
         self,
@@ -1616,9 +1978,10 @@ class AgentGraphService:
         if isinstance(slots, dict):
             slots = AgentSlots.model_validate(slots)
         slots = self._slots_with_active_citation_for_followup(state, slots)
+        effective_rag_intent = self._effective_rag_intent(state) or state["intent"]
         result = await self.agentic_rag.run(
             message=state["message"],
-            intent=state["intent"],
+            intent=effective_rag_intent,
             slots=slots,
             route_context=state.get("route_context"),
             recent_messages=state.get("recent_messages") or [],
@@ -2312,6 +2675,13 @@ class AgentGraphService:
                 return True
         return False
 
+    @staticmethod
+    def _message_names_explicit_acronym_topic(message: str | None) -> bool:
+        return any(
+            len(raw_term) > 2 and raw_term.isupper()
+            for raw_term in re.findall(r"[a-zA-Z][a-zA-Z0-9]*", str(message or ""))
+        )
+
     def _model_dump_like(self, value):
         if isinstance(value, dict):
             return value
@@ -2622,7 +2992,7 @@ class AgentGraphService:
             )
             return {**state, "tool_result": result}
         if state["intent"] == "request_replan":
-            result = await self.tools.replan_proposal()
+            result = await self.tools.replan_proposal(state.get("message", ""))
             result = await self._persist_pending_action_for_result(state, result, "request_replan")
             return {**state, "tool_result": result}
         if state["intent"] == "request_path_switch":
