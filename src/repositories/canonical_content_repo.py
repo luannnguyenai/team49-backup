@@ -248,7 +248,9 @@ class CanonicalContentRepository:
         current = current_result.scalar_one_or_none()
         if current is None:
             return None
-        if normalized_courses and current.course_id.lower() not in normalized_courses:
+        if normalized_courses and current.course_id.lower() not in await self._course_scope_aliases(
+            normalized_courses
+        ):
             return None
 
         legacy_lecture = None
@@ -311,6 +313,27 @@ class CanonicalContentRepository:
                 for unit in units
             ],
         }
+
+    async def _course_scope_aliases(self, normalized_course_ids: list[str]) -> set[str]:
+        aliases = {course_id for course_id in normalized_course_ids if course_id}
+        uuid_ids = []
+        for course_id in normalized_course_ids:
+            try:
+                uuid_ids.append(UUID(course_id))
+            except ValueError:
+                continue
+        filters = [
+            func.lower(Course.canonical_course_id).in_(normalized_course_ids),
+            func.lower(Course.slug).in_(normalized_course_ids),
+        ]
+        if uuid_ids:
+            filters.append(Course.id.in_(uuid_ids))
+        result = await self.session.execute(select(Course).where(or_(*filters)))
+        for course in result.scalars().all():
+            for value in (course.canonical_course_id, course.slug, course.id):
+                if value:
+                    aliases.add(str(value).lower())
+        return aliases
 
     async def get_mastery_lcb_by_kp_ids(self, user_id, kp_ids: list[str]) -> dict[str, float]:
         if not kp_ids:
