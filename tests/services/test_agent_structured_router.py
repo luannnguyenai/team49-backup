@@ -784,6 +784,15 @@ def test_structured_router_agentic_rag_responding_prompt_handles_aggregated_lect
     assert "backend-produced synthesis" in prompt
 
 
+def test_structured_router_agentic_rag_responding_prompt_does_not_clarify_cadence_estimate():
+    prompt = AgentPromptManager().get("agentic_rag", "responding.system")
+
+    assert "When the learner provides a study cadence" in prompt
+    assert "without naming a specific course or path" in prompt
+    assert "state that assumption naturally" in prompt
+    assert "Do not ask the learner to pick a course/path before giving the estimate" in prompt
+
+
 def test_structured_router_agentic_rag_responding_prompt_generates_inline_practice_questions():
     prompt = AgentPromptManager().get("agentic_rag", "responding.system")
 
