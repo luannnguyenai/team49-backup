@@ -1,207 +1,170 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agentic RAG Pipeline — AI Adaptive Learning Platform</title>
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
-    .header { padding: 20px 32px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-    .header-left h1 { font-size: 1.25rem; font-weight: 700; color: #f97316; }
-    .header-left p { color: #475569; font-size: 0.82rem; margin-top: 2px; }
-    .nav { display: flex; gap: 6px; flex-wrap: wrap; }
-    .nav a { color: #64748b; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #1e293b; transition: all 0.2s; white-space: nowrap; }
-    .nav a:hover { color: #e2e8f0; border-color: #334155; }
-    .nav a.active { background: #7c2d12; color: #fed7aa; border-color: #ea580c; }
-    .content { padding: 28px 32px; }
-    .diagram-card { background: #0d1117; border: 1px solid #21262d; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
-    .diagram-card h2 { font-size: 0.95rem; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .info-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px; }
-    .info-box h3 { font-size: 0.8rem; color: #f97316; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .info-box p { font-size: 0.78rem; color: #6e7681; line-height: 1.6; }
-    .info-box code { background: #0d1117; padding: 1px 5px; border-radius: 3px; font-size: 0.75rem; color: #79c0ff; }
-    .mermaid { background: #0d1117; overflow-x: auto; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic RAG Pipeline — A20-App-049</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F0F2F5; padding: 40px 24px; color: #16213E; }
+.back { display: inline-block; margin-bottom: 20px; font-size: 13px; color: #4A90D9; text-decoration: none; }
+.page-header { text-align: center; margin-bottom: 40px; }
+.page-header h1 { font-size: 22px; font-weight: 700; color: #232F3E; }
+.page-header p { font-size: 13px; color: #888; margin-top: 6px; }
+
+/* pipeline container */
+.pipeline { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+/* step node */
+.step { width: 100%; max-width: 520px; border-radius: 10px; padding: 14px 20px; border: 1.5px solid transparent; position: relative; }
+.step-title { font-size: 14px; font-weight: 700; }
+.step-sub { font-size: 11px; opacity: 0.7; margin-top: 3px; }
+
+/* arrow down */
+.arrow { display: flex; justify-content: center; align-items: center; height: 32px; color: #9CA3AF; font-size: 20px; }
+.arrow-label { font-size: 10px; color: #9CA3AF; font-weight: 600; letter-spacing: 0.3px; margin-left: 6px; }
+
+/* branch (horizontal split) */
+.branch { display: flex; gap: 12px; width: 100%; justify-content: center; }
+.branch-item { flex: 1; max-width: 170px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid transparent; text-align: center; }
+.branch-item .step-title { font-size: 12px; }
+.branch-item .step-sub { font-size: 10px; }
+.branch-connector { display: flex; justify-content: center; align-items: flex-end; padding: 0; }
+.branch-line { width: 100%; border-top: 2px dashed #D1D5DB; position: relative; top: -16px; }
+
+/* route badge */
+.badge { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+
+/* colors */
+.c-input  { background:#EEF4FF; border-color:#4A90D9; color:#1B4F8A; }
+.c-safety { background:#FEE2E2; border-color:#DC2626; color:#7F1D1D; }
+.c-router { background:#FFF3E0; border-color:#FF9900; color:#7D3C00; }
+.c-agent  { background:#F5EEF8; border-color:#8E44AD; color:#5B2C6F; }
+.c-tool   { background:#F0FFF4; border-color:#27AE60; color:#1A6E3A; }
+.c-answer { background:#EAF4FB; border-color:#1565C0; color:#0D4080; }
+.c-output { background:#EAFAF1; border-color:#27AE60; color:#1A6E3A; }
+.c-block  { background:#FEF2F2; border-color:#F87171; color:#B91C1C; }
+
+.badge-pass  { background:#D1FAE5; color:#065F46; }
+.badge-block { background:#FEE2E2; color:#7F1D1D; }
+.badge-safe  { background:#DBEAFE; color:#1E3A8A; }
+.badge-complex { background:#EDE9FE; color:#5B21B6; }
+.badge-simple { background:#FEF3C7; color:#92400E; }
+</style>
 </head>
 <body>
-  <div class="header">
-    <div class="header-left">
-      <h1>Agentic RAG Pipeline</h1>
-      <p>02 · PII → Guardrail Router → Smart Router → LangGraph deeptutor-style Agent → RAG → Response</p>
-    </div>
-    <nav class="nav">
-      <a href="index.html">← Hub</a>
-      <a href="01-system-overview.html">01 Overview</a>
-      <a href="02-agentic-rag-pipeline.html" class="active">02 RAG Pipeline</a>
-      <a href="03-aws-infrastructure.html">03 AWS Infra</a>
-      <a href="04-request-lifecycle.html">04 Request Flow</a>
-      <a href="05-data-schema.html">05 DB Schema</a>
-    </nav>
+
+<a class="back" href="index.html">← Architecture Hub</a>
+
+<div class="page-header">
+  <h1>Agentic RAG Pipeline</h1>
+  <p>Request flow: User Input → Guardrail → Smart Router → LangGraph Agent → Answer</p>
+</div>
+
+<div class="pipeline">
+
+  <!-- INPUT -->
+  <div class="step c-input">
+    <div class="step-title">👤 User Message</div>
+    <div class="step-sub">Free-text query from learner in AI Tutor chat</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- PII -->
+  <div class="step c-safety" style="max-width:520px;">
+    <div class="step-title">🔒 PII Sanitizer</div>
+    <div class="step-sub">Strips email · phone · CCCD from input before any LLM processing</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- GUARDRAIL -->
+  <div class="step c-safety">
+    <div class="step-title">🛡 Guardrail Router <span style="font-size:10px;font-weight:400;opacity:0.7">Qwen3.5-0.8B LoRA · vLLM self-hosted</span></div>
+    <div class="step-sub">Classifies: SAFE / HARMFUL / AMBIGUOUS · Detects jailbreak, off-topic, PII injection</div>
   </div>
 
-  <div class="content">
-    <div class="info-grid">
-      <div class="info-box">
-        <h3>🛡️ Guardrail Router</h3>
-        <p>Model: <code>Qwen3.5-0.8B LoRA</code><br>
-        Dataset: 13,513 samples (7 nguồn)<br>
-        <code>valid_json_rate = 1.0</code><br>
-        <code>harmful_false_allow_rate = 0.0</code><br>
-        <code>ambiguous_recall = 0.9905</code><br>
-        Serving: vLLM via Cloudflare Tunnel</p>
+  <!-- BRANCH: PASS or BLOCK -->
+  <div style="display:flex;width:100%;max-width:520px;gap:12px;margin-top:8px;">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+      <div class="arrow" style="height:24px;">↓ <span class="arrow-label"><span class="badge badge-pass">SAFE</span></span></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+      <div class="arrow" style="height:24px;">↓ <span class="arrow-label"><span class="badge badge-block">HARMFUL</span></span></div>
+    </div>
+  </div>
+
+  <div style="display:flex;width:100%;max-width:520px;gap:12px;">
+    <!-- SAFE PATH -->
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+
+      <!-- SMART ROUTER -->
+      <div class="step c-router" style="width:100%;">
+        <div class="step-title">🔀 Smart Router</div>
+        <div class="step-sub">Classifies query complexity: SIMPLE or COMPLEX</div>
       </div>
-      <div class="info-box">
-        <h3>🧠 LangGraph Agent</h3>
-        <p>Style: deeptutor-style RAG<br>
-        Nodes: structured router → context → search → rerank → answer<br>
-        State: checkpointer + thread lock<br>
-        Memory: multi-turn conversation history<br>
-        Evidence: grounded / partial / no_source</p>
+
+      <!-- SPLIT -->
+      <div style="display:flex;width:100%;gap:8px;margin-top:8px;">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow" style="height:20px;font-size:14px;">↓ <span class="arrow-label"><span class="badge badge-simple">SIMPLE</span></span></div>
+          <div class="branch-item c-router" style="width:100%;">
+            <div class="step-title">💬 Direct LLM</div>
+            <div class="step-sub">Gemini / GPT<br>No agent graph</div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+          <div class="arrow" style="height:20px;font-size:14px;">↓ <span class="arrow-label"><span class="badge badge-complex">COMPLEX</span></span></div>
+          <!-- AGENT -->
+          <div class="step c-agent" style="width:100%;">
+            <div class="step-title">🤖 LangGraph Agent</div>
+            <div class="step-sub">Agentic RAG · ReAct · Thread memory</div>
+          </div>
+          <div class="arrow" style="height:20px;font-size:14px;">↓</div>
+          <!-- TOOLS BRANCH -->
+          <div style="display:flex;width:100%;gap:6px;">
+            <div class="branch-item c-tool" style="flex:1;">
+              <div class="step-title">🔍 RAG Search</div>
+              <div class="step-sub">pgvector<br>Transcript retrieval</div>
+            </div>
+            <div class="branch-item c-tool" style="flex:1;">
+              <div class="step-title">🐍 Sandbox</div>
+              <div class="step-sub">Python exec<br>Math · Code</div>
+            </div>
+            <div class="branch-item c-tool" style="flex:1;">
+              <div class="step-title">🌐 Web Search</div>
+              <div class="step-sub">Semantic Scholar<br>External refs</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="info-box">
-        <h3>🤖 Model Serving</h3>
-        <p>Fast model: <code>Qwen3.5-4B LoRA</code> (SIMPLE route)<br>
-        Answer gen: <code>Qwen3.5-4B LoRA</code> (COMPLEX route)<br>
-        Endpoint: <code>vllm.a20-app-049.io.vn/v1</code><br>
-        Fallback: Gemini / OpenAI / Anthropic<br>
-        VRAM: ~1.5GB peak (RTX 3050)</p>
-      </div>
-      <div class="info-box">
-        <h3>🔍 RAG Stack</h3>
-        <p>Retrieval: pgvector (PostgreSQL 16)<br>
-        Tool: <code>search_learning_content</code><br>
-        Rerank: combined score (embed sim + KP overlap + title match)<br>
-        Scope: current learning unit first<br>
-        External fallback: Semantic Scholar + Web</p>
-      </div>
+
     </div>
 
-    <div class="diagram-card">
-      <h2>Full Pipeline — Input to Response</h2>
-      <div class="mermaid">
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#431407', 'primaryTextColor': '#fed7aa', 'primaryBorderColor': '#ea580c', 'lineColor': '#fb923c', 'secondaryColor': '#0d1117', 'tertiaryColor': '#161b22', 'background': '#0d1117', 'nodeBorder': '#374151'}}}%%
-flowchart LR
-    IN(["💬 User Message\n(HTTP POST /api/agent/message)"]) --> PII_IN
-
-    subgraph SAFETY["🛡️ Safety Gate"]
-        PII_IN["PII Sanitizer\n(input)\nredact PII before any LLM call"]
-        GR["Guardrail Router\nQwen3.5-0.8B LoRA\n📊 13,513 training samples"]
-        GR_OUT{{"Route Decision"}}
-    end
-
-    subgraph GUARD_LABELS["Guardrail Output Labels"]
-        GL1["safety_label\nSAFE / HARMFUL"]
-        GL2["topic_label\nON_TOPIC / OFF_TOPIC\nAMBIGUOUS / N_A"]
-        GL3["action\nALLOW_LESSON_ANSWER\nSOFT_REFUSE_REDIRECT\nASK_CLARIFY\nSAFETY_REFUSE"]
-        GL4["attack_type\nharmful_request\npolicy_override\njailbreak_template\nmultilingual_jailbreak"]
-    end
-
-    REFUSE_SAFETY(["❌ SAFETY_REFUSE\nHARMFUL → block"])
-    REFUSE_TOPIC(["↩️ SOFT_REFUSE_REDIRECT\nOFF_TOPIC → redirect"])
-    CLARIFY(["❓ ASK_CLARIFY\nAMBIGUOUS → ask"])
-
-    subgraph ROUTING["🔀 Smart Router"]
-        SR["Intent Classification\nBLOCKED / SIMPLE / COMPLEX"]
-        SR_OUT{{"Route"}}
-    end
-
-    BLOCK_OUT(["🚫 BLOCKED\nPolicy violation"])
-
-    subgraph FAST_PATH["⚡ Simple Path"]
-        FAST["Fast Model\nQwen3.5-4B LoRA\n+ LLM Provider fallback\n(direct answer, no tools)"]
-    end
-
-    subgraph AGENT["🧠 LangGraph ReAct Agent — deeptutor-style"]
-        AG_ROUTER["Structured Router Node\n① assessment boundary check\n② topic classification\n③ pronoun resolution\n④ intent detection"]
-        ASSESS_BLOCK(["🚫 Assessment Boundary\nblock answer when in quiz/test"])
-        AG_CTX["Context Service Node\nload learning unit context\nKP scope + conversation history\nthread memory (multi-turn)"]
-
-        subgraph RAG_CORE["RAG Core"]
-            AG_SEARCH["Search Service Node\nsearch_learning_content tool\npgvector embedding search\nscope: current unit first"]
-            AG_RERANK["Rerank Node\ncombined score:\n• embedding similarity\n• KP overlap score\n• unit title match\n• acronym trap filter"]
-        end
-
-        AG_EXT["External Research Node\nSemantic Scholar API\nWeb Search fallback\n(when in-course evidence insufficient)"]
-
-        AG_ANSWER["Answer Node\n📌 evidence_policy enforcement\nconfidence: grounded | partial | no_source\ncitation: must_not_hallucinate\nmust_not_cite outside source"]
-
-        THREAD_MEM[("Thread Memory\nCheckpointer\nagent_graph_runs\nagent_pending_actions\nagent_response_payloads")]
-    end
-
-    subgraph MODELS["🤖 Model Serving"]
-        vLLM_MAIN["vLLM\nQwen3.5-4B LoRA\nTutor Answer Generator\nvllm.a20-app-049.io.vn/v1"]
-        LLM_FB["LLM Providers\nGemini / OpenAI / Anthropic\n(fallback + orchestration)"]
-    end
-
-    subgraph OUTPUT["📤 Output"]
-        PII_OUT["PII Sanitizer\n(output)\nredact before returning"]
-        RESP(["SSE Stream Response\nto Browser"])
-        TRACE["Langfuse Trace\nspan + eval\nasync logging"]
-    end
-
-    PII_IN --> GR
-    GR -.->|"labels"| GUARD_LABELS
-    GR --> GR_OUT
-    GR_OUT -->|"HARMFUL"| REFUSE_SAFETY
-    GR_OUT -->|"OFF_TOPIC"| REFUSE_TOPIC
-    GR_OUT -->|"AMBIGUOUS"| CLARIFY
-    GR_OUT -->|"ON_TOPIC\nALLOW_LESSON_ANSWER"| SR
-
-    SR --> SR_OUT
-    SR_OUT -->|"BLOCKED"| BLOCK_OUT
-    SR_OUT -->|"SIMPLE"| FAST
-    SR_OUT -->|"COMPLEX"| AG_ROUTER
-
-    AG_ROUTER -->|"assessment context detected"| ASSESS_BLOCK
-    AG_ROUTER -->|"normal query"| AG_CTX
-    AG_CTX --> AG_SEARCH
-    AG_SEARCH --> AG_RERANK
-    AG_RERANK -->|"evidence sufficient"| AG_ANSWER
-    AG_RERANK -->|"evidence insufficient\n+ not assessment"| AG_EXT
-    AG_EXT --> AG_ANSWER
-    AG_ANSWER --> vLLM_MAIN
-    FAST --> vLLM_MAIN
-    vLLM_MAIN -->|"model unavailable"| LLM_FB
-
-    AG_ANSWER <-.->|"state read/write"| THREAD_MEM
-    AG_CTX <-.->|"recall history"| THREAD_MEM
-
-    vLLM_MAIN --> PII_OUT
-    LLM_FB --> PII_OUT
-    PII_OUT --> RESP
-    PII_OUT --> TRACE
-
-    style SAFETY fill:#1c0a00,stroke:#c2410c
-    style GUARD_LABELS fill:#0c0a00,stroke:#78350f
-    style ROUTING fill:#0a0a1a,stroke:#4338ca
-    style AGENT fill:#0a1a0a,stroke:#16a34a
-    style RAG_CORE fill:#051a05,stroke:#15803d
-    style FAST_PATH fill:#0a0a1a,stroke:#6366f1
-    style MODELS fill:#1a0a1a,stroke:#a21caf
-    style OUTPUT fill:#001a1a,stroke:#0891b2
-    style THREAD_MEM fill:#1a1500,stroke:#b45309
-      </div>
-    </div>
-
-    <div class="diagram-card">
-      <h2>Guardrail Training Data Sources</h2>
-      <div class="mermaid">
-%%{init: {'theme': 'dark'}}%%
-pie title Guardrail Dataset — 13,513 samples
-    "EduVidQA + Question Bank (ON_TOPIC)" : 4200
-    "CantTalkAboutThis + CLINC150/OOS (OFF_TOPIC)" : 3100
-    "WildGuardMix (HARMFUL)" : 1500
-    "JailBreakV-28K (jailbreak)" : 900
-    "MultiJail (multilingual jailbreak)" : 700
-    "Router + Policy Injection" : 600
-    "Ambiguous + Open-QA" : 2513
+    <!-- BLOCK PATH -->
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:0;">
+      <div class="step c-block" style="width:100%;">
+        <div class="step-title">🚫 Safety Refuse</div>
+        <div class="step-sub">Returns refusal message. No LLM inference.</div>
       </div>
     </div>
   </div>
 
-  <script>mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });</script>
+  <div class="arrow" style="margin-top:8px;">↓</div>
+
+  <!-- ANSWER GEN -->
+  <div class="step c-answer">
+    <div class="step-title">✍️ Answer Generator <span style="font-size:10px;font-weight:400;opacity:0.7">Qwen3.5-4B LoRA · citation grounding</span></div>
+    <div class="step-sub">Evidence policy: GROUNDED / PARTIAL / NO_SOURCE · Blocks hallucination</div>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- OUTPUT -->
+  <div class="step c-output">
+    <div class="step-title">📡 SSE Stream Response</div>
+    <div class="step-sub">Streamed to browser · Langfuse trace logged per turn</div>
+  </div>
+
+</div>
+
 </body>
 </html>
