@@ -1,415 +1,178 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Database Schema — AI Adaptive Learning Platform</title>
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
-    .header { padding: 20px 32px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-    .header-left h1 { font-size: 1.25rem; font-weight: 700; color: #4ade80; }
-    .header-left p { color: #475569; font-size: 0.82rem; margin-top: 2px; }
-    .nav { display: flex; gap: 6px; flex-wrap: wrap; }
-    .nav a { color: #64748b; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #1e293b; transition: all 0.2s; white-space: nowrap; }
-    .nav a:hover { color: #e2e8f0; border-color: #334155; }
-    .nav a.active { background: #14532d; color: #bbf7d0; border-color: #22c55e; }
-    .content { padding: 28px 32px; }
-    .diagram-card { background: #0d1117; border: 1px solid #21262d; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
-    .diagram-card h2 { font-size: 0.95rem; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-    .diagram-card p { font-size: 0.8rem; color: #475569; margin-bottom: 16px; }
-    .mermaid { background: #0d1117; overflow-x: auto; }
-    .layer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 24px; }
-    .layer { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px; }
-    .layer h3 { font-size: 0.8rem; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .layer ul { list-style: none; }
-    .layer ul li { font-size: 0.77rem; color: #6e7681; padding: 2px 0; font-family: monospace; }
-    .layer ul li::before { content: "→ "; color: #374151; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database Schema — A20-App-049</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F0F2F5; padding: 40px 24px; color: #16213E; }
+.back { display: inline-block; margin-bottom: 20px; font-size: 13px; color: #4A90D9; text-decoration: none; }
+.page-header { text-align: center; margin-bottom: 40px; }
+.page-header h1 { font-size: 22px; font-weight: 700; color: #232F3E; }
+.page-header p { font-size: 13px; color: #888; margin-top: 6px; }
+
+.canvas { max-width: 900px; margin: 0 auto; }
+
+/* 4-zone grid */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.zone { border-radius: 12px; padding: 20px; border: 2px solid transparent; }
+.zone-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.zone-icon { font-size: 22px; }
+.zone-title { font-size: 15px; font-weight: 700; }
+.zone-sub { font-size: 11px; opacity: 0.7; }
+
+/* table list */
+.table-list { display: flex; flex-direction: column; gap: 6px; }
+.table-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+.table-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.table-note { font-size: 10px; font-weight: 400; opacity: 0.65; margin-left: auto; }
+
+/* zone colors */
+.z1 { background: #FFF7ED; border-color: #FED7AA; }
+.z1 .zone-title { color: #9A3412; }
+.z1 .table-item { background: rgba(254,215,170,0.3); color: #7C2D12; }
+.z1 .table-dot { background: #F97316; }
+
+.z2 { background: #EFF6FF; border-color: #BFDBFE; }
+.z2 .zone-title { color: #1E3A8A; }
+.z2 .table-item { background: rgba(191,219,254,0.3); color: #1E40AF; }
+.z2 .table-dot { background: #3B82F6; }
+
+.z3 { background: #F0FDF4; border-color: #BBF7D0; }
+.z3 .zone-title { color: #14532D; }
+.z3 .table-item { background: rgba(187,247,208,0.3); color: #166534; }
+.z3 .table-dot { background: #22C55E; }
+
+.z4 { background: #FAF5FF; border-color: #E9D5FF; }
+.z4 .zone-title { color: #4A1D96; }
+.z4 .table-item { background: rgba(233,213,255,0.3); color: #6D28D9; }
+.z4 .table-dot { background: #8B5CF6; }
+
+/* flow diagram below grid */
+.flow { margin-top: 24px; background: white; border-radius: 12px; border: 1.5px solid #E5E7EB; padding: 20px; }
+.flow-title { font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 16px; text-align: center; }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.flow-box { padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1.5px solid transparent; text-align: center; }
+.flow-arrow { font-size: 16px; color: #9CA3AF; }
+
+.fb1 { background:#FFF7ED; border-color:#FED7AA; color:#9A3412; }
+.fb2 { background:#EFF6FF; border-color:#BFDBFE; color:#1E3A8A; }
+.fb3 { background:#F0FDF4; border-color:#BBF7D0; color:#14532D; }
+.fb4 { background:#FAF5FF; border-color:#E9D5FF; color:#4A1D96; }
+</style>
 </head>
 <body>
-  <div class="header">
-    <div class="header-left">
-      <h1>Database Schema</h1>
-      <p>05 · 4 layers: Product Shell · Canonical Content · Learner State · Agent State</p>
+
+<a class="back" href="index.html">← Architecture Hub</a>
+
+<div class="page-header">
+  <h1>Database Schema — 4 Layers</h1>
+  <p>PostgreSQL 16 + pgvector · Product Shell → Canonical Content → Learner State → Agent State</p>
+</div>
+
+<div class="canvas">
+
+  <div class="grid">
+
+    <!-- LAYER 1: Product Shell -->
+    <div class="zone z1">
+      <div class="zone-header">
+        <span class="zone-icon">🏗</span>
+        <div>
+          <div class="zone-title">Layer 1 — Product Shell</div>
+          <div class="zone-sub">Course catalog & content structure</div>
+        </div>
+      </div>
+      <div class="table-list">
+        <div class="table-item"><div class="table-dot"></div>courses <span class="table-note">canonical_course_id</span></div>
+        <div class="table-item"><div class="table-dot"></div>course_sections</div>
+        <div class="table-item"><div class="table-dot"></div>learning_units <span class="table-note">canonical_unit_id</span></div>
+        <div class="table-item"><div class="table-dot"></div>lectures <span class="table-note">video · transcript</span></div>
+        <div class="table-item"><div class="table-dot"></div>transcripts</div>
+        <div class="table-item"><div class="table-dot"></div>learning_progress_records</div>
+      </div>
     </div>
-    <nav class="nav">
-      <a href="index.html">← Hub</a>
-      <a href="01-system-overview.html">01 Overview</a>
-      <a href="02-agentic-rag-pipeline.html">02 RAG Pipeline</a>
-      <a href="03-aws-infrastructure.html">03 AWS Infra</a>
-      <a href="04-request-lifecycle.html">04 Request Flow</a>
-      <a href="05-data-schema.html" class="active">05 DB Schema</a>
-    </nav>
+
+    <!-- LAYER 2: Canonical Content -->
+    <div class="zone z2">
+      <div class="zone-header">
+        <span class="zone-icon">📚</span>
+        <div>
+          <div class="zone-title">Layer 2 — Canonical Content</div>
+          <div class="zone-sub">KP graph · Assessment · Prerequisites</div>
+        </div>
+      </div>
+      <div class="table-list">
+        <div class="table-item"><div class="table-dot"></div>concepts_kp <span class="table-note">Knowledge Points</span></div>
+        <div class="table-item"><div class="table-dot"></div>question_bank <span class="table-note">+ item_phase_map</span></div>
+        <div class="table-item"><div class="table-dot"></div>item_calibration <span class="table-note">IRT params</span></div>
+        <div class="table-item"><div class="table-dot"></div>item_kp_map</div>
+        <div class="table-item"><div class="table-dot"></div>prerequisite_edges</div>
+        <div class="table-item"><div class="table-dot"></div>unit_kp_map</div>
+      </div>
+    </div>
+
+    <!-- LAYER 3: Learner State -->
+    <div class="zone z3">
+      <div class="zone-header">
+        <span class="zone-icon">🎓</span>
+        <div>
+          <div class="zone-title">Layer 3 — Learner State</div>
+          <div class="zone-sub">Mastery · Planner · Session tracking</div>
+        </div>
+      </div>
+      <div class="table-list">
+        <div class="table-item"><div class="table-dot"></div>users</div>
+        <div class="table-item"><div class="table-dot"></div>sessions <span class="table-note">+ interactions</span></div>
+        <div class="table-item"><div class="table-dot"></div>learner_mastery_kp <span class="table-note">theta · sigma</span></div>
+        <div class="table-item"><div class="table-dot"></div>goal_preferences <span class="table-note">selected courses</span></div>
+        <div class="table-item"><div class="table-dot"></div>plan_history · rationale_log</div>
+        <div class="table-item"><div class="table-dot"></div>waived_units · planner_session_state</div>
+      </div>
+    </div>
+
+    <!-- LAYER 4: Agent State -->
+    <div class="zone z4">
+      <div class="zone-header">
+        <span class="zone-icon">🤖</span>
+        <div>
+          <div class="zone-title">Layer 4 — Agent State</div>
+          <div class="zone-sub">LangGraph run state · Citations · Actions</div>
+        </div>
+      </div>
+      <div class="table-list">
+        <div class="table-item"><div class="table-dot"></div>agent_graph_runs <span class="table-note">turn · trace_id</span></div>
+        <div class="table-item"><div class="table-dot"></div>agent_pending_actions <span class="table-note">prerequisite</span></div>
+        <div class="table-item"><div class="table-dot"></div>agent_response_payloads <span class="table-note">citations</span></div>
+        <div class="table-item"><div class="table-dot"></div>agent_route_context <span class="table-note">course · unit scope</span></div>
+        <div class="table-item"><div class="table-dot"></div>localized_content <span class="table-note">vi / en</span></div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="content">
-    <div class="layer-grid">
-      <div class="layer">
-        <h3 style="color:#60a5fa">🏫 Product Shell</h3>
-        <ul>
-          <li>courses</li>
-          <li>course_sections</li>
-          <li>learning_units</li>
-          <li>course_assets</li>
-          <li>lectures</li>
-          <li>chapters</li>
-          <li>transcript_lines</li>
-        </ul>
-      </div>
-      <div class="layer">
-        <h3 style="color:#f97316">📚 Canonical Content</h3>
-        <ul>
-          <li>concepts_kp</li>
-          <li>units (canonical)</li>
-          <li>unit_kp_map</li>
-          <li>question_bank</li>
-          <li>item_calibration</li>
-          <li>item_phase_map</li>
-          <li>item_kp_map</li>
-          <li>prerequisite_edges</li>
-          <li>pruned_edges</li>
-        </ul>
-      </div>
-      <div class="layer">
-        <h3 style="color:#4ade80">👤 Learner State</h3>
-        <ul>
-          <li>users</li>
-          <li>sessions</li>
-          <li>interactions</li>
-          <li>learner_mastery_kp</li>
-          <li>learning_progress_records</li>
-          <li>completed_units</li>
-          <li>waived_units</li>
-          <li>goal_preferences</li>
-          <li>qa_history</li>
-        </ul>
-      </div>
-      <div class="layer">
-        <h3 style="color:#c084fc">🧠 Planner + Agent</h3>
-        <ul>
-          <li>plan_history</li>
-          <li>rationale_log</li>
-          <li>planner_session_state</li>
-          <li>agent_graph_runs</li>
-          <li>agent_pending_actions</li>
-          <li>agent_response_payloads</li>
-          <li>calibration_runs</li>
-          <li>item_calibration_history</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="diagram-card">
-      <h2>Schema Layer 1 — Product Shell (Course Structure)</h2>
-      <p>Public-facing tables that define what learners see and navigate through.</p>
-      <div class="mermaid">
-%%{init: {'theme': 'dark'}}%%
-erDiagram
-    courses {
-        uuid id PK
-        string slug
-        string title
-        string canonical_course_id FK
-        bool active
-    }
-    course_sections {
-        uuid id PK
-        uuid course_id FK
-        string title
-        int order_index
-        string canonical_section_id
-    }
-    learning_units {
-        uuid id PK
-        uuid section_id FK
-        string title
-        string canonical_unit_id FK
-        int order_index
-        string unit_type
-    }
-    course_assets {
-        uuid id PK
-        uuid learning_unit_id FK
-        string asset_type
-        string s3_key
-        string cloudfront_url
-    }
-    lectures {
-        uuid id PK
-        uuid learning_unit_id FK
-        string youtube_id
-        string transcript_s3_key
-        int duration_s
-    }
-    transcript_lines {
-        uuid id PK
-        uuid lecture_id FK
-        float start_s
-        float end_s
-        text content
-        vector embedding
-    }
-
-    courses ||--o{ course_sections : "has"
-    course_sections ||--o{ learning_units : "contains"
-    learning_units ||--o{ course_assets : "has assets"
-    learning_units ||--o| lectures : "has lecture"
-    lectures ||--o{ transcript_lines : "has lines"
-      </div>
-    </div>
-
-    <div class="diagram-card">
-      <h2>Schema Layer 2 — Canonical Content (Knowledge Graph)</h2>
-      <p>Reusable knowledge structures imported from JSONL pipeline. Source of truth for assessment and mastery.</p>
-      <div class="mermaid">
-%%{init: {'theme': 'dark'}}%%
-erDiagram
-    concepts_kp {
-        uuid id PK
-        string kp_id
-        string title
-        string course_id
-        string description
-    }
-    units {
-        uuid id PK
-        string unit_id
-        string title
-        string canonical_course_id
-        string phase
-    }
-    unit_kp_map {
-        uuid id PK
-        string unit_id FK
-        string kp_id FK
-        float weight
-        bool is_primary
-    }
-    question_bank {
-        uuid id PK
-        string item_id
-        string canonical_unit_id FK
-        text stem
-        jsonb options
-        string correct_answer
-        string source_ref
-    }
-    item_calibration {
-        uuid id PK
-        string canonical_item_id FK
-        float discrimination
-        float difficulty
-        float guessing
-        bool is_calibrated
-    }
-    item_phase_map {
-        uuid id PK
-        string canonical_item_id FK
-        string phase
-        int depth_level
-    }
-    item_kp_map {
-        uuid id PK
-        string canonical_item_id FK
-        string kp_id FK
-        float weight
-    }
-    prerequisite_edges {
-        uuid id PK
-        string from_kp_id FK
-        string to_kp_id FK
-        float score
-        string model_source
-    }
-
-    concepts_kp ||--o{ unit_kp_map : "mapped via"
-    units ||--o{ unit_kp_map : "covers"
-    units ||--o{ question_bank : "has questions"
-    question_bank ||--o| item_calibration : "calibrated by"
-    question_bank ||--o{ item_phase_map : "phased as"
-    question_bank ||--o{ item_kp_map : "tests KPs"
-    concepts_kp ||--o{ prerequisite_edges : "requires"
-      </div>
-    </div>
-
-    <div class="diagram-card">
-      <h2>Schema Layer 3 — Learner State & Planner Audit</h2>
-      <p>All personalization state. Mastery updated after every assessment submission.</p>
-      <div class="mermaid">
-%%{init: {'theme': 'dark'}}%%
-erDiagram
-    users {
-        uuid id PK
-        string email
-        string hashed_password
-        string role
-        timestamptz created_at
-    }
-    sessions {
-        uuid id PK
-        uuid user_id FK
-        string canonical_phase
-        timestamptz started_at
-    }
-    interactions {
-        uuid id PK
-        uuid session_id FK
-        string canonical_item_id FK
-        bool correct
-        int latency_ms
-        bool is_synthetic
-    }
-    learner_mastery_kp {
-        uuid id PK
-        uuid user_id FK
-        string kp_id FK
-        float theta_mu
-        float theta_sigma
-        int n_observations
-        timestamptz updated_at
-    }
-    learning_progress_records {
-        uuid id PK
-        uuid user_id FK
-        uuid learning_unit_id FK
-        string status
-        float video_progress_s
-        bool video_finished
-        timestamptz last_activity
-    }
-    waived_units {
-        uuid id PK
-        uuid user_id FK
-        uuid learning_unit_id FK
-        string reason
-        float mastery_lcb_at_waive
-    }
-    goal_preferences {
-        uuid id PK
-        uuid user_id FK
-        jsonb selected_course_ids
-        jsonb known_unit_ids
-        jsonb desired_section_ids
-    }
-    planner_session_state {
-        uuid id PK
-        uuid user_id FK
-        uuid current_unit_id
-        string current_stage
-        float current_progress
-        jsonb items_remaining
-        timestamptz last_activity
-    }
-    plan_history {
-        uuid id PK
-        uuid user_id FK
-        jsonb recommended_units
-        timestamptz created_at
-    }
-
-    users ||--o{ sessions : "has"
-    users ||--o{ learner_mastery_kp : "tracks"
-    users ||--o{ learning_progress_records : "has progress"
-    users ||--o{ waived_units : "waived"
-    users ||--o| goal_preferences : "has goals"
-    users ||--o| planner_session_state : "current state"
-    users ||--o{ plan_history : "history"
-    sessions ||--o{ interactions : "contains"
-      </div>
-    </div>
-
-    <div class="diagram-card">
-      <h2>Schema Layer 4 — Agent State (LangGraph Persistence)</h2>
-      <p>Stateful conversation management for LangGraph ReAct Agent. Enables multi-turn memory, pending action confirmation, and idempotent response delivery.</p>
-      <div class="mermaid">
-%%{init: {'theme': 'dark'}}%%
-erDiagram
-    agent_graph_runs {
-        uuid id PK
-        uuid user_id FK
-        string thread_id
-        string status
-        jsonb graph_state
-        timestamptz created_at
-        timestamptz updated_at
-    }
-    agent_pending_actions {
-        uuid id PK
-        string thread_id FK
-        string action_id
-        string action_type
-        jsonb payload
-        string status
-        timestamptz expires_at
-    }
-    agent_response_payloads {
-        uuid id PK
-        string thread_id FK
-        string incoming_message_id
-        jsonb payload_json
-        timestamptz created_at
-    }
-
-    agent_graph_runs ||--o{ agent_pending_actions : "has pending"
-    agent_graph_runs ||--o{ agent_response_payloads : "has responses"
-      </div>
-    </div>
-
-    <div class="diagram-card">
-      <h2>Adaptive Learning Loop — Data Flow Between Schema Layers</h2>
-      <div class="mermaid">
-%%{init: {'theme': 'dark'}}%%
-flowchart LR
-    subgraph CONTENT["📚 Canonical Content"]
-        QB["question_bank\nitem_calibration\nitem_kp_map"]
-        KP["concepts_kp\nprerequisite_edges"]
-        UNITS["units\nunit_kp_map"]
-    end
-
-    subgraph LEARNER["👤 Learner State"]
-        MASTERY["learner_mastery_kp\nθ_mu, θ_sigma\n2PL-lite IRT"]
-        PROGRESS["learning_progress_records\nstatus, video_progress\nwaived_units"]
-        INTERACT["interactions\ncanonical_item_id\ncorrect, latency_ms"]
-    end
-
-    subgraph PLANNER["🧭 Recommendation Engine"]
-        RECOM["recommendation_engine\nmastery_lcb = sigmoid(θ)\nprerequisite-aware\ngoal_preferences scoped"]
-    end
-
-    subgraph AGENT["🤖 AI Agent"]
-        AGENT_STATE["agent_graph_runs\nthread memory\ncontext service\nsearch service"]
-    end
-
-    subgraph USER["👤 User"]
-        LEARN["Watch Video\n+ Inline Quiz"]
-        ASSESS["Assessment\n(placement / module test)"]
-        TUTOR["AI Tutor\nChat"]
-    end
-
-    LEARN -->|"video progress"| PROGRESS
-    LEARN -->|"quiz answers"| INTERACT
-    ASSESS -->|"submit answers"| INTERACT
-    INTERACT -->|"grade by IRT"| MASTERY
-    QB & KP -->|"item params + KP graph"| MASTERY
-    MASTERY -->|"mastery_lcb per KP"| RECOM
-    PROGRESS -->|"completed + waived units"| RECOM
-    UNITS -->|"unit → KP map"| RECOM
-    RECOM -->|"next recommended units"| LEARN
-    TUTOR -->|"message + unit_id + kp_ids"| AGENT_STATE
-    AGENT_STATE -->|"pgvector search"| QB
-    AGENT_STATE -->|"evidence-grounded answer"| TUTOR
-
-    style CONTENT fill:#1c1007,stroke:#f59e0b
-    style LEARNER fill:#0a1a0a,stroke:#22c55e
-    style PLANNER fill:#0a0a1a,stroke:#6366f1
-    style AGENT fill:#1a0505,stroke:#f87171
-    style USER fill:#0c1a2e,stroke:#3b82f6
-      </div>
+  <!-- ADAPTIVE LOOP -->
+  <div class="flow">
+    <div class="flow-title">Adaptive Learning Loop — How layers interact</div>
+    <div class="flow-row">
+      <div class="flow-box fb1">📋 Onboarding<br><small>goal_preferences</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box fb2">📝 Assessment<br><small>question_bank + IRT</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box fb3">📊 Mastery Update<br><small>learner_mastery_kp</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box fb3">🗺 Planner<br><small>prerequisite_edges</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box fb1">🎬 Learn Unit<br><small>learning_units</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box fb4">🤖 AI Tutor<br><small>agent_graph_runs</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box fb3" style="border-style:dashed">🔄 Next Unit</div>
     </div>
   </div>
 
-  <script>mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });</script>
+</div>
+
 </body>
 </html>
