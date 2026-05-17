@@ -56,7 +56,7 @@
 | **Live URL** | ✅ `https://a20-app-049.io.vn` | |
 | **Demo Video** | ✅ Google Drive | `https://drive.google.com/file/d/1q0Ce-3aJcJJFBfBRygGXvCH3ofkhUoIW/view?usp=sharing` |
 | **Pitch Deck** | ✅ Repo file | `VinLearn-Pitch.pdf` |
-| Link architecture | ✅ Done | `architecture/01-system-overview.svg`, `architecture/02-agentic-rag-pipeline.svg`, `docs/architecture.md` |
+| Link architecture | ✅ Done | `ARCHITECTURE.pdf`, `architecture/01-system-overview.svg`, `architecture/02-agentic-rag-pipeline.svg`, `docs/architecture.md` |
 | Link AI Logs | ✅ Done | `docs/ai-logs.md` |
 | Link evaluation | ✅ Done | `docs/evaluation-report.md` |
 
@@ -65,6 +65,7 @@
 | Hạng mục | Status | File |
 |---|---|---|
 | Sơ đồ tổng quan hệ thống | ✅ Done | `architecture/01-system-overview.svg` |
+| Architecture PDF nộp bài | ✅ Done | `ARCHITECTURE.pdf` |
 | Agentic RAG Pipeline | ✅ Done | `architecture/02-agentic-rag-pipeline.svg` |
 | AWS Infrastructure | ✅ Done | `architecture/03-aws-infrastructure.drawio` |
 | Request Lifecycle | ✅ Done | `architecture/04-request-lifecycle.drawio` |
@@ -162,6 +163,7 @@ Dùng **trình duyệt ẩn danh** để kiểm tra:
 A20-App-049/
 ├── README.md                         ✅ (đã có Video + Pitch link)
 ├── AGENTS.md                         ✅
+├── ARCHITECTURE.pdf                  ✅
 ├── CHANGELOG.md                      ✅
 ├── Dockerfile                        ✅
 ├── docker-compose.yml                ✅

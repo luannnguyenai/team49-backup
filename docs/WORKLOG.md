@@ -518,13 +518,13 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 
 ---
 
-### [ADR-16] Agent search rerank, production observability stack, và auth UX hardening — 12/05/2026 (Nguyễn Đôn Đức + Nguyễn Duy Minh Hoàng)
+### [ADR-16] Agent search rerank, production observability stack, và auth UX hardening — 12/05/2026 (Nguyễn Duy Minh Hoàng + Nguyễn Đôn Đức + Nguyễn Lê Minh Luân)
 
 **Bối cảnh:** Tuần cuối trước submission (17/05) tập trung vào 3 vấn đề còn tồn đọng: (1) agent search chỉ dùng embedding similarity, thiếu rerank step nên citation precision thấp khi nhiều unit có title/KP tương tự; (2) observability stack đã có Terraform module nhưng chưa được deploy đầy đủ lên ECS production; (3) auth flow có stale error từ persisted Zustand store, và password policy quá strict cho demo account.
 
 **Quyết định:**
 
-**1. Agent search rerank (Nguyễn Đôn Đức):**
+**1. Agent search rerank (Nguyễn Duy Minh Hoàng):**
 - Thêm rerank step sau embedding search: score từng kết quả theo combined relevance (embedding sim + KP overlap + unit title match).
 - Ưu tiên unit có KP trực tiếp match với query hơn là unit chỉ có title tương tự.
 - Fix narrow qualified acronym evidence: chặn trường hợp agent cite unit chứa keyword giống nhau nhưng context khác (ví dụ: "YOLO loss" vs "generic loss").
@@ -537,7 +537,7 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 - Admin panel frontend embed: iframe Grafana dashboard + Loki query UI, protected bằng admin role.
 - Fix agent downtime 4 lần (HTTPS endpoint URL → pgvector image version → secret injection → Cloud Map namespace) trước khi stack ổn định.
 
-**3. Auth UX hardening (Nguyễn Đôn Đức):**
+**3. Auth UX hardening (Nguyễn Duy Minh Hoàng):**
 - Fix stale error hydration: Zustand persist store có thể giữ `authError` từ session cũ. Fix bằng cách reset error state khi store rehydrate, không dùng persisted error làm initial state.
 - Relax password schema cho auth/user registration: bỏ yêu cầu special character để demo account `DemoPass123!` và các password đơn giản tương tự login được mà không bị validation reject.
 - Thêm test coverage: auth store ignore persisted errors, auth forms clear stale errors trước khi submit.

@@ -17,7 +17,7 @@
   [![AWS](https://img.shields.io/badge/AWS-ECS%2FFargate-FF9900?style=for-the-badge&logo=amazonecs&logoColor=white)](https://aws.amazon.com/ecs/)
   [![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
 
-  [**🚀 Live Demo**](https://a20-app-049.io.vn) · [**🎬 Video Demo**](https://drive.google.com/file/d/1q0Ce-3aJcJJFBfBRygGXvCH3ofkhUoIW/view?usp=sharing) · [**📑 Pitch Deck**](VinLearn-Pitch.pdf) · [**📐 Architecture**](architecture/) · [**📄 Technical Report**](TECHNICAL_REPORT.md) · [**🤖 AI Logs**](docs/ai-logs.md) · [**📊 Evaluation**](docs/evaluation-report.md) · [**📝 Worklog**](docs/WORKLOG.md)
+  [**🚀 Live Demo**](https://a20-app-049.io.vn) · [**🎬 Video Demo**](https://drive.google.com/file/d/1q0Ce-3aJcJJFBfBRygGXvCH3ofkhUoIW/view?usp=sharing) · [**📑 Pitch Deck**](VinLearn-Pitch.pdf) · [**📐 Architecture PDF**](ARCHITECTURE.pdf) · [**📐 Architecture Diagrams**](architecture/) · [**📄 Technical Report**](TECHNICAL_REPORT.md) · [**🤖 AI Logs**](docs/ai-logs.md) · [**📊 Evaluation**](docs/evaluation-report.md) · [**📝 Worklog**](docs/WORKLOG.md)
 
 </div>
 
@@ -230,6 +230,7 @@ GEMINI_API_KEY=...
 | Live URL | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
 | Video Demo | [Google Drive](https://drive.google.com/file/d/1q0Ce-3aJcJJFBfBRygGXvCH3ofkhUoIW/view?usp=sharing) |
 | Pitch Deck | [VinLearn-Pitch.pdf](VinLearn-Pitch.pdf) |
+| Architecture PDF | [ARCHITECTURE.pdf](ARCHITECTURE.pdf) |
 | Evaluation Report | [docs/evaluation-report.md](docs/evaluation-report.md) |
 | AI Logs | [docs/ai-logs.md](docs/ai-logs.md) |
 | Golden Eval Dataset | [docs/agent-golden-evals.md](docs/agent-golden-evals.md) |
