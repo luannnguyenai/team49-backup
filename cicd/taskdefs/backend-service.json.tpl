@@ -62,6 +62,7 @@
         { "name": "GEMINI_API_KEY", "valueFrom": "__BACKEND_SECRET_ARN__:GEMINI_API_KEY::" },
         { "name": "LANGFUSE_SECRET_KEY", "valueFrom": "__BACKEND_SECRET_ARN__:LANGFUSE_SECRET_KEY::" },
         { "name": "LANGFUSE_PUBLIC_KEY", "valueFrom": "__BACKEND_SECRET_ARN__:LANGFUSE_PUBLIC_KEY::" },
+        { "name": "EMAIL_FROM", "valueFrom": "__BACKEND_SECRET_ARN__:EMAIL_FROM::" },
         { "name": "GMAIL_APP_PASSWORD", "valueFrom": "__BACKEND_SECRET_ARN__:GMAIL_APP_PASSWORD::" },
         { "name": "AI_LOG_API_KEY", "valueFrom": "__BACKEND_SECRET_ARN__:AI_LOG_API_KEY::" },
         { "name": "ADMIN_TOKEN", "valueFrom": "__BACKEND_SECRET_ARN__:ADMIN_TOKEN::" }

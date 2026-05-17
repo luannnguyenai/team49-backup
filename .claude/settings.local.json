@@ -20,7 +20,9 @@
       "Bash(Get-ChildItem *)",
       "Bash(rtk proxy *)",
       "Bash(Get-Content *)",
-      "Bash(awk '{print $5, $9}')"
+      "Bash(awk '{print $5, $9}')",
+      "Bash(ls docs/)",
+      "Bash(dir docs *)"
     ]
   },
   "disabledMcpjsonServers": [

@@ -138,6 +138,37 @@ async def test_forgot_password_request_returns_ok_and_sends_email_for_existing_u
 
 
 @pytest.mark.asyncio
+async def test_forgot_password_request_returns_ok_when_email_delivery_fails():
+    from src.api.app import app
+
+    user = User(
+        email="reset-user@example.com",
+        full_name="Reset User",
+        hashed_password="OldPass123!",
+    )
+    user.id = uuid.uuid4()
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        with (
+            patch("src.routers.auth._is_forgot_password_allowed", new=AsyncMock(return_value=True)),
+            patch("src.routers.auth.get_user_by_email", new=AsyncMock(return_value=user)),
+            patch("src.routers.auth.create_password_reset_token", new=AsyncMock(return_value="raw-token")),
+            patch(
+                "src.routers.auth.send_password_reset_email",
+                new=AsyncMock(side_effect=RuntimeError("Gmail email configuration is missing.")),
+            ) as mock_send,
+        ):
+            response = await client.post(
+                "/api/auth/forgot-password/request",
+                json={"email": "reset-user@example.com"},
+            )
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+    mock_send.assert_awaited_once_with("reset-user@example.com", "raw-token")
+
+
+@pytest.mark.asyncio
 async def test_forgot_password_request_returns_generic_ok_for_unknown_email():
     from src.api.app import app
 

@@ -10,6 +10,7 @@ Auth & user-profile routes:
     PUT   /api/users/me/onboarding
 """
 
+import logging
 import time
 import uuid
 from collections import defaultdict
@@ -110,6 +111,7 @@ _forgot_email_limiter = _SlidingWindowRateLimiter(
 auth_router = APIRouter(prefix="/api/auth", tags=["Auth"])
 users_router = APIRouter(prefix="/api/users", tags=["Users"])
 _bearer = HTTPBearer(auto_error=True)
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -350,7 +352,13 @@ async def request_password_reset(
     user = await get_user_by_email(db, email)
     if user is not None:
         token = await create_password_reset_token(db, user, client_ip)
-        await send_password_reset_email(user.email, token)
+        try:
+            await send_password_reset_email(user.email, token)
+        except Exception:
+            logger.exception(
+                "Password reset email delivery failed",
+                extra={"user_id": str(user.id), "client_ip": client_ip},
+            )
     return {"status": "ok"}
 
 
