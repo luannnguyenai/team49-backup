@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram id="avatarpipeline" name="AI Avatar Pipeline">
+    <mxGraphModel dx="1366" dy="768" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="AI Avatar Pipeline" style="text;html=1;align=center;fontStyle=1;fontSize=18;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="334" y="20" width="500" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- Left column: User I/O -->
+        <mxCell id="user_in" value="&lt;b&gt;🧑 User&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;12&#39;&gt;speaks or types&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#3B82F6;fontColor=#1E3A8A;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="60" y="160" width="180" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="avatar_out" value="&lt;b&gt;🤖 3D Avatar&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;12&#39;&gt;speaks &amp;amp; animates&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#D1FAE5;strokeColor=#22C55E;fontColor=#065F46;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="60" y="560" width="180" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Processing chain (center, vertical) -->
+        <mxCell id="stt" value="&lt;b&gt;Speech-to-Text&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;voice → text&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="394" y="80" width="240" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ctx_pipeline" value="&lt;b&gt;Context Pipeline&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;RAG search · session memory&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#F59E0B;fontColor=#78350F;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="394" y="210" width="240" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- RAG + Memory as sub-boxes -->
+        <mxCell id="rag_box" value="🔍 Course RAG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#6EE7B7;fontColor=#065F46;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="200" width="180" height="46" as="geometry"/>
+        </mxCell>
+        <mxCell id="mem_box" value="🧠 Session Memory" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDF4FF;strokeColor=#D8B4FE;fontColor=#581C87;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="264" width="180" height="46" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="llm" value="&lt;b&gt;LLM&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;generate + safety filter&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#22C55E;fontColor=#14532D;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="394" y="350" width="240" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="renderer" value="&lt;b&gt;Voice &amp;amp; Animation Renderer&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;text → speech + lip-sync&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0EA5E9;fontColor=#0C4A6E;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="394" y="490" width="240" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Edges -->
+        <mxCell id="e1" edge="1" source="user_in" target="stt" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;" value="voice input">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" edge="1" source="stt" target="ctx_pipeline" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" edge="1" source="ctx_pipeline" target="rag_box" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=1.5;dashed=1;strokeColor=#6B7280;" value="search">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" edge="1" source="ctx_pipeline" target="mem_box" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=1.5;dashed=1;strokeColor=#6B7280;" value="recall">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_rag_back" edge="1" source="rag_box" target="llm" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=1.5;strokeColor=#059669;" value="context">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="840" y="380"/>
+              <mxPoint x="634" y="380"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" source="ctx_pipeline" target="llm" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" edge="1" source="llm" target="renderer" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" edge="1" source="renderer" target="avatar_out" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;" value="avatar response">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

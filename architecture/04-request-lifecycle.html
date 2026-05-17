@@ -25,7 +25,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .step-body { flex: 1; background: white; border-radius: 8px; padding: 10px 14px; border: 1.5px solid #E5E7EB; }
 .step-actor { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #9CA3AF; }
 .step-action { font-size: 13px; font-weight: 600; color: #1F2937; margin-top: 2px; }
-.step-note { font-size: 11px; color: #6B7280; margin-top: 3px; }
 
 /* connector */
 .connector { display: flex; gap: 12px; height: 20px; }
@@ -34,21 +33,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .connector-body { flex: 1; }
 
 /* color accents per step type */
-.c-browser { border-left: 3px solid #4A90D9; }
+.c-browser  { border-left: 3px solid #4A90D9; }
 .c-network  { border-left: 3px solid #FF9900; }
 .c-frontend { border-left: 3px solid #E7500A; }
 .c-backend  { border-left: 3px solid #E7500A; }
-.c-db       { border-left: 3px solid #1565C0; }
 .c-ai       { border-left: 3px solid #8E44AD; }
 .c-stream   { border-left: 3px solid #27AE60; }
-.c-cache    { border-left: 3px solid #00A1C9; }
 
 .num-blue   { background: #DBEAFE; color: #1E3A8A; }
 .num-orange { background: #FEF3C7; color: #92400E; }
 .num-red    { background: #FEE2E2; color: #7F1D1D; }
 .num-purple { background: #EDE9FE; color: #5B21B6; }
 .num-green  { background: #D1FAE5; color: #065F46; }
-.num-teal   { background: #CFFAFE; color: #164E63; }
 </style>
 </head>
 <body>
@@ -57,14 +53,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <div class="page-header">
   <h1>Request Lifecycle</h1>
-  <p>Two key flows: standard page load vs. AI Tutor chat with agentic RAG</p>
+  <p>Two key flows: standard page load vs. AI Tutor chat</p>
 </div>
 
 <div class="flows">
 
   <!-- FLOW 1: PAGE LOAD -->
   <div class="flow">
-    <div class="flow-title">🖥 Flow 1 — Page Load (SSR)
+    <div class="flow-title">🖥 Flow 1 — Page Load
       <span>Browser requests a course or learning unit page</span>
     </div>
 
@@ -72,8 +68,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="step-num num-blue">1</div>
       <div class="step-body c-browser">
         <div class="step-actor">Browser</div>
-        <div class="step-action">GET /courses/:id</div>
-        <div class="step-note">HTTPS request to CloudFront / ALB</div>
+        <div class="step-action">Request course page</div>
       </div>
     </div>
     <div class="connector"><div class="connector-num"><div class="connector-line"></div></div><div class="connector-body"></div></div>
@@ -81,9 +76,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="step">
       <div class="step-num num-orange">2</div>
       <div class="step-body c-network">
-        <div class="step-actor">ALB</div>
-        <div class="step-action">Route → Next.js Frontend (ECS)</div>
-        <div class="step-note">Path-based routing</div>
+        <div class="step-actor">Load Balancer</div>
+        <div class="step-action">Route to Frontend service</div>
       </div>
     </div>
     <div class="connector"><div class="connector-num"><div class="connector-line"></div></div><div class="connector-body"></div></div>
@@ -91,9 +85,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="step">
       <div class="step-num num-red">3</div>
       <div class="step-body c-frontend">
-        <div class="step-actor">Next.js Frontend</div>
-        <div class="step-action">Server-side fetch → FastAPI /api/courses</div>
-        <div class="step-note">RSC data fetch with auth cookie</div>
+        <div class="step-actor">Frontend (Next.js)</div>
+        <div class="step-action">Server-side render · fetch data from Backend</div>
       </div>
     </div>
     <div class="connector"><div class="connector-num"><div class="connector-line"></div></div><div class="connector-body"></div></div>
@@ -101,9 +94,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="step">
       <div class="step-num num-red">4</div>
       <div class="step-body c-backend">
-        <div class="step-actor">FastAPI Backend</div>
-        <div class="step-action">Query PostgreSQL + Redis cache</div>
-        <div class="step-note">Course data, learner progress, mastery</div>
+        <div class="step-actor">Backend (FastAPI)</div>
+        <div class="step-action">Query database · check cache</div>
       </div>
     </div>
     <div class="connector"><div class="connector-num"><div class="connector-line"></div></div><div class="connector-body"></div></div>
@@ -112,8 +104,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="step-num num-blue">5</div>
       <div class="step-body c-browser">
         <div class="step-actor">Browser</div>
-        <div class="step-action">Receive rendered HTML + hydrate</div>
-        <div class="step-note">Full page with course, progress, planner</div>
+        <div class="step-action">Receive rendered page · hydrate</div>
       </div>
     </div>
 
@@ -121,16 +112,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
   <!-- FLOW 2: AI TUTOR CHAT -->
   <div class="flow">
-    <div class="flow-title">🤖 Flow 2 — AI Tutor Chat (Agentic RAG)
-      <span>Learner sends a question to AI Tutor</span>
+    <div class="flow-title">🤖 Flow 2 — AI Tutor Chat
+      <span>Learner sends a question to the AI Tutor</span>
     </div>
 
     <div class="step">
       <div class="step-num num-blue">1</div>
       <div class="step-body c-browser">
         <div class="step-actor">Browser</div>
-        <div class="step-action">POST /api/agent/chat</div>
-        <div class="step-note">User message + session context</div>
+        <div class="step-action">Send message to AI Tutor</div>
       </div>
     </div>
     <div class="connector"><div class="connector-num"><div class="connector-line"></div></div><div class="connector-body"></div></div>
@@ -138,9 +128,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="step">
       <div class="step-num num-red">2</div>
       <div class="step-body c-backend">
-        <div class="step-actor">FastAPI Backend</div>
-        <div class="step-action">PII Sanitize → Guardrail Router</div>
-        <div class="step-note">Qwen3.5-0.8B LoRA · SAFE / HARMFUL check</div>
+        <div class="step-actor">Backend</div>
+        <div class="step-action">Safety check · route query</div>
       </div>
     </div>
     <div class="connector"><div class="connector-num"><div class="connector-line"></div></div><div class="connector-body"></div></div>
@@ -149,8 +138,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="step-num num-purple">3</div>
       <div class="step-body c-ai">
         <div class="step-actor">LangGraph Agent</div>
-        <div class="step-action">Smart Router → ReAct graph</div>
-        <div class="step-note">COMPLEX: enter agent graph with tools</div>
+        <div class="step-action">Search knowledge base · use tools</div>
       </div>
     </div>
     <div class="connector"><div class="connector-num"><div class="connector-line"></div></div><div class="connector-body"></div></div>
@@ -158,29 +146,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="step">
       <div class="step-num num-purple">4</div>
       <div class="step-body c-ai">
-        <div class="step-actor">Agent Tools</div>
-        <div class="step-action">RAG search pgvector → retrieve transcript chunks</div>
-        <div class="step-note">Optionally: Python Sandbox or Semantic Scholar</div>
-      </div>
-    </div>
-    <div class="connector"><div class="connector-num"><div class="connector-line"></div></div><div class="connector-body"></div></div>
-
-    <div class="step">
-      <div class="step-num num-purple">5</div>
-      <div class="step-body c-ai">
         <div class="step-actor">Answer Generator</div>
-        <div class="step-action">Qwen3.5-4B LoRA generates grounded answer</div>
-        <div class="step-note">Citation grounded · No hallucination policy</div>
+        <div class="step-action">Generate grounded answer with citations</div>
       </div>
     </div>
     <div class="connector"><div class="connector-num"><div class="connector-line"></div></div><div class="connector-body"></div></div>
 
     <div class="step">
-      <div class="step-num num-green">6</div>
+      <div class="step-num num-green">5</div>
       <div class="step-body c-stream">
-        <div class="step-actor">SSE Stream</div>
+        <div class="step-actor">Streaming Response</div>
         <div class="step-action">Token-by-token stream → Browser</div>
-        <div class="step-note">Langfuse trace logged · Redis updates session</div>
       </div>
     </div>
 

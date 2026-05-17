@@ -22,32 +22,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .zone-title { font-size: 15px; font-weight: 700; }
 .zone-sub { font-size: 11px; opacity: 0.7; }
 
-/* table list */
-.table-list { display: flex; flex-direction: column; gap: 6px; }
-.table-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
-.table-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.table-note { font-size: 10px; font-weight: 400; opacity: 0.65; margin-left: auto; }
+/* item list */
+.item-list { display: flex; flex-direction: column; gap: 6px; }
+.item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+.item-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
 /* zone colors */
 .z1 { background: #FFF7ED; border-color: #FED7AA; }
 .z1 .zone-title { color: #9A3412; }
-.z1 .table-item { background: rgba(254,215,170,0.3); color: #7C2D12; }
-.z1 .table-dot { background: #F97316; }
+.z1 .item { background: rgba(254,215,170,0.3); color: #7C2D12; }
+.z1 .item-dot { background: #F97316; }
 
 .z2 { background: #EFF6FF; border-color: #BFDBFE; }
 .z2 .zone-title { color: #1E3A8A; }
-.z2 .table-item { background: rgba(191,219,254,0.3); color: #1E40AF; }
-.z2 .table-dot { background: #3B82F6; }
+.z2 .item { background: rgba(191,219,254,0.3); color: #1E40AF; }
+.z2 .item-dot { background: #3B82F6; }
 
 .z3 { background: #F0FDF4; border-color: #BBF7D0; }
 .z3 .zone-title { color: #14532D; }
-.z3 .table-item { background: rgba(187,247,208,0.3); color: #166534; }
-.z3 .table-dot { background: #22C55E; }
+.z3 .item { background: rgba(187,247,208,0.3); color: #166534; }
+.z3 .item-dot { background: #22C55E; }
 
 .z4 { background: #FAF5FF; border-color: #E9D5FF; }
 .z4 .zone-title { color: #4A1D96; }
-.z4 .table-item { background: rgba(233,213,255,0.3); color: #6D28D9; }
-.z4 .table-dot { background: #8B5CF6; }
+.z4 .item { background: rgba(233,213,255,0.3); color: #6D28D9; }
+.z4 .item-dot { background: #8B5CF6; }
 
 /* flow diagram below grid */
 .flow { margin-top: 24px; background: white; border-radius: 12px; border: 1.5px solid #E5E7EB; padding: 20px; }
@@ -68,7 +67,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <div class="page-header">
   <h1>Database Schema — 4 Layers</h1>
-  <p>PostgreSQL 16 + pgvector · Product Shell → Canonical Content → Learner State → Agent State</p>
+  <p>Product Shell → Canonical Content → Learner State → Agent State</p>
 </div>
 
 <div class="canvas">
@@ -84,13 +83,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <div class="zone-sub">Course catalog & content structure</div>
         </div>
       </div>
-      <div class="table-list">
-        <div class="table-item"><div class="table-dot"></div>courses <span class="table-note">canonical_course_id</span></div>
-        <div class="table-item"><div class="table-dot"></div>course_sections</div>
-        <div class="table-item"><div class="table-dot"></div>learning_units <span class="table-note">canonical_unit_id</span></div>
-        <div class="table-item"><div class="table-dot"></div>lectures <span class="table-note">video · transcript</span></div>
-        <div class="table-item"><div class="table-dot"></div>transcripts</div>
-        <div class="table-item"><div class="table-dot"></div>learning_progress_records</div>
+      <div class="item-list">
+        <div class="item"><div class="item-dot"></div>Courses</div>
+        <div class="item"><div class="item-dot"></div>Course sections</div>
+        <div class="item"><div class="item-dot"></div>Learning units</div>
+        <div class="item"><div class="item-dot"></div>Lectures &amp; transcripts</div>
+        <div class="item"><div class="item-dot"></div>Progress records</div>
       </div>
     </div>
 
@@ -103,13 +101,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <div class="zone-sub">KP graph · Assessment · Prerequisites</div>
         </div>
       </div>
-      <div class="table-list">
-        <div class="table-item"><div class="table-dot"></div>concepts_kp <span class="table-note">Knowledge Points</span></div>
-        <div class="table-item"><div class="table-dot"></div>question_bank <span class="table-note">+ item_phase_map</span></div>
-        <div class="table-item"><div class="table-dot"></div>item_calibration <span class="table-note">IRT params</span></div>
-        <div class="table-item"><div class="table-dot"></div>item_kp_map</div>
-        <div class="table-item"><div class="table-dot"></div>prerequisite_edges</div>
-        <div class="table-item"><div class="table-dot"></div>unit_kp_map</div>
+      <div class="item-list">
+        <div class="item"><div class="item-dot"></div>Knowledge points</div>
+        <div class="item"><div class="item-dot"></div>Question bank</div>
+        <div class="item"><div class="item-dot"></div>IRT calibration</div>
+        <div class="item"><div class="item-dot"></div>Prerequisite graph</div>
+        <div class="item"><div class="item-dot"></div>KP mappings</div>
       </div>
     </div>
 
@@ -122,13 +119,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <div class="zone-sub">Mastery · Planner · Session tracking</div>
         </div>
       </div>
-      <div class="table-list">
-        <div class="table-item"><div class="table-dot"></div>users</div>
-        <div class="table-item"><div class="table-dot"></div>sessions <span class="table-note">+ interactions</span></div>
-        <div class="table-item"><div class="table-dot"></div>learner_mastery_kp <span class="table-note">theta · sigma</span></div>
-        <div class="table-item"><div class="table-dot"></div>goal_preferences <span class="table-note">selected courses</span></div>
-        <div class="table-item"><div class="table-dot"></div>plan_history · rationale_log</div>
-        <div class="table-item"><div class="table-dot"></div>waived_units · planner_session_state</div>
+      <div class="item-list">
+        <div class="item"><div class="item-dot"></div>Users &amp; sessions</div>
+        <div class="item"><div class="item-dot"></div>Mastery scores</div>
+        <div class="item"><div class="item-dot"></div>Goal preferences</div>
+        <div class="item"><div class="item-dot"></div>Learning plan</div>
+        <div class="item"><div class="item-dot"></div>Waived units</div>
       </div>
     </div>
 
@@ -141,12 +137,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <div class="zone-sub">LangGraph run state · Citations · Actions</div>
         </div>
       </div>
-      <div class="table-list">
-        <div class="table-item"><div class="table-dot"></div>agent_graph_runs <span class="table-note">turn · trace_id</span></div>
-        <div class="table-item"><div class="table-dot"></div>agent_pending_actions <span class="table-note">prerequisite</span></div>
-        <div class="table-item"><div class="table-dot"></div>agent_response_payloads <span class="table-note">citations</span></div>
-        <div class="table-item"><div class="table-dot"></div>agent_route_context <span class="table-note">course · unit scope</span></div>
-        <div class="table-item"><div class="table-dot"></div>localized_content <span class="table-note">vi / en</span></div>
+      <div class="item-list">
+        <div class="item"><div class="item-dot"></div>Agent runs</div>
+        <div class="item"><div class="item-dot"></div>Pending actions</div>
+        <div class="item"><div class="item-dot"></div>Response payloads</div>
+        <div class="item"><div class="item-dot"></div>Route context</div>
+        <div class="item"><div class="item-dot"></div>Localized content</div>
       </div>
     </div>
 
@@ -156,17 +152,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="flow">
     <div class="flow-title">Adaptive Learning Loop — How layers interact</div>
     <div class="flow-row">
-      <div class="flow-box fb1">📋 Onboarding<br><small>goal_preferences</small></div>
+      <div class="flow-box fb1">📋 Onboarding</div>
       <div class="flow-arrow">→</div>
-      <div class="flow-box fb2">📝 Assessment<br><small>question_bank + IRT</small></div>
+      <div class="flow-box fb2">📝 Assessment</div>
       <div class="flow-arrow">→</div>
-      <div class="flow-box fb3">📊 Mastery Update<br><small>learner_mastery_kp</small></div>
+      <div class="flow-box fb3">📊 Mastery Update</div>
       <div class="flow-arrow">→</div>
-      <div class="flow-box fb3">🗺 Planner<br><small>prerequisite_edges</small></div>
+      <div class="flow-box fb3">🗺 Planner</div>
       <div class="flow-arrow">→</div>
-      <div class="flow-box fb1">🎬 Learn Unit<br><small>learning_units</small></div>
+      <div class="flow-box fb1">🎬 Learn Unit</div>
       <div class="flow-arrow">→</div>
-      <div class="flow-box fb4">🤖 AI Tutor<br><small>agent_graph_runs</small></div>
+      <div class="flow-box fb4">🤖 AI Tutor</div>
       <div class="flow-arrow">→</div>
       <div class="flow-box fb3" style="border-style:dashed">🔄 Next Unit</div>
     </div>

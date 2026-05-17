@@ -29,8 +29,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .branch-item { flex: 1; max-width: 170px; border-radius: 10px; padding: 12px 14px; border: 1.5px solid transparent; text-align: center; }
 .branch-item .step-title { font-size: 12px; }
 .branch-item .step-sub { font-size: 10px; }
-.branch-connector { display: flex; justify-content: center; align-items: flex-end; padding: 0; }
-.branch-line { width: 100%; border-top: 2px dashed #D1D5DB; position: relative; top: -16px; }
 
 /* route badge */
 .badge { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
@@ -47,9 +45,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 .badge-pass  { background:#D1FAE5; color:#065F46; }
 .badge-block { background:#FEE2E2; color:#7F1D1D; }
-.badge-safe  { background:#DBEAFE; color:#1E3A8A; }
-.badge-complex { background:#EDE9FE; color:#5B21B6; }
 .badge-simple { background:#FEF3C7; color:#92400E; }
+.badge-complex { background:#EDE9FE; color:#5B21B6; }
 </style>
 </head>
 <body>
@@ -73,14 +70,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <!-- PII -->
   <div class="step c-safety" style="max-width:520px;">
     <div class="step-title">🔒 PII Sanitizer</div>
-    <div class="step-sub">Strips email · phone · CCCD from input before any LLM processing</div>
+    <div class="step-sub">Strips personal identifiers from input before any LLM processing</div>
   </div>
   <div class="arrow">↓</div>
 
   <!-- GUARDRAIL -->
   <div class="step c-safety">
-    <div class="step-title">🛡 Guardrail Router <span style="font-size:10px;font-weight:400;opacity:0.7">Qwen3.5-0.8B LoRA · vLLM self-hosted</span></div>
-    <div class="step-sub">Classifies: SAFE / HARMFUL / AMBIGUOUS · Detects jailbreak, off-topic, PII injection</div>
+    <div class="step-title">🛡 Guardrail Router</div>
+    <div class="step-sub">Classifies: SAFE / HARMFUL · Detects jailbreak, off-topic, PII injection</div>
   </div>
 
   <!-- BRANCH: PASS or BLOCK -->
@@ -109,7 +106,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <div class="arrow" style="height:20px;font-size:14px;">↓ <span class="arrow-label"><span class="badge badge-simple">SIMPLE</span></span></div>
           <div class="branch-item c-router" style="width:100%;">
             <div class="step-title">💬 Direct LLM</div>
-            <div class="step-sub">Gemini / GPT<br>No agent graph</div>
+            <div class="step-sub">Direct response<br>No agent graph</div>
           </div>
         </div>
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
@@ -124,15 +121,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <div style="display:flex;width:100%;gap:6px;">
             <div class="branch-item c-tool" style="flex:1;">
               <div class="step-title">🔍 RAG Search</div>
-              <div class="step-sub">pgvector<br>Transcript retrieval</div>
+              <div class="step-sub">Knowledge base retrieval</div>
             </div>
             <div class="branch-item c-tool" style="flex:1;">
               <div class="step-title">🐍 Sandbox</div>
-              <div class="step-sub">Python exec<br>Math · Code</div>
+              <div class="step-sub">Code execution</div>
             </div>
             <div class="branch-item c-tool" style="flex:1;">
               <div class="step-title">🌐 Web Search</div>
-              <div class="step-sub">Semantic Scholar<br>External refs</div>
+              <div class="step-sub">External references</div>
             </div>
           </div>
         </div>
@@ -153,15 +150,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
   <!-- ANSWER GEN -->
   <div class="step c-answer">
-    <div class="step-title">✍️ Answer Generator <span style="font-size:10px;font-weight:400;opacity:0.7">Qwen3.5-4B LoRA · citation grounding</span></div>
-    <div class="step-sub">Evidence policy: GROUNDED / PARTIAL / NO_SOURCE · Blocks hallucination</div>
+    <div class="step-title">✍️ Answer Generator</div>
+    <div class="step-sub">Generates grounded answer with citations · Blocks hallucination</div>
   </div>
   <div class="arrow">↓</div>
 
   <!-- OUTPUT -->
   <div class="step c-output">
-    <div class="step-title">📡 SSE Stream Response</div>
-    <div class="step-sub">Streamed to browser · Langfuse trace logged per turn</div>
+    <div class="step-title">📡 Streaming Response</div>
+    <div class="step-sub">Streamed token-by-token to browser</div>
   </div>
 
 </div>

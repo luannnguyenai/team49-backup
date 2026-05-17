@@ -1,38 +1,38 @@
 # Evaluation Report - AI Adaptive Learning Platform
 
 > AI20K Submission | Version 1.0  
-> Ngay: 2026-05-15
+> Ngày: 2026-05-15
 
 ---
 
-## 1. Muc tieu danh gia
+## 1. Mục tiêu đánh giá
 
-Danh gia do tin cay, tinh chinh xac va tinh an toan cua he thong AI Adaptive Learning Platform tren cac khia canh:
+Đánh giá độ tin cậy, tính chính xác và tính an toàn của hệ thống AI Adaptive Learning Platform trên các khía cạnh:
 
-- **API Contract**: Dam bao cac route hoat dong dung spec (HTTP status, response schema).
-- **Business Logic**: Kiem tra logic nghiep vu cot loi (mastery scoring, learning path).
-- **AI Agent Behavior**: Danh gia hanh vi agent qua golden eval dataset — bao gom RAG retrieval, context continuity, hallucination prevention, assessment boundary.
-- **Safety & Guardrail**: Danh gia bo loc an toan (guardrail router) voi 13,513 samples bao gom harmful request, jailbreak, prompt injection.
-- **Integration/E2E**: Kiem tra luong end-to-end tu request den response.
+- **API Contract**: Đảm bảo các route hoạt động đúng spec (HTTP status, response schema).
+- **Business Logic**: Kiểm tra logic nghiệp vụ cốt lõi (mastery scoring, learning path).
+- **AI Agent Behavior**: Đánh giá hành vi agent qua golden eval dataset — bao gồm RAG retrieval, context continuity, hallucination prevention, assessment boundary.
+- **Safety & Guardrail**: Đánh giá bộ lọc an toàn (guardrail router) với 13,513 samples bao gồm harmful request, jailbreak, prompt injection.
+- **Integration/E2E**: Kiểm tra luồng end-to-end từ request đến response.
 
 ---
 
-## 2. Pham vi danh gia
+## 2. Phạm vi đánh giá
 
-| Thanh phan | Mo ta |
+| Thành phần | Mô tả |
 |---|---|
-| API Routes | Contract tests cho toan bo route chinh (FastAPI) |
+| API Routes | Contract tests cho toàn bộ route chính (FastAPI) |
 | Service Layer | Unit tests cho business logic (mastery, learning path, agent routing) |
 | AI Agent | Golden eval dataset — 50+ test cases, 10+ categories |
 | Guardrail Router | 13,513 samples — train/val/test split, multi-attack-type coverage |
-| Mastery Scoring | 2PL-lite residual scoring voi IRT priors |
-| E2E Flows | Integration tests cho cac luong chinh |
+| Mastery Scoring | 2PL-lite residual scoring với IRT priors |
+| E2E Flows | Integration tests cho các luồng chính |
 
 ---
 
-## 3. Bo test cases
+## 3. Bộ test cases
 
-### 3.1 Tong quan
+### 3.1 Tổng quan
 
 | Category | Count | Type | Location |
 |---|---|---|---|
@@ -44,38 +44,38 @@ Danh gia do tin cay, tinh chinh xac va tinh an toan cua he thong AI Adaptive Lea
 
 ### 3.2 Golden Eval Categories (AI Agent)
 
-| Category | Muc dich | Vi du kiem tra |
+| Category | Mục đích | Ví dụ kiểm tra |
 |---|---|---|
-| `rag_initial_retrieval` | Agent tim va trich dan dung noi dung | Tool call `search_learning_content`, citation co mat |
-| `rag_followup_same_topic` | Giai quyet dai tu, duy tri context | Pronoun resolution trong cung topic |
-| `source_limited_answer` | Tra loi trung thuc khi evidence han che | Confidence = `partial`, khong hallucinate |
-| `contextual_evidence_gap` | Nhan biet thieu evidence thay vi bia | Phai co disclaimer, khong fabricate |
-| `new_topic_after_context` | Chuyen topic sach, khong citation bleed | Khong trich dan tu topic cu |
-| `thread_memory` | Nho chinh xac lich su hoi thoai | Recall thong tin tu cac turn truoc |
-| `scope_current_path_first` | Tim trong learning path hien tai truoc | Search scope uu tien current path |
-| `search_refinement` | Thu lai voi query tot hon khi fail | Retry voi refined search query |
-| `lexical_trap` | Khong bi lua boi keyword tuong tu | Phan biet dung noi dung du keyword giong |
-| `assessment_boundary` | Tu choi ho tro trong assessment | Block response khi context la bai kiem tra |
+| `rag_initial_retrieval` | Agent tìm và trích dẫn đúng nội dung | Tool call `search_learning_content`, citation có mặt |
+| `rag_followup_same_topic` | Giải quyết đại từ, duy trì context | Pronoun resolution trong cùng topic |
+| `source_limited_answer` | Trả lời trung thực khi evidence hạn chế | Confidence = `partial`, không hallucinate |
+| `contextual_evidence_gap` | Nhận biết thiếu evidence thay vì bịa | Phải có disclaimer, không fabricate |
+| `new_topic_after_context` | Chuyển topic sạch, không citation bleed | Không trích dẫn từ topic cũ |
+| `thread_memory` | Nhớ chính xác lịch sử hội thoại | Recall thông tin từ các turn trước |
+| `scope_current_path_first` | Tìm trong learning path hiện tại trước | Search scope ưu tiên current path |
+| `search_refinement` | Thử lại với query tốt hơn khi fail | Retry với refined search query |
+| `lexical_trap` | Không bị lừa bởi keyword tương tự | Phân biệt đúng nội dung dù keyword giống |
+| `assessment_boundary` | Từ chối hỗ trợ trong assessment | Block response khi context là bài kiểm tra |
 
-Moi test case bao gom:
+Mỗi test case bao gồm:
 - **Expected behaviors**: tool calls, search queries, citations, answer content
-- **Forbidden behaviors**: must-not rules (vd: `must_not_cite`, `must_not_hallucinate`)
+- **Forbidden behaviors**: must-not rules (ví dụ: `must_not_cite`, `must_not_hallucinate`)
 - **Confidence levels**: `grounded`, `partial`, `no_source`
 
 ### 3.3 Guardrail Router Dataset
 
-| Metric | Gia tri |
+| Metric | Giá trị |
 |---|---|
-| Tong samples | 13,513 |
+| Tổng samples | 13,513 |
 | Train set | 10,756 |
 | Validation set | 1,041 |
 | Test set | 1,716 |
 | Schema violations | 0 |
 | Train/test leakage | 0 |
 
-**Nguon du lieu HARMFUL:**
+**Nguồn dữ liệu HARMFUL:**
 
-| Source | So luong |
+| Source | Số lượng |
 |---|---|
 | WildGuardMix | 1,500 |
 | JailBreakV-28K | 900 |
@@ -83,7 +83,7 @@ Moi test case bao gom:
 | Router-injection | 300 |
 | Off-topic | 240 |
 
-**Phan loai attack types:**
+**Phân loại attack types:**
 
 | Attack Type | Count |
 |---|---|
@@ -93,10 +93,10 @@ Moi test case bao gom:
 | `multilingual_jailbreak` | 181 |
 
 **Actions:**
-- `ALLOW_LESSON_ANSWER` — Cho phep tra loi lien quan bai hoc
-- `SOFT_REFUSE_REDIRECT` — Tu choi mem, huong dan lai
-- `ASK_CLARIFY` — Yeu cau lam ro cau hoi
-- `SAFETY_REFUSE` — Tu choi vi ly do an toan
+- `ALLOW_LESSON_ANSWER` — Cho phép trả lời liên quan bài học
+- `SOFT_REFUSE_REDIRECT` — Từ chối mềm, hướng dẫn lại
+- `ASK_CLARIFY` — Yêu cầu làm rõ câu hỏi
+- `SAFETY_REFUSE` — Từ chối vì lý do an toàn
 
 ---
 
@@ -104,76 +104,76 @@ Moi test case bao gom:
 
 ### 4.1 Mastery Scoring
 
-- Mo hinh: **2PL-lite residual scoring** voi IRT priors
-- Cong thuc:
+- Mô hình: **2PL-lite residual scoring** với IRT priors
+- Công thức:
   ```
   mastery_lcb = sigmoid((theta_mu - theta_sigma) / sqrt(1 + theta_sigma^2))
   ```
-- Staleness: Applied on-read bang cach inflating uncertainty theo thoi gian
-- Trang thai: Phase-1 scoring (chua validated production IRT/BKT)
+- Staleness: Applied on-read bằng cách inflating uncertainty theo thời gian
+- Trạng thái: Phase-1 scoring (chưa validated production IRT/BKT)
 
 ### 4.2 Guardrail Router
 
-- Schema validation: **0 violations** tren toan bo dataset
+- Schema validation: **0 violations** trên toàn bộ dataset
 - Data integrity: **0 train/test leakage**
-- Coverage: 4 attack types, 4+ nguon du lieu harmful
+- Coverage: 4 attack types, 4+ nguồn dữ liệu harmful
 
 ### 4.3 Golden Eval
 
-- 50+ test cases bao phu 10+ categories
-- Moi case co expected va forbidden behaviors ro rang
-- Evaluation: Deterministic dataset check (pattern matching tren tool calls, citations, answer content)
+- 50+ test cases bao phủ 10+ categories
+- Mỗi case có expected và forbidden behaviors rõ ràng
+- Evaluation: Deterministic dataset check (pattern matching trên tool calls, citations, answer content)
 
 ---
 
-## 5. Ket qua chinh
+## 5. Kết quả chính
 
-| Hang muc | Ket qua |
+| Hạng mục | Kết quả |
 |---|---|
-| API Contract tests | 13+ tests — kiem tra HTTP status, response schema |
+| API Contract tests | 13+ tests — kiểm tra HTTP status, response schema |
 | Service logic tests | 10+ tests — business logic pass |
 | Golden eval coverage | 50+ cases, 10+ behavior categories |
 | Guardrail dataset quality | 13,513 samples, 0 schema violations, 0 leakage |
 | Guardrail attack coverage | 4 attack types (harmful, policy override, jailbreak, multilingual) |
-| Mastery scoring | 2PL-lite implemented, staleness decay hoat dong |
+| Mastery scoring | 2PL-lite implemented, staleness decay hoạt động |
 | E2E flows | 5+ integration tests |
 
 ---
 
-## 6. Failure Cases va cach xu ly
+## 6. Failure Cases và cách xử lý
 
-| # | Van de | Nguyen nhan | Cach fix |
+| # | Vấn đề | Nguyên nhân | Cách fix |
 |---|---|---|---|
-| 1 | Hallucination khi evidence han che | Agent sinh noi dung khong co trong source | Ap dung `evidence_policy` — bat buoc confidence level, cam fabricate |
-| 2 | Citation bleed giua cac topic | Chuyen topic nhung van trich dan topic cu | Them topic switching logic — reset citation context khi topic thay doi |
-| 3 | Generic loss bi cite nham la YOLO loss | Keyword similarity dan den sai noi dung | Them `must_not_cite` rules trong golden eval, cai thien search relevance |
-| 4 | Prompt injection attempts | User co gang override system prompt | Deploy guardrail router + system prompt hardening, test voi 1,684+ harmful samples |
+| 1 | Hallucination khi evidence hạn chế | Agent sinh nội dung không có trong source | Áp dụng `evidence_policy` — bắt buộc confidence level, cấm fabricate |
+| 2 | Citation bleed giữa các topic | Chuyển topic nhưng vẫn trích dẫn topic cũ | Thêm topic switching logic — reset citation context khi topic thay đổi |
+| 3 | Generic loss bị cite nhầm là YOLO loss | Keyword similarity dẫn đến sai nội dung | Thêm `must_not_cite` rules trong golden eval, cải thiện search relevance |
+| 4 | Prompt injection attempts | User cố gắng override system prompt | Deploy guardrail router + system prompt hardening, test với 1,684+ harmful samples |
 
 ---
 
-## 7. Nhan xet cuoi
+## 7. Nhận xét cuối
 
-### Diem manh
+### Điểm mạnh
 
-- **Coverage rong**: Test suite bao phu tu API contract, business logic, AI agent behavior den safety guardrail.
-- **Golden eval co cau truc**: 50+ cases voi expected/forbidden behaviors ro rang, cho phep regression testing khi thay doi agent logic.
-- **Guardrail dataset lon**: 13,513 samples tu nhieu nguon, bao gom ca multilingual jailbreak — dam bao do phu attack surface.
-- **Failure cases duoc document va fix**: Moi van de phat hien deu co root cause va giai phap cu the.
+- **Coverage rộng**: Test suite bao phủ từ API contract, business logic, AI agent behavior đến safety guardrail.
+- **Golden eval có cấu trúc**: 50+ cases với expected/forbidden behaviors rõ ràng, cho phép regression testing khi thay đổi agent logic.
+- **Guardrail dataset lớn**: 13,513 samples từ nhiều nguồn, bao gồm cả multilingual jailbreak — đảm bảo độ phủ attack surface.
+- **Failure cases được document và fix**: Mỗi vấn đề phát hiện đều có root cause và giải pháp cụ thể.
 
-### Han che hien tai
+### Hạn chế hiện tại
 
-- **Route contract tests**: Co issue request hang voi `httpx.ASGITransport` — can fix de chay on dinh trong CI.
-- **IRT/BKT calibration**: Chua validated voi real interaction data — mastery scoring dang o phase-1.
-- **Golden eval la deterministic check**: Khong phai live model evaluation — chua do duoc actual model accuracy/latency.
-- **Chua co quantified metrics**: Accuracy, precision, recall, latency chua duoc do luong chinh thuc.
+- **Route contract tests**: Có issue request hang với `httpx.ASGITransport` — cần fix để chạy ổn định trong CI.
+- **IRT/BKT calibration**: Chưa validated với real interaction data — mastery scoring đang ở phase-1.
+- **Golden eval là deterministic check**: Không phải live model evaluation — chưa đo được actual model accuracy/latency.
+- **Chưa có quantified metrics**: Accuracy, precision, recall, latency chưa được đo lường chính thức.
 
-### Huong tiep theo
+### Hướng tiếp theo
 
-1. Fix httpx.ASGITransport hang issue de chay full contract suite trong CI.
-2. Thu thap real interaction data de validate IRT/BKT calibration.
-3. Them live model evaluation voi quantified accuracy/latency metrics.
-4. Mo rong golden eval dataset khi co them behavior categories.
+1. Fix httpx.ASGITransport hang issue để chạy full contract suite trong CI.
+2. Thu thập real interaction data để validate IRT/BKT calibration.
+3. Thêm live model evaluation với quantified accuracy/latency metrics.
+4. Mở rộng golden eval dataset khi có thêm behavior categories.
 
 ---
 
-> **Ghi chu**: Bao cao nay phan anh trang thai evaluation tai thoi diem submission. Cac metric dinh luong se duoc bo sung khi co du lieu tuong tac thuc te.
+> **Ghi chú**: Báo cáo này phản ánh trạng thái evaluation tại thời điểm submission. Các metric định lượng sẽ được bổ sung khi có dữ liệu tương tác thực tế.

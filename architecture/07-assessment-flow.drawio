@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram id="assessmentflow" name="Assessment Flow">
+    <mxGraphModel dx="1366" dy="768" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="User Onboarding &amp; Assessment Flow" style="text;html=1;align=center;fontStyle=1;fontSize=18;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="234" y="15" width="700" height="30" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══ PHASE 1 ═══ -->
+        <mxCell id="p1_bg" value="&lt;b&gt;Phase 1 — Goal &amp;amp; Topic Discovery&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;fontColor=#1E40AF;fontSize=14;align=left;verticalAlign=top;spacingLeft=14;spacingTop=10;arcSize=4;" vertex="1" parent="1">
+          <mxGeometry x="30" y="58" width="1109" height="170" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p1s1" value="&lt;b&gt;Select Goals&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;Choose learning objectives&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=white;strokeColor=#93C5FD;fontColor=#1E3A8A;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="110" width="220" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1s2" value="&lt;b&gt;Browse Topics&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;Explore courses &amp;amp; units&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=white;strokeColor=#93C5FD;fontColor=#1E3A8A;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="340" y="110" width="220" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1s3" value="&lt;b&gt;Mark Known Topics&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;Skip what you already know&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=white;strokeColor=#93C5FD;fontColor=#1E3A8A;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="620" y="110" width="220" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1s4" value="&lt;b&gt;Set Experience Level&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;Beginner / Intermediate / Advanced&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=white;strokeColor=#93C5FD;fontColor=#1E3A8A;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="900" y="110" width="220" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p1e1" edge="1" source="p1s1" target="p1s2" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1e2" edge="1" source="p1s2" target="p1s3" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1e3" edge="1" source="p1s3" target="p1s4" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Phase 1 → Phase 2 arrow -->
+        <mxCell id="ep12" edge="1" source="p1_bg" target="p2_bg" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══ PHASE 2 ═══ -->
+        <mxCell id="p2_bg" value="&lt;b&gt;Phase 2 — Placement Assessment&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#F59E0B;fontColor=#92400E;fontSize=14;align=left;verticalAlign=top;spacingLeft=14;spacingTop=10;arcSize=4;" vertex="1" parent="1">
+          <mxGeometry x="30" y="278" width="1109" height="170" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p2s1" value="&lt;b&gt;Start Assessment&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;System generates questions&lt;br&gt;per topic (Easy · Medium · Hard)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=white;strokeColor=#FCD34D;fontColor=#78350F;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="330" width="260" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2s2" value="&lt;b&gt;Answer Questions&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;Multiple choice · local state&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=white;strokeColor=#FCD34D;fontColor=#78350F;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="454" y="330" width="260" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2s3" value="&lt;b&gt;Submit Answers&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;Scored per topic&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=white;strokeColor=#FCD34D;fontColor=#78350F;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="808" y="330" width="260" height="90" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p2e1" edge="1" source="p2s1" target="p2s2" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2e2" edge="1" source="p2s2" target="p2s3" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Phase 2 → Phase 3 arrow -->
+        <mxCell id="ep23" edge="1" source="p2_bg" target="p3_bg" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══ PHASE 3 ═══ -->
+        <mxCell id="p3_bg" value="&lt;b&gt;Phase 3 — Results &amp;amp; Decisions&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#22C55E;fontColor=#14532D;fontSize=14;align=left;verticalAlign=top;spacingLeft=14;spacingTop=10;arcSize=4;" vertex="1" parent="1">
+          <mxGeometry x="30" y="498" width="1109" height="290" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="p3_results" value="&lt;b&gt;View Results&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39;&gt;Score per topic&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=white;strokeColor=#86EFAC;fontColor=#14532D;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="454" y="540" width="260" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Three outcome boxes -->
+        <mxCell id="skip_box" value="&lt;b&gt;✅ SKIP&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;12&#39;&gt;Score ≥ 70%&lt;/font&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#14532D&#39;&gt;Move to next topic&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#22C55E;fontColor=#15803D;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="90" y="660" width="280" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="review_box" value="&lt;b&gt;⚠️ REVIEW&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;12&#39;&gt;50% – 69%&lt;/font&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#78350F&#39;&gt;User chooses: skip or relearn&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9C3;strokeColor=#F59E0B;fontColor=#92400E;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="444" y="660" width="280" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="relearn_box" value="&lt;b&gt;❌ RELEARN&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;12&#39;&gt;Score &lt; 50%&lt;/font&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#7F1D1D&#39;&gt;Must complete learning unit&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#F87171;fontColor=#B91C1C;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="798" y="660" width="280" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Results → 3 branches -->
+        <mxCell id="p3e1" edge="1" source="p3_results" target="skip_box" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#16A34A;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3e2" edge="1" source="p3_results" target="review_box" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#F59E0B;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3e3" edge="1" source="p3_results" target="relearn_box" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#DC2626;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
