@@ -10,40 +10,20 @@
   [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
   [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
   [![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-  [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
   [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
   [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
-  [![LangChain](https://img.shields.io/badge/LangChain-LangGraph-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://www.langchain.com/)
-  [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+  [![LangGraph](https://img.shields.io/badge/LangChain-LangGraph-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://www.langchain.com/)
   [![AWS](https://img.shields.io/badge/AWS-ECS%2FFargate-FF9900?style=for-the-badge&logo=amazonecs&logoColor=white)](https://aws.amazon.com/ecs/)
   [![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
-  [![Langfuse](https://img.shields.io/badge/Langfuse-Tracing-4F46E5?style=for-the-badge)](https://langfuse.com/)
 
-  ---
-
-  [**:rocket: Live Demo**](https://a20-app-049.io.vn) · [**:triangular_ruler: Architecture**](architecture/index.html) · [**:robot: AI Logs**](docs/ai-logs.md) · [**:bar_chart: Evaluation**](docs/evaluation-report.md) · [**:memo: Worklog**](docs/WORKLOG.md) · [**:notebook: Journal**](docs/JOURNAL.md)
+  [**🚀 Live Demo**](https://a20-app-049.io.vn) · [**📐 Architecture**](architecture/) · [**🤖 AI Logs**](docs/ai-logs.md) · [**📊 Evaluation**](docs/evaluation-report.md) · [**📝 Worklog**](docs/WORKLOG.md)
 
 </div>
 
 ---
 
-## :link: Quick Links
-
-| Hạng mục | Link |
-|---|---|
-| :globe_with_meridians: Live URL | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
-| :clapper: Demo Video | _(link)_ |
-| :bar_chart: Pitch Deck | _(link)_ |
-| :triangular_ruler: Architecture | [architecture/index.html](architecture/index.html) · [SVGs](architecture/) |
-| :robot: AI Logs | [docs/ai-logs.md](docs/ai-logs.md) |
-| :clipboard: Worklog | [docs/WORKLOG.md](docs/WORKLOG.md) |
-| :notebook: Weekly Journal | [docs/JOURNAL.md](docs/JOURNAL.md) |
-| :white_check_mark: Evaluation Report | [docs/evaluation-report.md](docs/evaluation-report.md) |
-
----
-
-## :bulb: 1. Giới thiệu dự án
+## 1. Giới thiệu
 
 **AI Adaptive Tutor** là nền tảng học tập cá nhân hóa, nơi AI đóng vai trò gia sư 24/7 — hướng dẫn học sinh học đúng thứ họ cần, đúng thời điểm, dựa trên năng lực thực tế được đo lường liên tục.
 
@@ -51,149 +31,148 @@ Sản phẩm hướng tới học sinh từ cấp 2 đến đại học, đặc 
 
 ---
 
-## :warning: 2. Vấn đề cần giải quyết
-
-> **Phần lớn học sinh tự học online không có lộ trình rõ ràng và không biết mình yếu ở đâu.**
+## 2. Vấn đề
 
 | Vấn đề | Hệ quả |
 |---|---|
-| :x: Không biết mình yếu ở đâu | Học lan man, không tập trung đúng chỗ |
-| :x: Nội dung không phù hợp level | Học quá dễ hoặc quá khó, mất thời gian |
-| :x: Không có feedback tức thì | Làm bài xong không biết đúng sai, không hiểu tại sao |
-| :x: Không có người hướng dẫn 24/7 | Muốn hỏi lúc nào cũng phải tự tìm |
-
-**Kết quả:** Học sinh mất động lực, học không hiệu quả, không tối ưu được thời gian.
+| Không biết mình yếu ở đâu | Học lan man, không tập trung đúng chỗ |
+| Nội dung không phù hợp level | Học quá dễ hoặc quá khó, mất thời gian |
+| Không có feedback tức thì | Làm bài xong không biết đúng sai, không hiểu tại sao |
+| Không có người hướng dẫn 24/7 | Muốn hỏi lúc nào cũng phải tự tìm |
 
 ---
 
-## :rocket: 3. Giải pháp
+## 3. Giải pháp — Adaptive Learning Loop
 
-AI Adaptive Tutor giải quyết bằng **vòng lặp học tập thích ứng (Adaptive Learning Loop)**:
+Học sinh trải qua vòng lặp thích ứng khép kín: **Onboarding → Placement Assessment → Personalized Path → Learn → Mastery Update → lặp lại.**
 
 | Bước | Mô tả |
 |---|---|
-| :one: **Diagnostic Assessment** | Quiz xác định level và điểm yếu theo từng Knowledge Point (KP) |
-| :two: **Personalized Path** | Planner tự động đề xuất nội dung học dựa trên mastery, prerequisite graph và mục tiêu |
-| :three: **Learn + Instant Feedback** | Học bài, làm quiz, nhận giải thích ngay lập tức bằng AI tutor |
-| :four: **Mastery Update** | Hệ thống cập nhật điểm mastery theo KP và điều chỉnh lộ trình |
+| **1. Diagnostic Assessment** | Quiz xác định level và điểm yếu theo từng Knowledge Point |
+| **2. Personalized Path** | Planner đề xuất nội dung dựa trên mastery, prerequisite graph và mục tiêu |
+| **3. Learn + Instant Feedback** | Học bài, làm quiz, nhận giải thích ngay lập tức từ AI Tutor |
+| **4. Mastery Update** | Hệ thống cập nhật điểm mastery theo KP và điều chỉnh lộ trình |
 
-![Assessment Flow](architecture/07-assessment-flow.svg)
+![Onboarding & Assessment Flow](architecture/06-onboarding-assesment.svg)
 
 ---
 
-## :star2: 4. Tính năng chính
+## 4. Tính năng chính
 
-| Tính năng | Mô tả | AI-powered |
+| Tính năng | Mô tả | AI |
 |---|---|:---:|
-| :dart: **Onboarding & Placement** | Đánh giá đầu vào để xác định level và chọn mục tiêu học | :white_check_mark: |
-| :compass: **Adaptive Learning Path** | Lộ trình cá nhân hóa dựa trên KP mastery và prerequisite graph | :white_check_mark: |
-| :robot: **AI Tutor 24/7** | Gia sư AI hỗ trợ giải đáp trong ngữ cảnh bài giảng, chạy code Python sandbox | :white_check_mark: |
-| :pencil2: **Quiz & Assessment** | Mini quiz, module test, placement test với feedback tức thì | :white_check_mark: |
-| :chart_with_upwards_trend: **Mastery Tracking** | Theo dõi tiến độ theo từng Knowledge Point với IRT scoring | |
-| :shield: **Guardrail & Safety** | Smart Router phân loại intent, Guardrail Router chặn prompt injection | :white_check_mark: |
-| :tv: **Video Learning** | Xem bài giảng video với progress tracking và inline quiz | |
-| :speech_balloon: **Lecture Q&A** | Hỏi đáp trong context bài giảng, AI trả lời dựa trên transcript + slides | :white_check_mark: |
+| **Onboarding & Placement** | Đánh giá đầu vào để xác định level và chọn mục tiêu học | ✅ |
+| **Adaptive Learning Path** | Lộ trình cá nhân hóa dựa trên KP mastery và prerequisite graph | ✅ |
+| **AI Tutor 24/7** | Gia sư AI hỗ trợ giải đáp trong ngữ cảnh bài giảng, chạy code Python sandbox | ✅ |
+| **Quiz & Assessment** | Mini quiz, module test, placement test với feedback tức thì | ✅ |
+| **Mastery Tracking** | Theo dõi tiến độ theo từng Knowledge Point với IRT scoring | |
+| **Guardrail & Safety** | Smart Router phân loại intent, Guardrail Router chặn prompt injection | ✅ |
+| **Video Learning** | Xem bài giảng video với progress tracking và inline quiz | |
+| **Lecture Q&A** | Hỏi đáp trong context bài giảng, AI trả lời dựa trên transcript + slides | ✅ |
+
+### AI Tutor Overlay
+
+Khi học sinh hover hoặc dừng trên một đoạn nội dung, AI Tutor chủ động gợi ý giải thích. Học sinh có thể hỏi, nhận câu trả lời có trích dẫn, và báo lỗi để cải thiện RAG.
+
+![AI Tutor UX Flow](architecture/07-ai-tutor.svg)
 
 ---
 
-## :brain: 4.1. Fine-tuned Models
+## 5. Kiến trúc hệ thống
 
-Ngoài việc sử dụng LLM API (Gemini, OpenAI, Anthropic), hệ thống còn **fine-tune và self-host** các model riêng phục vụ 3 mục đích chính:
+Hệ thống được chia thành 7 lớp: **Client → CDN/Edge → Application → AI Agent Stack → Data → Observability → CI/CD**, triển khai trên AWS ECS Fargate với Terraform IaC.
 
-### :shield: Guardrail Router — Qwen3.5-0.8B LoRA
+![System Overview](architecture/01-system-overview.svg)
+
+| Sơ đồ | Mô tả |
+|---|---|
+| [01 — System Overview](architecture/01-system-overview.drawio) | Tổng quan 7 lớp: Client, CDN/Edge, Application, AI Stack, Data, Observability, CI/CD |
+| [02 — Agentic RAG Pipeline](architecture/02-agentic-rag-pipeline.drawio) | PII → Guardrail → Smart Router → LangGraph → Answer Generator |
+| [03 — AWS Infrastructure](architecture/03-aws-infrastructure.drawio) | VPC, ECS Fargate, RDS, ElastiCache, ECR, S3 + CloudFront, CI/CD |
+| [04 — Request Lifecycle](architecture/04-request-lifecycle.drawio) | Flow 1: SSR page load · Flow 2: AI Tutor chat |
+| [05 — Data Schema](architecture/05-data-schema.drawio) | 4 lớp DB: Product Shell, Canonical Content, Learner State, Agent State |
+| [07 — Assessment Flow](architecture/07-assessment-flow.drawio) | 3 phase: Goal Discovery → Placement Test → SKIP / REVIEW / RELEARN |
+
+---
+
+## 6. AI Pipeline & Fine-tuned Models
+
+Mọi câu hỏi từ học sinh đi qua pipeline: **PII Sanitizer → Guardrail Router → Smart Router → LangGraph Agent (ReAct + RAG tools) → Answer Generator → SSE stream về browser.**
+
+![Agentic RAG Pipeline](architecture/02-agentic-rag-pipeline.svg)
+
+### Guardrail Router — Qwen3.5-0.8B LoRA
 
 | Hạng mục | Chi tiết |
 |---|---|
 | Base model | Qwen3.5-0.8B |
 | Phương pháp | LoRA fine-tune (Unsloth) |
-| Mục đích | Phân loại safety/topic/action cho mọi user message trước khi vào AI Tutor |
-| Output | JSON ngắn: `safety_label`, `topic_label`, `action`, `attack_type`, `selected_kp_ids` |
-| Dataset | 13,513 samples từ 7+ nguồn (EduVidQA, WildGuardMix, JailBreakV-28K, MultiJail, CantTalkAboutThis, CLINC150, internal question bank) |
-| Kết quả | `valid_json_rate = 1.0`, `harmful_false_allow_rate = 0.0`, `ambiguous_recall = 0.9905`, `hard_offtopic_recall = 0.9408` |
-| Serving | vLLM trên Cloudflare Tunnel, fallback sang Gemini/OpenAI nếu local server không khả dụng |
-| VRAM | Peak ~1.5 GB (chạy được trên RTX 3050 Laptop GPU) |
+| Mục đích | Phân loại safety / topic / action cho mọi user message trước khi vào AI Tutor |
+| Output | JSON: `safety_label`, `topic_label`, `action`, `attack_type`, `selected_kp_ids` |
+| Dataset | 13,513 samples (EduVidQA, WildGuardMix, JailBreakV-28K, MultiJail, CLINC150, internal) |
+| Kết quả | `valid_json_rate=1.0` · `harmful_false_allow_rate=0.0` · `ambiguous_recall=0.9905` |
+| Serving | vLLM trên Cloudflare Tunnel, fallback Gemini / OpenAI |
+| VRAM | ~1.5 GB peak (RTX 3050 Laptop) |
 
-### :robot: Tutor Answer Generator — Qwen3.5-4B LoRA
+### Tutor Answer Generator — Qwen3.5-4B LoRA
 
 | Hạng mục | Chi tiết |
 |---|---|
 | Base model | Qwen3.5-4B |
 | Phương pháp | LoRA fine-tune (Unsloth) |
-| Mục đích | Sinh câu trả lời / từ chối cho AI Tutor trong ngữ cảnh bài giảng |
-| Đặc điểm | Multilingual (Việt/Anh), lecture-grounded, không hallucinate ngoài context |
-| Evaluation | So sánh với baseline Gemini/OpenAI qua Gemini judge + OpenAI judge notebooks |
-| Serving | vLLM (OpenAI-compatible API) tại `vllm.a20-app-049.io.vn/v1` |
+| Mục đích | Sinh câu trả lời cho AI Tutor trong ngữ cảnh bài giảng |
+| Đặc điểm | Multilingual (Vi / En), lecture-grounded, không hallucinate ngoài context |
+| Serving | vLLM (OpenAI-compatible API) |
 
-### :link: Prerequisite Edge Scoring — DeBERTa / ModernBERT / SciBERT
+### Prerequisite Edge Scoring — DeBERTa / ModernBERT / SciBERT
 
-Fine-tune và zero-shot scoring cho **prerequisite graph** (quan hệ tiên quyết giữa các Knowledge Point):
+Xây dựng **prerequisite graph** (quan hệ tiên quyết giữa các Knowledge Point) bằng multi-model scoring:
 
 | Model | Vai trò | Phương pháp |
 |---|---|---|
-| **DeBERTa-v3-large-MNLI** | Chấm chiều prerequisite A→B vs B→A | Zero-shot NLI (entailment vs contradiction), forward-reverse scoring |
-| **ModernBERT-base** | Chấm edge strength qua anchor embedding | Anchor embedding contrast (positive/negative prerequisite anchors) |
-| **ModernBERT-large** | Variant masked scoring cho edge strength | Masked prerequisite scoring |
-| **SciBERT** | Scoring cho domain khoa học chuyên biệt | Masked edge scoring cho CS/AI domain |
-| **DeBERTa + MoocCubeX** | Rebalanced prerequisite classification | Fine-tune trên MoocCubeX dataset cho prerequisite prediction |
+| DeBERTa-v3-large-MNLI | Chấm chiều prerequisite A→B vs B→A | Zero-shot NLI |
+| ModernBERT-base | Chấm edge strength qua anchor embedding | Anchor embedding contrast |
+| SciBERT | Scoring cho domain khoa học | Masked edge scoring |
+| DeBERTa + MoocCubeX | Prerequisite classification | Fine-tune trên MoocCubeX |
 
-**Pipeline**: Raw KP pairs → Multi-model scoring → GPT-5.4 adjudication → Transitive pruning → Final prerequisite graph được import vào PostgreSQL (`prerequisite_edges`, `pruned_edges`).
+**Pipeline:** Raw KP pairs → Multi-model scoring → GPT adjudication → Transitive pruning → PostgreSQL (`prerequisite_edges`).
 
-### :package: Artifact Management
+### Data Flywheel — Continuous Improvement
 
-- Model adapters và datasets được track bằng **DVC** (Data Version Control) — không commit binary vào Git.
-- Toàn bộ training notebooks nằm trong `notebooks/` — reproducible trên Google Colab.
-- Build reports: `docs/guardrail-router-v1-build-report.md`, `docs/guardrail-router-v2-build-report.md`.
+Mỗi tương tác của học sinh (hiểu / hỏi lại / báo lỗi) được thu thập và phân tích hàng tuần để cải thiện RAG index, prompt và ngưỡng proactive suggestion.
 
----
-
-## :building_construction: 5. Kiến trúc hệ thống
-
-![System Overview](architecture/systemoverview.drawio.svg)
-
-### Agentic RAG Pipeline
-
-![Agentic RAG Pipeline](architecture/02-agentic-rag-pipeline-Agentic%20RAG%20Pipeline.drawio.svg)
-
-| Sơ đồ | Mô tả |
-|---|---|
-| [Agentic RAG Pipeline](architecture/02-agentic-rag-pipeline-Agentic%20RAG%20Pipeline.drawio.svg) | PII Sanitizer → Guardrail Router → Smart Router → LangGraph → vLLM |
-| [AWS Infrastructure](architecture/aws-infrastructure.svg) | VPC, ECS Fargate, RDS, ElastiCache, ECR, S3+CloudFront, CI/CD |
-| [Request Lifecycle](architecture/request-lifecycle.svg) | Sequence diagrams: SSR, AI chat SSE, Assessment IRT, Video delivery |
-| [Data Schema](architecture/data-schema.svg) | ER diagrams: Product Shell, Canonical Content, Learner State, Agent State |
-| [Interactive Diagrams](architecture/index.html) | HTML viewer cho tất cả sơ đồ (open locally) |
+![Data Flywheel](architecture/08-data-flywheel.svg)
 
 ---
 
-## :wrench: 6. Công nghệ sử dụng
+## 7. Công nghệ
 
 | Thành phần | Công nghệ |
 |---|---|
-| :art: Frontend | Next.js 14 App Router, React 18, TypeScript 5, Zustand, Tailwind CSS |
-| :gear: Backend/API | Python 3.12, FastAPI, SQLAlchemy async, Pydantic v2, Alembic |
-| :floppy_disk: Database | PostgreSQL 16, Redis 7 |
-| :brain: AI Agent/LLM | LangChain, LangGraph, Gemini / OpenAI / Anthropic |
-| :fire: Fine-tuned Models | Qwen3.5-0.8B LoRA (Guardrail Router), Qwen3.5-4B LoRA (Tutor), DeBERTa/ModernBERT/SciBERT (KG Edge Scoring) |
-| :rocket: Model Serving | vLLM (OpenAI-compatible), Unsloth (LoRA training), DVC (artifact tracking) |
-| :mag: Observability | Langfuse (LLM tracing), Prometheus, Grafana, Loki |
-| :cloud: Deployment | Docker Compose, AWS ECS/Fargate, Terraform |
-| :test_tube: Testing | pytest, Playwright, golden eval dataset (50+ cases) |
+| Frontend | Next.js 14 App Router, React 18, TypeScript 5, Zustand, Tailwind CSS |
+| Backend / API | Python 3.12, FastAPI, SQLAlchemy async, Pydantic v2, Alembic |
+| Database | PostgreSQL 16 + pgvector, Redis 7 |
+| AI Agent | LangChain, LangGraph, Gemini / OpenAI / Anthropic |
+| Fine-tuned Models | Qwen3.5-0.8B LoRA (Guardrail), Qwen3.5-4B LoRA (Tutor), DeBERTa / ModernBERT / SciBERT |
+| Model Serving | vLLM, Unsloth, DVC |
+| Observability | Langfuse, Prometheus, Grafana, Loki |
+| Deployment | Docker Compose, AWS ECS / Fargate, Terraform |
 
 ---
 
-## :computer: 7. Cài đặt và chạy local
+## 8. Cài đặt và chạy local
 
 ### Yêu cầu
 
-- Docker Desktop với Docker Compose v2, hoặc Python 3.12, Node.js 18+, PostgreSQL 16, Redis 7, `uv`
+- Docker Desktop với Docker Compose v2, hoặc Python 3.12 + Node.js 18+ + PostgreSQL 16 + Redis 7 + `uv`
 - Ít nhất 1 LLM API key (Gemini, OpenAI, hoặc Anthropic)
 
-### Cách 1: Docker (khuyến nghị) :whale:
+### Docker (khuyến nghị)
 
 ```bash
 git clone https://github.com/a20-ai-thuc-chien/A20-App-049.git
 cd A20-App-049
-cp .env.example .env
-# Điền API keys vào .env
+cp .env.example .env          # điền API keys
 
 docker compose up -d --build
 docker compose exec backend alembic upgrade head
@@ -201,37 +180,33 @@ docker compose exec backend python -m src.scripts.pipeline.import_canonical_arti
 docker compose exec backend python -m src.scripts.pipeline.import_product_shell_to_db
 ```
 
-### Cách 2: Chạy trực tiếp :zap:
+### Chạy trực tiếp
 
 ```bash
 # Backend
-uv sync
-cp .env.example .env
+uv sync && cp .env.example .env
 uv run alembic upgrade head
 uv run python -m src.scripts.pipeline.import_canonical_artifacts_to_db
 uv run python -m src.scripts.pipeline.import_product_shell_to_db
 uv run python main.py
 
 # Frontend
-cd frontend
-npm install
+cd frontend && npm install
 printf "NEXT_PUBLIC_API_URL=http://localhost:8000\n" > .env.local
 npm run dev
 ```
 
-### Truy cập
-
 | URL | Mô tả |
 |---|---|
-| :globe_with_meridians: `http://localhost:3000` | Frontend |
-| :page_facing_up: `http://localhost:8000/docs` | Swagger API docs |
-| :heartbeat: `http://localhost:8000/health` | Health check |
+| `http://localhost:3000` | Frontend |
+| `http://localhost:8000/docs` | Swagger API docs |
+| `http://localhost:8000/health` | Health check |
 
 ---
 
-## :key: 8. Biến môi trường
+## 9. Biến môi trường
 
-> :warning: **Không commit file `.env`.** Chỉ commit `.env.example`.
+> **Không commit `.env`.** Chỉ commit `.env.example`.
 
 ```env
 DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5433/ai_learning
@@ -242,204 +217,153 @@ DEFAULT_MODEL=gemini-2.0-flash
 GEMINI_API_KEY=...
 ```
 
-Xem `.env.example` để biết đầy đủ các biến môi trường.
-
 ---
 
-## :joystick: 9. Cách sử dụng sản phẩm
-
-### Luồng chính: Học tập thích ứng
+## 10. Cách sử dụng
 
 | Bước | Hành động | Mô tả |
 |:---:|---|---|
-| 1 | :door: **Đăng ký / Đăng nhập** | Tạo tài khoản hoặc đăng nhập |
-| 2 | :dart: **Onboarding** | Chọn mục tiêu học (Deep Learning, Computer Vision, NLP) |
-| 3 | :pencil: **Placement Assessment** | Làm bài đánh giá đầu vào (5-10 câu) để xác định level |
-| 4 | :world_map: **Xem lộ trình** | Hệ thống đề xuất lộ trình cá nhân hóa dựa trên kết quả |
-| 5 | :books: **Học bài** | Xem video bài giảng, đọc nội dung, hỏi AI Tutor bất cứ lúc nào |
-| 6 | :pencil2: **Làm quiz** | Sau mỗi bài học, làm mini quiz để kiểm tra hiểu bài |
-| 7 | :bulb: **Xem feedback** | Nhận giải thích chi tiết cho từng câu trả lời |
-| 8 | :arrows_counterclockwise: **Cập nhật lộ trình** | Hệ thống tự động điều chỉnh lộ trình dựa trên kết quả mới |
+| 1 | Đăng ký / Đăng nhập | Tạo tài khoản hoặc đăng nhập |
+| 2 | Onboarding | Chọn mục tiêu học: Deep Learning, Computer Vision, NLP |
+| 3 | Placement Assessment | Làm bài đánh giá đầu vào để xác định level |
+| 4 | Xem lộ trình | Hệ thống đề xuất lộ trình cá nhân hóa |
+| 5 | Học bài | Xem video, đọc nội dung, hỏi AI Tutor bất cứ lúc nào |
+| 6 | Làm quiz | Mini quiz sau mỗi bài học |
+| 7 | Xem feedback | Nhận giải thích chi tiết cho từng câu trả lời |
+| 8 | Lộ trình tự cập nhật | Hệ thống điều chỉnh dựa trên kết quả mới |
 
-### :bust_in_silhouette: Tài khoản demo
+**Tài khoản demo:** `demo@vinuni.edu.vn` / `DemoPass123!`
 
-| | |
+---
+
+## 11. Demo & Kết quả
+
+| Hạng mục | Link |
 |---|---|
-| **Email** | `demo@vinuni.edu.vn` |
-| **Password** | `DemoPass123!` |
+| Live URL | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
+| Video Demo | _(link)_ |
+| Evaluation Report | [docs/evaluation-report.md](docs/evaluation-report.md) |
+| AI Logs | [docs/ai-logs.md](docs/ai-logs.md) |
+| Golden Eval Dataset | [docs/agent-golden-evals.md](docs/agent-golden-evals.md) |
 
 ---
 
-## :movie_camera: 10. Demo và kết quả
-
-| Hạng mục | Link / Thông tin |
-|---|---|
-| :globe_with_meridians: **Live URL** | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
-| :clapper: **Video Demo** | _(link)_ |
-| :white_check_mark: **Evaluation Report** | [docs/evaluation-report.md](docs/evaluation-report.md) |
-| :robot: **AI Logs** | [docs/ai-logs.md](docs/ai-logs.md) |
-| :test_tube: **Golden Eval Dataset** | 50+ test cases ([docs/agent-golden-evals.md](docs/agent-golden-evals.md)) |
-| :shield: **Guardrail Router** | 13,513 samples safety/topic classification |
-
----
-
-## :bar_chart: 11. Evaluation
-
-> Chi tiết: [**docs/evaluation-report.md**](docs/evaluation-report.md)
-
-| Loại đánh giá | Số lượng | Mô tả |
-|---|---|---|
-| :white_check_mark: API Contract Tests | 13+ | Kiểm tra HTTP route contracts |
-| :gear: Service Logic Tests | 10+ | Kiểm tra business logic |
-| :robot: Golden Eval Cases | 50+ | Kiểm tra hành vi AI Agent (10+ categories) |
-| :shield: Guardrail Dataset | 13,513 | Kiểm tra phân loại safety/topic |
-| :arrows_counterclockwise: Integration Tests | 5+ | Kiểm tra luồng end-to-end |
-
-**Failure cases** và cách xử lý được ghi nhận trong [docs/evaluation-report.md](docs/evaluation-report.md).
-
----
-
-## :busts_in_silhouette: 12. Team & Phân công công việc
+## 12. Team
 
 | Thành viên | Vai trò | Công việc chính |
 |---|---|---|
-| **Nguyễn Duy Minh Hoàng** | Infrastructure & DevOps Lead | AWS ECS/Fargate + Terraform IaC, CI/CD pipeline (GitHub Actions self-hosted runner), Observability stack (Prometheus/Grafana/Loki/CloudWatch), Production deployment & secret management, Model registry |
-| **Nguyễn Đôn Đức** | AI/ML Lead | Agentic RAG pipeline (LangGraph deeptutor-style), Guardrail Router fine-tune (Qwen3.5-0.8B LoRA, 13,513 samples), Language normalization (Vi/En), External research mode (Semantic Scholar + web search), Model health caching & failover, Auth hardening, Agent UI |
-| **Nguyễn Lê Minh Luân** | Frontend & Assessment Lead | Landing page redesign, Onboarding UX (goal selection, experience level, placement flow), Placement assessment (IRTAdaptiveStrategy, 3PL-lite batch CAT), Calibration scaffold (calibration_runs, item_calibration_history), Backend Redis resilience |
+| **Nguyễn Duy Minh Hoàng** | AI/ML Lead | LangGraph ReAct Agent, Agentic RAG pipeline (deeptutor-style), Qwen3.5 LoRA fine-tuning (Guardrail + Tutor), Smart Router, SSE streaming, RoadmapPlanner |
+| **Nguyễn Đôn Đức** | Infrastructure & DevOps Lead | AWS ECS/Fargate + Terraform IaC, CI/CD (GitHub Actions self-hosted), Observability (Prometheus/Grafana/Loki), Auth hardening, Submission docs |
+| **Nguyễn Lê Minh Luân** | Frontend, UI/UX & Assessment Lead | UI/UX design (landing page, onboarding flow), Placement assessment (IRT/CAT), Redis resilience |
 
 ---
 
-## :crystal_ball: 13. Hạn chế và hướng phát triển
+## 13. Hạn chế & Hướng phát triển
 
-### Hạn chế hiện tại
+| # | Hạn chế hiện tại |
+|---|---|
+| 1 | IRT/BKT mastery scoring đang ở phase-1, chưa có calibration với dữ liệu thực |
+| 2 | Nội dung tập trung Computer Vision / Deep Learning, chưa mở rộng nhiều domain |
+| 3 | Chưa đo live model accuracy / latency trên production traffic |
 
-| # | Hạn chế | Ghi chú |
-|---|---|---|
-| 1 | IRT/BKT mastery scoring đang ở phase-1 | Chưa có calibration job với dữ liệu thực |
-| 2 | Golden eval dataset kiểm tra hành vi expected | Chưa đo live model accuracy/latency |
-| 3 | Route contract test suite có lỗi request hang | Service-level tests là regression signal chính |
-| 4 | Nội dung học tập trung Computer Vision / Deep Learning | Chưa mở rộng nhiều domain |
-
-### Hướng phát triển
-
-| # | Kế hoạch | Giá trị |
-|---|---|---|
-| 1 | :chart_with_upwards_trend: Chạy IRT calibration với dữ liệu thực | Nâng cấp mastery scoring chính xác |
-| 2 | :books: Thêm domain mới (NLP, Math, Programming) | Mở rộng phạm vi học tập |
-| 3 | :mag: Mở rộng AI Agent tools (web search, doc retrieval) | Agent thông minh hơn |
-| 4 | :test_tube: A/B testing prompt versions | Tối ưu chất lượng AI tutor |
-| 5 | :chart_with_upwards_trend: Dashboard cho giáo viên | Theo dõi tiến độ lớp học |
-| 6 | :iphone: Mobile app (React Native) | Hỗ trợ học trên điện thoại |
+| # | Kế hoạch |
+|---|---|
+| 1 | Chạy IRT calibration với dữ liệu thực — nâng cấp mastery scoring |
+| 2 | Thêm domain mới (NLP, Math, Programming) |
+| 3 | Mở rộng AI Agent tools (web search, doc retrieval) |
+| 4 | A/B testing prompt versions |
+| 5 | Dashboard cho giáo viên theo dõi tiến độ lớp học |
+| 6 | Mobile app (React Native) |
 
 ---
 
 <details>
-<summary><strong>:books: Technical Reference (click để mở)</strong></summary>
-
-### Tài liệu kỹ thuật chi tiết
-
-- [Production DB Integration Handoff](docs/PRODUCTION_DB_INTEGRATION_HANDOFF.md)
-- [Schema Branch Snapshot](docs/SCHEMA_BRANCH_SNAPSHOT_2026-04-23.md)
-- [Forgot Password + Resend Setup](docs/forgot-password-resend.md)
-- [ECS Deployment Guide](deploy-ecs/README.md)
-
-### Current Production Contract
-
-The active runtime schema is canonical and course-first. Do not build new product logic on the old `modules`, `topics`, `questions`, `mastery_scores`, or `learning_paths` tables.
-
-| Layer | Active tables / artifacts | Purpose |
-|---|---|---|
-| Product shell | `courses`, `course_sections`, `learning_units`, `course_assets`, `course_overviews` | User-facing course catalog and lesson navigation |
-| Canonical content | `concepts_kp`, `units`, `unit_kp_map`, `question_bank`, `item_calibration`, `item_kp_map`, `prerequisite_edges`, `pruned_edges` | Source-of-truth content, question bank, KP mapping, and prerequisite graph |
-| Learner state | `learner_mastery_kp`, `learning_progress_records`, `completed_units`, `waived_units`, `goal_preferences` | KP mastery, progress, skip/waive audit, and selected course goals |
-| Planner audit | `plan_history`, `rationale_log`, `planner_session_state` | Planner decisions, scoring rationale, abandon/resume state |
-| Tutor store | `lectures`, `chapters`, `transcript_lines`, `qa_history` | Lecture Q&A context and history |
+<summary><strong>Technical Reference</strong></summary>
 
 ### Repository Layout
 
 ```text
 src/
-  api/app.py                         FastAPI app registration
-  models/                            SQLAlchemy models (canonical, course, learning, store)
-  repositories/                      DB access helpers
-  routers/                           API endpoints
-  services/                          Runtime business logic
-  scripts/pipeline/                  Canonical export/import/parity tooling
+  api/app.py                          FastAPI app registration
+  models/                             SQLAlchemy models
+  repositories/                       DB access helpers
+  routers/                            API endpoints
+  services/                           Runtime business logic
+  scripts/pipeline/                   Canonical export / import / parity tooling
 frontend/
-  app/                               Next.js pages/routes
-  components/                        React components
-  lib/                               API clients and frontend mappers
-  types/                             Frontend DTOs
+  app/                                Next.js pages / routes
+  components/                         React components
+  lib/                                API clients and frontend mappers
 data/
-  courses/                           Course assets, transcripts, slides, videos
-  final_artifacts/*/canonical/        Generated canonical JSONL import bundles
-docs/                                Documentation, journals, evaluation
-alembic/                             Database migrations (26+ versions)
-deploy-ecs/                          AWS ECS deployment (Terraform, task defs, observability)
+  courses/                            Course assets, transcripts, slides, videos
+  final_artifacts/*/canonical/         Generated canonical JSONL import bundles
+docs/                                 Documentation, journals, evaluation
+alembic/                              Database migrations
+deploy-ecs/                           AWS ECS deployment (Terraform, task defs, observability)
+architecture/                         Architecture diagrams (.drawio, .svg)
 ```
+
+### Database Schema (Active Tables)
+
+| Layer | Tables | Purpose |
+|---|---|---|
+| Product Shell | `courses`, `course_sections`, `learning_units`, `course_assets` | User-facing course catalog |
+| Canonical Content | `concepts_kp`, `question_bank`, `item_calibration`, `prerequisite_edges` | KP graph, question bank |
+| Learner State | `learner_mastery_kp`, `goal_preferences`, `waived_units`, `plan_history` | Mastery, progress, planner |
+| Agent State | `agent_graph_runs`, `agent_response_payloads`, `agent_route_context` | AI conversation state |
 
 ### API Surface
 
-| Area | Endpoints | Mô tả |
-|---|---|---|
-| Auth/Onboarding | `/api/auth/*`, `/api/users/me/onboarding` | Đăng ký, đăng nhập, forgot password, onboarding goals |
-| Content | `/api/course-sections`, `/api/learning-units/{id}/content` | Course catalog và learning unit content |
-| Quiz | `/api/quiz/start`, `/api/quiz/{id}/answer`, `/api/quiz/{id}/complete` | Mini quiz với canonical question bank |
-| Assessment | `/api/assessment/start`, `/api/assessment/{id}/submit`, `/api/assessment/{id}/results` | Placement assessment và results |
-| Learning Path | `/api/learning-path/generate`, `/api/learning-path`, `/api/learning-path/timeline` | Adaptive learning path generation |
-| Learning Session | `/api/learning-session/resume`, `/api/learning-session/learning-units/{id}/progress` | Abandon/resume và progress tracking |
-| AI Tutor | `/api/lectures/ask`, `/api/lectures/{qa_id}/rate` | Lecture Q&A streaming với rating |
-| History | `/api/history`, `/api/history/{id}/detail` | Interaction history |
-
-### LLM Tracing
-
-LangFuse root-span-first pattern cho traced AI flows:
-- Tutor streaming: `/api/lectures/ask`
-- Rating linkage: `/api/lectures/{qa_id}/rate`
-- Assessment AI summary generation
-- Onboarding prior-analysis
+| Area | Endpoints |
+|---|---|
+| Auth / Onboarding | `/api/auth/*`, `/api/users/me/onboarding` |
+| Content | `/api/course-sections`, `/api/learning-units/{id}/content` |
+| Quiz | `/api/quiz/start`, `/api/quiz/{id}/answer`, `/api/quiz/{id}/complete` |
+| Assessment | `/api/assessment/start`, `/api/assessment/{id}/submit`, `/api/assessment/{id}/results` |
+| Learning Path | `/api/learning-path/generate`, `/api/learning-path` |
+| AI Tutor | `/api/lectures/ask`, `/api/lectures/{qa_id}/rate` |
 
 ### Validation
 
 ```bash
 uv run python -m src.scripts.pipeline.import_canonical_artifacts_to_db --validate-only
-uv run python -m src.scripts.pipeline.import_product_shell_to_db --validate-only
 uv run python -m src.scripts.pipeline.check_canonical_runtime_parity
-uv run pytest tests/services/test_assessment_canonical_cutover.py tests/services/test_module_test_canonical_cutover.py -q
+uv run pytest tests/ -q
 npm --prefix frontend run type-check
 ```
 
-### Synthetic Demo Data
-
-```bash
-.venv/bin/python -m src.scripts.pipeline.reset_demo_accounts
-.venv/bin/python -m src.scripts.pipeline.reset_synthetic_cohort
-.venv/bin/python -m src.scripts.pipeline.generate_synthetic_demo_users --dataset all
-```
-
-Demo accounts: `@vinuni.edu.vn`, password `DemoPass123!`
-
 ### Troubleshooting
 
-| Problem | Cause | Fix |
-|---|---|---|
-| Backend starts but content is empty | Canonical artifacts not imported | Run canonical + product shell importers |
-| Quiz has no questions | Missing `item_phase_map` or `item_kp_map` | Validate canonical artifacts |
-| Planner looks flat | Sparse prerequisite graph | Check `prerequisite_edges`, `unit_kp_map` |
-| Tutor can't answer lecture questions | Missing transcripts | Restore course assets, run `seed_lectures` |
-| No LangFuse traces | Missing keys or wrong URL | Fill root `.env`, restart backend |
+| Problem | Fix |
+|---|---|
+| Content is empty | Run canonical + product shell importers |
+| Quiz has no questions | Validate canonical artifacts (item_phase_map, item_kp_map) |
+| Planner looks flat | Check `prerequisite_edges`, `unit_kp_map` |
+| Tutor can't answer | Restore course assets, run `seed_lectures` |
+| No Langfuse traces | Fill root `.env`, restart backend |
 
-### Contribution Notes
+### Knowledge Graph — Prerequisite Edge Visualization
 
-- Run `bash scripts/setup_hooks.sh` before opening a PR
-- Do not commit `.ai-log/*.jsonl`
-- Do not reintroduce dropped legacy runtime tables
-- Keep new logic KP-level and learning-unit-level
+Prerequisite graph được build từ multi-model scoring pipeline. Hai biểu đồ dưới đây là output của phase audit (tất cả edges được đề xuất) và phase kept-only (sau transitive pruning).
+
+<details>
+<summary>kg_p5_audit.svg — tất cả edges được đề xuất</summary>
+
+![KG Audit](data/final_artifacts/cs224n_cs231n_cs230_v1/kg_visualizations/kg_p5_audit.svg)
+
+</details>
+
+<details>
+<summary>kg_p5_kept_only.svg — edges sau transitive pruning</summary>
+
+![KG Kept Only](data/final_artifacts/cs224n_cs231n_cs230_v1/kg_visualizations/kg_p5_kept_only.svg)
+
+</details>
 
 </details>
 
 ---
 
 <div align="center">
-  <sub>Built with :heart: by Team A20-App-049 | AI20K Build Phase 2026</sub>
+  <sub>Built with ❤️ by Team A20-App-049 · AI20K Build Phase 2026</sub>
 </div>

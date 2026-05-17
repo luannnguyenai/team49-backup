@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+
+  <!-- ═══════════════════════════════════════════════════════
+       Page 1 — UX Flow: AI Tutor Overlay
+  ═══════════════════════════════════════════════════════ -->
+  <diagram id="uxflow" name="UX Flow — AI Tutor Overlay">
+    <mxGraphModel dx="1366" dy="768" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="UX Flow — AI Tutor Overlay" style="text;html=1;align=center;fontStyle=1;fontSize=17;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="234" y="14" width="600" height="28" as="geometry"/>
+        </mxCell>
+
+        <!-- A: Start -->
+        <mxCell id="A" value="&lt;b&gt;🎓 Student opens lesson&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="55" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- B: Context capture -->
+        <mxCell id="B" value="&lt;b&gt;System captures context&lt;/b&gt;&lt;br&gt;&lt;font color=&apos;#6B7280&apos; style=&apos;font-size:11px&apos;&gt;slide · video timestamp · transcript&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#94A3B8;fontColor=#1E293B;fontSize=13;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="310" y="160" width="300" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- C: Decision -->
+        <mxCell id="C" value="Student interaction?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="355" y="268" width="210" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- D: Proactive chip (WARN) -->
+        <mxCell id="D" value="&lt;b&gt;Proactive suggestion chip&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3cd;strokeColor=#ffc107;fontColor=#856404;fontSize=13;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="60" y="400" width="210" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- E: AI Tutor overlay -->
+        <mxCell id="E" value="&lt;b&gt;AI Tutor overlay opens&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;fontSize=13;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="350" y="400" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- F: Continue learning (HAPPY) — end -->
+        <mxCell id="F" value="&lt;b&gt;✅ Continue learning&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d4edda;strokeColor=#28a745;fontColor=#155724;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="690" y="400" width="200" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- G: AI answers -->
+        <mxCell id="G" value="&lt;b&gt;AI answers with citations&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF4FB;strokeColor=#1565C0;fontColor=#0D3057;fontSize=13;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="350" y="510" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- H: Satisfied? -->
+        <mxCell id="H" value="Satisfied?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="365" y="615" width="190" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- I: Report error (FAIL) -->
+        <mxCell id="I" value="&lt;b&gt;❌ Report error&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:11px&apos;&gt;improve RAG&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#dc3545;fontColor=#721c24;fontSize=13;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="690" y="620" width="200" height="65" as="geometry"/>
+        </mxCell>
+
+        <!-- ─── Edges ─── -->
+
+        <!-- A → B -->
+        <mxCell id="eAB" edge="1" source="A" target="B" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#4A90D9;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- B → C -->
+        <mxCell id="eBC" edge="1" source="B" target="C" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- C → D  Passive hover/pause -->
+        <mxCell id="eCD" edge="1" source="C" target="D" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#ffc107;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" label="Passive hover">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="308"/>
+              <mxPoint x="165" y="308"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- C → E  Active question -->
+        <mxCell id="eCE" edge="1" source="C" target="E" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#8E44AD;fontSize=11;" label="Active question">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- C → F  None -->
+        <mxCell id="eCF" edge="1" source="C" target="F" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#28a745;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" label="None">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="308"/>
+              <mxPoint x="790" y="375"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- D → E  Accept -->
+        <mxCell id="eDE" edge="1" source="D" target="E" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#8E44AD;fontSize=11;" label="Accept">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- D → F  Ignore (curved around top) -->
+        <mxCell id="eDF" edge="1" source="D" target="F" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#28a745;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;" label="Ignore">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="165" y="370"/>
+              <mxPoint x="165" y="350"/>
+              <mxPoint x="790" y="350"/>
+              <mxPoint x="790" y="375"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E → G -->
+        <mxCell id="eEG" edge="1" source="E" target="G" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#1565C0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- G → H -->
+        <mxCell id="eGH" edge="1" source="G" target="H" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- H → F  Yes -->
+        <mxCell id="eHF" edge="1" source="H" target="F" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#28a745;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=11;" label="Yes — understood">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="655"/>
+              <mxPoint x="790" y="455"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- H → E  Ask follow-up -->
+        <mxCell id="eHE" edge="1" source="H" target="E" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#8E44AD;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" label="Ask follow-up">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="310" y="655"/>
+              <mxPoint x="310" y="427"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- H → I  Wrong answer -->
+        <mxCell id="eHI" edge="1" source="H" target="I" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#dc3545;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fontSize=11;" label="Wrong answer">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- I → F -->
+        <mxCell id="eIF" edge="1" source="I" target="F" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;strokeColor=#28a745;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;" label="Reported">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="620"/>
+              <mxPoint x="790" y="427"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ═══════════════════════════════════════════════════════
+       Page 2 — Data Flywheel: Continuous Improvement Loop
+  ═══════════════════════════════════════════════════════ -->
+  <diagram id="flywheel" name="Data Flywheel — Continuous Improvement">
+    <mxGraphModel dx="1366" dy="768" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="Data Flywheel — Continuous Improvement Loop" style="text;html=1;align=center;fontStyle=1;fontSize=17;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="134" y="25" width="700" height="28" as="geometry"/>
+        </mxCell>
+
+        <!-- fA: Student interacts (purple) -->
+        <mxCell id="fA" value="&lt;b&gt;🎓 Student interacts&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8d5f5;strokeColor=#6f42c1;fontColor=#3d0066;fontSize=14;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="140" width="210" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- fB: Collect signals -->
+        <mxCell id="fB" value="&lt;b&gt;Collect signals&lt;/b&gt;&lt;br&gt;&lt;font color=&apos;#374151&apos; style=&apos;font-size:12px&apos;&gt;✅ understood&lt;br&gt;❓ follow-up&lt;br&gt;❌ report error&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#6f42c1;fontColor=#1E293B;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="330" y="120" width="210" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- fC: Weekly analysis -->
+        <mxCell id="fC" value="&lt;b&gt;Weekly analysis&lt;/b&gt;&lt;br&gt;&lt;font color=&apos;#374151&apos; style=&apos;font-size:12px&apos;&gt;accuracy · latency&lt;br&gt;engagement&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#6f42c1;fontColor=#1E293B;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="610" y="130" width="210" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- fD: Improve system (purple) -->
+        <mxCell id="fD" value="&lt;b&gt;Improve system&lt;/b&gt;&lt;br&gt;&lt;font color=&apos;#3d0066&apos; style=&apos;font-size:12px&apos;&gt;RAG index · prompts&lt;br&gt;proactive threshold&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8d5f5;strokeColor=#6f42c1;fontColor=#3d0066;fontSize=13;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="890" y="130" width="210" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- fA → fB -->
+        <mxCell id="efAB" edge="1" source="fA" target="fB" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2.5;strokeColor=#6f42c1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- fB → fC -->
+        <mxCell id="efBC" edge="1" source="fB" target="fC" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2.5;strokeColor=#6f42c1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- fC → fD -->
+        <mxCell id="efCD" edge="1" source="fC" target="fD" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2.5;strokeColor=#6f42c1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- fD → fA  loop back below -->
+        <mxCell id="efDA" edge="1" source="fD" target="fA" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2.5;strokeColor=#6f42c1;dashed=1;dashPattern=8 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=13;fontColor=#6f42c1;fontStyle=1;" label="🔄 continuous loop">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="995" y="310"/>
+              <mxPoint x="165" y="310"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+</mxfile>

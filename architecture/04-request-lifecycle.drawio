@@ -15,19 +15,19 @@
           <mxGeometry x="60" y="56" width="480" height="726" as="geometry"/>
         </mxCell>
 
-        <mxCell id="f1s1" value="&lt;b&gt;1 · Browser&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Request course page&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
+        <mxCell id="f1s1" value="&lt;b&gt;1 · Browser&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Request course page&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
           <mxGeometry x="30" y="40" width="420" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="f1s2" value="&lt;b&gt;2 · Load Balancer&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Route to Frontend service&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
+        <mxCell id="f1s2" value="&lt;b&gt;2 · Load Balancer&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Route to Frontend service&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
           <mxGeometry x="30" y="164" width="420" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="f1s3" value="&lt;b&gt;3 · Frontend (Next.js)&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Server-side render · fetch data from Backend&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF0E8;strokeColor=#E7500A;fontColor=#7B2A0A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
+        <mxCell id="f1s3" value="&lt;b&gt;3 · Frontend (Next.js)&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Server-side render · fetch data from Backend&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF0E8;strokeColor=#E7500A;fontColor=#7B2A0A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
           <mxGeometry x="30" y="288" width="420" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="f1s4" value="&lt;b&gt;4 · Backend (FastAPI)&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Query database · check cache&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF0E8;strokeColor=#E7500A;fontColor=#7B2A0A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
+        <mxCell id="f1s4" value="&lt;b&gt;4 · Backend (FastAPI)&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Query database · check cache&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF0E8;strokeColor=#E7500A;fontColor=#7B2A0A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
           <mxGeometry x="30" y="412" width="420" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="f1s5" value="&lt;b&gt;5 · Browser&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Receive rendered page · hydrate&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
+        <mxCell id="f1s5" value="&lt;b&gt;5 · Browser&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Receive rendered page · hydrate&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim1">
           <mxGeometry x="30" y="536" width="420" height="70" as="geometry"/>
         </mxCell>
 
@@ -53,19 +53,19 @@
           <mxGeometry x="629" y="56" width="480" height="726" as="geometry"/>
         </mxCell>
 
-        <mxCell id="f2s1" value="&lt;b&gt;1 · Browser&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Send message to AI Tutor&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
+        <mxCell id="f2s1" value="&lt;b&gt;1 · Browser&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Send message to AI Tutor&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEF4FF;strokeColor=#4A90D9;fontColor=#1B4F8A;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
           <mxGeometry x="30" y="40" width="420" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="f2s2" value="&lt;b&gt;2 · Backend&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Safety check · route query&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontColor=#7F1D1D;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
+        <mxCell id="f2s2" value="&lt;b&gt;2 · Backend&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Safety check · route query&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontColor=#7F1D1D;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
           <mxGeometry x="30" y="164" width="420" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="f2s3" value="&lt;b&gt;3 · LangGraph Agent&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Search knowledge base · use tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
+        <mxCell id="f2s3" value="&lt;b&gt;3 · LangGraph Agent&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Search knowledge base · use tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
           <mxGeometry x="30" y="288" width="420" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="f2s4" value="&lt;b&gt;4 · Answer Generator&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Generate grounded answer with citations&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
+        <mxCell id="f2s4" value="&lt;b&gt;4 · Answer Generator&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Generate grounded answer with citations&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
           <mxGeometry x="30" y="412" width="420" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="f2s5" value="&lt;b&gt;5 · Streaming Response&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#6B7280&#39;&gt;Token-by-token stream → Browser&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D1FAE5;strokeColor=#27AE60;fontColor=#065F46;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
+        <mxCell id="f2s5" value="&lt;b&gt;5 · Streaming Response&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#6B7280&#39; style=&#39;font-size:11px&#39;&gt;Token-by-token stream → Browser&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D1FAE5;strokeColor=#27AE60;fontColor=#065F46;fontSize=13;arcSize=6;align=left;spacingLeft=14;" vertex="1" parent="swim2">
           <mxGeometry x="30" y="536" width="420" height="70" as="geometry"/>
         </mxCell>
 

@@ -17,7 +17,7 @@
         </mxCell>
 
         <!-- Safety Check -->
-        <mxCell id="safety" value="&lt;b&gt;Safety Check&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#7F1D1D&#39;&gt;PII Sanitizer · Guardrail&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontColor=#7F1D1D;fontSize=13;arcSize=8;" vertex="1" parent="1">
+        <mxCell id="safety" value="&lt;b&gt;Safety Check&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#7F1D1D&#39; style=&#39;font-size:11px&#39;&gt;PII Sanitizer · Guardrail&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DC2626;fontColor=#7F1D1D;fontSize=13;arcSize=8;" vertex="1" parent="1">
           <mxGeometry x="394" y="170" width="280" height="56" as="geometry"/>
         </mxCell>
 
@@ -27,7 +27,7 @@
         </mxCell>
 
         <!-- Smart Router -->
-        <mxCell id="router" value="&lt;b&gt;Smart Router&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#7D3C00&#39;&gt;Simple or Complex?&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;fontSize=13;arcSize=8;" vertex="1" parent="1">
+        <mxCell id="router" value="&lt;b&gt;Smart Router&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#7D3C00&#39; style=&#39;font-size:11px&#39;&gt;Simple or Complex?&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9900;fontColor=#7D3C00;fontSize=13;arcSize=8;" vertex="1" parent="1">
           <mxGeometry x="394" y="290" width="280" height="56" as="geometry"/>
         </mxCell>
 
@@ -37,7 +37,7 @@
         </mxCell>
 
         <!-- LangGraph Agent -->
-        <mxCell id="agent" value="&lt;b&gt;LangGraph Agent&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#5B2C6F&#39;&gt;ReAct · Thread Memory&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;fontSize=13;arcSize=8;" vertex="1" parent="1">
+        <mxCell id="agent" value="&lt;b&gt;LangGraph Agent&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#5B2C6F&#39; style=&#39;font-size:11px&#39;&gt;ReAct · Thread Memory&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontColor=#5B2C6F;fontSize=13;arcSize=8;" vertex="1" parent="1">
           <mxGeometry x="394" y="410" width="280" height="56" as="geometry"/>
         </mxCell>
 
@@ -60,7 +60,7 @@
         </mxCell>
 
         <!-- Answer Generator -->
-        <mxCell id="answgen" value="&lt;b&gt;Answer Generator&lt;/b&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#0D4080&#39;&gt;Citation grounded&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF4FB;strokeColor=#1565C0;fontColor=#0D4080;fontSize=13;arcSize=8;" vertex="1" parent="1">
+        <mxCell id="answgen" value="&lt;b&gt;Answer Generator&lt;/b&gt;&lt;br&gt;&lt;font color=&#39;#0D4080&#39; style=&#39;font-size:11px&#39;&gt;Citation grounded&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF4FB;strokeColor=#1565C0;fontColor=#0D4080;fontSize=13;arcSize=8;" vertex="1" parent="1">
           <mxGeometry x="394" y="660" width="280" height="56" as="geometry"/>
         </mxCell>
 

@@ -12,22 +12,22 @@
         </mxCell>
 
         <!-- LAYER 1: Product Shell (top-left, orange) -->
-        <mxCell id="z1" value="&lt;b&gt;🏗 Layer 1 — Product Shell&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font size=&#39;12&#39;&gt;Course catalog &amp;amp; content structure&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#9A3412&#39;&gt;courses · sections · learning units · lectures&lt;br&gt;transcripts · progress records&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#F97316;fontColor=#9A3412;arcSize=5;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1">
+        <mxCell id="z1" value="&lt;b&gt;🏗 Layer 1 — Product Shell&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&#39;font-size:12px&#39;&gt;Course catalog &amp;amp; content structure&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font color=&#39;#9A3412&#39; style=&#39;font-size:11px&#39;&gt;courses · sections · learning units · lectures&lt;br&gt;transcripts · progress records&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#F97316;fontColor=#9A3412;arcSize=5;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1">
           <mxGeometry x="60" y="70" width="490" height="200" as="geometry"/>
         </mxCell>
 
         <!-- LAYER 2: Canonical Content (top-right, blue) -->
-        <mxCell id="z2" value="&lt;b&gt;📚 Layer 2 — Canonical Content&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font size=&#39;12&#39;&gt;Knowledge graph, assessments &amp;amp; prerequisites&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#1E3A8A&#39;&gt;knowledge points · question bank · IRT calibration&lt;br&gt;prerequisite graph · KP mappings&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;fontColor=#1E3A8A;arcSize=5;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1">
+        <mxCell id="z2" value="&lt;b&gt;📚 Layer 2 — Canonical Content&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&#39;font-size:12px&#39;&gt;Knowledge graph, assessments &amp;amp; prerequisites&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font color=&#39;#1E3A8A&#39; style=&#39;font-size:11px&#39;&gt;knowledge points · question bank · IRT calibration&lt;br&gt;prerequisite graph · KP mappings&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#3B82F6;fontColor=#1E3A8A;arcSize=5;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1">
           <mxGeometry x="619" y="70" width="490" height="200" as="geometry"/>
         </mxCell>
 
         <!-- LAYER 3: Learner State (bottom-left, green) -->
-        <mxCell id="z3" value="&lt;b&gt;🎓 Layer 3 — Learner State&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font size=&#39;12&#39;&gt;Mastery, progress &amp;amp; adaptive planner&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#14532D&#39;&gt;users · sessions · mastery scores&lt;br&gt;goal preferences · learning plan · waived units&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#22C55E;fontColor=#14532D;arcSize=5;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1">
+        <mxCell id="z3" value="&lt;b&gt;🎓 Layer 3 — Learner State&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&#39;font-size:12px&#39;&gt;Mastery, progress &amp;amp; adaptive planner&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font color=&#39;#14532D&#39; style=&#39;font-size:11px&#39;&gt;users · sessions · mastery scores&lt;br&gt;goal preferences · learning plan · waived units&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#22C55E;fontColor=#14532D;arcSize=5;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1">
           <mxGeometry x="60" y="330" width="490" height="200" as="geometry"/>
         </mxCell>
 
         <!-- LAYER 4: Agent State (bottom-right, purple) -->
-        <mxCell id="z4" value="&lt;b&gt;🤖 Layer 4 — Agent State&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font size=&#39;12&#39;&gt;AI conversation runs, citations &amp;amp; context&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font size=&#39;11&#39; color=&#39;#4A1D96&#39;&gt;agent runs · pending actions · response payloads&lt;br&gt;route context · localized content&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#8B5CF6;fontColor=#4A1D96;arcSize=5;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1">
+        <mxCell id="z4" value="&lt;b&gt;🤖 Layer 4 — Agent State&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&#39;font-size:12px&#39;&gt;AI conversation runs, citations &amp;amp; context&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font color=&#39;#4A1D96&#39; style=&#39;font-size:11px&#39;&gt;agent runs · pending actions · response payloads&lt;br&gt;route context · localized content&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#8B5CF6;fontColor=#4A1D96;arcSize=5;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1">
           <mxGeometry x="619" y="330" width="490" height="200" as="geometry"/>
         </mxCell>
 
