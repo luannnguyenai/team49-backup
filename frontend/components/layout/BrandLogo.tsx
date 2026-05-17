@@ -27,7 +27,7 @@ export default function BrandLogo({
         <Brain className={compact ? "h-4 w-4" : "h-5 w-5"} />
       </div>
       <div>
-        <p className="text-sm font-semibold text-slate-950">AI Learning Hub</p>
+        <p className="text-sm font-semibold text-slate-950">VinLearn</p>
         {subtitle ? <p className="text-xs text-slate-500">{subtitle}</p> : null}
       </div>
     </Link>

@@ -66,7 +66,7 @@ describe("profile page", () => {
     render(<ProfilePage />);
 
     await waitFor(() => {
-      expect(document.title).toBe("AI Learning Hub - Profile");
+      expect(document.title).toBe("VinLearn - Profile");
     });
   });
 });

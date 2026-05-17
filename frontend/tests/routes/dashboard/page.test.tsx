@@ -129,7 +129,7 @@ describe("dashboard search", () => {
     render(<DashboardPage />);
 
     await waitFor(() => {
-      expect(document.title).toBe("AI Learning Hub - Dashboard");
+      expect(document.title).toBe("VinLearn - Dashboard");
     });
   });
 

@@ -525,7 +525,7 @@ function Th({
 // ---------------------------------------------------------------------------
 
 export default function HistoryPage() {
-  usePageTitle("AI Learning Hub - History");
+  usePageTitle("VinLearn - History");
   const searchParams = useSearchParams();
   const targetSessionId = searchParams.get("session_id");
 

@@ -110,7 +110,7 @@ function CourseCard({ course }: { course: CourseCatalogItem }) {
 }
 
 export default function DashboardPage() {
-  usePageTitle("AI Learning Hub - Dashboard");
+  usePageTitle("VinLearn - Dashboard");
   const user = useAuthStore((s) => s.user);
   const searchParams = useSearchParams();
   const [courses, setCourses] = useState<CourseCatalogItem[]>([]);

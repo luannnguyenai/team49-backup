@@ -465,7 +465,7 @@ class StructuredAgentRouter:
                     {
                         "role": "system",
                         "content": (
-                            "You are the AI Learning Hub assistant. "
+                            "You are the VinLearn assistant. "
                             "The catalog search found many title-level learning units for the user's topic. "
                             "Write one concise, natural clarification in English or Vietnamese, matching the "
                             "latest user message or visible conversation style. Do not switch to a third language. "
@@ -583,7 +583,7 @@ class StructuredAgentRouter:
                     {
                         "role": "system",
                         "content": (
-                            "Answer as the AI Learning Hub assistant. "
+                            "Answer as the VinLearn assistant. "
                             "Use only these retrieved learning units as evidence. "
                             "Answer in English or Vietnamese only; the answer language must match "
                             "the user's latest message or visible conversation style. If the latest message "

@@ -418,7 +418,7 @@ export default function LandingPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
               AI in Action
             </p>
-            <h2 className="text-2xl font-semibold">Dự án AI Learning Hub</h2>
+            <h2 className="text-2xl font-semibold">Dự án VinLearn</h2>
             <p className="max-w-2xl text-sm leading-7 text-slate-300">
               Dự án thuộc khuôn khổ chương trình AI IN ACTION thuộc VinUniversity,
               Tập Đoàn VinGroup.

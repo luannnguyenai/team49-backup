@@ -37,6 +37,17 @@ describe("onboarding navigation", () => {
     expect(buildAssessmentNextHref("/dashboard")).toBe("/dashboard");
   });
 
+  it("does not send users from assessment results back into onboarding", () => {
+    expect(buildAssessmentNextHref("/onboarding")).toBe("/learn");
+    expect(buildAssessmentNextHref("/onboarding?next=%2Flearn")).toBe("/learn");
+    expect(
+      buildPostOnboardingHref({
+        hasAssessmentUnits: true,
+        requestedNext: "/onboarding",
+      }),
+    ).toBe("/assessment?next=%2Flearn");
+  });
+
   it("rejects unsafe protocol-relative next targets", () => {
     expect(buildAssessmentNextHref("//evil.example")).toBe("/learn");
     expect(
