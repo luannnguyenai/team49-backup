@@ -41,7 +41,7 @@ async def send_password_reset_email(email: str, token: str) -> None:
         <!-- Header -->
         <tr><td style="background:linear-gradient(135deg,#4f46e5,#06b6d4,#2dd4bf);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
           <div style="display:inline-block;background:rgba(255,255,255,0.18);border-radius:12px;padding:8px 16px;margin-bottom:12px;">
-            <span style="color:#ffffff;font-size:18px;font-weight:700;letter-spacing:0.02em;">AI Learning Hub</span>
+            <span style="color:#ffffff;font-size:18px;font-weight:700;letter-spacing:0.02em;">VinLearn</span>
           </div>
         </td></tr>
 
@@ -83,7 +83,7 @@ async def send_password_reset_email(email: str, token: str) -> None:
 
         <!-- Footer -->
         <tr><td style="padding:20px 0;text-align:center;">
-          <p style="margin:0;font-size:12px;color:#94a3b8;">AI Learning Hub &mdash; Adaptive AI Education Platform</p>
+          <p style="margin:0;font-size:12px;color:#94a3b8;">VinLearn &mdash; Adaptive AI Education Platform</p>
         </td></tr>
 
       </table>

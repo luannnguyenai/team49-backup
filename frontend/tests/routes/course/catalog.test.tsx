@@ -37,7 +37,7 @@ describe("landing page route", () => {
     expect(
       screen.getByRole("heading", { name: "Support that keeps you learning" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Dự án AI Learning Hub")).toBeInTheDocument();
+    expect(screen.getByText("Dự án VinLearn")).toBeInTheDocument();
   });
 });
 

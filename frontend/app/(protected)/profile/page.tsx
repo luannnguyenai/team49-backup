@@ -151,7 +151,7 @@ function StatRow({ icon, iconBg, label, value }: StatRowProps) {
 }
 
 export default function ProfilePage() {
-  usePageTitle("AI Learning Hub - Profile");
+  usePageTitle("VinLearn - Profile");
   const user = useAuthStore((s) => s.user);
   const [summary, setSummary] = useState<HistorySummary | null>(null);
   const [skills, setSkills] = useState<UserSkillSnapshot[]>(DEFAULT_SKILLS);

@@ -1228,7 +1228,7 @@ describe("learning unit page (US3)", () => {
 
     await renderTopNavAndWaitForCatalog();
 
-    const brand = screen.getByRole("link", { name: "AI Learning Hub" });
+    const brand = screen.getByRole("link", { name: "VinLearn" });
     const search = screen.getByLabelText("Search courses");
     const tutorLink = screen.getByRole("link", { name: "AI Assistant" });
 

@@ -135,7 +135,7 @@ describe("history page inline quiz rows", () => {
     render(<HistoryPage />);
 
     await waitFor(() => {
-      expect(document.title).toBe("AI Learning Hub - History");
+      expect(document.title).toBe("VinLearn - History");
     });
   });
 

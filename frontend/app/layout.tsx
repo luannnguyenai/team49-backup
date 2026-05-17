@@ -7,8 +7,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "AI Learning Hub",
-    template: "AI Learning Hub - %s",
+    default: "VinLearn",
+    template: "VinLearn - %s",
   },
   description: "Adaptive AI-powered learning tailored to you.",
 };
