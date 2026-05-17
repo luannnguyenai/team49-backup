@@ -252,9 +252,9 @@ GEMINI_API_KEY=...
 
 | Thành viên | Vai trò | Công việc chính |
 |---|---|---|
-| **Nguyễn Duy Minh Hoàng** | AI/ML Lead | LangGraph ReAct Agent, Agentic RAG pipeline (deeptutor-style), Qwen3.5 LoRA fine-tuning (Guardrail + Tutor), Smart Router, SSE streaming, RoadmapPlanner |
+| **Nguyễn Duy Minh Hoàng** | AI/ML Lead | LangGraph ReAct Agent, Agentic RAG pipeline (deeptutor-style), Qwen3.5 LoRA fine-tuning (Guardrail + Tutor), Smart Router, SSE streaming, RoadmapPlanner, Replan feature E2E (frontend → backend), Guardrail Router (multilayer + Lingua language normalization), External research mode (Semantic Scholar API + web search), Langfuse observability (trace ID propagation, span tagging), DVC transcript tracking |
 | **Nguyễn Đôn Đức** | Full-stack & DevOps Lead | Frontend UI/UX (design system, i18n 50+ components, tutor hub, admin dashboard, landing page, auth pages), Backend (DB foundation, repository layer, Redis auth, PII guardrail), AWS ECS/Fargate + Terraform, CI/CD (GitHub Actions), Observability (Prometheus/Grafana/Loki) |
-| **Nguyễn Lê Minh Luân** | Frontend, UI/UX & Assessment Lead | UI/UX design (landing page, onboarding flow), Placement assessment (IRT/CAT), Redis resilience |
+| **Nguyễn Lê Minh Luân** | Frontend, UI/UX & Assessment Lead | UI/UX design (landing page, onboarding flow), Onboarding UX redesign (5-step flow: StepGoalSelection, StepKnownTopicsFiltered, StepPlacementTest, ResultGate, frontend store + placement API layer), Placement assessment backend (IRT/CAT, IRTAdaptiveStrategy 3PL-lite CAT, placement router start/submit/results/topic-decision), KG full implementation (kg_concepts, kg_edges, bridges, recommendation engine), Recommendation engine Phase A/B, Redis resilience |
 
 ---
 

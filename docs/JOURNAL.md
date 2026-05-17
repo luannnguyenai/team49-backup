@@ -140,7 +140,10 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 - **CS224n/CS231n data pipeline** (Rin): Curate toàn bộ lecture segments cho CS224n và CS231n — rà soát P2-P5 artifacts, kiểm tra segment, question bank, calibration bootstrap, prerequisite graph. Tổ chức lại `data/` theo vai trò rõ ràng (`bootstrap/`, `courses/`, `working/`, `final_artifacts/`).
 - **Syllabus schema normalization** (Rin): Chuẩn hóa `CS231n/syllabus.json` theo schema mới của CS224n — thêm `assets`, `title`, `youtube_title`, `topic`, `year`, `type`, `custom_order` (additive, giữ field cũ). Patch script/service/test sang path mới.
 - **Onboarding flow UX** (Rin): Thêm experience-level step (beginner skip / experienced continue), flat units trong known-topics step, AI prior profiling step, onboarding assessment depth. Fix onboarding loading hang.
-- **IRT/CAT Placement Assessment** (Luân): Implement `IRTAdaptiveStrategy` với 3PL-lite batch CAT, audit logging qua `interactions` và `sessions` (ADD-only), `random_uniform` và `spread_by_prior` strategies. Scaffold `calibration_runs` và `item_calibration_history`. Fix alembic migration (schema_v2 idempotent, merge heads).
+- **IRT/CAT Placement Assessment backend** (Luân): Implement `IRTAdaptiveStrategy` với 3PL-lite batch CAT, audit logging qua `interactions` và `sessions` (ADD-only), `random_uniform` và `spread_by_prior` strategies. Scaffold `calibration_runs` và `item_calibration_history`. Fix alembic migration (schema_v2 idempotent, merge heads) (25/04).
+- **Onboarding 5-step flow redesign** (Luân): Redesign toàn bộ onboarding UX sang 5-step flow — `StepGoalSelection` (goal cards + deep_learning goal), `StepKnownTopicsFiltered` (known topics UX), `StepPlacementTest` (placement assessment UX), `ResultGate` step, KnownTopics banner, frontend onboarding store + placement API layer. Thêm `learning-path Phase A/B UI` (26/04).
+- **Placement assessment router** (Luân): Backend API router đầy đủ cho placement — endpoints `start`, `submit`, `results`, `topic-decision`. Thêm `onboarding goals/topics/known-topics endpoints`. App wiring toàn bộ (27/04).
+- **Recommendation engine Phase A/B** (Luân): Tách recommendation engine thành Phase A/B split từ placement decisions. Planner Phase A rationale format, multi-goal interleave, dynamic gate (27/04).
 - **Planner Roadmap UI** (Rin): Port roadmap-style planner UI — group by course, collapse units under lectures, planner path switcher compact, fix placement decisions → planner actions. Weekly time settings popover. Regenerate planner khi profile changes.
 - **Frontend: learning experience + landing page** (Đức): feat(history) course metadata, feat(learn) section title on video rail, feat(profile) joined courses count, fix lesson completion after final quiz, feat(tutor) streaming transitions + status, fix onboarding canonical sections, fix quiz scope to lecture sections. Scrolling animation, public landing page phase 1, route signed-out users về landing, route authenticated users về course hub, unify brand logo, reorder top nav (24-28/04).
 - **Semantic brand token rebrand** (Đức): Semantic brand tokens + tailwind utilities, repaint navigation shells, landing, dashboard, tutor profile + history với semantic utilities. Finalize color-system rebrand phase 1 (29/04).
@@ -167,7 +170,7 @@ Ghi lại hành trình xây dựng sản phẩm mỗi tuần — những gì đ�
 
 ---
 
-## Tuần 5 — 23/04/2026
+## Tuần 5 (tiếp theo) — 23/04/2026
 
 **Thành viên:** Nguyễn Duy Minh Hoàng, Nguyễn Đôn Đức, Nguyễn Lê Minh Luân
 

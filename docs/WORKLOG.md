@@ -655,3 +655,36 @@ assessment-page, assessment-results-page, course-catalog, course-overview, cours
 **9. Reset Password Flow (05/05):** Complete frontend + backend wiring, 15 iterations.
 
 **Hệ quả:** Frontend có design system nhất quán — thay đổi màu/token chỉ cần sửa một chỗ, không còn hardcoded hex rải rác. Toàn bộ app chuyển sang tiếng Anh, phù hợp người dùng quốc tế. Admin dashboard live với Langfuse tracing. Auth UX hoàn chỉnh (login, register, forgot password, reset password). Trade-off: mỗi phase translation/token là batch commits lớn, cần review kỹ để không miss component nào.
+
+---
+
+### [ADR-19] Onboarding 5-Step Redesign & Placement Assessment Backend — 25–27/04/2026 (Nguyễn Lê Minh Luân)
+
+**Bối cảnh:** Sau khi KG layer (ADR tuần 4) và canonical DB cutover (Tuần 5 tiếp theo) xong, onboarding cũ dùng flat topic list không còn phản ánh đúng course-first structure. Assessment chưa có frontend flow rõ ràng để dẫn user từ goal selection → placement → learning path decision. Recommendation engine cũng đang monolithic, chưa tách được Phase A (bootstrap path) và Phase B (adaptive path) để A/B split.
+
+**Các hạng mục đã thực hiện:**
+
+**1. Onboarding 5-step frontend redesign (26/04):**
+- `feat: redesign onboarding to 5-step flow with goal selection and placement assessment` — refactor toàn bộ wizard sang stepper chuẩn.
+- `StepGoalSelection`: goal card UI với friendly presentation, thêm `deep_learning` goal.
+- `StepKnownTopicsFiltered`: cho phép user đánh dấu topics đã biết dựa trên canonical sections.
+- `StepPlacementTest`: UX step dẫn user vào placement assessment session.
+- `ResultGate`: step cuối hiển thị kết quả placement và routing decision (SKIP / REVIEW / RELEARN).
+- KnownTopics banner, `learning-path Phase A/B UI` components.
+- Frontend onboarding store + placement API layer (`feat: frontend onboarding store and placement API layer`).
+
+**2. Placement assessment backend router (27/04):**
+- `feat: placement assessment router — start/submit/results/topic-decision + app wiring` — đầy đủ 4 endpoints.
+- `feat: onboarding goals/topics/known-topics endpoints` — cho phép onboarding wizard gọi API canonical.
+- App wiring hoàn chỉnh: router registered, dependency injection, error handling.
+
+**3. Recommendation engine Phase A/B (27/04):**
+- `feat: recommendation engine Phase A/B split from placement decisions` — tách Phase A (bootstrap từ placement score) và Phase B (adaptive từ mastery update sau học).
+- `feat: planner Phase A rationale format, multi-goal interleave, dynamic gate` — planner có thể interleave nhiều goal, dynamic gate quyết định khi nào chuyển Phase A → Phase B.
+
+**4. IRT/CAT backend (25/04):**
+- `feat(placement): IRTAdaptiveStrategy with 3PL-lite batch CAT` — chiến lược chọn câu hỏi CAT theo IRT 3PL-lite, batch selection để giảm latency.
+- `feat(calibration): scaffold calibration_runs and item_calibration_history` — schema để track calibration over time.
+- Audit logging qua `interactions` và `sessions` (ADD-only semantics), `random_uniform` và `spread_by_prior` selection strategies.
+
+**Hệ quả:** Onboarding không còn là flat wizard — user đi qua 5 bước có mục đích rõ ràng, kết thúc bằng placement decision thực sự ảnh hưởng đến learning path. Placement assessment có đủ backend để start → submit → xem kết quả → quyết định theo topic. Recommendation engine có thể được A/B test độc lập. Trade-off: flow 5 bước dài hơn onboarding cũ, cần careful UX để giảm drop-off ở giữa wizard.
