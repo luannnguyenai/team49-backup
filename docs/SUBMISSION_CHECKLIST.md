@@ -54,8 +54,8 @@
 | Team & phân công | ✅ Done | Section 12 |
 | Hạn chế & hướng phát triển | ✅ Done | Section 13 |
 | **Live URL** | ✅ `https://a20-app-049.io.vn` | |
-| **Demo Video** | ✅ Google Drive | `https://drive.google.com/file/d/1q0Ce-3aJcJJFBfBRygGXvCH3ofkhUoIW/view?usp=sharing` |
-| **Pitch Deck** | ✅ Repo file | `VinLearn-Pitch.pdf` |
+| **Demo Video** | ✅ YouTube | `https://www.youtube.com/watch?v=9YLKDFpAEio` |
+| **Pitch Deck** | ✅ Google Drive | `https://drive.google.com/file/d/1YH_QWxxfRwtMAHUphpxTCodZoHOY0QJ7/view?usp=drive_link` |
 | Link architecture | ✅ Done | `ARCHITECTURE.pdf`, `architecture/01-system-overview.svg`, `architecture/02-agentic-rag-pipeline.svg`, `docs/architecture.md` |
 | Link AI Logs | ✅ Done | `docs/ai-logs.md` |
 | Link evaluation | ✅ Done | `docs/evaluation-report.md` |
@@ -113,8 +113,8 @@
 | Hạng mục | Status | Ghi chú |
 |---|---|---|
 | **Live URL** | ✅ Ready | `https://a20-app-049.io.vn` |
-| **Video Demo (3–5 phút)** | ✅ Ready | Google Drive link đã cập nhật trong README |
-| **Pitch Deck (5–10 trang)** | ✅ Ready | `VinLearn-Pitch.pdf` đã có trong repo |
+| **Video Demo (3–5 phút)** | ✅ Ready | YouTube link đã cập nhật trong README |
+| **Pitch Deck (5–10 trang)** | ✅ Ready | Google Drive link đã cập nhật trong README |
 
 ---
 
@@ -124,9 +124,9 @@
 |---|---|---|
 | GitHub repo public | ✅ Confirm | kiểm tra Settings → Visibility |
 | Live URL không yêu cầu auth nội bộ | ✅ Check | test incognito trên `a20-app-049.io.vn` |
-| Video demo (public/unlisted) | ⚠️ Cần verify quyền xem | Đã có Drive link; cần test bằng cửa sổ ẩn danh |
-| Pitch deck (anyone with link) | ✅ Repo file | `VinLearn-Pitch.pdf`; nếu nộp Form nên dùng GitHub raw/file URL sau khi push |
-| Tất cả link trong README click được | ⚠️ Cần verify | README đã có Live URL, Video, Pitch, Architecture, Technical Report, AI Logs, Evaluation, Worklog |
+| Video demo (public/unlisted) | ✅ Reachable | YouTube link trả HTTP 200 |
+| Pitch deck (anyone with link) | ✅ Google Drive | `https://drive.google.com/file/d/1YH_QWxxfRwtMAHUphpxTCodZoHOY0QJ7/view?usp=drive_link` |
+| Tất cả link trong README click được | ✅ Verified | README link audit: external HTTP 200, local paths exist |
 
 ---
 
@@ -136,10 +136,10 @@ Dùng **trình duyệt ẩn danh** để kiểm tra:
 
 - [ ] `https://a20-app-049.io.vn` — load được không?
 - [ ] Đăng ký tài khoản mới → onboarding → học thử → quiz → AI Tutor
-- [ ] Video demo → xem được không?
-- [ ] Pitch deck → mở được không?
+- [x] Video demo → xem được không?
+- [x] Pitch deck → mở được không?
 - [ ] GitHub repo → clone + README rõ không?
-- [ ] Tất cả link trong README hoạt động
+- [x] Tất cả link trong README hoạt động
 
 ---
 

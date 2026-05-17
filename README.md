@@ -17,7 +17,7 @@
   [![AWS](https://img.shields.io/badge/AWS-ECS%2FFargate-FF9900?style=for-the-badge&logo=amazonecs&logoColor=white)](https://aws.amazon.com/ecs/)
   [![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
 
-  [**🚀 Live Demo**](https://a20-app-049.io.vn) · [**🎬 Video Demo**](https://drive.google.com/file/d/1q0Ce-3aJcJJFBfBRygGXvCH3ofkhUoIW/view?usp=sharing) · [**📑 Pitch Deck**](VinLearn-Pitch.pdf) · [**📐 Architecture PDF**](ARCHITECTURE.pdf) · [**📐 Architecture Diagrams**](architecture/) · [**📄 Technical Report**](TECHNICAL_REPORT.md) · [**🤖 AI Logs**](docs/ai-logs.md) · [**📊 Evaluation**](docs/evaluation-report.md) · [**📝 Worklog**](docs/WORKLOG.md)
+  [**🚀 Live Demo**](https://a20-app-049.io.vn) · [**🛠️ Admin Observability**](http://a20-app-049.io.vn/admin) · [**🎬 Video Demo**](https://www.youtube.com/watch?v=9YLKDFpAEio) · [**📑 Pitch Deck**](https://drive.google.com/file/d/1YH_QWxxfRwtMAHUphpxTCodZoHOY0QJ7/view?usp=drive_link) · [**📐 Architecture PDF**](ARCHITECTURE.pdf) · [**📐 Architecture Diagrams**](architecture/) · [**📄 Technical Report**](TECHNICAL_REPORT.md) · [**🤖 AI Logs**](docs/ai-logs.md) · [**📊 Evaluation**](docs/evaluation-report.md) · [**📝 Worklog**](docs/WORKLOG.md)
 
 </div>
 
@@ -221,6 +221,8 @@ GEMINI_API_KEY=...
 
 **Tài khoản demo:** `demo@vinuni.edu.vn` / `DemoPass123!`
 
+**Tài khoản admin observability:** `admin1@vinuni.edu.vn` / `AdminTest123!`
+
 ---
 
 ## 11. Demo & Kết quả
@@ -228,8 +230,9 @@ GEMINI_API_KEY=...
 | Hạng mục | Link |
 |---|---|
 | Live URL | [https://a20-app-049.io.vn](https://a20-app-049.io.vn) |
-| Video Demo | [Google Drive](https://drive.google.com/file/d/1q0Ce-3aJcJJFBfBRygGXvCH3ofkhUoIW/view?usp=sharing) |
-| Pitch Deck | [VinLearn-Pitch.pdf](VinLearn-Pitch.pdf) |
+| Admin Observability | [Overview](http://a20-app-049.io.vn/admin) · [LLM Health & Feedback Loop](http://a20-app-049.io.vn/admin/llm) · [Langfuse Tracing](http://a20-app-049.io.vn/admin/langfuse) · [Logs](http://a20-app-049.io.vn/admin/logs) · [System Health](http://a20-app-049.io.vn/admin/system) |
+| Video Demo | [YouTube](https://www.youtube.com/watch?v=9YLKDFpAEio) |
+| Pitch Deck | [Google Drive](https://drive.google.com/file/d/1YH_QWxxfRwtMAHUphpxTCodZoHOY0QJ7/view?usp=drive_link) |
 | Architecture PDF | [ARCHITECTURE.pdf](ARCHITECTURE.pdf) |
 | Evaluation Report | [docs/evaluation-report.md](docs/evaluation-report.md) |
 | AI Logs | [docs/ai-logs.md](docs/ai-logs.md) |
