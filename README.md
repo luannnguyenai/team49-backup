@@ -148,11 +148,15 @@ Fine-tune và zero-shot scoring cho **prerequisite graph** (quan hệ tiên quy�
 
 ## :building_construction: 5. Kiến trúc hệ thống
 
-![System Overview](architecture/system-overview.svg)
+![System Overview](architecture/systemoverview.drawio.svg)
+
+### Agentic RAG Pipeline
+
+![Agentic RAG Pipeline](architecture/02-agentic-rag-pipeline-Agentic%20RAG%20Pipeline.drawio.svg)
 
 | Sơ đồ | Mô tả |
 |---|---|
-| [Agentic RAG Pipeline](architecture/agentic-rag.svg) | PII Sanitizer → Guardrail Router → Smart Router → LangGraph → vLLM |
+| [Agentic RAG Pipeline](architecture/02-agentic-rag-pipeline-Agentic%20RAG%20Pipeline.drawio.svg) | PII Sanitizer → Guardrail Router → Smart Router → LangGraph → vLLM |
 | [AWS Infrastructure](architecture/aws-infrastructure.svg) | VPC, ECS Fargate, RDS, ElastiCache, ECR, S3+CloudFront, CI/CD |
 | [Request Lifecycle](architecture/request-lifecycle.svg) | Sequence diagrams: SSR, AI chat SSE, Assessment IRT, Video delivery |
 | [Data Schema](architecture/data-schema.svg) | ER diagrams: Product Shell, Canonical Content, Learner State, Agent State |
