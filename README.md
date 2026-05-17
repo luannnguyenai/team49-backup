@@ -124,19 +124,6 @@ Mọi câu hỏi từ học sinh đi qua pipeline: **PII Sanitizer → Guardrail
 | Đặc điểm | Multilingual (Vi / En), lecture-grounded, không hallucinate ngoài context |
 | Serving | vLLM (OpenAI-compatible API) |
 
-### Prerequisite Edge Scoring — DeBERTa / ModernBERT / SciBERT
-
-Xây dựng **prerequisite graph** (quan hệ tiên quyết giữa các Knowledge Point) bằng multi-model scoring:
-
-| Model | Vai trò | Phương pháp |
-|---|---|---|
-| DeBERTa-v3-large-MNLI | Chấm chiều prerequisite A→B vs B→A | Zero-shot NLI |
-| ModernBERT-base | Chấm edge strength qua anchor embedding | Anchor embedding contrast |
-| SciBERT | Scoring cho domain khoa học | Masked edge scoring |
-| DeBERTa + MoocCubeX | Prerequisite classification | Fine-tune trên MoocCubeX |
-
-**Pipeline:** Raw KP pairs → Multi-model scoring → GPT adjudication → Transitive pruning → PostgreSQL (`prerequisite_edges`).
-
 ### Data Flywheel — Continuous Improvement
 
 Mỗi tương tác của học sinh (hiểu / hỏi lại / báo lỗi) được thu thập và phân tích hàng tuần để cải thiện RAG index, prompt và ngưỡng proactive suggestion.
@@ -153,7 +140,7 @@ Mỗi tương tác của học sinh (hiểu / hỏi lại / báo lỗi) được
 | Backend / API | Python 3.12, FastAPI, SQLAlchemy async, Pydantic v2, Alembic |
 | Database | PostgreSQL 16 + pgvector, Redis 7 |
 | AI Agent | LangChain, LangGraph, Gemini / OpenAI / Anthropic |
-| Fine-tuned Models | Qwen3.5-0.8B LoRA (Guardrail), Qwen3.5-4B LoRA (Tutor), DeBERTa / ModernBERT / SciBERT |
+| Fine-tuned Models | Qwen3.5-0.8B LoRA (Guardrail), Qwen3.5-4B LoRA (Tutor) |
 | Model Serving | vLLM, Unsloth, DVC |
 | Observability | Langfuse, Prometheus, Grafana, Loki |
 | Deployment | Docker Compose, AWS ECS / Fargate, Terraform |
@@ -345,7 +332,7 @@ npm --prefix frontend run type-check
 
 ### Knowledge Graph — Prerequisite Edge Visualization
 
-Prerequisite graph được build từ multi-model scoring pipeline. Hai biểu đồ dưới đây là output của phase audit (tất cả edges được đề xuất) và phase kept-only (sau transitive pruning).
+Hai biểu đồ dưới đây là output của phase audit (tất cả edges được đề xuất) và phase kept-only (sau transitive pruning).
 
 <details>
 <summary>kg_p5_audit.svg — tất cả edges được đề xuất</summary>
