@@ -137,6 +137,26 @@ async def test_forgot_password_request_returns_ok_and_sends_email_for_existing_u
     mock_send.assert_awaited_once_with("reset-user@example.com", "raw-token")
 
 
+def test_get_client_ip_prefers_x_forwarded_for():
+    from starlette.requests import Request
+
+    request = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/api/auth/forgot-password/request",
+            "headers": [(b"x-forwarded-for", b"203.0.113.10, 10.20.0.138")],
+            "client": ("10.20.0.138", 12345),
+            "scheme": "https",
+            "server": ("a20-app-049.io.vn", 443),
+        }
+    )
+
+    from src.routers.auth import _get_client_ip
+
+    assert _get_client_ip(request) == "203.0.113.10"
+
+
 @pytest.mark.asyncio
 async def test_forgot_password_request_returns_ok_when_email_delivery_fails():
     from src.api.app import app

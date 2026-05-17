@@ -253,7 +253,7 @@ GEMINI_API_KEY=...
 | Thành viên | Vai trò | Công việc chính |
 |---|---|---|
 | **Nguyễn Duy Minh Hoàng** | AI/ML Lead | LangGraph ReAct Agent, Agentic RAG pipeline (deeptutor-style), Qwen3.5 LoRA fine-tuning (Guardrail + Tutor), Smart Router, SSE streaming, RoadmapPlanner |
-| **Nguyễn Đôn Đức** | Full-stack & Infrastructure Lead | Frontend UI/UX (design tokens, tutor hub, learn pages, UI audit, InContextTutor), AWS ECS/Fargate + Terraform IaC, CI/CD (GitHub Actions), Observability (Prometheus/Grafana/Loki), Auth hardening |
+| **Nguyễn Đôn Đức** | Full-stack & DevOps Lead | Frontend UI/UX (design system, i18n 50+ components, tutor hub, admin dashboard, landing page, auth pages), Backend (DB foundation, repository layer, Redis auth, PII guardrail), AWS ECS/Fargate + Terraform, CI/CD (GitHub Actions), Observability (Prometheus/Grafana/Loki) |
 | **Nguyễn Lê Minh Luân** | Frontend, UI/UX & Assessment Lead | UI/UX design (landing page, onboarding flow), Placement assessment (IRT/CAT), Redis resilience |
 
 ---

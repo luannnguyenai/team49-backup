@@ -133,6 +133,13 @@ def _user_to_profile(user: User) -> UserProfile:
     return UserProfile.model_validate(user)
 
 
+def _get_client_ip(request: Request) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        return forwarded_for.split(",", 1)[0].strip() or "unknown"
+    return request.client.host if request.client else "unknown"
+
+
 _SKILL_LABELS = [
     "Machine Learning",
     "Deep Learning",
@@ -303,7 +310,7 @@ async def login(
     db: AsyncSession = Depends(get_async_db),
 ) -> TokenPair:
     # Rate limiting — key by client IP
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
     if not await _is_login_allowed(client_ip):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -341,7 +348,7 @@ async def request_password_reset(
     db: AsyncSession = Depends(get_async_db),
 ) -> dict[str, str]:
     email = normalize_email(str(body.email))
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = _get_client_ip(request)
     if not await _is_forgot_password_allowed(client_ip, email):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,

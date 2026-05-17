@@ -580,3 +580,78 @@ Guardrail Router vLLM serving được đặt trên server riêng qua Cloudflare
 7. **Agent route context persistence**: Khi user chuyển từ trang học sang agent chat, route context (course, unit, section) được truyền và persist trong agent session, không cần user nhắc lại.
 
 **Hệ quả:** Agent không còn "mù" về learner — có thể cá nhân hóa câu trả lời theo mastery và progress thực tế. Workload tool giúp agent đưa ra lịch học gợi ý thực tế thay vì chỉ describe nội dung. Guardrail alias normalization giảm edge case route sai do linguistic variation. RAG intent threshold thấp hơn giảm false negative cho câu hỏi học thuật ngắn.
+
+---
+
+### [ADR-18] Frontend UI/UX Architecture, Design System & i18n — 19/04–05/05/2026 (Nguyễn Đôn Đức)
+
+**Bối cảnh:** Sau hybrid integration (ADR-6/7), frontend tồn tại nhiều vấn đề: màu hardcoded hex rải rác khắp component, copy tiếng Việt/tiếng Anh lẫn lộn không nhất quán, không có shared token system để audit a11y hay re-theme nhanh, và nhiều trang core (tutor hub, learn, landing) chưa có hoặc bị xóa nhầm trong merge.
+
+**Các hạng mục đã thực hiện:**
+
+**1. Tutor Hub đầy đủ (19-21/04):**
+- Scaffold "Khoá học đang tham gia" hub layout.
+- fetch course catalog, split active vs suggested enrolled courses.
+- "Tiếp tục học" resume card từ sessionStorage.
+- "Khoá của bạn" enrolled courses grid.
+- "Gợi ý cho bạn" recommended courses section.
+- Empty state + "Xem tất cả" discovery link.
+- Restore Học tập landing page (replace redirect), topic content page (TOC + markdown + quiz CTA).
+- Restore AI Tutor + Học nav items, fix sidebar brand, thêm TopNav cho `/tutor` và `/learn` public routes.
+- Lesson sidebar cho learning unit page.
+- Fix alembic merge heads × 2, migrate seed_lectures.py sang async SQLAlchemy.
+
+**2. Design Token System (20-21/04):**
+- Phase 1: design tokens và shared color modules.
+- Phase 2: normalize Vietnamese copy, áp design tokens toàn app.
+- Phase 3-4: migrate hardcoded colors sang shared modules, fix a11y issues.
+- UI audit review — 16/24 standalone components kiểm tra.
+- Component hierarchy map + scan script để track coverage.
+
+**3. Learning Experience Improvements (24-28/04):**
+- feat(history): include course metadata in history items.
+- feat(learn): show current/hovered section titles on video rail.
+- feat(profile): count joined courses from user history; align stats với shared membership logic.
+- fix: preserve lesson completion after final quiz.
+- feat(tutor): polish streaming transitions + input states, surface streaming status trước answer text.
+- fix(onboarding): derive topics từ canonical course sections.
+- fix(quiz): scope inline video quizzes to lecture sections.
+- Fix radar chart appearance, improve chat UX.
+
+**4. Public Landing Page + Auth Routing (28/04):**
+- `feat(frontend): add public landing page phase 1`, scrolling animation.
+- Route signed-out users về landing page, authenticated users về course hub.
+- Unify brand logo, reorder top nav, hide Courses nav item khi authenticated.
+- Search box improvements (8 iterations).
+
+**5. Semantic Brand Token Rebrand (29/04):**
+- Add semantic brand tokens và tailwind utilities.
+- Align navigation shells với semantic brand utilities.
+- Converge landing neutrals với shared color system.
+- Re-theme shared UI primitives với semantic utilities.
+- Refresh status badge presentation.
+- Repaint dashboard, tutor profile và history với semantic utilities.
+
+**6. Full i18n Translation Vi→En (30/04) — 50+ components:**
+assessment-page, assessment-results-page, course-catalog, course-overview, course-start-page, dashboard-page, dashboard-presenters, history-page, in-context-tutor, landing-page, learn-page, learn-unit-page, tất cả learning-path sub-components (duration, empty-state, page, presenters, profile, shell, status, store), learning-unit-card/drawer/shell, mock-course-catalog, module-test-page/results, onboarding-page, path-required-state, planner-header/reasons, player-insights, profile-change-banner/page, quiz-page/results, roadmap-model/node-card/planner, root-page-metadata, tất cả onboarding step components (assessment-depth, desired-sections, experience-level, goal-selection, known-topics-filtered, known-units, prior-knowledge-input), timeline-board, tutor-page. Chuẩn hóa navigation names, tab names, copywriting.
+
+**7. Admin Dashboard (02/05):**
+- Ship admin dashboard: AdminSidebar, KpiCard, admin-api.ts, admin.py.
+- test_admin_routes.py, test_tutor_observability.py.
+- tutorSessionHistory.ts, authStore.ts improvements.
+- Langfuse integration setup (03/05).
+
+**8. Full UI Theme System Phases 0-5 (04/05):**
+- Phase 0: retint buttons.
+- Phase 1: public CTA unify (landing CTA unification, tests).
+- Phase 2: auth pages refactor — LoginForm, RegisterForm, ForgotPasswordForm, AuthBackLink.
+- Phase 3: decorative tokens.
+- Phase 4: bloom badges + session migrate.
+- Phase 5: admin chart palette — ChartCard, KpiCard, chart-theme.ts.
+- AgentChatPage theme, PublicTopNav, feedbackStyles.ts, globals.css, tailwind.config.ts.
+- Test coverage: achievement-tier, bloom-badge, chart-theme, agent-chat-theme, auth-pages-theme, decorative-tokens, landing-cta, type-colors tests.
+- Learning path improvement UX.
+
+**9. Reset Password Flow (05/05):** Complete frontend + backend wiring, 15 iterations.
+
+**Hệ quả:** Frontend có design system nhất quán — thay đổi màu/token chỉ cần sửa một chỗ, không còn hardcoded hex rải rác. Toàn bộ app chuyển sang tiếng Anh, phù hợp người dùng quốc tế. Admin dashboard live với Langfuse tracing. Auth UX hoàn chỉnh (login, register, forgot password, reset password). Trade-off: mỗi phase translation/token là batch commits lớn, cần review kỹ để không miss component nào.
