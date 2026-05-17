@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="./heroimage.png" alt="AI Adaptive Learning Platform" width="800"/>
+  <img src="./heroimage.png" alt="VinLearn - AI Adaptive Learning Platform" width="800"/>
 
-  # AI Adaptive Learning Platform
+  # VinLearn
 
   > *"Học đúng thứ bạn yếu, với lộ trình riêng cho bạn — có AI hướng dẫn 24/7"*
 
-  **Nền tảng học tập thích ứng sử dụng AI — cá nhân hóa lộ trình học cho từng học sinh dựa trên năng lực thực tế.**
+  **AI Adaptive Learning Platform — cá nhân hóa lộ trình học cho từng học sinh dựa trên năng lực thực tế.**
 
   [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
   [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -25,7 +25,7 @@
 
 ## 1. Giới thiệu
 
-**AI Adaptive Tutor** là nền tảng học tập cá nhân hóa, nơi AI đóng vai trò gia sư 24/7 — hướng dẫn học sinh học đúng thứ họ cần, đúng thời điểm, dựa trên năng lực thực tế được đo lường liên tục.
+**VinLearn** là nền tảng học tập thích ứng sử dụng AI, kết hợp learning path cá nhân hóa, AI Tutor theo ngữ cảnh, quiz thông minh và AI Assistant để biến mỗi tương tác thành tín hiệu giúp hệ thống ngày càng hiểu và đồng hành tốt hơn với người học.
 
 Sản phẩm hướng tới học sinh từ cấp 2 đến đại học, đặc biệt những bạn tự học qua tài liệu online mà thiếu lộ trình rõ ràng và không có người hướng dẫn thường xuyên.
 
