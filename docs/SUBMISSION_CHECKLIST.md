@@ -11,7 +11,7 @@
 | Kênh | Status | Ghi chú |
 |---|---|---|
 | **GitHub Repository** | ✅ Sẵn sàng | Code, docs, architecture đầy đủ |
-| **Form nộp bài** | ⚠️ Thiếu Video + Pitch Deck | Cần hoàn thiện trước 17/05 |
+| **Form nộp bài** | ✅ Sẵn sàng điền | Live URL, video demo và pitch deck đã có link/file |
 | **Live URL** | ✅ Online | https://a20-app-049.io.vn |
 
 ---
@@ -54,9 +54,9 @@
 | Team & phân công | ✅ Done | Section 12 |
 | Hạn chế & hướng phát triển | ✅ Done | Section 13 |
 | **Live URL** | ✅ `https://a20-app-049.io.vn` | |
-| **Demo Video** | ⚠️ "Đang cập nhật" | **CẦN THÊM LINK** |
-| **Pitch Deck** | ⚠️ "Đang cập nhật" | **CẦN THÊM LINK** |
-| Link architecture | ✅ Done | `architecture/index.html` |
+| **Demo Video** | ✅ Google Drive | `https://drive.google.com/file/d/1q0Ce-3aJcJJFBfBRygGXvCH3ofkhUoIW/view?usp=sharing` |
+| **Pitch Deck** | ✅ Repo file | `VinLearn-Pitch.pdf` |
+| Link architecture | ✅ Done | `architecture/01-system-overview.svg`, `architecture/02-agentic-rag-pipeline.svg`, `docs/architecture.md` |
 | Link AI Logs | ✅ Done | `docs/ai-logs.md` |
 | Link evaluation | ✅ Done | `docs/evaluation-report.md` |
 
@@ -64,12 +64,12 @@
 
 | Hạng mục | Status | File |
 |---|---|---|
-| Sơ đồ tổng quan hệ thống | ✅ Done | `architecture/system-overview.svg` |
-| Agentic RAG Pipeline | ✅ Done | `architecture/agentic-rag.svg` |
-| AWS Infrastructure (draw.io 2026 style) | ✅ Done | `architecture/03-aws-infrastructure.html` |
-| Request Lifecycle | ✅ Done | `architecture/request-lifecycle.svg` |
-| Data Schema | ✅ Done | `architecture/data-schema.svg` |
-| Interactive HTML viewer | ✅ Done | `architecture/index.html` |
+| Sơ đồ tổng quan hệ thống | ✅ Done | `architecture/01-system-overview.svg` |
+| Agentic RAG Pipeline | ✅ Done | `architecture/02-agentic-rag-pipeline.svg` |
+| AWS Infrastructure | ✅ Done | `architecture/03-aws-infrastructure.drawio` |
+| Request Lifecycle | ✅ Done | `architecture/04-request-lifecycle.drawio` |
+| Data Schema | ✅ Done | `architecture/05-data-schema.drawio` |
+| UX / Assessment / Data flywheel diagrams | ✅ Done | `architecture/06-onboarding-assesment.svg`, `architecture/07-ai-tutor.svg`, `architecture/08-data-flywheel.svg` |
 | Luồng dữ liệu chính | ✅ Done | `docs/architecture.md` |
 | Vị trí AI Agent trong hệ thống | ✅ Done | RAG pipeline diagram |
 | Deployment diagram | ✅ Done | AWS infra HTML + drawio |
@@ -112,8 +112,8 @@
 | Hạng mục | Status | Ghi chú |
 |---|---|---|
 | **Live URL** | ✅ Ready | `https://a20-app-049.io.vn` |
-| **Video Demo (3–5 phút)** | ❌ Chưa có | **BLOCKERS: quay + upload** |
-| **Pitch Deck (5–10 trang)** | ❌ Chưa có | **BLOCKERS: tạo slide** |
+| **Video Demo (3–5 phút)** | ✅ Ready | Google Drive link đã cập nhật trong README |
+| **Pitch Deck (5–10 trang)** | ✅ Ready | `VinLearn-Pitch.pdf` đã có trong repo |
 
 ---
 
@@ -123,9 +123,9 @@
 |---|---|---|
 | GitHub repo public | ✅ Confirm | kiểm tra Settings → Visibility |
 | Live URL không yêu cầu auth nội bộ | ✅ Check | test incognito trên `a20-app-049.io.vn` |
-| Video demo (public/unlisted) | ❌ Chưa upload | cần YouTube/Drive link |
-| Pitch deck (anyone with link) | ❌ Chưa tạo | cần Google Slides / Canva link |
-| Tất cả link trong README click được | ⚠️ Cần verify | Demo Video + Pitch Deck còn "Đang cập nhật" |
+| Video demo (public/unlisted) | ⚠️ Cần verify quyền xem | Đã có Drive link; cần test bằng cửa sổ ẩn danh |
+| Pitch deck (anyone with link) | ✅ Repo file | `VinLearn-Pitch.pdf`; nếu nộp Form nên dùng GitHub raw/file URL sau khi push |
+| Tất cả link trong README click được | ⚠️ Cần verify | README đã có Live URL, Video, Pitch, Architecture, Technical Report, AI Logs, Evaluation, Worklog |
 
 ---
 
@@ -146,10 +146,10 @@ Dùng **trình duyệt ẩn danh** để kiểm tra:
 
 | Priority | Việc cần làm | Deadline |
 |---|---|---|
-| 🔴 P0 | Quay video demo 3–5 phút (live demo trên `a20-app-049.io.vn`) | 16/05 |
-| 🔴 P0 | Tạo Pitch Deck 5–10 trang, mở public link | 16/05 |
-| 🔴 P0 | Cập nhật README: thêm link Video + Pitch Deck | 17/05 sáng |
-| 🟡 P1 | Bổ sung Journal tuần 5–6 (18/04 → 15/05) | 16/05 |
+| ✅ Done | Video demo 3–5 phút (live demo trên `a20-app-049.io.vn`) | Done |
+| ✅ Done | Pitch Deck 5–10 trang | Done |
+| ✅ Done | Cập nhật README: thêm link Video + Pitch Deck | Done |
+| ✅ Done | Bổ sung Journal tuần 5–10 | Done |
 | 🟡 P1 | Verify Live URL: smoke test toàn bộ flow chính | 16/05 |
 | 🟢 P2 | Self-test toàn bộ link bằng incognito | 17/05 sáng |
 | 🟢 P2 | Nộp Form chính thức | 17/05 trước 23:59 |
@@ -160,7 +160,7 @@ Dùng **trình duyệt ẩn danh** để kiểm tra:
 
 ```
 A20-App-049/
-├── README.md                         ✅ (cần thêm Video + Pitch link)
+├── README.md                         ✅ (đã có Video + Pitch link)
 ├── AGENTS.md                         ✅
 ├── CHANGELOG.md                      ✅
 ├── Dockerfile                        ✅
@@ -169,17 +169,16 @@ A20-App-049/
 ├── pyproject.toml / requirements.txt ✅
 ├── .env.example                      ✅ (không commit .env thật)
 ├── architecture/
-│   ├── index.html                    ✅
-│   ├── 01-system-overview.html       ✅
-│   ├── 02-agentic-rag-pipeline.html  ✅
-│   ├── 03-aws-infrastructure.html    ✅ (AWS draw.io 2026 style)
-│   ├── 04-request-lifecycle.html     ✅
-│   ├── 05-data-schema.html           ✅
-│   ├── system-overview.svg           ✅
-│   ├── agentic-rag.svg               ✅
-│   ├── aws-infrastructure.svg        ✅
-│   ├── request-lifecycle.svg         ✅
-│   └── data-schema.svg               ✅
+│   ├── 01-system-overview.svg        ✅
+│   ├── 01-system-overview.drawio     ✅
+│   ├── 02-agentic-rag-pipeline.svg   ✅
+│   ├── 02-agentic-rag-pipeline.drawio ✅
+│   ├── 03-aws-infrastructure.drawio  ✅
+│   ├── 04-request-lifecycle.drawio   ✅
+│   ├── 05-data-schema.drawio         ✅
+│   ├── 06-onboarding-assesment.svg   ✅
+│   ├── 07-ai-tutor.svg               ✅
+│   └── 08-data-flywheel.svg          ✅
 ├── docs/
 │   ├── architecture.md               ✅
 │   ├── ai-logs.md                    ✅
